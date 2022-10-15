@@ -38,6 +38,16 @@
     $RESTPath = $Specification.path -replace " ", "%20"
     $RESTMethod = $Specification.method
 
+    $CommandOptions = New-Object System.Text.StringBuilder
+
+    if ($Specification.hidden) {
+        $CommandOptions.AppendLine("`t`tHidden: true,")
+    }
+
+    if ($CommandOptions.Length -gt 0) {
+        $CommandOptions.Insert(0, "`n")
+    }
+
     #
     # Arguments
     #
@@ -50,12 +60,25 @@
 
     # Query parameters
     if ($Specification.queryParameters) {
-        $null = $ArgumentSources.AddRange(([array]$Specification.queryParameters))
+        foreach ($item in $Specification.queryParameters) {
+            if ($item.children) {
+                # Ignore the item, and only use the children to build the cli arguments
+                $null = $ArgumentSources.AddRange(([array]$item.children | Where-Object {
+                    $_.type -ne "stringStatic"
+                }))
+            } else {
+                $null = $ArgumentSources.Add($item)
+            }
+        }
     }
 
     # Body parameters
     if ($Specification.body) {
-        $null = $ArgumentSources.AddRange(([array]$Specification.body))
+        $values = [array]$Specification.body
+        $null = $ArgumentSources.AddRange(@($values | ForEach-Object {
+            $_ | Add-Member -MemberType NoteProperty -Name "ArgSource" -Value "body"
+            $_
+        }))
     }
 
     # Header parameters
@@ -74,9 +97,14 @@
     $PipelineVariableProperty = ""
     $PipelineVariableAliases = ""
     $collectionProperty = ""
+    $DeprecationNotice = ""
 
     if ($Specification.collectionProperty) {
         $collectionProperty = $Specification.collectionProperty
+    }
+
+    if ($Specification.deprecated) {
+        $DeprecationNotice = $Specification.deprecated
     }
 
     # Body init
@@ -104,8 +132,8 @@
                 }
             }
 
-            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|hostedapplication|software\b|softwareName\b|softwareversion\b|softwareversionName\b|firmware\b|firmwareName\b|firmwareversion\b|firmwareversionName\b|firmwarepatch\b|firmwarepatchName\b|configuration\b|deviceprofile\b|microservice|\[\]id|\[\]devicerequest") {
-                if ($RESTMethod -match "POST") {
+            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|hostedapplication|software\b|softwareName\b|deviceservice\b|softwareversion\b|softwareversionName\b|firmware\b|firmwareName\b|firmwareversion\b|firmwareversionName\b|firmwarepatch\b|firmwarepatchName\b|configuration\b|deviceprofile\b|microservice|\[\]id|\[\]devicerequest") {
+                if ($RESTMethod -match "POST" -and $iArg.ArgSource -eq "body") {
                     # Add override capability to piped arguments, so the user can still override piped data with the argument
                     [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
                 }
@@ -151,13 +179,24 @@
             }
         }
 
+        # Special microservices completions
+        if ($ParentName -match "loglevels") {
+            $CompletionName = $ParentName + ":" + $iArg.Name
+            switch -Regex ($CompletionName) {
+                "loglevels:loggerName" {
+                    [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroserviceLoggers(`"$($iArg.Name)`", `"name`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),")
+                }
+            }
+        }
+
         # Add Completions based on type
         $ArgType = $iArg.type
         switch -Regex ($ArgType) {
             "^application|applicationname" { [void] $CompletionBuilderOptions.AppendLine("completion.WithApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "hostedapplication" { [void] $CompletionBuilderOptions.AppendLine("completion.WithHostedApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "microservice\b" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "microserviceinstance" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroserviceInstance(`"$($iArg.Name)`", `"id`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "microservicename\b" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "microserviceinstance\b" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroserviceInstance(`"$($iArg.Name)`", `"id`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "role" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUserRole(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?devicerequest$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceRegistrationRequest(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "\[\]user(self)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUser(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
@@ -175,7 +214,10 @@
             "(\[\])?firmwarepatch(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwarePatch(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?configuration$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithConfiguration(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?deviceprofile$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceProfile(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?deviceservice$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceService(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?certificate$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceCertificate(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "subscriptionName$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionName(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "subscriptionId$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionId(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
         }
 
         $ArgParams = @{
@@ -188,8 +230,8 @@
             Hidden = $iArg.hidden
             Pipeline = $iArg.pipeline
         }
-        $arg = Get-C8yGoArgs @ArgParams
-        $null = $CommandArgs.Add($arg)
+        $CurrentArg = Get-C8yGoArgs @ArgParams
+        $null = $CommandArgs.Add($CurrentArg)
     }
 
     if (!$PipelineVariableName -and $ArgumentSources.Count -gt 0) {
@@ -219,6 +261,9 @@
         $null = $PostActionOptions.AppendLine("}")
     }
 
+    # Prepare Request
+    $PrepareRequest = New-Object System.Text.StringBuilder
+
     #
     # Body
     #
@@ -240,7 +285,16 @@
             }
         }
 
+        $HasProgress = $false
         foreach ($iArg in (Remove-SkippedParameters $Specification.body)) {
+
+            if ($Specification.method -match "POST|PUT" -and -Not $HasProgress) {
+                if ($iArg.type -in @("file", "fileContents", "attachment")) {
+                    $HasProgress = $true
+                    $null = $PrepareRequest.Append("PrepareRequest: c8ybinary.AddProgress(cmd, `"$($iArg.name)`", cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY())),")
+                }
+            }
+
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
             if ($code) {
                 switch -Regex ($code) {
@@ -249,7 +303,7 @@
                         break
                     }
 
-                    "^(flags\.|c8yfetcher\.|With)" {
+                    "^(flags\.|c8yfetcher\.|With|c8ybinary\.)" {
                         $null = $RESTBodyBuilderOptions.AppendLine($code)
                         break
                     }
@@ -342,12 +396,40 @@
     # Query parameters
     #
     $RESTQueryBuilderWithValues = New-Object System.Text.StringBuilder
+    $CumulocityQueryExpressionBuilder = New-Object System.Text.StringBuilder
     $RESTQueryBuilderPost = New-Object System.Text.StringBuilder
+
     if ($Specification.queryParameters) {
+        # TODO: Handle special case of an item with .children
         foreach ($Properties in (Remove-SkippedParameters $Specification.queryParameters)) {
-            $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "query"
-            if ($code) {
-                $null = $RESTQueryBuilderWithValues.AppendLine($code)
+
+            if ($Properties.type -eq "queryExpression" -and $Properties.children) {
+
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("		flags.WithCumulocityQuery(")
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("			[]flags.GetOption{")
+                
+                foreach ($child in $Properties.children) {
+
+                    # Ignore special in-built values as these are handled separately
+                    if ($child.name -in @("queryTemplate", "orderBy")) {
+                        continue
+                    }
+
+                    # Special case to handle Cumulocity query language builder
+                    $code = New-C8yApiGoGetValueFromFlag -Parameters $child -SetterType "query"
+                    if ($code) {
+                        $null = $CumulocityQueryExpressionBuilder.AppendLine($code)
+                    }
+                }
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("			},")
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("			`"$($Properties.property || $Properties.name)`",")
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("		),")
+
+            } else {
+                $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "query"
+                if ($code) {
+                    $null = $RESTQueryBuilderWithValues.AppendLine($code)
+                }
             }
         }
     }
@@ -435,6 +517,7 @@ import (
 	"net/url"
 
     "github.com/MakeNowJust/heredoc/v2"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
     "github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
     "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
     "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
@@ -461,7 +544,7 @@ func New${NameCamel}Cmd(f *cmdutil.Factory) *${NameCamel}Cmd {
 	cmd := &cobra.Command{
 		Use:   "$Use",
 		Short: "$Description",
-		Long:  ``$DescriptionLong``,
+		Long:  ``$DescriptionLong``,$CommandOptions
         Example: heredoc.Doc(``
 $($Examples -join "`n`n")
         ``),
@@ -501,8 +584,33 @@ $($Examples -join "`n`n")
             }   
         )
         $(
+            foreach ($item in $CommandArgs) {
+                $iAliases = $item.PipelineAliases
+                if (!$iAliases) {
+                    $iAliases = @($item.Name)
+                }
+                if ($item.PipelineAliases) {
+                    $usedAliases = @{}
+                    $sourceAliases = ($item.PipelineAliases | ForEach-Object {
+                        if (!$usedAliases.ContainsKey($_)) {
+                            "`"$_`""`
+                        }
+                        $usedAliases[$_] = $true
+                    } | Where-Object { $_ }) -join ", "
+                    if ($sourceAliases) {
+                        "flags.WithPipelineAliases(`"$($item.Name)`", $sourceAliases),`n"
+                    }
+                }
+            }
+        )
+        $(
             if ($collectionProperty) {
                 "flags.WithCollectionProperty(`"$collectionProperty`"),"
+            }
+        )
+        $(
+            if ($DeprecationNotice) {
+                "flags.WithDeprecationNotice(`"$DeprecationNotice`"),"
             }
         )
 	)
@@ -522,6 +630,11 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+    // Runtime flag options
+    flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
     client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -539,6 +652,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         inputIterators,
         flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
         $RESTQueryBuilderWithValues
+        $CumulocityQueryExpressionBuilder
     )
     if err != nil {
 		return cmderrors.NewUserError(err)
@@ -577,7 +691,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     
 
     // body
-    body := mapbuilder.NewInitializedMapBuilder($(($RESTMethod -match "PUT|POST").ToString().ToLower()))
+    body := mapbuilder.NewInitializedMapBuilder($(($RESTMethod -match "PUT|POST" -and $Specification.body).ToString().ToLower()))
     err = flags.WithBody(
         cmd,
         body,
@@ -609,6 +723,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         Header:       headers,
         IgnoreAccept: cfg.IgnoreAcceptHeader(),
         DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+        $PrepareRequest
     }
     $PostActionOptions
 
@@ -641,12 +756,12 @@ Remove skipped parameters. These are parameter which should not be used when gen
         [object[]] $CommandParameters
     )
 
-    $CommandParameters | Where-Object {
+    [array]($CommandParameters | Where-Object {
         if ($_.skip -eq $true) {
             Write-Verbose ("Skipping parameter [{0}] as it is marked as skip" -f $_.name)
         }
         $_.skip -ne $true
-    }
+    })
 }
 
 Function Get-C8yGoArgs {
@@ -735,6 +850,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("time", "creationTime", "creationTime", "lastUpdated")
             }
         }
 
@@ -746,6 +862,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id", "source.id", "managedObject.id", "deviceId")
             }
         }
 
@@ -792,6 +909,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("deviceId", "source.id", "managedObject.id", "id")
             }
         }
 
@@ -804,11 +922,25 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("deviceId", "source.id", "managedObject.id", "id")
             }
         }
 
         # Management repository types
         { $_ -in "[]software", "[]softwareversion", "[]firmware", "[]firmwareversion", "[]firmwarepatch", "[]configuration", "[]deviceprofile" } {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        # Device extensions
+        { $_ -in @("[]deviceservice") } {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -853,6 +985,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("source.id", "managedObject.id", "id")
             }
         }
 
@@ -877,6 +1010,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("managedObject.id")
             }
         }
 
@@ -889,6 +1023,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("self", "id")
             }
         }
 
@@ -901,6 +1036,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -913,6 +1049,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -924,6 +1061,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -935,6 +1073,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -946,10 +1085,59 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
+            }
+        }
+
+        "microservicename" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+            @{
+                SetFlag = $SetFlag
+                PipelineAliases = @("name")
+            }
+        }
+
+        "inventoryChildType" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
             }
         }
 
         "string" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        { $_ -in "subscriptionName", "subscriptionId" } {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "stringStatic" {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {
@@ -1018,6 +1206,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("tenant", "owner.tenant.id")
             }
         }
 
@@ -1133,6 +1322,8 @@ Function Get-C8yGoArgs {
     if ($Hidden -match "true|yes" -and $Pipeline -notmatch "true") {
         $Entry | Add-Member -MemberType NoteProperty -Name "Hidden" -Value "_ = cmd.Flags().MarkHidden(`"${Name}`")"
     }
+
+    $Entry.Name = $Name
 
     $Entry
 }

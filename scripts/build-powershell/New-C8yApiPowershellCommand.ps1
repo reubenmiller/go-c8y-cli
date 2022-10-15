@@ -23,6 +23,7 @@
     $File = Join-Path -Path $OutputDir -ChildPath ("{0}.ps1" -f $CmdletName)
     $ResultType = $Specification.accept
     $ResultItemType = $Specification.collectionType
+    $Deprecated = $Specification.powershell.deprecated
 
     $ResultSelectProperty = $Specification.collectionProperty
     if ($ResultSelectProperty) {
@@ -49,7 +50,7 @@
             }
             @{
                 Command = $iExample.command
-                Description = $iExample.description
+                Description = $iExample.description -replace "`"", "`'"
                 BeforeEach = $iExample.beforeEach
                 AfterEach = $iExample.afterEach
             }
@@ -70,6 +71,7 @@
                 -TestCaseVariables $TestCaseVariables `
                 -OutFolder "$OutputDir/../Tests" `
                 -SkipTest:$SkipTest `
+                -Deprecated:$Deprecated `
                 -TestCaseTemplateFile $TestCaseTemplate `
                 -TemplateFile "$PSScriptRoot/templates/test.template.ps1"
         }
@@ -123,7 +125,16 @@
     }
 
     if ($Specification.queryParameters) {
-        $null = $ArgumentSources.AddRange(([array]$Specification.queryParameters))
+        foreach ($item in $Specification.queryParameters) {
+            if ($item.children) {
+                # Ignore the item, and only use the children to build the cli arguments
+                $null = $ArgumentSources.AddRange(([array]$item.children | Where-Object {
+                    $_.type -ne "stringStatic"
+                }))
+            } else {
+                $null = $ArgumentSources.Add($item)
+            }
+        }
     }
 
     if ($Specification.body) {
@@ -450,9 +461,14 @@ $(New-Body2 `
 }
 "@
 
-	# Write to file with BOM (to help with encoding in powershell)
-    $Encoding = New-Object System.Text.UTF8Encoding $true
-	[System.IO.File]::WriteAllLines($File, $Template, $Encoding)
+    if ($Deprecated) {
+        # Remove file if exists as powershell commands do not get deprecation notices!
+        Remove-Item -Path $File -ErrorAction SilentlyContinue
+    } else {
+        # Write to file with BOM (to help with encoding in powershell)
+        $Encoding = New-Object System.Text.UTF8Encoding $true
+        [System.IO.File]::WriteAllLines($File, $Template, $Encoding)
+    }
 }
 
 Function New-Body2 {

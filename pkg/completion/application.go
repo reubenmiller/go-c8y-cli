@@ -155,6 +155,46 @@ func WithMicroservice(flagName string, clientFunc func() (*c8y.Client, error)) O
 	}
 }
 
+// WithMicroservice completion
+func WithMicroserviceLoggers(flagName string, flagNameMicroserviceName string, clientFunc func() (*c8y.Client, error)) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			client, err := clientFunc()
+			if err != nil {
+				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
+			}
+
+			microserviceName, err := cmd.Flags().GetString(flagNameMicroserviceName)
+			if err != nil {
+				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
+			}
+
+			values := []string{}
+			resp, err := client.SendRequest(context.Background(), c8y.RequestOptions{
+				Method: "GET",
+				Path:   "/service/" + microserviceName + "/loggers",
+			})
+
+			if err != nil {
+				values := []string{fmt.Sprintf("error. %s", err)}
+				return values, cobra.ShellCompDirectiveError
+			}
+
+			pattern := "*" + toComplete + "*"
+
+			resp.JSON("loggers").ForEach(func(key, value gjson.Result) bool {
+				if toComplete == "" || MatchString(pattern, key.String()) {
+					values = append(values, key.String())
+				}
+				return true
+			})
+
+			return values, cobra.ShellCompDirectiveNoFileComp
+		})
+		return cmd
+	}
+}
+
 func getMicroserviceByName(client *c8y.Client, name string) (string, error) {
 	apps, _, err := client.Application.GetApplicationsByName(
 		context.Background(),

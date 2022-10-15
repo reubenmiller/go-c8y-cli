@@ -65,6 +65,7 @@ Find managed objects which contain the text 'myText' and is a device (using pipe
 		cmd,
 
 		flags.WithExtendedPipelineSupport("text", "text", true, "id"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -81,6 +82,11 @@ func (n *FindByTextCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

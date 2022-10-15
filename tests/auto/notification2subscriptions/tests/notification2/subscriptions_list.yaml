@@ -1,0 +1,26 @@
+tests:
+    notification2/subscriptions_list_Get all subscriptions for the managed object scope:
+        command: c8y notification2 subscriptions list --context mo
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /notification2/subscriptions
+            contains:
+                - context=mo
+    notification2/subscriptions_list_Get all subscriptions related to a specific source:
+        command: c8y notification2 subscriptions list --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /notification2/subscriptions
+            contains:
+                - source=12345
+    notification2/subscriptions_list_Get existing subscriptions:
+        command: c8y notification2 subscriptions list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /notification2/subscriptions

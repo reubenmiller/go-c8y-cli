@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
@@ -83,6 +84,11 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -147,7 +153,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("configurationType", "configurationType"),
 		flags.WithStringValue("url", "url"),
 		flags.WithStringValue("deviceType", "deviceType"),
-		flags.WithBinaryUploadURL(client, "file", "url"),
+		c8ybinary.WithBinaryUploadURL(client, n.factory.IOStreams.ProgressIndicator(), "file", "url"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_ConfigurationDump', c8y_Global:{}}`),
 		cmdutil.WithTemplateValue(cfg),

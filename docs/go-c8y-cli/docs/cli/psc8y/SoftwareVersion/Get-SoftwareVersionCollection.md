@@ -18,10 +18,16 @@ Get software package version collection
 
 ```
 Get-SoftwareVersionCollection
+	[[-Query] <String>]
+	[[-QueryTemplate] <String>]
+	[[-OrderBy] <String>]
 	[[-Software] <Object[]>]
+	[[-Version] <String>]
+	[[-Url] <String>]
 	[-WithParents]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
+	[-WithTotalElements]
 	[-CurrentPage <Int32>]
 	[-TotalPages <Int32>]
 	[-IncludeAll]
@@ -31,6 +37,7 @@ Get-SoftwareVersionCollection
 	[-Proxy]
 	[-NoProxy]
 	[-Timeout <String>]
+	[-NoProgress]
 	[-Session <String>]
 	[-SessionUsername <String>]
 	[-SessionPassword <String>]
@@ -83,6 +90,54 @@ Get a list of software package versions
 
 ## PARAMETERS
 
+### -Query
+Additional query filter
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -QueryTemplate
+String template to be used when applying the given query.
+Use %s to reference the query/pipeline input
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OrderBy
+Order by.
+e.g.
+_id asc or name asc or creationTime.date desc
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Software
 Software package id or name
 
@@ -92,9 +147,39 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 1
+Position: 4
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Version
+Filter by version
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Url
+Filter by url
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
@@ -517,6 +602,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -NoProgress
+Disable progress bars
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -NoProxy
 Ignore the proxy settings
 
@@ -785,6 +885,21 @@ Accept wildcard characters: False
 
 ### -WithError
 Errors will be printed on stdout instead of stderr
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithTotalElements
+Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)
 
 ```yaml
 Type: SwitchParameter

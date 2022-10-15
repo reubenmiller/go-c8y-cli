@@ -34,7 +34,7 @@ func NewUnassignCmd(f *cmdutil.Factory) *UnassignCmd {
 		Short: "Unassign child addition",
 		Long:  `Unassign/delete a child addition from an existing managed object`,
 		Example: heredoc.Doc(`
-$ c8y inventory additions unassign --id 12345 --childId 22553
+$ c8y inventory additions unassign --id 12345 --child 22553
 Unassign a child addition from its parent managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -46,7 +46,7 @@ Unassign a child addition from its parent managed object
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Managed object id (required)")
-	cmd.Flags().String("childId", "", "Child managed object id (required) (accepts pipeline)")
+	cmd.Flags().String("child", "", "Child managed object id (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -56,7 +56,7 @@ Unassign a child addition from its parent managed object
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("childId", "childId", true, "id"),
+		flags.WithExtendedPipelineSupport("child", "child", true, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -73,6 +73,11 @@ func (n *UnassignCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -136,13 +141,13 @@ func (n *UnassignCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAdditions/{childId}")
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAdditions/{child}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
 		c8yfetcher.WithIDSlice(args, "id", "id"),
-		flags.WithStringValue("childId", "childId"),
+		flags.WithStringValue("child", "child"),
 	)
 	if err != nil {
 		return err

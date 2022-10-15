@@ -3,7 +3,7 @@ category: ManagedObjects
 external help file: PSc8y-help.xml
 id: Find-ManagedObjectCollection
 Module Name: PSc8y
-online version:
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_find
 schema: 2.0.0
 slug: /docs/cli/psc8y/ManagedObjects/find-managedobjectcollection
 title: Find-ManagedObjectCollection
@@ -12,7 +12,7 @@ title: Find-ManagedObjectCollection
 
 
 ## SYNOPSIS
-Get a collection of managedObjects based on Cumulocity query language
+Find managed object collection
 
 ## SYNTAX
 
@@ -21,10 +21,22 @@ Find-ManagedObjectCollection
 	[[-Query] <Object[]>]
 	[[-QueryTemplate] <String>]
 	[[-OrderBy] <String>]
-	[-WithParents]
+	[[-Name] <String>]
+	[[-Type] <String>]
+	[-Agents]
+	[[-FragmentType] <String>]
+	[[-Owner] <String>]
+	[[-Availability] <String>]
+	[[-LastMessageDateTo] <String>]
+	[[-LastMessageDateFrom] <String>]
+	[[-CreationTimeDateTo] <String>]
+	[[-CreationTimeDateFrom] <String>]
+	[[-Group] <Object[]>]
 	[-OnlyDevices]
+	[-WithParents]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
+	[-WithTotalElements]
 	[-CurrentPage <Int32>]
 	[-TotalPages <Int32>]
 	[-IncludeAll]
@@ -34,6 +46,7 @@ Find-ManagedObjectCollection
 	[-Proxy]
 	[-NoProxy]
 	[-Timeout <String>]
+	[-NoProgress]
 	[-Session <String>]
 	[-SessionUsername <String>]
 	[-SessionPassword <String>]
@@ -73,21 +86,21 @@ Find-ManagedObjectCollection
 ```
 
 ## DESCRIPTION
-Get a collection of managedObjects based on Cumulocity query language
+Get a collection of managedObjects based on the Cumulocity query language
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
 Find-ManagedObjectCollection -Query "name eq 'roomUpperFloor_*'"
-Find all devices with their names starting with 'roomUpperFloor_'
 ```
+
+Find all managed objects with their names starting with 'roomUpperFloor_'
 
 ## PARAMETERS
 
 ### -Query
-ManagedObject query.
-(required)
+ManagedObject query
 
 ```yaml
 Type: Object[]
@@ -118,7 +131,9 @@ Accept wildcard characters: False
 ```
 
 ### -OrderBy
-ManagedObject sort results by.
+Order by.
+e.g.
+_id asc or name asc or creationTime.date desc
 
 ```yaml
 Type: String
@@ -132,8 +147,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WithParents
-include a flat list of all parents and grandparents of the given object
+### -Name
+Filter by name
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Type
+Filter by type
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Agents
+Only include agents
 
 ```yaml
 Type: SwitchParameter
@@ -147,9 +192,143 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -FragmentType
+Filter by fragment type
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Owner
+Filter by owner
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Availability
+Filter by c8y_Availability.status
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 8
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LastMessageDateTo
+Filter c8y_Availability.lastMessage to a specific date
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 9
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LastMessageDateFrom
+Filter c8y_Availability.lastMessage from a specific date
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 10
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreationTimeDateTo
+Filter creationTime.date to a specific date
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 11
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreationTimeDateFrom
+Filter creationTime.date from a specific date
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 12
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Group
+Filter by group inclusion
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 13
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -OnlyDevices
-only include devices (i.e.
-add has(c8y_IsDevice) to the query)
+Only include devices (deprecated)
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithParents
+include a flat list of all parents and grandparents of the given object
 
 ```yaml
 Type: SwitchParameter
@@ -567,6 +746,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -NoProgress
+Disable progress bars
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -NoProxy
 Ignore the proxy settings
 
@@ -835,6 +1029,21 @@ Accept wildcard characters: False
 
 ### -WithError
 Errors will be printed on stdout instead of stderr
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithTotalElements
+Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)
 
 ```yaml
 Type: SwitchParameter

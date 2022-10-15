@@ -58,6 +58,8 @@ List all of the binaries related to a Hosted (web) application
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "id"),
+
 		flags.WithCollectionProperty("attachments"),
 	)
 
@@ -74,6 +76,11 @@ func (n *ListApplicationBinariesCmd) RunE(cmd *cobra.Command, args []string) err
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

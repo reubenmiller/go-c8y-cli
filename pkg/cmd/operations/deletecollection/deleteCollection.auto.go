@@ -66,6 +66,10 @@ Remove all pending operations for a given device
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("agent", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
 	)
 
 	// Required flags
@@ -81,6 +85,11 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -99,8 +108,8 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "agent", "agentId"),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
-		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom"),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo"),
 		flags.WithStringValue("status", "status"),
 	)
 	if err != nil {

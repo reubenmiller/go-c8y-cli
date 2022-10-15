@@ -1,0 +1,213 @@
+{
+  "information": {
+    "name": "microservices/loglevels",
+    "description": "Cumulocity microservice log levels",
+    "descriptionLong": "Manage log levels of microservices.\nLoggers define the log levels based on the qualified name of the Java class.\n(This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)\n",
+    "link": "https://cumulocity.com/guides/reference/applications/"
+  },
+  "endpoints": [
+    {
+      "name": "list",
+      "description": "List log levels of microservice",
+      "descriptionLong": "List all log levels of microservice.\n(This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)\n",
+      "method": "GET",
+      "path": "/service/{name}/loggers",
+      "accept": "application/json",
+      "collectionProperty": "loggers",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-MicroserviceLogLevelCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "List log levels of microservice",
+            "command": "Get-MicroserviceLogLevelCollection -Name my-microservice",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "List log levels of microservice",
+            "command": "c8y microservices loglevels list --name my-microservice"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "name",
+          "type": "microservicename",
+          "required": true,
+          "description": "Microservice name"
+        }
+      ]
+    },
+    {
+      "name": "get",
+      "description": "Get log level of microservice",
+      "descriptionLong": "Get configured log level for a package (incl. subpackages), or a specific class.\n(This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)\n",
+      "method": "GET",
+      "path": "/service/{name}/loggers/{loggerName}",
+      "accept": "application/json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-MicroserviceLogLevel"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get log level of microservice for a package",
+            "command": "Get-MicroserviceLogLevel -Name my-microservice -LoggerName org.example",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Get log level of microservice for a package",
+            "command": "c8y microservices loglevels get --name my-microservice --loggerName org.example"
+          },
+          {
+            "description": "Get log level of microservice for a specific class",
+            "command": "c8y microservices loglevels get --name my-microservice --loggerName org.example.microservice.ClassName"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "name",
+          "type": "microservicename",
+          "required": true,
+          "description": "Microservice name"
+        },
+        {
+          "name": "loggerName",
+          "type": "string",
+          "required": true,
+          "description": "Name of the logger: Qualified name of package or class"
+        }
+      ]
+    },
+    {
+      "name": "set",
+      "description": "Set log level of microservice",
+      "descriptionLong": "Set configured log level for a package (incl. subpackages), or a specific class.\n(This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)\n",
+      "method": "POST",
+      "path": "/service/{name}/loggers/{loggerName}",
+      "accept": "application/json",
+      "alias": {
+        "go": "set",
+        "powershell": "Set-MicroserviceLogLevel"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Set log level of microservice",
+            "command": "Set-MicroserviceLogLevel -Name my-microservice -LoggerName org.example.microservice -LogLevel DEBUG",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Set log level of microservice for a package",
+            "command": "c8y microservices loglevels set --name my-microservice --loggerName org.example --logLevel DEBUG"
+          },
+          {
+            "description": "Set log level of microservice for a specific class",
+            "command": "c8y microservices loglevels set --name my-microservice --loggerName org.example.microservice.ClassName --logLevel TRACE"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "name",
+          "type": "microservicename",
+          "required": true,
+          "description": "Microservice name"
+        },
+        {
+          "name": "loggerName",
+          "type": "string",
+          "required": true,
+          "description": "Name of the logger: Qualified name of package or class"
+        }
+      ],
+      "bodyRequiredKeys": [
+        "configuredLevel"
+      ],
+      "body": [
+        {
+          "name": "logLevel",
+          "type": "string",
+          "property": "configuredLevel",
+          "required": true,
+          "validationSet": [
+            "TRACE",
+            "DEBUG",
+            "INFO",
+            "WARN",
+            "ERROR",
+            "OFF"
+          ],
+          "description": "Log level: TRACE | DEBUG | INFO | WARN | ERROR | OFF"
+        }
+      ]
+    },
+    {
+      "name": "delete",
+      "description": "Delete configured log level of microservice",
+      "descriptionLong": "Delete configured log level for a package (incl. subpackages), or a specific class.\nThis resets its value to the default log level.\n(This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)\n",
+      "method": "POST",
+      "path": "/service/{name}/loggers/{loggerName}",
+      "accept": "application/json",
+      "alias": {
+        "go": "delete",
+        "powershell": "Remove-MicroserviceLogLevel"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Delete configured log level of microservice",
+            "command": "Remove-MicroserviceLogLevel -Name my-microservice -LoggerName org.example.microservice",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Delete configured log level of microservice for a package",
+            "command": "c8y microservices loglevels delete --name my-microservice --loggerName org.example"
+          },
+          {
+            "description": "Delete configured log level of microservice for a specific class",
+            "command": "c8y microservices loglevels delete --name my-microservice --loggerName org.example.microservice.ClassName"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "name",
+          "type": "microservicename",
+          "required": true,
+          "description": "Microservice name"
+        },
+        {
+          "name": "loggerName",
+          "type": "string",
+          "required": true,
+          "description": "Name of the logger: Qualified name of package or class"
+        }
+      ],
+      "bodyTemplate": {
+        "type": "jsonnet",
+        "template": "{\"configuredLevel\":null}\n"
+      },
+      "body": [
+        {
+          "name": "logLevel",
+          "type": "string",
+          "description": "Hidden property as it is hardcoded within the bodyTemplate",
+          "hidden": true
+        }
+      ]
+    }
+  ]
+}

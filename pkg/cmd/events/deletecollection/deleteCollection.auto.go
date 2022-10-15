@@ -67,6 +67,11 @@ Remove events from a device
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("createdFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("createdTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
 	)
 
 	// Required flags
@@ -82,6 +87,11 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -101,10 +111,10 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
-		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom", ""),
-		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo", ""),
-		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom"),
+		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo"),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom"),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo"),
 		flags.WithBoolValue("revert", "revert", ""),
 	)
 	if err != nil {

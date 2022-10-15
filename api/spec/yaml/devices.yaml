@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../schema.json
 ---
 information:
   name: devices
@@ -6,6 +7,143 @@ information:
   link: https://cumulocity.com/guides/reference/inventory/
 
 endpoints:
+  - name: listDevices
+    description: Get device collection
+    descriptionLong: Get a collection of devices based on filter parameters
+    method: GET
+    path: inventory/managedObjects
+    accept: application/vnd.com.nsn.cumulocity.managedobjectcollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.customDevice+json
+    collectionProperty: managedObjects
+    alias:
+        go: list
+        powershell: Get-DeviceCollection
+    examples:
+      powershell:
+        - description: c8y devices list --name "sensor*" --type myType
+          skipTest: true
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Get-DeviceCollection -Name "sensor*" -Type myType
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Get a collection of devices of type "myType", and their names start with "sensor"
+          command: c8y devices list --name "sensor*" --type myType
+          assertStdOut:
+            contains:
+              - name eq 'sensor*'
+              - type eq 'myType'
+
+        - description: Get devices which names containing 'sensor' and were created after 2021-04-02
+          command: c8y devices list --query "name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'"
+          assertStdOut:
+            contains:
+              - name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'
+
+        - description: Get devices which where registered longer than 7 days ago
+          command: c8y devices list --creationTimeDateFrom -7d
+          assertStdOut:
+            contains:
+              - (creationTime.date ge '
+
+        - description: Get devices which where registered in the last day
+          command: c8y devices list --creationTimeDateTo -1d
+          assertStdOut:
+            contains:
+              - (creationTime.date le '
+
+        - description: Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipeline)
+          command: echo -e "c8y_MacOS\nc8y_Linux" | c8y devices list --queryTemplate "type eq '%s'"
+          skipTest: true
+    
+    queryParameters:
+      - name: query
+        description: Query expression group
+        property: q
+        type: queryExpression
+        children:
+          - name: query
+            type: string
+            description: Additional query filter
+            format: "%s"
+            pipeline: true
+            pipelineAliases:
+              - c8y_DeviceQueryString
+
+          - name: queryTemplate
+            type: string
+            description: String template to be used when applying the given query. Use %s to reference the query/pipeline input
+          
+          - name: orderBy
+            type: string
+            default: name
+            description: Order by. e.g. _id asc or name asc or creationTime.date desc
+
+          - name: name
+            type: string
+            description: Filter by name
+            format: (name eq '%s')
+
+          - name: type
+            type: string
+            description: Filter by type
+            format: (type eq '%s')
+
+          - name: agents
+            type: booleanDefault
+            description: Only include agents
+            value: 'has(com_cumulocity_model_Agent)'
+
+          - name: fragmentType
+            type: string
+            description: Filter by fragment type
+            format: has(%s)
+
+          - name: owner
+            type: string
+            description: Filter by owner
+            format: (owner eq '%s')
+
+          - name: availability
+            type: string
+            description: Filter by c8y_Availability.status
+            format: (c8y_Availability.status eq '%s')
+            validationSet:
+              - AVAILABLE
+              - UNAVAILABLE
+              - MAINTENANCE
+
+          - name: lastMessageDateTo
+            type: datetime
+            description: Filter c8y_Availability.lastMessage to a specific date
+            format: (c8y_Availability.lastMessage le '%s')
+
+          - name: lastMessageDateFrom
+            type: datetime
+            description: Filter c8y_Availability.lastMessage from a specific date
+            format: (c8y_Availability.lastMessage ge '%s')
+
+          - name: creationTimeDateTo
+            type: datetime
+            description: Filter creationTime.date to a specific date
+            format: (creationTime.date le '%s')
+
+          - name: creationTimeDateFrom
+            type: datetime
+            description: Filter creationTime.date from a specific date
+            format: (creationTime.date ge '%s')
+
+          - name: group
+            type: '[]devicegroup'
+            description: Filter by group inclusion
+            format: bygroupid(%s)
+
+      - name: withParents
+        type: boolean
+        description: Include a flat list of all parents and grandparents of the given object
+
   - name: getDevice
     description: Get device
     descriptionLong: Get an existing device
@@ -305,7 +443,11 @@ endpoints:
         required: true
         description: Device ID
 
+  # Deprecated commands. TODO: Remove in >=2.20.0
   - name: newManagedObjectChildDevice
+    hidden: true
+    deprecated: "please use 'c8y devices children assign --childType device' instead"
+    deprecatedAt: "2022-08-03"
     method: POST
     path: inventory/managedObjects/{device}/childDevices
     accept: application/vnd.com.nsn.cumulocity.managedObjectReference+json
@@ -316,25 +458,13 @@ endpoints:
     alias:
         go: assignChild
         powershell: Add-ChildDeviceToDevice
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Assign a device as a child device to an existing device
-          beforeEach:
-            - $Device = PSc8y\New-TestDevice
-            - $ChildDevice = PSc8y\New-TestDevice
-          command: Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
-          afterEach:
-            - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
-            - PSc8y\Remove-ManagedObject -Id $Device.id
-
-        - description: Assign a device as a child device to an existing device (using pipeline)
-          beforeEach:
-            - $Device = PSc8y\New-TestDevice
-            - $ChildDevice = PSc8y\New-TestDevice
-          command: Get-ManagedObject -Id $ChildDevice.id | Add-ChildDeviceToDevice -Device $Device.id
-          afterEach:
-            - PSc8y\Remove-ManagedObject -Id $Device.id
-            - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
+          command: Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
+          skipTest: true
 
       go:
         - description: Assign a device as a child device to an existing device
@@ -354,6 +484,9 @@ endpoints:
 
 
   - name: deleteManagedObjectChildDeviceReference
+    hidden: true
+    deprecated: "please use 'c8y devices children unassign --childType device' instead"
+    deprecatedAt: "2022-08-03"
     description: Delete child device reference
     descriptionLong: Delete child device reference
     method: DELETE
@@ -362,13 +495,15 @@ endpoints:
     alias:
         go: unassignChild
         powershell: Remove-ChildDeviceFromDevice
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Unassign a child device from its parent device
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
+            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
           command: Remove-ChildDeviceFromDevice -Device $Device.id -ChildDevice $ChildDevice.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
@@ -390,6 +525,9 @@ endpoints:
         description: Child device reference
 
   - name: getManagedObjectChildDeviceCollection
+    hidden: true
+    deprecated: "please use 'c8y devices children list --childType device' instead"
+    deprecatedAt: "2022-08-03"
     method: GET
     description: Get child device collection
     descriptionLong: Get a collection of managedObjects child references
@@ -400,13 +538,15 @@ endpoints:
     alias:
         go: listChildren
         powershell: Get-ChildDeviceCollection
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Get a list of the child devices of an existing device
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
+            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
           command: Get-ChildDeviceCollection -Device $Device.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $Device.id
@@ -416,7 +556,7 @@ endpoints:
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
+            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
           command: Get-ManagedObject -Id $Device.id | Get-ChildDeviceCollection
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $Device.id
@@ -437,6 +577,9 @@ endpoints:
         description: Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
 
   - name: getManagedObjectChildDeviceReference
+    hidden: true
+    deprecated: "please use 'c8y devices children get --childType device' instead"
+    deprecatedAt: "2022-08-03"
     description: Get child device reference
     descriptionLong: Get managed object child device reference
     method: GET
@@ -445,13 +588,15 @@ endpoints:
     alias:
         go: getChild
         powershell: Get-ChildDeviceReference
+    powershell:
+      deprecated: true
     examples:
         powershell:
           - description: Get an existing child device reference
             beforeEach:
               - $Agent = New-TestAgent
               - $Device = New-TestDevice
-              - $Ref = Add-ChildDeviceToDevice -Device $Agent.id -NewChild $Device.id
+              - $Ref = Add-ChildDeviceToDevice -Device $Agent.id -Child $Device.id
             command: Get-ChildDeviceReference -Device $Agent.id -Reference $Ref.id
             afterEach:
               - Remove-ManagedObject -Id $Device.id
@@ -472,6 +617,9 @@ endpoints:
         description: Device reference id
 
   - name: listChildAssetCollection
+    hidden: true
+    deprecated: "please use 'c8y devices children list --childType asset' instead"
+    deprecatedAt: "2022-08-03"
     method: GET
     description: Get child asset collection
     descriptionLong: Get a collection of managedObjects child references
@@ -482,14 +630,17 @@ endpoints:
     alias:
         go: listAssets
         powershell: Get-DeviceChildAssetCollection
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Get a list of the child assets of an existing device
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-AssetToGroup -Group $Device.id -NewChildDevice $ChildDevice.id
+            - PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Device.id -Child $ChildDevice.id
           command: Get-DeviceChildAssetCollection -Id $Group.id
+          skipTest: true
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
             - PSc8y\Remove-ManagedObject -Id $Device.id
@@ -498,8 +649,9 @@ endpoints:
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildGroup = PSc8y\New-TestDeviceGroup
-            - PSc8y\Add-AssetToGroup -Group $Group.id -NewChildGroup $ChildGroup.id
+            - PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $ChildGroup.id
           command: Get-DeviceChildAssetCollection -Id $Group.id
+          skipTest: true
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildGroup.id
             - PSc8y\Remove-ManagedObject -Id $Group.id

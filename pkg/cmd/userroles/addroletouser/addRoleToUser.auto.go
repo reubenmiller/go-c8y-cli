@@ -61,6 +61,8 @@ Add a role (ROLE_ALARM_READ) to a user
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("role", "role.self", false, "self", "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("role", "self", "id"),
 	)
 
 	// Required flags
@@ -77,6 +79,11 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

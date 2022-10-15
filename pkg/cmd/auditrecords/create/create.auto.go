@@ -65,6 +65,7 @@ Create an audit record for a custom managed object update
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("source", "source.id", false, "id"),
+		flags.WithPipelineAliases("time", "time", "creationTime", "lastUpdated"),
 	)
 
 	// Required flags
@@ -80,6 +81,11 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -140,7 +146,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithOverrideValue("source", "source.id"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("type", "type"),
-		flags.WithRelativeTimestamp("time", "time", ""),
+		flags.WithRelativeTimestamp("time", "time"),
 		flags.WithStringValue("text", "text"),
 		flags.WithStringValue("source", "source.id"),
 		flags.WithStringValue("activity", "activity"),

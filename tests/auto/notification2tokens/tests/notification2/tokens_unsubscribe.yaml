@@ -1,0 +1,10 @@
+tests:
+    notification2/tokens_unsubscribe_Unsubscribe a subscriber using its token:
+        command: c8y notification2 tokens unsubscribe --token "eyJhbGciOiJSUzI1NiJ9"
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /notification2/unsubscribe
+            contains:
+                - token=eyJhbGciOiJSUzI1NiJ9

@@ -31,9 +31,11 @@ func NewListChildrenCmd(f *cmdutil.Factory) *ListChildrenCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "listChildren",
-		Short: "Get child device collection",
-		Long:  `Get a collection of managedObjects child references`,
+		Use:    "listChildren",
+		Short:  "Get child device collection",
+		Long:   `Get a collection of managedObjects child references`,
+		Hidden: true,
+
 		Example: heredoc.Doc(`
 $ c8y devices listChildren --device 12345
 Get a list of the child devices of an existing device
@@ -58,7 +60,10 @@ Get a list of the child devices of an existing device
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("references.#.managedObject"),
+		flags.WithDeprecationNotice("please use 'c8y devices children list --childType device' instead"),
 	)
 
 	// Required flags
@@ -74,6 +79,11 @@ func (n *ListChildrenCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -64,9 +65,9 @@ type AddChildAddition struct {
 
 func (a *AddChildAddition) Run(v interface{}) (resp interface{}, err error) {
 	if value, ok := v.(*c8y.Response); ok {
-		if value.JSON != nil {
-			moID := value.JSON.Get("id").String()
-			binaryURL := value.JSON.Get(a.URLProperty).String()
+		if len(value.Body()) > 0 {
+			moID := value.JSON("id").String()
+			binaryURL := value.JSON(a.URLProperty).String()
 
 			if moID != "" && strings.Contains(binaryURL, "/inventory/binaries/") {
 				parts := strings.Split(binaryURL, "/")
@@ -75,6 +76,17 @@ func (a *AddChildAddition) Run(v interface{}) (resp interface{}, err error) {
 				}
 			}
 		}
+	}
+	return
+}
+
+type TransformRelativeTimestamp struct {
+	Encode bool
+}
+
+func (t *TransformRelativeTimestamp) Run(v interface{}) (resp interface{}, err error) {
+	if value, ok := v.(string); ok {
+		return timestamp.TryGetTimestamp(value, t.Encode)
 	}
 	return
 }

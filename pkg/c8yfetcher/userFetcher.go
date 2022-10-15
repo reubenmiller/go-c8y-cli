@@ -33,7 +33,7 @@ func (f *UserFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	results[0] = fetcherResultSet{
 		ID:    user.ID,
 		Name:  user.Username,
-		Value: *resp.JSON,
+		Value: resp.JSON(),
 	}
 	return results, nil
 }

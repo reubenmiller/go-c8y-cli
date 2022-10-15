@@ -34,8 +34,8 @@ func ParseValues(values []string) (ids []string) {
 		parts := strings.Split(value, ",")
 
 		for _, part := range parts {
-			// Only add uint looking values
-			if part != "" {
+			// Only add uint looking values, and filter out custom pipeline mapped flags
+			if part != "" && part != flags.FlagReadFromPipeText && !strings.HasPrefix(part, flags.FlagReadFromPipeJSON) {
 				ids = append(ids, strings.TrimSpace(part))
 			}
 		}
@@ -269,8 +269,8 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 	refs := []entityReference{}
 
 	if len(value) != 0 {
-		// only lookup if value is not empty
-		refs, err = lookupIDByName(i.Fetcher, string(value), i.GetID, i.Format)
+		// only lookup if value is not empty. Formatting is done later
+		refs, err = lookupIDByName(i.Fetcher, string(value), i.GetID, "")
 		if err != nil {
 			return nil, rawValue, err
 		}
@@ -777,6 +777,18 @@ func WithSoftwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts
 			software = v[0]
 		}
 		opt := WithReferenceByNameFirstMatch(client, NewSoftwareVersionFetcher(client, software), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
+// WithSoftwareVersionByNameFirstMatch add reference by name matching for software version via cli args. Only the first match will be used
+func WithDeviceServiceByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		device := ""
+		if v, err := cmd.Flags().GetStringSlice("device"); err == nil && len(v) > 0 {
+			device = v[0]
+		}
+		opt := WithReferenceByNameFirstMatch(client, NewDeviceServiceFetcher(client, device), args, opts...)
 		return opt(cmd, inputIterators)
 	}
 }

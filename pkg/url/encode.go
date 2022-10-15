@@ -21,5 +21,7 @@ func EscapeQueryString(v string) string {
 	// Preserve special characters
 	v = url.QueryEscape(v)
 	v = strings.ReplaceAll(v, "%2A", "*")
+	v = strings.ReplaceAll(v, "%3A", ":")
+	v = strings.ReplaceAll(v, "+", "%2B")
 	return v
 }

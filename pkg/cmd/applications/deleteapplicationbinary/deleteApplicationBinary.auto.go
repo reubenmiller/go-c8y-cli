@@ -61,6 +61,7 @@ Remove an application binary related to a Hosted (web) application
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("binaryId", "binaryId", true, "id"),
+		flags.WithPipelineAliases("application", "id"),
 	)
 
 	// Required flags
@@ -77,6 +78,11 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

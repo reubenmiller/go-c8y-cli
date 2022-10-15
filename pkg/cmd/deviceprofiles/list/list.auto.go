@@ -45,7 +45,10 @@ Get a list of device profiles
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "**", "DeviceProfile name filter (accepts pipeline)")
+	cmd.Flags().String("query", "", "Additional query filter")
+	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
+	cmd.Flags().String("orderBy", "creationTime.date desc,creationTime desc", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+	cmd.Flags().String("name", "", "Filter by name (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -54,7 +57,8 @@ Get a list of device profiles
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("name", "name", false, "name"),
+		flags.WithExtendedPipelineSupport("name", "name", false, "c8y_Software.name", "name"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -71,6 +75,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -87,6 +96,15 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+
+		flags.WithCumulocityQuery(
+			[]flags.GetOption{
+				flags.WithStringValue("query", "query", "%s"),
+				flags.WithStaticStringValue("deviceProfileType", "type eq 'c8y_Profile'"),
+				flags.WithStringValue("name", "name", "(name eq '%s')"),
+			},
+			"query",
+		),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -138,12 +156,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=((type%20eq%20'c8y_Profile')%20and%20(name%20eq%20'{name}'))%20$orderby=name%20asc")
+	path := flags.NewStringTemplate("inventory/managedObjects")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("name", "name"),
 	)
 	if err != nil {
 		return err

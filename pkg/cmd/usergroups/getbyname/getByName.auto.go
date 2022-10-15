@@ -57,6 +57,7 @@ Get user group by its name
 		cmd,
 
 		flags.WithExtendedPipelineSupport("name", "name", false, "name"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags
@@ -72,6 +73,11 @@ func (n *GetByNameCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

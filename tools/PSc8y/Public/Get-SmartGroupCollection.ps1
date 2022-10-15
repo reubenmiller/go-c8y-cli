@@ -8,7 +8,7 @@ List smart group collection
 Get a collection of smart groups based on filter parameters
 
 .LINK
-c8y smartgroups list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/smartgroups_list
 
 .EXAMPLE
 PS> Get-SmartGroupCollection
@@ -27,27 +27,7 @@ Get a list of smart groups with the names starting with 'myText'
     [Alias()]
     [OutputType([object])]
     Param(
-        # Filter by name
-        [Parameter()]
-        [string]
-        $Name,
-
-        # Filter by fragment type
-        [Parameter()]
-        [string]
-        $FragmentType,
-
-        # Filter by owner
-        [Parameter()]
-        [string]
-        $Owner,
-
-        # Filter by device query
-        [Parameter()]
-        [string]
-        $DeviceQuery,
-
-        # Filter by owner
+        # Additional query filter
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
@@ -62,6 +42,26 @@ Get a list of smart groups with the names starting with 'myText'
         [Parameter()]
         [string]
         $OrderBy,
+
+        # Filter by name
+        [Parameter()]
+        [string]
+        $Name,
+
+        # Filter by device query
+        [Parameter()]
+        [string]
+        $DeviceQuery,
+
+        # Filter by fragment type
+        [Parameter()]
+        [string]
+        $FragmentType,
+
+        # Filter by owner
+        [Parameter()]
+        [string]
+        $Owner,
 
         # Only include invisible smart groups
         [Parameter()]

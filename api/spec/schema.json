@@ -2,6 +2,69 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "definitions": {
+    "parameterDefinition": {
+      "type": "object",
+      "title": "Parameter definition",
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/argumentName"
+        },
+        "type": {
+          "$ref": "#/definitions/cliArgumentType"
+        },
+        "property": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/parameterDefinition"
+          }
+        },
+        "pipeline": {
+          "type": "boolean"
+        },
+        "pipelineAliases": {
+          "$ref": "#/definitions/pipelineAliases"
+        },
+        "description": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "default": {
+          "type": "string"
+        },
+        "required": {
+          "$ref": "#/definitions/requiredParameter"
+        },
+        "hidden": {
+          "$ref": "#/definitions/hiddenParameter"
+        },
+        "position": {
+          "$ref": "#/definitions/argumentPosition"
+        },
+        "validationSet": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "dependsOn": {
+          "$ref": "#/definitions/dependsOn"
+        },
+        "skip": {
+          "$ref": "#/definitions/skipParameter"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "description"
+      ]
+    },
     "outputAssertion": {
       "type": "object",
       "properties": {
@@ -37,6 +100,13 @@
         "line-count": {
           "type": "integer",
           "title": "Expected number of lines (exact match)"
+        },
+        "contains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Output contains given values"
         }
       }
     },
@@ -100,12 +170,19 @@
         "json",
         "json_custom",
         "microservice",
+        "microservicename",
         "microserviceinstance",
+        "queryExpression",
         "string",
+        "stringStatic",
+        "inventoryChildType",
         "source",
+        "subscriptionId",
+        "subscriptionName",
         "tenant",
         "tenantname",
         "[]devicerequest",
+        "[]deviceservice",
         "[]id",
         "[]agent",
         "[]certificate",
@@ -169,6 +246,22 @@
         "link": {
           "type": "string",
           "title": "Link to Cumulocity documentation"
+        },
+        "deprecated": {
+          "type": "string",
+          "title": "Deprecation message to be displayed to the user",
+          "description": "The command will still visible to the user but always generate a warning"
+        },
+        "deprecatedAt": {
+          "type": "string",
+          "title": "Deprecated At",
+          "format": "date",
+          "description": "Date when the command was deprecated"
+        },
+        "hidden": {
+          "type": "boolean",
+          "title": "Command should be hidden",
+          "description": "The command will still work but it will not be visible in the documentation and completions"
         }
       },
       "required": [
@@ -180,6 +273,7 @@
     },
     "endpoints": {
       "type": "array",
+      "minItems": 0,
       "items": {
         "type": "object",
         "properties": {
@@ -224,6 +318,22 @@
             "title": "Skip parameter",
             "description": "Skip the parameter from the command. Useful if preparing for future versions of the c8y api tool"
           },
+          "deprecated": {
+            "type": "string",
+            "title": "Deprecation message to be displayed to the user",
+            "description": "The command will still visible to the user but always generate a warning"
+          },
+          "deprecatedAt": {
+            "type": "string",
+            "title": "Deprecated At",
+            "format": "date",
+            "description": "Date when the command was deprecated"
+          },
+          "hidden": {
+            "type": "boolean",
+            "title": "Command should be hidden",
+            "description": "The command will still work but it will not be visible in the documentation and completions"
+          },
           "alias": {
             "type": "object",
             "title": "Endpoint alias",
@@ -243,6 +353,18 @@
               "go",
               "powershell"
             ]
+          },
+          "powershell": {
+            "type": "object",
+            "title": "Powershell specific options",
+            "description": "Options related to powershell commands",
+            "properties": {
+              "deprecated": {
+                "type": "boolean",
+                "title": "Deprecated",
+                "description": "The command is no longer used"
+              }
+            }
           },
           "examples": {
             "type": "object",
@@ -374,54 +496,7 @@
             "type": "array",
             "minItems": 1,
             "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "$ref": "#/definitions/argumentName"
-                },
-                "type": {
-                  "$ref": "#/definitions/cliArgumentType"
-                },
-                "property": {
-                  "type": "string"
-                },
-                "pipeline": {
-                  "type": "boolean"
-                },
-                "pipelineAliases": {
-                  "$ref": "#/definitions/pipelineAliases"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "required": {
-                  "$ref": "#/definitions/requiredParameter"
-                },
-                "hidden": {
-                  "$ref": "#/definitions/hiddenParameter"
-                },
-                "position": {
-                  "$ref": "#/definitions/argumentPosition"
-                },
-                "validationSet": {
-                  "type": "array",
-                  "minItems": 1,
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "dependsOn": {
-                  "$ref": "#/definitions/dependsOn"
-                },
-                "skip": {
-                  "$ref": "#/definitions/skipParameter"
-                }
-              },
-              "required": [
-                "name",
-                "type",
-                "description"
-              ]
+              "$ref": "#/definitions/parameterDefinition"
             }
           },
           "pathParameters": {

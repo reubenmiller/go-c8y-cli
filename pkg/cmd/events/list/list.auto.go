@@ -72,6 +72,14 @@ Get events from a device
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("createdFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("createdTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("lastUpdatedFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("lastUpdatedTo", "time", "creationTime", "lastUpdated"),
+
 		flags.WithCollectionProperty("events"),
 	)
 
@@ -88,6 +96,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -108,12 +121,12 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
 		flags.WithStringValue("fragmentValue", "fragmentValue"),
-		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom", ""),
-		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo", ""),
-		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
-		flags.WithEncodedRelativeTimestamp("lastUpdatedFrom", "lastUpdatedFrom", ""),
-		flags.WithEncodedRelativeTimestamp("lastUpdatedTo", "lastUpdatedTo", ""),
+		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom"),
+		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo"),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom"),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo"),
+		flags.WithEncodedRelativeTimestamp("lastUpdatedFrom", "lastUpdatedFrom"),
+		flags.WithEncodedRelativeTimestamp("lastUpdatedTo", "lastUpdatedTo"),
 		flags.WithBoolValue("revert", "revert", ""),
 		flags.WithBoolValue("withSourceAssets", "withSourceAssets", ""),
 		flags.WithBoolValue("withSourceDevices", "withSourceDevices", ""),

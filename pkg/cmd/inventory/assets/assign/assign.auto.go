@@ -34,7 +34,7 @@ func NewAssignCmd(f *cmdutil.Factory) *AssignCmd {
 		Short: "Assign child asset",
 		Long:  `Assigns a group or device to an existing group and marks them as assets`,
 		Example: heredoc.Doc(`
-$ c8y inventory assets assign --group 12345 --newChildGroup 43234
+$ c8y inventory assets assign --id 12345 --childGroup 43234
 Create group hierarchy (parent group -> child group)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -45,27 +45,29 @@ Create group hierarchy (parent group -> child group)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("group", []string{""}, "Group (required)")
-	cmd.Flags().StringSlice("newChildDevice", []string{""}, "New child device to be added to the group as an asset (accepts pipeline)")
-	cmd.Flags().StringSlice("newChildGroup", []string{""}, "New child device group to be added to the group as an asset")
+	cmd.Flags().StringSlice("id", []string{""}, "Managed object id (required)")
+	cmd.Flags().StringSlice("childDevice", []string{""}, "New child device to be added to the group as an asset (accepts pipeline)")
+	cmd.Flags().StringSlice("childGroup", []string{""}, "New child device group to be added to the group as an asset")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDeviceGroup("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithDevice("newChildDevice", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithDeviceGroup("newChildGroup", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("childDevice", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDeviceGroup("childGroup", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("newChildDevice", "managedObject.id", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("childDevice", "managedObject.id", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("childDevice", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("childGroup", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObject"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("group")
+	_ = cmd.MarkFlagRequired("id")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -78,6 +80,11 @@ func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -136,8 +143,8 @@ func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "newChildDevice", "managedObject.id"),
-		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "newChildGroup", "managedObject.id"),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "childDevice", "managedObject.id"),
+		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "childGroup", "managedObject.id"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("managedObject"),
@@ -152,7 +159,7 @@ func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "id"),
+		c8yfetcher.WithIDSlice(args, "id", "id"),
 	)
 	if err != nil {
 		return err

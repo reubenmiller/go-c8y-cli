@@ -86,10 +86,6 @@ $script:Aliases = @{
     mo = "Get-ManagedObject"
     op = "Get-Operation"
 
-    # References
-    childdevices = "Get-ChildDeviceCollection"
-    childassets = "Get-ChildAssetCollection"
-
     # utilities
     json = "ConvertTo-NestedJson"
     tojson = "ConvertTo-NestedJson"

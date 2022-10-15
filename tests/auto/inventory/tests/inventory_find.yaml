@@ -1,0 +1,31 @@
+tests:
+    inventory_find_Find managed objects which include myname in their names.:
+        command: $TEST_SHELL -c 'echo "myname" | c8y inventory find --queryTemplate "name eq '*%s*'"'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+            contains:
+                - queryTemplate=name eq '*%s*'
+    inventory_find_Get a list of managed objects:
+        command: c8y inventory find --query "name eq 'roomUpperFloor_*'"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+            contains:
+                - query=name eq 'roomUpperFloor_*'
+    inventory_find_Invert a given query received via piped input (stdin) by using a template:
+        command: $TEST_SHELL -c 'echo "name eq 'name'" | c8y inventory find --queryTemplate 'not(%s)''
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+            contains:
+                - queryTemplate=not(%s)

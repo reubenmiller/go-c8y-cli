@@ -30,9 +30,11 @@ func NewAssignDeviceCmd(f *cmdutil.Factory) *AssignDeviceCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "assignDevice",
-		Short: "Assign device to group",
-		Long:  `Assigns a device to a group. The device will be a childAsset of the group`,
+		Use:    "assignDevice",
+		Short:  "Assign device to group",
+		Long:   `Assigns a device to a group. The device will be a childAsset of the group`,
+		Hidden: true,
+
 		Example: heredoc.Doc(`
 $ c8y devicegroups assignDevice --group 12345 --newChildDevice 43234
 Add a device to a group
@@ -62,7 +64,11 @@ Add multiple devices to a group
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("newChildDevice", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("newChildDevice", "deviceId", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObject"),
+		flags.WithDeprecationNotice("please use 'c8y devicegroups children assign --childType asset' instead"),
 	)
 
 	// Required flags
@@ -79,6 +85,11 @@ func (n *AssignDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

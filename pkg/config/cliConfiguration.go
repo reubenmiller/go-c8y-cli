@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -25,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/vbauerster/mpb/v6"
 )
 
 var (
@@ -85,6 +87,9 @@ const (
 	// SettingsWithTotalPages include the total pages statistics under statistics.totalPages
 	SettingsWithTotalPages = "settings.defaults.withTotalPages"
 
+	// SettingsWithTotalElements include the total pages statistics under statistics.totalPages
+	SettingsWithTotalElements = "settings.defaults.withTotalElements"
+
 	// SettingsRawOutput include the raw (original) output instead of only returning the nested array property
 	SettingsRawOutput = "settings.defaults.raw"
 
@@ -117,6 +122,9 @@ const (
 
 	// SettingsShowProgress show progress bar
 	SettingsShowProgress = "settings.defaults.progress"
+
+	// SettingsDisableColor don't print progress bar
+	SettingsDisableProgress = "settings.defaults.noProgress"
 
 	// SettingsDisableColor don't print console output in color
 	SettingsDisableColor = "settings.defaults.noColor"
@@ -279,6 +287,9 @@ const (
 	// SettingsCacheKeyAuth include authorization header in cache key generation
 	SettingsCacheKeyAuth = "settings.cache.keyauth"
 
+	// SettingsCacheBodyPaths include only specific json body paths in cache hashing calculation
+	SettingsCacheBodyPaths = "settings.defaults.cacheBodyPaths"
+
 	// SettingsDefaultsInsecure allow insecure SSL connections
 	SettingsDefaultsInsecure = "settings.defaults.insecure"
 
@@ -403,9 +414,10 @@ func (c *Config) bindSettings() {
 
 		WithBindEnv(SettingsLoggerHideSensitive, false),
 
-		WithBindEnv(SettingsCacheMethods, "GET"),
+		WithBindEnv(SettingsCacheMethods, "GET PUT POST DELETE"),
 		WithBindEnv(SettingsCacheKeyHost, true),
 		WithBindEnv(SettingsCacheKeyAuth, true),
+		WithBindEnv(SettingsCacheBodyPaths, ""),
 		WithBindEnv(SettingsCacheMode, nil),
 		WithBindEnv(SettingsCacheDir, filepath.Join(os.TempDir(), "go-c8y-cli-cache")),
 
@@ -941,6 +953,11 @@ func (c *Config) WithTotalPages() bool {
 	return c.viper.GetBool(SettingsWithTotalPages)
 }
 
+// WithTotalElements return total of all elements
+func (c *Config) WithTotalElements() bool {
+	return c.viper.GetBool(SettingsWithTotalElements)
+}
+
 // RawOutput return raw (original) response
 func (c *Config) RawOutput() bool {
 	return c.viper.GetBool(SettingsRawOutput)
@@ -1022,7 +1039,22 @@ func (c *Config) CompactJSON() bool {
 
 // ShowProgress show progress bar
 func (c *Config) ShowProgress() bool {
-	return c.viper.GetBool(SettingsShowProgress)
+	return c.viper.GetBool(SettingsShowProgress) && !c.DisableProgress()
+}
+
+func (c *Config) GetProgressBar(w io.Writer, enable bool) (progress *mpb.Progress) {
+	if enable && !c.DisableProgress() {
+		progress = mpb.New(
+			mpb.WithOutput(w),
+			mpb.WithRefreshRate(180*time.Millisecond),
+		)
+	}
+	return
+}
+
+// DisableProgress don't print progress bar
+func (c *Config) DisableProgress() bool {
+	return c.viper.GetBool(SettingsDisableProgress)
 }
 
 // DisableColor don't print console output in color
@@ -1305,6 +1337,10 @@ func (c *Config) CacheKeyIncludeAuth() bool {
 	return c.viper.GetBool(SettingsCacheKeyAuth)
 }
 
+func (c *Config) CacheBodyKeys() []string {
+	return c.viper.GetStringSlice(SettingsCacheBodyPaths)
+}
+
 // SkipSSLVerify skip SSL verify
 func (c *Config) SkipSSLVerify() bool {
 	return c.viper.GetBool(SettingsDefaultsInsecure)
@@ -1360,6 +1396,7 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 	}
 
 	options.WithTotalPages = c.WithTotalPages()
+	options.WithTotalElements = c.WithTotalElements()
 
 	options.IncludeAll = c.IncludeAll()
 

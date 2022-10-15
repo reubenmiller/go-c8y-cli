@@ -198,6 +198,12 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
+	// no progress
+	"defaults.noProgress": {"defaults.noProgress", "bool", "settings.defaults.noProgress", []string{
+		"true",
+		"false",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
 	// withError
 	"defaults.withError": {"defaults.withError", "bool", "settings.defaults.withError", []string{
 		"true",

@@ -52,25 +52,23 @@
     # Type Definition
     $DataType = switch ($Type) {
         "[]agent" { "object[]"; break }
+        "[]certificate" { "object[]"; break }
+        "[]configuration" { "object[]"; break }
         "[]device" { "object[]"; break }
         "[]devicegroup" { "object[]"; break }
         "[]deviceprofile" { "object[]"; break }
+        "[]devicerequest" { "object[]"; break }
+        "[]firmware" { "object[]"; break }
+        "[]firmwarepatch" { "object[]"; break }
+        "[]firmwareversion" { "object[]"; break }
         "[]id" { "object[]"; break }
-        "[]smartgroup" { "object[]"; break }
         "[]role" { "object[]"; break }
         "[]roleself" { "object[]"; break }
-        "[]string" { "string[]"; break }
-        "[]configuration" { "object[]"; break }
+        "[]smartgroup" { "object[]"; break }
         "[]software" { "object[]"; break }
-        "softwareName" { "object[]"; break }
         "[]softwareversion" { "object[]"; break }
-        "softwareversionName" { "object[]"; break }
-        "[]firmware" { "object[]"; break }
-        "firmwareName" { "object[]"; break }
-        "[]firmwareversion" { "object[]"; break }
-        "firmwareversionName" { "object[]"; break }
-        "[]firmwarepatch" { "object[]"; break }
-        "firmwarepatchName" { "object[]"; break }
+        "[]deviceservice" { "object[]"; break }
+        "[]string" { "string[]"; break }
         "[]stringcsv" { "string[]"; break }
         "[]tenant" { "object[]"; break }
         "[]user" { "object[]"; break }
@@ -78,35 +76,48 @@
         "[]userself" { "object[]"; break }
         "application" { "object[]"; break }
         "applicationname" { "string"; break }
-        "hostedapplication" { "object[]"; break }
+        "attachment" { "string"; break }
+        "binaryUploadURL" { "string"; break }
         "boolean" { "switch"; break }
         "booleanDefault" { "switch"; break }
-        "optional_fragment" { "switch"; break }
+        "certificatefile" { "string"; break }
+        "date" { "string"; break }
         "datefrom" { "string"; break }
         "datetime" { "string"; break }
-        "date" { "string"; break }
         "dateto" { "string"; break }
         "directory" { "string"; break }
         "file" { "string"; break }
-        "float" { "float"; break }
         "fileContents" { "string"; break }
-        "attachment" { "string"; break }
-        "binaryUploadURL" { "string"; break }
+        "firmwareName" { "object[]"; break }
+        "firmwarepatchName" { "object[]"; break }
+        "firmwareversionName" { "object[]"; break }
+        "float" { "float"; break }
+        "hostedapplication" { "object[]"; break }
         "id" { "object[]"; break }
         "integer" { "long"; break }
-        "json" { "object"; break }
+        "inventoryChildType" { "string"; break }
         "json_custom" { "object"; break }
+        "json" { "object"; break }
         "microservice" { "object[]"; break }
         "microserviceinstance" { "string"; break }
+        "microservicename" { "object[]"; break }
+        "optional_fragment" { "switch"; break }
         "set" { "object[]"; break }
+        "softwareName" { "object[]"; break }
+        "softwareversionName" { "object[]"; break }
         "source" { "object"; break }
         "string" { "string"; break }
-        "[]devicerequest" { "object[]"; break }
         "strings" { "string"; break }
+        "subscriptionId" { "string"; break }
+        "subscriptionName" { "string"; break }
         "tenant" { "object"; break }
         "tenantname" { "string"; break }
-        "[]certificate" { "object[]"; break }
-        "certificatefile" { "string"; break }
+
+        # stringStatic
+        "stringStatic" { $Ignore = $true; ""; break }
+
+        # queryExpression
+        "queryExpression" { $Ignore = $true; ""; break }
 
         # Complex lookup types. These should not be visible in powershell
         "softwareDetails" { $Ignore = $true; ""; break }

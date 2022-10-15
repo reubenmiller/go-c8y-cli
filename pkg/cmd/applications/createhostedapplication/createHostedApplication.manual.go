@@ -1,22 +1,44 @@
 package createhostedapplication
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/zipUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
+
+const CumulocityManifestFile = "cumulocity.json"
+
+type Application struct {
+	c8y.Application
+	Manifest Manifest
+}
+
+type Manifest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Key         string `json:"key"`
+	Version     string `json:"version"`
+	ContextPath string `json:"contextPath"`
+}
 
 type CmdCreateHostedApplication struct {
 	*subcommand.SubCommand
@@ -41,7 +63,11 @@ func NewCmdCreateHostedApplication(f *cmdutil.Factory) *CmdCreateHostedApplicati
 	cmd := &cobra.Command{
 		Use:   "createHostedApplication",
 		Short: "Create hosted application",
-		Long:  `Create a new hosted web application or update the binary of an existing hosted application`,
+		Long: heredoc.Doc(`
+			Create a new hosted web application or update the binary of an existing hosted application
+
+			If the zip file or folder contains a 'cumulocity.json' manifest file, then the key will be automatically read from it.
+		`),
 		Example: heredoc.Doc(`
 			$ c8y applications createHostedApplication --file ./myapp.zip
 			Create new hosted application from a given zip file. The application will be called "myapp". If the application placeholder does not exist then it will be created
@@ -62,13 +88,18 @@ func NewCmdCreateHostedApplication(f *cmdutil.Factory) *CmdCreateHostedApplicati
 
 	cmd.Flags().StringVar(&ccmd.file, "file", "", "File or Folder of the web application. It should contain a index.html file in the root folder/ or zip file")
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of application")
-	cmd.Flags().StringVar(&ccmd.key, "key", "", "Shared secret of application. Defaults to the name")
+	cmd.Flags().StringVar(&ccmd.key, "key", "", "Shared secret of application. Defaults to the value inside the cumulocity.json file (if present)")
 	cmd.Flags().StringVar(&ccmd.availability, "availability", "", "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)")
 	cmd.Flags().StringVar(&ccmd.contextPath, "contextPath", "", "contextPath of the hosted application")
 	cmd.Flags().StringVar(&ccmd.resourcesURL, "resourcesUrl", "/", "URL to application base directory hosted on an external server. Required when application type is HOSTED")
 
 	cmd.Flags().BoolVar(&ccmd.skipActivation, "skipActivation", false, "Don't activate to the application after it has been created and uploaded")
 	cmd.Flags().BoolVar(&ccmd.skipUpload, "skipUpload", false, "Don't uploaded the web app binary. Only the application placeholder will be created")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("availability", "MARKET", "PRIVATE"),
+	)
 
 	flags.WithOptions(
 		cmd,
@@ -83,9 +114,9 @@ func NewCmdCreateHostedApplication(f *cmdutil.Factory) *CmdCreateHostedApplicati
 	return ccmd
 }
 
-func (n *CmdCreateHostedApplication) getApplicationDetails() *c8y.Application {
+func (n *CmdCreateHostedApplication) getApplicationDetails(log *logger.Logger) (*Application, error) {
 
-	app := c8y.Application{}
+	app := Application{}
 
 	// set default name to the file name
 	baseFileName := filepath.Base(n.file)
@@ -95,12 +126,46 @@ func (n *CmdCreateHostedApplication) getApplicationDetails() *c8y.Application {
 
 	// Set application properties
 
+	if strings.EqualFold(filepath.Ext(n.file), ".zip") {
+		// Try loading manifest file directly from the zip (without unzipping it)
+		log.Infof("Trying to detect manifest from a zip file. path=%s", n.file)
+		if err := GetManifestContents(n.file, &app.Manifest); err != nil {
+			log.Infof("Could not find manifest file. Expected %s to contain %s. %s", n.file, CumulocityManifestFile, err)
+		}
+	} else if n.file != "" {
+		// Assume json (regardless of file type)
+		manifestPath := filepath.Join(n.file, CumulocityManifestFile)
+		log.Infof("Assuming file is json (regardless of file extension). path=%s", manifestPath)
+
+		if _, err := os.Stat(manifestPath); err == nil {
+			jsonFile, err := os.Open(manifestPath)
+			if err != nil {
+				return nil, err
+			}
+			byteValue, _ := ioutil.ReadAll(jsonFile)
+
+			if err := json.Unmarshal(byteValue, &app.Manifest); err != nil {
+				log.Warnf("invalid manifest file. Only json or zip files are accepted. %s", strings.TrimSpace(err.Error()))
+			}
+		}
+	}
+
+	if app.Manifest.Name != "" {
+		app.Name = app.Manifest.Name
+	}
+
 	app.Name = appNameFromFile
+	if app.Manifest.Name != "" {
+		app.Name = app.Manifest.Name
+	}
 	if n.name != "" {
 		app.Name = n.name
 	}
 
 	app.Key = app.Name + "-application-key"
+	if app.Manifest.Key != "" {
+		app.Key = app.Manifest.Key
+	}
 	if n.key != "" {
 		app.Key = n.key
 	}
@@ -112,6 +177,9 @@ func (n *CmdCreateHostedApplication) getApplicationDetails() *c8y.Application {
 	}
 
 	app.ContextPath = app.Name
+	if app.Manifest.ContextPath != "" {
+		app.ContextPath = app.Manifest.ContextPath
+	}
 	if n.contextPath != "" {
 		app.ContextPath = n.contextPath
 	}
@@ -120,7 +188,7 @@ func (n *CmdCreateHostedApplication) getApplicationDetails() *c8y.Application {
 	if n.resourcesURL != "" {
 		app.ResourcesURL = n.resourcesURL
 	}
-	return &app
+	return &app, nil
 }
 
 // packageWebApplication zips the given folder path to a zip
@@ -184,7 +252,11 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 
 	// note: use POST when checking if it should use try run or not, even though it could actually be PUT as well
 	dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
-	appDetails := n.getApplicationDetails()
+	appDetails, err := n.getApplicationDetails(log)
+
+	if err != nil {
+		return err
+	}
 
 	// TODO: Use the default name value from n.Name rather then reading it from the args again.
 	log.Infof("application name: %s", appDetails.Name)
@@ -192,7 +264,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 		refs, err := c8yfetcher.FindHostedApplications(client, []string{appDetails.Name}, true, "")
 
 		if err != nil {
-			return fmt.Errorf("Failed to find hosted application. %s", err)
+			return fmt.Errorf("failed to find hosted application. %s", err)
 		}
 
 		if err == nil && len(refs) > 0 {
@@ -203,10 +275,10 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 	if applicationID == "" {
 		// Create the application
 		log.Info("Creating new application")
-		application, response, err = client.Application.Create(context.Background(), appDetails)
+		application, response, err = client.Application.Create(context.Background(), &appDetails.Application)
 
 		if err != nil {
-			return fmt.Errorf("Failed to create microservice. %s", err)
+			return fmt.Errorf("failed to create hosted application. %s", err)
 		}
 		applicationID = application.ID
 	} else {
@@ -215,7 +287,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 		application, response, err = client.Application.GetApplication(context.Background(), applicationID)
 
 		if err != nil {
-			return fmt.Errorf("Failed to get microservice. %s", err)
+			return fmt.Errorf("failed to get hosted application. %s", err)
 		}
 	}
 
@@ -232,43 +304,54 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 			}
 
 			log.Infof("uploading binary [app=%s]", application.ID)
-			resp, err := client.Application.CreateBinary(context.Background(), zipfile, application.ID)
+			progress := n.factory.IOStreams.ProgressIndicator()
+			resp, err := c8ybinary.CreateBinaryWithProgress(
+				context.Background(),
+				client,
+				"/application/applications/"+application.ID+"/binaries",
+				zipfile,
+				nil,
+				progress,
+			)
+			n.factory.IOStreams.WaitForProgressIndicator()
 
 			if err != nil {
 				// handle error
 				n.SubCommand.GetCommand().PrintErrf("failed to upload file. %s", err)
 			} else {
-				applicationBinaryID = resp.JSON.Get("id").String()
+				applicationBinaryID = resp.JSON("id").String()
 			}
 		}
 	}
 
 	// App activation (only if a new version was uploaded)
 	if !skipUpload && !n.skipActivation {
-		log.Infof("Activating application")
+		if !dryRun {
+			log.Infof("Activating application")
 
-		if applicationBinaryID == "" {
-			return fmt.Errorf("failed to activate new application version because binary id is empty")
-		}
-
-		_, resp, err := client.Application.Update(
-			context.Background(),
-			applicationID,
-			&c8y.Application{
-				ActiveVersionID: applicationBinaryID,
-			},
-		)
-
-		if err != nil {
-			if resp != nil && resp.StatusCode == 409 {
-				log.Infof("application is already enabled")
-			} else {
-				return fmt.Errorf("failed to activate application. %s", err)
+			if applicationBinaryID == "" {
+				return fmt.Errorf("failed to activate new application version because binary id is empty")
 			}
-		}
 
-		// use the updated application json
-		response = resp
+			_, resp, err := client.Application.Update(
+				context.Background(),
+				applicationID,
+				&c8y.Application{
+					ActiveVersionID: applicationBinaryID,
+				},
+			)
+
+			if err != nil {
+				if resp != nil && resp.StatusCode() == 409 {
+					log.Infof("application is already enabled")
+				} else {
+					return fmt.Errorf("failed to activate application. %s", err)
+				}
+			}
+
+			// use the updated application json
+			response = resp
+		}
 	}
 
 	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
@@ -282,4 +365,36 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 	}
 	_, err = handler.ProcessResponse(response, err, commonOptions)
 	return err
+}
+
+func GetManifestContents(zipFilename string, contents interface{}) error {
+	reader, err := zip.OpenReader(zipFilename)
+	if err != nil {
+		return err
+	}
+
+	defer reader.Close()
+
+	for _, file := range reader.File {
+		// check if the file matches the name for application portfolio xml
+		if strings.EqualFold(file.Name, CumulocityManifestFile) {
+			rc, err := file.Open()
+			if err != nil {
+				return err
+			}
+
+			buf := new(bytes.Buffer)
+			if _, err := buf.ReadFrom(rc); err != nil {
+				return err
+			}
+
+			defer rc.Close()
+
+			// Unmarshal bytes
+			if err := json.Unmarshal(buf.Bytes(), &contents); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

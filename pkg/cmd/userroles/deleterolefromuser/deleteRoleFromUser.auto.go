@@ -61,6 +61,8 @@ Remove a role from the given user
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("role", "role", true, "id"),
+		flags.WithPipelineAliases("role", "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags
@@ -77,6 +79,11 @@ func (n *DeleteRoleFromUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

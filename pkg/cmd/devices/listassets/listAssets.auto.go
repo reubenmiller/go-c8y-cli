@@ -31,9 +31,11 @@ func NewListAssetsCmd(f *cmdutil.Factory) *ListAssetsCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "listAssets",
-		Short: "Get child asset collection",
-		Long:  `Get a collection of managedObjects child references`,
+		Use:    "listAssets",
+		Short:  "Get child asset collection",
+		Long:   `Get a collection of managedObjects child references`,
+		Hidden: true,
+
 		Example: heredoc.Doc(`
 $ c8y devices listAssets --id 12345
 Get a list of the child devices of an existing device
@@ -57,7 +59,10 @@ Get a list of the child devices of an existing device
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("references.#.managedObject"),
+		flags.WithDeprecationNotice("please use 'c8y devices children list --childType asset' instead"),
 	)
 
 	// Required flags
@@ -73,6 +78,11 @@ func (n *ListAssetsCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

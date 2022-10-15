@@ -61,6 +61,9 @@ Add a role to the admin group
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("role", "role.self", true, "self", "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("group", "id"),
+		flags.WithPipelineAliases("role", "self", "id"),
 	)
 
 	// Required flags
@@ -77,6 +80,11 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

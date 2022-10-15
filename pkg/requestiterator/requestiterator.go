@@ -72,6 +72,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		NoAuthentication: r.Request.NoAuthentication,
 		IgnoreAccept:     r.Request.IgnoreAccept,
 		DryRun:           r.Request.DryRun,
+		PrepareRequest:   r.Request.PrepareRequest,
 	}
 
 	var inputLine interface{}

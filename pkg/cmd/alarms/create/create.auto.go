@@ -65,6 +65,8 @@ Create a new alarm for device
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("device", "source.id", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("time", "time", "creationTime", "lastUpdated"),
 	)
 
 	// Required flags
@@ -80,6 +82,11 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -140,7 +147,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source.id"),
 		flags.WithStringValue("type", "type"),
-		flags.WithRelativeTimestamp("time", "time", ""),
+		flags.WithRelativeTimestamp("time", "time"),
 		flags.WithStringValue("text", "text"),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithStringValue("status", "status"),

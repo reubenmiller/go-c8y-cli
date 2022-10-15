@@ -4,8 +4,10 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
@@ -14,6 +16,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/pkg/c8y/binary"
 	"github.com/spf13/cobra"
 )
 
@@ -182,10 +185,37 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		if filename == "" {
 			_, resp, respErr = client.Inventory.CreateChildAddition(context.Background(), firmwareID, body)
 		} else {
+			file, err := os.Open(filename)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			progress := n.factory.IOStreams.ProgressIndicator()
+			bar, err := c8ybinary.NewProgressBar(progress, filename)
+
+			if err != nil {
+				return err
+			}
+
+			binaryFile, err := binary.NewBinaryFile(
+				binary.WithReader(file),
+				binary.WithFileProperties(filename),
+				binary.WithGlobal(),
+			)
+
+			if err != nil {
+				return err
+			}
 			_, resp, respErr = client.Inventory.CreateChildAdditionWithBinary(
-				context.Background(), firmwareID, filename, func(binaryURL string) interface{} {
+				context.Background(), firmwareID, binaryFile, func(binaryURL string) interface{} {
 					_ = body.Set("c8y_Firmware.url", binaryURL)
 					return body
+				}, func(r *http.Request) (*http.Request, error) {
+					if bar != nil {
+						r.Body = bar.ProxyReader(r.Body)
+					}
+					return r, nil
 				})
 		}
 

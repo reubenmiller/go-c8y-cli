@@ -64,6 +64,8 @@ Delete a user from a user group (using pipeline)
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("user", "user", true, "id"),
+		flags.WithPipelineAliases("group", "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags
@@ -80,6 +82,11 @@ func (n *DeleteUserFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

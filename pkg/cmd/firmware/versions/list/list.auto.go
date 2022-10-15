@@ -52,7 +52,12 @@ Get all versions of a firmware using an existing version object
 
 	cmd.SilenceUsage = true
 
+	cmd.Flags().String("query", "", "Additional query filter")
+	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
+	cmd.Flags().String("orderBy", "creationTime.date desc", "Order by. e.g. _id asc or name asc or creationTime.date desc")
 	cmd.Flags().StringSlice("firmware", []string{""}, "Firmware package id or name (required) (accepts pipeline)")
+	cmd.Flags().String("version", "", "Filter by version")
+	cmd.Flags().String("url", "", "Filter by url")
 	cmd.Flags().Bool("withParents", true, "Include parent references")
 
 	completion.WithOptions(
@@ -64,6 +69,7 @@ Get all versions of a firmware using an existing version object
 		cmd,
 
 		flags.WithExtendedPipelineSupport("firmware", "firmware", true, "additionParents.references.0.managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -80,6 +86,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -97,6 +108,17 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		flags.WithDefaultBoolValue("withParents", "withParents", ""),
+
+		flags.WithCumulocityQuery(
+			[]flags.GetOption{
+				flags.WithStringValue("query", "query", "%s"),
+				c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmware", "firmware", "bygroupid(%s)"),
+				flags.WithStaticStringValue("ignorePatches", "not(has(c8y_Patch))"),
+				flags.WithStringValue("version", "version", "(c8y_Firmware.version eq '%s')"),
+				flags.WithStringValue("url", "url", "(c8y_Firmware.url eq '%s')"),
+			},
+			"query",
+		),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -148,12 +170,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=((not(has(c8y_Patch)))%20and%20(bygroupid({firmware})))%20$orderby=creationTime.date%20desc,creationTime%20desc")
+	path := flags.NewStringTemplate("inventory/managedObjects")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmware", "firmware"),
 	)
 	if err != nil {
 		return err

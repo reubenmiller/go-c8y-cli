@@ -73,6 +73,11 @@ Check if a user has access to the cockpit application
 		cmd,
 
 		flags.WithExtendedPipelineSupport("type", "type", false, "id"),
+		flags.WithPipelineAliases("name", "id"),
+		flags.WithPipelineAliases("owner", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("providedFor", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("subscriber", "tenant", "owner.tenant.id"),
+
 		flags.WithCollectionProperty("applications"),
 	)
 
@@ -89,6 +94,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

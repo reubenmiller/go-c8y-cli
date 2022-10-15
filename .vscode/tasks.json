@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build (incl. generate)",
+            "label": "Generate and Build",
             "type": "shell",
-            "command": "task build-snapshot",
+            "command": "task generate build-snapshot-single",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -22,9 +22,9 @@
             "problemMatcher": []
         },
         {
-            "label": "Build-fast (w/o generate)",
+            "label": "Build",
             "type": "shell",
-            "command": "task build-fast",
+            "command": "task build-snapshot-single",
             "group": {
                 "kind": "build",
                 "isDefault": true

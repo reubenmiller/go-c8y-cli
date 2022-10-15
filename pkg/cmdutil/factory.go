@@ -193,7 +193,7 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 	}
 
 	view := cfg.ViewOption()
-	showRaw := cfg.RawOutput() || cfg.WithTotalPages()
+	showRaw := cfg.RawOutput() || cfg.WithTotalPages() || cfg.WithTotalElements()
 
 	if showRaw {
 		return []string{"**"}, nil

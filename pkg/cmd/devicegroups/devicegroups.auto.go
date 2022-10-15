@@ -6,6 +6,7 @@ import (
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/create"
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/delete"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/list"
 	cmdListAssets "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/listassets"
 	cmdUnassignDevice "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/unassigndevice"
 	cmdUnassignGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/unassigngroup"
@@ -29,6 +30,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdDevicegroups {
 	}
 
 	// Subcommands
+	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
 	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())

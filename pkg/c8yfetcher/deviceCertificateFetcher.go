@@ -46,7 +46,7 @@ func (f *DeviceCertificateFetcher) getByID(id string) ([]fetcherResultSet, error
 		ID:    cert.Fingerprint,
 		Name:  cert.Name,
 		Self:  cert.Self,
-		Value: *resp.JSON,
+		Value: resp.JSON(),
 	}
 	return results, nil
 }

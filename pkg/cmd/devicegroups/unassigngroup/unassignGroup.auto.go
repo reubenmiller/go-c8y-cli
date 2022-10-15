@@ -30,9 +30,11 @@ func NewUnassignGroupCmd(f *cmdutil.Factory) *UnassignGroupCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "unassignGroup",
-		Short: "Delete child group reference",
-		Long:  `Delete child group reference`,
+		Use:    "unassignGroup",
+		Short:  "Delete child group reference",
+		Long:   `Delete child group reference`,
+		Hidden: true,
+
 		Example: heredoc.Doc(`
 $ c8y devicegroups unassignGroup --id 12345 --child 22553
 Unassign a child device from its parent device
@@ -59,6 +61,10 @@ Unassign a child device from its parent device
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("child", "child", true, "id"),
+		flags.WithPipelineAliases("id", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("child", "source.id", "managedObject.id", "id"),
+
+		flags.WithDeprecationNotice("please use 'c8y devicegroups children unassign --childType asset' instead"),
 	)
 
 	// Required flags
@@ -75,6 +81,11 @@ func (n *UnassignGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

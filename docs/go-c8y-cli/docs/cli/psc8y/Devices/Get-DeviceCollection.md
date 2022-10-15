@@ -3,7 +3,7 @@ category: Devices
 external help file: PSc8y-help.xml
 id: Get-DeviceCollection
 Module Name: PSc8y
-online version:
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_list
 schema: 2.0.0
 slug: /docs/cli/psc8y/Devices/get-devicecollection
 title: Get-DeviceCollection
@@ -12,27 +12,30 @@ title: Get-DeviceCollection
 
 
 ## SYNOPSIS
-Get a collection of devices
+Get device collection
 
 ## SYNTAX
 
 ```
 Get-DeviceCollection
+	[[-Query] <Object[]>]
+	[[-QueryTemplate] <String>]
+	[[-OrderBy] <String>]
 	[[-Name] <String>]
 	[[-Type] <String>]
+	[-Agents]
 	[[-FragmentType] <String>]
 	[[-Owner] <String>]
 	[[-Availability] <String>]
-	[[-LastMessageDateFrom] <String>]
 	[[-LastMessageDateTo] <String>]
-	[[-Group] <String>]
-	[[-Query] <String>]
-	[[-QueryTemplate] <String>]
-	[[-OrderBy] <String>]
-	[-Agents]
+	[[-LastMessageDateFrom] <String>]
+	[[-CreationTimeDateTo] <String>]
+	[[-CreationTimeDateFrom] <String>]
+	[[-Group] <Object[]>]
 	[-WithParents]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
+	[-WithTotalElements]
 	[-CurrentPage <Int32>]
 	[-TotalPages <Int32>]
 	[-IncludeAll]
@@ -42,6 +45,7 @@ Get-DeviceCollection
 	[-Proxy]
 	[-NoProxy]
 	[-Timeout <String>]
+	[-NoProgress]
 	[-Session <String>]
 	[-SessionUsername <String>]
 	[-SessionPassword <String>]
@@ -81,51 +85,37 @@ Get-DeviceCollection
 ```
 
 ## DESCRIPTION
-Get a collection of devices in Cumulocity by using the inventory API.
+Get a collection of devices based on filter parameters
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-DeviceCollection -Name *sensor*
+Get-DeviceCollection -Name "sensor*" -Type myType
 ```
 
-Get all devices with "sensor" in their name
-
-### EXAMPLE 2
-```
-Get-DeviceCollection -Name *sensor* -Type *c8y_* -PageSize 100
-```
-
-Get the first 100 devices with "sensor" in their name and has a type matching "c8y_"
-
-### EXAMPLE 3
-```
-Get-DeviceCollection -Query "lastUpdated.date gt '2020-01-01T00:00:00Z'"
-```
-
-Get a list of devices which have been updated more recently than 2020-01-01
+c8y devices list --name "sensor*" --type myType
 
 ## PARAMETERS
 
-### -Name
-Device name.
-Wildcards accepted
+### -Query
+Additional query filter
 
 ```yaml
-Type: String
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -Type
-Device type.
+### -QueryTemplate
+String template to be used when applying the given query.
+Use %s to reference the query/pipeline input
 
 ```yaml
 Type: String
@@ -139,8 +129,10 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -FragmentType
-Device fragment type.
+### -OrderBy
+Order by.
+e.g.
+_id asc or name asc or creationTime.date desc
 
 ```yaml
 Type: String
@@ -154,8 +146,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Owner
-Device owner.
+### -Name
+Filter by name
 
 ```yaml
 Type: String
@@ -169,8 +161,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Availability
-Availability.
+### -Type
+Filter by type
 
 ```yaml
 Type: String
@@ -184,100 +176,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -LastMessageDateFrom
-LastMessageDateFrom - c8y_Availability.lastMessage filter
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -LastMessageDateTo
-LastMessageDateTo - c8y_Availability.lastMessage filter
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Group
-Group.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 8
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Query
-Query.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 9
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -QueryTemplate
-QueryTemplate.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 10
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -OrderBy
-Order results by a specific field.
-i.e.
-"name", "_id desc" or "creationTime.date asc".
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 11
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Agents
-Only include agents.
+Only include agents
 
 ```yaml
 Type: SwitchParameter
@@ -291,8 +191,128 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -FragmentType
+Filter by fragment type
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Owner
+Filter by owner
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Availability
+Filter by c8y_Availability.status
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 8
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LastMessageDateTo
+Filter c8y_Availability.lastMessage to a specific date
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 9
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LastMessageDateFrom
+Filter c8y_Availability.lastMessage from a specific date
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 10
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreationTimeDateTo
+Filter creationTime.date to a specific date
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 11
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreationTimeDateFrom
+Filter creationTime.date from a specific date
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 12
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Group
+Filter by group inclusion
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 13
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -WithParents
-include a flat list of all parents and grandparents of the given object
+Include a flat list of all parents and grandparents of the given object
 
 ```yaml
 Type: SwitchParameter
@@ -710,6 +730,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -NoProgress
+Disable progress bars
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -NoProxy
 Ignore the proxy settings
 
@@ -991,6 +1026,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -WithTotalElements
+Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -WithTotalPages
 Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
 
@@ -1028,6 +1078,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### System.Object
 ## NOTES
 
 ## RELATED LINKS

@@ -77,6 +77,14 @@ Get collection of active and acknowledged alarms in the last 1d
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("createdFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("createdTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("lastUpdatedFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("lastUpdatedTo", "time", "creationTime", "lastUpdated"),
+
 		flags.WithCollectionProperty("alarms"),
 	)
 
@@ -93,6 +101,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -110,18 +123,18 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
-		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom"),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringSliceCSV("status", "status", ""),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithBoolValue("resolved", "resolved", ""),
 		flags.WithBoolValue("withSourceAssets", "withSourceAssets", ""),
 		flags.WithBoolValue("withSourceDevices", "withSourceDevices", ""),
-		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom", ""),
-		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo", ""),
-		flags.WithEncodedRelativeTimestamp("lastUpdatedFrom", "lastUpdatedFrom", ""),
-		flags.WithEncodedRelativeTimestamp("lastUpdatedTo", "lastUpdatedTo", ""),
+		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom"),
+		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo"),
+		flags.WithEncodedRelativeTimestamp("lastUpdatedFrom", "lastUpdatedFrom"),
+		flags.WithEncodedRelativeTimestamp("lastUpdatedTo", "lastUpdatedTo"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -238,8 +238,8 @@ func NewServerError(r *c8y.Response, err error) CommandError {
 		if r.Response != nil {
 			cmdError.StatusCode = r.Response.StatusCode
 
-			if r.Request != nil {
-				cmdError.URL = r.Request.URL.Path
+			if r.Response.Request != nil {
+				cmdError.URL = r.Response.Request.URL.Path
 			}
 
 			if v, ok := httpStatusCodeToExitCode[cmdError.StatusCode]; ok {

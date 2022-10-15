@@ -136,7 +136,11 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
     ],
   ],
   themeConfig: {
-    hideableSidebar: true,
+    docs: {
+      sidebar: {
+        hideable: true
+      },
+    },
     prism: {
       theme: require('prism-react-renderer/themes/github'),
       darkTheme: require('prism-react-renderer/themes/dracula'),
@@ -226,6 +230,10 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
         },
         googleAnalytics: {
           trackingID: 'UA-155263011-1',
+          anonymizeIP: true,
+        },
+        gtag: {
+          trackingID: 'G-64LM52SE7T',
           anonymizeIP: true,
         },
         blog: {

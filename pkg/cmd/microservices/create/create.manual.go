@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
@@ -261,7 +262,17 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	if !skipUpload {
 		log.Infof("uploading binary [id=%s]", application.ID)
 		if !dryRun {
-			_, err := client.Application.CreateBinary(context.Background(), n.file, application.ID)
+
+			progress := n.factory.IOStreams.ProgressIndicator()
+			_, err := c8ybinary.CreateBinaryWithProgress(
+				context.Background(),
+				client,
+				"/application/applications/"+application.ID+"/binaries",
+				n.file,
+				nil,
+				progress,
+			)
+			n.factory.IOStreams.WaitForProgressIndicator()
 
 			if err != nil {
 				// handle error
@@ -293,7 +304,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 			_, resp, err := client.Tenant.AddApplicationReference(context.Background(), client.TenantName, application.Self)
 
 			if err != nil {
-				if resp != nil && resp.StatusCode == 409 {
+				if resp != nil && resp.StatusCode() == 409 {
 					log.Infof("microservice is already enabled")
 				} else {
 					return fmt.Errorf("Failed to subscribe to application. %s", err)

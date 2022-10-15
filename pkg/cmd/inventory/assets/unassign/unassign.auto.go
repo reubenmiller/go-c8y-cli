@@ -56,7 +56,7 @@ Unassign a child device from its parent device
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("child", "reference", false, "id"),
+		flags.WithExtendedPipelineSupport("child", "child", false, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -73,6 +73,11 @@ func (n *UnassignCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -136,13 +141,13 @@ func (n *UnassignCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAssets/{reference}")
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAssets/{child}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
 		c8yfetcher.WithIDSlice(args, "id", "id"),
-		flags.WithStringValue("child", "reference"),
+		flags.WithStringValue("child", "child"),
 	)
 	if err != nil {
 		return err

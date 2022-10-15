@@ -45,6 +45,7 @@ Inherit common parameters to a custom function. This will add parameters such as
                 "Collection" {
                     New-DynamicParam -Name "PageSize" -Type "int" -DPDictionary $Dictionary -HelpMessage "Maximum results per page"
                     New-DynamicParam -Name "WithTotalPages" -Type "switch" -DPDictionary $Dictionary -HelpMessage "Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages"
+                    New-DynamicParam -Name "WithTotalElements" -Type "switch" -DPDictionary $Dictionary -HelpMessage "Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)"
                     New-DynamicParam -Name "CurrentPage" -Type "int" -DPDictionary $Dictionary -HelpMessage "Current page which should be returned"
                     New-DynamicParam -Name "TotalPages" -Type "int" -DPDictionary $Dictionary -HelpMessage "Total number of pages to get"
                     New-DynamicParam -Name "IncludeAll" -Type "switch" -DPDictionary $Dictionary -HelpMessage "Include all results by iterating through each page"
@@ -83,6 +84,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name Proxy -Type "switch" -DPDictionary $Dictionary -HelpMessage "Proxy setting, i.e. http://10.0.0.1:8080"
         New-DynamicParam -Name NoProxy -Type "switch" -DPDictionary $Dictionary -HelpMessage "Ignore the proxy settings"
         New-DynamicParam -Name Timeout -Type "string" -DPDictionary $Dictionary -HelpMessage "Request timeout. It accepts a duration, i.e. 1ms, 0.5s, 1m etc."
+        New-DynamicParam -Name NoProgress -Type "switch" -DPDictionary $Dictionary -HelpMessage "Disable progress bars"
         
         # Session
         New-DynamicParam -Name Session -Type "string" -DPDictionary $Dictionary -HelpMessage "Session configuration"

@@ -30,9 +30,11 @@ func NewAssignGroupCmd(f *cmdutil.Factory) *AssignGroupCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "assignGroup",
-		Short: "Assign child group",
-		Long:  `Assigns a group to a group. The group will be a childAsset of the group`,
+		Use:    "assignGroup",
+		Short:  "Assign child group",
+		Long:   `Assigns a group to a group. The group will be a childAsset of the group`,
+		Hidden: true,
+
 		Example: heredoc.Doc(`
 $ c8y devicegroups assignGroup --group 12345 --newChildGroup 43234
 Add a group to a group
@@ -62,7 +64,11 @@ Add multiple groups to a group
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("newChildGroup", "managedObject.id", true, "id"),
+		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("newChildGroup", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObject"),
+		flags.WithDeprecationNotice("please use 'c8y devicegroups children unassign --childType asset' instead"),
 	)
 
 	// Required flags
@@ -79,6 +85,11 @@ func (n *AssignGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

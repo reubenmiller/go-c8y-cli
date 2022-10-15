@@ -9,10 +9,9 @@
     {
       "name": "getFirmwareCollection",
       "method": "GET",
-      "skip": true,
       "description": "Get firmware collection",
       "descriptionLong": "Get a collection of firmware packages (managedObjects) based on filter parameters",
-      "path": "inventory/managedObjects?query=$filter=((type eq 'c8y_Firmware') and ((name eq '{name}') and ((not(has(description))) or description eq '{description}') and (not(has(c8y_Filter.type)) or c8y_Filter.type eq '{deviceType}'))) $orderby=name asc",
+      "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "collectionProperty": "managedObjects",
@@ -39,24 +38,59 @@
           }
         ]
       },
-      "pathParameters": [
+      "queryParameters": [
         {
-          "name": "name",
-          "type": "string",
-          "default": "**",
-          "description": "Firmware name filter"
-        },
-        {
-          "name": "description",
-          "type": "string",
-          "default": "**",
-          "description": "Firmware description filter"
-        },
-        {
-          "name": "deviceType",
-          "type": "string",
-          "default": "**",
-          "description": "Firmware device type filter"
+          "name": "query",
+          "description": "Query expression group",
+          "property": "query",
+          "type": "queryExpression",
+          "children": [
+            {
+              "name": "query",
+              "type": "string",
+              "description": "Additional query filter",
+              "format": "%s",
+              "pipeline": true,
+              "pipelineAliases": [
+                "c8y_DeviceQueryString"
+              ]
+            },
+            {
+              "name": "queryTemplate",
+              "type": "string",
+              "description": "String template to be used when applying the given query. Use %s to reference the query/pipeline input"
+            },
+            {
+              "name": "orderBy",
+              "type": "string",
+              "default": "name",
+              "description": "Order by. e.g. _id asc or name asc or creationTime.date desc"
+            },
+            {
+              "name": "firmware",
+              "type": "stringStatic",
+              "description": "",
+              "value": "(type eq 'c8y_Firmware')"
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "description": "Filter by name",
+              "format": "(name eq '%s')"
+            },
+            {
+              "name": "deviceType",
+              "type": "string",
+              "description": "Filter by deviceType",
+              "format": "(c8y_Filter.type eq '%s')"
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "description": "Filter by description",
+              "format": "(description eq '%s')"
+            }
+          ]
         }
       ]
     },

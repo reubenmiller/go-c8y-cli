@@ -1,0 +1,21 @@
+tests:
+    notification2/subscriptions_create_Create a new subscription to operations for a specific device:
+        command: c8y notification2 subscriptions create --name deviceSub --device 12345 --context mo --apiFilter operations --apiFilter alarms
+        exit-code: 0
+        stdout:
+            json:
+                body.context: mo
+                body.source.id: "12345"
+                body.subscription: deviceSub
+                body.subscriptionFilter.apis.0: operations
+                body.subscriptionFilter.apis.1: alarms
+                method: POST
+                path: /notification2/subscriptions
+    notification2/subscriptions_create_Create a subscription which groups all devices in a single subscription name:
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.devices.list.json | c8y notification2 subscriptions create --name devicegroup --context mo --apiFilter operations'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: POST
+                path: /notification2/subscriptions
