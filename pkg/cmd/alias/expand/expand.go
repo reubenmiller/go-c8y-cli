@@ -97,7 +97,7 @@ func ExpandAlias(aliases map[string]string, args []string, findShFunc func() (st
 		expectedPositionals := lingeringRE.FindAllString(expandedAliasWithVariables, -1)
 
 		err = fmt.Errorf(
-			"not enough arguments for alias. Expected %d, got %d\n\n  Expanded alias: %s %s\n\n  Tip: Aliases expect the positional arguments to be given before other flags",
+			"not enough arguments for alias, expected %d, got %d\n\n  Expanded alias: %s %s\n\n  Tip: Aliases expect the positional arguments to be given before other flags",
 			len(expectedPositionals),
 			len(expectedPositionals)-len(missingPositionals),
 			expansion,
