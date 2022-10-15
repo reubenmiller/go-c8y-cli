@@ -23,6 +23,7 @@ func init() {
 const (
 	RowModeTruncate = "truncate"
 	RowModeWrap     = "wrap"
+	RowModeOverflow = "overflow" // default
 )
 
 // TableView renders a table in the terminal

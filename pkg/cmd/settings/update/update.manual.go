@@ -14,6 +14,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/tableviewer"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -333,6 +334,43 @@ var updateSettingsOptions = map[string]argumentHandler{
 	"defaults.insecure": {"defaults.insecure", "bool", config.SettingsDefaultsInsecure, []string{
 		"true",
 		"false",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	// Table view settings
+	"views.rowMode": {"views.rowMode", "string", config.SettingsViewRowMode, []string{
+		tableviewer.RowModeTruncate,
+		tableviewer.RowModeWrap,
+		tableviewer.RowModeOverflow,
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"views.columnMinWidth": {"views.columnMinWidth", "int", config.SettingsViewMinColumnWidth, []string{
+		"5",
+		"10",
+		"15",
+		"20",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"views.columnMaxWidth": {"views.columnMaxWidth", "int", config.SettingsViewMaxColumnWidth, []string{
+		"40",
+		"60",
+		"80",
+		"100",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"views.columnPadding": {"views.columnPadding", "int", config.SettingsViewColumnPadding, []string{
+		"0",
+		"5",
+		"10",
+		"15",
+		"20",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"views.columnMinWidthEmptyValue": {"views.columnMinWidthEmptyValue", "int", config.SettingsViewEmptyValueMinColumnWidth, []string{
+		"0",
+		"15",
+		"20",
+		"25",
+		"30",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 }
 

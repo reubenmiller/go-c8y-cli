@@ -437,6 +437,10 @@ Maximum width of columns when using the table view
 
 Minimum width of columns when using the table view
 
+### views.columnMinWidthEmptyValue: int
+
+Minimum column width for cells where the first row includes an non-existent or empty value when using the table view. This value is typically larger than the minimum width so that other rows which might have an non-empty value will still be readable (and not truncated so much)
+
 ### views.columnpadding: int
 
 Column padding to add when calculating the column widths based on the content.
