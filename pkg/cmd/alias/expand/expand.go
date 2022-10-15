@@ -29,7 +29,7 @@ func ExpandAlias(aliases map[string]string, args []string, findShFunc func() (st
 	isCompletion := false
 	completionCmd := ""
 	if len(args) > 2 {
-		if strings.HasSuffix(args[1], "__complete") {
+		if strings.HasPrefix(args[1], "__complete") {
 			completionCmd = args[1]
 			aliasName = args[2]
 			isCompletion = true
@@ -47,6 +47,7 @@ func ExpandAlias(aliases map[string]string, args []string, findShFunc func() (st
 	if !ok {
 		return
 	}
+	expandedAliasWithVariables := expansion
 
 	if strings.HasPrefix(expansion, "!") {
 		isShell = true
@@ -70,16 +71,38 @@ func ExpandAlias(aliases map[string]string, args []string, findShFunc func() (st
 	}
 
 	extraArgs := []string{}
+	isOption := regexp.MustCompile(`^--?[a-zA-Z][a-zA-Z0-9\-]*(=.*)?$`)
+	foundOption := false
+
+	// Positional arguments should be included first (otherwise we have to parse the command using the proper command definition)
+	// to find out which are flags expecting options and which are boolean flags.
 	for i, a := range args[2:] {
 		if !strings.Contains(expansion, "$") {
 			extraArgs = append(extraArgs, a)
 		} else {
-			expansion = strings.ReplaceAll(expansion, fmt.Sprintf("$%d", i+1), a)
+			// Check if user provided a positional argument or not
+			// Once an option is found, assume everything afterwards is also options or option values
+			if foundOption || isOption.MatchString(a) {
+				foundOption = true
+				extraArgs = append(extraArgs, a)
+			} else {
+				expansion = strings.ReplaceAll(expansion, fmt.Sprintf("$%d", i+1), a)
+			}
 		}
 	}
 	lingeringRE := regexp.MustCompile(`\$\d`)
 	if lingeringRE.MatchString(expansion) {
-		err = fmt.Errorf("not enough arguments for alias: %s", expansion)
+
+		missingPositionals := lingeringRE.FindAllString(expansion, -1)
+		expectedPositionals := lingeringRE.FindAllString(expandedAliasWithVariables, -1)
+
+		err = fmt.Errorf(
+			"not enough arguments for alias. Expected %d, got %d\n\n  Expanded alias: %s %s\n\n  Tip: Aliases expect the positional arguments to be given before other flags",
+			len(expectedPositionals),
+			len(expectedPositionals)-len(missingPositionals),
+			expansion,
+			strings.Join(extraArgs, " "),
+		)
 		return
 	}
 
