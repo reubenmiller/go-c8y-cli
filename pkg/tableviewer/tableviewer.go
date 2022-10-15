@@ -269,8 +269,8 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 
 	// Enable row separator when wrapping cells to make it easier to read
 	table.SetRowSeparator("-")
-	table.SetAutoWrapText(v.EnableWrap)
-	table.SetRowLine(v.EnableWrap)
+	table.SetAutoWrapText(!v.EnableTruncate && v.EnableWrap)
+	table.SetRowLine(!v.EnableTruncate && v.EnableWrap)
 
 	table.AppendBulk(data)
 	table.Render()
