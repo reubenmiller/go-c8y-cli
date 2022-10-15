@@ -14,6 +14,8 @@ import (
 
 var Logger *log.Logger
 
+var TextEllipsis = "…"
+
 func init() {
 	Logger = log.New(io.Discard, "tableviewer", 0)
 }
@@ -45,27 +47,9 @@ func (v *TableView) getValue(value gjson.Result) []string {
 		}
 		if columnWidth != 0 && len(columnValue) > columnWidth {
 			if v.EnableTruncate {
-				columnValue = columnValue[0:columnWidth-1] + "…"
+				columnValue = columnValue[0:columnWidth-1] + TextEllipsis
 			} else if v.EnableWrap {
-				// Force wrapping column values by splitting on length (not just whitespace)
-				splitValue := strings.Builder{}
-				lineWidth := 0
-				for _, c := range columnValue {
-					if unicode.IsSpace(c) {
-						// table writer will split on whitespace
-						lineWidth = -1
-					}
-
-					if lineWidth >= columnWidth {
-						splitValue.WriteString("\n…")
-						lineWidth = 1
-					}
-
-					splitValue.WriteRune(c)
-					lineWidth += 1
-				}
-
-				columnValue = splitValue.String()
+				columnValue = WrapLine(columnValue, columnWidth, TextEllipsis)
 			}
 		}
 		row = append(row, columnValue)
@@ -79,7 +63,7 @@ func (v *TableView) getWidth(defaultWidth int) int {
 	if err != nil {
 		return defaultWidth
 	}
-	return termSize.Col()
+	return termSize.Col() - 1
 }
 
 var TABLE_MAX_WIDTH = 120
@@ -100,7 +84,7 @@ func (v *TableView) calculateColumnWidths(minWidth int, row []string) {
 	if len(v.ColumnWidths) == 0 {
 		maxTableWidth := v.getWidth(TABLE_MAX_WIDTH)
 		v.ColumnWidths = make([]int, 0)
-		columnSeperatorWidth := 3
+		columnSeparatorWidth := 3
 		tableEndBuffer := 3
 		usedWith := 0
 		curMinWidth := 0
@@ -113,6 +97,13 @@ func (v *TableView) calculateColumnWidths(minWidth int, row []string) {
 				curMinWidth = v.MinEmptyValueColumnWidth
 			}
 
+			Logger.Printf("iColumn: name=%s, cellWidth=%d, min=%d, col=%d",
+				v.Columns[i],
+				tablewriter.DisplayWidth(columnValue)+v.ColumnPadding,
+				curMinWidth+v.ColumnPadding,
+				tablewriter.DisplayWidth(v.Columns[i]),
+			)
+
 			_, colWidth := minmax([]int{
 				// only pad value (not column widths)
 				tablewriter.DisplayWidth(columnValue) + v.ColumnPadding,
@@ -122,8 +113,8 @@ func (v *TableView) calculateColumnWidths(minWidth int, row []string) {
 
 			// TODO: When the column value is empty, then use a dedicate empty width value instead
 			// of the minimum width value
-			if usedWith+colWidth+columnSeperatorWidth > maxTableWidth {
-				leftOver := maxTableWidth - usedWith - columnSeperatorWidth - tableEndBuffer
+			if usedWith+colWidth+columnSeparatorWidth > maxTableWidth {
+				leftOver := maxTableWidth - usedWith - columnSeparatorWidth - tableEndBuffer
 				Logger.Printf("Left over: %d", leftOver)
 				if leftOver > curMinWidth {
 					v.ColumnWidths = append(v.ColumnWidths, leftOver)
@@ -132,7 +123,7 @@ func (v *TableView) calculateColumnWidths(minWidth int, row []string) {
 				break
 			}
 			v.ColumnWidths = append(v.ColumnWidths, colWidth)
-			usedWith += colWidth + 3 // overhead
+			usedWith += colWidth + columnSeparatorWidth // overhead
 			if i < len(v.ColumnWidths) {
 				columns = append(columns, v.Columns[i])
 			}
@@ -185,6 +176,42 @@ func (v *TableView) TransformData(j []byte, property string) [][]string {
 	return data
 }
 
+func WrapLine(line string, width int, wrapPrefix string) string {
+	if len(line) <= width {
+		return line
+	}
+	name := strings.Builder{}
+	lineWidth := 0
+	for _, c := range line {
+		if unicode.IsSpace(c) {
+			// table writer will split on whitespace
+			lineWidth = -1
+		}
+		if lineWidth >= width {
+			name.WriteRune('\n')
+			if wrapPrefix != "" {
+				name.WriteString(wrapPrefix)
+				lineWidth = 1
+			} else {
+				lineWidth = 0
+			}
+
+		}
+		name.WriteRune(c)
+		lineWidth++
+	}
+	return name.String()
+}
+
+func (v *TableView) GetHeaders() (headers []string) {
+	for i, col := range v.Columns {
+		if i < len(v.ColumnWidths) {
+			headers = append(headers, WrapLine(col, v.ColumnWidths[i], ""))
+		}
+	}
+	return headers
+}
+
 // Render writes the json data to console in the form of a table
 func (v *TableView) Render(jsonData []byte, withHeader bool) {
 	data := v.TransformData(jsonData, "")
@@ -196,7 +223,7 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 
 	isMarkdown := true
 	if withHeader {
-		table.SetHeader(v.Columns)
+		table.SetHeader(v.GetHeaders())
 		if !isMarkdown {
 			table.Append(v.getHeaderRow())
 		}
