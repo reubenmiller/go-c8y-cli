@@ -49,6 +49,9 @@ func init() {
 
 	// set seed for random generation
 	rand.Seed(time.Now().UTC().UnixNano())
+
+	// Enable case insensitive matches
+	cobra.EnableCaseInsensitive = true
 }
 
 // Execute runs the root command
@@ -196,8 +199,8 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 
 		v := viper.GetViper()
 		aliases := v.GetStringMapString(config.SettingsCommonAliases)
-		for k, v := range v.GetStringMapString(config.SettingsAliases) {
-			aliases[k] = v
+		for name, value := range v.GetStringMapString(config.SettingsAliases) {
+			aliases[name] = value
 		}
 		expandedArgs, isShell, err = expand.ExpandAlias(aliases, os.Args, nil)
 		if err != nil {
