@@ -128,6 +128,7 @@ tests:
     config:
       env:
         C8Y_SETTINGS_CI: false
+        CI: ""
         C8Y_SETTINGS_DEFAULTS_DRY: true
         C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
         C8Y_SETTINGS_MODE_ENABLEUPDATE: false
