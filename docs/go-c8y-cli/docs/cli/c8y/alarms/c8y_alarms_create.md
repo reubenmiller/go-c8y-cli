@@ -23,17 +23,17 @@ Create a new alarm for device
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings          The ManagedObject that the alarm originated from (accepts pipeline)
-  -h, --help                    help for create
-      --processingMode string   Cumulocity processing mode
-      --severity string         The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.
-      --status string           The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.
-      --template string         Body template
-      --templateVars string     Body template variables
-      --text string             Text description of the alarm.
-      --time string             Time of the alarm. Defaults to current timestamp.
-      --type string             Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'.
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --device strings             The ManagedObject that the alarm originated from (accepts pipeline)
+  -h, --help                       help for create
+      --processingMode string      Cumulocity processing mode
+      --severity string            The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.
+      --status string              The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --text string                Text description of the alarm.
+      --time string                Time of the alarm. Defaults to current timestamp.
+      --type string                Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'.
 ```
 
 ### Options inherited from parent commands

@@ -30,14 +30,14 @@ Upload a file with a custom name and custom meta information
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string             File to be uploaded as a binary (required)
-  -h, --help                    help for create
-      --name string             Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
-      --processingMode string   Cumulocity processing mode
-      --template string         Body template
-      --templateVars string     Body template variables
-      --type string             Custom type. If left blank, the MIME type will be detected from the file extension
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --file string                File to be uploaded as a binary (required)
+  -h, --help                       help for create
+      --name string                Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --type string                Custom type. If left blank, the MIME type will be detected from the file extension
 ```
 
 ### Options inherited from parent commands

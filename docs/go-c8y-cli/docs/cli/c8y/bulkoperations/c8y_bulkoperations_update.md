@@ -23,13 +23,13 @@ Update an bulk operation
 ### Options
 
 ```
-      --creationRampSec float32   Delay between every operation creation.
-  -d, --data string               static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-  -h, --help                      help for update
-      --id strings                Bulk Operation id (required) (accepts pipeline)
-      --processingMode string     Cumulocity processing mode
-      --template string           Body template
-      --templateVars string       Body template variables
+      --creationRampSec float32    Delay between every operation creation.
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help                       help for update
+      --id strings                 Bulk Operation id (required) (accepts pipeline)
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

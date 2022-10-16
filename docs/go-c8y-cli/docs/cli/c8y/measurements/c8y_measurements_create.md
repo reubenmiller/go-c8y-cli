@@ -26,14 +26,14 @@ Copy measurements from one device to another
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings          The ManagedObject which is the source of this measurement. (accepts pipeline)
-  -h, --help                    help for create
-      --processingMode string   Cumulocity processing mode
-      --template string         Body template
-      --templateVars string     Body template variables
-      --time string             Time of the measurement. Defaults to current timestamp.
-      --type string             The most specific type of this entire measurement.
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --device strings             The ManagedObject which is the source of this measurement. (accepts pipeline)
+  -h, --help                       help for create
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --time string                Time of the measurement. Defaults to current timestamp.
+      --type string                The most specific type of this entire measurement.
 ```
 
 ### Options inherited from parent commands

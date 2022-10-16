@@ -23,15 +23,15 @@ Uninstall a software package version
 ### Options
 
 ```
-      --action string           Software action (default "delete")
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings          Device or agent where the software should be installed (accepts pipeline)
-  -h, --help                    help for uninstall
-      --processingMode string   Cumulocity processing mode
-      --software string         Software name (required)
-      --template string         Body template
-      --templateVars string     Body template variables
-      --version string          Software version name or id
+      --action string              Software action (default "delete")
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --device strings             Device or agent where the software should be installed (accepts pipeline)
+  -h, --help                       help for uninstall
+      --processingMode string      Cumulocity processing mode
+      --software string            Software name (required)
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --version string             Software version name or id
 ```
 
 ### Options inherited from parent commands

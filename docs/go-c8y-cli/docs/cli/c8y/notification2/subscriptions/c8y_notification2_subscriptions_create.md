@@ -31,17 +31,17 @@ Create a subscription which groups all devices in a single subscription name
 ### Options
 
 ```
-      --apiFilter strings         Filter notifications by api
-      --context string            The context to which the subscription is associated.
-  -d, --data string               static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings            The managed object to which the subscription is associated. (accepts pipeline)
-      --fragmentsToCopy strings   Transforms the data to only include specified custom fragments. Each custom fragment is identified by a unique name. If nothing is specified here, the data is forwarded as-is.
-  -h, --help                      help for create
-      --name string               The subscription name. Each subscription is identified by a unique name within a specific context.
-      --processingMode string     Cumulocity processing mode
-      --template string           Body template
-      --templateVars string       Body template variables
-      --typeFilter string         The data needs to have the specified value in its type property to meet the filter criteria.
+      --apiFilter strings          Filter notifications by api
+      --context string             The context to which the subscription is associated.
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --device strings             The managed object to which the subscription is associated. (accepts pipeline)
+      --fragmentsToCopy strings    Transforms the data to only include specified custom fragments. Each custom fragment is identified by a unique name. If nothing is specified here, the data is forwarded as-is.
+  -h, --help                       help for create
+      --name string                The subscription name. Each subscription is identified by a unique name within a specific context.
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --typeFilter string          The data needs to have the specified value in its type property to meet the filter criteria.
 ```
 
 ### Options inherited from parent commands

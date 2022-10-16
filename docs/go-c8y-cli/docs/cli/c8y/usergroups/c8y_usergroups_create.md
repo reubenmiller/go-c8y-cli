@@ -29,7 +29,7 @@ Create a user group
       --name string                Group name (accepts pipeline)
       --processingMode string      Cumulocity processing mode
       --template string            Body template
-      --templateVars string        Body template variables
+      --templateVars stringArray   Body template variables
       --tenant string              Tenant
 ```
 

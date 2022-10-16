@@ -24,14 +24,14 @@ Update an operation
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --failureReason string    Reason for the failure. Use when setting status to FAILED
-  -h, --help                    help for update
-      --id strings              Operation id (required) (accepts pipeline)
-      --processingMode string   Cumulocity processing mode
-      --status string           Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
-      --template string         Body template
-      --templateVars string     Body template variables
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --failureReason string       Reason for the failure. Use when setting status to FAILED
+  -h, --help                       help for update
+      --id strings                 Operation id (required) (accepts pipeline)
+      --processingMode string      Cumulocity processing mode
+      --status string              Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

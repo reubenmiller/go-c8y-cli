@@ -45,18 +45,18 @@ a template to also build the request's body from the piped input data.
 ### Options
 
 ```
-      --accept string         accept (header)
-      --contentType string    content type (header)
-  -d, --data string           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string           File to be uploaded as a binary
-      --formdata string       form data (json or shorthand json)
-  -h, --help                  help for api
-      --host string           host to use for the rest request. If empty, then the session's host will be used
-      --keepProperties        Don't strip Cumulocity properties from the data property, i.e. source etc. (default true)
-      --method string         HTTP method (default "GET")
-      --template string       Body template
-      --templateVars string   Body template variables
-      --url string            URL path. Any reference to '%s' will be replaced with the current input value (accepts pipeline)
+      --accept string              accept (header)
+      --contentType string         content type (header)
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --file string                File to be uploaded as a binary
+      --formdata string            form data (json or shorthand json)
+  -h, --help                       help for api
+      --host string                host to use for the rest request. If empty, then the session's host will be used
+      --keepProperties             Don't strip Cumulocity properties from the data property, i.e. source etc. (default true)
+      --method string              HTTP method (default "GET")
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --url string                 URL path. Any reference to '%s' will be replaced with the current input value (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

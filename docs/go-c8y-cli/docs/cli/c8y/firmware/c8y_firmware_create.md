@@ -26,14 +26,14 @@ Create the same firmware package for multiple device types
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --description string      Description of the firmware package
-      --deviceType string       Device type filter. Only allow firmware to be applied to devices of this type (accepts pipeline)
-  -h, --help                    help for create
-      --name string             name
-      --processingMode string   Cumulocity processing mode
-      --template string         Body template
-      --templateVars string     Body template variables
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --description string         Description of the firmware package
+      --deviceType string          Device type filter. Only allow firmware to be applied to devices of this type (accepts pipeline)
+  -h, --help                       help for create
+      --name string                name
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

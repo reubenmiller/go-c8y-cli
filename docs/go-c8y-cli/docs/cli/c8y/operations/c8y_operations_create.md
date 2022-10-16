@@ -23,13 +23,13 @@ Create operation for a device
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --description string      Text description of the operation.
-      --device strings          Identifies the target device on which this operation should be performed. (accepts pipeline)
-  -h, --help                    help for create
-      --processingMode string   Cumulocity processing mode
-      --template string         Body template
-      --templateVars string     Body template variables
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --description string         Text description of the operation.
+      --device strings             Identifies the target device on which this operation should be performed. (accepts pipeline)
+  -h, --help                       help for create
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

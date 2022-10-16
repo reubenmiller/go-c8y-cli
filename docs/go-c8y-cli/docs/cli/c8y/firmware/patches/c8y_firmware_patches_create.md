@@ -33,7 +33,7 @@ Create a new patch (storing the file in Cumulocity) to an existing firmware vers
   -h, --help                       help for create
       --processingMode string      Cumulocity processing mode
       --template string            Body template
-      --templateVars string        Body template variables
+      --templateVars stringArray   Body template variables
       --url string                 URL to the firmware patch
       --version string             Patch version, i.e. 1.0.0
 ```

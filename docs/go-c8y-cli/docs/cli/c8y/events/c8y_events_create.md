@@ -26,15 +26,15 @@ Create a new event for a device (using pipeline)
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings          The ManagedObject which is the source of this event. (accepts pipeline)
-  -h, --help                    help for create
-      --processingMode string   Cumulocity processing mode
-      --template string         Body template
-      --templateVars string     Body template variables
-      --text string             Text description of the event.
-      --time string             Time of the event. Defaults to current timestamp.
-      --type string             Identifies the type of this event.
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --device strings             The ManagedObject which is the source of this event. (accepts pipeline)
+  -h, --help                       help for create
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --text string                Text description of the event.
+      --time string                Time of the event. Defaults to current timestamp.
+      --type string                Identifies the type of this event.
 ```
 
 ### Options inherited from parent commands

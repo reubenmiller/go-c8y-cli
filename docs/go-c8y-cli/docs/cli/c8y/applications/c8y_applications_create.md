@@ -35,7 +35,7 @@ Create a new hosted application
       --resourcesUrl string        URL to application base directory hosted on an external server. Required when application type is HOSTED
       --resourcesUsername string   authorization username to access resourcesUrl
       --template string            Body template
-      --templateVars string        Body template variables
+      --templateVars stringArray   Body template variables
       --type string                Type of application. Possible values are EXTERNAL, HOSTED, MICROSERVICE
 ```
 

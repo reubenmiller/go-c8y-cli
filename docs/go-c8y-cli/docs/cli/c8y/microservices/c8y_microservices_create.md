@@ -26,19 +26,19 @@ Create or update a microservice using an explicit name
 ### Options
 
 ```
-      --availability string     Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
-      --contextPath string      contextPath of the hosted application. Required when application type is HOSTED
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string             Microservice file to be uploaded (or Cumulocity.json) file
-  -h, --help                    help for create
-      --key string              Shared secret of application
-      --name string             Name of application
-      --processingMode string   Cumulocity processing mode
-      --resourcesUrl string     URL to application base directory hosted on an external server. Required when application type is HOSTED
-      --skipSubscription        Skip microservice subscription when creating the new microservice
-      --skipUpload              Skip uploading the binary to the platform
-      --template string         Body template
-      --templateVars string     Body template variables
+      --availability string        Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
+      --contextPath string         contextPath of the hosted application. Required when application type is HOSTED
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --file string                Microservice file to be uploaded (or Cumulocity.json) file
+  -h, --help                       help for create
+      --key string                 Shared secret of application
+      --name string                Name of application
+      --processingMode string      Cumulocity processing mode
+      --resourcesUrl string        URL to application base directory hosted on an external server. Required when application type is HOSTED
+      --skipSubscription           Skip microservice subscription when creating the new microservice
+      --skipUpload                 Skip uploading the binary to the platform
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

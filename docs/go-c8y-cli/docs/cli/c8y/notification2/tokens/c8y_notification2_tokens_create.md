@@ -26,15 +26,15 @@ Create a new token which is valid for 30 minutes
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --expiresInMinutes int    The token expiration duration. (default 1440)
-  -h, --help                    help for create
-      --name string             The subscription name. This value must match the same that was used when the subscription was created.
-      --processingMode string   Cumulocity processing mode
-      --shared string           Subscription is shared amongst multiple subscribers
-      --subscriber string       The subscriber name which the client wishes to be identified with. (accepts pipeline)
-      --template string         Body template
-      --templateVars string     Body template variables
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --expiresInMinutes int       The token expiration duration. (default 1440)
+  -h, --help                       help for create
+      --name string                The subscription name. This value must match the same that was used when the subscription was created.
+      --processingMode string      Cumulocity processing mode
+      --shared string              Subscription is shared amongst multiple subscribers
+      --subscriber string          The subscriber name which the client wishes to be identified with. (accepts pipeline)
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

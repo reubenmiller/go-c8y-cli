@@ -27,16 +27,16 @@ Copy device certificates from one Cumulocity tenant to another (tenants must not
 ### Options
 
 ```
-      --autoRegistrationEnabled   Enable auto registration
-  -d, --data string               static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string               Certificate file (in PEM format with header/footer)
-  -h, --help                      help for create
-      --name string               Certificate name (accepts pipeline)
-      --processingMode string     Cumulocity processing mode
-      --status string             Status (default "ENABLED")
-      --template string           Body template
-      --templateVars string       Body template variables
-      --tenant string             Tenant id
+      --autoRegistrationEnabled    Enable auto registration
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --file string                Certificate file (in PEM format with header/footer)
+  -h, --help                       help for create
+      --name string                Certificate name (accepts pipeline)
+      --processingMode string      Cumulocity processing mode
+      --status string              Status (default "ENABLED")
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --tenant string              Tenant id
 ```
 
 ### Options inherited from parent commands

@@ -32,18 +32,18 @@ Create/update hosted web application but don't activate it, so the current versi
 ### Options
 
 ```
-      --availability string   Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
-      --contextPath string    contextPath of the hosted application
-  -d, --data string           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string           File or Folder of the web application. It should contain a index.html file in the root folder/ or zip file
-  -h, --help                  help for createHostedApplication
-      --key string            Shared secret of application. Defaults to the value inside the cumulocity.json file (if present)
-      --name string           Name of application
-      --resourcesUrl string   URL to application base directory hosted on an external server. Required when application type is HOSTED (default "/")
-      --skipActivation        Don't activate to the application after it has been created and uploaded
-      --skipUpload            Don't uploaded the web app binary. Only the application placeholder will be created
-      --template string       Body template
-      --templateVars string   Body template variables
+      --availability string        Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
+      --contextPath string         contextPath of the hosted application
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --file string                File or Folder of the web application. It should contain a index.html file in the root folder/ or zip file
+  -h, --help                       help for createHostedApplication
+      --key string                 Shared secret of application. Defaults to the value inside the cumulocity.json file (if present)
+      --name string                Name of application
+      --resourcesUrl string        URL to application base directory hosted on an external server. Required when application type is HOSTED (default "/")
+      --skipActivation             Don't activate to the application after it has been created and uploaded
+      --skipUpload                 Don't uploaded the web app binary. Only the application placeholder will be created
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

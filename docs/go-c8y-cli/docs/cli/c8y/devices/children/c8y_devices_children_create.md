@@ -23,14 +23,14 @@ Create a child addition and link it to an existing managed object
 ### Options
 
 ```
-      --childType string        Child relationship type (required)
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --global                  Enable global access to the managed object
-  -h, --help                    help for create
-      --id strings              Managed object id where the child addition will be added to (required) (accepts pipeline)
-      --processingMode string   Cumulocity processing mode
-      --template string         Body template
-      --templateVars string     Body template variables
+      --childType string           Child relationship type (required)
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --global                     Enable global access to the managed object
+  -h, --help                       help for create
+      --id strings                 Managed object id where the child addition will be added to (required) (accepts pipeline)
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

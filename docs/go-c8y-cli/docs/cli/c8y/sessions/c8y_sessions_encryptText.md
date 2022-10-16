@@ -34,6 +34,7 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
 ```
   -h, --help                help for encryptText
       --passphrase string   Passphrase use for encrypting the text
+      --raw                 Only return the encrypted text and nothing else
       --text string         Text to be encrypted. (required)
 ```
 
@@ -77,7 +78,6 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
   -p, --pageSize int               Maximum results per page (default 5)
       --progress                   Show progress bar. This will also disable any other verbose output
       --proxy string               Proxy setting, i.e. http://10.0.0.1:8080
-  -r, --raw                        Show raw response. This mode will force output=json and view=off
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
   -P, --sessionPassword string     Override session password

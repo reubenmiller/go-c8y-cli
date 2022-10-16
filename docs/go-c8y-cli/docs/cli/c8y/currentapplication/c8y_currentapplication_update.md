@@ -35,7 +35,7 @@ Update custom properties of the current application (requires using application 
       --resourcesUrl string        URL to application base directory hosted on an external server
       --resourcesUsername string   authorization username to access resourcesUrl
       --template string            Body template
-      --templateVars string        Body template variables
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

@@ -23,18 +23,18 @@ Create a new tenant (from the management tenant)
 ### Options
 
 ```
-      --adminName string        Username of the tenant administrator
-      --adminPass string        Password of the tenant administrator
-      --company string          Company name. Maximum 256 characters
-      --contactName string      A contact name, for example an administrator, of the tenant
-      --contactPhone string     An international contact phone number
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --domain string           Domain name to be used for the tenant. Maximum 256 characters (accepts pipeline)
-  -h, --help                    help for create
-      --processingMode string   Cumulocity processing mode
-      --template string         Body template
-      --templateVars string     Body template variables
-      --tenantId string         The tenant ID. This should be left bank unless you know what you are doing. Will be auto-generated if not present.
+      --adminName string           Username of the tenant administrator
+      --adminPass string           Password of the tenant administrator
+      --company string             Company name. Maximum 256 characters
+      --contactName string         A contact name, for example an administrator, of the tenant
+      --contactPhone string        An international contact phone number
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --domain string              Domain name to be used for the tenant. Maximum 256 characters (accepts pipeline)
+  -h, --help                       help for create
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --tenantId string            The tenant ID. This should be left bank unless you know what you are doing. Will be auto-generated if not present.
 ```
 
 ### Options inherited from parent commands

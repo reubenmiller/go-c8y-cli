@@ -23,20 +23,20 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 ### Options
 
 ```
-      --createdFrom string      Start date or date and time of the alarm creation. Version >= 10.11
-      --createdTo string        End date or date and time of the alarm creation. Version >= 10.11
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --dateFrom string         Start date or date and time of alarm occurrence.
-      --dateTo string           End date or date and time of alarm occurrence.
-      --device strings          The ManagedObject that the alarm originated from (accepts pipeline)
-  -h, --help                    help for updateCollection
-      --newStatus string        New status to be applied to all of the matching alarms
-      --processingMode string   Cumulocity processing mode
-      --resolved                When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
-      --severity string         The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.
-      --status string           The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.
-      --template string         Body template
-      --templateVars string     Body template variables
+      --createdFrom string         Start date or date and time of the alarm creation. Version >= 10.11
+      --createdTo string           End date or date and time of the alarm creation. Version >= 10.11
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --dateFrom string            Start date or date and time of alarm occurrence.
+      --dateTo string              End date or date and time of alarm occurrence.
+      --device strings             The ManagedObject that the alarm originated from (accepts pipeline)
+  -h, --help                       help for updateCollection
+      --newStatus string           New status to be applied to all of the matching alarms
+      --processingMode string      Cumulocity processing mode
+      --resolved                   When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
+      --severity string            The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.
+      --status string              The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

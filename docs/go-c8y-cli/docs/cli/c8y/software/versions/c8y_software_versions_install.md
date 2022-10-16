@@ -29,17 +29,17 @@ Install a software package version with an explicit url
 ### Options
 
 ```
-      --action string           Software action (default "install")
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --description string      Operation description (default "Install software package")
-      --device strings          Device or agent where the software should be installed (accepts pipeline)
-  -h, --help                    help for install
-      --processingMode string   Cumulocity processing mode
-      --software string         Software name (required)
-      --template string         Body template
-      --templateVars string     Body template variables
-      --url string              Software url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
-      --version string          Software version id or name
+      --action string              Software action (default "install")
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --description string         Operation description (default "Install software package")
+      --device strings             Device or agent where the software should be installed (accepts pipeline)
+  -h, --help                       help for install
+      --processingMode string      Cumulocity processing mode
+      --software string            Software name (required)
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --url string                 Software url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
+      --version string             Software version id or name
 ```
 
 ### Options inherited from parent commands

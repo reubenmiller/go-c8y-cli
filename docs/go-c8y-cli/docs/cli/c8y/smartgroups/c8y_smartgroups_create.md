@@ -30,14 +30,14 @@ Create a smart group which is not visible in the UI
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-  -h, --help                    help for create
-      --invisible               Should the smart group be hidden from the user interface
-      --name string             Smart group name
-      --processingMode string   Cumulocity processing mode
-      --query string            Smart group query. Should be a valid inventory query. i.e. "name eq 'myname' and has(myFragment)" (accepts pipeline)
-      --template string         Body template
-      --templateVars string     Body template variables
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help                       help for create
+      --invisible                  Should the smart group be hidden from the user interface
+      --name string                Smart group name
+      --processingMode string      Cumulocity processing mode
+      --query string               Smart group query. Should be a valid inventory query. i.e. "name eq 'myname' and has(myFragment)" (accepts pipeline)
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

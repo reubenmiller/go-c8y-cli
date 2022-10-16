@@ -26,16 +26,16 @@ Update service status
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings          Device id (required for name lookup)
-  -h, --help                    help for update
-      --id strings              Service id (required) (accepts pipeline)
-      --name string             Service name
-      --processingMode string   Cumulocity processing mode
-      --serviceType string      Service type, e.g. systemd
-      --status string           Service status
-      --template string         Body template
-      --templateVars string     Body template variables
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --device strings             Device id (required for name lookup)
+  -h, --help                       help for update
+      --id strings                 Service id (required) (accepts pipeline)
+      --name string                Service name
+      --processingMode string      Cumulocity processing mode
+      --serviceType string         Service type, e.g. systemd
+      --status string              Service status
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

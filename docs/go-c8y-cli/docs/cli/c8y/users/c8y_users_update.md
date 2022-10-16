@@ -27,21 +27,21 @@ Update the email field in each user to match the id (if the id includes the @ si
 ### Options
 
 ```
-      --customProperties string   Custom properties to be added to the user
-  -d, --data string               static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --email string              User email address
-      --enabled                   User activation status (true/false)
-      --firstName string          User first name
-  -h, --help                      help for update
-      --id strings                User id (required) (accepts pipeline)
-      --lastName string           User last name
-      --password string           User password. Min: 6, max: 32 characters. Only Latin1 chars allowed
-      --phone string              User phone number. Format: '+[country code][number]', has to be a valid MSISDN
-      --processingMode string     Cumulocity processing mode
-      --sendPasswordResetEmail    Send password reset email to the user instead of setting a password
-      --template string           Body template
-      --templateVars string       Body template variables
-      --tenant string             Tenant
+      --customProperties string    Custom properties to be added to the user
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --email string               User email address
+      --enabled                    User activation status (true/false)
+      --firstName string           User first name
+  -h, --help                       help for update
+      --id strings                 User id (required) (accepts pipeline)
+      --lastName string            User last name
+      --password string            User password. Min: 6, max: 32 characters. Only Latin1 chars allowed
+      --phone string               User phone number. Format: '+[country code][number]', has to be a valid MSISDN
+      --processingMode string      Cumulocity processing mode
+      --sendPasswordResetEmail     Send password reset email to the user instead of setting a password
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --tenant string              Tenant
 ```
 
 ### Options inherited from parent commands

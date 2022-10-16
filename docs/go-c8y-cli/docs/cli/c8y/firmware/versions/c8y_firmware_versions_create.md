@@ -26,15 +26,15 @@ Create a new version with an external URL and link it to the existing "linux-os1
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string             File to be uploaded
-      --firmware strings        Firmware package id where the version will be added to (accepts pipeline)
-  -h, --help                    help for create
-      --processingMode string   Cumulocity processing mode
-      --template string         Body template
-      --templateVars string     Body template variables
-      --url string              URL to the firmware package
-      --version string          Version name, i.e. 1.0.0. If left blank than the version
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --file string                File to be uploaded
+      --firmware strings           Firmware package id where the version will be added to (accepts pipeline)
+  -h, --help                       help for create
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --url string                 URL to the firmware package
+      --version string             Version name, i.e. 1.0.0. If left blank than the version
 ```
 
 ### Options inherited from parent commands

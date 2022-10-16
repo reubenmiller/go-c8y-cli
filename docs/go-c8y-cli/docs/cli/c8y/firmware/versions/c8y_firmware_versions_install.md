@@ -28,16 +28,16 @@ Install a firmware version with an explicit url
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --description string      Operation description
-      --device strings          Device or agent where the firmware should be installed (accepts pipeline)
-      --firmware string         Firmware name (required)
-  -h, --help                    help for install
-      --processingMode string   Cumulocity processing mode
-      --template string         Body template
-      --templateVars string     Body template variables
-      --url string              Firmware url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
-      --version string          Firmware version
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --description string         Operation description
+      --device strings             Device or agent where the firmware should be installed (accepts pipeline)
+      --firmware string            Firmware name (required)
+  -h, --help                       help for install
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --url string                 Firmware url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
+      --version string             Firmware version
 ```
 
 ### Options inherited from parent commands

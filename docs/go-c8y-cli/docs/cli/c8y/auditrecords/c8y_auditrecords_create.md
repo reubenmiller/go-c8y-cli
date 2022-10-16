@@ -23,19 +23,19 @@ Create an audit record for a custom managed object update
 ### Options
 
 ```
-      --activity string         The activity that was carried out.
-      --application string      The application used to carry out the audited action.
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-  -h, --help                    help for create
-      --processingMode string   Cumulocity processing mode
-      --severity string         The severity of action: critical, major, minor, warning or information.
-      --source string           An optional ManagedObject that the audit record originated from (accepts pipeline)
-      --template string         Body template
-      --templateVars string     Body template variables
-      --text string             Text description of the audit record.
-      --time string             Time of the audit record. Defaults to current timestamp.
-      --type string             Identifies the type of this audit record.
-      --user string             The user responsible for the audited action.
+      --activity string            The activity that was carried out.
+      --application string         The application used to carry out the audited action.
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help                       help for create
+      --processingMode string      Cumulocity processing mode
+      --severity string            The severity of action: critical, major, minor, warning or information.
+      --source string              An optional ManagedObject that the audit record originated from (accepts pipeline)
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --text string                Text description of the audit record.
+      --time string                Time of the audit record. Defaults to current timestamp.
+      --type string                Identifies the type of this audit record.
+      --user string                The user responsible for the audited action.
 ```
 
 ### Options inherited from parent commands

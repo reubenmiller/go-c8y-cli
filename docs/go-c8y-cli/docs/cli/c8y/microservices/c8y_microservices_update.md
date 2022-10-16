@@ -24,16 +24,16 @@ Update microservice availability to MARKET
 ### Options
 
 ```
-      --availability string     Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
-      --contextPath string      contextPath of the hosted application
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-  -h, --help                    help for update
-      --id string               Microservice id (required) (accepts pipeline)
-      --key string              Shared secret of microservice
-      --processingMode string   Cumulocity processing mode
-      --resourcesUrl string     URL to microservice base directory hosted on an external server
-      --template string         Body template
-      --templateVars string     Body template variables
+      --availability string        Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
+      --contextPath string         contextPath of the hosted application
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help                       help for update
+      --id string                  Microservice id (required) (accepts pipeline)
+      --key string                 Shared secret of microservice
+      --processingMode string      Cumulocity processing mode
+      --resourcesUrl string        URL to microservice base directory hosted on an external server
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

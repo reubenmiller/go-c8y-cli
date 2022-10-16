@@ -26,15 +26,15 @@ Update severity of an existing alarm to CRITICAL
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-  -h, --help                    help for update
-      --id strings              Alarm id (required) (accepts pipeline)
-      --processingMode string   Cumulocity processing mode
-      --severity string         Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status string           The status of the alarm. If not specified, a new alarm will be created as ACTIVE.
-      --template string         Body template
-      --templateVars string     Body template variables
-      --text string             Text description of the alarm.
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help                       help for update
+      --id strings                 Alarm id (required) (accepts pipeline)
+      --processingMode string      Cumulocity processing mode
+      --severity string            Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
+      --status string              The status of the alarm. If not specified, a new alarm will be created as ACTIVE.
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --text string                Text description of the alarm.
 ```
 
 ### Options inherited from parent commands

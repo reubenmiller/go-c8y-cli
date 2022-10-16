@@ -33,7 +33,7 @@ Update a configuration file
       --newName string             New configuration name
       --processingMode string      Cumulocity processing mode
       --template string            Body template
-      --templateVars string        Body template variables
+      --templateVars stringArray   Body template variables
       --url string                 URL link to the configuration file
 ```
 

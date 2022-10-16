@@ -26,15 +26,15 @@ Create a new version with an external URL
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string             File to be uploaded
-  -h, --help                    help for create
-      --processingMode string   Cumulocity processing mode
-      --software strings        Software package id where the version will be added to (accepts pipeline)
-      --template string         Body template
-      --templateVars string     Body template variables
-      --url string              URL to the software package
-      --version string          Software package version name, i.e. 1.0.0
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --file string                File to be uploaded
+  -h, --help                       help for create
+      --processingMode string      Cumulocity processing mode
+      --software strings           Software package id where the version will be added to (accepts pipeline)
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --url string                 URL to the software package
+      --version string             Software package version name, i.e. 1.0.0
 ```
 
 ### Options inherited from parent commands

@@ -24,17 +24,17 @@ Create a retention rule
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --dataType string         RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *]. (accepts pipeline)
-      --editable                Whether the rule is editable. Can be updated only by management tenant.
-      --fragmentType string     RetentionRule will be applied to documents with fragmentType.
-  -h, --help                    help for create
-      --maximumAge int          Maximum age of document in days.
-      --processingMode string   Cumulocity processing mode
-      --source string           RetentionRule will be applied to documents with source.
-      --template string         Body template
-      --templateVars string     Body template variables
-      --type string             RetentionRule will be applied to documents with type.
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --dataType string            RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *]. (accepts pipeline)
+      --editable                   Whether the rule is editable. Can be updated only by management tenant.
+      --fragmentType string        RetentionRule will be applied to documents with fragmentType.
+  -h, --help                       help for create
+      --maximumAge int             Maximum age of document in days.
+      --processingMode string      Cumulocity processing mode
+      --source string              RetentionRule will be applied to documents with source.
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --type string                RetentionRule will be applied to documents with type.
 ```
 
 ### Options inherited from parent commands
