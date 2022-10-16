@@ -1184,22 +1184,17 @@ func (c *Config) GetTemplatePaths() (paths []string) {
 
 // AllowModeCreate enables create (post) commands
 func (c *Config) AllowModeCreate() bool {
-	return c.viper.GetBool(SettingsModeEnableCreate) || c.CIModeEnabled()
+	return c.viper.GetBool(SettingsModeEnableCreate) || c.IsCIMode()
 }
 
 // AllowModeUpdate enables update commands
 func (c *Config) AllowModeUpdate() bool {
-	return c.viper.GetBool(SettingsModeEnableUpdate) || c.CIModeEnabled()
+	return c.viper.GetBool(SettingsModeEnableUpdate) || c.IsCIMode()
 }
 
 // AllowModeDelete enables delete commands
 func (c *Config) AllowModeDelete() bool {
-	return c.viper.GetBool(SettingsModeEnableDelete) || c.CIModeEnabled()
-}
-
-// CIModeEnabled enable continuous integration mode (this will enable all commands)
-func (c *Config) CIModeEnabled() bool {
-	return c.viper.GetBool(SettingsModeCI)
+	return c.viper.GetBool(SettingsModeEnableDelete) || c.IsCIMode()
 }
 
 // Force don't prompt for confirmation
