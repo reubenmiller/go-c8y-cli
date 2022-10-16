@@ -219,7 +219,7 @@ The following shows a few examples of the transformation:
 
 | Setting | Environment Variable |
 |------|----------------------|
-| `ci` | `C8Y_SETTINGS_CI` |
+| `ci` | `C8Y_SETTINGS_CI` or `CI` |
 | `defaults.pageSize` | `C8Y_SETTINGS_DEFAULTS_PAGESIZE` |
 | `defaults.force` | `C8Y_SETTINGS_DEFAULTS_FORCE` |
 
@@ -351,10 +351,14 @@ Enable CI mode where all prompts will be disabled. If set to `true` it will over
 * `mode.enableupdate`
 
 :::note
-As it's name suggests, CI mode is ideally used for CI/CD pipelines only. The settings can be easily updated by setting a single environment variable:
+From `v2.18.0`, `go-c8y-cli` will detect the `CI` environment variable which is set by most CI/CD environments.
+It can be enabled explicitly using:
 
 ```bash
 export C8Y_SETTINGS_CI=true
+
+# or
+export CI=true
 ```
 :::
 

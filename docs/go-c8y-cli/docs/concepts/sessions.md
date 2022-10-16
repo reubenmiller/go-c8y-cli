@@ -110,7 +110,7 @@ Then the Cumulocity settings can be set by the following environment variables.
 * C8Y_TENANT (example "myTenant")
 * C8Y_USER
 * C8Y_PASSWORD
-* C8Y_SETTINGS_CI
+* C8Y_SETTINGS_CI or `CI`
 
 
 ### Switching sessions for a single command
