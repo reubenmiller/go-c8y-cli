@@ -12,8 +12,8 @@ Unofficial Cumulocity IoT Command Line Tool
 Supported on
 
 * Linux (amd64, x86, armv5->7)
-* MacOS (amd64)
-* Windows (amd64, x86)
+* MacOS (amd64, arm64)
+* Windows (amd64, x86, arm64 (binary only))
 
 ## Installation
 
