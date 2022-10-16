@@ -68,7 +68,7 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 			return nil
 		}
 		cmd.Flags().String(flags.FlagDataTemplateName, "", "Body template")
-		cmd.Flags().String(flags.FlagDataTemplateVariablesName, "", "Body template variables")
+		cmd.Flags().StringArray(flags.FlagDataTemplateVariablesName, []string{}, "Body template variables")
 
 		_ = cmd.RegisterFlagCompletionFunc(flags.FlagDataTemplateName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			templatePath := cfg.GetTemplatePaths()

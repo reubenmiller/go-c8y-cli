@@ -101,11 +101,11 @@ func WithCommonCumulocityQueryOptions() Option {
 	}
 }
 
-// WithTemplate adds support for templates
-func WithTemplate() Option {
+// WithTemplateNoCompletion adds support for templates
+func WithTemplateNoCompletion() Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		cmd.Flags().String(FlagDataTemplateName, "", "Body template")
-		cmd.Flags().String(FlagDataTemplateVariablesName, "", "Body template variables")
+		cmd.Flags().StringArray(FlagDataTemplateVariablesName, []string{}, "Body template variables")
 		return cmd
 	}
 }

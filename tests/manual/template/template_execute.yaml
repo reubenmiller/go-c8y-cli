@@ -267,3 +267,11 @@ tests:
     stderr:
       contains:
         - 'commandError: Missing required parameter. template'
+
+  It accepts multiple template vars:
+    command: |
+      c8y template execute --template vars --templateVars prop1.value=1 --templateVars prop2=two
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"prop1":{"value":1},"prop2":"two"}

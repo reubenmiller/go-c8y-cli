@@ -854,19 +854,32 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, raw bool, opts ...string) G
 			return "", "", nil
 		}
 
-		value, err := cmd.Flags().GetString(src)
+		values, err := cmd.Flags().GetStringArray(src)
 		if err != nil {
-			return dst, value, err
+			// Try to read from string instead
+			if value, err := cmd.Flags().GetString(src); err != nil {
+				return dst, value, err
+			} else {
+				values = append(values, value)
+			}
+		}
+
+		if len(values) == 0 {
+			return "", "", nil
 		}
 
 		if raw {
-			return dst, RawString(resolveContents(value)), nil
+			return dst, RawString(resolveContents(values[0])), nil
 		}
 		data := make(map[string]interface{})
 
-		err = jsonUtilities.ParseJSON(resolveContents(value), data)
-		if err != nil {
-			return dst, "", fmt.Errorf("json error: %s parameter does not contain valid json or shorthand json. %w", src, err)
+		// Merge multiple data objects together
+		for _, value := range values {
+			log.Printf("Parsing value: %v", value)
+			err = jsonUtilities.ParseJSON(resolveContents(value), data)
+			if err != nil {
+				return dst, "", fmt.Errorf("json error: %s parameter does not contain valid json or shorthand json. %w", src, err)
+			}
 		}
 
 		if stripCumulocityKeys {
