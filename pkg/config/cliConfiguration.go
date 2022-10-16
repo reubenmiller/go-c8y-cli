@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -374,6 +375,16 @@ func WithDefault(name string, defaultValue interface{}) func(*Config) error {
 	}
 }
 
+// WithBoolEnvOverride support optional override boolean variable
+func WithBoolEnvOverride(name string, envName string) func(*Config) error {
+	return func(c *Config) error {
+		if v, err := strconv.ParseBool(os.Getenv(envName)); err == nil {
+			c.viper.Set(name, v)
+		}
+		return nil
+	}
+}
+
 func (c *Config) WithOptions(opts ...Option) error {
 	for _, opt := range opts {
 		err := opt(c)
@@ -409,7 +420,12 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsModeEnableCreate, false),
 		WithBindEnv(SettingsModeEnableUpdate, false),
 		WithBindEnv(SettingsModeEnableDelete, false),
+
+		// Support CI env variable as it is commonly used in CI/CD environments
+		// The env variable "CI" is preferred if present/valid
 		WithBindEnv(SettingsModeCI, false),
+		WithBoolEnvOverride(SettingsModeCI, "CI"),
+
 		WithBindEnv(SettingsConfigPath, ""),
 		WithBindEnv(SettingsViewsCommonPaths, ""),
 		WithBindEnv(SettingsViewsCustomPaths, ""),
@@ -847,7 +863,7 @@ func (c *Config) SetTenant(value string) {
 
 // IsCIMode return true if the cli is running in CI mode
 func (c *Config) IsCIMode() bool {
-	return c.viper.GetBool("settings.ci")
+	return c.viper.GetBool(SettingsModeCI)
 }
 
 // IsEncryptionEnabled indicates if session encryption is enabled or not
