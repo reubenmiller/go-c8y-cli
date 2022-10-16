@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+tests:
+  It supports CI env:
+    config:
+      inherit-env: false
+    command: |
+      CI=true C8Y_SETTINGS_CI=false c8y settings list --select ci --output csv
+      CI=true C8Y_SETTINGS_CI=true c8y settings list --select ci --output csv
+      CI=false C8Y_SETTINGS_CI=false c8y settings list --select ci --output csv
+      CI=false C8Y_SETTINGS_CI=true c8y settings list --select ci --output csv
+
+      CI= C8Y_SETTINGS_CI=false c8y settings list --select ci --output csv
+      CI= C8Y_SETTINGS_CI=true c8y settings list --select ci --output csv
+    exit-code: 0
+    stdout:
+      exactly: |
+        true
+        true
+        false
+        false
+        false
+        true
