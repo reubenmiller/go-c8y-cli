@@ -25,7 +25,7 @@ func Test_WithTemplateValue(t *testing.T) {
 	flags.WithOptions(
 		cmd,
 		flags.WithData(),
-		flags.WithTemplate(),
+		flags.WithTemplateNoCompletion(),
 	)
 	inputIterator, _ := NewRequestInputIterators(cmd, nil)
 
