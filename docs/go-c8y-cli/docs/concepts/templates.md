@@ -159,6 +159,21 @@ c8y inventory create \
 }
 ```
 
+When using `c8y` directly, `--templateVars` can be used multiple times in the same command. This provides a better tab completion experience for the template variable names.
+
+<CodeExample>
+
+```bash
+c8y inventory create \
+    --template "./examples/templates/device.jsonnet" \
+    --templateVars "type=macOS" \
+    --templateVars "fragment=customer_Agent" \
+    --dry
+```
+
+</CodeExample>
+
+
 ## Template Functions (added by go-c8y-cli)
 
 Below lists the additional functions which are available in jsonnet template files. These functions are added to your template automatically by the c8y cli tool itself, and are not part of the standard jsonnet library. The built-in [jsonnet standard library](https://jsonnet.org/ref/stdlib.html) provides additional functions that can be used in combination with those injected by go-c8y-cli.
