@@ -168,6 +168,27 @@ endpoints:
         required: true
         description: DeviceProfile (managedObject) id
 
+    queryParameters:
+      - name: skipChildrenNames
+        type: boolean
+        description: Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
+
+      - name: withChildren
+        type: boolean
+        description: Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
+
+      - name: withChildrenCount
+        type: boolean
+        description: When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
+      
+      - name: withGroups
+        type: boolean
+        description: When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
+
+      - name: withParents
+        type: boolean
+        description: Include a flat list of all parents and grandparents of the given object
+
   - name: updateDeviceProfile
     method: PUT
     path: inventory/managedObjects/{id}

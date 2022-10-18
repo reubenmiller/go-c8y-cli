@@ -83,6 +83,10 @@ endpoints:
         type: boolean
         description: Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
 
+      - name: withChildrenCount
+        type: boolean
+        description: When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
+
   - name: assignChildAddition
     method: POST
     path: inventory/managedObjects/{id}/childAdditions

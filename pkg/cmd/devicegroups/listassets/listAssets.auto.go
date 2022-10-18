@@ -49,6 +49,8 @@ Get a list of the child devices of an existing device
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Device Group. (required) (accepts pipeline)")
+	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
+	cmd.Flags().Bool("withChildrenCount", false, "When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)")
 
 	completion.WithOptions(
 		cmd,
@@ -99,6 +101,8 @@ func (n *ListAssetsCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithBoolValue("withChildren", "withChildren", ""),
+		flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
