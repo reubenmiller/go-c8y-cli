@@ -56,6 +56,10 @@ Get a list of firmware patches where the dependency version starts with '1.'
 	cmd.Flags().String("dependency", "", "Patch dependency version")
 	cmd.Flags().String("version", "", "Patch version")
 	cmd.Flags().String("url", "", "Filter by url")
+	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")
+	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
+	cmd.Flags().Bool("withChildrenCount", false, "When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)")
+	cmd.Flags().Bool("withGroups", false, "When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.")
 	cmd.Flags().Bool("withParents", true, "Include parent references")
 
 	completion.WithOptions(
@@ -105,6 +109,10 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithBoolValue("skipChildrenNames", "skipChildrenNames", ""),
+		flags.WithBoolValue("withChildren", "withChildren", ""),
+		flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
+		flags.WithBoolValue("withGroups", "withGroups", ""),
 		flags.WithDefaultBoolValue("withParents", "withParents", ""),
 
 		flags.WithCumulocityQuery(

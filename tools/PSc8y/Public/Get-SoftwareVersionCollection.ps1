@@ -53,6 +53,26 @@ Get a list of software package versions
         [string]
         $Url,
 
+        # Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
+        [Parameter()]
+        [switch]
+        $SkipChildrenNames,
+
+        # Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
+        [Parameter()]
+        [switch]
+        $WithChildren,
+
+        # When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
+        [Parameter()]
+        [switch]
+        $WithChildrenCount,
+
+        # When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
+        [Parameter()]
+        [switch]
+        $WithGroups,
+
         # Include parent references
         [Parameter()]
         [switch]
