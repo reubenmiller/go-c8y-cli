@@ -875,7 +875,6 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, raw bool, opts ...string) G
 
 		// Merge multiple data objects together
 		for _, value := range values {
-			log.Printf("Parsing value: %v", value)
 			err = jsonUtilities.ParseJSON(resolveContents(value), data)
 			if err != nil {
 				return dst, "", fmt.Errorf("json error: %s parameter does not contain valid json or shorthand json. %w", src, err)
