@@ -78,7 +78,7 @@ Get a list of managed objects by id
         [switch]
         $SkipChildrenNames,
 
-        # include a flat list of all parents and grandparents of the given object
+        # Include a flat list of all parents and grandparents of the given object
         [Parameter()]
         [switch]
         $WithParents,
@@ -87,6 +87,11 @@ Get a list of managed objects by id
         [Parameter()]
         [switch]
         $WithChildren,
+
+        # When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
+        [Parameter()]
+        [switch]
+        $WithChildrenCount,
 
         # When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
         [Parameter()]

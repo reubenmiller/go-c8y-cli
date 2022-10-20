@@ -54,8 +54,11 @@ Find managed objects which contain the text 'myText' and is a device (using pipe
 	cmd.Flags().String("text", "", "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z). (required) (accepts pipeline)")
 	cmd.Flags().String("type", "", "ManagedObject type.")
 	cmd.Flags().String("fragmentType", "", "ManagedObject fragment type.")
-	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
 	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")
+	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
+	cmd.Flags().Bool("withChildrenCount", false, "When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)")
+	cmd.Flags().Bool("withGroups", false, "When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.")
+	cmd.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
 
 	completion.WithOptions(
 		cmd,
@@ -106,8 +109,11 @@ func (n *FindByTextCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("text", "text"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
-		flags.WithBoolValue("withParents", "withParents", ""),
 		flags.WithBoolValue("skipChildrenNames", "skipChildrenNames", ""),
+		flags.WithBoolValue("withChildren", "withChildren", ""),
+		flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
+		flags.WithBoolValue("withGroups", "withGroups", ""),
+		flags.WithBoolValue("withParents", "withParents", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

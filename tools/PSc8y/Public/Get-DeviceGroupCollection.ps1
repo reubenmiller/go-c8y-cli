@@ -68,15 +68,30 @@ Get a collection of device groups with names that start with 'parent'
         [object[]]
         $Group,
 
-        # Include a flat list of all parents and grandparents of the given object
+        # Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
         [Parameter()]
         [switch]
-        $WithParents,
+        $SkipChildrenNames,
 
         # Include names of child assets (only use where necessary as it is slow for large groups)
         [Parameter()]
         [switch]
-        $WithChildren
+        $WithChildren,
+
+        # When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
+        [Parameter()]
+        [switch]
+        $WithChildrenCount,
+
+        # When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
+        [Parameter()]
+        [switch]
+        $WithGroups,
+
+        # Include a flat list of all parents and grandparents of the given object
+        [Parameter()]
+        [switch]
+        $WithParents
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

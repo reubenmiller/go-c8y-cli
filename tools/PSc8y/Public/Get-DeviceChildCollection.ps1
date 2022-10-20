@@ -58,7 +58,12 @@ Get a list of the child additions of an existing managed object (using pipeline)
         # Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
         [Parameter()]
         [switch]
-        $WithChildren
+        $WithChildren,
+
+        # When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
+        [Parameter()]
+        [switch]
+        $WithChildrenCount
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
