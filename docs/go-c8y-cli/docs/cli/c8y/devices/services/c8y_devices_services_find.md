@@ -34,7 +34,11 @@ Find any ntp services which are currently down
       --orderBy string       Order by. e.g. _id asc or name asc or creationTime.date desc
       --query string         Additional query filter
       --serviceType string   Filter by service type e.g. systemd
+      --skipChildrenNames    Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
       --status string        Filter by service status (custom values allowed)
+      --withChildren         Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
+      --withChildrenCount    When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
+      --withGroups           When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
       --withParents          Include a flat list of all parents and grandparents of the given object
 ```
 

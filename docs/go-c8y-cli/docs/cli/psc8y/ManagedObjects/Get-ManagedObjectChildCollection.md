@@ -24,6 +24,7 @@ Get-ManagedObjectChildCollection
 	[[-QueryTemplate] <String>]
 	[[-OrderBy] <String>]
 	[-WithChildren]
+	[-WithChildrenCount]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-WithTotalElements]
@@ -178,6 +179,21 @@ Accept wildcard characters: False
 ### -WithChildren
 Determines if children with ID and name should be returned when fetching the managed object.
 Set it to false to improve query performance.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithChildrenCount
+When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
 
 ```yaml
 Type: SwitchParameter

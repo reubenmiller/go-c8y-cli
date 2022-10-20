@@ -43,8 +43,12 @@ Invert a given query received via piped input (stdin) by using a template
       --owner string                  Filter by owner
       --query string                  ManagedObject query (accepts pipeline)
       --queryTemplate string          String template to be used when applying the given query. Use %s to reference the query/pipeline input
+      --skipChildrenNames             Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
       --type string                   Filter by type
-      --withParents                   include a flat list of all parents and grandparents of the given object
+      --withChildren                  Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
+      --withChildrenCount             When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
+      --withGroups                    When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
+      --withParents                   Include a flat list of all parents and grandparents of the given object
 ```
 
 ### Options inherited from parent commands
