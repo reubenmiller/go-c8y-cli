@@ -85,7 +85,7 @@ func WithProcessingModeValue() GetOption {
 // WithData adds support for data input
 func WithData() Option {
 	return func(cmd *cobra.Command) *cobra.Command {
-		cmd.Flags().StringP(FlagDataName, "d", "", "static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'")
+		cmd.Flags().StringArrayP(FlagDataName, "d", []string{}, "static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'")
 		return cmd
 	}
 }
