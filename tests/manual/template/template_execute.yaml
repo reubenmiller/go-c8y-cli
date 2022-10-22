@@ -275,3 +275,21 @@ tests:
     stdout:
       exactly: |
         {"prop1":{"value":1},"prop2":"two"}
+
+  It can combine data and template flags:
+    command: |
+      c8y template execute \
+        --template "{name: 'testdevice'}" \
+        --data "my.value=1" \
+        --data "prop2=false" \
+        --output json -c=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "my": {
+            "value": 1
+          },
+          "name": "testdevice",
+          "prop2": false
+        }
