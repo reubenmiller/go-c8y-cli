@@ -80,7 +80,7 @@ func MainRun() {
 		cfg := config.NewConfig(v)
 		for _, alias := range cfg.GetExtensionAliases() {
 			if alias.Name != "" {
-				aliases[alias.Name] = alias.Command
+				aliases[alias.Name] = alias.GetCommand()
 			}
 		}
 
@@ -213,7 +213,7 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 		cfg := config.NewConfig(v)
 		for _, alias := range cfg.GetExtensionAliases() {
 			if alias.Name != "" {
-				aliases[alias.Name] = alias.Command
+				aliases[alias.Name] = alias.GetCommand()
 			}
 		}
 

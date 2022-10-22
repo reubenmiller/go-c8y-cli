@@ -1370,6 +1370,13 @@ type ExtensionAlias struct {
 	Shell       bool   `json:"shell"`
 }
 
+func (a *ExtensionAlias) GetCommand() string {
+	if a.Shell {
+		return "!" + a.Command
+	}
+	return a.Command
+}
+
 func (c *Config) GetExtensionAliases() []ExtensionAlias {
 	files := c.getExtensionFiles("extension.json")
 
