@@ -94,10 +94,10 @@ func parseJSONStructure(value string, data map[string]interface{}) error {
 	return nil
 }
 
-//
 // Examples:
 // "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source={'id': '12345'}"
 // "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source={id: '12345'}"
+//
 //	->	{"severity":"MAJOR","source":{"id":"12345"},"text":"one","time":"2019-01-01","type":"test_Type"}
 func parseValue(value string) interface{} {
 	propValue := strings.TrimSpace(value)
@@ -133,6 +133,8 @@ func parseValue(value string) interface{} {
 		return true
 	} else if propValue == "false" {
 		return false
+	} else if propValue == "null" {
+		return nil
 	} else {
 		if hasQuotes(propValue) {
 			// remove quotes
