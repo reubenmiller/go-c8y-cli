@@ -13,11 +13,13 @@ vars:
 env:
   C8Y_SETTINGS_CI: true
   GITHUB_TOKEN: ""
+  LOCAL_PATH:
+    sh: |
+      echo "$(pwd)/.bin:$PATH"
 
 dotenv: ['.env', '{{.ENV}}/.env.', '{{.HOME}}/.env']
 
 tasks:
-
   # ---------------------------------------------------------------
   # Helpers
   # ---------------------------------------------------------------
@@ -283,7 +285,7 @@ tasks:
     vars:
       FILTER: "*"
     cmds:
-      - ./tests/run-manual.sh {{.CLI_ARGS}}
+      - env PATH="$LOCAL_PATH" ./tests/run-manual.sh {{.CLI_ARGS}}
   
   test-cli-auto:
     desc: Run auto generated cli tests
@@ -292,8 +294,8 @@ tasks:
       task test-cli-auto -- software 
     deps: [install-test-dependencies]
     cmds:
-      - ./tests/scripts/setup.sh
-      - ./tests/run-auto.sh {{.CLI_ARGS}}
+      - env PATH="$LOCAL_PATH" ./tests/scripts/setup.sh
+      - env PATH="$LOCAL_PATH" ./tests/run-auto.sh {{.CLI_ARGS}}
 
   test-installation:
     desc: Test installation of linux packages
