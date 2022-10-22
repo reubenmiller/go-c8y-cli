@@ -331,7 +331,22 @@
         "go": [
           {
             "description": "Update device by id",
-            "command": "c8y devices update --id 12345"
+            "command": "c8y devices update --id 12345 --newName \"MyDevice\""
+          },
+          {
+            "description": "Update device using a template",
+            "command": "c8y devices update --id 12345 --template \"{c8y_SupportedOperations:['c8y_Restart', 'c8y_Command']}\"",
+            "skipTest": true
+          },
+          {
+            "description": "Update device using a data (with different formats)",
+            "command": "c8y devices update --id 12345 --data \"my.nested.number=1.234,my.nested.bool=true,my.nested.string=my name,my.nested.num_as_str='1.234'\"",
+            "skipTest": true
+          },
+          {
+            "description": "Remove a property from a device by setting it to null",
+            "command": "c8y devices update --id 12345 --data \"myFragment=null\"",
+            "skipTest": true
           }
         ]
       },

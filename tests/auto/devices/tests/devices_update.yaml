@@ -1,7 +1,37 @@
 tests:
-    devices_update_Update device by id:
-        command: c8y devices update --id 12345
+    devices_update_Remove a property from a device by setting it to null:
+        command: c8y devices update --id 12345 --data "myFragment=null"
         exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.myFragment: <nil>
+                method: PUT
+                path: /inventory/managedObjects/12345
+    devices_update_Update device by id:
+        command: c8y devices update --id 12345 --newName "MyDevice"
+        exit-code: 0
+        stdout:
+            json:
+                body.name: MyDevice
+                method: PUT
+                path: /inventory/managedObjects/12345
+    devices_update_Update device using a data (with different formats):
+        command: c8y devices update --id 12345 --data "my.nested.number=1.234,my.nested.bool=true,my.nested.string=my name,my.nested.num_as_str='1.234'"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                ..#(body.data="my.nested.bool=true").body.data: my.nested.bool=true
+                ..#(body.data="my.nested.num_as_str='1.234'").body.data: my.nested.num_as_str='1.234'
+                ..#(body.data="my.nested.number=1.234").body.data: my.nested.number=1.234
+                ..#(body.data="my.nested.string=my name").body.data: my.nested.string=my name
+                method: PUT
+                path: /inventory/managedObjects/12345
+    devices_update_Update device using a template:
+        command: c8y devices update --id 12345 --template "{c8y_SupportedOperations:['c8y_Restart', 'c8y_Command']}"
+        exit-code: 0
+        skip: true
         stdout:
             json:
                 method: PUT

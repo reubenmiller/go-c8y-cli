@@ -36,6 +36,9 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Example: heredoc.Doc(`
 $ c8y inventory update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"
 Update a managed object
+
+$ c8y inventory update --id 12345 --data "my_Fragment=null"
+Remove a property (by setting it to null)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.UpdateModeEnabled()

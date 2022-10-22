@@ -528,6 +528,10 @@ endpoints:
       go:
         - description: Update a managed object
           command: 'c8y inventory update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"'
+        
+        - description: Remove a property (by setting it to null)
+          command: c8y inventory update --id 12345 --data "my_Fragment=null"
+          skipTest: true
     body:
       - name: newName
         property: name
