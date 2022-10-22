@@ -136,6 +136,13 @@ var (
 	OperationCount         AssertionErrorContext = "operationCount"
 )
 
+func NewSilentError() error {
+	return CommandError{
+		silent:   true,
+		ExitCode: ExitError,
+	}
+}
+
 func NewAssertionError(e *AssertionError) error {
 	return CommandError{
 		silent:    false,

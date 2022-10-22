@@ -302,6 +302,11 @@ const (
 
 	// SettingsBrowser default browser
 	SettingsBrowser = "settings.browser"
+
+	// Extensions
+	SettingsExtensionDataDir         = "settings.extensions.datadir"
+	SettingsExtensionDefaultHost     = "settings.extensions.defaultHost"
+	SettingsExtensionDefaultUsername = "settings.extensions.defaultUsername"
 )
 
 var (
@@ -457,6 +462,10 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsCacheDir, filepath.Join(os.TempDir(), "go-c8y-cli-cache")),
 
 		WithBindEnv(SettingsBrowser, ""),
+
+		// Extensions
+		WithBindEnv(SettingsExtensionDataDir, ""),
+		WithBindEnv(SettingsExtensionDefaultHost, "github.com"),
 	)
 
 	if err != nil {
@@ -1407,6 +1416,20 @@ func (c *Config) SkipSSLVerify() bool {
 // Browser get default web browser
 func (c *Config) Browser() string {
 	return c.viper.GetString(SettingsBrowser)
+}
+
+// Get Extension Data Directory
+func (c *Config) ExtensionsDataDir() string {
+	dir := c.viper.GetString(SettingsExtensionDataDir)
+	return path.Join(c.GetSessionHomeDir(), dir)
+}
+
+func (c *Config) DefaultHost() string {
+	return c.viper.GetString(SettingsExtensionDefaultHost)
+}
+
+func (c *Config) ExtensionDefaultUsername() string {
+	return c.viper.GetString(SettingsExtensionDefaultUsername)
 }
 
 // GetJSONSelect get json properties to be selected from the output. Only the given properties will be returned

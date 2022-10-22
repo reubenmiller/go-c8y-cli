@@ -14,6 +14,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonformatter"
@@ -42,6 +43,9 @@ type Factory struct {
 
 	BuildVersion string
 	BuildBranch  string
+
+	// Extension
+	ExtensionManager func() extensions.ExtensionManager
 
 	// Executable is the path to the currently invoked binary
 	Executable string
