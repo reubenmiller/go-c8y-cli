@@ -48,7 +48,7 @@ tests:
 
   It support multiple data flags:
     command: |
-      c8y devices create --data name=MyDevice --data "my.value=1" --data "prop2=false" --dry --dryFormat json |
+      c8y devices create --data name=MyDevice --data "subtypes=[linuxA,linuxB]" --data "my.value=1" --data "prop2=false" --dry --dryFormat json |
       c8y util show --select body --output json -c=false
     exit-code: 0
     stdout:
@@ -60,6 +60,7 @@ tests:
               "value": 1
             },
             "name": "MyDevice",
-            "prop2": false
+            "prop2": false,
+            "subtypes": ["linuxA", "linuxB"]
           }
         }
