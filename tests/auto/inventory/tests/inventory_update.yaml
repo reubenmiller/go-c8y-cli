@@ -1,4 +1,13 @@
 tests:
+    inventory_update_Remove a property (by setting it to null):
+        command: c8y inventory update --id 12345 --data "my_Fragment=null"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.my_Fragment: <nil>
+                method: PUT
+                path: /inventory/managedObjects/12345
     inventory_update_Update a managed object:
         command: c8y inventory update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"
         exit-code: 0

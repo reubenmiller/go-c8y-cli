@@ -13,4 +13,35 @@ tests:
         body.name: test
         body.c8y_IsDevice: '{}'
         body.my.nested.value: '1'
+
+  It supports deleting properties using null value:
+    command: |
+      c8y devices update --id 12345 --data "my.nested.value=null" --dry --dryFormat json |
+        c8y util show --select "body" --output json -c
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"my":{"nested":{"value":null}}}}
   
+  It supports values of different types:
+    command: |
+      c8y devices update --id 12345 --data "my.nested.float=1.234,my.nested.int=2,my.nested.neg_int=-2,my.nested.bool_true=true,my.nested.bool_false=false,my.nested.string=my name,my.nested.num_as_str='1.234'" --dry --dryFormat json |
+        c8y util show --select "body" --output json -c=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "my": {
+              "nested": {
+                "bool_false": false,
+                "bool_true": true,
+                "float": 1.234,
+                "int": 2,
+                "neg_int": -2,
+                "num_as_str": "1.234",
+                "string": "my name"
+              }
+            }
+          }
+        }

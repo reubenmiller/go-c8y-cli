@@ -34,8 +34,17 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Short: "Update device",
 		Long:  `Update properties of an existing device`,
 		Example: heredoc.Doc(`
-$ c8y devices update --id 12345
+$ c8y devices update --id 12345 --newName "MyDevice"
 Update device by id
+
+$ c8y devices update --id 12345 --template "{c8y_SupportedOperations:['c8y_Restart', 'c8y_Command']}"
+Update device using a template
+
+$ c8y devices update --id 12345 --data "my.nested.number=1.234,my.nested.bool=true,my.nested.string=my name,my.nested.num_as_str='1.234'"
+Update device using a data (with different formats)
+
+$ c8y devices update --id 12345 --data "myFragment=null"
+Remove a property from a device by setting it to null
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.UpdateModeEnabled()
