@@ -110,6 +110,8 @@ func FromURL(u *url.URL) (Interface, error) {
 	}
 
 	parts := strings.SplitN(strings.Trim(u.Path, "/"), "/", 3)
+
+	// TODO: Handle other repo sources, e.g. Azure DevOps
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid path: %s", u.Path)
 	}

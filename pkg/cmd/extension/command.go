@@ -62,25 +62,17 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				// t := utils.NewTablePrinter(io)
-
 				for _, c := range cmds {
 					ext := map[string]interface{}{}
 					var repo string
 					if u, err := git.ParseURL(c.URL()); err == nil {
+						repo = u.String()
 						if r, err := ghrepo.FromURL(u); err == nil {
 							repo = ghrepo.FullName(r)
 						}
 					}
 
-					// t.AddField(fmt.Sprintf("gh %s", c.Name()), nil, nil)
-					// t.AddField(repo, nil, nil)
 					version := displayExtensionVersion(c, c.CurrentVersion())
-					// if c.IsPinned() {
-					// 	t.AddField(version, nil, cs.Cyan)
-					// } else {
-					// 	t.AddField(version, nil, nil)
-					// }
 
 					ext["name"] = c.Name()
 					ext["repo"] = repo
@@ -93,10 +85,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					}
 
 					f.WriteJSONToConsole(cfg, cmd, "", rowText)
-
-					// t.EndRow()
 				}
-				// return t.Render()
 				return nil
 			},
 		},
