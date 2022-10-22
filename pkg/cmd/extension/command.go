@@ -398,7 +398,8 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 }
 
 func checkValidExtension(rootCmd *cobra.Command, m extensions.ExtensionManager, extName string) error {
-	if !strings.HasPrefix(extName, ExtPrefix) {
+	// Allow prefix anyway in the extension name
+	if !strings.HasPrefix(extName, ExtPrefix) && !strings.Contains(extName, ExtPrefix) {
 		return fmt.Errorf("extension repository name must start with `%s`", ExtPrefix)
 	}
 

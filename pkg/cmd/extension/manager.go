@@ -132,7 +132,7 @@ func (m *Manager) list(includeMetadata bool) ([]Extension, error) {
 
 	var results []Extension
 	for _, f := range entries {
-		if !strings.HasPrefix(f.Name(), ExtPrefix) {
+		if !strings.HasPrefix(f.Name(), ExtPrefix) && !strings.Contains(f.Name(), ExtPrefix) {
 			continue
 		}
 		var ext Extension
