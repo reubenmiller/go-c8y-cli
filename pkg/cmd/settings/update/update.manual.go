@@ -375,6 +375,9 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"25",
 		"30",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	// extensions
+	"extensions.datadir": {"extensions.datadir", "string", config.SettingsExtensionDataDir, []string{}, nil, cobra.ShellCompDirectiveDefault},
 }
 
 // NewCmdUpdate returns a new command used to update session settings
