@@ -198,7 +198,7 @@ func (m *Manager) parseBinaryExtensionDir(fi fs.DirEntry) (Extension, error) {
 	if err != nil {
 		return ext, fmt.Errorf("could not parse %s: %w", manifestPath, err)
 	}
-	repo := ghrepo.NewWithHost(bm.Owner, bm.Name, bm.Host)
+	repo := ghrepo.NewWithHost(bm.Owner, bm.Name, bm.Host, "")
 	remoteURL := ghrepo.GenerateRepoURL(repo, "")
 	ext.url = remoteURL
 	ext.currentVersion = bm.Tag
@@ -337,29 +337,31 @@ type binManifest struct {
 
 // Install installs an extension from repo, and pins to commitish if provided
 func (m *Manager) Install(repo ghrepo.Interface, target string) error {
-	isBin, err := isBinExtension(m.client, repo)
-	if err != nil {
-		if errors.Is(err, releaseNotFoundErr) {
-			if ok, err := repoExists(m.client, repo); err != nil {
-				return err
-			} else if !ok {
-				return repositoryNotFoundErr
+	if strings.Contains(repo.RepoHost(), "github") {
+		isBin, err := isBinExtension(m.client, repo)
+		if err != nil {
+			if errors.Is(err, releaseNotFoundErr) {
+				if ok, err := repoExists(m.client, repo); err != nil {
+					return err
+				} else if !ok {
+					return repositoryNotFoundErr
+				}
+			} else {
+				return fmt.Errorf("could not check for binary extension: %w", err)
 			}
-		} else {
-			return fmt.Errorf("could not check for binary extension: %w", err)
 		}
-	}
-	if isBin {
-		return m.installBin(repo, target)
-	}
+		if isBin {
+			return m.installBin(repo, target)
+		}
 
-	hb, err := hasBundle(m.client, repo)
-	if err != nil {
-		return err
-	}
+		hb, err := hasBundle(m.client, repo)
+		if err != nil {
+			return err
+		}
 
-	if !hb {
-		return errors.New("extension is not installable: missing executable")
+		if !hb {
+			return errors.New("extension is not installable: missing executable")
+		}
 	}
 
 	return m.installGit(repo, target, m.io.Out, m.io.ErrOut)

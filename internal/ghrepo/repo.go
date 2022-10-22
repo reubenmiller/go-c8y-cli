@@ -13,27 +13,39 @@ type Interface interface {
 	RepoName() string
 	RepoOwner() string
 	RepoHost() string
+	RepoURL() string
 }
 
 func NewRepoFromHost(u string, defaultHost string) (*Respository, error) {
-	parts := strings.Split(u, "/")
 	repo := Respository{
 		host: defaultHost,
 	}
-	if len(parts) >= 2 {
-		if len(parts) == 3 {
-			repo.host = strings.Join(parts[:len(parts)-2], "/")
+
+	parts := strings.Split(u, "/")
+	repoURL, err := url.Parse(u)
+
+	if err == nil {
+		if repoURL.Host != "" {
+			repo.host = repoURL.Host
 		}
-		repo.owner = parts[len(parts)-2]
+		if repoURL.Scheme != "" {
+			repo.rawURL = u
+		}
+		parts = strings.Split(repoURL.Path, "/")
+	}
+
+	if len(parts) >= 2 {
+		repo.owner = strings.Join(parts[0:len(parts)-1], "/")
 		repo.name = parts[len(parts)-1]
 	}
 	return &repo, nil
 }
 
 type Respository struct {
-	name  string
-	owner string
-	host  string
+	name   string
+	owner  string
+	host   string
+	rawURL string
 }
 
 func (r *Respository) Name() string {
@@ -46,17 +58,22 @@ func (r *Respository) Host() string {
 	return r.host
 }
 
+func (r *Respository) URL() string {
+	return r.rawURL
+}
+
 // New instantiates a GitHub repository from owner and name arguments
 func New(owner, repo string) Interface {
-	return NewWithHost(owner, repo, ghinstance.Default())
+	return NewWithHost(owner, repo, ghinstance.Default(), "")
 }
 
 // NewWithHost is like New with an explicit host name
-func NewWithHost(owner, repo, hostname string) Interface {
+func NewWithHost(owner, repo, hostname string, fullURL string) Interface {
 	return &ghRepo{
 		owner:    owner,
 		name:     repo,
 		hostname: normalizeHostname(hostname),
+		fullURL:  fullURL,
 	}
 }
 
@@ -83,7 +100,7 @@ func FromFullNameWithHost(nwo, fallbackHost string) (Interface, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewWithHost(repo.Owner(), repo.Name(), repo.Host()), nil
+	return NewWithHost(repo.Owner(), repo.Name(), repo.Host(), repo.URL()), nil
 }
 
 // FromURL extracts the GitHub repository information from a git remote URL
@@ -97,7 +114,7 @@ func FromURL(u *url.URL) (Interface, error) {
 		return nil, fmt.Errorf("invalid path: %s", u.Path)
 	}
 
-	return NewWithHost(parts[0], strings.TrimSuffix(parts[1], ".git"), u.Hostname()), nil
+	return NewWithHost(parts[0], strings.TrimSuffix(parts[1], ".git"), u.Hostname(), u.String()), nil
 }
 
 func normalizeHostname(h string) string {
@@ -123,6 +140,9 @@ func GenerateRepoURL(repo Interface, p string, args ...interface{}) string {
 
 // TODO there is a parallel implementation for non-isolated commands
 func FormatRemoteURL(repo Interface, protocol string) string {
+	if repo.RepoURL() != "" {
+		return repo.RepoURL()
+	}
 	if protocol == "ssh" {
 		return fmt.Sprintf("git@%s:%s/%s.git", repo.RepoHost(), repo.RepoOwner(), repo.RepoName())
 	}
@@ -134,6 +154,7 @@ type ghRepo struct {
 	owner    string
 	name     string
 	hostname string
+	fullURL  string
 }
 
 func (r ghRepo) RepoOwner() string {
@@ -146,4 +167,8 @@ func (r ghRepo) RepoName() string {
 
 func (r ghRepo) RepoHost() string {
 	return r.hostname
+}
+
+func (r ghRepo) RepoURL() string {
+	return r.fullURL
 }
