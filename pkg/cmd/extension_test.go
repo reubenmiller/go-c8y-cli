@@ -25,3 +25,12 @@ func Test_ExtensionUpgrade(t *testing.T) {
 	err := ExecuteCmd(cmd, cmdtext)
 	assert.OK(t, err)
 }
+
+func Test_ExtensionGetViews(t *testing.T) {
+	cmd := setupTest()
+	cmdtext := heredoc.Doc(`
+		devices list --view device/agent
+	`)
+	err := ExecuteCmd(cmd, cmdtext)
+	assert.OK(t, err)
+}

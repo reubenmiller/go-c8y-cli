@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -937,8 +938,10 @@ func (c *Config) DecryptSession() error {
 }
 
 // CommonAliases Get common aliases from the global configuration file
+// deprecated in favor of extensions
 func (c *Config) CommonAliases() map[string]string {
-	return c.viper.GetStringMapString(SettingsCommonAliases)
+	return map[string]string{}
+	// return c.viper.GetStringMapString(SettingsCommonAliases)
 }
 
 // Aliases get aliases configured in the current session
@@ -1225,6 +1228,7 @@ func (c *Config) GetTemplatePaths() (paths []string) {
 	// Prefer custom path over default path
 	paths = append(paths, c.GetPathSlice(SettingsTemplateCustomPaths)...)
 	paths = append(paths, c.GetPathSlice(SettingsTemplatePath)...)
+	paths = append(paths, c.GetExtensionTemplates()...)
 	return paths
 }
 
@@ -1340,9 +1344,113 @@ func (c *Config) GetConfigPath() string {
 
 // GetViewPaths get list of view paths
 func (c *Config) GetViewPaths() []string {
-	viewPaths := c.GetPathSlice(SettingsViewsCommonPaths)
-	viewPaths = append(viewPaths, c.GetPathSlice(SettingsViewsCustomPaths)...)
-	return viewPaths
+	paths := c.GetPathSlice(SettingsViewsCommonPaths)
+	paths = append(paths, c.GetPathSlice(SettingsViewsCustomPaths)...)
+	paths = append(paths, c.GetExtensionViews()...)
+	return paths
+}
+
+func (c *Config) GetExtensionViews() []string {
+	return c.getExtensionPaths("views")
+}
+
+func (c *Config) GetExtensionTemplates() []string {
+	return c.getExtensionPaths("templates")
+}
+
+type ExtensionFile struct {
+	Aliases []ExtensionAlias `json:"aliases,omitempty"`
+}
+
+type ExtensionAlias struct {
+	Source      string `json:"-"`
+	Name        string `json:"name,omitempty"`
+	Command     string `json:"command,omitempty"`
+	Description string `json:"description,omitempty"`
+	Shell       bool   `json:"shell"`
+}
+
+func (c *Config) GetExtensionAliases() []ExtensionAlias {
+	files := c.getExtensionFiles("extension.json")
+
+	aliases := make([]ExtensionAlias, 0)
+	for _, file := range files {
+
+		if fp, err := os.Open(file); err == nil {
+			if b, bErr := io.ReadAll(fp); bErr == nil {
+				ext := &ExtensionFile{}
+				if jErr := json.Unmarshal(b, ext); jErr != nil {
+					continue
+				}
+
+				for _, alias := range ext.Aliases {
+					if alias.Name != "" && alias.Command != "" {
+						alias.Source = ""
+						aliases = append(aliases, alias)
+					}
+				}
+			}
+		}
+	}
+	return aliases
+}
+
+func (c *Config) getExtensionPaths(subdir string) (folders []string) {
+	dataDir := c.ExtensionsDataDir()
+	dataDirContents, err := ioutil.ReadDir(dataDir)
+
+	if err != nil {
+		c.Logger.Warnf("Could not retrieve extension views. %s", err)
+		return
+	}
+
+	c.Logger.Debugf("Checking %s in extensions. %s", subdir, dataDir)
+	for _, item := range dataDirContents {
+		if item.IsDir() {
+			extDir := filepath.Join(dataDir, item.Name())
+
+			if extContents, err := ioutil.ReadDir(extDir); err == nil {
+				for _, extItem := range extContents {
+					if extItem.IsDir() && strings.EqualFold(extItem.Name(), subdir) {
+						viewPath := filepath.Join(extDir, extItem.Name())
+						c.Logger.Debugf("Found extension %s. %s", subdir, viewPath)
+						folders = append(folders, viewPath)
+					}
+				}
+			}
+
+		}
+	}
+	return
+}
+
+func (c *Config) getExtensionFiles(name string) (folders []string) {
+	dataDir := c.ExtensionsDataDir()
+	dataDirContents, err := ioutil.ReadDir(dataDir)
+
+	if err != nil {
+		c.Logger.Warnf("Could not retrieve extension views. %s", err)
+		return
+	}
+
+	c.Logger.Debugf("Checking %s in extensions. %s", name, dataDir)
+	for _, item := range dataDirContents {
+		if item.IsDir() {
+			extDir := filepath.Join(dataDir, item.Name())
+
+			if extContents, err := ioutil.ReadDir(extDir); err == nil {
+				for _, extItem := range extContents {
+					if !extItem.IsDir() && strings.EqualFold(extItem.Name(), name) {
+						filePath := filepath.Join(extDir, extItem.Name())
+						c.Logger.Debugf("Found extension %s. %s", name, filePath)
+						folders = append(folders, filePath)
+					}
+				}
+			}
+
+		}
+	}
+	return
 }
 
 // GetJSONFilter get json filter to be applied to the output
@@ -1421,7 +1529,10 @@ func (c *Config) Browser() string {
 // Get Extension Data Directory
 func (c *Config) ExtensionsDataDir() string {
 	dir := c.viper.GetString(SettingsExtensionDataDir)
-	return path.Join(c.GetSessionHomeDir(), dir)
+	if dir == "" {
+		dir = c.GetSessionHomeDir()
+	}
+	return filepath.Join(dir, "extensions")
 }
 
 func (c *Config) DefaultHost() string {

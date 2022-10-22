@@ -7,6 +7,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/spf13/cobra"
 )
@@ -51,8 +52,9 @@ func listRun(opts *ListOptions) error {
 
 	aliasCfg := cfg.Aliases()
 	commonAliasCfg := cfg.CommonAliases()
+	aliasExtensions := cfg.GetExtensionAliases()
 
-	if len(aliasCfg) == 0 && len(commonAliasCfg) == 0 {
+	if len(aliasCfg) == 0 && len(commonAliasCfg) == 0 && len(aliasExtensions) == 0 {
 		if opts.IO.IsStdoutTTY() {
 			fmt.Fprintf(opts.IO.ErrOut, "no aliases configured\n")
 		}
@@ -62,6 +64,11 @@ func listRun(opts *ListOptions) error {
 	w := opts.IO.Out
 
 	err = printAliases(w, opts.IO.ColorScheme(), "session aliases", aliasCfg)
+	if err != nil {
+		return err
+	}
+
+	err = printExtensionAliases(w, opts.IO.ColorScheme(), "extension aliases", aliasExtensions)
 	if err != nil {
 		return err
 	}
@@ -89,6 +96,31 @@ func printAliases(w io.Writer, cs *iostreams.ColorScheme, title string, aliases 
 	// TODO: Change to json writer
 	for _, alias := range keys {
 		_, err := fmt.Fprintf(w, "%s: %s\n", cs.CyanBold(alias), aliases[alias])
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func printExtensionAliases(w io.Writer, cs *iostreams.ColorScheme, title string, aliases []config.ExtensionAlias) error {
+	if len(aliases) == 0 {
+		return nil
+	}
+
+	aliasSet := make(map[string]config.ExtensionAlias)
+	keys := []string{}
+	for _, alias := range aliases {
+		keys = append(keys, alias.Name)
+		aliasSet[alias.Name] = alias
+	}
+	sort.Strings(keys)
+
+	fmt.Fprintf(w, "\n%s\n", cs.Bold(cs.Magenta(title)))
+
+	// TODO: Change to json writer
+	for _, alias := range keys {
+		_, err := fmt.Fprintf(w, "%s: %s\n", cs.CyanBold(alias), aliasSet[alias].Command)
 		if err != nil {
 			return err
 		}

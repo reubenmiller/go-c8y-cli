@@ -640,7 +640,7 @@ func (m *Manager) Remove(name string) error {
 }
 
 func (m *Manager) installDir() string {
-	return filepath.Join(m.dataDir(), "extensions")
+	return m.dataDir()
 }
 
 //go:embed ext_tmpls/goBinMain.go.txt

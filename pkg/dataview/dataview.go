@@ -106,7 +106,8 @@ func (v *DataView) LoadDefinitions() error {
 				viewDefinition := &DefinitionCollection{}
 				if err := json.Unmarshal(contents, &viewDefinition); err != nil {
 					v.Logger.Warnf("Could not load view definitions. %s", err)
-					return err
+					// do not prevent walking other folders
+					return nil
 				}
 				for i := range viewDefinition.Definitions {
 					viewDefinition.Definitions[i].FileName = d.Name()

@@ -77,6 +77,13 @@ func MainRun() {
 			aliases[key] = value
 		}
 
+		cfg := config.NewConfig(v)
+		for _, alias := range cfg.GetExtensionAliases() {
+			if alias.Name != "" {
+				aliases[alias.Name] = alias.Command
+			}
+		}
+
 		var results []string
 		for aliasName, aliasValue := range aliases {
 			if strings.HasPrefix(aliasName, toComplete) {
@@ -202,6 +209,14 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 		for name, value := range v.GetStringMapString(config.SettingsAliases) {
 			aliases[name] = value
 		}
+		// TODO: Get aliases from extensions. Is it possible to read from
+		cfg := config.NewConfig(v)
+		for _, alias := range cfg.GetExtensionAliases() {
+			if alias.Name != "" {
+				aliases[alias.Name] = alias.Command
+			}
+		}
+
 		expandedArgs, isShell, err = expand.ExpandAlias(aliases, os.Args, nil)
 		if err != nil {
 			return nil, err
