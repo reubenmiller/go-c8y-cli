@@ -1223,13 +1223,40 @@ func (c *Config) StorePassword() bool {
 	return c.viper.GetBool(SettingsStorageStorePassword)
 }
 
+type ExtensionSource struct {
+	Name  string
+	Paths []string
+}
+
+func NewExtensionItemCollection() *ExtensionItemCollection {
+	collection := &ExtensionItemCollection{
+		Items: []ExtensionSource{},
+	}
+	return collection
+}
+
+type ExtensionItemCollection struct {
+	Items []ExtensionSource
+}
+
+func (t *ExtensionItemCollection) Add(name string, paths []string) {
+	if len(paths) > 0 {
+		t.Items = append(t.Items, ExtensionSource{name, paths})
+	}
+}
+
+func (t *ExtensionItemCollection) AddSources(sources []ExtensionSource) {
+	t.Items = append(t.Items, sources...)
+}
+
 // GetTemplatePaths template folders where the template files are located
-func (c *Config) GetTemplatePaths() (paths []string) {
+func (c *Config) GetTemplatePaths() *ExtensionItemCollection {
 	// Prefer custom path over default path
-	paths = append(paths, c.GetPathSlice(SettingsTemplateCustomPaths)...)
-	paths = append(paths, c.GetPathSlice(SettingsTemplatePath)...)
-	paths = append(paths, c.GetExtensionTemplates()...)
-	return paths
+	collection := NewExtensionItemCollection()
+	collection.Add("", c.GetPathSlice(SettingsTemplateCustomPaths))
+	collection.Add("", c.GetPathSlice(SettingsTemplatePath))
+	collection.AddSources(c.GetExtensionTemplates())
+	return collection
 }
 
 // AllowModeCreate enables create (post) commands
@@ -1346,15 +1373,24 @@ func (c *Config) GetConfigPath() string {
 func (c *Config) GetViewPaths() []string {
 	paths := c.GetPathSlice(SettingsViewsCommonPaths)
 	paths = append(paths, c.GetPathSlice(SettingsViewsCustomPaths)...)
-	paths = append(paths, c.GetExtensionViews()...)
+	// TODO: Do views need a source prefix?
+	// collection := NewExtensionItemCollection()
+	// collection.Add("", c.GetPathSlice(SettingsTemplateCustomPaths))
+	// collection.Add("", c.GetPathSlice(SettingsTemplatePath))
+	// collection.AddSources(c.GetExtensionTemplates())
+	// paths = append(paths, c.GetExtensionViews()...)
+
+	for _, item := range c.GetExtensionViews() {
+		paths = append(paths, item.Paths...)
+	}
 	return paths
 }
 
-func (c *Config) GetExtensionViews() []string {
+func (c *Config) GetExtensionViews() []ExtensionSource {
 	return c.getExtensionPaths("views")
 }
 
-func (c *Config) GetExtensionTemplates() []string {
+func (c *Config) GetExtensionTemplates() []ExtensionSource {
 	return c.getExtensionPaths("templates")
 }
 
@@ -1402,7 +1438,7 @@ func (c *Config) GetExtensionAliases() []ExtensionAlias {
 	return aliases
 }
 
-func (c *Config) getExtensionPaths(subdir string) (folders []string) {
+func (c *Config) getExtensionPaths(subdir string) (sources []ExtensionSource) {
 	dataDir := c.ExtensionsDataDir()
 	dataDirContents, err := ioutil.ReadDir(dataDir)
 
@@ -1419,9 +1455,15 @@ func (c *Config) getExtensionPaths(subdir string) (folders []string) {
 			if extContents, err := ioutil.ReadDir(extDir); err == nil {
 				for _, extItem := range extContents {
 					if extItem.IsDir() && strings.EqualFold(extItem.Name(), subdir) {
-						viewPath := filepath.Join(extDir, extItem.Name())
-						c.Logger.Debugf("Found extension %s. %s", subdir, viewPath)
-						folders = append(folders, viewPath)
+						path := filepath.Join(extDir, extItem.Name())
+						c.Logger.Debugf("Found extension %s. %s", subdir, path)
+
+						sources = append(sources, ExtensionSource{
+							Name: item.Name(),
+							Paths: []string{
+								path,
+							},
+						})
 					}
 				}
 			}

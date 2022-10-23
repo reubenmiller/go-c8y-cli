@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
@@ -20,6 +21,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonformatter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mode"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -357,6 +359,37 @@ func (f *Factory) CheckPostCommandError(err error) error {
 	}
 
 	return outErr
+}
+
+func (f *Factory) ResolveTemplates(pattern string, withFullPath bool) ([]string, error) {
+	cfg, err := f.Config()
+	if err != nil {
+		return nil, err
+	}
+	collection := cfg.GetTemplatePaths()
+
+	allMatches := []string{}
+
+	// Filter
+	for _, item := range collection.Items {
+		matches, err := pathresolver.ResolvePaths(item.Paths, "*", []string{".jsonnet"}, "ignore")
+		if err != nil {
+			return []string{"jsonnet"}, err
+		}
+
+		// Apply full matches
+		for _, m := range matches {
+			option := fmt.Sprintf("%s::%s", item.Name, filepath.Base(m))
+			if matched, _ := filepath.Match(pattern, option); matched {
+				if withFullPath {
+					allMatches = append(allMatches, m)
+				} else {
+					allMatches = append(allMatches, option)
+				}
+			}
+		}
+	}
+	return allMatches, nil
 }
 
 // NewRequestInputIterators create a request iterator based on pipe line configuration
