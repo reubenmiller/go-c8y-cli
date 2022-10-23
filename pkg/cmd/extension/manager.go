@@ -208,7 +208,7 @@ func (m *Manager) parseBinaryExtensionDir(fi fs.DirEntry) (Extension, error) {
 
 func (m *Manager) parseGitExtensionDir(fi fs.DirEntry) (Extension, error) {
 	id := m.installDir()
-	exePath := filepath.Join(id, fi.Name(), fi.Name())
+	exePath := filepath.Join(id, fi.Name())
 	remoteUrl := m.getRemoteUrl(fi.Name())
 	currentVersion := m.getCurrentVersion(fi.Name())
 
@@ -287,7 +287,7 @@ func (m *Manager) populateLatestVersions(exts []Extension) {
 
 func (m *Manager) getLatestVersion(ext Extension) (string, error) {
 	if ext.isLocal {
-		return "", localExtensionUpgradeError
+		return "", ErrLocalExtensionUpgrade
 	}
 	if ext.IsBinary() {
 		repo, err := ghrepo.FromFullName(ext.url)
@@ -512,10 +512,10 @@ func (m *Manager) installGit(repo ghrepo.Interface, target string, stdout, stder
 	return f.Close()
 }
 
-var pinnedExtensionUpgradeError = errors.New("pinned extensions can not be upgraded")
-var localExtensionUpgradeError = errors.New("local extensions can not be upgraded")
-var upToDateError = errors.New("already up to date")
-var noExtensionsInstalledError = errors.New("no extensions installed")
+var ErrPinnedExtensionUpgrade = errors.New("pinned extensions can not be upgraded")
+var ErrLocalExtensionUpgrade = errors.New("local extensions can not be upgraded")
+var ErrUpToDate = errors.New("already up to date")
+var ErrNoExtensionsInstalled = errors.New("no extensions installed")
 
 func (m *Manager) Upgrade(name string, force bool) error {
 	// Fetch metadata during list only when upgrading all extensions.
@@ -524,7 +524,7 @@ func (m *Manager) Upgrade(name string, force bool) error {
 	fetchMetadata := name == ""
 	exts, _ := m.list(fetchMetadata)
 	if len(exts) == 0 {
-		return noExtensionsInstalledError
+		return ErrNoExtensionsInstalled
 	}
 	if name == "" {
 		return m.upgradeExtensions(exts, force)
@@ -551,9 +551,9 @@ func (m *Manager) upgradeExtensions(exts []Extension, force bool) error {
 		fmt.Fprintf(m.io.Out, "[%s]: ", f.Name())
 		err := m.upgradeExtension(f, force)
 		if err != nil {
-			if !errors.Is(err, localExtensionUpgradeError) &&
-				!errors.Is(err, upToDateError) &&
-				!errors.Is(err, pinnedExtensionUpgradeError) {
+			if !errors.Is(err, ErrLocalExtensionUpgrade) &&
+				!errors.Is(err, ErrUpToDate) &&
+				!errors.Is(err, ErrPinnedExtensionUpgrade) {
 				failed = true
 			}
 			fmt.Fprintf(m.io.Out, "%s\n", err)
@@ -575,13 +575,13 @@ func (m *Manager) upgradeExtensions(exts []Extension, force bool) error {
 
 func (m *Manager) upgradeExtension(ext Extension, force bool) error {
 	if ext.isLocal {
-		return localExtensionUpgradeError
+		return ErrLocalExtensionUpgrade
 	}
 	if ext.IsPinned() {
-		return pinnedExtensionUpgradeError
+		return ErrPinnedExtensionUpgrade
 	}
 	if !ext.UpdateAvailable() {
-		return upToDateError
+		return ErrUpToDate
 	}
 	var err error
 	if ext.IsBinary() {

@@ -78,6 +78,9 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					ext["repo"] = repo
 					ext["version"] = version
 					ext["pinned"] = c.IsPinned()
+					ext["path"] = c.Path()
+					ext["isLocal"] = c.IsLocal()
+					ext["isBinary"] = c.IsBinary()
 
 					rowText, err := json.Marshal(ext)
 					if err != nil {
@@ -194,10 +197,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					}
 					cs := io.ColorScheme()
 					err := m().Upgrade(name, flagForce)
-					if err != nil && !errors.Is(err, upToDateError) {
+					if err != nil && !errors.Is(err, ErrUpToDate) {
 						if name != "" {
 							fmt.Fprintf(io.ErrOut, "%s Failed upgrading extension %s: %s\n", cs.FailureIcon(), name, err)
-						} else if errors.Is(err, noExtensionsInstalledError) {
+						} else if errors.Is(err, ErrNoExtensionsInstalled) {
 							return cmderrors.NewSystemError("no installed extensions found")
 						} else {
 							fmt.Fprintf(io.ErrOut, "%s Failed upgrading extensions\n", cs.FailureIcon())
@@ -209,7 +212,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						if flagDryRun {
 							successStr = "Would have"
 						}
-						if errors.Is(err, upToDateError) {
+						if errors.Is(err, ErrUpToDate) {
 							fmt.Fprintf(io.Out, "%s Extension already up to date\n", cs.SuccessIcon())
 						} else if name != "" {
 							fmt.Fprintf(io.Out, "%s %s upgraded extension %s\n", cs.SuccessIcon(), successStr, name)
