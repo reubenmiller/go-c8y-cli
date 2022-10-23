@@ -170,8 +170,6 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 		}(),
 		func() *cobra.Command {
 			var flagAll bool
-			var flagForce bool
-			var flagDryRun bool
 			cmd := &cobra.Command{
 				Use:   "upgrade {<name> | --all}",
 				Short: "Upgrade installed extensions",
@@ -192,11 +190,15 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					if len(args) > 0 {
 						name = normalizeExtensionSelector(args[0])
 					}
-					if flagDryRun {
+					cfg, cfgErr := f.Config()
+					if cfgErr != nil {
+						return cfgErr
+					}
+					if cfg.DryRun() {
 						m().EnableDryRunMode()
 					}
 					cs := io.ColorScheme()
-					err := m().Upgrade(name, flagForce)
+					err := m().Upgrade(name, cfg.Force())
 					if err != nil && !errors.Is(err, ErrUpToDate) {
 						if name != "" {
 							fmt.Fprintf(io.ErrOut, "%s Failed upgrading extension %s: %s\n", cs.FailureIcon(), name, err)
@@ -209,7 +211,8 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					}
 					if io.IsStdoutTTY() {
 						successStr := "Successfully"
-						if flagDryRun {
+
+						if cfg.DryRun() {
 							successStr = "Would have"
 						}
 						if errors.Is(err, ErrUpToDate) {
@@ -224,8 +227,6 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				},
 			}
 			cmd.Flags().BoolVar(&flagAll, "all", false, "Upgrade all extensions")
-			cmd.Flags().BoolVar(&flagForce, "force", false, "Force upgrade extension")
-			cmd.Flags().BoolVar(&flagDryRun, "dry-run", false, "Only display upgrades")
 			return cmd
 		}(),
 		&cobra.Command{
@@ -233,13 +234,26 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 			Short: "Remove an installed extension",
 			Args:  cobra.ExactArgs(1),
 			RunE: func(cmd *cobra.Command, args []string) error {
+				cfg, cfgErr := f.Config()
+				if cfgErr != nil {
+					return cfgErr
+				}
+				if cfg.DryRun() {
+					m().EnableDryRunMode()
+				}
+
 				extName := normalizeExtensionSelector(args[0])
 				if err := m().Remove(extName); err != nil {
 					return err
 				}
+
 				if io.IsStdoutTTY() {
+					successStr := "Removed"
+					if cfg.DryRun() {
+						successStr = "Would have removed"
+					}
 					cs := io.ColorScheme()
-					fmt.Fprintf(io.Out, "%s Removed extension %s\n", cs.SuccessIcon(), extName)
+					fmt.Fprintf(io.Out, "%s %s extension %s\n", cs.SuccessIcon(), successStr, extName)
 				}
 				return nil
 			},

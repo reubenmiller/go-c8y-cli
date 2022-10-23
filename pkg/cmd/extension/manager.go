@@ -45,6 +45,7 @@ func NewManager(ios *iostreams.IOStreams, cfg *config.Config) *Manager {
 		lookPath:   safeexec.LookPath,
 		findSh:     findsh.Find,
 		newCommand: exec.Command,
+		dryRunMode: cfg.DryRun(),
 		platform: func() (string, string) {
 			ext := ""
 			if runtime.GOOS == "windows" {
@@ -631,10 +632,27 @@ func (m *Manager) upgradeBinExtension(ext Extension) error {
 }
 
 func (m *Manager) Remove(name string) error {
-	targetDir := filepath.Join(m.installDir(), ExtPrefix+name)
-	if _, err := os.Lstat(targetDir); os.IsNotExist(err) {
-		return fmt.Errorf("no extension found: %q", targetDir)
+	if strings.TrimSpace(name) == "" {
+		return fmt.Errorf("extension name is empty")
 	}
+	targetDirs := []string{
+		filepath.Join(m.installDir(), ExtPrefix+name),
+		filepath.Join(m.installDir(), name),
+	}
+
+	var targetDir string
+
+	for _, targetDir = range targetDirs {
+		if _, err := os.Lstat(targetDir); os.IsNotExist(err) {
+			continue
+		}
+		break
+	}
+
+	if targetDir == "" {
+		return fmt.Errorf("no extension found: %q", name)
+	}
+
 	if m.dryRunMode {
 		return nil
 	}
