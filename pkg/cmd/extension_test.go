@@ -11,7 +11,25 @@ import (
 func Test_ExtensionInstall(t *testing.T) {
 	cmd := setupTest()
 	cmdtext := `
-	extension install reubenmiller/c8y-devmgmt
+		extension install reubenmiller/c8y-devmgmt
+	`
+	err := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
+	assert.OK(t, err)
+}
+
+func Test_ExtensionList(t *testing.T) {
+	cmd := setupTest()
+	cmdtext := `
+		extension list
+	`
+	err := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
+	assert.OK(t, err)
+}
+
+func Test_ExtensionDelete(t *testing.T) {
+	cmd := setupTest()
+	cmdtext := `
+		extension delete go-c8y-cli-addons
 	`
 	err := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 	assert.OK(t, err)
