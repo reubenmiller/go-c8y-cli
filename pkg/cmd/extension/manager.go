@@ -163,7 +163,7 @@ func (m *Manager) list(includeMetadata bool) ([]Extension, error) {
 func (m *Manager) parseExtensionFile(fi fs.DirEntry) (Extension, error) {
 	ext := Extension{isLocal: true}
 	id := m.installDir()
-	exePath := filepath.Join(id, fi.Name(), fi.Name())
+	exePath := filepath.Join(id, fi.Name())
 	if !isSymlink(fi.Type()) {
 		// if this is a regular file, its contents is the local directory of the extension
 		p, err := readPathFromFile(filepath.Join(id, fi.Name()))

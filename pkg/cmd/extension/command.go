@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -121,16 +122,27 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					return err
 				},
 				RunE: func(cmd *cobra.Command, args []string) error {
-					if args[0] == "." {
+					if fileInfo, err := os.Stat(args[0]); err == nil && fileInfo.IsDir() {
 						if pinFlag != "" {
 							return fmt.Errorf("local extensions cannot be pinned")
 						}
-						wd, err := os.Getwd()
+
+						sourcePath, err := filepath.Abs(args[0])
 						if err != nil {
 							return err
 						}
-						return m().InstallLocal(wd)
+						return m().InstallLocal(sourcePath)
 					}
+					// if args[0] == "." {
+					// 	if pinFlag != "" {
+					// 		return fmt.Errorf("local extensions cannot be pinned")
+					// 	}
+					// 	wd, err := os.Getwd()
+					// 	if err != nil {
+					// 		return err
+					// 	}
+					// 	return m().InstallLocal(wd)
+					// }
 
 					repo, err := ghrepo.FromFullName(args[0])
 					if err != nil {
