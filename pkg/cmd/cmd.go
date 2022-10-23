@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math/rand"
 	"os"
@@ -62,7 +62,7 @@ func MainRun() {
 	}
 
 	// Expand any aliases
-	expandedArgs, err := setArgs(rootCmd.Command)
+	expandedArgs, err := setArgs(rootCmd.Command, rootCmd.Factory)
 	if err != nil {
 		Logger.Errorf("Could not expand aliases. %s", err)
 		os.Exit(int(cmderrors.ExitInvalidAlias))
@@ -99,6 +99,26 @@ func MainRun() {
 				results = append(results, s)
 			}
 		}
+
+		// Extension commands
+		// for _, ext := range rootCmd.Factory.ExtensionManager().List() {
+		// 	if strings.HasPrefix(ext.Name(), toComplete) {
+		// 		var s string
+		// 		if ext.IsLocal() {
+		// 			s = fmt.Sprintf("%s\tLocal extension gh-%s", ext.Name(), ext.Name())
+		// 		} else {
+		// 			path := ext.URL()
+		// 			if u, err := git.ParseURL(ext.URL()); err == nil {
+		// 				if r, err := ghrepo.FromURL(u); err == nil {
+		// 					path = ghrepo.FullName(r)
+		// 				}
+		// 			}
+		// 			s = fmt.Sprintf("%s\tExtension %s", ext.Name(), path)
+		// 		}
+		// 		results = append(results, s)
+		// 	}
+		// }
+
 		return results, cobra.ShellCompDirectiveNoFileComp
 	}
 
@@ -133,7 +153,7 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 	if logErr != nil {
 		log.Fatalf("Could not configure logger. %s", logErr)
 	}
-	w := ioutil.Discard
+	w := io.Discard
 
 	if errors.Is(err, cmderrors.ErrHelp) {
 		return err
@@ -194,13 +214,18 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 	return err
 }
 
-func setArgs(cmd *cobra.Command) ([]string, error) {
+func hasCommand(rootCmd *cobra.Command, args []string) bool {
+	c, _, err := rootCmd.Traverse(args)
+	return err == nil && c != rootCmd
+}
+
+func setArgs(cmd *cobra.Command, cmdFactory *cmdutil.Factory) ([]string, error) {
 	expandedArgs := []string{}
+	var err error
 	if len(os.Args) > 0 {
 		expandedArgs = os.Args[1:]
 	}
-	cmd, _, err := cmd.Traverse(expandedArgs)
-	if err != nil || cmd == cmd.Root() {
+	if !hasCommand(cmd.Root(), expandedArgs) {
 		originalArgs := expandedArgs
 		isShell := false
 
@@ -245,6 +270,19 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 				return nil, err
 			}
 			os.Exit(int(cmderrors.ExitOK))
+		} else if len(expandedArgs) > 0 && !hasCommand(cmd.Root(), expandedArgs) {
+
+			extensionManager := cmdFactory.ExtensionManager()
+			if found, err := extensionManager.Dispatch(expandedArgs, os.Stdin, os.Stdout, os.Stderr); err != nil {
+				var execError *exec.ExitError
+				if errors.As(err, &execError) {
+					return nil, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCode(execError.ExitCode()), execError)
+				}
+				fmt.Fprintf(cmdFactory.IOStreams.ErrOut, "failed to run extension: %s\n", err)
+				return nil, cmderrors.NewSystemError("failed to run extension")
+			} else if found {
+				return nil, cmderrors.NewErrorWithExitCode(0, nil)
+			}
 		}
 	}
 	return expandedArgs, nil
