@@ -2,14 +2,15 @@ package config
 
 // CommandSettings contains the standard commonly used configuration settings
 type CommandSettings struct {
-	ActivityLog *ActivityLogSettings `json:"activityLog,omitempty"`
-	Encryption  *EncryptionSettings  `json:"encryption,omitempty"`
-	IncludeAll  *IncludeAllSettings  `json:"includeAll,omitempty"`
-	Session     *SessionSettings     `json:"session,omitempty"`
-	Mode        *ModeSettings        `json:"mode,omitempty"`
-	Storage     *StorageSettings     `json:"storage,omitempty"`
-	Template    *TemplateSettings    `json:"template,omitempty"`
-	View        *ViewSettings        `json:"views,omitempty"`
+	ActivityLog *ActivityLogSettings   `json:"activityLog,omitempty"`
+	Encryption  *EncryptionSettings    `json:"encryption,omitempty"`
+	IncludeAll  *IncludeAllSettings    `json:"includeAll,omitempty"`
+	Session     *SessionSettings       `json:"session,omitempty"`
+	Mode        *ModeSettings          `json:"mode,omitempty"`
+	Storage     *StorageSettings       `json:"storage,omitempty"`
+	Template    *TemplateSettings      `json:"template,omitempty"`
+	View        *ViewSettings          `json:"views,omitempty"`
+	Defaults    map[string]interface{} `json:"defaults,omitempty"`
 }
 
 // Bool returns a bool pointer set to the given value

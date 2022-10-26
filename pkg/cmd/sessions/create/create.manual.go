@@ -71,6 +71,7 @@ type CmdCreate struct {
 	noTenantPrefix bool
 	noStorage      bool
 	encrypt        bool
+	allowInsecure  bool
 
 	*subcommand.SubCommand
 
@@ -101,6 +102,10 @@ $ c8y sessions create \
 ### Example 3: Create a new production session where only only GET commands are enabled (with no password storage)
 
 $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.com" --noStorage
+
+### Example 4: Create a session which points to a local api endpoint (most like an Cumulocity IoT Edge instance)
+
+$ c8y sessions create --type prod --host "https://localhost:443" --insecure
 		`),
 		PersistentPreRunE: ccmd.promptArgs,
 		Args:              cobra.NoArgs,
@@ -120,6 +125,7 @@ $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.
 	cmd.Flags().BoolVar(&ccmd.noTenantPrefix, "noTenantPrefix", false, "Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false")
 	cmd.Flags().BoolVar(&ccmd.noStorage, "noStorage", false, "Don't store any passwords or tokens in the session file")
 	cmd.Flags().BoolVar(&ccmd.encrypt, "encrypt", false, "Encrypt passwords and tokens (occurs when logging in)")
+	cmd.Flags().BoolVar(&ccmd.allowInsecure, "allowInsecure", false, "Allow insecure connection (e.g. when using self-signed certificates)")
 
 	// Required flags
 	completion.WithOptions(cmd,
@@ -271,6 +277,13 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 			Enabled:         settings.Bool(true),
 			CachePassphrase: settings.Bool(true),
 		}
+	}
+
+	if cmd.Flags().Changed("allowInsecure") {
+		if settings.Defaults == nil {
+			settings.Defaults = make(map[string]interface{})
+		}
+		settings.Defaults[config.GetSettingsNameWithoutPrefix(config.SettingsDefaultsInsecure)] = n.allowInsecure
 	}
 
 	session.Settings = settings
