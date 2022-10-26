@@ -25,6 +25,30 @@ c8y sessions create \
 
 You will be prompted for the username and password.
 
+### Create a session for a host with self-signed certificates
+
+If your Cumulocity host is using a self-signed certificate (which is usually the case if you are using the Cumulocity IoT Edge), then you may want to use the `allowInsecure` flag. This option ignores the SSL verification. It should only be used if you trust the host and you have no option available (e.g. importing the missing CA certificate to the operating system)!
+
+<CodeExample>
+
+```bash
+c8y sessions create \
+    --host "mytenant.eu-latest.cumulocity.com" \
+    --allowInsecure
+```
+
+</CodeExample>
+
+Alternatively you can allow insecure mode (i.e. disable SSL verification) for a single command by using the `--insecure` global flag.
+
+<CodeExample>
+
+```bash
+c8y devices list --insecure
+```
+
+</CodeExample>
+
 ## Activate a session (interactive)
 
 A helper is provided to set the session interactively by providing the user a list of configured sessions. The user will be prompted to select one of the listed sessions.
@@ -46,6 +70,12 @@ set-session
 ```
 
 </CodeExample>
+
+:::tip
+You can also provide additional flags to set session, as these are passed directly to the underlying `c8y sessions set` command.
+
+`set-session --debug`
+:::
 
 ## Activate a session (manual)
 

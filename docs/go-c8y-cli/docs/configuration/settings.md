@@ -63,6 +63,7 @@ c8y settings list --select "**" --output json
     "flatten": false,
     "force": false,
     "includeall": false,
+    "insecure": false,
     "logmessage": "",
     "maxjobs": 0,
     "maxworkers": 50,
