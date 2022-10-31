@@ -150,7 +150,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithBoolValue("editable", "editable", ""),
 		flags.WithDefaultTemplateString(`
 {maximumAge: 365}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("maximumAge", "dataType"),
 	)

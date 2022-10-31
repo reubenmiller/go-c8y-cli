@@ -149,7 +149,7 @@ func (n *AssignGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "newChildGroup", "managedObject.id"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

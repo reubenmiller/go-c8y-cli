@@ -150,7 +150,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("status", "status"),
 		flags.WithCertificateFile("file", "certInPemFormat"),
 		flags.WithBoolValue("autoRegistrationEnabled", "autoRegistrationEnabled", ""),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("name", "certInPemFormat", "status"),
 	)

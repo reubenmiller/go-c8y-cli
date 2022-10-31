@@ -24,6 +24,36 @@ type Extension interface {
 	UpdateAvailable() bool
 	IsBinary() bool
 	IsLocal() bool
+
+	// Extension components
+	TemplatePath() string
+	ViewPath() string
+	Aliases() ([]Alias, error)
+	Commands() ([]Command, error)
+}
+
+//go:generate moq -rm -out alias_mock.go . Alias
+type Alias interface {
+	Command() string
+	Name() string
+	Description() string
+	IsShell() bool
+}
+
+type Command interface {
+	Command() string
+	Name() string
+	Description() string
+}
+
+type Template interface {
+	Path() string
+	Name() string
+}
+
+type View interface {
+	Path() string
+	Name() string
 }
 
 //go:generate moq -rm -out manager_mock.go . ExtensionManager

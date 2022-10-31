@@ -147,7 +147,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "externalId"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_Serial'}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "externalId"),
 	)

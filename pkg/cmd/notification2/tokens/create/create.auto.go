@@ -147,7 +147,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "subscription"),
 		flags.WithIntValue("expiresInMinutes", "expiresInMinutes"),
 		flags.WithStringValue("shared", "shared"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("subscriber", "subscription"),
 	)

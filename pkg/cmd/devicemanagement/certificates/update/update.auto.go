@@ -149,7 +149,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("status", "status"),
 		flags.WithBoolValue("autoRegistrationEnabled", "autoRegistrationEnabled", ""),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

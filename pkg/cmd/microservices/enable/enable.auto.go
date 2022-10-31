@@ -144,7 +144,7 @@ func (n *EnableCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithMicroserviceByNameFirstMatch(client, args, "id", "application.id"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

@@ -163,7 +163,7 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
     + (if self._version != "" then " (%s)" % self._version else "")
 }
 `),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("deviceId", "c8y_Firmware.name", "c8y_Firmware.version"),
 	)

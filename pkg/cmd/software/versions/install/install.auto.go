@@ -159,7 +159,7 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("description", "description"),
 		c8yfetcher.WithSoftwareVersionData(client, "software", "version", "url", args, "", "c8y_SoftwareUpdate.0"),
 		flags.WithStringValue("action", "c8y_SoftwareUpdate.0.action"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("deviceId", "c8y_SoftwareUpdate.0.name", "c8y_SoftwareUpdate.0.version", "c8y_SoftwareUpdate.0.action"),
 	)

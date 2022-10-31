@@ -148,7 +148,7 @@ func (n *UninstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("software", "c8y_SoftwareUpdate.0.name"),
 		flags.WithStringValue("version", "c8y_SoftwareUpdate.0.version"),
 		flags.WithStringValue("action", "c8y_SoftwareUpdate.0.action"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("deviceId", "c8y_SoftwareUpdate.0.name", "c8y_SoftwareUpdate.0.action"),
 	)

@@ -158,7 +158,7 @@ func (n *CreateBulkCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithRelativeTimestamp("time", "time", ""),
 		flags.WithStringValue("type", "type"),
 		flags.WithDefaultTemplateString(`{time: _.Now('0s')} + (if std.isObject(input.value) then input.value else {source:{id:input.value}}) + {id:: '', 'self':: ''}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "time", "source.id"),
 	)

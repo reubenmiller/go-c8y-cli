@@ -144,7 +144,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("url", "c8y_Software.url"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_SoftwareBinary', c8y_Global:{}}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "c8y_Software.version"),
 	)

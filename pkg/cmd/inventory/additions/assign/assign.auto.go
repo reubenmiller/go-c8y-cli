@@ -140,7 +140,7 @@ func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithOverrideValue("child", "managedObject.id"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("child", "managedObject.id"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

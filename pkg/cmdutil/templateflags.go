@@ -15,6 +15,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var NamespaceSeparator = "::"
+
+func BuildTemplatePath(namespace, name string) string {
+	return fmt.Sprintf("%s%s%s", namespace, NamespaceSeparator, name)
+}
+
 type TemplatePathResolver struct {
 	Paths []string
 }
@@ -30,7 +36,7 @@ func matchFilePath(paths []string, pattern string, extensions []string, ignoreDi
 	}
 
 	sourcePattern := ""
-	if a, b, ok := strings.Cut(pattern, "::"); ok {
+	if a, b, ok := strings.Cut(pattern, NamespaceSeparator); ok {
 		sourcePattern = a
 		pattern = b
 	}
@@ -40,7 +46,7 @@ func matchFilePath(paths []string, pattern string, extensions []string, ignoreDi
 	for _, sourceDir := range paths {
 		sourceName := ""
 		sourcePath := sourceDir
-		if a, b, ok := strings.Cut(sourceDir, "::"); ok {
+		if a, b, ok := strings.Cut(sourceDir, NamespaceSeparator); ok {
 			sourceName = a
 			sourcePath = b
 		}
@@ -166,18 +172,21 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 }
 
 // WithTemplateValue get the template value using the path resolver controlled by the configuration
-func WithTemplateValue(cfg *config.Config) flags.GetOption {
-	return flags.WithTemplateValue(flags.FlagDataTemplateName, NewTemplateResolver(cfg))
+func WithTemplateValue(factory *Factory, cfg *config.Config) flags.GetOption {
+	return flags.WithTemplateValue(flags.FlagDataTemplateName, NewTemplateResolver(factory, cfg))
 }
 
-func NewTemplateResolver(cfg *config.Config) *TemplatePathResolver {
-	collection := cfg.GetTemplatePaths()
-	paths := []string{}
-	for _, item := range collection.Items {
-		for _, p := range item.Paths {
-			paths = append(paths, fmt.Sprintf("%s::%s", item.Name, p))
+func NewTemplateResolver(factory *Factory, cfg *config.Config) *TemplatePathResolver {
+	paths := cfg.GetTemplatePaths()
+
+	// TODO: Get extension templates
+	for _, ext := range factory.ExtensionManager().List() {
+		path := ext.TemplatePath()
+		if path != "" {
+			paths = append(paths, BuildTemplatePath(ext.Name(), path))
 		}
 	}
+
 	return &TemplatePathResolver{
 		Paths: paths,
 	}

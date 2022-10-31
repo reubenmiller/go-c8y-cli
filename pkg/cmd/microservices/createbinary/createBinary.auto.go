@@ -135,7 +135,7 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		formData,
 		inputIterators,
-		flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(cfg), "file", "data")...,
+		flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(n.factory, cfg), "file", "data")...,
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -148,7 +148,7 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

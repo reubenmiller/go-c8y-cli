@@ -156,7 +156,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8ybinary.WithBinaryUploadURL(client, n.factory.IOStreams.ProgressIndicator(), "file", "url"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_ConfigurationDump', c8y_Global:{}}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "name", "url"),
 	)

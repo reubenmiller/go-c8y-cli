@@ -13,41 +13,59 @@ var _ Extension = &ExtensionMock{}
 
 // ExtensionMock is a mock implementation of Extension.
 //
-// 	func TestSomethingThatUsesExtension(t *testing.T) {
+//	func TestSomethingThatUsesExtension(t *testing.T) {
 //
-// 		// make and configure a mocked Extension
-// 		mockedExtension := &ExtensionMock{
-// 			CurrentVersionFunc: func() string {
-// 				panic("mock out the CurrentVersion method")
-// 			},
-// 			IsBinaryFunc: func() bool {
-// 				panic("mock out the IsBinary method")
-// 			},
-// 			IsLocalFunc: func() bool {
-// 				panic("mock out the IsLocal method")
-// 			},
-// 			IsPinnedFunc: func() bool {
-// 				panic("mock out the IsPinned method")
-// 			},
-// 			NameFunc: func() string {
-// 				panic("mock out the Name method")
-// 			},
-// 			PathFunc: func() string {
-// 				panic("mock out the Path method")
-// 			},
-// 			URLFunc: func() string {
-// 				panic("mock out the URL method")
-// 			},
-// 			UpdateAvailableFunc: func() bool {
-// 				panic("mock out the UpdateAvailable method")
-// 			},
-// 		}
+//		// make and configure a mocked Extension
+//		mockedExtension := &ExtensionMock{
+//			AliasesFunc: func() ([]Alias, error) {
+//				panic("mock out the Aliases method")
+//			},
+//			CommandsFunc: func() ([]Command, error) {
+//				panic("mock out the Commands method")
+//			},
+//			CurrentVersionFunc: func() string {
+//				panic("mock out the CurrentVersion method")
+//			},
+//			IsBinaryFunc: func() bool {
+//				panic("mock out the IsBinary method")
+//			},
+//			IsLocalFunc: func() bool {
+//				panic("mock out the IsLocal method")
+//			},
+//			IsPinnedFunc: func() bool {
+//				panic("mock out the IsPinned method")
+//			},
+//			NameFunc: func() string {
+//				panic("mock out the Name method")
+//			},
+//			PathFunc: func() string {
+//				panic("mock out the Path method")
+//			},
+//			TemplatePathFunc: func() string {
+//				panic("mock out the TemplatePath method")
+//			},
+//			URLFunc: func() string {
+//				panic("mock out the URL method")
+//			},
+//			UpdateAvailableFunc: func() bool {
+//				panic("mock out the UpdateAvailable method")
+//			},
+//			ViewPathFunc: func() string {
+//				panic("mock out the ViewPath method")
+//			},
+//		}
 //
-// 		// use mockedExtension in code that requires Extension
-// 		// and then make assertions.
+//		// use mockedExtension in code that requires Extension
+//		// and then make assertions.
 //
-// 	}
+//	}
 type ExtensionMock struct {
+	// AliasesFunc mocks the Aliases method.
+	AliasesFunc func() ([]Alias, error)
+
+	// CommandsFunc mocks the Commands method.
+	CommandsFunc func() ([]Command, error)
+
 	// CurrentVersionFunc mocks the CurrentVersion method.
 	CurrentVersionFunc func() string
 
@@ -66,14 +84,26 @@ type ExtensionMock struct {
 	// PathFunc mocks the Path method.
 	PathFunc func() string
 
+	// TemplatePathFunc mocks the TemplatePath method.
+	TemplatePathFunc func() string
+
 	// URLFunc mocks the URL method.
 	URLFunc func() string
 
 	// UpdateAvailableFunc mocks the UpdateAvailable method.
 	UpdateAvailableFunc func() bool
 
+	// ViewPathFunc mocks the ViewPath method.
+	ViewPathFunc func() string
+
 	// calls tracks calls to the methods.
 	calls struct {
+		// Aliases holds details about calls to the Aliases method.
+		Aliases []struct {
+		}
+		// Commands holds details about calls to the Commands method.
+		Commands []struct {
+		}
 		// CurrentVersion holds details about calls to the CurrentVersion method.
 		CurrentVersion []struct {
 		}
@@ -92,21 +122,85 @@ type ExtensionMock struct {
 		// Path holds details about calls to the Path method.
 		Path []struct {
 		}
+		// TemplatePath holds details about calls to the TemplatePath method.
+		TemplatePath []struct {
+		}
 		// URL holds details about calls to the URL method.
 		URL []struct {
 		}
 		// UpdateAvailable holds details about calls to the UpdateAvailable method.
 		UpdateAvailable []struct {
 		}
+		// ViewPath holds details about calls to the ViewPath method.
+		ViewPath []struct {
+		}
 	}
+	lockAliases         sync.RWMutex
+	lockCommands        sync.RWMutex
 	lockCurrentVersion  sync.RWMutex
 	lockIsBinary        sync.RWMutex
 	lockIsLocal         sync.RWMutex
 	lockIsPinned        sync.RWMutex
 	lockName            sync.RWMutex
 	lockPath            sync.RWMutex
+	lockTemplatePath    sync.RWMutex
 	lockURL             sync.RWMutex
 	lockUpdateAvailable sync.RWMutex
+	lockViewPath        sync.RWMutex
+}
+
+// Aliases calls AliasesFunc.
+func (mock *ExtensionMock) Aliases() ([]Alias, error) {
+	if mock.AliasesFunc == nil {
+		panic("ExtensionMock.AliasesFunc: method is nil but Extension.Aliases was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockAliases.Lock()
+	mock.calls.Aliases = append(mock.calls.Aliases, callInfo)
+	mock.lockAliases.Unlock()
+	return mock.AliasesFunc()
+}
+
+// AliasesCalls gets all the calls that were made to Aliases.
+// Check the length with:
+//
+//	len(mockedExtension.AliasesCalls())
+func (mock *ExtensionMock) AliasesCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockAliases.RLock()
+	calls = mock.calls.Aliases
+	mock.lockAliases.RUnlock()
+	return calls
+}
+
+// Commands calls CommandsFunc.
+func (mock *ExtensionMock) Commands() ([]Command, error) {
+	if mock.CommandsFunc == nil {
+		panic("ExtensionMock.CommandsFunc: method is nil but Extension.Commands was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockCommands.Lock()
+	mock.calls.Commands = append(mock.calls.Commands, callInfo)
+	mock.lockCommands.Unlock()
+	return mock.CommandsFunc()
+}
+
+// CommandsCalls gets all the calls that were made to Commands.
+// Check the length with:
+//
+//	len(mockedExtension.CommandsCalls())
+func (mock *ExtensionMock) CommandsCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockCommands.RLock()
+	calls = mock.calls.Commands
+	mock.lockCommands.RUnlock()
+	return calls
 }
 
 // CurrentVersion calls CurrentVersionFunc.
@@ -124,7 +218,8 @@ func (mock *ExtensionMock) CurrentVersion() string {
 
 // CurrentVersionCalls gets all the calls that were made to CurrentVersion.
 // Check the length with:
-//     len(mockedExtension.CurrentVersionCalls())
+//
+//	len(mockedExtension.CurrentVersionCalls())
 func (mock *ExtensionMock) CurrentVersionCalls() []struct {
 } {
 	var calls []struct {
@@ -150,7 +245,8 @@ func (mock *ExtensionMock) IsBinary() bool {
 
 // IsBinaryCalls gets all the calls that were made to IsBinary.
 // Check the length with:
-//     len(mockedExtension.IsBinaryCalls())
+//
+//	len(mockedExtension.IsBinaryCalls())
 func (mock *ExtensionMock) IsBinaryCalls() []struct {
 } {
 	var calls []struct {
@@ -176,7 +272,8 @@ func (mock *ExtensionMock) IsLocal() bool {
 
 // IsLocalCalls gets all the calls that were made to IsLocal.
 // Check the length with:
-//     len(mockedExtension.IsLocalCalls())
+//
+//	len(mockedExtension.IsLocalCalls())
 func (mock *ExtensionMock) IsLocalCalls() []struct {
 } {
 	var calls []struct {
@@ -202,7 +299,8 @@ func (mock *ExtensionMock) IsPinned() bool {
 
 // IsPinnedCalls gets all the calls that were made to IsPinned.
 // Check the length with:
-//     len(mockedExtension.IsPinnedCalls())
+//
+//	len(mockedExtension.IsPinnedCalls())
 func (mock *ExtensionMock) IsPinnedCalls() []struct {
 } {
 	var calls []struct {
@@ -228,7 +326,8 @@ func (mock *ExtensionMock) Name() string {
 
 // NameCalls gets all the calls that were made to Name.
 // Check the length with:
-//     len(mockedExtension.NameCalls())
+//
+//	len(mockedExtension.NameCalls())
 func (mock *ExtensionMock) NameCalls() []struct {
 } {
 	var calls []struct {
@@ -254,7 +353,8 @@ func (mock *ExtensionMock) Path() string {
 
 // PathCalls gets all the calls that were made to Path.
 // Check the length with:
-//     len(mockedExtension.PathCalls())
+//
+//	len(mockedExtension.PathCalls())
 func (mock *ExtensionMock) PathCalls() []struct {
 } {
 	var calls []struct {
@@ -262,6 +362,33 @@ func (mock *ExtensionMock) PathCalls() []struct {
 	mock.lockPath.RLock()
 	calls = mock.calls.Path
 	mock.lockPath.RUnlock()
+	return calls
+}
+
+// TemplatePath calls TemplatePathFunc.
+func (mock *ExtensionMock) TemplatePath() string {
+	if mock.TemplatePathFunc == nil {
+		panic("ExtensionMock.TemplatePathFunc: method is nil but Extension.TemplatePath was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockTemplatePath.Lock()
+	mock.calls.TemplatePath = append(mock.calls.TemplatePath, callInfo)
+	mock.lockTemplatePath.Unlock()
+	return mock.TemplatePathFunc()
+}
+
+// TemplatePathCalls gets all the calls that were made to TemplatePath.
+// Check the length with:
+//
+//	len(mockedExtension.TemplatePathCalls())
+func (mock *ExtensionMock) TemplatePathCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockTemplatePath.RLock()
+	calls = mock.calls.TemplatePath
+	mock.lockTemplatePath.RUnlock()
 	return calls
 }
 
@@ -280,7 +407,8 @@ func (mock *ExtensionMock) URL() string {
 
 // URLCalls gets all the calls that were made to URL.
 // Check the length with:
-//     len(mockedExtension.URLCalls())
+//
+//	len(mockedExtension.URLCalls())
 func (mock *ExtensionMock) URLCalls() []struct {
 } {
 	var calls []struct {
@@ -306,7 +434,8 @@ func (mock *ExtensionMock) UpdateAvailable() bool {
 
 // UpdateAvailableCalls gets all the calls that were made to UpdateAvailable.
 // Check the length with:
-//     len(mockedExtension.UpdateAvailableCalls())
+//
+//	len(mockedExtension.UpdateAvailableCalls())
 func (mock *ExtensionMock) UpdateAvailableCalls() []struct {
 } {
 	var calls []struct {
@@ -314,5 +443,32 @@ func (mock *ExtensionMock) UpdateAvailableCalls() []struct {
 	mock.lockUpdateAvailable.RLock()
 	calls = mock.calls.UpdateAvailable
 	mock.lockUpdateAvailable.RUnlock()
+	return calls
+}
+
+// ViewPath calls ViewPathFunc.
+func (mock *ExtensionMock) ViewPath() string {
+	if mock.ViewPathFunc == nil {
+		panic("ExtensionMock.ViewPathFunc: method is nil but Extension.ViewPath was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockViewPath.Lock()
+	mock.calls.ViewPath = append(mock.calls.ViewPath, callInfo)
+	mock.lockViewPath.Unlock()
+	return mock.ViewPathFunc()
+}
+
+// ViewPathCalls gets all the calls that were made to ViewPath.
+// Check the length with:
+//
+//	len(mockedExtension.ViewPathCalls())
+func (mock *ExtensionMock) ViewPathCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockViewPath.RLock()
+	calls = mock.calls.ViewPath
+	mock.lockViewPath.RUnlock()
 	return calls
 }

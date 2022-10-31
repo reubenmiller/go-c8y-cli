@@ -52,3 +52,22 @@ func Test_ExtensionGetViews(t *testing.T) {
 	err := ExecuteCmd(cmd, cmdtext)
 	assert.OK(t, err)
 }
+
+func Test_ExtensionInstallFromURL(t *testing.T) {
+	cmd := setupTest()
+	cmdtext := `
+		extension install https://Enercon@dev.azure.com/Enercon/EC-P1D/_git/ec-p1d-iot-c8y-cli
+	`
+	err := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
+	assert.OK(t, err)
+}
+
+func Test_Debugging(t *testing.T) {
+	cmd := setupTest()
+	cmdtext := `
+		__complete template execute --template ec-p1d-iot-c8y-cli::op.unassignServers.jsonnet --templateVars ""
+	`
+	// __complete template execute --template c8y-simu*::*test
+	err := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
+	assert.OK(t, err)
+}

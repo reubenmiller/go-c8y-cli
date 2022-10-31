@@ -147,7 +147,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("serviceType", "serviceType"),
 		flags.WithStringValue("status", "status"),
 		flags.WithStaticStringValue("type", "c8y_Service"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("name", "status", "type", "serviceType"),
 	)

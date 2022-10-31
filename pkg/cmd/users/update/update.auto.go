@@ -159,7 +159,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("password", "password"),
 		flags.WithBoolValue("sendPasswordResetEmail", "sendPasswordResetEmail", ""),
 		flags.WithDataValue("customProperties", "customProperties"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

@@ -150,7 +150,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataValue("operation", "operationPrototype"),
 		flags.WithDefaultTemplateString(`
 {startDate: _.Now('300s'), creationRamp: 1.000}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("groupId", "startDate", "creationRamp", "operationPrototype"),
 	)

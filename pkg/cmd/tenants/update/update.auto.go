@@ -148,7 +148,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("adminPass", "adminPass"),
 		flags.WithStringValue("contactName", "contactName"),
 		flags.WithStringValue("contactPhone", "contact_phone"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

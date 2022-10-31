@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -1223,40 +1222,13 @@ func (c *Config) StorePassword() bool {
 	return c.viper.GetBool(SettingsStorageStorePassword)
 }
 
-type ExtensionSource struct {
-	Name  string
-	Paths []string
-}
-
-func NewExtensionItemCollection() *ExtensionItemCollection {
-	collection := &ExtensionItemCollection{
-		Items: []ExtensionSource{},
-	}
-	return collection
-}
-
-type ExtensionItemCollection struct {
-	Items []ExtensionSource
-}
-
-func (t *ExtensionItemCollection) Add(name string, paths []string) {
-	if len(paths) > 0 {
-		t.Items = append(t.Items, ExtensionSource{name, paths})
-	}
-}
-
-func (t *ExtensionItemCollection) AddSources(sources []ExtensionSource) {
-	t.Items = append(t.Items, sources...)
-}
-
 // GetTemplatePaths template folders where the template files are located
-func (c *Config) GetTemplatePaths() *ExtensionItemCollection {
+func (c *Config) GetTemplatePaths() []string {
 	// Prefer custom path over default path
-	collection := NewExtensionItemCollection()
-	collection.Add("", c.GetPathSlice(SettingsTemplateCustomPaths))
-	collection.Add("", c.GetPathSlice(SettingsTemplatePath))
-	collection.AddSources(c.GetExtensionTemplates())
-	return collection
+	paths := make([]string, 0)
+	paths = append(paths, c.GetPathSlice(SettingsTemplateCustomPaths)...)
+	paths = append(paths, c.GetPathSlice(SettingsTemplatePath)...)
+	return paths
 }
 
 // AllowModeCreate enables create (post) commands
@@ -1373,133 +1345,7 @@ func (c *Config) GetConfigPath() string {
 func (c *Config) GetViewPaths() []string {
 	paths := c.GetPathSlice(SettingsViewsCommonPaths)
 	paths = append(paths, c.GetPathSlice(SettingsViewsCustomPaths)...)
-	// TODO: Do views need a source prefix?
-	// collection := NewExtensionItemCollection()
-	// collection.Add("", c.GetPathSlice(SettingsTemplateCustomPaths))
-	// collection.Add("", c.GetPathSlice(SettingsTemplatePath))
-	// collection.AddSources(c.GetExtensionTemplates())
-	// paths = append(paths, c.GetExtensionViews()...)
-
-	for _, item := range c.GetExtensionViews() {
-		paths = append(paths, item.Paths...)
-	}
 	return paths
-}
-
-func (c *Config) GetExtensionViews() []ExtensionSource {
-	return c.getExtensionPaths("views")
-}
-
-func (c *Config) GetExtensionTemplates() []ExtensionSource {
-	return c.getExtensionPaths("templates")
-}
-
-type ExtensionFile struct {
-	Aliases []ExtensionAlias `json:"aliases,omitempty"`
-}
-
-type ExtensionAlias struct {
-	Source      string `json:"-"`
-	Name        string `json:"name,omitempty"`
-	Command     string `json:"command,omitempty"`
-	Description string `json:"description,omitempty"`
-	Shell       bool   `json:"shell"`
-}
-
-func (a *ExtensionAlias) GetCommand() string {
-	if a.Shell {
-		return "!" + a.Command
-	}
-	return a.Command
-}
-
-func (c *Config) GetExtensionAliases() []ExtensionAlias {
-	files := c.getExtensionFiles("extension.json")
-
-	aliases := make([]ExtensionAlias, 0)
-	for _, file := range files {
-
-		if fp, err := os.Open(file); err == nil {
-			if b, bErr := io.ReadAll(fp); bErr == nil {
-				ext := &ExtensionFile{}
-				if jErr := json.Unmarshal(b, ext); jErr != nil {
-					continue
-				}
-
-				for _, alias := range ext.Aliases {
-					if alias.Name != "" && alias.Command != "" {
-						alias.Source = ""
-						aliases = append(aliases, alias)
-					}
-				}
-			}
-		}
-	}
-	return aliases
-}
-
-func (c *Config) getExtensionPaths(subdir string) (sources []ExtensionSource) {
-	dataDir := c.ExtensionsDataDir()
-	dataDirContents, err := ioutil.ReadDir(dataDir)
-
-	if err != nil {
-		c.Logger.Warnf("Could not retrieve extension views. %s", err)
-		return
-	}
-
-	c.Logger.Debugf("Checking %s in extensions. %s", subdir, dataDir)
-	for _, item := range dataDirContents {
-		if item.IsDir() {
-			extDir := filepath.Join(dataDir, item.Name())
-
-			if extContents, err := ioutil.ReadDir(extDir); err == nil {
-				for _, extItem := range extContents {
-					if extItem.IsDir() && strings.EqualFold(extItem.Name(), subdir) {
-						path := filepath.Join(extDir, extItem.Name())
-						c.Logger.Debugf("Found extension %s. %s", subdir, path)
-
-						sources = append(sources, ExtensionSource{
-							Name: item.Name(),
-							Paths: []string{
-								path,
-							},
-						})
-					}
-				}
-			}
-
-		}
-	}
-	return
-}
-
-func (c *Config) getExtensionFiles(name string) (folders []string) {
-	dataDir := c.ExtensionsDataDir()
-	dataDirContents, err := ioutil.ReadDir(dataDir)
-
-	if err != nil {
-		c.Logger.Warnf("Could not retrieve extension views. %s", err)
-		return
-	}
-
-	c.Logger.Debugf("Checking %s in extensions. %s", name, dataDir)
-	for _, item := range dataDirContents {
-		if item.IsDir() {
-			extDir := filepath.Join(dataDir, item.Name())
-
-			if extContents, err := ioutil.ReadDir(extDir); err == nil {
-				for _, extItem := range extContents {
-					if !extItem.IsDir() && strings.EqualFold(extItem.Name(), name) {
-						filePath := filepath.Join(extDir, extItem.Name())
-						c.Logger.Debugf("Found extension %s. %s", name, filePath)
-						folders = append(folders, filePath)
-					}
-				}
-			}
-
-		}
-	}
-	return
 }
 
 // GetJSONFilter get json filter to be applied to the output

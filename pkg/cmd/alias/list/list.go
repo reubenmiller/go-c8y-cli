@@ -7,7 +7,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/spf13/cobra"
 )
@@ -52,7 +52,12 @@ func listRun(opts *ListOptions) error {
 
 	aliasCfg := cfg.Aliases()
 	commonAliasCfg := cfg.CommonAliases()
-	aliasExtensions := cfg.GetExtensionAliases()
+	aliasExtensions := make([]extensions.Alias, 0)
+	for _, ext := range opts.factory.ExtensionManager().List() {
+		if extAliases, err := ext.Aliases(); err == nil {
+			aliasExtensions = append(aliasExtensions, extAliases...)
+		}
+	}
 
 	if len(aliasCfg) == 0 && len(commonAliasCfg) == 0 && len(aliasExtensions) == 0 {
 		if opts.IO.IsStdoutTTY() {
@@ -103,16 +108,16 @@ func printAliases(w io.Writer, cs *iostreams.ColorScheme, title string, aliases 
 	return nil
 }
 
-func printExtensionAliases(w io.Writer, cs *iostreams.ColorScheme, title string, aliases []config.ExtensionAlias) error {
+func printExtensionAliases(w io.Writer, cs *iostreams.ColorScheme, title string, aliases []extensions.Alias) error {
 	if len(aliases) == 0 {
 		return nil
 	}
 
-	aliasSet := make(map[string]config.ExtensionAlias)
+	aliasSet := make(map[string]extensions.Alias)
 	keys := []string{}
 	for _, alias := range aliases {
-		keys = append(keys, alias.Name)
-		aliasSet[alias.Name] = alias
+		keys = append(keys, alias.Name())
+		aliasSet[alias.Name()] = alias
 	}
 	sort.Strings(keys)
 
@@ -120,7 +125,7 @@ func printExtensionAliases(w io.Writer, cs *iostreams.ColorScheme, title string,
 
 	// TODO: Change to json writer
 	for _, alias := range keys {
-		_, err := fmt.Fprintf(w, "%s: %s\n", cs.CyanBold(alias), aliasSet[alias].Command)
+		_, err := fmt.Fprintf(w, "%s: %s\n", cs.CyanBold(alias), aliasSet[alias].Command())
 		if err != nil {
 			return err
 		}

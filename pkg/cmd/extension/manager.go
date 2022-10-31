@@ -894,3 +894,8 @@ func codesignBinary(binPath string) error {
 	cmd := exec.Command(codesignExe, "--sign", "-", "--force", "--preserve-metadata=entitlements,requirements,flags,runtime", binPath)
 	return cmd.Run()
 }
+
+type AliasCollection struct {
+	Name    string
+	Aliases []extensions.Alias
+}

@@ -286,7 +286,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 			body,
 			inputIterators,
 			flags.WithDataValueAdvanced(!n.keepProperties, !request.HasJSONHeader(&headers), flags.FlagDataName, ""),
-			cmdutil.WithTemplateValue(cfg),
+			cmdutil.WithTemplateValue(n.factory, cfg),
 			flags.WithTemplateVariablesValue(),
 		)
 

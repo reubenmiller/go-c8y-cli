@@ -157,7 +157,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringSliceValues("fragmentsToCopy", "fragmentsToCopy", ""),
 		flags.WithStringSliceValues("apiFilter", "subscriptionFilter.apis", ""),
 		flags.WithStringValue("typeFilter", "subscriptionFilter.typeFilter"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("context", "subscription"),
 	)

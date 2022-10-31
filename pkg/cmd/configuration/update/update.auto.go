@@ -150,7 +150,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("url", "url"),
 		flags.WithStringValue("deviceType", "deviceType"),
 		c8ybinary.WithBinaryUploadURL(client, n.factory.IOStreams.ProgressIndicator(), "file", "url"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

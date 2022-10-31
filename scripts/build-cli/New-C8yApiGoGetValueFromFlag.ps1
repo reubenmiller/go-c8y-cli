@@ -31,7 +31,7 @@
 
     $Definitions = @{
         # file (used in multipart/form-data uploads). It writes to the formData object instead of the body
-        "file" = "flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(cfg), `"${prop}`", `"data`")...,"
+        "file" = "flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(n.factory, cfg), `"${prop}`", `"data`")...,"
 
         # fileContents. File contents will be added to body
         "fileContents" = "flags.WithFilePath(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"

@@ -527,7 +527,17 @@ func (c *CmdRoot) Configure(disableEncryptionCheck bool) error {
 		}
 
 		l, _ := c.Factory.Logger()
-		dv, err := dataview.NewDataView(".*", ".json", l, cfg.GetViewPaths()...)
+		viewPaths := cfg.GetViewPaths()
+
+		// Add extensions
+		for _, ext := range c.Factory.ExtensionManager().List() {
+			path := ext.ViewPath()
+			if path != "" {
+				viewPaths = append(viewPaths, path)
+			}
+		}
+
+		dv, err := dataview.NewDataView(".*", ".json", l, viewPaths...)
 		c.dataview = dv
 		return dv, err
 	}

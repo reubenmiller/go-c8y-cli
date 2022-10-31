@@ -142,7 +142,7 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("newPassword", "password"),
 		flags.WithRequiredTemplateString(`
 {sendPasswordResetEmail: !std.objectHas(self, 'password')}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

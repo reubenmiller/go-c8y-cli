@@ -150,7 +150,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("text", "text"),
 		flags.WithDefaultTemplateString(`
 {time: _.Now('0s')}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "text", "time", "source.id"),
 	)

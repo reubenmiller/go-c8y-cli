@@ -151,7 +151,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("dependencyVersion", "c8y_Patch.dependency"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_FirmwareBinary', c8y_Global:{}}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "c8y_Firmware.version", "c8y_Patch.dependency"),
 	)

@@ -161,7 +161,7 @@ func (n *UpdateCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("newStatus", "status"),
 		flags.WithRelativeTimestamp("createdFrom", "createdFrom"),
 		flags.WithRelativeTimestamp("createdTo", "createdTo"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("status"),
 	)
