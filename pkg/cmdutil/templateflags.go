@@ -72,7 +72,7 @@ func matchFilePath(paths []string, pattern string, extensions []string, ignoreDi
 	}
 
 	// try to resolve path in nested
-	names, err := pathresolver.ResolvePaths(paths, pattern, extensions, ignoreDir)
+	names, err := pathresolver.ResolvePaths(validPaths, pattern, extensions, ignoreDir)
 	if err != nil {
 		return "", err
 	}
