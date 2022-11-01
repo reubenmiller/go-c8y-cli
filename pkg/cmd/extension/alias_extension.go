@@ -1,28 +1,28 @@
 package extension
 
 type AliasExtension struct {
-	source      string `json:"-"`
-	name        string `json:"name,omitempty"`
-	command     string `json:"command,omitempty"`
-	description string `json:"description,omitempty"`
-	shell       bool   `json:"shell"`
+	Source      string `json:"-"`
+	Name        string `json:"name,omitempty"`
+	Command     string `json:"command,omitempty"`
+	Description string `json:"description,omitempty"`
+	Shell       bool   `json:"shell"`
 }
 
-func (a *AliasExtension) Command() string {
-	if a.shell {
-		return "!" + a.command
+func (a *AliasExtension) GetCommand() string {
+	if a.Shell {
+		return "!" + a.Command
 	}
-	return a.command
+	return a.Command
 }
 
-func (a *AliasExtension) Name() string {
-	return a.name
+func (a *AliasExtension) GetName() string {
+	return a.Name
 }
 
-func (a *AliasExtension) Description() string {
-	return a.description
+func (a *AliasExtension) GetDescription() string {
+	return a.Description
 }
 
 func (a *AliasExtension) IsShell() bool {
-	return a.shell
+	return a.Shell
 }

@@ -9,12 +9,10 @@ import (
 	"math/rand"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/cli/safeexec"
-	"github.com/reubenmiller/go-c8y-cli/v2/internal/ghrepo"
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/run"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alias/expand"
@@ -26,7 +24,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/git"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -82,29 +79,6 @@ func MainRun() {
 
 		var results []string
 
-		// cfg := config.NewConfig(v)
-		for _, ext := range rootCmd.Factory.ExtensionManager().List() {
-			extAliases, aliasErr := ext.Aliases()
-			if aliasErr == nil {
-				for _, iAlias := range extAliases {
-
-					var s string
-					desc := iAlias.Description()
-					if len(desc) > 80 {
-						desc = desc[:80] + "..."
-					}
-					if iAlias.IsShell() {
-						s = fmt.Sprintf("%s\tExtension shell alias %s", iAlias.Name(), desc)
-					} else {
-						s = fmt.Sprintf("%s\tExtension alias to %s", iAlias.Name(), desc)
-					}
-
-					s += fmt.Sprintf(" |%s", ext.Name())
-					results = append(results, s)
-				}
-			}
-		}
-
 		for aliasName, aliasValue := range aliases {
 			if strings.HasPrefix(aliasName, toComplete) {
 				var s string
@@ -120,26 +94,29 @@ func MainRun() {
 			}
 		}
 
-		// Extension commands
+		// Extension Aliases
 		for _, ext := range rootCmd.Factory.ExtensionManager().List() {
-			scriptDir := filepath.Join(ext.Path(), "commands")
-			os.ReadDir(scriptDir)
-			if strings.HasPrefix(ext.Name(), toComplete) {
-				var s string
-				if ext.IsLocal() {
-					s = fmt.Sprintf("%s\tLocal extension gh-%s", ext.Name(), ext.Name())
-				} else {
-					path := ext.URL()
-					if u, err := git.ParseURL(ext.URL()); err == nil {
-						if r, err := ghrepo.FromURL(u); err == nil {
-							path = ghrepo.FullName(r)
-						}
+			extAliases, aliasErr := ext.Aliases()
+			if aliasErr == nil {
+				for _, iAlias := range extAliases {
+
+					var s string
+					desc := iAlias.GetDescription()
+					if len(desc) > 80 {
+						desc = desc[:80] + "..."
 					}
-					s = fmt.Sprintf("%s\tExtension %s", ext.Name(), path)
+					if iAlias.IsShell() {
+						s = fmt.Sprintf("%s\tExtension shell alias %s", iAlias.GetName(), desc)
+					} else {
+						s = fmt.Sprintf("%s\tExtension alias to %s", iAlias.GetName(), desc)
+					}
+
+					s += fmt.Sprintf(" |%s", ext.Name())
+					results = append(results, s)
 				}
-				results = append(results, s)
 			}
 		}
+		// Note: Extension commands are defined in root.go
 
 		return results, cobra.ShellCompDirectiveNoFileComp
 	}
@@ -151,7 +128,7 @@ func MainRun() {
 		err = CheckCommandError(rootCmd.Command, rootCmd.Factory, err)
 
 		// Help is not really error, just a way to exit early
-		// after displaying help to ther user
+		// after displaying help to the user
 		if errors.Is(err, cmderrors.ErrHelp) {
 			os.Exit(int(cmderrors.ExitOK))
 		}
@@ -260,7 +237,7 @@ func setArgs(cmd *cobra.Command, cmdFactory *cmdutil.Factory) ([]string, error) 
 		for _, ext := range cmdFactory.ExtensionManager().List() {
 			if extAliases, err := ext.Aliases(); err == nil {
 				for _, alias := range extAliases {
-					aliases[alias.Name()] = alias.Command()
+					aliases[alias.GetName()] = alias.GetCommand()
 				}
 			}
 		}

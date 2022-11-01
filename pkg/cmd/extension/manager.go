@@ -76,14 +76,26 @@ func (m *Manager) Dispatch(args []string, stdin io.Reader, stdout, stderr io.Wri
 
 	var exe string
 	extName := args[0]
-	forwardArgs := args[1:]
+
+	subCommand := ""
+	if len(args) > 1 {
+		subCommand = args[1]
+	}
+	forwardArgs := []string{}
+	if len(args) > 2 {
+		forwardArgs = append(forwardArgs, args[2:]...)
+	}
 
 	exts, _ := m.list(false)
 	var ext Extension
 	for _, e := range exts {
 		if e.Name() == extName {
 			ext = e
-			exe = ext.Path()
+			if ext.IsBinary() {
+				exe = filepath.Join(ext.Path())
+			} else {
+				exe = filepath.Join(ext.Path(), commandsName, subCommand)
+			}
 			break
 		}
 	}

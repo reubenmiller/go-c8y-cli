@@ -17,17 +17,17 @@ var _ Alias = &AliasMock{}
 //
 //		// make and configure a mocked Alias
 //		mockedAlias := &AliasMock{
-//			CommandFunc: func() string {
-//				panic("mock out the Command method")
+//			GetCommandFunc: func() string {
+//				panic("mock out the GetCommand method")
 //			},
-//			DescriptionFunc: func() string {
-//				panic("mock out the Description method")
+//			GetDescriptionFunc: func() string {
+//				panic("mock out the GetDescription method")
+//			},
+//			GetNameFunc: func() string {
+//				panic("mock out the GetName method")
 //			},
 //			IsShellFunc: func() bool {
 //				panic("mock out the IsShell method")
-//			},
-//			NameFunc: func() string {
-//				panic("mock out the Name method")
 //			},
 //		}
 //
@@ -36,90 +36,117 @@ var _ Alias = &AliasMock{}
 //
 //	}
 type AliasMock struct {
-	// CommandFunc mocks the Command method.
-	CommandFunc func() string
+	// GetCommandFunc mocks the GetCommand method.
+	GetCommandFunc func() string
 
-	// DescriptionFunc mocks the Description method.
-	DescriptionFunc func() string
+	// GetDescriptionFunc mocks the GetDescription method.
+	GetDescriptionFunc func() string
+
+	// GetNameFunc mocks the GetName method.
+	GetNameFunc func() string
 
 	// IsShellFunc mocks the IsShell method.
 	IsShellFunc func() bool
 
-	// NameFunc mocks the Name method.
-	NameFunc func() string
-
 	// calls tracks calls to the methods.
 	calls struct {
-		// Command holds details about calls to the Command method.
-		Command []struct {
+		// GetCommand holds details about calls to the GetCommand method.
+		GetCommand []struct {
 		}
-		// Description holds details about calls to the Description method.
-		Description []struct {
+		// GetDescription holds details about calls to the GetDescription method.
+		GetDescription []struct {
+		}
+		// GetName holds details about calls to the GetName method.
+		GetName []struct {
 		}
 		// IsShell holds details about calls to the IsShell method.
 		IsShell []struct {
 		}
-		// Name holds details about calls to the Name method.
-		Name []struct {
-		}
 	}
-	lockCommand     sync.RWMutex
-	lockDescription sync.RWMutex
-	lockIsShell     sync.RWMutex
-	lockName        sync.RWMutex
+	lockGetCommand     sync.RWMutex
+	lockGetDescription sync.RWMutex
+	lockGetName        sync.RWMutex
+	lockIsShell        sync.RWMutex
 }
 
-// Command calls CommandFunc.
-func (mock *AliasMock) Command() string {
-	if mock.CommandFunc == nil {
-		panic("AliasMock.CommandFunc: method is nil but Alias.Command was just called")
+// GetCommand calls GetCommandFunc.
+func (mock *AliasMock) GetCommand() string {
+	if mock.GetCommandFunc == nil {
+		panic("AliasMock.GetCommandFunc: method is nil but Alias.GetCommand was just called")
 	}
 	callInfo := struct {
 	}{}
-	mock.lockCommand.Lock()
-	mock.calls.Command = append(mock.calls.Command, callInfo)
-	mock.lockCommand.Unlock()
-	return mock.CommandFunc()
+	mock.lockGetCommand.Lock()
+	mock.calls.GetCommand = append(mock.calls.GetCommand, callInfo)
+	mock.lockGetCommand.Unlock()
+	return mock.GetCommandFunc()
 }
 
-// CommandCalls gets all the calls that were made to Command.
+// GetCommandCalls gets all the calls that were made to GetCommand.
 // Check the length with:
 //
-//	len(mockedAlias.CommandCalls())
-func (mock *AliasMock) CommandCalls() []struct {
+//	len(mockedAlias.GetCommandCalls())
+func (mock *AliasMock) GetCommandCalls() []struct {
 } {
 	var calls []struct {
 	}
-	mock.lockCommand.RLock()
-	calls = mock.calls.Command
-	mock.lockCommand.RUnlock()
+	mock.lockGetCommand.RLock()
+	calls = mock.calls.GetCommand
+	mock.lockGetCommand.RUnlock()
 	return calls
 }
 
-// Description calls DescriptionFunc.
-func (mock *AliasMock) Description() string {
-	if mock.DescriptionFunc == nil {
-		panic("AliasMock.DescriptionFunc: method is nil but Alias.Description was just called")
+// GetDescription calls GetDescriptionFunc.
+func (mock *AliasMock) GetDescription() string {
+	if mock.GetDescriptionFunc == nil {
+		panic("AliasMock.GetDescriptionFunc: method is nil but Alias.GetDescription was just called")
 	}
 	callInfo := struct {
 	}{}
-	mock.lockDescription.Lock()
-	mock.calls.Description = append(mock.calls.Description, callInfo)
-	mock.lockDescription.Unlock()
-	return mock.DescriptionFunc()
+	mock.lockGetDescription.Lock()
+	mock.calls.GetDescription = append(mock.calls.GetDescription, callInfo)
+	mock.lockGetDescription.Unlock()
+	return mock.GetDescriptionFunc()
 }
 
-// DescriptionCalls gets all the calls that were made to Description.
+// GetDescriptionCalls gets all the calls that were made to GetDescription.
 // Check the length with:
 //
-//	len(mockedAlias.DescriptionCalls())
-func (mock *AliasMock) DescriptionCalls() []struct {
+//	len(mockedAlias.GetDescriptionCalls())
+func (mock *AliasMock) GetDescriptionCalls() []struct {
 } {
 	var calls []struct {
 	}
-	mock.lockDescription.RLock()
-	calls = mock.calls.Description
-	mock.lockDescription.RUnlock()
+	mock.lockGetDescription.RLock()
+	calls = mock.calls.GetDescription
+	mock.lockGetDescription.RUnlock()
+	return calls
+}
+
+// GetName calls GetNameFunc.
+func (mock *AliasMock) GetName() string {
+	if mock.GetNameFunc == nil {
+		panic("AliasMock.GetNameFunc: method is nil but Alias.GetName was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockGetName.Lock()
+	mock.calls.GetName = append(mock.calls.GetName, callInfo)
+	mock.lockGetName.Unlock()
+	return mock.GetNameFunc()
+}
+
+// GetNameCalls gets all the calls that were made to GetName.
+// Check the length with:
+//
+//	len(mockedAlias.GetNameCalls())
+func (mock *AliasMock) GetNameCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockGetName.RLock()
+	calls = mock.calls.GetName
+	mock.lockGetName.RUnlock()
 	return calls
 }
 
@@ -147,32 +174,5 @@ func (mock *AliasMock) IsShellCalls() []struct {
 	mock.lockIsShell.RLock()
 	calls = mock.calls.IsShell
 	mock.lockIsShell.RUnlock()
-	return calls
-}
-
-// Name calls NameFunc.
-func (mock *AliasMock) Name() string {
-	if mock.NameFunc == nil {
-		panic("AliasMock.NameFunc: method is nil but Alias.Name was just called")
-	}
-	callInfo := struct {
-	}{}
-	mock.lockName.Lock()
-	mock.calls.Name = append(mock.calls.Name, callInfo)
-	mock.lockName.Unlock()
-	return mock.NameFunc()
-}
-
-// NameCalls gets all the calls that were made to Name.
-// Check the length with:
-//
-//	len(mockedAlias.NameCalls())
-func (mock *AliasMock) NameCalls() []struct {
-} {
-	var calls []struct {
-	}
-	mock.lockName.RLock()
-	calls = mock.calls.Name
-	mock.lockName.RUnlock()
 	return calls
 }

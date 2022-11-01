@@ -93,11 +93,9 @@ func (e *Extension) Aliases() ([]extensions.Alias, error) {
 				return nil, jErr
 			}
 
-			for _, alias := range ext.Aliases {
-
-				if alias.Name() != "" && alias.Command() != "" {
-					alias.source = ""
-					aliases = append(aliases, &alias)
+			for i, alias := range ext.Aliases {
+				if alias.GetName() != "" && alias.GetCommand() != "" {
+					aliases = append(aliases, &ext.Aliases[i])
 				}
 			}
 		}

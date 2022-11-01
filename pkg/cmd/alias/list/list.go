@@ -116,8 +116,8 @@ func printExtensionAliases(w io.Writer, cs *iostreams.ColorScheme, title string,
 	aliasSet := make(map[string]extensions.Alias)
 	keys := []string{}
 	for _, alias := range aliases {
-		keys = append(keys, alias.Name())
-		aliasSet[alias.Name()] = alias
+		keys = append(keys, alias.GetName())
+		aliasSet[alias.GetName()] = alias
 	}
 	sort.Strings(keys)
 
@@ -125,7 +125,7 @@ func printExtensionAliases(w io.Writer, cs *iostreams.ColorScheme, title string,
 
 	// TODO: Change to json writer
 	for _, alias := range keys {
-		_, err := fmt.Fprintf(w, "%s: %s\n", cs.CyanBold(alias), aliasSet[alias].Command())
+		_, err := fmt.Fprintf(w, "%s: %s\n", cs.CyanBold(alias), aliasSet[alias].GetCommand())
 		if err != nil {
 			return err
 		}

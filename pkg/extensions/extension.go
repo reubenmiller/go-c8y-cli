@@ -34,9 +34,9 @@ type Extension interface {
 
 //go:generate moq -rm -out alias_mock.go . Alias
 type Alias interface {
-	Command() string
-	Name() string
-	Description() string
+	GetCommand() string
+	GetName() string
+	GetDescription() string
 	IsShell() bool
 }
 

@@ -108,8 +108,38 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"go.uber.org/zap/zapcore"
 )
+
+func extractUnknownArgs(flags *pflag.FlagSet, args []string) []string {
+	unknownArgs := []string{}
+
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		var f *pflag.Flag
+		if a[0] == '-' {
+			if a[1] == '-' {
+				f = flags.Lookup(strings.SplitN(a[2:], "=", 2)[0])
+			} else {
+				for _, s := range a[1:] {
+					f = flags.ShorthandLookup(string(s))
+					if f == nil {
+						break
+					}
+				}
+			}
+		}
+		if f != nil {
+			if f.NoOptDefVal == "" && i+1 < len(args) && f.Value.String() == args[i+1] {
+				i++
+			}
+			continue
+		}
+		unknownArgs = append(unknownArgs, a)
+	}
+	return unknownArgs
+}
 
 type CmdRoot struct {
 	*cobra.Command
@@ -424,7 +454,47 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.AddCommand(aliasCmd.NewCmdAlias(f))
 	cmd.AddCommand(apiCmd.NewSubCommand(f).GetCommand())
 
-	// Handle errors (not in cobra libary)
+	// Add sub commands for the extensions
+	for _, ext := range f.ExtensionManager().List() {
+		extCmd := cobra.Command{
+			Use:                ext.Name(),
+			Short:              fmt.Sprintf("Extension %s", ext.Name()),
+			FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+			DisableFlagParsing: true,
+			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+				names := []string{}
+				if len(args) > 0 {
+					return names, cobra.ShellCompDirectiveNoFileComp
+				}
+				if localCommands, err := ext.Commands(); err == nil {
+					for _, c := range localCommands {
+						names = append(names, c.Name())
+					}
+				}
+				return names, cobra.ShellCompDirectiveNoFileComp
+			},
+			RunE: func(cmd *cobra.Command, args []string) error {
+				// Remove known global
+				// Check if these should be used or should all known and unknown arguments be passed
+				// as is
+				// Otherwise the global flags could be converted to environment variables
+				delegatedArgs := args
+				if false {
+					delegatedArgs = extractUnknownArgs(cmd.Flags(), args)
+				}
+
+				extArgs := []string{
+					ext.Name(),
+				}
+				extArgs = append(extArgs, delegatedArgs...)
+				_, err := f.ExtensionManager().Dispatch(extArgs, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
+				return err
+			},
+		}
+		cmd.AddCommand(&extCmd)
+	}
+
+	// Handle errors (not in cobra library)
 	cmd.SilenceErrors = true
 
 	ccmd.Command = cmd
