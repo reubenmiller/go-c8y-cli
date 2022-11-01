@@ -455,41 +455,46 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.AddCommand(apiCmd.NewSubCommand(f).GetCommand())
 
 	// Add sub commands for the extensions
-	for _, ext := range f.ExtensionManager().List() {
+	extensions := f.ExtensionManager().List()
+	for i, ext := range extensions {
 		extCmd := cobra.Command{
 			Use:                ext.Name(),
 			Short:              fmt.Sprintf("Extension %s", ext.Name()),
 			FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 			DisableFlagParsing: true,
-			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				names := []string{}
-				if len(args) > 0 {
+			ValidArgsFunction: func(j int) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+				return func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+					names := []string{}
+					if len(args) > 0 {
+						return names, cobra.ShellCompDirectiveNoFileComp
+					}
+					if localCommands, err := extensions[j].Commands(); err == nil {
+						for _, c := range localCommands {
+							names = append(names, c.Name())
+						}
+					}
 					return names, cobra.ShellCompDirectiveNoFileComp
 				}
-				if localCommands, err := ext.Commands(); err == nil {
-					for _, c := range localCommands {
-						names = append(names, c.Name())
+			}(i),
+			RunE: func(j int) func(cmd *cobra.Command, args []string) error {
+				return func(cmd *cobra.Command, args []string) error {
+					// Remove known global
+					// Check if these should be used or should all known and unknown arguments be passed
+					// as is
+					// Otherwise the global flags could be converted to environment variables
+					delegatedArgs := args
+					if false {
+						delegatedArgs = extractUnknownArgs(cmd.Flags(), args)
 					}
-				}
-				return names, cobra.ShellCompDirectiveNoFileComp
-			},
-			RunE: func(cmd *cobra.Command, args []string) error {
-				// Remove known global
-				// Check if these should be used or should all known and unknown arguments be passed
-				// as is
-				// Otherwise the global flags could be converted to environment variables
-				delegatedArgs := args
-				if false {
-					delegatedArgs = extractUnknownArgs(cmd.Flags(), args)
-				}
 
-				extArgs := []string{
-					ext.Name(),
+					extArgs := []string{
+						extensions[j].Name(),
+					}
+					extArgs = append(extArgs, delegatedArgs...)
+					_, err := f.ExtensionManager().Dispatch(extArgs, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
+					return err
 				}
-				extArgs = append(extArgs, delegatedArgs...)
-				_, err := f.ExtensionManager().Dispatch(extArgs, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
-				return err
-			},
+			}(i),
 		}
 		cmd.AddCommand(&extCmd)
 	}
