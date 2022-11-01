@@ -56,7 +56,7 @@ func Test_ExtensionGetViews(t *testing.T) {
 func Test_ExtensionInstallFromURL(t *testing.T) {
 	cmd := setupTest()
 	cmdtext := `
-		extension install https://Enercon@dev.azure.com/Enercon/EC-P1D/_git/ec-p1d-iot-c8y-cli
+		extension install https://github.com/reubenmiller/iot-project-c8y-cli
 	`
 	err := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 	assert.OK(t, err)
