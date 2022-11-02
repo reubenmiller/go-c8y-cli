@@ -457,6 +457,10 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// Add sub commands for the extensions
 	extensions := f.ExtensionManager().List()
 	for i, ext := range extensions {
+		extCommands, _ := ext.Commands()
+		if len(extCommands) == 0 {
+			continue
+		}
 		extCmd := cobra.Command{
 			Use:                ext.Name(),
 			Short:              fmt.Sprintf("Extension %s", ext.Name()),
@@ -470,7 +474,9 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 					}
 					if localCommands, err := extensions[j].Commands(); err == nil {
 						for _, c := range localCommands {
-							names = append(names, c.Name())
+							if c.Command() != "" {
+								names = append(names, c.Name())
+							}
 						}
 					}
 					return names, cobra.ShellCompDirectiveNoFileComp

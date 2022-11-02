@@ -3,6 +3,7 @@ package extension
 import (
 	"encoding/json"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -108,21 +109,25 @@ func (e *Extension) Commands() ([]extensions.Command, error) {
 	path := filepath.Join(e.path, commandsName)
 	commands := make([]extensions.Command, 0)
 
-	dirs, err := os.ReadDir(path)
-	if err != nil {
-		return commands, err
-	}
-
-	for _, dir := range dirs {
-		if !dir.IsDir() {
+	err := filepath.Walk(path, func(ipath string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
 			commands = append(commands, &Command{
-				name:    filepath.Base(dir.Name()),
-				command: dir.Name(),
+				name:    filepath.Base(ipath),
+				command: "",
+			})
+		} else {
+			commands = append(commands, &Command{
+				name:    filepath.Base(ipath),
+				command: ipath,
 			})
 		}
-	}
+		return nil
+	})
 
-	return commands, nil
+	return commands, err
 }
 
 func (e *Extension) TemplatePath() string {
