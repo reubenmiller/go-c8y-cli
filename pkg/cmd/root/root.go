@@ -455,6 +455,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.AddCommand(apiCmd.NewSubCommand(f).GetCommand())
 
 	// Add sub commands for the extensions
+	// TODO: How to efficiently add a dynamic command only when it is required
 	extensions := f.ExtensionManager().List()
 	for i, ext := range extensions {
 		extCommands, _ := ext.Commands()
@@ -469,27 +470,33 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			ValidArgsFunction: func(j int) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 				return func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 					names := []string{}
-					if len(args) > 0 {
-						return names, cobra.ShellCompDirectiveNoFileComp
-					}
+					cArgs := strings.Join(args, " ")
+					options := make(map[string]string)
 					if localCommands, err := extensions[j].Commands(); err == nil {
 						for _, c := range localCommands {
-							if c.Command() != "" {
-								names = append(names, c.Name())
+							if strings.HasPrefix(c.Name(), cArgs) {
+								if c.Command() != "" && !strings.HasSuffix(c.Command(), ".yaml") {
+									nextPart, _, _ := strings.Cut(strings.TrimSpace(strings.TrimPrefix(c.Name(), strings.Join(args, " "))), " ")
+									if nextPart != "" {
+										options[nextPart] = fmt.Sprintf("%s\t%s", nextPart, "Command")
+									}
+								}
 							}
 						}
+					}
+					for _, v := range options {
+						names = append(names, v)
 					}
 					return names, cobra.ShellCompDirectiveNoFileComp
 				}
 			}(i),
 			RunE: func(j int) func(cmd *cobra.Command, args []string) error {
 				return func(cmd *cobra.Command, args []string) error {
-					// Remove known global
 					// Check if these should be used or should all known and unknown arguments be passed
-					// as is
-					// Otherwise the global flags could be converted to environment variables
+					// as is otherwise the global flags could be converted to environment variables
 					delegatedArgs := args
 					if false {
+						// Remove known global
 						delegatedArgs = extractUnknownArgs(cmd.Flags(), args)
 					}
 
@@ -497,11 +504,28 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 						extensions[j].Name(),
 					}
 					extArgs = append(extArgs, delegatedArgs...)
+
+					// TODO: how to determine how many args are part of the command
+					// and how many are options args
 					_, err := f.ExtensionManager().Dispatch(extArgs, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
 					return err
 				}
 			}(i),
 		}
+
+		// for _, iCmd := range extCommands {
+		// 	if strings.HasSuffix(iCmd.Command(), ".yaml") {
+		// 		if file, err := os.Open(iCmd.Command()); err == nil {
+		// 			defer file.Close()
+		// 			subCmd, subCmdErr := cmdparser.ParseCommand(file)
+
+		// 			if subCmdErr == nil {
+		// 				extCmd.AddCommand(subCmd)
+		// 			}
+		// 		}
+		// 	}
+		// }
+
 		cmd.AddCommand(&extCmd)
 	}
 

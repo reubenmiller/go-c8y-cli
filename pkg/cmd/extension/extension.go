@@ -113,14 +113,9 @@ func (e *Extension) Commands() ([]extensions.Command, error) {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() {
+		if !info.IsDir() {
 			commands = append(commands, &Command{
-				name:    filepath.Base(ipath),
-				command: "",
-			})
-		} else {
-			commands = append(commands, &Command{
-				name:    filepath.Base(ipath),
+				name:    strings.TrimSpace(strings.ReplaceAll(strings.TrimPrefix(ipath, path), "/", " ")),
 				command: ipath,
 			})
 		}

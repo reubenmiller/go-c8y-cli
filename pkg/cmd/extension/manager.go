@@ -77,27 +77,60 @@ func (m *Manager) Dispatch(args []string, stdin io.Reader, stdout, stderr io.Wri
 	var exe string
 	extName := args[0]
 
-	subCommand := ""
-	if len(args) > 1 {
-		subCommand = args[1]
-	}
+	// subCommand := ""
+	// if len(args) > 1 {
+	// 	subCommand = args[1]
+	// }
 	forwardArgs := []string{}
-	if len(args) > 2 {
-		forwardArgs = append(forwardArgs, args[2:]...)
-	}
+	// if len(args) > 2 {
+	// 	forwardArgs = append(forwardArgs, args[2:]...)
+	// }
+
+	// TODO: Detect which part is the extension and which part is the command
+	cArgs := strings.Join(args[1:], " ")
 
 	exts, _ := m.list(false)
 	var ext Extension
+	found := false
 	for _, e := range exts {
 		if e.Name() == extName {
-			ext = e
-			if ext.IsBinary() {
-				exe = filepath.Join(ext.Path())
-			} else {
-				exe = filepath.Join(ext.Path(), commandsName, subCommand)
+
+			if commands, cmdErr := e.Commands(); cmdErr == nil {
+				for _, c := range commands {
+					if strings.HasPrefix(cArgs, c.Name()) {
+						ext = e
+
+						if ext.IsBinary() {
+							exe = filepath.Join(ext.Path())
+						} else {
+							exe = filepath.Join(ext.Path(), commandsName)
+						}
+
+						exe = filepath.Join(append([]string{exe}, strings.Split(c.Name(), " ")...)...)
+
+						consumerArgCount := strings.Count(c.Name(), " ") + 1
+						if consumerArgCount < len(args)-1 {
+							forwardArgs = args[consumerArgCount+1:]
+						}
+						found = true
+						break
+					}
+				}
 			}
+		}
+
+		if found {
 			break
 		}
+		// if e.Name() == extName {
+		// 	ext = e
+		// 	if ext.IsBinary() {
+		// 		exe = filepath.Join(ext.Path())
+		// 	} else {
+		// 		exe = filepath.Join(ext.Path(), commandsName, subCommand)
+		// 	}
+		// 	break
+		// }
 	}
 	if exe == "" {
 		return false, nil
