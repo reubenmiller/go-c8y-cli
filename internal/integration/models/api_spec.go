@@ -17,6 +17,8 @@ type SpecificationInformation struct {
 
 type EndPoint struct {
 	Name               string       `yaml:"name"`
+	Description        string       `yaml:"description"`
+	DescriptionLong    string       `yaml:"descriptionLong"`
 	Method             string       `yaml:"method"`
 	Accept             string       `yaml:"accept,omitempty"`
 	CollectionType     string       `yaml:"collectionType,omitempty"`
