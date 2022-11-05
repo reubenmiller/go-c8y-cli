@@ -267,7 +267,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						successStr = "Would have removed"
 					}
 					cs := io.ColorScheme()
-					fmt.Fprintf(io.Out, "%s %s extension %s\n", cs.SuccessIcon(), successStr, extName)
+					fmt.Fprintf(io.Out, "%s %s extension %s\n", cs.SuccessIconWithColor(cs.Red), successStr, extName)
 				}
 				return nil
 			},
