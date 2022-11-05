@@ -178,6 +178,7 @@ func (m *Manager) list(includeMetadata bool) ([]Extension, error) {
 
 	var results []Extension
 	for _, f := range entries {
+		// TODO: Check if this filter is really needed
 		if !strings.HasPrefix(f.Name(), ExtPrefix) && !strings.Contains(f.Name(), ExtPrefix) {
 			continue
 		}
@@ -362,8 +363,10 @@ func (m *Manager) getLatestVersion(ext Extension) (string, error) {
 	}
 }
 
-func (m *Manager) InstallLocal(dir string) error {
-	name := filepath.Base(dir)
+func (m *Manager) InstallLocal(dir string, name string) error {
+	if name == "" {
+		name = filepath.Base(dir)
+	}
 	targetLink := filepath.Join(m.installDir(), name)
 	if err := os.MkdirAll(filepath.Dir(targetLink), 0755); err != nil {
 		return err
@@ -382,7 +385,7 @@ type binManifest struct {
 }
 
 // Install installs an extension from repo, and pins to commitish if provided
-func (m *Manager) Install(repo ghrepo.Interface, target string) error {
+func (m *Manager) Install(repo ghrepo.Interface, name string, target string) error {
 	if strings.Contains(repo.RepoHost(), "github") {
 		isBin, err := isBinExtension(m.client, repo)
 		if err != nil {
@@ -410,7 +413,7 @@ func (m *Manager) Install(repo ghrepo.Interface, target string) error {
 		}
 	}
 
-	return m.installGit(repo, target, m.io.Out, m.io.ErrOut)
+	return m.installGit(repo, name, target, m.io.Out, m.io.ErrOut)
 }
 
 func (m *Manager) installBin(repo ghrepo.Interface, target string) error {
@@ -513,7 +516,7 @@ func (m *Manager) installBin(repo ghrepo.Interface, target string) error {
 	return nil
 }
 
-func (m *Manager) installGit(repo ghrepo.Interface, target string, stdout, stderr io.Writer) error {
+func (m *Manager) installGit(repo ghrepo.Interface, name, target string, stdout, stderr io.Writer) error {
 	protocol := repo.RepoHost()
 	cloneURL := ghrepo.FormatRemoteURL(repo, protocol)
 
@@ -530,7 +533,9 @@ func (m *Manager) installGit(repo ghrepo.Interface, target string, stdout, stder
 		}
 	}
 
-	name := strings.TrimSuffix(path.Base(cloneURL), ".git")
+	if name == "" {
+		name = strings.TrimSuffix(path.Base(cloneURL), ".git")
+	}
 	targetDir := filepath.Join(m.installDir(), name)
 
 	externalCmd := m.newCommand(exe, "clone", cloneURL, targetDir)

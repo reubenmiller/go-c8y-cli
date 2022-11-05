@@ -28,10 +28,10 @@ var _ ExtensionManager = &ExtensionManagerMock{}
 //			EnableDryRunModeFunc: func()  {
 //				panic("mock out the EnableDryRunMode method")
 //			},
-//			InstallFunc: func(interfaceMoqParam ghrepo.Interface, s string) error {
+//			InstallFunc: func(interfaceMoqParam ghrepo.Interface, s1 string, s2 string) error {
 //				panic("mock out the Install method")
 //			},
-//			InstallLocalFunc: func(dir string) error {
+//			InstallLocalFunc: func(dir string, name string) error {
 //				panic("mock out the InstallLocal method")
 //			},
 //			ListFunc: func() []Extension {
@@ -60,10 +60,10 @@ type ExtensionManagerMock struct {
 	EnableDryRunModeFunc func()
 
 	// InstallFunc mocks the Install method.
-	InstallFunc func(interfaceMoqParam ghrepo.Interface, s string) error
+	InstallFunc func(interfaceMoqParam ghrepo.Interface, s1 string, s2 string) error
 
 	// InstallLocalFunc mocks the InstallLocal method.
-	InstallLocalFunc func(dir string) error
+	InstallLocalFunc func(dir string, name string) error
 
 	// ListFunc mocks the List method.
 	ListFunc func() []Extension
@@ -101,13 +101,17 @@ type ExtensionManagerMock struct {
 		Install []struct {
 			// InterfaceMoqParam is the interfaceMoqParam argument value.
 			InterfaceMoqParam ghrepo.Interface
-			// S is the s argument value.
-			S string
+			// S1 is the s1 argument value.
+			S1 string
+			// S2 is the s2 argument value.
+			S2 string
 		}
 		// InstallLocal holds details about calls to the InstallLocal method.
 		InstallLocal []struct {
 			// Dir is the dir argument value.
 			Dir string
+			// Name is the name argument value.
+			Name string
 		}
 		// List holds details about calls to the List method.
 		List []struct {
@@ -243,21 +247,23 @@ func (mock *ExtensionManagerMock) EnableDryRunModeCalls() []struct {
 }
 
 // Install calls InstallFunc.
-func (mock *ExtensionManagerMock) Install(interfaceMoqParam ghrepo.Interface, s string) error {
+func (mock *ExtensionManagerMock) Install(interfaceMoqParam ghrepo.Interface, s1 string, s2 string) error {
 	if mock.InstallFunc == nil {
 		panic("ExtensionManagerMock.InstallFunc: method is nil but ExtensionManager.Install was just called")
 	}
 	callInfo := struct {
 		InterfaceMoqParam ghrepo.Interface
-		S                 string
+		S1                string
+		S2                string
 	}{
 		InterfaceMoqParam: interfaceMoqParam,
-		S:                 s,
+		S1:                s1,
+		S2:                s2,
 	}
 	mock.lockInstall.Lock()
 	mock.calls.Install = append(mock.calls.Install, callInfo)
 	mock.lockInstall.Unlock()
-	return mock.InstallFunc(interfaceMoqParam, s)
+	return mock.InstallFunc(interfaceMoqParam, s1, s2)
 }
 
 // InstallCalls gets all the calls that were made to Install.
@@ -266,11 +272,13 @@ func (mock *ExtensionManagerMock) Install(interfaceMoqParam ghrepo.Interface, s 
 //	len(mockedExtensionManager.InstallCalls())
 func (mock *ExtensionManagerMock) InstallCalls() []struct {
 	InterfaceMoqParam ghrepo.Interface
-	S                 string
+	S1                string
+	S2                string
 } {
 	var calls []struct {
 		InterfaceMoqParam ghrepo.Interface
-		S                 string
+		S1                string
+		S2                string
 	}
 	mock.lockInstall.RLock()
 	calls = mock.calls.Install
@@ -279,19 +287,21 @@ func (mock *ExtensionManagerMock) InstallCalls() []struct {
 }
 
 // InstallLocal calls InstallLocalFunc.
-func (mock *ExtensionManagerMock) InstallLocal(dir string) error {
+func (mock *ExtensionManagerMock) InstallLocal(dir string, name string) error {
 	if mock.InstallLocalFunc == nil {
 		panic("ExtensionManagerMock.InstallLocalFunc: method is nil but ExtensionManager.InstallLocal was just called")
 	}
 	callInfo := struct {
-		Dir string
+		Dir  string
+		Name string
 	}{
-		Dir: dir,
+		Dir:  dir,
+		Name: name,
 	}
 	mock.lockInstallLocal.Lock()
 	mock.calls.InstallLocal = append(mock.calls.InstallLocal, callInfo)
 	mock.lockInstallLocal.Unlock()
-	return mock.InstallLocalFunc(dir)
+	return mock.InstallLocalFunc(dir, name)
 }
 
 // InstallLocalCalls gets all the calls that were made to InstallLocal.
@@ -299,10 +309,12 @@ func (mock *ExtensionManagerMock) InstallLocal(dir string) error {
 //
 //	len(mockedExtensionManager.InstallLocalCalls())
 func (mock *ExtensionManagerMock) InstallLocalCalls() []struct {
-	Dir string
+	Dir  string
+	Name string
 } {
 	var calls []struct {
-		Dir string
+		Dir  string
+		Name string
 	}
 	mock.lockInstallLocal.RLock()
 	calls = mock.calls.InstallLocal

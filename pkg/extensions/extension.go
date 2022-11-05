@@ -59,8 +59,8 @@ type View interface {
 //go:generate moq -rm -out manager_mock.go . ExtensionManager
 type ExtensionManager interface {
 	List() []Extension
-	Install(ghrepo.Interface, string) error
-	InstallLocal(dir string) error
+	Install(ghrepo.Interface, string, string) error
+	InstallLocal(dir string, name string) error
 	Upgrade(name string, force bool) error
 	Remove(name string) error
 	Dispatch(args []string, stdin io.Reader, stdout, stderr io.Writer) (bool, error)

@@ -95,6 +95,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 		},
 		func() *cobra.Command {
 			var pinFlag string
+			var nameFlag string
 			cmd := &cobra.Command{
 				Use:   "install <repository>",
 				Short: "Install a c8y extension from a repository",
@@ -131,30 +132,30 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						if err != nil {
 							return err
 						}
-						return m().InstallLocal(sourcePath)
+						return m().InstallLocal(sourcePath, nameFlag)
 					}
-					// if args[0] == "." {
-					// 	if pinFlag != "" {
-					// 		return fmt.Errorf("local extensions cannot be pinned")
-					// 	}
-					// 	wd, err := os.Getwd()
-					// 	if err != nil {
-					// 		return err
-					// 	}
-					// 	return m().InstallLocal(wd)
-					// }
 
 					repo, err := ghrepo.FromFullName(args[0])
 					if err != nil {
 						return err
 					}
 
-					if err := checkValidExtension(cmd.Root(), m(), repo.RepoName()); err != nil {
+					extName := nameFlag
+					skipNameCheck := true
+					if extName == "" {
+						extName = repo.RepoName()
+						skipNameCheck = false
+					} else {
+						if !strings.HasPrefix(extName, ExtPrefix) {
+							extName = ExtPrefix + extName
+						}
+					}
+					if err := checkValidExtension(cmd.Root(), m(), extName, skipNameCheck); err != nil {
 						return err
 					}
 
 					cs := io.ColorScheme()
-					if err := m().Install(repo, pinFlag); err != nil {
+					if err := m().Install(repo, extName, pinFlag); err != nil {
 						if errors.Is(err, releaseNotFoundErr) {
 							return fmt.Errorf("%s Could not find a release of %s for %s",
 								cs.FailureIcon(), args[0], cs.Cyan(pinFlag))
@@ -169,7 +170,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					}
 
 					if io.IsStdoutTTY() {
-						fmt.Fprintf(io.Out, "%s Installed extension %s\n", cs.SuccessIcon(), args[0])
+						fmt.Fprintf(io.Out, "%s Installed extension %s\n", cs.SuccessIcon(), extName)
 						if pinFlag != "" {
 							fmt.Fprintf(io.Out, "%s Pinned extension at %s\n", cs.SuccessIcon(), cs.Cyan(pinFlag))
 						}
@@ -178,6 +179,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				},
 			}
 			cmd.Flags().StringVar(&pinFlag, "pin", "", "pin extension to a release tag or commit ref")
+			cmd.Flags().StringVar(&nameFlag, "name", "", "use custom name for the extension")
 			return cmd
 		}(),
 		func() *cobra.Command {
@@ -415,10 +417,12 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 	return &extCmd
 }
 
-func checkValidExtension(rootCmd *cobra.Command, m extensions.ExtensionManager, extName string) error {
+func checkValidExtension(rootCmd *cobra.Command, m extensions.ExtensionManager, extName string, skipNameCheck bool) error {
 	// Allow prefix anyway in the extension name
-	if !strings.HasPrefix(extName, ExtPrefix) && !strings.Contains(extName, ExtPrefix) {
-		return fmt.Errorf("extension repository name must start with `%s`", ExtPrefix)
+	if !skipNameCheck {
+		if !strings.HasPrefix(extName, ExtPrefix) && !strings.Contains(extName, ExtPrefix) {
+			return fmt.Errorf("extension repository name must start with `%s`", ExtPrefix)
+		}
 	}
 
 	commandName := strings.TrimPrefix(extName, ExtPrefix)
