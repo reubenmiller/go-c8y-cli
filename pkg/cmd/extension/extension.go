@@ -113,7 +113,7 @@ func (e *Extension) Commands() ([]extensions.Command, error) {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() {
+		if !info.IsDir() && strings.HasPrefix(info.Name(), ".") {
 			commands = append(commands, &Command{
 				name:    strings.TrimSpace(strings.ReplaceAll(strings.TrimPrefix(ipath, path), "/", " ")),
 				command: ipath,
