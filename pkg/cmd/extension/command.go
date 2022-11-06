@@ -121,6 +121,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					return err
 				},
 				RunE: func(cmd *cobra.Command, args []string) error {
+					cfg, err := f.Config()
+					if err != nil {
+						return err
+					}
 					if fileInfo, err := os.Stat(args[0]); err == nil && fileInfo.IsDir() {
 						if pinFlag != "" {
 							return fmt.Errorf("local extensions cannot be pinned")
@@ -130,7 +134,19 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						if err != nil {
 							return err
 						}
-						return m().InstallLocal(sourcePath, nameFlag)
+
+						if err := m().InstallLocal(sourcePath, nameFlag); err != nil {
+							return err
+						}
+						if io.IsStdoutTTY() {
+							successStr := "Installed"
+							if cfg.DryRun() {
+								successStr = "Would have installed"
+							}
+							cs := io.ColorScheme()
+							fmt.Fprintf(io.Out, "%s %s extension %s\n", cs.SuccessIcon(), successStr, filepath.Base(sourcePath))
+						}
+						return nil
 					}
 
 					repo, err := ghrepo.FromFullName(args[0])
@@ -300,14 +316,14 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 			Long: heredoc.Doc(`
 				Execute an extension using the short name. For example, if the extension repository is
 				"owner/c8y-extension", you should pass "extension". You can use this command when
-				the short name conflicts with a core gh command.
+				the short name conflicts with a core c8y command.
 
 				All arguments after the extension name will be forwarded to the executable
 				of the extension.
 			`),
 			Example: heredoc.Doc(`
-				# execute a label extension instead of the core gh label command
-				$ gh extension exec label
+				# execute a label extension instead of the core c8y label command
+				$ c8y extension exec label
 			`),
 			Args: cobra.MinimumNArgs(1),
 			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -402,7 +418,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					var goBinChecks string
 
 					steps := fmt.Sprintf(
-						"- run 'cd %[1]s; gh extension install .; gh %[2]s' to see your new extension in action",
+						"- run 'cd %[1]s; c8y extension install .; c8y %[2]s list' to see your new extension in action",
 						fullName, extName)
 
 					cs := io.ColorScheme()
@@ -412,13 +428,13 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						%[1]s Built %[2]s binary
 						`, cs.SuccessIcon(), fullName)
 						steps = heredoc.Docf(`
-						- run 'cd %[1]s; gh extension install .; gh %[2]s' to see your new extension in action
-						- use 'go build && gh %[2]s' to see changes in your code as you develop`, fullName, extName)
+						- run 'cd %[1]s; c8y extension install .; c8y %[2]s' to see your new extension in action
+						- use 'go build && c8y %[2]s' to see changes in your code as you develop`, fullName, extName)
 					} else if tmplType == extensions.OtherBinTemplateType {
 						steps = heredoc.Docf(`
-						- run 'cd %[1]s; gh extension install .' to install your extension locally
+						- run 'cd %[1]s; c8y extension install .' to install your extension locally
 						- fill in script/build.sh with your compilation script for automated builds
-						- compile a %[1]s binary locally and run 'gh %[2]s' to see changes`, fullName, extName)
+						- compile a %[1]s binary locally and run 'c8y %[2]s' to see changes`, fullName, extName)
 					}
 					link := "https://docs.github.com/github-cli/github-cli/creating-github-cli-extensions"
 					out := heredoc.Docf(`

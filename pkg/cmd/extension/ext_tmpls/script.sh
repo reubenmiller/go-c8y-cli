@@ -7,7 +7,7 @@ help() {
 Example description about what your command does
 
 Usage:
-    c8y %[1]s [FLAGS]
+    c8y %[1]s %[2]s [FLAGS]
 
 Flags:
     --name <string>           Match by name

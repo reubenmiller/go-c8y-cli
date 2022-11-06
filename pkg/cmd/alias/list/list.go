@@ -27,7 +27,7 @@ func NewCmdList(f *cmdutil.Factory, runF func(*ListOptions) error) *cobra.Comman
 		Use:   "list",
 		Short: "List your aliases",
 		Long: heredoc.Doc(`
-			This command prints out all of the aliases gh is configured to use.
+			This command prints out all of the aliases c8y is configured to use.
 		`),
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {

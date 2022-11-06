@@ -757,7 +757,28 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 		return err
 	}
 
+	cmdName := strings.TrimPrefix(name, ExtPrefix)
+
 	if err := m.newCommand(exe, "init", "--quiet", name).Run(); err != nil {
+		return err
+	}
+
+	commandsDir := filepath.Join(name, commandsName)
+	if err := os.MkdirAll(commandsDir, 0755); err != nil {
+		return err
+	}
+	subCommandsDir := filepath.Join(name, commandsName, "services")
+	if err := os.MkdirAll(subCommandsDir, 0755); err != nil {
+		return err
+	}
+
+	templatesDir := filepath.Join(name, templateName)
+	if err := os.MkdirAll(templatesDir, 0755); err != nil {
+		return err
+	}
+
+	viewsDir := filepath.Join(name, viewsName)
+	if err := os.MkdirAll(viewsDir, 0755); err != nil {
 		return err
 	}
 
@@ -767,12 +788,18 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 		return m.otherBinScaffolding(exe, name)
 	}
 
-	script := fmt.Sprintf(scriptTmpl, name, "list")
-	if err := writeFile(filepath.Join(name, name), []byte(script), 0755); err != nil {
+	script := fmt.Sprintf(scriptTmpl, cmdName, "list")
+	if err := writeFile(filepath.Join(commandsDir, "list"), []byte(script), 0755); err != nil {
+		return err
+	}
+	m.newCommand(exe, "-C", name, "add", filepath.Join(commandsName, "list"), "--chmod=+x").Run()
+
+	script = fmt.Sprintf(scriptTmpl, cmdName, "services list")
+	if err := writeFile(filepath.Join(subCommandsDir, "list"), []byte(script), 0755); err != nil {
 		return err
 	}
 
-	return m.newCommand(exe, "-C", name, "add", name, "--chmod=+x").Run()
+	return m.newCommand(exe, "-C", name, "add", filepath.Join(commandsName, "services", "list"), "--chmod=+x").Run()
 }
 
 func (m *Manager) otherBinScaffolding(gitExe, name string) error {
