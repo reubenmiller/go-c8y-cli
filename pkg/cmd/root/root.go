@@ -103,43 +103,14 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 	"go.uber.org/zap/zapcore"
 )
-
-func extractUnknownArgs(flags *pflag.FlagSet, args []string) []string {
-	unknownArgs := []string{}
-
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		var f *pflag.Flag
-		if a[0] == '-' {
-			if a[1] == '-' {
-				f = flags.Lookup(strings.SplitN(a[2:], "=", 2)[0])
-			} else {
-				for _, s := range a[1:] {
-					f = flags.ShorthandLookup(string(s))
-					if f == nil {
-						break
-					}
-				}
-			}
-		}
-		if f != nil {
-			if f.NoOptDefVal == "" && i+1 < len(args) && f.Value.String() == args[i+1] {
-				i++
-			}
-			continue
-		}
-		unknownArgs = append(unknownArgs, a)
-	}
-	return unknownArgs
-}
 
 type CmdRoot struct {
 	*cobra.Command
@@ -183,7 +154,23 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		`),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			disableEncryptionCheck := !cmdutil.IsConfigEncryptionCheckEnabled(cmd)
-			if err := ccmd.Configure(disableEncryptionCheck); err != nil {
+
+			// Note: Support setting verbose/debug mode even when flag parsing
+			// is disabled so that logging still works as expected. Extensions make
+			// use of this
+			forceVerbose := false
+			forceDebug := false
+			if cmd.DisableFlagParsing {
+				for _, v := range args {
+					if v == "-v" || v == "-v=true" || v == "--verbose" || v == "--verbose=true" {
+						forceVerbose = true
+					}
+					if v == "--debug" || v == "--debug=true" {
+						forceDebug = true
+					}
+				}
+			}
+			if err := ccmd.Configure(disableEncryptionCheck, forceVerbose, forceDebug); err != nil {
 				return err
 			}
 			if notice := flags.GetDeprecationNoticeFromAnnotation(cmd); notice != "" {
@@ -457,77 +444,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// Add sub commands for the extensions
 	// TODO: How to efficiently add a dynamic command only when it is required
 	extensions := f.ExtensionManager().List()
-	for i, ext := range extensions {
-		extCommands, _ := ext.Commands()
-		if len(extCommands) == 0 {
-			continue
-		}
-		extCmd := cobra.Command{
-			Use:                ext.Name(),
-			Short:              fmt.Sprintf("Extension %s", ext.Name()),
-			FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-			DisableFlagParsing: true,
-			ValidArgsFunction: func(j int) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				return func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-					names := []string{}
-					cArgs := strings.Join(args, " ")
-					options := make(map[string]string)
-					if localCommands, err := extensions[j].Commands(); err == nil {
-						for _, c := range localCommands {
-							if strings.HasPrefix(c.Name(), cArgs) {
-								if c.Command() != "" && !strings.HasSuffix(c.Command(), ".yaml") {
-									nextPart, _, _ := strings.Cut(strings.TrimSpace(strings.TrimPrefix(c.Name(), strings.Join(args, " "))), " ")
-									if nextPart != "" {
-										options[nextPart] = fmt.Sprintf("%s\t%s", nextPart, "Command")
-									}
-								}
-							}
-						}
-					}
-					for _, v := range options {
-						names = append(names, v)
-					}
-					return names, cobra.ShellCompDirectiveNoFileComp
-				}
-			}(i),
-			RunE: func(j int) func(cmd *cobra.Command, args []string) error {
-				return func(cmd *cobra.Command, args []string) error {
-					// Check if these should be used or should all known and unknown arguments be passed
-					// as is otherwise the global flags could be converted to environment variables
-					delegatedArgs := args
-					if false {
-						// Remove known global
-						delegatedArgs = extractUnknownArgs(cmd.Flags(), args)
-					}
-
-					extArgs := []string{
-						extensions[j].Name(),
-					}
-					extArgs = append(extArgs, delegatedArgs...)
-
-					// TODO: how to determine how many args are part of the command
-					// and how many are options args
-					_, err := f.ExtensionManager().Dispatch(extArgs, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
-					return err
-				}
-			}(i),
-		}
-
-		// for _, iCmd := range extCommands {
-		// 	if strings.HasSuffix(iCmd.Command(), ".yaml") {
-		// 		if file, err := os.Open(iCmd.Command()); err == nil {
-		// 			defer file.Close()
-		// 			subCmd, subCmdErr := cmdparser.ParseCommand(file)
-
-		// 			if subCmdErr == nil {
-		// 				extCmd.AddCommand(subCmd)
-		// 			}
-		// 		}
-		// 	}
-		// }
-
-		cmd.AddCommand(&extCmd)
-	}
+	ConvertToCobraCommands(f, cmd, extensions)
 
 	// Handle errors (not in cobra library)
 	cmd.SilenceErrors = true
@@ -536,7 +453,104 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	return ccmd
 }
 
-func (c *CmdRoot) Configure(disableEncryptionCheck bool) error {
+func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions []extensions.Extension) error {
+	extCommandTree := make(map[string]*cobra.Command)
+	for _, ext := range extensions {
+		commands, _ := ext.Commands()
+		if len(commands) == 0 {
+			continue
+		}
+
+		extName := ext.Name()
+		extRoot := &cobra.Command{
+			Use:   extName,
+			Short: extName + " Extensions",
+		}
+		extCommandTree[extName] = extRoot
+
+		for _, command := range commands {
+
+			path := extName + " " + command.Name()
+			key := path
+			name := path
+			var parentCmd *cobra.Command
+			exists := false
+
+			parts := strings.Split(path, " ")
+
+			if len(parts) > 1 {
+				name = parts[len(parts)-1]
+				key = strings.Join(parts[0:len(parts)-1], " ")
+				parentName := parts[0]
+				if len(parts) > 2 {
+					parentName = parts[len(parts)-2]
+				}
+				parentCmd, exists = extCommandTree[key]
+				if !exists {
+					parentCmd = &cobra.Command{
+						Use:   parentName,
+						Short: parentName + " commands",
+					}
+					if len(parts) == 3 {
+						extRoot.AddCommand(parentCmd)
+					}
+					extCommandTree[key] = parentCmd
+				}
+
+				iCmd := &cobra.Command{
+					Use:                name,
+					Short:              name + " commands",
+					FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+					DisableFlagParsing: true,
+					RunE: func(name, exe string) func(*cobra.Command, []string) error {
+						return func(cmd *cobra.Command, args []string) error {
+							log, err := f.Logger()
+							if err != nil {
+								return err
+							}
+							log.Infof("Executing extension. name: %s, command: %s, args: %v", name, exe, args)
+							_, err = f.ExtensionManager().Execute(exe, args, false, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
+							return err
+						}
+					}(extName, command.Command()),
+				}
+
+				if parentCmd != nil {
+					parentCmd.AddCommand(iCmd)
+				}
+			} else {
+				iCmd := &cobra.Command{
+					Use:                key,
+					Short:              key + " commands",
+					FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+					DisableFlagParsing: true,
+					RunE: func(name, exe string) func(*cobra.Command, []string) error {
+						return func(cmd *cobra.Command, args []string) error {
+							log, err := f.Logger()
+							if err != nil {
+								return err
+							}
+							log.Infof("Executing extension. name: %s, command: %s, args: %v", name, exe, args)
+							_, err = f.ExtensionManager().Execute(exe, args, false, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
+							return err
+						}
+					}(extName, command.Command()),
+				}
+				extRoot.AddCommand(iCmd)
+			}
+		}
+	}
+
+	// Only add root items
+	for p, c := range extCommandTree {
+		if !strings.Contains(p, " ") {
+			cmd.AddCommand(c)
+		}
+	}
+	return nil
+}
+
+func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug bool) error {
 	cfg, err := c.Factory.Config()
 	if err != nil {
 		return err
@@ -596,10 +610,10 @@ func (c *CmdRoot) Configure(disableEncryptionCheck bool) error {
 			// mode errors
 			logOptions.Silent = false
 		} else {
-			if cfg.Verbose() {
+			if cfg.Verbose() || forceVerbose {
 				logOptions.Level = zapcore.InfoLevel
 			}
-			if cfg.Debug() {
+			if cfg.Debug() || forceDebug {
 				logOptions.Level = zapcore.DebugLevel
 			}
 		}

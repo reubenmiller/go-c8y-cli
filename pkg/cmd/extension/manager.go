@@ -77,14 +77,7 @@ func (m *Manager) Dispatch(args []string, stdin io.Reader, stdout, stderr io.Wri
 	var exe string
 	extName := args[0]
 
-	// subCommand := ""
-	// if len(args) > 1 {
-	// 	subCommand = args[1]
-	// }
 	forwardArgs := []string{}
-	// if len(args) > 2 {
-	// 	forwardArgs = append(forwardArgs, args[2:]...)
-	// }
 
 	// TODO: Detect which part is the extension and which part is the command
 	cArgs := strings.Join(args[1:], " ")
@@ -139,6 +132,36 @@ func (m *Manager) Dispatch(args []string, stdin io.Reader, stdout, stderr io.Wri
 	var externalCmd *exec.Cmd
 
 	if ext.IsBinary() || runtime.GOOS != "windows" {
+		externalCmd = m.newCommand(exe, forwardArgs...)
+	} else if runtime.GOOS == "windows" {
+		// Dispatch all extension calls through the `sh` interpreter to support executable files with a
+		// shebang line on Windows.
+		shExe, err := m.findSh()
+		if err != nil {
+			if errors.Is(err, exec.ErrNotFound) {
+				return true, errors.New("the `sh.exe` interpreter is required. Please install Git for Windows and try again")
+			}
+			return true, err
+		}
+		forwardArgs = append([]string{"-c", `command "$@"`, "--", exe}, forwardArgs...)
+		externalCmd = m.newCommand(shExe, forwardArgs...)
+	}
+	externalCmd.Stdin = stdin
+	externalCmd.Stdout = stdout
+	externalCmd.Stderr = stderr
+	return true, externalCmd.Run()
+}
+
+func (m *Manager) Execute(exe string, args []string, isBinary bool, stdin io.Reader, stdout, stderr io.Writer) (bool, error) {
+	forwardArgs := args[:]
+
+	if exe == "" {
+		return false, nil
+	}
+
+	var externalCmd *exec.Cmd
+
+	if isBinary || runtime.GOOS != "windows" {
 		externalCmd = m.newCommand(exe, forwardArgs...)
 	} else if runtime.GOOS == "windows" {
 		// Dispatch all extension calls through the `sh` interpreter to support executable files with a

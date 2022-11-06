@@ -64,6 +64,7 @@ type ExtensionManager interface {
 	Upgrade(name string, force bool) error
 	Remove(name string) error
 	Dispatch(args []string, stdin io.Reader, stdout, stderr io.Writer) (bool, error)
+	Execute(exe string, args []string, isBinary bool, stdin io.Reader, stdout, stderr io.Writer) (bool, error)
 	Create(name string, tmplType ExtTemplateType) error
 	EnableDryRunMode()
 }

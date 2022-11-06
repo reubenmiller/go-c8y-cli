@@ -28,6 +28,9 @@ var _ ExtensionManager = &ExtensionManagerMock{}
 //			EnableDryRunModeFunc: func()  {
 //				panic("mock out the EnableDryRunMode method")
 //			},
+//			ExecuteFunc: func(exe string, args []string, isBinary bool, stdin io.Reader, stdout io.Writer, stderr io.Writer) (bool, error) {
+//				panic("mock out the Execute method")
+//			},
 //			InstallFunc: func(interfaceMoqParam ghrepo.Interface, s1 string, s2 string) error {
 //				panic("mock out the Install method")
 //			},
@@ -58,6 +61,9 @@ type ExtensionManagerMock struct {
 
 	// EnableDryRunModeFunc mocks the EnableDryRunMode method.
 	EnableDryRunModeFunc func()
+
+	// ExecuteFunc mocks the Execute method.
+	ExecuteFunc func(exe string, args []string, isBinary bool, stdin io.Reader, stdout io.Writer, stderr io.Writer) (bool, error)
 
 	// InstallFunc mocks the Install method.
 	InstallFunc func(interfaceMoqParam ghrepo.Interface, s1 string, s2 string) error
@@ -97,6 +103,21 @@ type ExtensionManagerMock struct {
 		// EnableDryRunMode holds details about calls to the EnableDryRunMode method.
 		EnableDryRunMode []struct {
 		}
+		// Execute holds details about calls to the Execute method.
+		Execute []struct {
+			// Exe is the exe argument value.
+			Exe string
+			// Args is the args argument value.
+			Args []string
+			// IsBinary is the isBinary argument value.
+			IsBinary bool
+			// Stdin is the stdin argument value.
+			Stdin io.Reader
+			// Stdout is the stdout argument value.
+			Stdout io.Writer
+			// Stderr is the stderr argument value.
+			Stderr io.Writer
+		}
 		// Install holds details about calls to the Install method.
 		Install []struct {
 			// InterfaceMoqParam is the interfaceMoqParam argument value.
@@ -132,6 +153,7 @@ type ExtensionManagerMock struct {
 	lockCreate           sync.RWMutex
 	lockDispatch         sync.RWMutex
 	lockEnableDryRunMode sync.RWMutex
+	lockExecute          sync.RWMutex
 	lockInstall          sync.RWMutex
 	lockInstallLocal     sync.RWMutex
 	lockList             sync.RWMutex
@@ -243,6 +265,58 @@ func (mock *ExtensionManagerMock) EnableDryRunModeCalls() []struct {
 	mock.lockEnableDryRunMode.RLock()
 	calls = mock.calls.EnableDryRunMode
 	mock.lockEnableDryRunMode.RUnlock()
+	return calls
+}
+
+// Execute calls ExecuteFunc.
+func (mock *ExtensionManagerMock) Execute(exe string, args []string, isBinary bool, stdin io.Reader, stdout io.Writer, stderr io.Writer) (bool, error) {
+	if mock.ExecuteFunc == nil {
+		panic("ExtensionManagerMock.ExecuteFunc: method is nil but ExtensionManager.Execute was just called")
+	}
+	callInfo := struct {
+		Exe      string
+		Args     []string
+		IsBinary bool
+		Stdin    io.Reader
+		Stdout   io.Writer
+		Stderr   io.Writer
+	}{
+		Exe:      exe,
+		Args:     args,
+		IsBinary: isBinary,
+		Stdin:    stdin,
+		Stdout:   stdout,
+		Stderr:   stderr,
+	}
+	mock.lockExecute.Lock()
+	mock.calls.Execute = append(mock.calls.Execute, callInfo)
+	mock.lockExecute.Unlock()
+	return mock.ExecuteFunc(exe, args, isBinary, stdin, stdout, stderr)
+}
+
+// ExecuteCalls gets all the calls that were made to Execute.
+// Check the length with:
+//
+//	len(mockedExtensionManager.ExecuteCalls())
+func (mock *ExtensionManagerMock) ExecuteCalls() []struct {
+	Exe      string
+	Args     []string
+	IsBinary bool
+	Stdin    io.Reader
+	Stdout   io.Writer
+	Stderr   io.Writer
+} {
+	var calls []struct {
+		Exe      string
+		Args     []string
+		IsBinary bool
+		Stdin    io.Reader
+		Stdout   io.Writer
+		Stderr   io.Writer
+	}
+	mock.lockExecute.RLock()
+	calls = mock.calls.Execute
+	mock.lockExecute.RUnlock()
 	return calls
 }
 
