@@ -767,7 +767,7 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 		return m.otherBinScaffolding(exe, name)
 	}
 
-	script := fmt.Sprintf(scriptTmpl, name)
+	script := fmt.Sprintf(scriptTmpl, name, "list")
 	if err := writeFile(filepath.Join(name, name), []byte(script), 0755); err != nil {
 		return err
 	}
