@@ -374,7 +374,7 @@ func (m *Manager) getLatestVersion(ext Extension) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		extDir := filepath.Dir(ext.path)
+		extDir := ext.path
 		gitDir := "--git-dir=" + filepath.Join(extDir, ".git")
 		cmd := m.newCommand(gitExe, gitDir, "ls-remote", "origin", "HEAD")
 		lsRemote, err := cmd.Output()
