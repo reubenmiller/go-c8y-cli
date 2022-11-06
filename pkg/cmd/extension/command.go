@@ -349,7 +349,8 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return extName, -1, err
 				}
-				options := []string{"Script (Bash, Ruby, Python, etc)", "Go", "Other Precompiled (C++, Rust, etc)"}
+				// options := []string{"Script (Bash, Ruby, Python, etc)", "Go", "Other Precompiled (C++, Rust, etc)"}
+				options := []string{"Script (Bash, Ruby, Python, etc)"}
 
 				extTmplType, err := prompt.Select("What kind of extension?", options, options[0])
 
@@ -367,12 +368,6 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 
 					# Create a script-based extension
 					c8y extension create foobar
-
-					# Create a Go extension
-					c8y extension create --precompiled=go foobar
-
-					# Create a non-Go precompiled extension
-					c8y extension create --precompiled=other foobar
 				`),
 				Args: cobra.MaximumNArgs(1),
 				RunE: func(cmd *cobra.Command, args []string) error {
@@ -446,7 +441,8 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 
 						%[4]s
 						%[5]s
-						- commit and use 'gh repo create' to share your extension with others
+						- commit and push your code to a git repository to share your extension with others.
+						  To share on github you can use the 'gh' command: 'gh repo create'
 
 						For more information on writing extensions:
 						%[3]s
@@ -455,7 +451,8 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					return nil
 				},
 			}
-			cmd.Flags().StringVar(&flagType, "precompiled", "", "Create a precompiled extension. Possible values: go, other")
+			// FUTURE: Support other types of extensions in the future
+			// cmd.Flags().StringVar(&flagType, "precompiled", "", "Create a precompiled extension. Possible values: go, other")
 			completion.WithOptions(
 				cmd,
 				completion.MarkLocalFlag(),
