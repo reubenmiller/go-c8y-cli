@@ -464,7 +464,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 		extName := ext.Name()
 		extRoot := &cobra.Command{
 			Use:   extName,
-			Short: extName + " Extensions",
+			Short: extName + " extension",
 		}
 		extCommandTree[extName] = extRoot
 
@@ -489,7 +489,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 				if !exists {
 					parentCmd = &cobra.Command{
 						Use:   parentName,
-						Short: parentName + " commands",
+						Short: fmt.Sprintf("%s command group", parentName),
 					}
 					if len(parts) == 3 {
 						extRoot.AddCommand(parentCmd)
@@ -499,7 +499,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 
 				iCmd := &cobra.Command{
 					Use:                name,
-					Short:              name + " commands",
+					Short:              fmt.Sprintf("Run %s command", name),
 					FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 					DisableFlagParsing: true,
 					RunE: func(name, exe string) func(*cobra.Command, []string) error {
@@ -521,7 +521,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 			} else {
 				iCmd := &cobra.Command{
 					Use:                key,
-					Short:              key + " commands",
+					Short:              fmt.Sprintf("%s command group", key),
 					FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 					DisableFlagParsing: true,
 					RunE: func(name, exe string) func(*cobra.Command, []string) error {
