@@ -1,7 +1,6 @@
 package extension
 
 import (
-	"encoding/json"
 	"io"
 	"io/fs"
 	"os"
@@ -9,10 +8,11 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
+	"gopkg.in/yaml.v3"
 )
 
 const manifestName = "manifest.yml"
-const fileAlias = "extension.json"
+const fileAlias = "extension.yaml"
 const templateName = "templates"
 const viewsName = "views"
 const commandsName = "commands"
@@ -37,7 +37,7 @@ type Extension struct {
 }
 
 type ExtensionFile struct {
-	Aliases []AliasExtension `json:"aliases,omitempty"`
+	Aliases []AliasExtension `json:"aliases,omitempty" yaml:"aliases,omitempty"`
 }
 
 func (e *Extension) Name() string {
@@ -90,7 +90,7 @@ func (e *Extension) Aliases() ([]extensions.Alias, error) {
 	if file, err := os.Open(path); err == nil {
 		if b, bErr := io.ReadAll(file); bErr == nil {
 			ext := &ExtensionFile{}
-			if jErr := json.Unmarshal(b, ext); jErr != nil {
+			if jErr := yaml.Unmarshal(b, ext); jErr != nil {
 				return nil, jErr
 			}
 

@@ -1,0 +1,19 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "customDevice",
+            "priority": 400,
+            "fragments": ["c8y_IsDevice"],
+            "columns": [
+                "id",
+                "name",
+                "type",
+                "owner",
+                "lastUpdated",
+                "c8y_Availability.status",
+                "c8y_Connection.status"
+            ]
+        }
+    ]
+}

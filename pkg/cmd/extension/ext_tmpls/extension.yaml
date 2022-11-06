@@ -1,0 +1,13 @@
+version: "v1"
+aliases:
+  - name: lookup
+    description: Pretty print inventory managed object
+    command: |
+      identity get --name "$1"
+    shell: false
+  
+  - name: customCommand
+    description: Example description
+    command: |
+      c8y devices list --type "myType"
+    shell: true

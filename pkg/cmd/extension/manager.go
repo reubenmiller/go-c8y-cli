@@ -748,6 +748,18 @@ var otherBinWorkflow []byte
 //go:embed ext_tmpls/script.sh
 var scriptTmpl string
 
+//go:embed ext_tmpls/README.md
+var readmeTmpl string
+
+//go:embed ext_tmpls/extension.yaml
+var exampleExtensionManifest []byte
+
+//go:embed ext_tmpls/customCommand.jsonnet
+var exampleJsonnet []byte
+
+//go:embed ext_tmpls/exampleDevice.json
+var exampleView []byte
+
 //go:embed ext_tmpls/buildScript.sh
 var buildScript []byte
 
@@ -760,6 +772,15 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 	cmdName := strings.TrimPrefix(name, ExtPrefix)
 
 	if err := m.newCommand(exe, "init", "--quiet", name).Run(); err != nil {
+		return err
+	}
+
+	if err := writeFile(filepath.Join(name, "extension.yaml"), exampleExtensionManifest, 0755); err != nil {
+		return err
+	}
+
+	readme := fmt.Sprintf(readmeTmpl, name)
+	if err := writeFile(filepath.Join(name, "README.md"), []byte(readme), 0755); err != nil {
 		return err
 	}
 
@@ -776,9 +797,15 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 	if err := os.MkdirAll(templatesDir, 0755); err != nil {
 		return err
 	}
+	if err := writeFile(filepath.Join(templatesDir, "customCommand.jsonnet"), exampleJsonnet, 0755); err != nil {
+		return err
+	}
 
 	viewsDir := filepath.Join(name, viewsName)
 	if err := os.MkdirAll(viewsDir, 0755); err != nil {
+		return err
+	}
+	if err := writeFile(filepath.Join(viewsDir, "exampleDevice.json"), exampleView, 0755); err != nil {
 		return err
 	}
 
@@ -798,8 +825,10 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 	if err := writeFile(filepath.Join(subCommandsDir, "list"), []byte(script), 0755); err != nil {
 		return err
 	}
+	m.newCommand(exe, "-C", name, "add", filepath.Join(commandsName, "services", "list"), "--chmod=+x").Run()
 
-	return m.newCommand(exe, "-C", name, "add", filepath.Join(commandsName, "services", "list"), "--chmod=+x").Run()
+	// stage remaining files
+	return m.newCommand(exe, "-C", name, "add", "**").Run()
 }
 
 func (m *Manager) otherBinScaffolding(gitExe, name string) error {

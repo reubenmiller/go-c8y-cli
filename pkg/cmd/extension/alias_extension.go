@@ -1,11 +1,11 @@
 package extension
 
 type AliasExtension struct {
-	Source      string `json:"-"`
-	Name        string `json:"name,omitempty"`
-	Command     string `json:"command,omitempty"`
-	Description string `json:"description,omitempty"`
-	Shell       bool   `json:"shell"`
+	Source      string `json:"-" yaml:"-"`
+	Name        string `json:"name,omitempty" yaml:"name,omitempty"`
+	Command     string `json:"command,omitempty" yaml:"command,omitempty"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+	Shell       bool   `json:"shell" yaml:"shell"`
 }
 
 func (a *AliasExtension) GetCommand() string {
