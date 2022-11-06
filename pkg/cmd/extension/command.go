@@ -12,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/ghrepo"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/git"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
@@ -27,16 +28,16 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 
 	extCmd := cobra.Command{
 		Use:   "extension",
-		Short: "Manage gh extensions",
+		Short: "Manage c8y extensions",
 		Long: heredoc.Docf(`
-			GitHub CLI extensions are repositories that provide additional gh commands.
+			GitHub CLI extensions are repositories that provide additional c8y commands.
 
 			The name of the extension repository must start with "c8y-" and it must contain an
 			executable of the same name. All arguments passed to the %[1]sc8y <extname>%[1]s invocation
 			will be forwarded to the %[1]sc8y-<extname>%[1]s executable of the extension.
 
 			An extension cannot override any of the core c8y commands. If an extension name conflicts
-			with a core gh command you can use %[1]sc8y extension exec <extname>%[1]s.
+			with a core c8y command you can use %[1]sc8y extension exec <extname>%[1]s.
 
 			See the list of available extensions at <https://github.com/topics/c8y-extension>.
 		`, "`"),
@@ -54,9 +55,6 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				if len(cmds) == 0 {
 					return cmderrors.NewSystemError("no installed extensions found")
 				}
-				// cs := io.ColorScheme()
-
-				// TODO: Add table printer
 				cfg, err := f.Config()
 
 				if err != nil {
@@ -180,6 +178,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 			}
 			cmd.Flags().StringVar(&pinFlag, "pin", "", "pin extension to a release tag or commit ref")
 			cmd.Flags().StringVar(&nameFlag, "name", "", "use custom name for the extension")
+			completion.WithOptions(
+				cmd,
+				completion.MarkLocalFlag(),
+			)
 			return cmd
 		}(),
 		func() *cobra.Command {
@@ -187,6 +189,14 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 			cmd := &cobra.Command{
 				Use:   "upgrade {<name> | --all}",
 				Short: "Upgrade installed extensions",
+				ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+					cmds := m().List()
+					names := []string{}
+					for _, c := range cmds {
+						names = append(names, c.Name())
+					}
+					return names, cobra.ShellCompDirectiveNoFileComp
+				},
 				Args: func(cmd *cobra.Command, args []string) error {
 					if len(args) == 0 && !flagAll {
 						return cmderrors.NewUserError("specify an extension to upgrade or `--all`")
@@ -241,12 +251,24 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				},
 			}
 			cmd.Flags().BoolVar(&flagAll, "all", false, "Upgrade all extensions")
+			completion.WithOptions(
+				cmd,
+				completion.MarkLocalFlag(),
+			)
 			return cmd
 		}(),
 		&cobra.Command{
 			Use:   "delete <name>",
 			Short: "Remove an installed extension",
 			Args:  cobra.ExactArgs(1),
+			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+				cmds := m().List()
+				names := []string{}
+				for _, c := range cmds {
+					names = append(names, c.Name())
+				}
+				return names, cobra.ShellCompDirectiveNoFileComp
+			},
 			RunE: func(cmd *cobra.Command, args []string) error {
 				cfg, cfgErr := f.Config()
 				if cfgErr != nil {
@@ -287,7 +309,15 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				# execute a label extension instead of the core gh label command
 				$ gh extension exec label
 			`),
-			Args:               cobra.MinimumNArgs(1),
+			Args: cobra.MinimumNArgs(1),
+			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+				cmds := m().List()
+				names := []string{}
+				for _, c := range cmds {
+					names = append(names, c.Name())
+				}
+				return names, cobra.ShellCompDirectiveNoFileComp
+			},
 			DisableFlagParsing: true,
 			RunE: func(cmd *cobra.Command, args []string) error {
 				if found, err := m().Dispatch(args, io.In, io.Out, io.ErrOut); !found {
@@ -317,16 +347,16 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				Short: "Create a new extension",
 				Example: heredoc.Doc(`
 					# Use interactively
-					gh extension create
+					c8y extension create
 
 					# Create a script-based extension
-					gh extension create foobar
+					c8y extension create foobar
 
 					# Create a Go extension
-					gh extension create --precompiled=go foobar
+					c8y extension create --precompiled=go foobar
 
 					# Create a non-Go precompiled extension
-					gh extension create --precompiled=other foobar
+					c8y extension create --precompiled=other foobar
 				`),
 				Args: cobra.MaximumNArgs(1),
 				RunE: func(cmd *cobra.Command, args []string) error {
@@ -410,6 +440,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				},
 			}
 			cmd.Flags().StringVar(&flagType, "precompiled", "", "Create a precompiled extension. Possible values: go, other")
+			completion.WithOptions(
+				cmd,
+				completion.MarkLocalFlag(),
+			)
 			return cmd
 		}(),
 	)
