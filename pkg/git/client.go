@@ -16,65 +16,9 @@ import (
 	"sync"
 
 	"github.com/cli/safeexec"
-	"github.com/reubenmiller/go-c8y-cli/v2/internal/run"
 )
 
 var remoteRE = regexp.MustCompile(`(.+)\s+(.+)\s+\((push|fetch)\)`)
-
-// ErrNotOnAnyBranch indicates that the user is in detached HEAD state.
-var ErrNotOnAnyBranch = errors.New("git: not on any branch")
-
-type NotInstalled struct {
-	message string
-	err     error
-}
-
-func (e *NotInstalled) Error() string {
-	return e.message
-}
-
-func (e *NotInstalled) Unwrap() error {
-	return e.err
-}
-
-type GitError struct {
-	stderr string
-	err    error
-}
-
-func (ge *GitError) Error() string {
-	stderr := ge.stderr
-	if stderr == "" {
-		var exitError *exec.ExitError
-		if errors.As(ge.err, &exitError) {
-			stderr = string(exitError.Stderr)
-		}
-	}
-	if stderr == "" {
-		return fmt.Sprintf("failed to run git: %v", ge.err)
-	}
-	return fmt.Sprintf("failed to run git: %s", stderr)
-}
-
-func (ge *GitError) Unwrap() error {
-	return ge.err
-}
-
-type gitCommand struct {
-	*exec.Cmd
-}
-
-// This is a hack in order to not break the hundreds of
-// existing tests that rely on `run.PrepareCmd` to be invoked.
-func (gc *gitCommand) Run() error {
-	return run.PrepareCmd(gc.Cmd).Run()
-}
-
-// This is a hack in order to not break the hundreds of
-// existing tests that rely on `run.PrepareCmd` to be invoked.
-func (gc *gitCommand) Output() ([]byte, error) {
-	return run.PrepareCmd(gc.Cmd).Output()
-}
 
 type Client struct {
 	GhPath  string
@@ -84,7 +28,7 @@ type Client struct {
 	Stdin   io.Reader
 	Stdout  io.Writer
 
-	commandContext func(ctx context.Context, name string, args ...string) *exec.Cmd
+	commandContext commandCtx
 	mu             sync.Mutex
 }
 
@@ -112,29 +56,10 @@ func (c *Client) Command(ctx context.Context, args ...string) (*gitCommand, erro
 	return &gitCommand{cmd}, nil
 }
 
-func resolveGitPath() (string, error) {
-	path, err := safeexec.LookPath("git")
-	if err != nil {
-		if errors.Is(err, exec.ErrNotFound) {
-			programName := "git"
-			if runtime.GOOS == "windows" {
-				programName = "Git for Windows"
-			}
-			return "", &NotInstalled{
-				message: fmt.Sprintf("unable to find git executable in PATH; please install %s before retrying", programName),
-				err:     err,
-			}
-		}
-		return "", err
-	}
-	return path, nil
-}
-
 // AuthenticatedCommand is a wrapper around Command that included configuration to use gh
 // as the credential helper for git.
 func (c *Client) AuthenticatedCommand(ctx context.Context, args ...string) (*gitCommand, error) {
-	preArgs := []string{}
-	preArgs = append(preArgs, "-c", "credential.helper=")
+	preArgs := []string{"-c", "credential.helper="}
 	if c.GhPath == "" {
 		// Assumes that gh is in PATH.
 		c.GhPath = "gh"
@@ -153,17 +78,21 @@ func (c *Client) Remotes(ctx context.Context) (RemoteSet, error) {
 	}
 	remoteOut, remoteErr := remoteCmd.Output()
 	if remoteErr != nil {
-		return nil, &GitError{err: remoteErr}
+		return nil, remoteErr
 	}
 
-	configArgs := []string{"config", "--get-regexp", `^remote\..*\.c8y-resolved$`}
+	configArgs := []string{"config", "--get-regexp", `^remote\..*\.gh-resolved$`}
 	configCmd, err := c.Command(ctx, configArgs...)
 	if err != nil {
 		return nil, err
 	}
 	configOut, configErr := configCmd.Output()
 	if configErr != nil {
-		return nil, &GitError{err: configErr}
+		// Ignore exit code 1 as it means there are no resolved remotes.
+		var gitErr *GitError
+		if ok := errors.As(configErr, &gitErr); ok && gitErr.ExitCode != 1 {
+			return nil, gitErr
+		}
 	}
 
 	remotes := parseRemotes(outputLines(remoteOut))
@@ -172,56 +101,30 @@ func (c *Client) Remotes(ctx context.Context) (RemoteSet, error) {
 	return remotes, nil
 }
 
-func (c *Client) AddRemote(ctx context.Context, name, urlStr string, trackingBranches []string) (*Remote, error) {
-	args := []string{"remote", "add"}
-	for _, branch := range trackingBranches {
-		args = append(args, "-t", branch)
-	}
-	args = append(args, "-f", name, urlStr)
-	//TODO: Use AuthenticatedCommand
-	cmd, err := c.Command(ctx, args...)
-	if err != nil {
-		return nil, err
-	}
-	if err := cmd.Run(); err != nil {
-		return nil, err
-	}
-	var urlParsed *url.URL
-	if strings.HasPrefix(urlStr, "https") {
-		urlParsed, err = url.Parse(urlStr)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		urlParsed, err = ParseURL(urlStr)
-		if err != nil {
-			return nil, err
-		}
-	}
-	remote := &Remote{
-		Name:     name,
-		FetchURL: urlParsed,
-		PushURL:  urlParsed,
-	}
-	return remote, nil
-}
-
 func (c *Client) UpdateRemoteURL(ctx context.Context, name, url string) error {
 	args := []string{"remote", "set-url", name, url}
 	cmd, err := c.Command(ctx, args...)
 	if err != nil {
 		return err
 	}
-	return cmd.Run()
+	_, err = cmd.Output()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Client) SetRemoteResolution(ctx context.Context, name, resolution string) error {
-	args := []string{"config", "--add", fmt.Sprintf("remote.%s.c8y-resolved", name), resolution}
+	args := []string{"config", "--add", fmt.Sprintf("remote.%s.gh-resolved", name), resolution}
 	cmd, err := c.Command(ctx, args...)
 	if err != nil {
 		return err
 	}
-	return cmd.Run()
+	_, err = cmd.Output()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // CurrentBranch reads the checked-out branch for the git repository.
@@ -231,42 +134,41 @@ func (c *Client) CurrentBranch(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	errBuf := bytes.Buffer{}
-	cmd.Stderr = &errBuf
 	out, err := cmd.Output()
 	if err != nil {
-		if errBuf.Len() == 0 {
-			return "", &GitError{err: err, stderr: "not on any branch"}
+		var gitErr *GitError
+		if ok := errors.As(err, &gitErr); ok && len(gitErr.Stderr) == 0 {
+			gitErr.Stderr = "not on any branch"
+			return "", gitErr
 		}
-		return "", &GitError{err: err, stderr: errBuf.String()}
+		return "", err
 	}
 	branch := firstLine(out)
 	return strings.TrimPrefix(branch, "refs/heads/"), nil
 }
 
 // ShowRefs resolves fully-qualified refs to commit hashes.
-func (c *Client) ShowRefs(ctx context.Context, ref ...string) ([]Ref, error) {
-	args := append([]string{"show-ref", "--verify", "--"}, ref...)
+func (c *Client) ShowRefs(ctx context.Context, refs []string) ([]Ref, error) {
+	args := append([]string{"show-ref", "--verify", "--"}, refs...)
 	cmd, err := c.Command(ctx, args...)
 	if err != nil {
 		return nil, err
 	}
+	// This functionality relies on parsing output from the git command despite
+	// an error status being returned from git.
 	out, err := cmd.Output()
-	if err != nil {
-		return nil, &GitError{err: err}
-	}
-	var refs []Ref
+	var verified []Ref
 	for _, line := range outputLines(out) {
 		parts := strings.SplitN(line, " ", 2)
 		if len(parts) < 2 {
 			continue
 		}
-		refs = append(refs, Ref{
+		verified = append(verified, Ref{
 			Hash: parts[0],
 			Name: parts[1],
 		})
 	}
-	return refs, nil
+	return verified, err
 }
 
 func (c *Client) Config(ctx context.Context, name string) (string, error) {
@@ -275,15 +177,14 @@ func (c *Client) Config(ctx context.Context, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	errBuf := bytes.Buffer{}
-	cmd.Stderr = &errBuf
 	out, err := cmd.Output()
 	if err != nil {
-		var exitError *exec.ExitError
-		if ok := errors.As(err, &exitError); ok && exitError.Error() == "1" {
-			return "", &GitError{err: err, stderr: fmt.Sprintf("unknown config key %s", name)}
+		var gitErr *GitError
+		if ok := errors.As(err, &gitErr); ok && gitErr.ExitCode == 1 {
+			gitErr.Stderr = fmt.Sprintf("unknown config key %s", name)
+			return "", gitErr
 		}
-		return "", &GitError{err: err, stderr: errBuf.String()}
+		return "", err
 	}
 	return firstLine(out), nil
 }
@@ -296,7 +197,7 @@ func (c *Client) UncommittedChangeCount(ctx context.Context) (int, error) {
 	}
 	out, err := cmd.Output()
 	if err != nil {
-		return 0, &GitError{err: err}
+		return 0, err
 	}
 	lines := strings.Split(string(out), "\n")
 	count := 0
@@ -316,7 +217,7 @@ func (c *Client) Commits(ctx context.Context, baseRef, headRef string) ([]*Commi
 	}
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, &GitError{err: err}
+		return nil, err
 	}
 	commits := []*Commit{}
 	sha := 0
@@ -337,19 +238,6 @@ func (c *Client) Commits(ctx context.Context, baseRef, headRef string) ([]*Commi
 	return commits, nil
 }
 
-func (c *Client) lookupCommit(ctx context.Context, sha, format string) ([]byte, error) {
-	args := []string{"-c", "log.ShowSignature=false", "show", "-s", "--pretty=format:" + format, sha}
-	cmd, err := c.Command(ctx, args...)
-	if err != nil {
-		return nil, err
-	}
-	out, err := cmd.Output()
-	if err != nil {
-		return nil, &GitError{err: err}
-	}
-	return out, nil
-}
-
 func (c *Client) LastCommit(ctx context.Context) (*Commit, error) {
 	output, err := c.lookupCommit(ctx, "HEAD", "%H,%s")
 	if err != nil {
@@ -367,15 +255,17 @@ func (c *Client) CommitBody(ctx context.Context, sha string) (string, error) {
 	return string(output), err
 }
 
-// Push publishes a git ref to a remote and sets up upstream configuration.
-func (c *Client) Push(ctx context.Context, remote string, ref string) error {
-	args := []string{"push", "--set-upstream", remote, ref}
-	//TODO: Use AuthenticatedCommand
+func (c *Client) lookupCommit(ctx context.Context, sha, format string) ([]byte, error) {
+	args := []string{"-c", "log.ShowSignature=false", "show", "-s", "--pretty=format:" + format, sha}
 	cmd, err := c.Command(ctx, args...)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return cmd.Run()
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // ReadBranchConfig parses the `branch.BRANCH.(remote|merge)` part of git config.
@@ -420,7 +310,11 @@ func (c *Client) DeleteLocalBranch(ctx context.Context, branch string) error {
 	if err != nil {
 		return err
 	}
-	return cmd.Run()
+	_, err = cmd.Output()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Client) HasLocalBranch(ctx context.Context, branch string) bool {
@@ -429,7 +323,7 @@ func (c *Client) HasLocalBranch(ctx context.Context, branch string) bool {
 	if err != nil {
 		return false
 	}
-	err = cmd.Run()
+	_, err = cmd.Output()
 	return err == nil
 }
 
@@ -439,7 +333,11 @@ func (c *Client) CheckoutBranch(ctx context.Context, branch string) error {
 	if err != nil {
 		return err
 	}
-	return cmd.Run()
+	_, err = cmd.Output()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Client) CheckoutNewBranch(ctx context.Context, remoteName, branch string) error {
@@ -449,37 +347,11 @@ func (c *Client) CheckoutNewBranch(ctx context.Context, remoteName, branch strin
 	if err != nil {
 		return err
 	}
-	return cmd.Run()
-}
-
-func (c *Client) Pull(ctx context.Context, remote, branch string) error {
-	args := []string{"pull", "--ff-only", remote, branch}
-	//TODO: Use AuthenticatedCommand
-	cmd, err := c.Command(ctx, args...)
+	_, err = cmd.Output()
 	if err != nil {
 		return err
 	}
-	return cmd.Run()
-}
-
-func (c *Client) Clone(ctx context.Context, cloneURL string, args []string) (target string, err error) {
-	cloneArgs, target := parseCloneArgs(args)
-	cloneArgs = append(cloneArgs, cloneURL)
-	// If the args contain an explicit target, pass it to clone
-	// otherwise, parse the URL to determine where git cloned it to so we can return it
-	if target != "" {
-		cloneArgs = append(cloneArgs, target)
-	} else {
-		target = path.Base(strings.TrimSuffix(cloneURL, ".git"))
-	}
-	cloneArgs = append([]string{"clone"}, cloneArgs...)
-	//TODO: Use AuthenticatedCommand
-	cmd, err := c.Command(ctx, cloneArgs...)
-	if err != nil {
-		return "", err
-	}
-	err = cmd.Run()
-	return
+	return nil
 }
 
 // ToplevelDir returns the top-level directory path of the current repository.
@@ -491,7 +363,7 @@ func (c *Client) ToplevelDir(ctx context.Context) (string, error) {
 	}
 	out, err := cmd.Output()
 	if err != nil {
-		return "", &GitError{err: err}
+		return "", err
 	}
 	return firstLine(out), nil
 }
@@ -504,7 +376,7 @@ func (c *Client) GitDir(ctx context.Context) (string, error) {
 	}
 	out, err := cmd.Output()
 	if err != nil {
-		return "", &GitError{err: err}
+		return "", err
 	}
 	return firstLine(out), nil
 }
@@ -524,6 +396,128 @@ func (c *Client) PathFromRoot(ctx context.Context) string {
 		return path[:len(path)-1]
 	}
 	return ""
+}
+
+// Below are commands that make network calls and need authentication credentials supplied from gh.
+
+func (c *Client) Fetch(ctx context.Context, remote string, refspec string, mods ...CommandModifier) error {
+	args := []string{"fetch", remote, refspec}
+	// TODO: Use AuthenticatedCommand
+	cmd, err := c.Command(ctx, args...)
+	if err != nil {
+		return err
+	}
+	for _, mod := range mods {
+		mod(cmd)
+	}
+	return cmd.Run()
+}
+
+func (c *Client) Pull(ctx context.Context, remote, branch string, mods ...CommandModifier) error {
+	args := []string{"pull", "--ff-only", remote, branch}
+	// TODO: Use AuthenticatedCommand
+	cmd, err := c.Command(ctx, args...)
+	if err != nil {
+		return err
+	}
+	for _, mod := range mods {
+		mod(cmd)
+	}
+	return cmd.Run()
+}
+
+func (c *Client) Push(ctx context.Context, remote string, ref string, mods ...CommandModifier) error {
+	args := []string{"push", "--set-upstream", remote, ref}
+	// TODO: Use AuthenticatedCommand
+	cmd, err := c.Command(ctx, args...)
+	if err != nil {
+		return err
+	}
+	for _, mod := range mods {
+		mod(cmd)
+	}
+	return cmd.Run()
+}
+
+func (c *Client) Clone(ctx context.Context, cloneURL string, args []string, mods ...CommandModifier) (string, error) {
+	cloneArgs, target := parseCloneArgs(args)
+	cloneArgs = append(cloneArgs, cloneURL)
+	// If the args contain an explicit target, pass it to clone otherwise,
+	// parse the URL to determine where git cloned it to so we can return it.
+	if target != "" {
+		cloneArgs = append(cloneArgs, target)
+	} else {
+		target = path.Base(strings.TrimSuffix(cloneURL, ".git"))
+	}
+	cloneArgs = append([]string{"clone"}, cloneArgs...)
+	// TODO: Use AuthenticatedCommand
+	cmd, err := c.Command(ctx, cloneArgs...)
+	if err != nil {
+		return "", err
+	}
+	for _, mod := range mods {
+		mod(cmd)
+	}
+	err = cmd.Run()
+	if err != nil {
+		return "", err
+	}
+	return target, nil
+}
+
+func (c *Client) AddRemote(ctx context.Context, name, urlStr string, trackingBranches []string, mods ...CommandModifier) (*Remote, error) {
+	args := []string{"remote", "add"}
+	for _, branch := range trackingBranches {
+		args = append(args, "-t", branch)
+	}
+	args = append(args, "-f", name, urlStr)
+	// TODO: Use AuthenticatedCommand
+	cmd, err := c.Command(ctx, args...)
+	if err != nil {
+		return nil, err
+	}
+	for _, mod := range mods {
+		mod(cmd)
+	}
+	if _, err := cmd.Output(); err != nil {
+		return nil, err
+	}
+	var urlParsed *url.URL
+	if strings.HasPrefix(urlStr, "https") {
+		urlParsed, err = url.Parse(urlStr)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		urlParsed, err = ParseURL(urlStr)
+		if err != nil {
+			return nil, err
+		}
+	}
+	remote := &Remote{
+		Name:     name,
+		FetchURL: urlParsed,
+		PushURL:  urlParsed,
+	}
+	return remote, nil
+}
+
+func resolveGitPath() (string, error) {
+	path, err := safeexec.LookPath("git")
+	if err != nil {
+		if errors.Is(err, exec.ErrNotFound) {
+			programName := "git"
+			if runtime.GOOS == "windows" {
+				programName = "Git for Windows"
+			}
+			return "", &NotInstalled{
+				message: fmt.Sprintf("unable to find git executable in PATH; please install %s before retrying", programName),
+				err:     err,
+			}
+		}
+		return "", err
+	}
+	return path, nil
 }
 
 func isFilesystemPath(p string) bool {

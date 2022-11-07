@@ -13,7 +13,7 @@ func GitCommand(args ...string) (*gitCommand, error) {
 
 func ShowRefs(ref ...string) ([]Ref, error) {
 	c := &Client{}
-	return c.ShowRefs(context.Background(), ref...)
+	return c.ShowRefs(context.Background(), ref)
 }
 
 func CurrentBranch() (string, error) {
