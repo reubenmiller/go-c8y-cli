@@ -1,0 +1,51 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "type": "object",
+    "definitions": {
+        "alias": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "title": "Alias name",
+                    "description": "The alias which will get expanded to a command",
+                    "minLength": 1
+                },
+                "command": {
+                    "type": "string",
+                    "title": "Alias command",
+                    "description": "The command will is run when the alias is used. The command can reference positional arguments using $1, $2 etc.",
+                    "minLength": 1
+                },
+                "description": {
+                    "type": "string",
+                    "title": "Alias description",
+                    "description": "Description about what the alias does. The text will be included in the tab completion"
+                },
+                "shell": {
+                    "type": "boolean",
+                    "title": "Shell option",
+                    "description": "Set to true if the alias should be executed in a shell",
+                    "default": false
+                }
+            }   
+        }
+    },
+    "properties":{
+        "version": {
+            "type": "string",
+            "title": "Extension version",
+            "description": "Extension version. Reserved for future use",
+            "default": "v1"
+        },
+        "aliases": {
+            "type": "array",
+            "title": "Aliases",
+            "description": "Custom aliases which are included in the extension",
+            "minItems": 0,
+            "items": {
+                "$ref": "#/definitions/alias"
+            }
+        }
+    }
+}
