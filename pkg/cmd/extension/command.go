@@ -310,39 +310,6 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				return nil
 			},
 		},
-		&cobra.Command{
-			Use:   "exec <name> [args]",
-			Short: "Execute an installed extension",
-			Long: heredoc.Doc(`
-				Execute an extension using the short name. For example, if the extension repository is
-				"owner/c8y-extension", you should pass "extension". You can use this command when
-				the short name conflicts with a core c8y command.
-
-				All arguments after the extension name will be forwarded to the executable
-				of the extension.
-			`),
-			Example: heredoc.Doc(`
-				# execute a label extension instead of the core c8y label command
-				$ c8y extension exec label
-			`),
-			Args: cobra.MinimumNArgs(1),
-			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-				cmds := m().List()
-				names := []string{}
-				for _, c := range cmds {
-					names = append(names, c.Name())
-				}
-				return names, cobra.ShellCompDirectiveNoFileComp
-			},
-			DisableFlagParsing: true,
-			RunE: func(cmd *cobra.Command, args []string) error {
-				if found, err := m().Dispatch(args, io.In, io.Out, io.ErrOut); !found {
-					return fmt.Errorf("extension %q not found", args[0])
-				} else {
-					return err
-				}
-			},
-		},
 		func() *cobra.Command {
 			promptCreate := func() (string, extensions.ExtTemplateType, error) {
 				extName, err := prompter.Input("Extension name", "", true, false)
