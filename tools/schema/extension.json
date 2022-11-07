@@ -9,18 +9,21 @@
                     "type": "string",
                     "title": "Alias name",
                     "description": "The alias which will get expanded to a command",
+                    "default": "do-something",
                     "minLength": 1
                 },
                 "command": {
                     "type": "string",
                     "title": "Alias command",
                     "description": "The command will is run when the alias is used. The command can reference positional arguments using $1, $2 etc.",
+                    "default": "inventory find --type myTest --name \"$1\"",
                     "minLength": 1
                 },
                 "description": {
                     "type": "string",
                     "title": "Alias description",
-                    "description": "Description about what the alias does. The text will be included in the tab completion"
+                    "description": "Description about what the alias does. The text will be included in the tab completion",
+                    "default": "Example command",
                 },
                 "shell": {
                     "type": "boolean",
@@ -28,7 +31,12 @@
                     "description": "Set to true if the alias should be executed in a shell",
                     "default": false
                 }
-            }   
+            },
+            "required": [
+                "name",
+                "command",
+                "description"
+            ]
         }
     },
     "properties":{
