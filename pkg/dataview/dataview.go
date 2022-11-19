@@ -95,7 +95,9 @@ func (v *DataView) LoadDefinitions() error {
 		}
 
 		if stat, err := os.Stat(path); err != nil {
-			v.Logger.Debugf("Skipping view path because it does not exist. path=%s, error=%s", path, err)
+			if extName == "" {
+				v.Logger.Debugf("Skipping view path because it does not exist. path=%s, error=%s", path, err)
+			}
 			continue
 		} else if !stat.IsDir() {
 			v.Logger.Debugf("Skipping view path because it is not a folder. path=%s", path)
