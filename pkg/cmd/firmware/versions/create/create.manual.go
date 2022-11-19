@@ -42,6 +42,9 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 
 			$ c8y firmware versions create --firmware "linux-os1" --version "1.0.0" --url "https://blob.azure.com/device-firmare/1.0.0/image.mender"
 			Create a new version with an external URL and link it to the existing "linux-os1" firmware
+
+			$ c8y firmware versions create --firmware 12345
+			Create a new version with an empty version number and url
 			`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
