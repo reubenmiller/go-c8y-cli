@@ -64,6 +64,8 @@ func (i *CumulocityQueryIterator) GetNext() (line []byte, input interface{}, err
 			if len(line) > 0 {
 				queryParts = append(queryParts, UnescapeValue(format, string(line)))
 			}
+		default:
+			queryParts = append(queryParts, UnescapeValue(format, fmt.Sprintf("%v", value)))
 		}
 	}
 

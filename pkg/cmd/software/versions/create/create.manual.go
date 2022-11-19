@@ -134,6 +134,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithStaticStringValue("c8y_Software.version", ""),
+		flags.WithStaticStringValue("c8y_Software.url", ""),
 		flags.WithDataFlagValue(),
 		flags.WithVersion("file", "version", "c8y_Software.version"),
 		flags.WithStringValue("url", "c8y_Software.url"),

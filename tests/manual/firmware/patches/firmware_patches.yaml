@@ -2,3 +2,12 @@ tests:
     It can create/update/delete a firmware patch:
         command: ./manual/firmware/patches/crud.sh
         exit-code: 0
+
+    It creates firmware patch with a blank version:
+        command: |
+            c8y firmware patches create --firmware 1234 --dependencyVersion "1.2.3" --dry |
+                c8y util show --select method,body -o json -c
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"body":{"c8y_Firmware":{"url":"","version":""},"c8y_Global":{},"c8y_Patch":{"dependency":"1.2.3"},"type":"c8y_FirmwareBinary"},"method":"POST"}

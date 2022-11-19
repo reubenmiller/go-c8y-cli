@@ -1,4 +1,0 @@
-tests:
-    It can create/update/delete a firmware version:
-        command: ./manual/firmware/versions/crud.sh
-        exit-code: 0

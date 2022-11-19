@@ -1,0 +1,13 @@
+tests:
+    It can create/update/delete a firmware version:
+        command: ./manual/firmware/versions/crud.sh
+        exit-code: 0
+
+    It creates firmware version with a blank version:
+        command: |
+            c8y firmware versions create --firmware 1234 --dry |
+                c8y util show --select method,body -o json -c
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"body":{"c8y_Firmware":{"url":"","version":""},"c8y_Global":{},"type":"c8y_FirmwareBinary"},"method":"POST"}
