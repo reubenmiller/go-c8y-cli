@@ -45,17 +45,17 @@ Send a configuration file to multiple devices
         [string]
         $Description,
 
-        # Configuration type
+        # Configuration type. Leave blank to automatically set it if a matching configuration is found in the c8y configuration repository
         [Parameter()]
         [string]
         $ConfigurationType,
 
-        # Url to the configuration
+        # Url to the configuration. Leave blank to automatically set it if a matching configuration is found in the c8y configuration repository
         [Parameter()]
         [string]
         $Url,
 
-        # Configuration file (managedObject) id
+        # Configuration name or id
         [Parameter()]
         [object[]]
         $Configuration

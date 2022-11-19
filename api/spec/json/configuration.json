@@ -541,28 +541,28 @@
           "type": "string",
           "property": "c8y_DownloadConfigFile.type",
           "required": false,
-          "description": "Configuration type"
+          "description": "Configuration type. Leave blank to automatically set it if a matching configuration is found in the c8y configuration repository"
         },
         {
           "name": "url",
           "type": "string",
           "property": "c8y_DownloadConfigFile.url",
           "required": false,
-          "description": "Url to the configuration"
+          "description": "Url to the configuration. Leave blank to automatically set it if a matching configuration is found in the c8y configuration repository"
         },
         {
           "name": "configuration",
           "type": "[]configuration",
           "property": "__tmp_configuration",
           "required": false,
-          "description": "Configuration file (managedObject) id"
+          "description": "Configuration name or id"
         },
         {
           "name": "configurationDetails",
           "type": "configurationDetails",
           "position": 98,
           "property": "c8y_DownloadConfigFile",
-          "description": "Computed parameter which is filled in when the configuration details, type and url"
+          "description": "Computed parameter which is used to set the url and configuration type parameters"
         },
         {
           "name": "data",

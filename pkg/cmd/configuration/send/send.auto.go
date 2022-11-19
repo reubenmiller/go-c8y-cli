@@ -63,9 +63,9 @@ Send a custom configuration by manually providing the type and url
 
 	cmd.Flags().StringSlice("device", []string{""}, "Identifies the target device on which this operation should be performed. (accepts pipeline)")
 	cmd.Flags().String("description", "", "Text description of the operation.")
-	cmd.Flags().String("configurationType", "", "Configuration type")
-	cmd.Flags().String("url", "", "Url to the configuration")
-	cmd.Flags().StringSlice("configuration", []string{""}, "Configuration file (managedObject) id")
+	cmd.Flags().String("configurationType", "", "Configuration type. Leave blank to automatically set it if a matching configuration is found in the c8y configuration repository")
+	cmd.Flags().String("url", "", "Url to the configuration. Leave blank to automatically set it if a matching configuration is found in the c8y configuration repository")
+	cmd.Flags().StringSlice("configuration", []string{""}, "Configuration name or id")
 
 	completion.WithOptions(
 		cmd,
