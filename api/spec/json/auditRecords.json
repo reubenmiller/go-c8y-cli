@@ -127,11 +127,13 @@
           "description": "Additional properties of the audit record."
         }
       ],
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": false,
-        "template": "{time: _.Now('0s')}"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": false,
+          "template": "{time: _.Now('0s')}"
+        }
+      ],
       "bodyRequiredKeys": [
         "activity",
         "source.id",

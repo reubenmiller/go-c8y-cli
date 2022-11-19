@@ -284,10 +284,10 @@ endpoints:
       - name: data
         type: json
         description: List of measurement fragments.
-    bodyTemplate:
-      type: jsonnet
-      applyLast: false
-      template: "{time: _.Now('0s')}" 
+    bodyTemplates:
+      - type: jsonnet
+        applyLast: false
+        template: "{time: _.Now('0s')}" 
     bodyRequiredKeys:
       - "type"
       - "time"

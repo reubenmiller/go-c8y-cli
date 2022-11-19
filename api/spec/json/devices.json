@@ -514,11 +514,13 @@
           }
         ]
       },
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": true,
-        "template": "{c8y_IsDevice: {}}"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": true,
+          "template": "{c8y_IsDevice: {}}"
+        }
+      ],
       "body": [
         {
           "name": "name",

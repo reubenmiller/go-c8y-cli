@@ -207,10 +207,10 @@ endpoints:
         - description: Create a smart group which is not visible in the UI
           command: c8y smartgroups create --name mySmartGroup --query "type eq 'IS*'" --invisible
 
-    bodyTemplate:
-      type: jsonnet
-      applyLast: true
-      template: "{type: 'c8y_DynamicGroup', c8y_DeviceQueryString: '', c8y_IsDynamicGroup: {}}"
+    bodyTemplates:
+      - type: jsonnet
+        applyLast: true
+        template: "{type: 'c8y_DynamicGroup', c8y_DeviceQueryString: '', c8y_IsDynamicGroup: {}}"
 
     body:
       - name: name

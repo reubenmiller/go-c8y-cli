@@ -128,6 +128,10 @@
             "c8yfetcher.WithSoftwareVersionData(client, `"software`", `"version`", `"url`", args, `"`", `"${queryParam}`"$FormatValue),"
         ) -join "`n"
 
+        "configurationDetails" = @(
+            "c8yfetcher.WithConfigurationFileData(client, `"configuration`", `"configurationType`", `"url`", args, `"`", `"${queryParam}`"$FormatValue),"
+        ) -join "`n"
+
         # software name
         "softwareName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
         

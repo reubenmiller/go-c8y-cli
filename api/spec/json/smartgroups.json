@@ -280,11 +280,13 @@
           }
         ]
       },
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": true,
-        "template": "{type: 'c8y_DynamicGroup', c8y_DeviceQueryString: '', c8y_IsDynamicGroup: {}}"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": true,
+          "template": "{type: 'c8y_DynamicGroup', c8y_DeviceQueryString: '', c8y_IsDynamicGroup: {}}"
+        }
+      ],
       "body": [
         {
           "name": "name",

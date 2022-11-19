@@ -893,6 +893,83 @@ func WithFirmwarePatchByNameFirstMatch(client *c8y.Client, args []string, opts .
 	}
 }
 
+// WithConfigurationFileData adds configuration information (type, url etc.)
+func WithConfigurationFileData(client *c8y.Client, flagConfiguration, flagConfigurationType, flagURL string, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		var err error
+		configuration := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagConfiguration); err == nil && len(v) > 0 {
+			configuration = v[0]
+		}
+
+		configurationType := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagConfigurationType); err == nil && len(v) > 0 {
+			configurationType = v[0]
+		}
+
+		url := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagURL); err == nil && len(v) > 0 {
+			url = v[0]
+		}
+
+		_, dst, _ := flags.UnpackGetterOptions("", opts...)
+
+		output := map[string]string{}
+
+		// If version is empty, or all values are provided, then pass the values as is
+		if configuration == "" && configurationType != "" && url != "" {
+			output["type"] = configurationType
+			output["url"] = url
+			output["name"] = configuration
+			return dst, output, nil
+		}
+
+		// Check for explicit managed object id
+		if IsID(configuration) {
+			mo, _, err := client.Inventory.GetManagedObject(WithDisabledDryRunContext(client), configuration, &c8y.ManagedObjectOptions{
+				WithParents: true,
+			})
+
+			if err != nil {
+				return "", "", err
+			}
+
+			output["type"] = mo.Item.Get("configurationType").String()
+			output["url"] = mo.Item.Get("url").String()
+			output["name"] = mo.Item.Get("name").String()
+
+			return dst, output, nil
+		}
+
+		// Lookup version (and software if not already resolved)
+		query := fmt.Sprintf("type eq 'c8y_ConfigurationDump' and name eq '%s'", configuration)
+		if configurationType != "" {
+			query += fmt.Sprintf(" and configurationType eq '%s'", configurationType)
+		}
+		col, _, err := client.Inventory.GetManagedObjects(
+			WithDisabledDryRunContext(client),
+			&c8y.ManagedObjectOptions{
+				Query:             query,
+				WithParents:       false,
+				PaginationOptions: *c8y.NewPaginationOptions(5),
+			},
+		)
+		if err != nil {
+			return "", "", err
+		}
+
+		if len(col.ManagedObjects) == 0 {
+			return "", "", cmderrors.NewNoMatchesFoundError(flagConfiguration)
+		}
+
+		output["type"] = col.Items[0].Get("configurationType").String()
+		output["url"] = col.Items[0].Get("url").String()
+		output["name"] = col.Items[0].Get("name").String()
+
+		return dst, output, err
+	}
+}
+
 // WithConfigurationByNameFirstMatch add reference by name matching for configuration via cli args. Only the first match will be used
 func WithConfigurationByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {

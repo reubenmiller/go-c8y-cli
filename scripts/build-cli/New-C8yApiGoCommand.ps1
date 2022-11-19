@@ -331,28 +331,30 @@
         #
         # Apply a body template to the data
         #
-        if ($Specification.bodyTemplate) {
-            switch ($Specification.bodyTemplate.type) {
-                "jsonnet" {
-                    # ApplyLast: true == apply template to the existing json (potentially overriding values)
-                    #            false == Use template as base json, and the existing json will take precendence
-                    if ($Specification.bodyTemplate.applyLast -eq "true") {
-                        $null = $RESTBodyBuilderOptions.AppendLine("flags.WithRequiredTemplateString(```n{0}``)," -f @(
-                            $Specification.bodyTemplate.template
-                        ))
-                        
-                    } else {
-                        $null = $RESTBodyBuilderOptions.AppendLine("flags.WithDefaultTemplateString(```n{0}``)," -f @(
-                            $Specification.bodyTemplate.template
-                        ))
+        if ($Specification.bodyTemplates) {    
+            foreach ($BodyTemplate in $Specification.bodyTemplates) {
+                switch ($BodyTemplate.type) {
+                    "jsonnet" {
+                        # ApplyLast: true == apply template to the existing json (potentially overriding values)
+                        #            false == Use template as base json, and the existing json will take precendence
+                        if ($BodyTemplate.applyLast -eq "true") {
+                            $null = $RESTBodyBuilderOptions.AppendLine("flags.WithRequiredTemplateString(```n{0}``)," -f @(
+                                $BodyTemplate.template
+                            ))
+                            
+                        } else {
+                            $null = $RESTBodyBuilderOptions.AppendLine("flags.WithDefaultTemplateString(```n{0}``)," -f @(
+                                $BodyTemplate.template
+                            ))
+                        }
+    
                     }
-
-                }
-                "none" {
-                    # Do nothing
-                }
-                default {
-                    Write-Warning ("Unsupported templating type [{0}]" -f $Specification.bodyTemplate.type)
+                    "none" {
+                        # Do nothing
+                    }
+                    default {
+                        Write-Warning ("Unsupported templating type [{0}]" -f $BodyTemplate.type)
+                    }
                 }
             }
         }
@@ -360,7 +362,7 @@
         #
         # Add support for user defined templates to control body
         #
-        if ($Specification.bodyTemplate.type -ne "none") {
+        if ($Specification.bodyTemplates.type -ne "none") {
             $null = $RESTBodyBuilderOptions.AppendLine("cmdutil.WithTemplateValue(cfg),")
             $null = $RESTBodyBuilderOptions.AppendLine("flags.WithTemplateVariablesValue(),")
         }

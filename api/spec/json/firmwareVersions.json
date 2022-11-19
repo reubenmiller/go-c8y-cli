@@ -442,10 +442,12 @@
         "c8y_Firmware.name",
         "c8y_Firmware.version"
       ],
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "template": "{\n  _version:: if std.objectHas(self.c8y_Firmware, 'version') then self.c8y_Firmware.version else '',\n  description:\n    ('Update firmware to: \"%s\"' % self.c8y_Firmware.name)\n    + (if self._version != \"\" then \" (%s)\" % self._version else \"\")\n}\n"
-      }
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "template": "{\n  _version:: if std.objectHas(self.c8y_Firmware, 'version') then self.c8y_Firmware.version else '',\n  description:\n    ('Update firmware to: \"%s\"' % self.c8y_Firmware.name)\n    + (if self._version != \"\" then \" (%s)\" % self._version else \"\")\n}\n"
+        }
+      ]
     }
   ]
 }

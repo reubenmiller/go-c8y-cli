@@ -241,11 +241,13 @@
           "description": "Additional properties of the alarm."
         }
       ],
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": false,
-        "template": "{time: _.Now('0s')}"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": false,
+          "template": "{time: _.Now('0s')}"
+        }
+      ],
       "bodyRequiredKeys": [
         "type",
         "text",

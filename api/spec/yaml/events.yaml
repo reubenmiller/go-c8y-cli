@@ -247,10 +247,10 @@ endpoints:
       - name: data
         type: json
         description: Additional properties of the event.
-    bodyTemplate:
-      type: jsonnet
-      applyLast: false
-      template: "{time: _.Now('0s')}"
+    bodyTemplates:
+      - type: jsonnet
+        applyLast: false
+        template: "{time: _.Now('0s')}"
     bodyRequiredKeys:
       - "type"
       - "text"
@@ -467,8 +467,8 @@ endpoints:
         required: true
         pipeline: true
         description: Event id
-    bodyTemplate:
-        type: none
+    bodyTemplates:
+      - type: none
     bodyContent:
         type: binary
     body:

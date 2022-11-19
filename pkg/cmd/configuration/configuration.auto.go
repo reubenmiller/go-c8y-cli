@@ -5,6 +5,7 @@ import (
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration/delete"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration/get"
 	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration/list"
+	cmdSend "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration/send"
 	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration/update"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -30,6 +31,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdConfiguration {
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
 	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
+	cmd.AddCommand(cmdSend.NewSendCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
