@@ -176,7 +176,7 @@ func (n *SendCmd) RunE(cmd *cobra.Command, args []string) error {
   c8y_DownloadConfigFile+: {name:: null},
 }
 `),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory, cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("deviceId"),
 	)
