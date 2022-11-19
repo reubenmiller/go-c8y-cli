@@ -476,46 +476,50 @@
       ]
     },
     {
-      "name": "installConfiguration",
-      "skip": true,
+      "name": "sendConfiguration",
       "method": "POST",
       "path": "devicecontrol/operations",
       "accept": "application/vnd.com.nsn.cumulocity.operation+json",
-      "description": "Apply the configuration to a device via an operation",
-      "descriptionLong": "Create a new operation to apply a configuration to an agent or device",
+      "description": "Send configuration to a device via an operation",
+      "descriptionLong": "Create a new operation to send configuration to an agent or device.\n\nIf you provide the reference to the configuration (via id or name), then the configuration's\nurl and type will be automatically added to the operation.\n\nYou may also manually set the url and configurationType rather than looking up the configuration\nfile in the configuration repository.\n",
       "examples": {
         "powershell": [
           {
-            "description": "Create operation for a device",
-            "beforeEach": [
-              "$device = New-TestAgent"
-            ],
-            "command": "New-Operation -Device $device.id -Description \"Restart device\" -Data @{ c8y_Restart = @{} }",
-            "afterEach": [
-              "Remove-ManagedObject -Id $device.id"
-            ]
+            "description": "Send a configuration file to a device",
+            "command": "Send-Configuration -Device mydevice -Configuration 12345",
+            "skipTest": true
           },
           {
-            "description": "Create operation for a device (using pipeline)",
-            "beforeEach": [
-              "$device = New-TestAgent"
-            ],
-            "command": "Get-Device $device.id | New-Operation -Description \"Restart device\" -Data @{ c8y_Restart = @{} }",
-            "afterEach": [
-              "Remove-ManagedObject -Id $device.id"
-            ]
+            "description": "Send a configuration file to multiple devices",
+            "command": "Get-DeviceCollection | Send-Configuration -Configuration 12345",
+            "skipTest": true
           }
         ],
         "go": [
           {
-            "description": "Create operation for a device",
-            "command": "c8y operations create --device 12345 --data \"c8y_Restart={}\""
+            "description": "Send a configuration file to a device",
+            "command": "c8y configuration send --device mydevice --configuration 12345",
+            "skipTest": true
+          },
+          {
+            "description": "Send a configuration file to multiple devices",
+            "command": "c8y devices list | c8y configuration send --configuration 12345",
+            "skipTest": true
+          },
+          {
+            "description": "Send a configuration file (by name) to multiple devices",
+            "command": "c8y devices list | c8y configuration send --configuration my-config-name",
+            "skipTest": true
+          },
+          {
+            "description": "Send a custom configuration by manually providing the type and url",
+            "command": "c8y configuration send --device 12345 --configurationType apt-lists --url \"http://example.com/myrepo.list\""
           }
         ]
       },
       "alias": {
-        "go": "install",
-        "powershell": "Install-Configuration"
+        "go": "send",
+        "powershell": "Send-Configuration"
       },
       "body": [
         {
@@ -533,10 +537,32 @@
           "description": "Text description of the operation."
         },
         {
-          "name": "configurationId",
+          "name": "configurationType",
+          "type": "string",
+          "property": "c8y_DownloadConfigFile.type",
+          "required": false,
+          "description": "Configuration type"
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "property": "c8y_DownloadConfigFile.url",
+          "required": false,
+          "description": "Url to the configuration"
+        },
+        {
+          "name": "configuration",
           "type": "[]configuration",
+          "property": "__tmp_configuration",
           "required": false,
           "description": "Configuration file (managedObject) id"
+        },
+        {
+          "name": "configurationDetails",
+          "type": "configurationDetails",
+          "position": 98,
+          "property": "c8y_DownloadConfigFile",
+          "description": "Computed parameter which is filled in when the configuration details, type and url"
         },
         {
           "name": "data",
@@ -546,6 +572,18 @@
       ],
       "bodyRequiredKeys": [
         "deviceId"
+      ],
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": false,
+          "template": "{\n  description:\n    ('Send configuration snapshot %s of configuration type %s to device' % [self.c8y_DownloadConfigFile.name, self.c8y_DownloadConfigFile.type]),\n}\n"
+        },
+        {
+          "type": "jsonnet",
+          "applyLast": true,
+          "template": "{\n  __tmp_configuration:: null,\n  c8y_DownloadConfigFile+: {name:: null},\n}\n"
+        }
       ]
     }
   ]
