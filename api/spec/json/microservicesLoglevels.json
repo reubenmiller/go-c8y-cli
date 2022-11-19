@@ -196,10 +196,12 @@
           "description": "Name of the logger: Qualified name of package or class"
         }
       ],
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "template": "{\"configuredLevel\":null}\n"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "template": "{\"configuredLevel\":null}\n"
+        }
+      ],
       "body": [
         {
           "name": "logLevel",

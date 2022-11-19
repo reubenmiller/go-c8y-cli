@@ -194,10 +194,10 @@ endpoints:
       - name: data
         type: json
         description: Additional properties describing the bulk operation which will be performed on the device group.
-    bodyTemplate:
-      type: jsonnet
-      applyLast: false
-      template: "{startDate: _.Now('300s'), creationRamp: 1.000}" 
+    bodyTemplates:
+      - type: jsonnet
+        applyLast: false
+        template: "{startDate: _.Now('300s'), creationRamp: 1.000}" 
     bodyRequiredKeys:
       - groupId
       - startDate

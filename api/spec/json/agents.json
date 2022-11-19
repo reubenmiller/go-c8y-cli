@@ -470,11 +470,13 @@
           }
         ]
       },
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": true,
-        "template": "{c8y_IsDevice: {}, com_cumulocity_model_Agent: {}}"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": true,
+          "template": "{c8y_IsDevice: {}, com_cumulocity_model_Agent: {}}"
+        }
+      ],
       "body": [
         {
           "name": "name",

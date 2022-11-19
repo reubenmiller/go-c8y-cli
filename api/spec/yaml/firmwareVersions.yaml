@@ -345,12 +345,12 @@ endpoints:
       - "c8y_Firmware.name"
       - "c8y_Firmware.version"
     
-    bodyTemplate:
-      type: jsonnet
-      template: |
-        {
-          _version:: if std.objectHas(self.c8y_Firmware, 'version') then self.c8y_Firmware.version else '',
-          description:
-            ('Update firmware to: "%s"' % self.c8y_Firmware.name)
-            + (if self._version != "" then " (%s)" % self._version else "")
-        }
+    bodyTemplates:
+      - type: jsonnet
+        template: |
+          {
+            _version:: if std.objectHas(self.c8y_Firmware, 'version') then self.c8y_Firmware.version else '',
+            description:
+              ('Update firmware to: "%s"' % self.c8y_Firmware.name)
+              + (if self._version != "" then " (%s)" % self._version else "")
+          }

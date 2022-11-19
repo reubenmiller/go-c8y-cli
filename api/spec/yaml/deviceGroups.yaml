@@ -295,10 +295,10 @@ endpoints:
         - description: Create device group with custom properties
           command: c8y devicegroups create --name mygroup --data "custom_value1=1234"
 
-    bodyTemplate:
-      type: jsonnet
-      applyLast: false
-      template: "{type: 'c8y_DeviceGroup', c8y_IsDeviceGroup: {}}"
+    bodyTemplates:
+      - type: jsonnet
+        applyLast: false
+        template: "{type: 'c8y_DeviceGroup', c8y_IsDeviceGroup: {}}"
 
     body:
       - name: name

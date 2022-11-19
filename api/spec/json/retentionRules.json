@@ -115,11 +115,13 @@
           "description": "Data"
         }
       ],
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": false,
-        "template": "{maximumAge: 365}"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": false,
+          "template": "{maximumAge: 365}"
+        }
+      ],
       "bodyRequiredKeys": [
         "maximumAge",
         "dataType"

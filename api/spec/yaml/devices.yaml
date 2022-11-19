@@ -388,10 +388,10 @@ endpoints:
         - description: Create device with custom properties
           command: c8y devices create --name myDevice --data "custom_value1=1234"
 
-    bodyTemplate:
-      type: jsonnet
-      applyLast: true
-      template: "{c8y_IsDevice: {}}"
+    bodyTemplates:
+      - type: jsonnet
+        applyLast: true
+        template: "{c8y_IsDevice: {}}"
 
     body:
       - name: name

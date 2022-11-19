@@ -165,10 +165,10 @@ endpoints:
         required: true
         description: 'Name of the logger: Qualified name of package or class'
     
-    bodyTemplate:
-      type: jsonnet
-      template: |
-        {"configuredLevel":null}
+    bodyTemplates:
+      - type: jsonnet
+        template: |
+          {"configuredLevel":null}
 
     body:
       - name: logLevel

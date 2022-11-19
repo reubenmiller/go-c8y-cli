@@ -212,11 +212,13 @@
           "description": "Additional properties of the configuration package."
         }
       ],
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": false,
-        "template": "{type: 'c8y_ConfigurationDump', c8y_Global:{}}"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": false,
+          "template": "{type: 'c8y_ConfigurationDump', c8y_Global:{}}"
+        }
+      ],
       "bodyRequiredKeys": [
         "type",
         "name",
