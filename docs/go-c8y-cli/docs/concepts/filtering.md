@@ -35,6 +35,8 @@ The `filter` parameter uses a query language which supports the following operat
 |dategt|match date greater than (newer) to value of (datetime/relative)|`--filter "creationTime dategt 2022-01-02T12:00"`|
 |dategte (or 'newerthan')|match date greater than (newer) or equal to value of (datetime/relative)|`--filter "creationTime dategte 2022-01-02T12:00"`|
 |version|match a version or version range|`--filter "c8y_Firmware.version version >1.0.1, <=2.0.0"`|
+|has|match when an object has a given key/property|`--filter "has name`|
+|nothas|match when an object does not have a given key/property|`--filter "nothas name`|
 
 ## Examples
 

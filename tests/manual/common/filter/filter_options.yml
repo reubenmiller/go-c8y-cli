@@ -79,3 +79,30 @@ tests:
       exactly: |
         {"value":"2.0.0"}
         {"value":""}
+
+  It supports filtering by key presence:
+    command: |
+      c8y util repeat 2 | c8y template execute --template "{value: if input.index == 1 then '2.0.0' else {nested:'item'}}" | c8y util show --filter "has value.nested" -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":{"nested":"item"}}
+
+  It supports filtering by key non-existence:
+    command: |
+      c8y util repeat 2 | c8y template execute --template "{value: if input.index == 1 then '2.0.0' else {nested:'item'}}" | c8y util show --filter "nothas value.nested" -o json
+      c8y util repeat 2 | c8y template execute --template "{value: if input.index == 1 then '2.0.0' else {nested:'item'}}" | c8y util show --filter "missing value.nested" -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2.0.0"}
+        {"value":"2.0.0"}
+
+  It supports filtering by key presence using different data types:
+    command: |
+      c8y util repeat 2 | c8y template execute --template "{value: if input.index == 1 then '2.0.0' else {nested:'item'}}" | c8y util show --filter "has value" -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2.0.0"}
+        {"value":{"nested":"item"}}
