@@ -652,7 +652,7 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 		for _, ext := range c.Factory.ExtensionManager().List() {
 			path := ext.ViewPath()
 			if path != "" {
-				viewPaths = append(viewPaths, path)
+				viewPaths = append(viewPaths, cmdutil.BuildTemplatePath(ext.Name(), path))
 			}
 		}
 
