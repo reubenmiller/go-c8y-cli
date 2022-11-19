@@ -42,6 +42,9 @@ func NewCreatePatchCmd(f *cmdutil.Factory) *CreateCmd {
 
 			$ c8y firmware patches create --firmware custom\ firmware\ 1 --dependencyVersion 2.2.0 --version 2.2.1 --file ./install.ps1
 			Create a new patch (storing the file in Cumulocity) to an existing firmware version
+
+			$ c8y firmware patches create --firmware 12345 --dependencyVersion 2.2.0
+			Create a new patch with an empty version number and url
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -140,6 +143,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithStaticStringValue("c8y_Firmware.version", ""),
+		flags.WithStaticStringValue("c8y_Firmware.url", ""),
 		flags.WithDataFlagValue(),
 		flags.WithVersion("file", "version", "c8y_Firmware.version"),
 		flags.WithStringValue("url", "c8y_Firmware.url"),

@@ -42,6 +42,9 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 
 			$ c8y software versions create --software "my-app" --version "1.0.0" --url "https://"
 			Create a new version with an external URL
+
+			$ c8y software versions create --software 12345
+			Create a new version with an empty version number and url
 			`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -134,6 +137,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithStaticStringValue("c8y_Software.version", ""),
+		flags.WithStaticStringValue("c8y_Software.url", ""),
 		flags.WithDataFlagValue(),
 		flags.WithVersion("file", "version", "c8y_Software.version"),
 		flags.WithStringValue("url", "c8y_Software.url"),

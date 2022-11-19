@@ -55,6 +55,8 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 					query.SetVariable(key, url.EscapeQueryString(val))
 				}
 			}
+		case AnyString:
+			query.SetVariable(name, string(v))
 		default:
 			strValue := fmt.Sprintf("%v", v)
 			if strValue != "" {
@@ -164,6 +166,10 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 			if v != "" {
 				err = body.Set(name, v)
 			}
+
+		case AnyString:
+			// Allow any string even empty values
+			err = body.Set(name, v)
 
 		case Template:
 			body.AppendTemplate(string(v))
@@ -353,7 +359,16 @@ func WithStaticStringValue(opts ...string) GetOption {
 		if len(opts) < 2 {
 			return "", nil, nil
 		}
-		return opts[0], opts[1], nil
+		return opts[0], AnyString(opts[1]), nil
+	}
+}
+
+func WithStaticStringValue2(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		if len(opts) < 2 {
+			return "", nil, nil
+		}
+		return opts[0], AnyString(opts[1]), nil
 	}
 }
 
@@ -843,6 +858,9 @@ func WithFilePath(opts ...string) GetOption {
 
 // RawString raw string type
 type RawString string
+
+// AnyString string type which allows also empty values
+type AnyString string
 
 // WithDataValueAdvanced adds json or shorthand json parsing with additional option to strip the Cumulocity properties from the input
 func WithDataValueAdvanced(stripCumulocityKeys bool, raw bool, opts ...string) GetOption {

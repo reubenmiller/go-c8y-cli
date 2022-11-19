@@ -35,3 +35,12 @@ tests:
       json:
         method: GET
         query: r/.*name eq '\*python\*'.*
+
+  It creates software version with a blank version:
+    command: |
+      c8y software versions create --software 1234 --dry |
+        c8y util show --select method,body -o json -c
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"c8y_Global":{},"c8y_Software":{"url":"","version":""},"type":"c8y_SoftwareBinary"},"method":"POST"}
