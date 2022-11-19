@@ -428,6 +428,9 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 		}(),
 	)
 
+	for _, cmd := range extCmd.Commands() {
+		cmdutil.DisableAuthCheck(cmd)
+	}
 	return &extCmd
 }
 
