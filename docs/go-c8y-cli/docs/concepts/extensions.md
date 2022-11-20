@@ -23,7 +23,7 @@ Example workflow
 
 ## What is an extension?
 
-An extension is a git repository which contains a files which control what the extension has to offer. The extension creator is free to choose to pick which elements are provided or not.
+An extension is a git repository which contains a files which control what the extension has to offer. The extension creator is free to pick which elements should be included.
 
 The different elements of an extension and where they are stored within the extension repository is listed below:
 
