@@ -27,7 +27,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 	prompter := prompt.NewPrompt(nil)
 
 	extCmd := cobra.Command{
-		Use:   "extension",
+		Use:   "extensions",
 		Short: "Manage c8y extensions",
 		Long: heredoc.Docf(`
 			GitHub CLI extensions are repositories that provide additional c8y commands.
@@ -36,12 +36,11 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 			executable of the same name. All arguments passed to the %[1]sc8y <extname>%[1]s invocation
 			will be forwarded to the %[1]sc8y-<extname>%[1]s executable of the extension.
 
-			An extension cannot override any of the core c8y commands. If an extension name conflicts
-			with a core c8y command you can use %[1]sc8y extension exec <extname>%[1]s.
+			An extension cannot override any of the core c8y commands.
 
 			See the list of available extensions at <https://github.com/topics/c8y-extension>.
 		`, "`"),
-		Aliases: []string{"extensions", "ext"},
+		Aliases: []string{"extension", "ext"},
 	}
 
 	extCmd.AddCommand(
@@ -96,7 +95,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 			var nameFlag string
 			cmd := &cobra.Command{
 				Use:   "install <repository>",
-				Short: "Install a c8y extension from a repository",
+				Short: "Install a c8y extensions from a repository",
 				Long: heredoc.Doc(`
 					Install a GitHub repository locally as a Cumulocity CLI extension.
 
@@ -109,9 +108,9 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					See the list of available extensions at <https://github.com/topics/c8y-extension>.
 				`),
 				Example: heredoc.Doc(`
-					$ c8y extension install owner/c8y-extension
-					$ c8y extension install https://git.example.com/owner/c8y-extension
-					$ c8y extension install .
+					$ c8y extensions install owner/c8y-extension
+					$ c8y extensions install https://git.example.com/owner/c8y-extension
+					$ c8y extensions install .
 				`),
 				Args: func(cmd *cobra.Command, args []string) error {
 					err := cobra.MinimumNArgs(1)(cmd, args)
@@ -331,10 +330,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				Short: "Create a new extension",
 				Example: heredoc.Doc(`
 					# Use interactively
-					c8y extension create
+					c8y extensions create
 
 					# Create a script-based extension
-					c8y extension create foobar
+					c8y extensions create foobar
 				`),
 				Args: cobra.MaximumNArgs(1),
 				RunE: func(cmd *cobra.Command, args []string) error {
@@ -380,7 +379,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					var goBinChecks string
 
 					steps := fmt.Sprintf(
-						"- run 'cd %[1]s; c8y extension install .; c8y %[2]s list' to see your new extension in action",
+						"- run 'cd %[1]s; c8y extensions install .; c8y %[2]s list' to see your new extension in action",
 						fullName, extName)
 
 					cs := io.ColorScheme()
@@ -390,11 +389,11 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						%[1]s Built %[2]s binary
 						`, cs.SuccessIcon(), fullName)
 						steps = heredoc.Docf(`
-						- run 'cd %[1]s; c8y extension install .; c8y %[2]s' to see your new extension in action
+						- run 'cd %[1]s; c8y extensions install .; c8y %[2]s' to see your new extension in action
 						- use 'go build && c8y %[2]s' to see changes in your code as you develop`, fullName, extName)
 					} else if tmplType == extensions.OtherBinTemplateType {
 						steps = heredoc.Docf(`
-						- run 'cd %[1]s; c8y extension install .' to install your extension locally
+						- run 'cd %[1]s; c8y extensions install .' to install your extension locally
 						- fill in script/build.sh with your compilation script for automated builds
 						- compile a %[1]s binary locally and run 'c8y %[2]s' to see changes`, fullName, extName)
 					}
