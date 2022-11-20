@@ -29,9 +29,9 @@ The different elements of an extension and where they are stored within the exte
 
 | Type | Path | Description |
 |-----------|------|-------------|
-| Aliases | extension.yaml | A convenient short commands which are easily accessible under the root command. e.g. `c8y my-alias` |
-| Commands | `commands/` | More complex commands which can be written in language you would like (e.g. bash, python etc.) which can call other commands or other tooling |
-| Templates | `templates/` | Any go-c8y-cli templates that are provided and can be referenced from the `template` flag |
+| Aliases | extension.yaml | Convenience commands which are easily accessible under the root command. e.g. `c8y my-alias` |
+| Commands | `commands/` | More complex commands which can be written in language  (e.g. bash, python etc.). The commands can call other go-c8y-cli commands or any other tooling |
+| Templates | `templates/` | Any go-c8y-cli templates that are provided and can be referenced by the `template` flag |
 | Views | `views/` | Any go-c8y-cli view definitions that are included that can be used to control which fragments are shown for which items, .e.g. show custom fragments for specific device types etc. |
 
 Below shows an example extension `c8y-myext` and a tree representation of the files associated with it.
