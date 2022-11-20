@@ -105,7 +105,7 @@ Below shows some examples of commands provided by an extension called `c8y-myext
 | `./commands/services/get` | `c8y myext services get` |
 | `./commands/list` | `c8y myext list` |
 
-The commands themselves can be written in any script-based language, e.g. `bash`, `python`, `ruby`. However they should include a [Shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) so that the correct shell interpreter can be called by the operating system.
+The commands themselves can be written in any script-based language, e.g. `bash`, `python`, `ruby` etc., however they should include a [Shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) so that the correct shell interpreter can be called by the operating system.
 
 Below is a simple example of a bash-based script.
 
@@ -121,11 +121,11 @@ Note: Make sure that your file is executable. On Unix, you can execute `chmod +x
 
 ### Templates
 
-A template can provide templates which are then accessible by the users when using the `template` flag. Templates can be useful in their own rights when using them together with the template `var("name")` syntax which enables
+An extension can provide templates which are then accessible by the users when using the `template` flag. Templates can be more useful than commands when using them together with the template `var("name")` syntax which enables the user to customize the template values via the `templateVars` flag (which is tab completed).
 
 Information about what a template is and how to create on can be found in the [Templates concept](https://goc8ycli.netlify.app/docs/concepts/templates/) page.
 
-Below show an small example of a `jsonnet` template which is for a custom operation which accepts one template variable `action`.
+Below show an small example of a `jsonnet` template which is for a custom operation which accepts one template variable called `action`.
 
 ```jsonnet title="file: ./templates/custom.operation.jsonnet"
 {
@@ -136,7 +136,7 @@ Below show an small example of a `jsonnet` template which is for a custom operat
 }
 ```
 
-The template is them accessible by using the `<EXTENSION_NAME>::` prefix.
+The template is accessible via the `template` flag and the template is prefixed with `<EXTENSION_NAME>::` (without the `c8y-` prefix).
 
 <CodeExample>
 
