@@ -95,7 +95,7 @@ c8y mo 12345
 
 ### Commands
 
-An extension can include any number of commands. The structure of the commands is based on the folder structure, so you can group commands by placing them under a sub folder. There is no limit to how many sub folders you can use, however you should keep them to under 4-5 levels so it is not annoying for users to type out.
+An extension can include any number of commands. The structure of the commands is based on the folder structure, so you can group commands by placing them under the same sub folder. There is no limit to the number of sub folders, however you should keep it under 4-5 levels so it is not annoying for users to type.
 
 Below shows some example of the folder structure and how the commands can be invoked.
 
