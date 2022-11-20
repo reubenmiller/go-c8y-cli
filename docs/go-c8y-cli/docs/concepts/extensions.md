@@ -60,13 +60,13 @@ c8y-myext/
 
 ### Aliases
 
-Aliases are defined in the `extension.yaml` file on the root level of the repository. The user can define any number of aliases, however aliases do not have any hierarchy so they should be used reserved for commands which are frequently used and are a "time saver".
+Aliases are defined in the `extension.yaml` file on the root level of the repository. The user can define any number of aliases, however aliases do not have any hierarchy so they should be reserved for commands which are frequently used and are a "time saver".
 
 The aliases should not clash with any existing values. If the alias is too specific then it might be better to leave the alias out and allow the users to specify their own session-based aliases using `c8y alias set`.
 
 Read the [Aliases concept](https://goc8ycli.netlify.app/docs/configuration/aliases/) page for more details on it.
 
-Below is an example of the `extension.yaml` file which defines one alias `mo` to pretty print a managed object given an id.
+Below is an example of an `extension.yaml` file which defines one alias called `mo`. `mo` pretty prints a managed object as json when given a managed object's id.
 
 :::note
 The example below does not use the `c8y` prefix in the command as it is a non-shell alias, meaning that the alias is not executed in an external shell. 
@@ -82,7 +82,7 @@ aliases:
     shell: false
 ```
 
-The above alias is accessible using:
+Once the extension is installe, the above alias is accessible using:
 
 <CodeExample>
 
