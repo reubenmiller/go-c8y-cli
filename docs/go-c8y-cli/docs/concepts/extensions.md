@@ -121,7 +121,7 @@ Note: Make sure that your file is executable. On Unix, you can execute `chmod +x
 
 ### Templates
 
-An extension can provide templates which are then accessible by the users when using the `template` flag. Templates can be more useful than commands when using them together with the template `var("name")` syntax which enables the user to customize the template values via the `templateVars` flag (which is tab completed).
+An extension can provide templates which are accessible when using the `template` flag. Templates can be more useful than commands when using them together with the template `var("name")` syntax which enables the user to customize the template values via the `templateVars` flag (which is tab completed).
 
 Information about what a template is and how to create on can be found in the [Templates concept](https://goc8ycli.netlify.app/docs/concepts/templates/) page.
 
