@@ -20,8 +20,8 @@
                 },
                 "fragments": {
                     "type": "array",
-                    "title": "Required fragments",
-                    "description": "The command will is run when the alias is used. The command can reference positional arguments using $1, $2 etc.",
+                    "title": "Match by fragments",
+                    "description": "List of fragments which must be present for the view to be activated. Regex is NOT supported",
                     "items": {
                         "type": "string"
                     }
@@ -29,14 +29,14 @@
                 "type": {
                     "type": "string",
                     "title": "Match by type",
-                    "description": "Match view by the given .type value",
+                    "description": "Match against the .type value. Accepts regex",
                     "default": "my_type"
                 },
                 "contentType": {
                     "type": "string",
                     "title": "Match by Content-Type header value",
                     "description": "Match against the response's Content-Type header. Accepts regex",
-                    "default": ""
+                    "default": "vnd.com.nsn.cumulocity.managedObject\\+json"
                 },
                 "self": {
                     "type": "string",
@@ -75,14 +75,15 @@
             "description": "Extension version. Reserved for future use",
             "default": "v1"
         },
-        "aliases": {
+        "definitions": {
             "type": "array",
-            "title": "Aliases",
-            "description": "Custom aliases which are included in the extension",
+            "title": "View definitions",
+            "description": "List of views where each view defines when it should be used and what it should be used to display. Views can use multiple matching definitions",
             "minItems": 0,
             "items": {
-                "$ref": "#/definitions/alias"
+                "$ref": "#/definitions/view"
             }
         }
-    }
+    },
+    "required": ["version", "definitions"]
 }
