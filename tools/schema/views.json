@@ -30,18 +30,21 @@
                     "type": "string",
                     "title": "Match by type",
                     "description": "Match against the .type value. Accepts regex",
+                    "minLength": 1,
                     "default": "my_type"
                 },
                 "contentType": {
                     "type": "string",
                     "title": "Match by Content-Type header value",
                     "description": "Match against the response's Content-Type header. Accepts regex",
+                    "minLength": 1,
                     "default": "vnd.com.nsn.cumulocity.managedObject\\+json"
                 },
                 "self": {
                     "type": "string",
                     "title": "Match by .self value",
                     "description": "Match against the response's .self property. Accepts regex",
+                    "minLength": 1,
                     "default": "tenant/tenants/\\w+/trusted-certificates/"
                 },
                 "columns": {
