@@ -748,6 +748,9 @@ var otherBinWorkflow []byte
 //go:embed ext_tmpls/script.sh
 var scriptTmpl string
 
+//go:embed ext_tmpls/script-inventory-example.sh
+var scriptInventoryTmpl string
+
 //go:embed ext_tmpls/README.md
 var readmeTmpl string
 
@@ -815,7 +818,7 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 		return m.otherBinScaffolding(exe, name)
 	}
 
-	script := fmt.Sprintf(scriptTmpl, cmdName, "list")
+	script := fmt.Sprintf(scriptInventoryTmpl, cmdName, "list")
 	if err := writeFile(filepath.Join(commandsDir, "list"), []byte(script), 0755); err != nil {
 		return err
 	}

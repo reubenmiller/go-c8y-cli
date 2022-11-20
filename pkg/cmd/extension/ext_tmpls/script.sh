@@ -9,20 +9,27 @@ Example description about what your command does
 Usage:
     c8y %[1]s %[2]s [FLAGS]
 
+$(examples)
+
 Flags:
     --name <string>           Match by name
-    --label <string>          Match by c8y_Kpi.label
-
-Examples:
-    c8y %[1]s %[2]s
-    \$ List datapoints
-
-    c8y %[1]s %[2]s --pageSize 100
-    \$ List the first 100 datapoints with a specific fragment
+    --onlyAgents              Only include managed objects with the 'com_cumulocity_model_Agent' fragment
 EOF
 }
 
-echo "Running custom %[2]s command!"
+examples () {
+  cat <<EOF
+Examples:
+    c8y %[1]s %[2]s
+    # List items
+
+    c8y %[1]s %[2]s --pageSize 100
+    # List the first 100 items
+EOF
+}
+
+# Print log messages on stderr so it does not mix with results which is generally printed on stdout
+echo "Running custom %[2]s command!" >&2
 
 # Snippets to help get started:
 
@@ -78,21 +85,21 @@ echo "Running custom %[2]s command!"
 #             )
 #             shift
 #             ;;
-#         --label)
-#             QUERY_PARTS+=(
-#                 "c8y_Kpi.label eq '$2'"
-#             )
-#             shift
-#             ;;
 #         --onlyAgents)
 #             QUERY_PARTS+=(
 #                 "has(com_cumulocity_model_Agent)"
 #             )
 #             ;;
-#         -h|--help)
-#             help
-#             exit 0
-#             ;;
+#        Support showing the help when users provide '-h' or '--help'
+#        -h|--help)
+#            help
+#            exit 0
+#            ;;
+#        # Support showing just the examples using '--examples'
+#        --examples)
+#            examples
+#            exit 0
+#            ;;
 #         *)
 #             REST_ARGS+=("$1")
 #             ;;
