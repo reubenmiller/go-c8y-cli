@@ -11,8 +11,7 @@
                 "name",
                 "type",
                 "customProperty",
-                "alias:example.with.alias",
-                "c8y_Availability.status",
+                "connAlias:c8y_Availability.status",
                 "c8y_Connection.status"
             ]
         }
