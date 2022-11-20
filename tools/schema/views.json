@@ -42,7 +42,7 @@
                     "type": "string",
                     "title": "Match by .self value",
                     "description": "Match against the response's .self property. Accepts regex",
-                    "default": ""
+                    "default": "tenant/tenants/\\w+/trusted-certificates/"
                 },
                 "columns": {
                     "type": "array",
