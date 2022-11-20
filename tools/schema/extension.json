@@ -23,7 +23,7 @@
                     "type": "string",
                     "title": "Alias description",
                     "description": "Description about what the alias does. The text will be included in the tab completion",
-                    "default": "Example command",
+                    "default": "Example command"
                 },
                 "shell": {
                     "type": "boolean",
