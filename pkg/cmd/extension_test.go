@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -64,8 +65,9 @@ func Test_ExtensionInstallFromURL(t *testing.T) {
 
 func Test_Debugging(t *testing.T) {
 	cmd := setupTest()
+	os.Setenv("C8Y_SETTINGS_EXTENSIONS_DATADIR", "$HOME/.cumulocity/global_extensions")
 	cmdtext := `
-		__complete template execute --template ec-p1d-iot-c8y-cli::op.unassignServers.jsonnet --templateVars ""
+		extension upgrade devmgmt --force
 	`
 	// __complete template execute --template c8y-simu*::*test
 	err := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
