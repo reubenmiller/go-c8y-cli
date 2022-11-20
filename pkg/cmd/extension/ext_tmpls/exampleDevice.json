@@ -1,9 +1,10 @@
 {
+    "$schema": "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/views.json",
     "version": "1",
     "definitions": [
         {
             "name": "customDevice",
-            "priority": 400,
+            "priority": 350,
             "fragments": ["c8y_IsDevice"],
             "columns": [
                 "id",
@@ -11,6 +12,7 @@
                 "type",
                 "owner",
                 "lastUpdated",
+                "customProperty",
                 "c8y_Availability.status",
                 "c8y_Connection.status"
             ]

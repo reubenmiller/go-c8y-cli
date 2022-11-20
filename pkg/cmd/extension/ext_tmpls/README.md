@@ -1,14 +1,19 @@
-# c8y-defaults
+# %[1]s
 
 go-c8y-cli extension
 
 ## What is included?
 
+:::hint
+✅ or 🔲 indicates if the extension includes the given functionality or not.
+:::
+
 |Type|Included|Notes|
 |----|:-:|-----|
 |Aliases|✅|Some useful default command like `mo <id>`|
-|Templates|🔲||
-|Views|✅|Sensible defaults showing the in-built fragments|
+|Commands|✅|Commands to manage the custom inventory managed object entities used in our IoT solution|
+|Templates|✅|Some random data templates and common operations|
+|Views|✅|Custom device and event views|
 
 ## Install
 

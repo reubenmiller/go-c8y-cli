@@ -1,0 +1,88 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "type": "object",
+    "definitions": {
+        "view": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "title": "View name",
+                    "description": "Human readable name which can be referenced by the user",
+                    "default": "myview",
+                    "minLength": 1
+                },
+                "priority": {
+                    "type": "integer",
+                    "title": "Priority",
+                    "description": "If multiple matches are found, the view with the lowest number will be used",
+                    "default": 300
+                },
+                "fragments": {
+                    "type": "array",
+                    "title": "Required fragments",
+                    "description": "The command will is run when the alias is used. The command can reference positional arguments using $1, $2 etc.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "type": "string",
+                    "title": "Match by type",
+                    "description": "Match view by the given .type value",
+                    "default": "my_type"
+                },
+                "contentType": {
+                    "type": "string",
+                    "title": "Match by Content-Type header value",
+                    "description": "Match against the response's Content-Type header. Accepts regex",
+                    "default": ""
+                },
+                "self": {
+                    "type": "string",
+                    "title": "Match by .self value",
+                    "description": "Match against the response's .self property. Accepts regex",
+                    "default": ""
+                },
+                "columns": {
+                    "type": "array",
+                    "title": "Columns to be displayed when the view is used",
+                    "description": "List of columns which will be used in the view. These can use the same syntax as the --select flag",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "default": ["id", "type", "**.id"]
+                },
+            },
+            "required": [
+                "name",
+                "priority",
+                "columns"
+            ],
+            "anyOf": [
+                {"required" : ["fragments"]},
+                {"required" : ["type"]},
+                {"required" : ["self"]},
+                {"required" : ["contentType"]}
+            ]
+        }
+    },
+    "properties":{
+        "version": {
+            "type": "string",
+            "title": "Extension version",
+            "description": "Extension version. Reserved for future use",
+            "default": "v1"
+        },
+        "aliases": {
+            "type": "array",
+            "title": "Aliases",
+            "description": "Custom aliases which are included in the extension",
+            "minItems": 0,
+            "items": {
+                "$ref": "#/definitions/alias"
+            }
+        }
+    }
+}
