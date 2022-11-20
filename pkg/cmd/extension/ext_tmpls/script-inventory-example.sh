@@ -33,7 +33,7 @@ EOF
 }
 
 # Print log messages on stderr so it does not mix with results which is generally printed on stdout
-echo "Running custom %[2]s command!" >&2
+echo "Running custom %[2]s command" >&2
 
 # Inventory query builder using
 FLAGS=()
@@ -42,7 +42,7 @@ QUERY_PARTS=()
 function join_by {
     local d=${1-} f=${2-}
     if shift 2; then
-        printf %s "$f" "${@/#/$d}"
+        printf %%s "$f" "${@/#/$d}"
     fi
 }
 
