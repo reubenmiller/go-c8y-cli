@@ -149,14 +149,13 @@ c8y operations create --device 12345 --template myext::custom.operation.jsonnet 
 
 ### Views
 
-Views allow you to custom what fragments are displayed by default. A view definition has a selection criteria which controls when the view is activated and then which columns should be used when displaying the data on the console.
+Views allow you to custom what fragments are displayed by default. A view definition has a selection criteria which controls when the view is activated and which columns are displayed on the console.
 
 Checkout the [Views concept](https://goc8ycli.netlify.app/docs/concepts/views/) page for more details.
 
+Like templates, extension views are also prefixed with `<EXTENSION_NAME>::` (without the `c8y-` prefix) to avoid name clashes amongst extensions and any user-created views.
 
-Like templates, extension views are also prefixed with `<EXTENSION_NAME>::` to avoid name clashes with different extensions and any user-created views.
-
-Views are generally automatically selected based on the criteria (and priority), but they can also be manually selected using the following syntax.
+Views are generally automatically selected based on their activation criteria (and priority), but they can also be manually activated using the global `view` flag.
 
 <CodeExample>
 
@@ -170,7 +169,7 @@ c8y operations create --device 12345 --view myext::mydevice
 
 ## How to use extensions
 
-This sections details how to interact with extensions
+This section details how to interact with extensions.
 
 ### List already installed extensions
 
@@ -191,7 +190,9 @@ c8y extensions list --raw
 
 **Prerequisites**
 
-Installing extensions requires the `git` command, as the repositories are cloned to your local file system. If you do not have git on your machine, then you also install an extension from a local folder.
+Installing extensions requires the `git` command. When an extension is installed from an external source, git is used to clone the repository to your file system. If you are cloning a private repository, then it is up to you to provide the necessary credentials when prompted. `go-c8y-cli` does not handle any of the repository authentication.
+
+If you do not have git on your machine, then you also install an extension from a local folder.
 
 Extensions can be installed from the following locations:
 
@@ -227,14 +228,14 @@ c8y myext list
 
 
 :::caution
-Never edit an extension directly from the go-c8y-cli extension folder as you will loose any unpublished changes if you call `c8y extensions delete <name>`!
+Never edit an extension directly from the `go-c8y-cli` extension folder as you will loose any unpublished changes if you call `c8y extensions delete <name>` command!
 
-Instead clone the extension manually and install it via the local directory folder. This way `go-c8y-cli` will only create a symlink to the folder, so deleting the extension will only remove the symlink and not the original folder.
+Instead clone the extension manually and install it using the filesystem path to the cloned repo. This way `go-c8y-cli` will only create a symlink to the folder, so deleting the extension will only remove the symlink and not the original folder.
 :::
 
 ### Deleting an extension
 
-An extension can be removed by using the following command.
+An extension can be removed by using the following command
 
 <CodeExample>
 
@@ -248,7 +249,7 @@ If an extension was installed via a local folder, then only the symlink to the e
 
 ### Creating
 
-To make it easier to create your own extensions, there is an in-built command which generates an extension with some examples. You can create the extension using:
+To make it easier to create your own extensions, there is an in-built command which generates an extension with some examples. You can create the extension using
 
 <CodeExample>
 
@@ -275,18 +276,18 @@ This sections shows some more advanced use-cases. It is not intended for everyon
 
 ### Set custom extensions location for a specific c8y session
 
-If you want to isolation which extensions are used for a session or a group of sessions, then you can change the setting which controls where the session looks for extensions.
+If you want to isolate which extensions are used for a specific session or a group of sessions, then you can change the setting which controls where `go-c8y-cli` looks for extensions.
 
 <CodeExample>
 
 ```bash
-# change to the session you want to change
+# 1. change to the session you want to change (if you have not already done this)
 set-session
 
-# change the extension location
+# 2. change the extension location
 c8y settings update extensions.datadir "$HOME/my_customer/extensions/"
 
-# install the extension
+# 3. install the extension
 c8y extensions install reubenmiller/c8y-example
 ```
 
