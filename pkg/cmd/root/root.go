@@ -453,8 +453,16 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	return ccmd
 }
 
+func isTabCompletionCommand() bool {
+	return strings.HasPrefix(strings.Join(os.Args[1:], ""), "__complete")
+}
+
 func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions []extensions.Extension) error {
 	extCommandTree := make(map[string]*cobra.Command)
+	// Enable flag parsing when using tab completion, otherwise disable it
+	// as it affects passing the arguments to the extension binary
+	disableFlagParsing := !isTabCompletionCommand()
+
 	for _, ext := range extensions {
 		commands, _ := ext.Commands()
 		if len(commands) == 0 {
@@ -501,7 +509,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 					Use:                name,
 					Short:              fmt.Sprintf("Run %s command", name),
 					FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-					DisableFlagParsing: true,
+					DisableFlagParsing: disableFlagParsing,
 					RunE: func(name, exe string) func(*cobra.Command, []string) error {
 						return func(cmd *cobra.Command, args []string) error {
 							log, err := f.Logger()
@@ -523,7 +531,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 					Use:                key,
 					Short:              fmt.Sprintf("%s command group", key),
 					FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-					DisableFlagParsing: true,
+					DisableFlagParsing: disableFlagParsing,
 					RunE: func(name, exe string) func(*cobra.Command, []string) error {
 						return func(cmd *cobra.Command, args []string) error {
 							log, err := f.Logger()
