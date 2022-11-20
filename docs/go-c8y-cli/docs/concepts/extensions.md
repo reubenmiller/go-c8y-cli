@@ -82,7 +82,7 @@ aliases:
     shell: false
 ```
 
-Once the extension is installe, the above alias is accessible using:
+Once the extension is installed, the above alias is accessible using:
 
 <CodeExample>
 
