@@ -144,6 +144,10 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 			true,
 		)
 
+		if domain := cfg.GetDomain(); domain != "" {
+			client.SetDomain(domain)
+		}
+
 		client.SetRequestOptions(c8y.DefaultRequestOptions{
 			DryRun: cfg.DryRun(),
 			DryRunHandler: func(options *c8y.RequestOptions, req *http.Request) {

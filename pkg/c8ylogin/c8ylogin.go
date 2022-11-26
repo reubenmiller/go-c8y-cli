@@ -172,11 +172,13 @@ func (lh *LoginHandler) sortLoginOptions() {
 		c8y.AuthMethodOAuth2Internal: 1,
 	}
 
-	if _, ok := optionOrder[lh.LoginType]; ok {
-		lh.Logger.Infof("Setting preferred login method. %s", lh.LoginType)
-		optionOrder[lh.LoginType] = 0
-	} else {
-		lh.Logger.Infof("Unsupported login method. The given option will be ignored. %s", lh.LoginType)
+	if lh.LoginType != "" {
+		if _, ok := optionOrder[lh.LoginType]; ok {
+			lh.Logger.Infof("Setting preferred login method. %s", lh.LoginType)
+			optionOrder[lh.LoginType] = 0
+		} else {
+			lh.Logger.Infof("Unsupported login method. The given option will be ignored. %s", lh.LoginType)
+		}
 	}
 
 	// sort login options

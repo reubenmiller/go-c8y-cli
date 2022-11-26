@@ -109,6 +109,10 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	}
 	cfg.Logger.Debugf("selected session file: %s", sessionFile)
 	if sessionFile != "" {
+		// Note: Ignore any environment variables as the session should take precedence because
+		// the user is most likely switching session so does not want to inherit any environment variables
+		// set from the last instance.
+		// But this has a side effect that you can't control the profile handing via environment variables when using the interact session selection
 		env_prefix := strings.ToUpper(config.EnvSettingsPrefix)
 		for _, env := range os.Environ() {
 			if strings.HasPrefix(env, env_prefix) && !strings.HasPrefix(env, config.EnvPassphrase) && !strings.HasPrefix(env, config.EnvSessionHome) {
