@@ -318,6 +318,11 @@ func GetSettingsName(flagName string) string {
 	return SettingsDefaultsPrefix + "." + flagName
 }
 
+// GetSettingsNameWithoutPrefix converts the setting name without the settings prefix
+func GetSettingsNameWithoutPrefix(name string) string {
+	return strings.TrimPrefix(name, SettingsDefaultsPrefix+".")
+}
+
 // Config cli configuration settings
 type Config struct {
 	viper *viper.Viper

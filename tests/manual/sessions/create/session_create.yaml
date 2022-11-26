@@ -8,3 +8,25 @@ tests:
     stderr:
       contains:
         - 'commandError: Missing required parameter. host'
+  
+  It support insecure mode when creating a session:
+    command: |
+      export C8Y_SESSION_HOME=/tmp/session_create_test01/
+      rm -Rf /tmp/session_create_test01/
+      c8y sessions create --type dev --host "https://mytenant.iot.cumulocity.com" --username "dummy" --password "test" --allowInsecure
+      cat /tmp/session_create_test01/*.json | jq -c | c8y util show --select username,password,host,settings.defaults -o json -c=false
+      rm -rf /tmp/session_create_test01/
+    exit-code: 0
+    stdout:
+      exactly: |
+        /tmp/session_create_test01/mytenant.iot.cumulocity.com-dummy.json
+        {
+          "host": "https://mytenant.iot.cumulocity.com",
+          "password": "test",
+          "settings": {
+            "defaults": {
+              "insecure": true
+            }
+          },
+          "username": "dummy"
+        }

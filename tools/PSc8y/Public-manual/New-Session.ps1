@@ -55,7 +55,12 @@ None
         # Don't use tenant name as a prefix to the user name when using Basic Authentication
         [Parameter(Mandatory = $false)]
         [switch]
-        $NoTenantPrefix
+        $NoTenantPrefix,
+
+        # Allow insecure connection (e.g. when using self-signed certificates)
+        [Parameter(Mandatory = $false)]
+        [switch]
+        $AllowInsecure
     )
 
     Begin {
