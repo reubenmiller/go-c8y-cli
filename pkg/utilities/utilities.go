@@ -108,6 +108,7 @@ func ClearEnvironmentVariables(shell ShellType) {
 		"C8Y_HOST",
 		"C8Y_URL",
 		"C8Y_BASEURL",
+		"C8Y_DOMAIN",
 		"C8Y_TENANT",
 		"C8Y_USER",
 		"C8Y_USERNAME",

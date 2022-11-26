@@ -172,11 +172,13 @@ func (lh *LoginHandler) sortLoginOptions() {
 		c8y.AuthMethodOAuth2Internal: 1,
 	}
 
-	if _, ok := optionOrder[lh.LoginType]; ok {
-		lh.Logger.Infof("Setting preferred login method. %s", lh.LoginType)
-		optionOrder[lh.LoginType] = 0
-	} else {
-		lh.Logger.Infof("Unsupported login method. The given option will be ignored. %s", lh.LoginType)
+	if lh.LoginType != "" {
+		if _, ok := optionOrder[lh.LoginType]; ok {
+			lh.Logger.Infof("Setting preferred login method. %s", lh.LoginType)
+			optionOrder[lh.LoginType] = 0
+		} else {
+			lh.Logger.Infof("Unsupported login method. The given option will be ignored. %s", lh.LoginType)
+		}
 	}
 
 	// sort login options
@@ -290,8 +292,15 @@ func (lh *LoginHandler) promptForPassword() error {
 func (lh *LoginHandler) login() {
 	lh.do(func() error {
 		if lh.LoginOptions == nil || len(lh.LoginOptions.LoginOptions) == 0 {
-			lh.state <- LoginStateAbort
-			return fmt.Errorf("No login options")
+			// Don't fail on no login options. Default to using BASIC auth
+			lh.Logger.Infof("No login options available. Using BASIC auth")
+			if lh.Authorized {
+				lh.state <- LoginStateAuth
+			} else {
+				lh.LoginType = c8y.AuthMethodBasic
+				lh.state <- LoginStateVerify
+			}
+			return nil
 		}
 
 		if lh.Authorized {
@@ -413,6 +422,10 @@ func (lh *LoginHandler) verify() {
 					lh.state <- LoginStateNoAuth
 					lh.C8Yclient.SetToken("")
 					lh.onSave()
+				} else if lh.errorContains(v.Message, "Tenant has no access from outside the platform") {
+					// Decide what to do here
+					lh.LoginType = c8y.AuthMethodBasic
+					lh.state <- LoginStateVerify
 				} else if lh.errorContains(v.Message, "Bad credentials") || lh.errorContains(v.Message, "Invalid credentials") {
 					lh.Logger.Infof("Bad credentials, using auth method: %s", lh.C8Yclient.AuthorizationMethod)
 
