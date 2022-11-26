@@ -33,7 +33,7 @@ Create a subscription which groups all devices in a single subscription name
 ```
       --apiFilter strings          Filter notifications by api
       --context string             The context to which the subscription is associated.
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --device strings             The managed object to which the subscription is associated. (accepts pipeline)
       --fragmentsToCopy strings    Transforms the data to only include specified custom fragments. Each custom fragment is identified by a unique name. If nothing is specified here, the data is forwarded as-is.
   -h, --help                       help for create

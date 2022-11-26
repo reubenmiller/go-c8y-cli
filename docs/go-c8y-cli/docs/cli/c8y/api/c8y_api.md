@@ -47,7 +47,7 @@ a template to also build the request's body from the piped input data.
 ```
       --accept string              accept (header)
       --contentType string         content type (header)
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --file string                File to be uploaded as a binary
       --formdata string            form data (json or shorthand json)
   -h, --help                       help for api

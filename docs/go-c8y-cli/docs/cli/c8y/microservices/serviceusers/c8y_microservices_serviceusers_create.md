@@ -19,11 +19,11 @@ Create new application service user
 ### Options
 
 ```
-  -d, --data string       static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-  -h, --help              help for create
-      --name string       Name of application
-      --roles strings     Roles which should be assigned to the service user
-      --tenants strings   Tenant to subscribe to. If left blank than the application will not generate the service user
+  -d, --data stringArray   static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help               help for create
+      --name string        Name of application
+      --roles strings      Roles which should be assigned to the service user
+      --tenants strings    Tenant to subscribe to. If left blank than the application will not generate the service user
 ```
 
 ### Options inherited from parent commands

@@ -23,7 +23,7 @@ Create a new service for a device (as a child addition)
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --device strings             Device id (required) (accepts pipeline)
   -h, --help                       help for create
       --name string                Service name

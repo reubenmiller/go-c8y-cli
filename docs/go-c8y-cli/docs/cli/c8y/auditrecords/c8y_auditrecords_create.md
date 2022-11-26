@@ -25,7 +25,7 @@ Create an audit record for a custom managed object update
 ```
       --activity string            The activity that was carried out.
       --application string         The application used to carry out the audited action.
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                       help for create
       --processingMode string      Cumulocity processing mode
       --severity string            The severity of action: critical, major, minor, warning or information.

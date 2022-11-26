@@ -25,7 +25,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 ```
       --createdFrom string         Start date or date and time of the alarm creation. Version >= 10.11
       --createdTo string           End date or date and time of the alarm creation. Version >= 10.11
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --dateFrom string            Start date or date and time of alarm occurrence.
       --dateTo string              End date or date and time of alarm occurrence.
       --device strings             The ManagedObject that the alarm originated from (accepts pipeline)

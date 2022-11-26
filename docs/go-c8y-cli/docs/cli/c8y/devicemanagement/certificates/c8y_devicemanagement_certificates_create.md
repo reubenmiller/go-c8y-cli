@@ -28,7 +28,7 @@ Copy device certificates from one Cumulocity tenant to another (tenants must not
 
 ```
       --autoRegistrationEnabled    Enable auto registration
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --file string                Certificate file (in PEM format with header/footer)
   -h, --help                       help for create
       --name string                Certificate name (accepts pipeline)

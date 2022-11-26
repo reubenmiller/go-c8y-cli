@@ -23,7 +23,7 @@ Update a device profile
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --deviceType string          Device type filter. Only allow device profile to be applied to devices of this type
   -h, --help                       help for update
       --id strings                 Device profile (managedObject) id (required) (accepts pipeline)

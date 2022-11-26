@@ -21,12 +21,15 @@ Create a new version using a binary file and link it to the existing "linux-os1"
 $ c8y firmware versions create --firmware "linux-os1" --version "1.0.0" --url "https://blob.azure.com/device-firmare/1.0.0/image.mender"
 Create a new version with an external URL and link it to the existing "linux-os1" firmware
 
+$ c8y firmware versions create --firmware 12345
+Create a new version with an empty version number and url
+
 ```
 
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --file string                File to be uploaded
       --firmware strings           Firmware package id where the version will be added to (accepts pipeline)
   -h, --help                       help for create

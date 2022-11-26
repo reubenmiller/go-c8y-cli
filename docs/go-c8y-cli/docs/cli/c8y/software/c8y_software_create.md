@@ -32,7 +32,7 @@ Create a software package and create a new version
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --description string         Description of the software package
       --deviceType string          Device type filter. Only allow software to be applied to devices of this type (accepts pipeline)
   -h, --help                       help for create

@@ -24,7 +24,7 @@ Update an operation
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --failureReason string       Reason for the failure. Use when setting status to FAILED
   -h, --help                       help for update
       --id strings                 Operation id (required) (accepts pipeline)

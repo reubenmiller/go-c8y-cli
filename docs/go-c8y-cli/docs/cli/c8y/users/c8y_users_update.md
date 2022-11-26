@@ -28,7 +28,7 @@ Update the email field in each user to match the id (if the id includes the @ si
 
 ```
       --customProperties string    Custom properties to be added to the user
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --email string               User email address
       --enabled                    User activation status (true/false)
       --firstName string           User first name

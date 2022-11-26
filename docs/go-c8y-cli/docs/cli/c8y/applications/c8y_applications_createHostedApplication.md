@@ -34,7 +34,7 @@ Create/update hosted web application but don't activate it, so the current versi
 ```
       --availability string        Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
       --contextPath string         contextPath of the hosted application
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --file string                File or Folder of the web application. It should contain a index.html file in the root folder/ or zip file
   -h, --help                       help for createHostedApplication
       --key string                 Shared secret of application. Defaults to the value inside the cumulocity.json file (if present)

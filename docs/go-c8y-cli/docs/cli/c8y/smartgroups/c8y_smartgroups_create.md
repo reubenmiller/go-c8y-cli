@@ -30,7 +30,7 @@ Create a smart group which is not visible in the UI
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                       help for create
       --invisible                  Should the smart group be hidden from the user interface
       --name string                Smart group name

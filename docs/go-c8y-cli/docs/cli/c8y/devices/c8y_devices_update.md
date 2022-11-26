@@ -15,15 +15,24 @@ c8y devices update [flags]
 ### Examples
 
 ```
-$ c8y devices update --id 12345
+$ c8y devices update --id 12345 --newName "MyDevice"
 Update device by id
+
+$ c8y devices update --id 12345 --template "{c8y_SupportedOperations:['c8y_Restart', 'c8y_Command']}"
+Update device using a template
+
+$ c8y devices update --id 12345 --data "my.nested.number=1.234,my.nested.bool=true,my.nested.string=my name,my.nested.num_as_str='1.234'"
+Update device using a data (with different formats)
+
+$ c8y devices update --id 12345 --data "myFragment=null"
+Remove a property from a device by setting it to null
         
 ```
 
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                       help for update
       --id strings                 Device ID (required) (accepts pipeline)
       --newName string             Device name

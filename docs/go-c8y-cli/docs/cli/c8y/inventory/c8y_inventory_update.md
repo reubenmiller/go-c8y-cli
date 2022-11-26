@@ -17,13 +17,16 @@ c8y inventory update [flags]
 ```
 $ c8y inventory update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"
 Update a managed object
+
+$ c8y inventory update --id 12345 --data "my_Fragment=null"
+Remove a property (by setting it to null)
         
 ```
 
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                       help for update
       --id strings                 ManagedObject id (required) (accepts pipeline)
       --newName string             name

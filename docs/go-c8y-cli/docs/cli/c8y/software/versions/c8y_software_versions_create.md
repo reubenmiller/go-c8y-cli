@@ -21,12 +21,15 @@ Create a new version using a binary file. The binary will be uploaded to Cumuloc
 $ c8y software versions create --software "my-app" --version "1.0.0" --url "https://"
 Create a new version with an external URL
 
+$ c8y software versions create --software 12345
+Create a new version with an empty version number and url
+
 ```
 
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --file string                File to be uploaded
   -h, --help                       help for create
       --processingMode string      Cumulocity processing mode

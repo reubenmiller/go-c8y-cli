@@ -20,13 +20,16 @@ Create a new patch (with external URL) to an existing firmware version
 
 $ c8y firmware patches create --firmware custom\ firmware\ 1 --dependencyVersion 2.2.0 --version 2.2.1 --file ./install.ps1
 Create a new patch (storing the file in Cumulocity) to an existing firmware version
+
+$ c8y firmware patches create --firmware 12345 --dependencyVersion 2.2.0
+Create a new patch with an empty version number and url
      
 ```
 
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --dependencyVersion string   Existing firmware version that the patch is dependent on
       --file string                File to be uploaded
       --firmware strings           Firmware package id where the version will be added to (accepts pipeline)

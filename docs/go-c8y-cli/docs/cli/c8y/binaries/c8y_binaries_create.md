@@ -30,7 +30,7 @@ Upload a file with a custom name and custom meta information
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --file string                File to be uploaded as a binary (required)
   -h, --help                       help for create
       --name string                Set the name of the binary file. This will be the name of the file when it is downloaded in the UI

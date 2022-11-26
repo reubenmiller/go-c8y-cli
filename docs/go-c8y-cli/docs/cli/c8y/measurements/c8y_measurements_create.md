@@ -26,7 +26,7 @@ Copy measurements from one device to another
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --device strings             The ManagedObject which is the source of this measurement. (accepts pipeline)
   -h, --help                       help for create
       --processingMode string      Cumulocity processing mode

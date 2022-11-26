@@ -25,6 +25,7 @@ New-Session
 	[[-Name] <String>]
 	[[-Description] <String>]
 	[-NoTenantPrefix]
+	[-AllowInsecure]
 	[<CommonParameters>]
 ```
 
@@ -144,6 +145,22 @@ Accept wildcard characters: False
 
 ### -NoTenantPrefix
 Don't use tenant name as a prefix to the user name when using Basic Authentication
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AllowInsecure
+Allow insecure connection (e.g.
+when using self-signed certificates)
 
 ```yaml
 Type: SwitchParameter

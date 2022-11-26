@@ -28,7 +28,7 @@ Create or update a microservice using an explicit name
 ```
       --availability string        Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
       --contextPath string         contextPath of the hosted application. Required when application type is HOSTED
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --file string                Microservice file to be uploaded (or Cumulocity.json) file
   -h, --help                       help for create
       --key string                 Shared secret of application

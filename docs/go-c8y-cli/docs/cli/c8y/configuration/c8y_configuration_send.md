@@ -1,41 +1,54 @@
 ---
-category: services
-title: c8y devices services update
+category: configuration
+title: c8y configuration send
 ---
-Update service status
+Send configuration to a device via an operation
 
 ### Synopsis
 
-Update service status
+Create a new operation to send configuration to an agent or device.
+
+If you provide the reference to the configuration (via id or name), then the configuration's
+url and type will be automatically added to the operation.
+
+You may also manually set the url and configurationType rather than looking up the configuration
+file in the configuration repository.
+
 
 ```
-c8y devices services update [flags]
+c8y configuration send [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y devices services update --id 12345 --status up
-Update service status
+$ c8y configuration send --device mydevice --configuration 12345
+Send a configuration file to a device
 
-$ c8y devices services list --device 12345 --name ntp | c8y devices services update --status up
-Update service status
+$ c8y devices list | c8y configuration send --configuration 12345
+Send a configuration file to multiple devices
+
+$ c8y devices list | c8y configuration send --configuration my-config-name
+Send a configuration file (by name) to multiple devices
+
+$ c8y configuration send --device 12345 --configurationType apt-lists --url "http://example.com/myrepo.list"
+Send a custom configuration by manually providing the type and url
         
 ```
 
 ### Options
 
 ```
+      --configuration strings      Configuration name or id
+      --configurationType string   Configuration type. Leave blank to automatically set it if a matching configuration is found in the c8y configuration repository
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings             Device id (required for name lookup)
-  -h, --help                       help for update
-      --id strings                 Service id (required) (accepts pipeline)
-      --name string                Service name
+      --description string         Text description of the operation.
+      --device strings             Identifies the target device on which this operation should be performed. (accepts pipeline)
+  -h, --help                       help for send
       --processingMode string      Cumulocity processing mode
-      --serviceType string         Service type, e.g. systemd
-      --status string              Service status
       --template string            Body template
       --templateVars stringArray   Body template variables
+      --url string                 Url to the configuration. Leave blank to automatically set it if a matching configuration is found in the c8y configuration repository
 ```
 
 ### Options inherited from parent commands

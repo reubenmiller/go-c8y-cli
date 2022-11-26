@@ -24,7 +24,7 @@ Uninstall a software package version
 
 ```
       --action string              Software action (default "delete")
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --device strings             Device or agent where the software should be installed (accepts pipeline)
   -h, --help                       help for uninstall
       --processingMode string      Cumulocity processing mode

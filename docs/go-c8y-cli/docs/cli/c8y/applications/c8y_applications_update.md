@@ -25,7 +25,7 @@ Update application availability to MARKET
 ```
       --availability string        Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
       --contextPath string         contextPath of the hosted application
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --externalUrl string         URL to the external application
   -h, --help                       help for update
       --id string                  Application id (required) (accepts pipeline)

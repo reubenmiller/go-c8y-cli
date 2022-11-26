@@ -28,7 +28,7 @@ Install a firmware version with an explicit url
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --description string         Operation description
       --device strings             Device or agent where the firmware should be installed (accepts pipeline)
       --firmware string            Firmware name (required)

@@ -29,12 +29,17 @@ $ c8y sessions create \
 ### Example 3: Create a new production session where only only GET commands are enabled (with no password storage)
 
 $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.com" --noStorage
+
+### Example 4: Create a session which points to a local api endpoint (most like an Cumulocity IoT Edge instance)
+
+$ c8y sessions create --type prod --host "https://localhost:443" --insecure
 		
 ```
 
 ### Options
 
 ```
+      --allowInsecure        Allow insecure connection (e.g. when using self-signed certificates)
       --description string   Description about the session
       --encrypt              Encrypt passwords and tokens (occurs when logging in)
   -h, --help                 help for create

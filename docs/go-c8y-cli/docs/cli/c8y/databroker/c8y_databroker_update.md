@@ -23,7 +23,7 @@ Change the status of a specific data broker connector by given connector id
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                       help for update
       --id strings                 Data broker connector id (required) (accepts pipeline)
       --processingMode string      Cumulocity processing mode

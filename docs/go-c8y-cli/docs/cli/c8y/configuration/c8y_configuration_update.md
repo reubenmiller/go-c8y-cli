@@ -24,7 +24,7 @@ Update a configuration file
 
 ```
       --configurationType string   Configuration type
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --description string         Description of the configuration package
       --deviceType string          Device type filter. Only allow configuration to be applied to devices of this type
       --file string                File to be uploaded

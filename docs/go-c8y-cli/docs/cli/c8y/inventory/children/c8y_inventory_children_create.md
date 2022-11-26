@@ -24,7 +24,7 @@ Create a child addition and link it to an existing managed object
 
 ```
       --childType string           Child relationship type (required)
-  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --global                     Enable global access to the managed object
   -h, --help                       help for create
       --id strings                 Managed object id where the child addition will be added to (required) (accepts pipeline)
