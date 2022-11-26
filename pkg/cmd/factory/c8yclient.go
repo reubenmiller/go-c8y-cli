@@ -227,7 +227,7 @@ func newWebsocketDialer(ignoreProxySettings bool) *websocket.Dialer {
 func WithProxyDisabled(disable bool) c8y.ClientOption {
 	return func(tr http.RoundTripper) http.RoundTripper {
 		if disable {
-		tr.(*http.Transport).Proxy = nil
+			tr.(*http.Transport).Proxy = nil
 		}
 		return tr
 	}
@@ -269,7 +269,7 @@ func configureProxySettings(cfg *config.Config, log *logger.Logger) {
 				}
 			}
 			if proxySettings.Len() > 0 {
-				log.Debugf("Using existing env variables.%s", proxySettings)
+				log.Debugf("Using existing env variables.%s", proxySettings.String())
 			}
 		}
 	}
