@@ -17,7 +17,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/sortorder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/thedevsaddam/gojsonq"
+	"github.com/reubenmiller/gojsonq/v2"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap/zapcore"
 )
@@ -52,7 +52,7 @@ func (f *JSONFilters) AddSelectors(props ...string) {
 // AddRawFilters add list of raw filters
 func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
 	for _, item := range rawFilters {
-		sepPattern := regexp.MustCompile(`(\s+[\-]?(like|match|notlike|notmatch|newerthan|olderthan|datelte|datelt|dategt|dategte|version|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWith|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
+		sepPattern := regexp.MustCompile(`(\s*[\-]?(has|nothas|hasnot|missing|keyIn|keyNotIn|like|match|notlike|notmatch|newerthan|olderthan|datelte|datelt|dategt|dategte|version|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWith|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
 
 		parts := sepPattern.Split(item, 2)
 
@@ -72,6 +72,17 @@ func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
 			continue
 		}
 
+		operatorAliases := map[string]string{
+			"has":     "keyIn",
+			"hasnot":  "keyNotIn",
+			"nothas":  "keyNotIn",
+			"missing": "keyNotIn",
+		}
+
+		if realName, ok := operatorAliases[operator]; ok {
+			operator = realName
+		}
+
 		if v, err := strconv.ParseFloat(value, 64); err == nil {
 			if strings.Contains(value, ".") {
 				// use float
@@ -84,6 +95,18 @@ func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
 			// Check boolean values
 			f.Add(strings.TrimSpace(parts[0]), operator, bool(v))
 		} else {
+			if parts[0] == "" {
+				// Support keyIn and keyNotIn operators which don't take
+				if strings.Contains(value, ".") {
+					lastIdx := strings.LastIndex(value, ".")
+					parts[0] = value[0:lastIdx]
+					value = value[lastIdx+1:]
+				} else {
+					// Default to root element
+					parts[0] = "."
+				}
+			}
+
 			f.Add(strings.TrimSpace(parts[0]), operator, value)
 		}
 	}

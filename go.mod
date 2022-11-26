@@ -32,7 +32,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.8.0
-	github.com/thedevsaddam/gojsonq v2.3.0+incompatible
 	github.com/tidwall/gjson v1.14.3
 	github.com/tidwall/pretty v1.2.1
 	github.com/tidwall/sjson v1.2.5
@@ -46,7 +45,10 @@ require (
 
 require github.com/hashicorp/go-version v1.6.0
 
-require github.com/cli/browser v1.1.0
+require (
+	github.com/cli/browser v1.1.0
+	github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3
+)
 
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
