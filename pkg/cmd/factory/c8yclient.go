@@ -226,7 +226,9 @@ func newWebsocketDialer(ignoreProxySettings bool) *websocket.Dialer {
 
 func WithProxyDisabled(disable bool) c8y.ClientOption {
 	return func(tr http.RoundTripper) http.RoundTripper {
+		if disable {
 		tr.(*http.Transport).Proxy = nil
+		}
 		return tr
 	}
 }
