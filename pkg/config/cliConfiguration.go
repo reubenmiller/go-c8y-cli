@@ -693,6 +693,7 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 		"C8Y_URL":                  host,
 		"C8Y_BASEURL":              host,
 		"C8Y_HOST":                 host,
+		"C8Y_DOMAIN":               domain,
 		"C8Y_TENANT":               tenant,
 		"C8Y_USER":                 username,
 		"C8Y_TOKEN":                token,
@@ -700,10 +701,6 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 		"C8Y_PASSWORD":             password,
 		"C8Y_HEADER_AUTHORIZATION": authHeaderValue,
 		"C8Y_HEADER":               authHeader,
-	}
-
-	if domain != "" {
-		output["C8Y_DOMAIN"] = domain
 	}
 
 	cache := c.CachePassphraseVariables()
