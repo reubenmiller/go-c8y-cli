@@ -124,10 +124,10 @@ endpoints:
         type: json
         description: Additional properties of the device profile.
 
-    bodyTemplate:
-      type: jsonnet
-      applyLast: false
-      template: "{type: 'c8y_Profile', c8y_DeviceProfile:{}, c8y_Filter:{}}"
+    bodyTemplates:
+      - type: jsonnet
+        applyLast: false
+        template: "{type: 'c8y_Profile', c8y_DeviceProfile:{}, c8y_Filter:{}}"
     bodyRequiredKeys:
       - "type"
       - "name"

@@ -359,10 +359,10 @@ endpoints:
         - description: Create agent with custom properties
           command: c8y agents create --name myAgent --data "custom_value1=1234"
 
-    bodyTemplate:
-      type: jsonnet
-      applyLast: true
-      template: "{c8y_IsDevice: {}, com_cumulocity_model_Agent: {}}"
+    bodyTemplates:
+      - type: jsonnet
+        applyLast: true
+        template: "{c8y_IsDevice: {}, com_cumulocity_model_Agent: {}}"
 
     body:
       - name: name

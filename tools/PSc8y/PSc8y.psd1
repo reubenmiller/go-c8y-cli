@@ -297,6 +297,7 @@ FunctionsToExport = @(
 	'Remove-UserTOTPSecret',
 	'Request-DeviceCredentials',
 	'Reset-UserPassword',
+	'Send-Configuration',
 	'Set-DeviceRequiredAvailability',
 	'Set-MicroserviceLogLevel',
 	'Unregister-Notification2Subscriber',

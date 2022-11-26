@@ -274,9 +274,11 @@
           "description": "Inventory binary id"
         }
       ],
-      "bodyTemplate": {
-        "type": "none"
-      },
+      "bodyTemplates": [
+        {
+          "type": "none"
+        }
+      ],
       "bodyContent": {
         "type": "binary"
       },

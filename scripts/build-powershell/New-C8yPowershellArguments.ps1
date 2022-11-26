@@ -122,6 +122,7 @@
         # Complex lookup types. These should not be visible in powershell
         "softwareDetails" { $Ignore = $true; ""; break }
         "firmwareDetails" { $Ignore = $true; ""; break }
+        "configurationDetails" { $Ignore = $true; ""; break }
         default {
             Write-Error "Unsupported Type. $_"
         }

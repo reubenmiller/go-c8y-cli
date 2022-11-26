@@ -212,8 +212,8 @@ endpoints:
         required: true
         pipeline: true
         description: Inventory binary id
-    bodyTemplate:
-        type: none
+    bodyTemplates:
+        - type: none
     bodyContent:
         type: binary
     body:

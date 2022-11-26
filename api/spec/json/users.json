@@ -557,11 +557,13 @@
           "position": 99
         }
       ],
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": true,
-        "template": "{sendPasswordResetEmail: !std.objectHas(self, 'password')}"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": true,
+          "template": "{sendPasswordResetEmail: !std.objectHas(self, 'password')}"
+        }
+      ],
       "body": [
         {
           "name": "newPassword",

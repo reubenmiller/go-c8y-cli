@@ -14,3 +14,13 @@ tests:
                 body.name: agent config
                 method: POST
                 path: /inventory/managedObjects
+
+    It creates an operation to send configuration to a device using url and type:
+        command: c8y configuration send --device 1234 --url "example.com" --configurationType custom-type --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                body.c8y_DownloadConfigFile.type: custom-type
+                body.c8y_DownloadConfigFile.url: example.com
+                body.deviceId: "1234"

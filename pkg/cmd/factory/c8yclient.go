@@ -144,6 +144,10 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 			true,
 		)
 
+		if domain := cfg.GetDomain(); domain != "" {
+			client.SetDomain(domain)
+		}
+
 		client.SetRequestOptions(c8y.DefaultRequestOptions{
 			DryRun: cfg.DryRun(),
 			DryRunHandler: func(options *c8y.RequestOptions, req *http.Request) {
@@ -226,7 +230,9 @@ func newWebsocketDialer(ignoreProxySettings bool) *websocket.Dialer {
 
 func WithProxyDisabled(disable bool) c8y.ClientOption {
 	return func(tr http.RoundTripper) http.RoundTripper {
-		tr.(*http.Transport).Proxy = nil
+		if disable {
+			tr.(*http.Transport).Proxy = nil
+		}
 		return tr
 	}
 }
@@ -267,7 +273,7 @@ func configureProxySettings(cfg *config.Config, log *logger.Logger) {
 				}
 			}
 			if proxySettings.Len() > 0 {
-				log.Debugf("Using existing env variables.%s", proxySettings)
+				log.Debugf("Using existing env variables.%s", proxySettings.String())
 			}
 		}
 	}

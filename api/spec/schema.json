@@ -110,6 +110,38 @@
         }
       }
     },
+    "bodyTemplate": {
+      "type": "object",
+      "description": "Use a template when constructing the body of the http request. This can be used to force values, have defaults, or perform custom logic (depending on the template engine). At the moment on jsonnet is supported",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Templating engine. Current only supports jsonnet",
+          "enum": [
+            "jsonnet",
+            "none"
+          ]
+        },
+        "applyLast": {
+          "type": "boolean",
+          "description": "Apply the json template after the existing parameters have been processed. This is useful if values needs to be forced, or if you want the user to be able to override defaults"
+        },
+        "template": {
+          "type": "string",
+          "description": "Template in the given template engine language"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "bodyRequiredKeys": {
+      "type": "array",
+      "description": "List of the required body keys. The keys will be checked after any templating logic",
+      "items": {
+        "type": "string"
+      }
+    },
     "skipParameter": {
       "type": "boolean",
       "title": "Skip (ignore) parameter",
@@ -187,6 +219,7 @@
         "[]agent",
         "[]certificate",
         "[]configuration",
+        "configurationDetails",
         "[]deviceprofile",
         "[]firmware",
         "[]firmwareversion",
@@ -567,27 +600,12 @@
               }
             }
           },
-          "bodyTemplate": {
-            "type": "object",
-            "description": "Use a template when constructing the body of the http request. This can be used to force values, have defaults, or perform custom logic (depending on the template engine). At the moment on jsonnet is supported",
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "Templating engine. Current only supports jsonnet",
-                "enum": ["jsonnet", "none"]
-              },
-              "applyLast": {
-                "type": "boolean",
-                "description": "Apply the json template after the existing parameters have been processed. This is useful if values needs to be forced, or if you want the user to be able to override defaults"
-              },
-              "template": {
-                "type": "string",
-                "description": "Template in the given template engine language"
-              }
-            },
-            "required": [
-              "type"
-            ]
+          "bodyTemplates": {
+            "type": "array",
+            "description": "List of templates to apply when constructing the body of the http request. This can be used to force values, have defaults, or perform custom logic (depending on the template engine). At the moment on jsonnet is supported",
+            "items": {
+              "$ref": "#/definitions/bodyTemplate"
+            }
           },
           "bodyRequiredKeys": {
             "type": "array",

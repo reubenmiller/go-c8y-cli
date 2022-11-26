@@ -1,0 +1,39 @@
+tests:
+    configuration_send_Send a configuration file (by name) to multiple devices:
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.devices.list.json | c8y configuration send --configuration my-config-name'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.__tmp_configuration: my-config-name
+                method: POST
+                path: /devicecontrol/operations
+    configuration_send_Send a configuration file to a device:
+        command: c8y configuration send --device mydevice --configuration 12345
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.__tmp_configuration: "12345"
+                body.deviceId: mydevice
+                method: POST
+                path: /devicecontrol/operations
+    configuration_send_Send a configuration file to multiple devices:
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.devices.list.json | c8y configuration send --configuration 12345'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.__tmp_configuration: "12345"
+                method: POST
+                path: /devicecontrol/operations
+    configuration_send_Send a custom configuration by manually providing the type and url:
+        command: c8y configuration send --device 12345 --configurationType apt-lists --url "http://example.com/myrepo.list"
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_DownloadConfigFile.type: apt-lists
+                body.c8y_DownloadConfigFile.url: http://example.com/myrepo.list
+                body.deviceId: "12345"
+                method: POST
+                path: /devicecontrol/operations

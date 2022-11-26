@@ -390,11 +390,13 @@
           }
         ]
       },
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": false,
-        "template": "{type: 'c8y_DeviceGroup', c8y_IsDeviceGroup: {}}"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": false,
+          "template": "{type: 'c8y_DeviceGroup', c8y_IsDeviceGroup: {}}"
+        }
+      ],
       "body": [
         {
           "name": "name",

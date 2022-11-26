@@ -36,7 +36,7 @@ echo "$CONFIG1" | c8y util show --select description -o csv | grep "My custom co
 package_file="$TEMP_DIR/package-1.json"
 echo "dummy file" > "$package_file"
 
-CONFIG2=$( c8y configuration create --name "${NAME}_2" --file "$package_file" --select "id,url" --output csv )
+CONFIG2=$( c8y configuration create --name "${NAME}_2" --file "$package_file" --configurationType dummytype --select "id,url" --output csv )
 echo "$CONFIG2" | grep "^[0-9]\+,.*/inventory/binaries/[0-9]\+$"
 
 # download
@@ -47,11 +47,23 @@ echo "$CONFIG2" | c8y configuration get | c8y api | grep "^dummy file$"
 c8y configuration update --id "$NAME" --description "Example description" --select description --output csv | grep "^Example description$"
 c8y configuration update --id "$NAME" --deviceType "myType" --select deviceType --output csv | grep "^myType$"
 
+
+# send configuration via id
+CONFIG2_ID=$( echo "$CONFIG2" | cut -d, -f1 )
+CONFIG2_URL=$( echo "$CONFIG2" | cut -d, -f2 )
+c8y configuration send --device 1234 --configuration "$CONFIG2_ID" --dry --dryFormat json -c | grep -F "\"url\":\"$CONFIG2_URL\"" | grep -F '"type":"dummytype"'
+
+# send configuration via name
+CONFIG2_ID=$( echo "$CONFIG2" | cut -d, -f1 )
+CONFIG2_URL=$( echo "$CONFIG2" | cut -d, -f2 )
+c8y configuration send --device 1234 --configuration "${NAME}_2" --dry --dryFormat json -c | grep -F "\"url\":\"$CONFIG2_URL\"" | grep -F '"type":"dummytype"'
+
+
 # Update configuration binary
 package_file2="$TEMP_DIR/package-2.json"
 echo "dummy file 2" > "$package_file2"
 CONFIG2_ID=$( echo "$CONFIG2" | cut -d, -f1 )
-echo "$CONFIG2" | c8y configuration update --file $package_file2 --select id --output csv | grep "^$CONFIG2_ID$"
+echo "$CONFIG2" | c8y configuration update --file "$package_file2" --select id --output csv | grep "^$CONFIG2_ID$"
 echo "$CONFIG2" | c8y configuration get | c8y api | grep "^dummy file 2$"
 
 

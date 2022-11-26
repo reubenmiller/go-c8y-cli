@@ -218,11 +218,13 @@
           "description": "Additional properties of the software package."
         }
       ],
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": false,
-        "template": "{type: 'c8y_Software', c8y_Global:{}}"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": false,
+          "template": "{type: 'c8y_Software', c8y_Global:{}}"
+        }
+      ],
       "bodyRequiredKeys": [
         "type",
         "name"

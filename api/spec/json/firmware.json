@@ -203,11 +203,13 @@
           "description": "Additional properties of the firmware package."
         }
       ],
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": false,
-        "template": "{type: 'c8y_Firmware', c8y_Global:{}}"
-      },
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": false,
+          "template": "{type: 'c8y_Firmware', c8y_Global:{}}"
+        }
+      ],
       "bodyRequiredKeys": [
         "type",
         "name"
