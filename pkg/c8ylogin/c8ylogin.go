@@ -202,7 +202,6 @@ func (lh *LoginHandler) init() {
 		loginOptions, _, err := lh.C8Yclient.Tenant.GetLoginOptions(context.Background())
 
 		if err != nil {
-			// TODO: Should an dummy BASIC_AUTH option be returned?
 			if strings.Contains(err.Error(), "401") {
 				lh.Logger.Infof("Login options returned 401. This may happen when your c8y hostname is not setup correctly")
 				return nil
@@ -294,15 +293,13 @@ func (lh *LoginHandler) login() {
 	lh.do(func() error {
 		if lh.LoginOptions == nil || len(lh.LoginOptions.LoginOptions) == 0 {
 			// Don't fail on no login options. Default to using BASIC auth
-			lh.Logger.Infof("No login options available. Assuming BASIC auth")
+			lh.Logger.Infof("No login options available. Using BASIC auth")
 			if lh.Authorized {
 				lh.state <- LoginStateAuth
 			} else {
 				lh.LoginType = c8y.AuthMethodBasic
 				lh.state <- LoginStateVerify
 			}
-			// lh.state <- LoginStateAbort
-			// return fmt.Errorf("No login options")
 			return nil
 		}
 
@@ -429,7 +426,6 @@ func (lh *LoginHandler) verify() {
 					// Decide what to do here
 					lh.LoginType = c8y.AuthMethodBasic
 					lh.state <- LoginStateVerify
-
 				} else if lh.errorContains(v.Message, "Bad credentials") || lh.errorContains(v.Message, "Invalid credentials") {
 					lh.Logger.Infof("Bad credentials, using auth method: %s", lh.C8Yclient.AuthorizationMethod)
 

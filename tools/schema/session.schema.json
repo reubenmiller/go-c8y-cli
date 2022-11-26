@@ -15,8 +15,8 @@
             "type": "string"
         },
         "domain": {
-            "title": "Options Cumulocity domain",
-            "description": "Only required if the host is use an alias which is not the proper url which is required for tenant/loginOptions. It will be used to set the Host header in each HTTP request",
+            "title": "Optional Cumulocity domain",
+            "description": "Use an alternative value for the 'Host' header used in each request. This is useful for custom setups where you are using tunnelling or custom host aliases",
             "type": "string"
         },
         "tenant": {
