@@ -24,6 +24,7 @@ type CmdSet struct {
 	TFACode       string
 	LoginErr      error
 	LoginOK       bool
+	LoginType     string
 	Shell         string
 	ClearToken    bool
 	sessionFilter string
@@ -65,11 +66,13 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 	cmd.Flags().StringVar(&ccmd.sessionFilter, "sessionFilter", "", "Filter to be applied to the list of sessions even before the values can be selected")
 	cmd.Flags().StringVar(&ccmd.TFACode, "tfaCode", "", "Two Factor Authentication code")
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", defaultShell, "Shell type to return the environment variables")
+	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL or BASIC")
 	cmd.Flags().BoolVar(&ccmd.ClearToken, "clear", false, "Clear any existing tokens")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("shell", "auto", "bash", "zsh", "fish", "powershell"),
+		completion.WithValidateSet("loginType", c8y.AuthMethodOAuth2Internal, c8y.AuthMethodBasic),
 	)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -158,7 +161,11 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	handler := c8ylogin.NewLoginHandler(client, cmd.ErrOrStderr(), func() {
 		n.onSave(client)
 	})
-	handler.LoginType = cfg.GetLoginType()
+	handler.LoginType = strings.ToUpper(cfg.GetLoginType())
+	if n.LoginType != "" {
+		handler.LoginType = strings.ToUpper(n.LoginType)
+	}
+	log.Infof("User preference for login type: %s", handler.LoginType)
 
 	if n.TFACode == "" {
 		if code, err := cfg.GetTOTP(time.Now()); err == nil {
