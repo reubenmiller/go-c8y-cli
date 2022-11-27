@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	_io "io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,7 +15,9 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/git"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/spf13/cobra"
 )
@@ -275,7 +278,6 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 		&cobra.Command{
 			Use:   "delete <name>",
 			Short: "Remove an installed extension",
-			Args:  cobra.ExactArgs(1),
 			ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 				cmds := m().List()
 				names := []string{}
@@ -293,20 +295,78 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					m().EnableDryRunMode()
 				}
 
-				extName := normalizeExtensionSelector(args[0])
-				if err := m().Remove(extName); err != nil {
+				inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+				if err != nil {
 					return err
 				}
+				var iter iterator.Iterator
+				_, input, err := flags.WithPipelineIterator(&flags.PipelineOptions{
+					Name:     "name",
+					Aliases:  []string{"name"},
+					Disabled: inputIterators.PipeOptions.Disabled,
+					Values:   args, // manual values
+					Required: false,
+				})(cmd, inputIterators)
 
-				if io.IsStdoutTTY() {
-					successStr := "Removed"
-					if cfg.DryRun() {
-						successStr = "Would have removed"
+				if err != nil {
+					return &flags.ParameterError{
+						Name: "Name",
+						Err:  fmt.Errorf("missing required argument or pipeline input. %w", flags.ErrParameterMissing),
 					}
-					cs := io.ColorScheme()
-					fmt.Fprintf(io.Out, "%s %s extension %s\n", cs.SuccessIconWithColor(cs.Red), successStr, extName)
 				}
-				return nil
+
+				extName := ""
+				switch v := input.(type) {
+				case iterator.Iterator:
+					iter = v
+				default:
+					return fmt.Errorf("unknown iterator type")
+				}
+
+				bounded := iter.IsBound()
+				errors := []error{}
+				for {
+					responseText, _, err := iter.GetNext()
+					if err != nil {
+						if err == _io.EOF {
+							break
+						}
+						return err
+					}
+
+					extName = normalizeExtensionSelector(string(responseText))
+
+					if err := m().Remove(extName); err != nil {
+						errors = append(errors, err)
+						continue
+					}
+
+					if io.IsStdoutTTY() {
+						successStr := "Removed"
+						if cfg.DryRun() {
+							successStr = "Would have removed"
+						}
+						cs := io.ColorScheme()
+						fmt.Fprintf(io.Out, "%s %s extension %s\n", cs.SuccessIconWithColor(cs.Red), successStr, extName)
+					}
+
+					if !bounded {
+						break
+					}
+				}
+
+				switch count := len(errors); count {
+				case 0:
+					return nil
+				case 1:
+					return errors[0]
+				default:
+					errorMessages := []string{}
+					for _, m := range errors {
+						errorMessages = append(errorMessages, m.Error())
+					}
+					return fmt.Errorf("failed to remove %d extension/s. errors=%v", count, strings.Join(errorMessages, ", "))
+				}
 			},
 		},
 		func() *cobra.Command {
@@ -315,13 +375,14 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return extName, -1, err
 				}
+				// Support only one type of extension to start out with
 				// options := []string{"Script (Bash, Ruby, Python, etc)", "Go", "Other Precompiled (C++, Rust, etc)"}
-				options := []string{"Script (Bash, Ruby, Python, etc)"}
+				// options := []string{"Script (Bash, Ruby, Python, etc)"}
 
-				extTmplType, err := prompt.Select("What kind of extension?", options, options[0])
+				// extTmplType, err := prompt.Select("What kind of extension?", options, options[0])
 
 				// TODO: Select type
-				_ = extTmplType
+				// _ = extTmplType
 				return extName, extensions.ExtTemplateType(extensions.GitTemplateType), err
 			}
 			var flagType string

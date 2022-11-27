@@ -1054,6 +1054,7 @@ type PipelineOptions struct {
 	Property    string              `json:"property"`
 	Aliases     []string            `json:"aliases"`
 	IsID        bool                `json:"isID"`
+	Values      []string            `json:"values"`
 	Validator   iterator.Validator  `json:"-"`
 	Formatter   func([]byte) []byte `json:"-"`
 	Format      string              `json:"-"`

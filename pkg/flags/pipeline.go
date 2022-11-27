@@ -26,6 +26,10 @@ func (e *ParameterError) Error() string {
 // or from the pipeline
 // It will automatically try to get the value from a String or a StringSlice flag
 func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, supportsPipeline bool) (iterator.Iterator, error) {
+	// Use manual values if provided
+	if len(pipeOpt.Values) > 0 {
+		return iterator.NewSliceIterator(pipeOpt.Values, pipeOpt.Format), nil
+	}
 	if supportsPipeline && !pipeOpt.Disabled {
 		sourceProperties := make([]string, 0)
 		if len(pipeOpt.Aliases) > 0 {
