@@ -205,8 +205,8 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 		func() *cobra.Command {
 			var flagAll bool
 			cmd := &cobra.Command{
-				Use:   "upgrade {<name> | --all}",
-				Short: "Upgrade installed extensions",
+				Use:   "update {<name> | --all}",
+				Short: "Update installed extensions",
 				ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 					cmds := m().List()
 					names := []string{}
@@ -217,7 +217,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				},
 				Args: func(cmd *cobra.Command, args []string) error {
 					if len(args) == 0 && !flagAll {
-						return cmderrors.NewUserError("specify an extension to upgrade or `--all`")
+						return cmderrors.NewUserError("specify an extension to update or `--all`")
 					}
 					if len(args) > 0 && flagAll {
 						return cmderrors.NewUserError("cannot use `--all` with extension name")
@@ -243,11 +243,11 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					err := m().Upgrade(name, cfg.Force())
 					if err != nil && !errors.Is(err, ErrUpToDate) {
 						if name != "" {
-							fmt.Fprintf(io.ErrOut, "%s Failed upgrading extension %s: %s\n", cs.FailureIcon(), name, err)
+							fmt.Fprintf(io.ErrOut, "%s Failed updating extension %s: %s\n", cs.FailureIcon(), name, err)
 						} else if errors.Is(err, ErrNoExtensionsInstalled) {
 							return cmderrors.NewSystemError("no installed extensions found")
 						} else {
-							fmt.Fprintf(io.ErrOut, "%s Failed upgrading extensions\n", cs.FailureIcon())
+							fmt.Fprintf(io.ErrOut, "%s Failed updating extensions\n", cs.FailureIcon())
 						}
 						return cmderrors.NewSilentError()
 					}
@@ -260,15 +260,15 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						if errors.Is(err, ErrUpToDate) {
 							fmt.Fprintf(io.Out, "%s Extension already up to date\n", cs.SuccessIcon())
 						} else if name != "" {
-							fmt.Fprintf(io.Out, "%s %s upgraded extension %s\n", cs.SuccessIcon(), successStr, name)
+							fmt.Fprintf(io.Out, "%s %s updated extension %s\n", cs.SuccessIcon(), successStr, name)
 						} else {
-							fmt.Fprintf(io.Out, "%s %s upgraded extensions\n", cs.SuccessIcon(), successStr)
+							fmt.Fprintf(io.Out, "%s %s updated extensions\n", cs.SuccessIcon(), successStr)
 						}
 					}
 					return nil
 				},
 			}
-			cmd.Flags().BoolVar(&flagAll, "all", false, "Upgrade all extensions")
+			cmd.Flags().BoolVar(&flagAll, "all", false, "Update all extensions")
 			completion.WithOptions(
 				cmd,
 				completion.MarkLocalFlag(),

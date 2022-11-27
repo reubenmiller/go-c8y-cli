@@ -586,8 +586,8 @@ func (m *Manager) installGit(repo ghrepo.Interface, name, target string, stdout,
 	return f.Close()
 }
 
-var ErrPinnedExtensionUpgrade = errors.New("pinned extensions can not be upgraded")
-var ErrLocalExtensionUpgrade = errors.New("local extensions can not be upgraded")
+var ErrPinnedExtensionUpgrade = errors.New("pinned extensions can not be updated")
+var ErrLocalExtensionUpgrade = errors.New("local extensions can not be updated")
 var ErrUpToDate = errors.New("already up to date")
 var ErrNoExtensionsInstalled = errors.New("no extensions installed")
 
