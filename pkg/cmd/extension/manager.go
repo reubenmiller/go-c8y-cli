@@ -714,15 +714,17 @@ func (m *Manager) Remove(name string) error {
 	}
 
 	var targetDir string
+	var found = false
 
 	for _, targetDir = range targetDirs {
 		if _, err := os.Lstat(targetDir); os.IsNotExist(err) {
 			continue
 		}
+		found = true
 		break
 	}
 
-	if targetDir == "" {
+	if !found {
 		return fmt.Errorf("no extension found: %q", name)
 	}
 
