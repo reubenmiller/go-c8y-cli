@@ -1,9 +1,9 @@
 package extension
 
 type Command struct {
-	name        string `json:"name,omitempty"`
-	command     string `json:"command,omitempty"`
-	description string `json:"description,omitempty"`
+	name        string
+	command     string
+	description string
 }
 
 func (c *Command) Command() string {
