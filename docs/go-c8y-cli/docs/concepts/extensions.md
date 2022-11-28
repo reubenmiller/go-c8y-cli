@@ -6,24 +6,15 @@ import CodeExample from '@site/src/components/CodeExample';
 
 ## Overview
 
-Extensions allow you to customize go-c8y-cli so you optimize you and your team's workflows. You can customize how your data is displayed and provide custom commands to simplify repetitive tasks.
+Extensions allow you to customize go-c8y-cli to optimize you and your team's workflows. You can customize how your data is displayed and provide custom commands to simplify repetitive tasks.
 
-Extensions utilize already existing features but package them as a git repository so they are easy to install and share. Since they can be stored in a git repository, it makes it easy for a team to collaborate to add new commands for custom microservices, or just add custom columns to the device view so you can display your new custom managed object fragments.
+Extensions utilize already existing features but package them as a git repository so they are easy to install and share. This makes it easy for a team to collaborate to add new commands for custom microservices, or just add custom columns to the device view so you can display new custom managed object fragments by default.
 
-Another important aspect is that an extension will be accessible across all session by default. However you can configure a session to have an independent extensions source folder if you would like finer-grain control over which sessions use which extensions.
-
-Example workflow
-
-1. Create a new extension
-2. Edit the views/templates/commands
-3. Locally test the extension (installing via a folder path)
-4. Push the changes to a git repository
-5. Share the extension link with someone else so they can install it
-6. Keep the extension up to date via `c8y extensions upgrade <extension_name>`
+By default extensions are accessible across all sessions. Though for scenarios where you would like to limit an extension to a single session or a group of sessions you can change the folder where the extensions are stored based on customer or some other task orientated grouping.
 
 ## What is an extension?
 
-An extension is a git repository which contains a files which control what the extension has to offer. The extension creator is free to pick which elements should be included.
+An extension is a git repository which contains multiple files/folders which control what the extension has to offer. The extension creator is free to pick which elements should be included. By default all extensions start with `c8y-`. This is to make public extension easier to discover, however the `c8y-` prefix will be ignore when using the extension (to avoid unnecessary typing).
 
 The different elements of an extension and where they are stored within the extension repository are listed below:
 
@@ -31,8 +22,8 @@ The different elements of an extension and where they are stored within the exte
 |-----------|------|-------------|
 | Aliases | extension.yaml | Convenience commands which are easily accessible under the root command. e.g. `c8y my-alias` |
 | Commands | `commands/` | More complex commands which can be written in language  (e.g. bash, python etc.). The commands can call other go-c8y-cli commands or any other tooling |
-| Templates | `templates/` | Any go-c8y-cli templates that are provided and can be referenced by the `template` flag |
-| Views | `views/` | Any go-c8y-cli view definitions that are included that can be used to control which fragments are shown for which items, .e.g. show custom fragments for specific device types etc. |
+| Templates | `templates/` | Any go-c8y-cli templates that can be referenced by when using the `template` flag |
+| Views | `views/` | Any go-c8y-cli view definitions that control which fragments are shown for which items, e.g. show custom fragments for specific device types etc. |
 
 Below shows an example extension `c8y-myext` and a tree representation of the files associated with it.
 
@@ -62,15 +53,11 @@ c8y-myext/
 
 Aliases are defined in the `extension.yaml` file on the root level of the repository. The user can define any number of aliases, however aliases do not have any hierarchy so they should be reserved for commands which are frequently used and are a "time saver".
 
-The aliases should not clash with any existing values. If the alias is too specific then it might be better to leave the alias out and allow the users to specify their own session-based aliases using `c8y alias set`.
+The aliases should not clash with any existing commands. If the alias is too specific then it might be better to leave the alias out and allow the users to specify their own session-based aliases using `c8y alias set`.
 
-Read the [Aliases concept](https://goc8ycli.netlify.app/docs/configuration/aliases/) page for more details on it.
+Read the [Aliases concept](https://goc8ycli.netlify.app/docs/configuration/aliases/) page for more details about it.
 
 Below is an example of an `extension.yaml` file which defines one alias called `mo`. `mo` pretty prints a managed object as json when given a managed object's id.
-
-:::note
-The example below does not use the `c8y` prefix in the command as it is a non-shell alias, meaning that the alias is not executed in an external shell. 
-:::
 
 ```yaml title="file: extension.yaml"
 version: "v1"
@@ -125,7 +112,7 @@ An extension can provide templates which are accessible when using the `template
 
 Information about what a template is and how to create on can be found in the [Templates concept](https://goc8ycli.netlify.app/docs/concepts/templates/) page.
 
-Below show an small example of a `jsonnet` template which is for a custom operation which accepts one template variable called `action`.
+Below shows an small example of a `jsonnet` template to create a custom operation which accepts one template variable called `action`.
 
 ```jsonnet title="file: ./templates/custom.operation.jsonnet"
 {
@@ -149,11 +136,11 @@ c8y operations create --device 12345 --template myext::custom.operation.jsonnet 
 
 ### Views
 
-Views allow you to custom what fragments are displayed by default. A view definition has a selection criteria which controls when the view is activated and which columns are displayed on the console.
+Views allow you to custom what fragments are displayed by default for specific responses. A view definition has a selection criteria which controls when the view is activated and which columns are displayed on the console.
 
 Checkout the [Views concept](https://goc8ycli.netlify.app/docs/concepts/views/) page for more details.
 
-Like templates, extension views are also prefixed with `<EXTENSION_NAME>::` (without the `c8y-` prefix) to avoid name clashes amongst extensions and any user-created views.
+Like templates, extension views are also prefixed with `<EXTENSION_NAME>::` (without the `c8y-` prefix) to avoid name clashes amongst extensions and any other user-created views.
 
 Views are generally automatically selected based on their activation criteria (and priority), but they can also be manually activated using the global `view` flag.
 
@@ -190,7 +177,7 @@ c8y extensions list --raw
 
 **Prerequisites**
 
-Installing extensions requires the `git` command. When an extension is installed from an external source, git is used to clone the repository to your file system. If you are cloning a private repository, then it is up to you to provide the necessary credentials when prompted. `go-c8y-cli` does not handle any of the repository authentication.
+Installing extensions requires the `git` command to be already installed. When an extension is installed from an external source, git is used to clone the repository to your file system. If you are cloning a private repository, then it is up to you to provide the necessary credentials when prompted. `go-c8y-cli` does not handle any of the repository authentication. If you are having problems then try cloning the repository manually.
 
 If you do not have git on your machine, then you also install an extension from a local folder.
 
@@ -228,7 +215,7 @@ c8y myext list
 
 
 :::caution
-Never edit an extension directly from the `go-c8y-cli` extension folder as you will loose any unpublished changes if you call `c8y extensions delete <name>` command!
+Never edit an extension directly from the `go-c8y-cli` extension folder as you will lose any unpublished changes if you call the `c8y extensions delete <name>` command!
 
 Instead clone the extension manually and install it using the filesystem path to the cloned repo. This way `go-c8y-cli` will only create a symlink to the folder, so deleting the extension will only remove the symlink and not the original folder.
 :::
@@ -245,11 +232,9 @@ c8y extensions delete my-extension
 
 </CodeExample>
 
-If an extension was installed via a local folder, then only the symlink to the extension will be deleted.
-
 ### Creating
 
-To make it easier to create your own extensions, there is an in-built command which generates an extension with some examples. You can create the extension using
+To make it easier to create your own extensions, there is an in-built command which generates an extension with some examples. This is done using
 
 <CodeExample>
 
@@ -259,7 +244,7 @@ c8y extensions create myext
 
 </CodeExample>
 
-Follow the on-screen instructions for using it.
+Then follow the on-screen instructions for using it.
 
 :::tip
 Creating an extension requires `git` to already by installed.
@@ -269,6 +254,23 @@ Creating an extension requires `git` to already by installed.
 The extension will be automatically prefixed with `c8y-` so that all extensions follow the same convention making them easier to find on GitHub.
 :::
 
+### Updating an extension
+
+Extensions can be updated using the following command. Any extensions which were installed from a local folder will be ignored.
+
+<CodeExample>
+
+```bash
+# Update a single extension
+c8y extensions update myext
+
+# Update all extensions
+c8y extensions update --all
+```
+
+</CodeExample>
+
+Extensions are updated by `go-c8y-cli` by using standard git commands, `git fetch` and `git pull`.
 
 ## Advanced usage
 
