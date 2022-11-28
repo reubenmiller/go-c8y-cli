@@ -738,15 +738,6 @@ func (m *Manager) installDir() string {
 	return m.dataDir()
 }
 
-//go:embed ext_tmpls/goBinMain.go.txt
-var mainGoTmpl string
-
-//go:embed ext_tmpls/goBinWorkflow.yml
-var goBinWorkflow []byte
-
-//go:embed ext_tmpls/otherBinWorkflow.yml
-var otherBinWorkflow []byte
-
 //go:embed ext_tmpls/script.sh
 var scriptTmpl string
 
@@ -764,9 +755,6 @@ var exampleJsonnet []byte
 
 //go:embed ext_tmpls/exampleDevice.json
 var exampleView []byte
-
-//go:embed ext_tmpls/buildScript.sh
-var buildScript []byte
 
 func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error {
 	exe, err := m.lookPath("git")
@@ -815,9 +803,9 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 	}
 
 	if tmplType == extensions.GoBinTemplateType {
-		return m.goBinScaffolding(exe, name)
+		return nil
 	} else if tmplType == extensions.OtherBinTemplateType {
-		return m.otherBinScaffolding(exe, name)
+		return nil
 	}
 
 	script := fmt.Sprintf(scriptInventoryTmpl, cmdName, "list")
@@ -834,60 +822,6 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 
 	// stage remaining files
 	return m.newCommand(exe, "-C", name, "add", "**").Run()
-}
-
-func (m *Manager) otherBinScaffolding(gitExe, name string) error {
-	if err := writeFile(filepath.Join(name, ".github", "workflows", "release.yml"), otherBinWorkflow, 0644); err != nil {
-		return err
-	}
-	buildScriptPath := filepath.Join("script", "build.sh")
-	if err := writeFile(filepath.Join(name, buildScriptPath), buildScript, 0755); err != nil {
-		return err
-	}
-	if err := m.newCommand(gitExe, "-C", name, "add", buildScriptPath, "--chmod=+x").Run(); err != nil {
-		return err
-	}
-	return m.newCommand(gitExe, "-C", name, "add", ".").Run()
-}
-
-func (m *Manager) goBinScaffolding(gitExe, name string) error {
-	goExe, err := m.lookPath("go")
-	if err != nil {
-		return fmt.Errorf("go is required for creating Go extensions: %w", err)
-	}
-
-	if err := writeFile(filepath.Join(name, ".github", "workflows", "release.yml"), goBinWorkflow, 0644); err != nil {
-		return err
-	}
-
-	mainGo := fmt.Sprintf(mainGoTmpl, name)
-	if err := writeFile(filepath.Join(name, "main.go"), []byte(mainGo), 0644); err != nil {
-		return err
-	}
-
-	host := m.config.DefaultHost()
-	currentUser := m.config.ExtensionDefaultUsername()
-
-	goCmds := [][]string{
-		{"mod", "init", fmt.Sprintf("%s/%s/%s", host, currentUser, name)},
-		{"mod", "tidy"},
-		{"build"},
-	}
-
-	ignore := fmt.Sprintf("/%[1]s\n/%[1]s.exe\n", name)
-	if err := writeFile(filepath.Join(name, ".gitignore"), []byte(ignore), 0644); err != nil {
-		return err
-	}
-
-	for _, args := range goCmds {
-		goCmd := m.newCommand(goExe, args...)
-		goCmd.Dir = name
-		if err := goCmd.Run(); err != nil {
-			return fmt.Errorf("failed to set up go module: %w", err)
-		}
-	}
-
-	return m.newCommand(gitExe, "-C", name, "add", ".").Run()
 }
 
 func isSymlink(m os.FileMode) bool {
