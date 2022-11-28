@@ -113,7 +113,7 @@ func GetFlagStringValues(cmd *cobra.Command, name string) ([]string, error) {
 	return items, nil
 }
 
-// ErrInvalidIDFormat invalid ID foratm
+// ErrInvalidIDFormat invalid ID format
 var ErrInvalidIDFormat = errors.New("invalid id format")
 
 // ValidateID returns an error if the input value does not match an id
