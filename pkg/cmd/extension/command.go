@@ -172,13 +172,13 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 
 					cs := io.ColorScheme()
 					if err := m().Install(repo, extName, pinFlag); err != nil {
-						if errors.Is(err, releaseNotFoundErr) {
+						if errors.Is(err, ErrReleaseNotFound) {
 							return fmt.Errorf("%s Could not find a release of %s for %s",
 								cs.FailureIcon(), args[0], cs.Cyan(pinFlag))
-						} else if errors.Is(err, commitNotFoundErr) {
+						} else if errors.Is(err, ErrCommitNotFound) {
 							return fmt.Errorf("%s %s does not exist in %s",
 								cs.FailureIcon(), cs.Cyan(pinFlag), args[0])
-						} else if errors.Is(err, repositoryNotFoundErr) {
+						} else if errors.Is(err, ErrRepositoryNotFound) {
 							return fmt.Errorf("%s Could not find extension '%s' on host %s",
 								cs.FailureIcon(), args[0], repo.RepoHost())
 						}

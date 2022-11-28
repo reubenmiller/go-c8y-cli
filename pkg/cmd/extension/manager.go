@@ -412,11 +412,11 @@ func (m *Manager) Install(repo ghrepo.Interface, name string, target string) err
 	if strings.Contains(repo.RepoHost(), "github") {
 		isBin, err := isBinExtension(m.client, repo)
 		if err != nil {
-			if errors.Is(err, releaseNotFoundErr) {
+			if errors.Is(err, ErrReleaseNotFound) {
 				if ok, err := repoExists(m.client, repo); err != nil {
 					return err
 				} else if !ok {
-					return repositoryNotFoundErr
+					return ErrRepositoryNotFound
 				}
 			} else {
 				return fmt.Errorf("could not check for binary extension: %w", err)

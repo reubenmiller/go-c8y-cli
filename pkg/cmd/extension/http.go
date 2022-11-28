@@ -42,33 +42,6 @@ func repoExists(httpClient *http.Client, repo ghrepo.Interface) (bool, error) {
 	}
 }
 
-func hasScript(httpClient *http.Client, repo ghrepo.Interface) (bool, error) {
-	path := fmt.Sprintf("repos/%s/%s/contents/%s",
-		repo.RepoOwner(), repo.RepoName(), repo.RepoName())
-	url := RESTPrefix(repo.RepoHost()) + path
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return false, err
-	}
-
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return false, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == 404 {
-		return false, nil
-	}
-
-	if resp.StatusCode > 299 {
-		err = HandleHTTPError(resp)
-		return false, err
-	}
-
-	return true, nil
-}
-
 func hasBundle(httpClient *http.Client, repo ghrepo.Interface) (bool, error) {
 	path := fmt.Sprintf("repos/%s/%s/contents",
 		repo.RepoOwner(), repo.RepoName())
@@ -135,9 +108,9 @@ func downloadAsset(httpClient *http.Client, asset releaseAsset, destPath string)
 	return err
 }
 
-var commitNotFoundErr = errors.New("commit not found")
-var releaseNotFoundErr = errors.New("release not found")
-var repositoryNotFoundErr = errors.New("repository not found")
+var ErrCommitNotFound = errors.New("commit not found")
+var ErrReleaseNotFound = errors.New("release not found")
+var ErrRepositoryNotFound = errors.New("repository not found")
 
 // fetchLatestRelease finds the latest published release for a repository.
 func fetchLatestRelease(httpClient *http.Client, baseRepo ghrepo.Interface) (*release, error) {
@@ -155,7 +128,7 @@ func fetchLatestRelease(httpClient *http.Client, baseRepo ghrepo.Interface) (*re
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 404 {
-		return nil, releaseNotFoundErr
+		return nil, ErrReleaseNotFound
 	}
 	if resp.StatusCode > 299 {
 		return nil, HandleHTTPError(resp)
@@ -192,7 +165,7 @@ func fetchReleaseFromTag(httpClient *http.Client, baseRepo ghrepo.Interface, tag
 
 	defer resp.Body.Close()
 	if resp.StatusCode == 404 {
-		return nil, releaseNotFoundErr
+		return nil, ErrReleaseNotFound
 	}
 	if resp.StatusCode > 299 {
 		return nil, HandleHTTPError(resp)
@@ -239,7 +212,7 @@ func fetchCommitSHA(httpClient *http.Client, baseRepo ghrepo.Interface, targetRe
 
 	defer resp.Body.Close()
 	if resp.StatusCode == 422 {
-		return "", commitNotFoundErr
+		return "", ErrCommitNotFound
 	}
 	if resp.StatusCode > 299 {
 		return "", HandleHTTPError(resp)
