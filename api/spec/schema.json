@@ -346,6 +346,14 @@
             "type": "string",
             "description": "Type of each item in the array related to the collectionType. Use '-' disable any automatic guessing"
           },
+          "responseType": {
+            "type": "string",
+            "description": "Expected response type returned by the server. If not provided a JSON object is assumed",
+            "enum": [
+              "object",
+              "array"
+            ]
+          },
           "skip": {
             "type": "boolean",
             "title": "Skip parameter",

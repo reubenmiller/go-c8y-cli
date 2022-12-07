@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+    It supports getting a summary of all tenants:
+        command: c8y tenantstatistics listSummaryAllTenants
+        exit-code: 0
+    
+    It supports raw values:
+        command: c8y tenantstatistics listSummaryAllTenants --raw
+        exit-code: 0
+        stdout:
+            match-pattern: |
+                \[.*\]
