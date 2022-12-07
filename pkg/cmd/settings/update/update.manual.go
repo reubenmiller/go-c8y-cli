@@ -336,6 +336,9 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
+	// proxy
+	"defaults.proxy": {"defaults.proxy", "string", "settings.defaults.proxy", []string{}, nil, cobra.ShellCompDirectiveNoFileComp},
+
 	// Table view settings
 	"views.rowMode": {"views.rowMode", "string", config.SettingsViewRowMode, []string{
 		tableviewer.RowModeTruncate,
