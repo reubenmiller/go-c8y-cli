@@ -108,9 +108,10 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 	defer cancel()
 	start := time.Now()
 
-	// TODO: Check if this is required
-	outData := make(map[string]interface{})
-	req.ResponseData = &outData
+	// Support both JSON objects or arrays, but default to an object
+	if req.ResponseData == nil {
+		req.ResponseData = make(map[string]interface{})
+	}
 	resp, err := r.Client.SendRequest(
 		ctx,
 		req,
@@ -827,10 +828,13 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 
 			emptyArray := []byte("[]\n")
 
-			if len(responseText) == len(emptyArray) && bytes.Equal(responseText, emptyArray) {
-				r.Logger.Info("No matching results found. Empty response will be omitted")
-				responseText = []byte{}
+			if !showRaw {
+				if len(responseText) == len(emptyArray) && bytes.Equal(responseText, emptyArray) {
+					r.Logger.Info("No matching results found. Empty response will be omitted")
+					responseText = []byte{}
+				}
 			}
+
 		} else {
 			responseText = resp.Body()
 		}

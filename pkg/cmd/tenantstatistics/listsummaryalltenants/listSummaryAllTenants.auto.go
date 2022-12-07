@@ -64,6 +64,8 @@ Get tenant summary statistics collection for the last 10 days, only return until
 		flags.WithExtendedPipelineSupport("", "", false),
 		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
+
+		flags.WithCollectionProperty("-"),
 	)
 
 	// Required flags
@@ -172,6 +174,8 @@ func (n *ListSummaryAllTenantsCmd) RunE(cmd *cobra.Command, args []string) error
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+
+		ResponseData: make([]map[string]interface{}, 0),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
