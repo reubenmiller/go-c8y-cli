@@ -534,7 +534,7 @@ func convertToCSV(flatMap map[string]interface{}, keys []string) string {
 	buf := bytes.Buffer{}
 	for i, key := range keys {
 		if i != 0 {
-			// handle for empty non-existant values by leaving it blank
+			// handle for empty non-existent values by leaving it blank
 			buf.WriteByte(',')
 		}
 		if value, ok := flatMap[key]; ok {
