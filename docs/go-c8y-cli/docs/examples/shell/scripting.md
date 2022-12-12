@@ -94,7 +94,7 @@ You can easily backup EPL Monitor files by exporting them from Cumulocity IoT an
 
 Each EPL Monitor file is saved as a separate file using it's name.
 
-:::Note
+:::note
 This example requires `jq` to be installed.
 :::
 
