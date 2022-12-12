@@ -87,3 +87,34 @@ echo "match1.out: matches: $(cat match1.out | wc -l)"
 echo "match2.out: matches: $(cat match2.out | wc -l)"
 echo "match3.out: matches: $(cat match3.out | wc -l)"
 ```
+
+### Backup EPL Monitor files from the Streaming Analytics engine
+
+You can easily backup EPL Monitor files by exporting them from Cumulocity IoT and saving them to disk.
+
+Each EPL Monitor file is saved as a separate file using it's name.
+
+:::Note
+This example requires `jq` to be installed.
+:::
+
+```bash
+#!/bin/bash
+#
+# Save EPL Monitor files in the platform from the Streaming Analytics engine
+#
+# Export each monitor file using the name as the the file name (with .mon) extension
+#
+i=0
+
+while read -r line; do
+    ((i++))
+
+    name="$( echo "$line" | jq -r '.name' )"
+    OUTPUT_FILE="${name}.mon"
+
+    echo "Saving EPL app ($i): $OUTPUT_FILE"
+    echo "$line" | jq -r '.apama_eplfile.contents' > "$OUTPUT_FILE"
+  
+done < <( c8y inventory list --type "apama_eplfile" --includeAll )
+```
