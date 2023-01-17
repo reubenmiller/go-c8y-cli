@@ -9,3 +9,12 @@ tests:
                 path: /tenant/tenants
                 body.domain: "abc.con.iot"
                 body.company: "ABC Con"
+
+    It uses explicit tenant id over piped value:
+        command: >
+          echo t11111 | c8y tenants get --id t22222 --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/tenants/t22222
