@@ -475,11 +475,24 @@ func WithOverrideValue(opts ...string) GetOption {
 	}
 }
 
+func ShouldReadFromPipeline(v string) bool {
+	return v == FlagReadFromPipeText || strings.HasPrefix(v, FlagReadFromPipeJSON)
+}
+
 // WithStringDefaultValue adds a string value from cli arguments
 func WithStringDefaultValue(defaultValue string, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, format := UnpackGetterOptions("%s", opts...)
+		var value string
+		var err error
+
+		if cmd.Flags().Changed(src) {
+			value, err = cmd.Flags().GetString(src)
+			if err == nil && !ShouldReadFromPipeline(value) {
+				return dst, applyFormatter(format, value), err
+			}
+		}
 
 		if inputIterators != nil && inputIterators.PipeOptions != nil {
 			if inputIterators.PipeOptions.Name == src {
@@ -488,16 +501,8 @@ func WithStringDefaultValue(defaultValue string, opts ...string) GetOption {
 			}
 		}
 
-		if !cmd.Flags().Changed(src) {
-			if defaultValue != "" {
-				return dst, defaultValue, nil
-			}
-			return "", defaultValue, nil
-		}
-
-		value, err := cmd.Flags().GetString(src)
-		if err != nil {
-			return dst, value, err
+		if defaultValue != "" {
+			return dst, defaultValue, nil
 		}
 		return dst, applyFormatter(format, value), err
 	}
