@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -316,6 +317,14 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 }
 
 func (n *CmdCreate) formatFilename(name string) string {
+	// Remove any characters which cause parsing problems in the future
+	// https://github.com/sindresorhus/escape-string-regexp/blob/master/index.js
+	reg := regexp.MustCompile(`[|\\{}()[\]^$+*?:/]`)
+	name = reg.ReplaceAllStringFunc(name, func(s string) string {
+		// Replace invalid char with an empty string
+		return ""
+	})
+
 	if !strings.HasSuffix(name, ".json") {
 		name = fmt.Sprintf("%s.json", name)
 	}
