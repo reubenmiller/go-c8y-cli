@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -296,7 +297,8 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	// session name (default to host and username)
 	hostname := "c8y"
 	if u, err := url.Parse(session.GetHost()); err == nil {
-		hostname = u.Host
+		// Don't include port number by default as it causes problems with paths across differents OS's
+		hostname = u.Hostname()
 	}
 
 	sessionName := hostname + "-" + session.Username
@@ -316,6 +318,13 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 }
 
 func (n *CmdCreate) formatFilename(name string) string {
+	// Remove any characters that don't match the allowed chars
+	reg := regexp.MustCompile(`[^A-Za-z0-9_#(). !,;'@%=&-]`)
+	name = reg.ReplaceAllStringFunc(name, func(s string) string {
+		// Replace invalid char with an empty string
+		return ""
+	})
+
 	if !strings.HasSuffix(name, ".json") {
 		name = fmt.Sprintf("%s.json", name)
 	}
