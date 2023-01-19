@@ -30,3 +30,37 @@ tests:
           },
           "username": "dummy"
         }
+
+  It santizes the session name:
+    command: |
+      export C8Y_SESSION_HOME=/tmp/session_create_test02/
+      rm -Rf /tmp/session_create_test02/
+      c8y sessions create --type dev --host "https://mytenant.iot.cumulocity.com:9090" --username "dummy@me.com" --password "test"
+      cat /tmp/session_create_test02/*.json | jq -c | c8y util show --select username,password,host -o json -c=false
+      rm -rf /tmp/session_create_test02/
+    exit-code: 0
+    stdout:
+      exactly: |
+        /tmp/session_create_test02/mytenant.iot.cumulocity.com-dummy@me.com.json
+        {
+          "host": "https://mytenant.iot.cumulocity.com:9090",
+          "password": "test",
+          "username": "dummy@me.com"
+        }
+
+  It santizes the session name when specified by the user:
+    command: |
+      export C8Y_SESSION_HOME=/tmp/session_create_test03/
+      rm -Rf /tmp/session_create_test03/
+      c8y sessions create --type dev --name 'some[]{}+*&?:/\_-(crazy)"!' --host "https://mytenant.iot.cumulocity.com:9090" --username "dummy@me.com" --password "test"
+      cat /tmp/session_create_test03/*.json | jq -c | c8y util show --select username,password,host -o json -c=false
+      rm -rf /tmp/session_create_test03/
+    exit-code: 0
+    stdout:
+      exactly: |
+        /tmp/session_create_test03/some&_-(crazy)!.json
+        {
+          "host": "https://mytenant.iot.cumulocity.com:9090",
+          "password": "test",
+          "username": "dummy@me.com"
+        }
