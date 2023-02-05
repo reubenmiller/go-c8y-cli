@@ -459,11 +459,12 @@ func Test_DebugStdinCommand(t *testing.T) {
 	cmd := setupTest()
 	stdin := fakestdin.NewStdIn()
 	defer stdin.Restore()
-	stdin.Write(`` + "\n")
-	// stdin.Write(`{"source":{"id":"1111"}}` + "\n")
+	// stdin.Write(`` + "\n")
+	stdin.Write(`{"id": "1", "props": {"prop1": "one", "prop2":"two"}}` + "\n")
+	stdin.Write(`{"id": "2", "props": {"prop1": "one"}}` + "\n")
 
 	cmdtext := `
-	api --method GET --url /measurement/measurements --customQueryParam "dateFrom=2022-08-10T14:59:29.561+02:00" --dry=false
+	util show --select props,id --output csvheader
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 

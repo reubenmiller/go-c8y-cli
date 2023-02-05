@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: csv
+
+
+tests:
+  It quotes csv fields when special characters are used:
+    command: |
+      cat manual/common/output/input_quotes.jsonl |
+        c8y util show --select id,name --output csvheader
+    exit-code: 0
+    stdout:
+      exactly: |
+        id,name
+        1,"someone's device01 managed by ""hal01"""
+        2,"someone's device02 managed by ""hal02"""
+        3,"someone's device03 \n1,2,3"
+        4,someone's
+
+  It supports uneven nested data shapes:
+    command: |
+      cat manual/common/output/input_uneven_shape.jsonl |
+        c8y util show --select props,id --output csvheader
+    exit-code: 0
+    stdout:
+      exactly: |
+        props.prop1,props.prop2,id
+        one,two,1
+        one,,2
+        ,two,2
+        ,,3
+        ,,4

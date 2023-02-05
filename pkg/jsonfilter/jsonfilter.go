@@ -22,6 +22,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+const CSVSpecialChars = ",\n\\\""
+
+var CSVQuote = []byte("\"")
+
 var Logger *logger.Logger
 
 func init() {
@@ -376,6 +380,11 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 	// skip flatten and select if a only a globstar is provided
 	// selectAllProperties := len(f.Pluck) == 1 && f.Pluck[0] == "**"
 	// && !selectAllProperties
+	delimiter := ","
+
+	fixedKeys := f.Pluck
+	fixedKeysSet := false
+
 	if (len(f.Pluck) > 0) || f.Flatten {
 		var bsub bytes.Buffer
 		jq.Writer(&bsub)
@@ -385,15 +394,19 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 			outputValues := make([]string, 0)
 
 			if showHeaders {
-				outputValues = append(outputValues, expandHeaderProperties(&formattedJSON, f.Pluck))
+				outputValues = append(outputValues, expandHeaderProperties(&formattedJSON, f.Pluck, delimiter))
 			}
 
 			for _, myval := range formattedJSON.Array() {
 
 				if myval.IsObject() {
-					if line, keys := f.pluckJsonValues(&myval, f.Pluck, f.Flatten, f.AsCSV); line != "" {
+					if line, keys := f.pluckJsonValues(&myval, fixedKeys, f.Flatten, f.AsCSV, delimiter); line != "" {
+						if !fixedKeysSet {
+							fixedKeysSet = true
+							fixedKeys = keys[:]
+						}
 						outputValues = append(outputValues, line)
-						setHeaderFunc(strings.Join(keys, ","))
+						setHeaderFunc(strings.Join(keys, delimiter))
 					}
 				} else {
 					outputValues = append(outputValues, myval.Raw)
@@ -402,8 +415,8 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 			return []byte(strings.Join(outputValues, "\n")), formatErrors(jq.Errors())
 		}
 
-		if line, keys := f.pluckJsonValues(&formattedJSON, f.Pluck, f.Flatten, f.AsCSV); line != "" {
-			setHeaderFunc(strings.Join(keys, ","))
+		if line, keys := f.pluckJsonValues(&formattedJSON, f.Pluck, f.Flatten, f.AsCSV, delimiter); line != "" {
+			setHeaderFunc(strings.Join(keys, delimiter))
 			return []byte(line), formatErrors(jq.Errors())
 		}
 
@@ -420,7 +433,7 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 	return b.Bytes(), formatErrors(jq.Errors())
 }
 
-func expandHeaderProperties(item *gjson.Result, properties []string) string {
+func expandHeaderProperties(item *gjson.Result, properties []string, delimiter string) string {
 	headers := []string{}
 
 	if item.IsArray() {
@@ -438,7 +451,7 @@ func expandHeaderProperties(item *gjson.Result, properties []string) string {
 			headers = append(headers, name)
 		}
 	}
-	return strings.Join(headers, ",")
+	return strings.Join(headers, delimiter)
 }
 
 func resolveKeyName(item *gjson.Result, key string) (name string, value interface{}, err error) {
@@ -459,7 +472,7 @@ func resolveKeyName(item *gjson.Result, key string) (name string, value interfac
 	return key, nil, nil
 }
 
-func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string, flat bool, asCSV bool) (string, []string) {
+func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string, flat bool, asCSV bool, delimiter string) (string, []string) {
 	if item == nil {
 		return "", nil
 	}
@@ -486,7 +499,7 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string, fl
 	var v []byte
 	if flat || asCSV {
 		if asCSV {
-			return convertToCSV(flatMap, flatKeys), flatKeys
+			return convertToCSV(flatMap, flatKeys, delimiter), flatKeys
 		}
 		v, err = json.Marshal(flatMap)
 	} else {
@@ -530,21 +543,39 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string, fl
 	return output.String(), flatKeys
 }
 
-func convertToCSV(flatMap map[string]interface{}, keys []string) string {
+func convertToCSV(flatMap map[string]interface{}, keys []string, delimiter string) string {
 	buf := bytes.Buffer{}
+	quoteField := delimiter == "," && len(keys) != 1
+
 	for i, key := range keys {
 		if i != 0 {
 			// handle for empty non-existent values by leaving it blank
-			buf.WriteByte(',')
+			buf.WriteString(delimiter)
 		}
 		if value, ok := flatMap[key]; ok {
 			if marshalledValue, err := json.Marshal(value); err != nil {
 				Logger.Warningf("failed to marshal value. value=%v, err=%s", value, err)
 			} else {
-				if !bytes.Contains(marshalledValue, []byte(",")) {
-					buf.Write(bytes.Trim(marshalledValue, "\""))
+				// Only add surrounding quotes if necessary (for cleaner output)
+				var withoutQuotes []byte
+				if bytes.HasPrefix(marshalledValue, CSVQuote) && bytes.HasSuffix(marshalledValue, CSVQuote) {
+					if quoteField {
+						withoutQuotes = bytes.ReplaceAll(marshalledValue[1:len(marshalledValue)-1], []byte("\\\""), []byte(`""`))
+					} else {
+						withoutQuotes = bytes.ReplaceAll(marshalledValue[1:len(marshalledValue)-1], []byte("\\\""), []byte(`"`))
+					}
+
 				} else {
-					buf.Write(marshalledValue)
+					withoutQuotes = marshalledValue
+				}
+				// withoutQuotes = bytes.ReplaceAll(withoutQuotes, []byte("\\\n"), []byte(`\n`))
+
+				if quoteField && bytes.ContainsAny(withoutQuotes, CSVSpecialChars) {
+					buf.Write(CSVQuote)
+					buf.Write(withoutQuotes)
+					buf.Write(CSVQuote)
+				} else {
+					buf.Write(withoutQuotes)
 				}
 			}
 		}

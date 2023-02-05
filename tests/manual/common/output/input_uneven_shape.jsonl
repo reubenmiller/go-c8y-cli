@@ -1,0 +1,5 @@
+{"id": "1", "props": {"prop1": "one", "prop2":"two"}}
+{"id": "2", "props": {"prop1": "one"}}
+{"id": "2", "props": {"prop2": "two"}}
+{"id": "3", "props": {}}
+{"id": "4"}

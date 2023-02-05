@@ -1,0 +1,4 @@
+{"id": "1", "name": "someone's device01 managed by \"hal01\"", "type": "c8yci_Example", "c8y_Example": {}, "values": [0, 1, 2], "floatValue": 1.234, "intValue": 100}
+{"id": "2", "name": "someone's device02 managed by \"hal02\"", "type": "c8yci_Example", "c8y_Example": {}, "values": [0, 1, 2], "floatValue": 1.234, "intValue": 100}
+{"id": "3", "name": "someone's device03 \n1,2,3", "type": "c8yci_Example", "c8y_Example": {}, "values": [0, 1, 2], "floatValue": 1.234, "intValue": 100}
+{"id": "4", "name": "someone's", "type": "c8yci_Example", "c8y_Example": {}, "values": [0, 1, 2], "floatValue": 1.234, "intValue": 100}
