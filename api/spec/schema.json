@@ -334,6 +334,10 @@
             "type": "string",
             "title": "Partial url i.e. /alarm/alarms"
           },
+          "addAccept": {
+            "type": "boolean",
+            "description": "Add an explicit Accept header value if set"
+          },
           "accept": {
             "type": "string",
             "description": "Accept header value. Data to be returned from the platform. The accept header will also control how the data will be displayed within the PowerShell module"

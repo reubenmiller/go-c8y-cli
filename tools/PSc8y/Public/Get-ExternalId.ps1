@@ -49,7 +49,7 @@ Get external identity
         $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "identity get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = "application/vnd.com.nsn.cumulocity.externalId+json"
+            Type = "application/vnd.com.nsn.cumulocity.externalid+json"
             ItemType = ""
             BoundParameters = $PSBoundParameters
         }
