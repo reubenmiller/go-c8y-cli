@@ -68,22 +68,29 @@
         {
           "name": "category",
           "type": "string",
-          "required": true,
           "description": "Category of option"
         },
         {
           "name": "key",
           "type": "string",
-          "required": true,
           "pipeline": true,
           "description": "Key of option"
         },
         {
           "name": "value",
           "type": "string",
-          "required": true,
           "description": "Value of option"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties"
         }
+      ],
+      "bodyRequiredKeys": [
+        "category",
+        "key",
+        "value"
       ]
     },
     {
@@ -229,9 +236,16 @@
         {
           "name": "value",
           "type": "string",
-          "required": true,
           "description": "New value"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties"
         }
+      ],
+      "bodyRequiredKeys": [
+        "value"
       ]
     },
     {

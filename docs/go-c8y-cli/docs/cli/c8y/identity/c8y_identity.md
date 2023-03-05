@@ -2,11 +2,11 @@
 category: identity
 title: c8y identity
 ---
-Cumulocity identity
+Cumulocity external identity
 
 ### Synopsis
 
-REST endpoint to interact with Cumulocity identity objects
+REST endpoint to interact with Cumulocity external identity objects
 
 ### Options
 

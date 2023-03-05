@@ -130,6 +130,14 @@ tests:
         path: /alarm/alarms
         query: pageSize=10&status=ACTIVE
 
+  It supports the pageSize flag:
+    command: |
+      c8y api /inventory/managedObjects --pageSize 10 --dry
+    exit-code: 0
+    stdout:
+      json:
+        query: pageSize=10
+
   It accepts positional arguments for path and defaults to GET (not using pipeline):
     command: |
       c8y api "/alarm/alarms"

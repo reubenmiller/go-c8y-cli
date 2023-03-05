@@ -2,7 +2,7 @@
 Function Get-ExternalIdCollection {
 <#
 .SYNOPSIS
-Get external id collection
+Get external identity collection
 
 .DESCRIPTION
 Get a collection of external ids related to an existing managed object
@@ -44,7 +44,7 @@ Get a list of external ids
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.externalIdCollection+json"
-            ItemType = "application/vnd.com.nsn.cumulocity.externalId+json"
+            ItemType = "application/vnd.com.nsn.cumulocity.externalid+json"
             BoundParameters = $PSBoundParameters
         }
     }

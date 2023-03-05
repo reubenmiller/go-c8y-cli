@@ -21,10 +21,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Go 1.18
+    - name: Set up Go 1.20
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18
+        go-version: "1.20"
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
@@ -41,6 +41,8 @@ jobs:
 
     - name: Install Task
       uses: arduino/setup-task@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build cli
       run: task build-powershell build-snapshot
@@ -92,13 +94,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Go 1.18
+    - name: Set up Go 1.20
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18
+        go-version: "1.20"
 
     - name: Install Task
       uses: arduino/setup-task@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - uses: actions/download-artifact@v3
       id: download
@@ -139,13 +143,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Go 1.18
+    - name: Set up Go 1.20
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18
+        go-version: "1.20"
     
     - name: Install Task
       uses: arduino/setup-task@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build powershell module
       run: task build-powershell build-snapshot

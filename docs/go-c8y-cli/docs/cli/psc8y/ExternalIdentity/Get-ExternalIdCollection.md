@@ -12,7 +12,7 @@ title: Get-ExternalIdCollection
 
 
 ## SYNOPSIS
-Get external id collection
+Get external identity collection
 
 ## SYNTAX
 

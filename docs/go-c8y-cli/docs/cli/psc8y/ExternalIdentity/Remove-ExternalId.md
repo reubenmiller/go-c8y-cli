@@ -12,7 +12,7 @@ title: Remove-ExternalId
 
 
 ## SYNOPSIS
-Delete external id
+Delete external identity
 
 ## SYNTAX
 

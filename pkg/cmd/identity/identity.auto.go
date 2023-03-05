@@ -19,8 +19,8 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdIdentity {
 
 	cmd := &cobra.Command{
 		Use:   "identity",
-		Short: "Cumulocity identity",
-		Long:  `REST endpoint to interact with Cumulocity identity objects`,
+		Short: "Cumulocity external identity",
+		Long:  `REST endpoint to interact with Cumulocity external identity objects`,
 	}
 
 	// Subcommands

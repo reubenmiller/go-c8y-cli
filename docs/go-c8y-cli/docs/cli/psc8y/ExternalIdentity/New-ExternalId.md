@@ -12,7 +12,7 @@ title: New-ExternalId
 
 
 ## SYNOPSIS
-Create external id
+Create external identity
 
 ## SYNTAX
 

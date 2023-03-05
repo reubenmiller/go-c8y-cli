@@ -19,11 +19,14 @@ Create a tenant option
 ### Options
 
 ```
-      --category string         Category of option (required)
-  -h, --help                    help for create
-      --key string              Key of option (required) (accepts pipeline)
-      --processingMode string   Cumulocity processing mode
-      --value string            Value of option (required)
+      --category string            Category of option
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help                       help for create
+      --key string                 Key of option (accepts pipeline)
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --value string               Value of option
 ```
 
 ### Options inherited from parent commands

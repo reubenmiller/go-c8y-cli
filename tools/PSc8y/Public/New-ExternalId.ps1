@@ -2,7 +2,7 @@
 Function New-ExternalId {
 <#
 .SYNOPSIS
-Create external id
+Create external identity
 
 .DESCRIPTION
 Create a new external id for an existing managed object
@@ -58,7 +58,7 @@ Create external identity (using pipeline)
         $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "identity create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = "application/vnd.com.nsn.cumulocity.externalId+json"
+            Type = "application/vnd.com.nsn.cumulocity.externalid+json"
             ItemType = ""
             BoundParameters = $PSBoundParameters
         }

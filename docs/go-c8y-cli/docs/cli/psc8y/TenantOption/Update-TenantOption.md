@@ -20,7 +20,7 @@ Update tenant option
 Update-TenantOption
 	[-Category] <String>
 	[-Key] <Object[]>
-	[-Value] <String>
+	[[-Value] <String>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -117,14 +117,14 @@ Accept wildcard characters: False
 ```
 
 ### -Value
-New value (required)
+New value
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 3
 Default value: None
 Accept pipeline input: False

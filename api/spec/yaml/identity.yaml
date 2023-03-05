@@ -2,18 +2,18 @@
 ---
 information:
   name: identity
-  description: Cumulocity identity
-  descriptionLong: 'REST endpoint to interact with Cumulocity identity objects'
+  description: Cumulocity external identity
+  descriptionLong: 'REST endpoint to interact with Cumulocity external identity objects'
   link: https://cumulocity.com/guides/reference/identity/
 
 endpoints:
   - name: getExternalIDCollection
     method: GET
-    description: Get external id collection
+    description: Get external identity collection
     descriptionLong: Get a collection of external ids related to an existing managed object
     path: identity/globalIds/{device}/externalIds
     accept: application/vnd.com.nsn.cumulocity.externalIdCollection+json
-    collectionType: application/vnd.com.nsn.cumulocity.externalId+json
+    collectionType: application/vnd.com.nsn.cumulocity.externalid+json
     collectionProperty: externalIds
     alias:
         go: list
@@ -53,12 +53,12 @@ endpoints:
 
 
   - name: getExternalID
-    description: Get external id
+    description: Get external identity
     descriptionLong: |
       Get an external identity object. An external identify will include the reference to a single device managed object
     method: GET
     path: /identity/externalIds/{type}/{name}
-    accept: application/vnd.com.nsn.cumulocity.externalId+json
+    accept: application/vnd.com.nsn.cumulocity.externalid+json
     alias:
         go: get
         powershell: Get-ExternalId
@@ -93,7 +93,7 @@ endpoints:
           - id
 
   - name: deleteExternalID
-    description: Delete external id
+    description: Delete external identity
     descriptionLong: Delete an existing external id. This does not delete the device managed object
     method: DELETE
     path: /identity/externalIds/{type}/{name}
@@ -143,8 +143,9 @@ endpoints:
   - name: newExternalID
     method: POST
     path: identity/globalIds/{device}/externalIds
-    accept: application/vnd.com.nsn.cumulocity.externalId+json
-    description: Create external id
+    addAccept: true
+    accept: application/vnd.com.nsn.cumulocity.externalid+json
+    description: Create external identity
     descriptionLong: Create a new external id for an existing managed object
     alias:
         go: create

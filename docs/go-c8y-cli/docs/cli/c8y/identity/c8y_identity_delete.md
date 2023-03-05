@@ -2,7 +2,7 @@
 category: identity
 title: c8y identity delete
 ---
-Delete external id
+Delete external identity
 
 ### Synopsis
 

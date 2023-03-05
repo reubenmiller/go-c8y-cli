@@ -24,14 +24,14 @@ type CreateCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewCreateCmd creates a command to Create external id
+// NewCreateCmd creates a command to Create external identity
 func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 	ccmd := &CreateCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create external id",
+		Short: "Create external identity",
 		Long:  `Create a new external id for an existing managed object`,
 		Example: heredoc.Doc(`
 $ c8y identity create --device 1234 --type test --name myserialnumber
@@ -118,6 +118,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
+		flags.WithStaticStringValue("Accept", "application/vnd.com.nsn.cumulocity.externalid+json"),
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {

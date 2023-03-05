@@ -2,7 +2,7 @@
 Function Remove-ExternalId {
 <#
 .SYNOPSIS
-Delete external id
+Delete external identity
 
 .DESCRIPTION
 Delete an existing external id. This does not delete the device managed object

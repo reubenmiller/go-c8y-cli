@@ -2,7 +2,7 @@
 category: identity
 title: c8y identity create
 ---
-Create external id
+Create external identity
 
 ### Synopsis
 

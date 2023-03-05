@@ -2,7 +2,7 @@
 category: identity
 title: c8y identity get
 ---
-Get external id
+Get external identity
 
 ### Synopsis
 

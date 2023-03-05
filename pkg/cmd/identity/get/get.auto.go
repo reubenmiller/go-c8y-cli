@@ -24,14 +24,14 @@ type GetCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewGetCmd creates a command to Get external id
+// NewGetCmd creates a command to Get external identity
 func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 	ccmd := &GetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get external id",
+		Short: "Get external identity",
 		Long: `Get an external identity object. An external identify will include the reference to a single device managed object
 `,
 		Example: heredoc.Doc(`
