@@ -41,6 +41,8 @@ jobs:
 
     - name: Install Task
       uses: arduino/setup-task@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build cli
       run: task build-powershell build-snapshot
@@ -99,6 +101,8 @@ jobs:
 
     - name: Install Task
       uses: arduino/setup-task@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - uses: actions/download-artifact@v3
       id: download
@@ -146,6 +150,8 @@ jobs:
     
     - name: Install Task
       uses: arduino/setup-task@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build powershell module
       run: task build-powershell build-snapshot
