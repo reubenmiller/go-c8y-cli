@@ -2,7 +2,7 @@
 Function Get-ExternalIdCollection {
 <#
 .SYNOPSIS
-Get external id collection
+Get external identity collection
 
 .DESCRIPTION
 Get a collection of external ids related to an existing managed object

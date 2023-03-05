@@ -23,14 +23,14 @@ type DeleteCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewDeleteCmd creates a command to Delete external id
+// NewDeleteCmd creates a command to Delete external identity
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 	ccmd := &DeleteCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Delete external id",
+		Short: "Delete external identity",
 		Long:  `Delete an existing external id. This does not delete the device managed object`,
 		Example: heredoc.Doc(`
 $ c8y identity delete --type test --name myserialnumber

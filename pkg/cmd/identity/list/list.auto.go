@@ -25,14 +25,14 @@ type ListCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewListCmd creates a command to Get external id collection
+// NewListCmd creates a command to Get external identity collection
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	ccmd := &ListCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get external id collection",
+		Short: "Get external identity collection",
 		Long:  `Get a collection of external ids related to an existing managed object`,
 		Example: heredoc.Doc(`
 $ c8y identity list --device 12345
