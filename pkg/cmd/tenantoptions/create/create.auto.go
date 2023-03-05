@@ -44,9 +44,9 @@ Create a tenant option
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("category", "", "Category of option (required)")
-	cmd.Flags().String("key", "", "Key of option (required) (accepts pipeline)")
-	cmd.Flags().String("value", "", "Value of option (required)")
+	cmd.Flags().String("category", "", "Category of option")
+	cmd.Flags().String("key", "", "Key of option (accepts pipeline)")
+	cmd.Flags().String("value", "", "Value of option")
 
 	completion.WithOptions(
 		cmd,
@@ -57,13 +57,12 @@ Create a tenant option
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
-		flags.WithExtendedPipelineSupport("key", "key", true, "id"),
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
+		flags.WithExtendedPipelineSupport("key", "key", false, "id"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("category")
-	_ = cmd.MarkFlagRequired("value")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -145,6 +144,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("value", "value"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("category", "key", "value"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -34,8 +34,8 @@ Update a tenant option
         [object[]]
         $Key,
 
-        # New value (required)
-        [Parameter(Mandatory = $true)]
+        # New value
+        [Parameter()]
         [string]
         $Value
     )

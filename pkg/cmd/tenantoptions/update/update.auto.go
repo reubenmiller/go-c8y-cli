@@ -46,7 +46,7 @@ Update a tenant option
 
 	cmd.Flags().String("category", "", "Tenant Option category (required)")
 	cmd.Flags().String("key", "", "Tenant Option key (required) (accepts pipeline)")
-	cmd.Flags().String("value", "", "New value (required)")
+	cmd.Flags().String("value", "", "New value")
 
 	completion.WithOptions(
 		cmd,
@@ -57,13 +57,13 @@ Update a tenant option
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("key", "key", true, "id"),
 	)
 
 	// Required flags
 	_ = cmd.MarkFlagRequired("category")
-	_ = cmd.MarkFlagRequired("value")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -142,6 +142,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("value", "value"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("value"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
