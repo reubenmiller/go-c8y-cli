@@ -44,7 +44,7 @@ Get a list of external ids
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.externalIdCollection+json"
-            ItemType = "application/vnd.com.nsn.cumulocity.externalId+json"
+            ItemType = "application/vnd.com.nsn.cumulocity.externalid+json"
             BoundParameters = $PSBoundParameters
         }
     }

@@ -118,6 +118,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
+		flags.WithStaticStringValue("Accept", "application/vnd.com.nsn.cumulocity.externalid+json"),
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {

@@ -13,7 +13,7 @@ endpoints:
     descriptionLong: Get a collection of external ids related to an existing managed object
     path: identity/globalIds/{device}/externalIds
     accept: application/vnd.com.nsn.cumulocity.externalIdCollection+json
-    collectionType: application/vnd.com.nsn.cumulocity.externalId+json
+    collectionType: application/vnd.com.nsn.cumulocity.externalid+json
     collectionProperty: externalIds
     alias:
         go: list
@@ -58,7 +58,7 @@ endpoints:
       Get an external identity object. An external identify will include the reference to a single device managed object
     method: GET
     path: /identity/externalIds/{type}/{name}
-    accept: application/vnd.com.nsn.cumulocity.externalId+json
+    accept: application/vnd.com.nsn.cumulocity.externalid+json
     alias:
         go: get
         powershell: Get-ExternalId
@@ -143,7 +143,8 @@ endpoints:
   - name: newExternalID
     method: POST
     path: identity/globalIds/{device}/externalIds
-    accept: application/vnd.com.nsn.cumulocity.externalId+json
+    addAccept: true
+    accept: application/vnd.com.nsn.cumulocity.externalid+json
     description: Create external identity
     descriptionLong: Create a new external id for an existing managed object
     alias:
