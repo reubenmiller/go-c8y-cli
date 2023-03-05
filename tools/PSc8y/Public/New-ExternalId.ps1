@@ -2,7 +2,7 @@
 Function New-ExternalId {
 <#
 .SYNOPSIS
-Create external id
+Create external identity
 
 .DESCRIPTION
 Create a new external id for an existing managed object

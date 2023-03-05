@@ -2,7 +2,7 @@
 Function Get-ExternalId {
 <#
 .SYNOPSIS
-Get external id
+Get external identity
 
 .DESCRIPTION
 Get an external identity object. An external identify will include the reference to a single device managed object
