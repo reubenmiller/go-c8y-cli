@@ -18,8 +18,11 @@ c8y api [flags]
 $ c8y api GET /alarm/alarms
 Get a list of alarms
 
-$ c8y api GET "/alarm/alarms?pageSize=10&status=ACTIVE"
+$ c8y api GET "/alarm/alarms&status=ACTIVE" --pageSize 10
 Get a list of alarms with custom query parameters
+
+$ c8y api GET "/alarm/alarms&status=ACTIVE" --pageSize 1 --withTotalPages
+Get a total ACTIVE alarms
 
 $ c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source.id='12345'" --keepProperties
 Create a new alarm

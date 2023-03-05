@@ -18,9 +18,9 @@ Create tenant option
 
 ```
 New-TenantOption
-	[-Category] <String>
-	[-Key] <Object[]>
-	[-Value] <String>
+	[[-Category] <String>]
+	[[-Key] <Object[]>]
+	[[-Value] <String>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -87,14 +87,14 @@ Create a tenant option
 ## PARAMETERS
 
 ### -Category
-Category of option (required)
+Category of option
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
 Accept pipeline input: False
@@ -102,14 +102,14 @@ Accept wildcard characters: False
 ```
 
 ### -Key
-Key of option (required)
+Key of option
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 2
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
@@ -117,14 +117,14 @@ Accept wildcard characters: False
 ```
 
 ### -Value
-Value of option (required)
+Value of option
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 3
 Default value: None
 Accept pipeline input: False

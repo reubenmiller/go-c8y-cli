@@ -12,7 +12,7 @@ title: Get-ExternalId
 
 
 ## SYNOPSIS
-Get external id
+Get external identity
 
 ## SYNTAX
 
