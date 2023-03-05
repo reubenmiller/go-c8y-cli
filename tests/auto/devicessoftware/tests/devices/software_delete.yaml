@@ -1,0 +1,31 @@
+tests:
+    devices/software_delete_Get software status (using pipeline):
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.devices.list.json | c8y devices software delete --name "myapp"'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: DELETE
+                path: /service/advanced-software-mgmt/software
+    devices/software_delete_Remove software:
+        command: c8y devices software delete --id 22222 --name ntp
+        exit-code: 0
+        stdout:
+            json:
+                body.0.name: ntp
+                method: DELETE
+                path: /service/advanced-software-mgmt/software
+            contains:
+                - deviceId=22222
+    devices/software_delete_Remove software by name:
+        command: c8y devices software delete --id 11111 --name ntp --version 1.0.2
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.0.name: ntp
+                body.0.version: 1.0.2
+                method: DELETE
+                path: /service/advanced-software-mgmt/software
+            contains:
+                - deviceId=11111

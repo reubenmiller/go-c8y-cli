@@ -1,0 +1,228 @@
+# yaml-language-server: $schema=../schema.json
+---
+information:
+  name: devices/software
+  description: Cumulocity device software
+  descriptionLong: Managed device software (introduced in 10.14)
+  link: https://cumulocity.com/guides/10.14.0/reference/device-management-library/#software
+
+endpoints:
+  - name: findSoftware
+    method: GET
+    description: Find software
+    descriptionLong: Find software of a device
+    path: service/advanced-software-mgmt/software
+    accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.customDeviceSoftware+json
+    collectionProperty: 'softwareList'
+    alias:
+        go: list
+        powershell: Find-DeviceSoftwareCollection
+    examples:
+      powershell:
+        - description: Find all software (from a device)
+          command: Find-DeviceSoftwareCollection -Id 12345
+          skipTest: true
+
+      go:
+        - description: Find all software (from a device)
+          command: c8y devices software list --id 12345
+
+        - description: Find any software matching ssh*
+          command: c8y devices software list --id 12345 --name "ssh*"
+          # assertStdOut:
+          #   contains:
+          #     - status eq 'down'
+
+        - description: Find software matching the name 'ssh' and version '2.0.0'
+          command: c8y devices software list --id 12345 --name ssh --version 2.0.0
+          # assertStdOut:
+          #   contains:
+          #     - (name eq 'ntp') and (status eq 'down')
+
+    queryParameters:
+      - name: id
+        property: deviceId
+        type: '[]device'
+        pipeline: true
+        description: Device
+
+      - name: name
+        type: string
+        description: Software name
+
+      - name: version
+        type: string
+        description: Software version
+
+      - name: type
+        type: string
+        description: Software type
+
+  - name: createService
+    method: POST
+    path: service/advanced-software-mgmt/software
+    accept: application/json
+    contentType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    description: Create service
+    descriptionLong: Create a new service which is attached to the given device
+    alias:
+        go: create
+        powershell: New-DeviceSoftware
+    examples:
+        powershell:
+          - description: Create a new software for a device
+            command: New-DeviceSoftware -Id $software.id -Name ntp -Version 1.0.2 -Type apt
+            skipTest: true
+        go:
+          - description: Create a new software for a device
+            command: c8y devices software create --id 12345 --name ntp --version 1.0.2 --type apt
+            assertStdOut:
+              json:
+                path: r/service/advanced-software-mgmt/software$
+                body.0.name: ntp
+                body.0.version: "1.0.2"
+                body.0.type: apt
+
+    queryParameters:
+      - name: id
+        type: '[]device'
+        pipeline: true
+        description: Device
+
+    body:
+      - name: name
+        type: string
+        property: '0.name'
+        description: Software name
+
+      - name: version
+        type: string
+        property: '0.version'
+        description: Software version
+
+      - name: url
+        type: string
+        property: '0.url'
+        description: Software url
+
+      - name: type
+        type: string
+        property: '0.type'
+        description: Software type, e.g. apt
+
+      # TODO: causes the body to be an object instead of an array
+      # - name: data
+      #   type: json
+      #   description: Additional properties of the inventory.
+    bodyRequiredKeys:
+      - "0.name"
+
+  - name: update
+    method: PUT
+    path: service/advanced-software-mgmt/software
+    accept: application/json
+    contentType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    description: Update service status
+    descriptionLong: Update service status
+    alias:
+        go: update
+        powershell: Update-DeviceSoftware
+    examples:
+        powershell:
+          - description: Update software status
+            command: Update-DeviceSoftware -Id 12345 -Status up
+            skipTest: true
+        go:
+          - description: Update service status
+            command: c8y devices software update --id 12345 --name myapp
+
+          - description: Update service status
+            command: c8y devices software list --device 12345 --name ntp | c8y devices software update --status up
+            skipTest: true
+
+    queryParameters:
+      - name: id
+        type: '[]device'
+        description: Device
+
+    body:
+      - name: name
+        type: string
+        property: '0.name'
+        description: Service name
+
+      - name: version
+        type: string
+        property: '0.version'
+        description: Software version
+
+      - name: url
+        type: string
+        property: '0.url'
+        description: Software url
+
+      - name: type
+        type: string
+        property: '0.type'
+        description: Software type, e.g. apt
+
+      # TODO: causes the body to be an object instead of an array
+      # - name: data
+      #   type: json
+      #   description: Additional properties.
+
+  - name: delete
+    method: DELETE
+    path: service/advanced-software-mgmt/software
+    accept: application/json
+    contentType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    description: Delete software
+    descriptionLong: |
+      Delete an existing software
+
+      For a software package to be deleted it must match both the name and version
+    alias:
+        go: delete
+        powershell: Remove-DeviceSoftware
+    examples:
+        powershell:
+          - description: Remove software
+            command: Remove-DeviceSoftware -Id 12345 -Name ntp
+            skipTest: true
+        go:
+          - description: Remove software
+            command: c8y devices software delete --id 22222 --name ntp
+
+          - description: Remove software by name
+            command: c8y devices software delete --id 11111 --name ntp --version 1.0.2
+            skipTest: true
+
+          - description: Get software status (using pipeline)
+            command: c8y devices list | c8y devices software delete --name "myapp"
+            skipTest: true
+
+    queryParameters:
+      - name: id
+        property: deviceId
+        type: '[]device'
+        pipeline: true
+        description: Device
+
+    body:
+      - name: name
+        property: '0.name'
+        type: string
+        description: Software name
+
+      - name: version
+        property: '0.version'
+        type: string
+        description: Software version
+
+    bodyRequiredKeys:
+      - "0.name"
+      - "0.version"

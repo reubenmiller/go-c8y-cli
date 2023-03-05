@@ -1,0 +1,13 @@
+tests:
+    devices/software_create_Create a new software for a device:
+        command: c8y devices software create --id 12345 --name ntp --version 1.0.2 --type apt
+        exit-code: 0
+        stdout:
+            json:
+                body.0.name: ntp
+                body.0.type: apt
+                body.0.version: 1.0.2
+                method: POST
+                path: r/service/advanced-software-mgmt/software$
+            contains:
+                - id=12345
