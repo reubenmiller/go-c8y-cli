@@ -22,20 +22,19 @@ Create a tenant option
     [Alias()]
     [OutputType([object])]
     Param(
-        # Category of option (required)
-        [Parameter(Mandatory = $true)]
+        # Category of option
+        [Parameter()]
         [string]
         $Category,
 
-        # Key of option (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # Key of option
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Key,
 
-        # Value of option (required)
-        [Parameter(Mandatory = $true)]
+        # Value of option
+        [Parameter()]
         [string]
         $Value
     )
