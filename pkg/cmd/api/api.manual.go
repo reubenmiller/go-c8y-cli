@@ -238,6 +238,11 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return nil
 	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
