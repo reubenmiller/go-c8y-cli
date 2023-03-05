@@ -54,8 +54,11 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 			$ c8y api GET /alarm/alarms
 			Get a list of alarms
 
-			$ c8y api GET "/alarm/alarms?pageSize=10&status=ACTIVE"
+			$ c8y api GET "/alarm/alarms&status=ACTIVE" --pageSize 10
 			Get a list of alarms with custom query parameters
+
+			$ c8y api GET "/alarm/alarms&status=ACTIVE" --pageSize 1 --withTotalPages
+			Get a total ACTIVE alarms
 
 			$ c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source.id='12345'" --keepProperties
 			Create a new alarm
@@ -238,6 +241,16 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return nil
 	}
+
+	// Only add common query parameter (for paging) to GET requests
+	if strings.EqualFold(method, http.MethodGet) {
+		commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+		if err != nil {
+			return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+		}
+		commonOptions.AddQueryParameters(query)
+	}
+
 	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
