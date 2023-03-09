@@ -1,6 +1,6 @@
 tests:
     devices/software_list_Find all software (from a device):
-        command: c8y devices software list --id 12345
+        command: c8y devices software list --device 12345
         exit-code: 0
         stdout:
             json:
@@ -9,7 +9,7 @@ tests:
             contains:
                 - deviceId=12345
     devices/software_list_Find any software matching ssh*:
-        command: c8y devices software list --id 12345 --name "ssh*"
+        command: c8y devices software list --device 12345 --name "ssh*"
         exit-code: 0
         stdout:
             json:
@@ -19,7 +19,7 @@ tests:
                 - deviceId=12345
                 - name=ssh*
     devices/software_list_Find software matching the name 'ssh' and version '2.0.0':
-        command: c8y devices software list --id 12345 --name ssh --version 2.0.0
+        command: c8y devices software list --device 12345 --name ssh --version 2.0.0
         exit-code: 0
         stdout:
             json:

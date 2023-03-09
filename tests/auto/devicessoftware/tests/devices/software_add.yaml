@@ -1,0 +1,20 @@
+tests:
+    devices/software_add_Add software to a device:
+        command: c8y devices software add --device 12345 --name myapp --version 1.0.2
+        exit-code: 0
+        stdout:
+            json:
+                body.0.name: myapp
+                body.0.version: 1.0.2
+                method: PUT
+                path: /service/advanced-software-mgmt/software
+            contains:
+                - deviceId=12345
+    devices/software_add_Add software to multiple devices (using pipeline):
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.devices.list.json | c8y devices software add --name myapp --version 1.0.2'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: PUT
+                path: /service/advanced-software-mgmt/software

@@ -5,7 +5,7 @@ Function Find-DeviceSoftwareCollection {
 Find software
 
 .DESCRIPTION
-Find software of a device
+Find software packages for a device
 
 .LINK
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_software_list
@@ -26,7 +26,7 @@ Find all software (from a device)
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id,
+        $Device,
 
         # Software name
         [Parameter()]
@@ -66,13 +66,13 @@ Find all software (from a device)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            $Device `
             | Group-ClientRequests `
             | c8y devices software list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Id `
+            $Device `
             | Group-ClientRequests `
             | c8y devices software list $c8yargs
         }

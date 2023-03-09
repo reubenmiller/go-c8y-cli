@@ -33,15 +33,15 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Find software",
-		Long:  `Find software of a device`,
+		Long:  `Find software packages for a device`,
 		Example: heredoc.Doc(`
-$ c8y devices software list --id 12345
+$ c8y devices software list --device 12345
 Find all software (from a device)
 
-$ c8y devices software list --id 12345 --name "ssh*"
+$ c8y devices software list --device 12345 --name "ssh*"
 Find any software matching ssh*
 
-$ c8y devices software list --id 12345 --name ssh --version 2.0.0
+$ c8y devices software list --device 12345 --name ssh --version 2.0.0
 Find software matching the name 'ssh' and version '2.0.0'
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -52,21 +52,21 @@ Find software matching the name 'ssh' and version '2.0.0'
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Device (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{""}, "Device (accepts pipeline)")
 	cmd.Flags().String("name", "", "Software name")
 	cmd.Flags().String("version", "", "Software version")
 	cmd.Flags().String("type", "", "Software type")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("id", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
-		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
 
 		flags.WithCollectionProperty("softwareList"),
 	)
@@ -105,7 +105,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "id", "deviceId"),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("version", "version"),
 		flags.WithStringValue("type", "type"),

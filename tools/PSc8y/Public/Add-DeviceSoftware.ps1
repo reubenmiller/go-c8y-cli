@@ -1,19 +1,19 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function New-DeviceSoftware {
+Function Add-DeviceSoftware {
 <#
 .SYNOPSIS
-Create service
+Add software package
 
 .DESCRIPTION
-Create a new service which is attached to the given device
+Add software packages to a device
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_software_create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_software_add
 
 .EXAMPLE
-PS> New-DeviceSoftware -Id $software.id -Name ntp -Version 1.0.2 -Type apt
+PS> Add-DeviceSoftware -Device 12345 -Name myapp -Version 1.0.2
 
-Create a new software for a device
+Add software to a device
 
 
 #>
@@ -23,10 +23,9 @@ Create a new software for a device
     [OutputType([object])]
     Param(
         # Device
-        [Parameter(ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
+        [Parameter()]
         [object[]]
-        $Id,
+        $Device,
 
         # Software name
         [Parameter()]
@@ -49,7 +48,7 @@ Create a new software for a device
         $Type
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template"
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {
@@ -59,7 +58,7 @@ Create a new software for a device
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices software create"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices software add"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/json"
@@ -71,17 +70,12 @@ Create a new software for a device
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
-            | Group-ClientRequests `
-            | c8y devices software create $c8yargs `
+            c8y devices software add $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Id `
-            | Group-ClientRequests `
-            | c8y devices software create $c8yargs
+            c8y devices software add $c8yargs
         }
-        
     }
 
     End {}

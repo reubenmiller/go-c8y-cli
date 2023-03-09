@@ -417,6 +417,12 @@ func (b *MapBuilder) SetEmptyMap() *MapBuilder {
 	return b
 }
 
+// SetEmptyArray sets the body to an empty array. It will override an existing body
+func (b *MapBuilder) SetEmptyArray() *MapBuilder {
+	b.BodyRaw = []byte("[]")
+	return b
+}
+
 // ApplyTemplates merges the existing body data with a given jsonnet snippet.
 // When reverse is false, then the snippet will be applied to the existing data,
 // when reverse is true, then the given snippet will be the base, and the existing data will be applied to the new snippet.

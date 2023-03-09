@@ -1,10 +1,10 @@
 package software
 
 import (
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/software/create"
+	cmdAdd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/software/add"
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/software/delete"
 	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/software/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/software/update"
+	cmdSet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/software/set"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -20,13 +20,13 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdSoftware {
 	cmd := &cobra.Command{
 		Use:   "software",
 		Short: "Cumulocity device software",
-		Long:  `Managed device software (introduced in 10.14)`,
+		Long:  `Managed device software (introduced in 10.15)`,
 	}
 
 	// Subcommands
 	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
+	cmd.AddCommand(cmdSet.NewSetCmd(f).GetCommand())
+	cmd.AddCommand(cmdAdd.NewAddCmd(f).GetCommand())
 	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)

@@ -1,19 +1,19 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Update-DeviceSoftware {
+Function Set-DeviceSoftware {
 <#
 .SYNOPSIS
-Update service status
+Set/replace software list
 
 .DESCRIPTION
-Update service status
+Set/replace a list of software for a device
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_software_update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_software_set
 
 .EXAMPLE
-PS> Update-DeviceSoftware -Id 12345 -Status up
+PS> Set-DeviceSoftware -Device $software.id -Name ntp -Version 1.0.2 -Type apt
 
-Update software status
+Set/replace the list of software on a device
 
 
 #>
@@ -26,9 +26,9 @@ Update software status
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id,
+        $Device,
 
-        # Service name
+        # Software name
         [Parameter()]
         [string]
         $Name,
@@ -49,7 +49,7 @@ Update software status
         $Type
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template"
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {
@@ -59,7 +59,7 @@ Update software status
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices software update"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices software set"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/json"
@@ -71,15 +71,15 @@ Update software status
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            $Device `
             | Group-ClientRequests `
-            | c8y devices software update $c8yargs `
+            | c8y devices software set $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Id `
+            $Device `
             | Group-ClientRequests `
-            | c8y devices software update $c8yargs
+            | c8y devices software set $c8yargs
         }
         
     }

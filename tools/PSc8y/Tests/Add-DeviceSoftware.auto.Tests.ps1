@@ -1,12 +1,12 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Remove-DeviceSoftware" {
+Describe -Name "Add-DeviceSoftware" {
     BeforeEach {
 
     }
 
-    It -Skip "Remove software" {
-        $Response = PSc8y\Remove-DeviceSoftware -Id 12345 -Name ntp -Version 1.0.0
+    It -Skip "Add software to a device" {
+        $Response = PSc8y\Add-DeviceSoftware -Device 12345 -Name myapp -Version 1.0.2
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

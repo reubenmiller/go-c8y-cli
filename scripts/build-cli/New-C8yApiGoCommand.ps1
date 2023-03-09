@@ -268,6 +268,7 @@
     # Body
     #
     $GetBodyContents = "body"
+    $BodyInitializationOptions = ""
     
     if ($Specification.body) {
         switch ($Specification.bodyContent.type) {
@@ -277,6 +278,10 @@
             }
             "formdata" {
                 $GetBodyContents = "body"
+                break
+            }
+            "json_array" {
+                $BodyInitializationOptions = ".SetEmptyArray()"
                 break
             }
             default {
@@ -701,7 +706,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     
 
     // body
-    body := mapbuilder.NewInitializedMapBuilder($(($RESTMethod -match "PUT|POST" -and $Specification.body).ToString().ToLower()))
+    body := mapbuilder.NewInitializedMapBuilder($(($RESTMethod -match "PUT|POST" -and $Specification.body).ToString().ToLower()))${BodyInitializationOptions}
     err = flags.WithBody(
         cmd,
         body,

@@ -2,15 +2,15 @@
   "information": {
     "name": "devices/software",
     "description": "Cumulocity device software",
-    "descriptionLong": "Managed device software (introduced in 10.14)",
-    "link": "https://cumulocity.com/guides/10.14.0/reference/device-management-library/#software"
+    "descriptionLong": "Managed device software (introduced in 10.15)",
+    "link": "https://cumulocity.com/guides/reference/device-management-library/#advanced-software-management"
   },
   "endpoints": [
     {
       "name": "findSoftware",
       "method": "GET",
       "description": "Find software",
-      "descriptionLong": "Find software of a device",
+      "descriptionLong": "Find software packages for a device",
       "path": "service/advanced-software-mgmt/software",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.customDeviceSoftware+json",
@@ -30,21 +30,21 @@
         "go": [
           {
             "description": "Find all software (from a device)",
-            "command": "c8y devices software list --id 12345"
+            "command": "c8y devices software list --device 12345"
           },
           {
             "description": "Find any software matching ssh*",
-            "command": "c8y devices software list --id 12345 --name \"ssh*\""
+            "command": "c8y devices software list --device 12345 --name \"ssh*\""
           },
           {
             "description": "Find software matching the name 'ssh' and version '2.0.0'",
-            "command": "c8y devices software list --id 12345 --name ssh --version 2.0.0"
+            "command": "c8y devices software list --device 12345 --name ssh --version 2.0.0"
           }
         ]
       },
       "queryParameters": [
         {
-          "name": "id",
+          "name": "device",
           "property": "deviceId",
           "type": "[]device",
           "pipeline": true,
@@ -68,30 +68,30 @@
       ]
     },
     {
-      "name": "createService",
+      "name": "setSoftware",
       "method": "POST",
       "path": "service/advanced-software-mgmt/software",
       "accept": "application/json",
       "contentType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "description": "Create service",
-      "descriptionLong": "Create a new service which is attached to the given device",
+      "description": "Set/replace software list",
+      "descriptionLong": "Set/replace a list of software for a device",
       "alias": {
-        "go": "create",
-        "powershell": "New-DeviceSoftware"
+        "go": "set",
+        "powershell": "Set-DeviceSoftware"
       },
       "examples": {
         "powershell": [
           {
-            "description": "Create a new software for a device",
-            "command": "New-DeviceSoftware -Id $software.id -Name ntp -Version 1.0.2 -Type apt",
+            "description": "Set/replace the list of software on a device",
+            "command": "Set-DeviceSoftware -Device $software.id -Name ntp -Version 1.0.2 -Type apt",
             "skipTest": true
           }
         ],
         "go": [
           {
-            "description": "Create a new software for a device",
-            "command": "c8y devices software create --id 12345 --name ntp --version 1.0.2 --type apt",
+            "description": "Set/replace the list of software on a device",
+            "command": "c8y devices software set --device 12345 --name ntp --version 1.0.2 --type apt",
             "assertStdOut": {
               "json": {
                 "path": "r/service/advanced-software-mgmt/software$",
@@ -105,12 +105,16 @@
       },
       "queryParameters": [
         {
-          "name": "id",
+          "name": "device",
+          "property": "deviceId",
           "type": "[]device",
           "pipeline": true,
           "description": "Device"
         }
       ],
+      "bodyContent": {
+        "type": "json_array"
+      },
       "body": [
         {
           "name": "name",
@@ -133,60 +137,69 @@
         {
           "name": "type",
           "type": "string",
-          "property": "0.type",
+          "property": "0.softwareType",
           "description": "Software type, e.g. apt"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties."
         }
       ],
       "bodyRequiredKeys": [
-        "name"
+        "0.name"
       ]
     },
     {
-      "name": "update",
+      "name": "add",
       "method": "PUT",
       "path": "service/advanced-software-mgmt/software",
       "accept": "application/json",
       "contentType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "description": "Update service status",
-      "descriptionLong": "Update service status",
+      "description": "Add software package",
+      "descriptionLong": "Add software packages to a device",
       "alias": {
-        "go": "update",
-        "powershell": "Update-DeviceSoftware"
+        "go": "add",
+        "powershell": "Add-DeviceSoftware"
       },
       "examples": {
         "powershell": [
           {
-            "description": "Update software status",
-            "command": "Update-DeviceSoftware -Id 12345 -Status up",
+            "description": "Add software to a device",
+            "command": "Add-DeviceSoftware -Device 12345 -Name myapp -Version 1.0.2",
             "skipTest": true
           }
         ],
         "go": [
           {
-            "description": "Update service status",
-            "command": "c8y devices software update --id 12345 --name myapp"
+            "description": "Add software to a device",
+            "command": "c8y devices software add --device 12345 --name myapp --version 1.0.2"
           },
           {
-            "description": "Update service status",
-            "command": "c8y devices software list --device 12345 --name ntp | c8y devices software update --status up",
+            "description": "Add software to multiple devices (using pipeline)",
+            "command": "c8y devices list | c8y devices software add --name myapp --version 1.0.2",
             "skipTest": true
           }
         ]
       },
       "queryParameters": [
         {
-          "name": "id",
+          "name": "device",
+          "property": "deviceId",
           "type": "[]device",
           "description": "Device"
         }
       ],
+      "bodyContent": {
+        "type": "json_array"
+      },
       "body": [
         {
           "name": "name",
           "type": "string",
           "property": "0.name",
-          "description": "Service name"
+          "description": "Software name"
         },
         {
           "name": "version",
@@ -203,8 +216,13 @@
         {
           "name": "type",
           "type": "string",
-          "property": "0.type",
+          "property": "0.softwareType",
           "description": "Software type, e.g. apt"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties."
         }
       ]
     },
@@ -215,8 +233,8 @@
       "accept": "application/json",
       "contentType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "description": "Delete service",
-      "descriptionLong": "Delete an existing service",
+      "description": "Delete software",
+      "descriptionLong": "Delete an existing software item from a device. This does not send an operation,\nit just modifies the cloud digital twin.\n\nFor a software package to be deleted it must match both the name and version, and patterns\nare not supported.\n",
       "alias": {
         "go": "delete",
         "powershell": "Remove-DeviceSoftware"
@@ -225,36 +243,35 @@
         "powershell": [
           {
             "description": "Remove software",
-            "command": "Remove-DeviceSoftware -Id 12345 -Name ntp",
+            "command": "Remove-DeviceSoftware -Id 12345 -Name ntp -Version 1.0.0",
             "skipTest": true
           }
         ],
         "go": [
           {
             "description": "Remove software",
-            "command": "c8y devices software delete --id 22222 --name ntp"
-          },
-          {
-            "description": "Remove software by name",
-            "command": "c8y devices software delete --id 11111 --name ntp --version 1.0.2",
+            "command": "c8y devices software delete --device 22222 --name ntp --version 1.0.0",
             "skipTest": true
           },
           {
-            "description": "Get software status (using pipeline)",
-            "command": "c8y devices list | c8y devices software delete --name \"myapp\"",
+            "description": "Remove software from a list of devices (using pipeline)",
+            "command": "c8y devices list | c8y devices software delete --name \"myapp\" --version 2.0.0",
             "skipTest": true
           }
         ]
       },
       "queryParameters": [
         {
-          "name": "id",
+          "name": "device",
           "property": "deviceId",
           "type": "[]device",
           "pipeline": true,
           "description": "Device"
         }
       ],
+      "bodyContent": {
+        "type": "json_array"
+      },
       "body": [
         {
           "name": "name",
@@ -267,10 +284,16 @@
           "property": "0.version",
           "type": "string",
           "description": "Software version"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties."
         }
       ],
       "bodyRequiredKeys": [
-        "0.name"
+        "0.name",
+        "0.version"
       ]
     }
   ]

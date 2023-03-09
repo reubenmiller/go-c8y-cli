@@ -1,8 +1,7 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package get
+package set
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -18,58 +17,51 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// GetCmd command
-type GetCmd struct {
+// SetCmd command
+type SetCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewGetCmd creates a command to Get service
-func NewGetCmd(f *cmdutil.Factory) *GetCmd {
-	ccmd := &GetCmd{
+// NewSetCmd creates a command to Set/replace software list
+func NewSetCmd(f *cmdutil.Factory) *SetCmd {
+	ccmd := &SetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "get",
-		Short: "Get service",
-		Long:  `Get an existing service`,
+		Use:   "set",
+		Short: "Set/replace software list",
+		Long:  `Set/replace a list of software for a device`,
 		Example: heredoc.Doc(`
-$ c8y devices software get --id 22222
-Get service by id
-
-$ c8y devices software get --device 11111 --id ntp
-Get service by name
-
-$ c8y devices software list --device 12345 --name ntp | c8y devices software get
-Get service status (using pipeline)
+$ c8y devices software set --device 12345 --name ntp --version 1.0.2 --type apt
+Set/replace the list of software on a device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			return f.CreateModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Device id (required for name lookup)")
-	cmd.Flags().StringSlice("id", []string{""}, "Service id or name (required) (accepts pipeline)")
-	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")
-	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
-	cmd.Flags().Bool("withChildrenCount", false, "When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)")
-	cmd.Flags().Bool("withGroups", false, "When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.")
-	cmd.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
+	cmd.Flags().StringSlice("device", []string{""}, "Device (accepts pipeline)")
+	cmd.Flags().String("name", "", "Software name")
+	cmd.Flags().String("version", "", "Software version")
+	cmd.Flags().String("url", "", "Software url")
+	cmd.Flags().String("type", "", "Software type, e.g. apt")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithDeviceService("id", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
-
-		flags.WithExtendedPipelineSupport("id", "id", true, "managedObject.id", "id"),
+		flags.WithProcessingMode(),
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
+		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
@@ -81,7 +73,7 @@ Get service status (using pipeline)
 }
 
 // RunE executes the command
-func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *SetCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -107,20 +99,11 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithBoolValue("skipChildrenNames", "skipChildrenNames", ""),
-		flags.WithBoolValue("withChildren", "withChildren", ""),
-		flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
-		flags.WithBoolValue("withGroups", "withGroups", ""),
-		flags.WithBoolValue("withParents", "withParents", ""),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -136,6 +119,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
 		flags.WithStaticStringValue("Content-Type", "application/vnd.com.nsn.cumulocity.managedObject+json"),
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -153,11 +137,18 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
+	body := mapbuilder.NewInitializedMapBuilder(true).SetEmptyArray()
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
+		flags.WithStringValue("name", "0.name"),
+		flags.WithStringValue("version", "0.version"),
+		flags.WithStringValue("url", "0.url"),
+		flags.WithStringValue("type", "0.softwareType"),
+		cmdutil.WithTemplateValue(cfg),
+		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("0.name"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -169,15 +160,13 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
-		c8yfetcher.WithDeviceServiceByNameFirstMatch(client, args, "id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "GET",
+		Method:       "POST",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

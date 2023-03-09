@@ -2,16 +2,21 @@
 Function Remove-DeviceSoftware {
 <#
 .SYNOPSIS
-Delete service
+Delete software
 
 .DESCRIPTION
-Delete an existing service
+Delete an existing software item from a device. This does not send an operation,
+it just modifies the cloud digital twin.
+
+For a software package to be deleted it must match both the name and version, and patterns
+are not supported.
+
 
 .LINK
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_software_delete
 
 .EXAMPLE
-PS> Remove-DeviceSoftware -Id 12345 -Name ntp
+PS> Remove-DeviceSoftware -Id 12345 -Name ntp -Version 1.0.0
 
 Remove software
 
@@ -26,7 +31,7 @@ Remove software
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id,
+        $Device,
 
         # Software name
         [Parameter()]
@@ -61,13 +66,13 @@ Remove software
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            $Device `
             | Group-ClientRequests `
             | c8y devices software delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Id `
+            $Device `
             | Group-ClientRequests `
             | c8y devices software delete $c8yargs
         }

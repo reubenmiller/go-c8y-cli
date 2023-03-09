@@ -93,6 +93,7 @@ FormatsToProcess = @(
 FunctionsToExport = @(
 	'Add-DeviceChild',
 	'Add-DeviceGroupChild',
+	'Add-DeviceSoftware',
 	'Add-ManagedObjectChild',
 	'Add-RoleToGroup',
 	'Add-RoleToUser',
@@ -303,6 +304,7 @@ FunctionsToExport = @(
 	'Reset-UserPassword',
 	'Send-Configuration',
 	'Set-DeviceRequiredAvailability',
+	'Set-DeviceSoftware',
 	'Set-MicroserviceLogLevel',
 	'Unregister-Notification2Subscriber',
 	'Update-Agent',

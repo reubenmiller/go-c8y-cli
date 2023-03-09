@@ -24,24 +24,26 @@ type DeleteCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewDeleteCmd creates a command to Delete service
+// NewDeleteCmd creates a command to Delete software
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 	ccmd := &DeleteCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Delete service",
-		Long:  `Delete an existing service`,
+		Short: "Delete software",
+		Long: `Delete an existing software item from a device. This does not send an operation,
+it just modifies the cloud digital twin.
+
+For a software package to be deleted it must match both the name and version, and patterns
+are not supported.
+`,
 		Example: heredoc.Doc(`
-$ c8y devices software delete --id 22222 --name ntp
+$ c8y devices software delete --device 22222 --name ntp --version 1.0.0
 Remove software
 
-$ c8y devices software delete --id 11111 --name ntp --version 1.0.2
-Remove software by name
-
-$ c8y devices list | c8y devices software delete --name "myapp"
-Get software status (using pipeline)
+$ c8y devices list | c8y devices software delete --name "myapp" --version 2.0.0
+Remove software from a list of devices (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.DeleteModeEnabled()
@@ -51,21 +53,22 @@ Get software status (using pipeline)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Device (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{""}, "Device (accepts pipeline)")
 	cmd.Flags().String("name", "", "Software name")
 	cmd.Flags().String("version", "", "Software version")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
-		flags.WithExtendedPipelineSupport("id", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
-		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
+		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -102,7 +105,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "id", "deviceId"),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -140,17 +143,16 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
+	body := mapbuilder.NewInitializedMapBuilder(false).SetEmptyArray()
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
-		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "0.name"),
 		flags.WithStringValue("version", "0.version"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("0.name"),
+		flags.WithRequiredProperties("0.name", "0.version"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

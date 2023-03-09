@@ -1,9 +1,0 @@
-tests:
-    devices/software_update_Update service status:
-        command: $TEST_SHELL -c 'c8y devices software list --device 12345 --name ntp | c8y devices software update --status up'
-        exit-code: 0
-        skip: true
-        stdout:
-            json:
-                method: PUT
-                path: /service/advanced-software-mgmt/software

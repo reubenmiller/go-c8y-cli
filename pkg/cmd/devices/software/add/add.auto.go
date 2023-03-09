@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package create
+package add
 
 import (
 	"io"
@@ -17,35 +17,38 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CreateCmd command
-type CreateCmd struct {
+// AddCmd command
+type AddCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreateCmd creates a command to Create service
-func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
-	ccmd := &CreateCmd{
+// NewAddCmd creates a command to Add software package
+func NewAddCmd(f *cmdutil.Factory) *AddCmd {
+	ccmd := &AddCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create service",
-		Long:  `Create a new service which is attached to the given device`,
+		Use:   "add",
+		Short: "Add software package",
+		Long:  `Add software packages to a device`,
 		Example: heredoc.Doc(`
-$ c8y devices software create --id 12345 --name ntp --version 1.0.2 --type apt
-Create a new software for a device
+$ c8y devices software add --device 12345 --name myapp --version 1.0.2
+Add software to a device
+
+$ c8y devices list | c8y devices software add --name myapp --version 1.0.2
+Add software to multiple devices (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.UpdateModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Device (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{""}, "Device")
 	cmd.Flags().String("name", "", "Software name")
 	cmd.Flags().String("version", "", "Software version")
 	cmd.Flags().String("url", "", "Software url")
@@ -53,15 +56,16 @@ Create a new software for a device
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
-		flags.WithExtendedPipelineSupport("id", "id", false, "deviceId", "source.id", "managedObject.id", "id"),
-		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
+		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -72,7 +76,7 @@ Create a new software for a device
 }
 
 // RunE executes the command
-func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *AddCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -98,7 +102,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -136,19 +140,17 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
+	body := mapbuilder.NewInitializedMapBuilder(true).SetEmptyArray()
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
-		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "0.name"),
 		flags.WithStringValue("version", "0.version"),
 		flags.WithStringValue("url", "0.url"),
-		flags.WithStringValue("type", "0.type"),
+		flags.WithStringValue("type", "0.softwareType"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("name"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -166,7 +168,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "POST",
+		Method:       "PUT",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
