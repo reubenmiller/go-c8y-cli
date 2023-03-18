@@ -185,6 +185,7 @@ func CreateFakeCommand(parentCmd string, endpoint *models.EndPoint) *cobra.Comma
 
 	cmd.Flags().String("outputFileRaw", "", "")
 	cmd.Flags().String("outputFile", "", "")
+	cmd.Flags().Bool("raw", false, "")
 	return cmd
 }
 

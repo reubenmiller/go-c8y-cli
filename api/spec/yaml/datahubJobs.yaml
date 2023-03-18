@@ -1,0 +1,162 @@
+# yaml-language-server: $schema=../schema.json
+---
+information:
+  name: datahub/jobs
+  description: Cumulocity IoT Data Hub api
+  descriptionLong: Cumulocity IoT Data Hub api
+  link: https://cumulocity.com/guides/datahub/datahub-overview/
+
+endpoints:
+  - name: createJob
+    method: POST
+    path: service/datahub/dremio/api/v3/sql
+    accept: application/json
+    description: Submit a SQL query and retrieve the ID of the Dremio job executing this query
+    descriptionLong: Submit a SQL query and retrieve the ID of the Dremio job executing this query. The request is asynchronous, i.e., the response does not wait for the query execution to complete.
+    collectionProperty: "-"
+    alias:
+        go: create
+        powershell: New-DataHubJob
+    examples:
+      powershell:
+        - description: Create a new datahub job
+          command: New-DataHubJob -Sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms"
+          skipTest: true
+
+        - description: Create a new datahub job using context
+          command: New-DataHubJob -Sql "SELECT * FROM alarms" -Context "myTenantIdDataLake", "Dremio", "myTenantId"
+          skipTest: true
+
+      go:
+        - description: Create a new datahub job
+          command: c8y datahub jobs create --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms"
+
+        - description: Create a new datahub job using context
+          command: c8y datahub jobs create --sql "SELECT * FROM alarms" --context myTenantIdDataLake,Dremio,myTenantId
+          assertStdOut:
+            json:
+                body.sql: SELECT * FROM alarms
+                body.context.0: myTenantIdDataLake
+                body.context.1: Dremio
+                body.context.2: myTenantId
+                body.context.#: "3"
+                method: POST
+                path: /service/datahub/dremio/api/v3/sql
+
+    body:
+      - name: sql
+        type: string
+        required: false
+        description: The SQL query to execute. The table to query is either referred to with the full path or with the table name if the context defines the path
+        pipeline: true
+
+      - name: context
+        type: '[]string'
+        required: false
+        description: The context in which the query is executed
+
+      - name: data
+        type: json
+        description: Additional properties
+
+    bodyRequiredKeys:
+      - "sql"
+
+  - name: getJob
+    method: GET
+    path: service/datahub/dremio/api/v3/job/{id}
+    accept: application/json
+    description: Retrieve the status of a query job
+    descriptionLong: Retrieve the status of a query given the ID of the Dremio job executing the query
+    collectionProperty: "-"
+    alias:
+        go: get
+        powershell: Get-DataHubJob
+    examples:
+      powershell:
+        - description: Retrieve a datahub job
+          command: Get-DataHubJob -Id "22feee74-875a-561c-5508-04114bdda000"
+          skipTest: true
+
+      go:
+        - description: Retrieve a datahub job
+          command: c8y datahub jobs get --id "22feee74-875a-561c-5508-04114bdda000"
+
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        description: The unique identifier of a Dremio job
+        pipeline: true
+        pipelineAliases:
+          - id
+
+  - name: cancelJob
+    method: POST
+    path: service/datahub/dremio/api/v3/job/{id}/cancel
+    accept: application/json
+    description: Cancel a query job given the ID of the Dremio job executing the query
+    descriptionLong: Cancel a query job given the ID of the Dremio job executing the query
+    collectionProperty: "-"
+    alias:
+        go: cancel
+        powershell: Stop-DataHubJob
+    examples:
+      powershell:
+        - description: Cancel a datahub job
+          command: Stop-DataHubJob -Id "22feee74-875a-561c-5508-04114bdda000"
+          skipTest: true
+
+      go:
+        - description: Cancel a datahub job
+          command: c8y datahub jobs cancel --id "22feee74-875a-561c-5508-04114bdda000"
+
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        description: The unique identifier of a Dremio job
+        pipeline: true
+        pipelineAliases:
+          - id
+
+  - name: getResults
+    method: GET
+    path: service/datahub/dremio/api/v3/job/{id}/results
+    accept: application/json
+    description: Retrieve the query results given the ID of the Dremio job that has executed the query
+    descriptionLong: Retrieve the query results given the ID of the Dremio job that has executed the query
+    collectionProperty: rows
+    alias:
+        go: listResults
+        powershell: Get-DataHubJobResult
+    examples:
+      powershell:
+        - description: Retrieve a datahub job
+          command: Get-DataHubJobResult -Id "22feee74-875a-561c-5508-04114bdda000"
+          skipTest: true
+
+      go:
+        - description: Retrieve results from a datahub job
+          command: c8y datahub jobs listResults --id "22feee74-875a-561c-5508-04114bdda000"
+
+        - description: Retrieve results from a datahub job with custom datahub pagination
+          command: c8y datahub jobs listResults --id "22feee74-875a-561c-5508-04114bdda000" --offset 2 --limit 100
+
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        description: The unique identifier of a Dremio job
+        pipeline: true
+        pipelineAliases:
+          - id
+
+    queryParameters:
+      - name: offset
+        type: integer
+        description: The offset of the paginated results
+
+      - name: limit
+        type: integer
+        description: The limit of the paginated results
