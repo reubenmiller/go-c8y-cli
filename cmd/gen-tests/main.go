@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -169,6 +170,12 @@ func CreateFakeCommand(parentCmd string, endpoint *models.EndPoint) *cobra.Comma
 		} else if parameter.Type == "boolean" || parameter.Type == "optional_fragment" || parameter.Type == "booleanDefault" {
 			defaultValue := parameter.Default == "true"
 			cmd.Flags().Bool(parameter.Name, defaultValue, "")
+		} else if parameter.Type == "integer" {
+			defaultValue := 0
+			if v, err := strconv.Atoi(parameter.Default); err == nil {
+				defaultValue = v
+			}
+			cmd.Flags().Int(parameter.Name, defaultValue, "")
 		} else {
 			cmd.Flags().String(parameter.Name, "", "")
 		}
@@ -351,7 +358,7 @@ func getParameterValue(cmd *cobra.Command, parameter *models.Parameter) (value s
 	}
 	switch parameter.Type {
 	case "integer":
-		v, err := cmd.Flags().GetInt64(parameter.Name)
+		v, err := cmd.Flags().GetInt(parameter.Name)
 		if err == nil {
 			value = fmt.Sprintf("%d", v)
 		}
