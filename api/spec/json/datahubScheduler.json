@@ -1,0 +1,68 @@
+{
+  "information": {
+    "name": "datahub/scheduler",
+    "description": "Cumulocity IoT DataHub Scheduler",
+    "descriptionLong": "Cumulocity IoT DataHub Scheduler",
+    "link": "https://cumulocity.com/guides/datahub/datahub-overview/",
+    "hidden": true
+  },
+  "endpoints": [
+    {
+      "name": "list",
+      "method": "GET",
+      "path": "service/datahub/scheduler/latestjobs",
+      "accept": "application/json",
+      "description": "List scheduler items",
+      "descriptionLong": "List scheduler items",
+      "collectionProperty": "-",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-DataHubSchedulerCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "List the datahub scheduled items",
+            "command": "Get-DataHubSchedulerCollection",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "List the datahub scheduled items",
+            "command": "c8y datahub scheduler list"
+          }
+        ]
+      },
+      "flagMapping": [
+        {
+          "name": "pageSize",
+          "property": "limit"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "jobType",
+          "type": "string",
+          "default": "COMPACTION",
+          "validationSet": [
+            "COMPACTION"
+          ],
+          "description": "Job type"
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "default": "0",
+          "description": "Offset"
+        },
+        {
+          "name": "nextOffset",
+          "type": "integer",
+          "default": "0",
+          "description": "Next offset"
+        }
+      ]
+    }
+  ]
+}

@@ -20,5 +20,6 @@ tests:
         exit-code: 0
         stdout:
             json:
+                body.c8y_RequiredAvailability.responseInterval: "10"
                 method: PUT
                 path: /inventory/managedObjects/12345

@@ -1,0 +1,8 @@
+tests:
+    datahub/scheduler_list_List the datahub scheduled items:
+        command: c8y datahub scheduler list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /service/datahub/scheduler/latestjobs

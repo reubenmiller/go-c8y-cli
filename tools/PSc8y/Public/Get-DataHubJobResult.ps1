@@ -32,12 +32,7 @@ Retrieve a datahub job
         # The offset of the paginated results
         [Parameter()]
         [long]
-        $Offset,
-
-        # The limit of the paginated results
-        [Parameter()]
-        [long]
-        $Limit
+        $Offset
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get"

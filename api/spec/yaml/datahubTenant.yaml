@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=../schema.json
+---
+information:
+  name: datahub/tenant
+  description: Cumulocity IoT DataHub Tenant information
+  descriptionLong: Cumulocity IoT DataHub Tenant information
+  link: https://cumulocity.com/guides/datahub/datahub-overview/
+
+endpoints:
+  - name: get
+    method: GET
+    path: service/datahub/tenant
+    accept: application/json
+    description: Get tenant configuration
+    descriptionLong: Get tenant configuration
+    collectionProperty: "data"
+    alias:
+        go: get
+        powershell: Get-DataHubTenant
+    examples:
+      powershell:
+        - description: Get datahub tenant configuration
+          command: Get-DataHubTenant
+          skipTest: true
+
+      go:
+        - description: List the datahub users
+          command: c8y datahub tenant get

@@ -6,6 +6,18 @@ information:
   descriptionLong: Data Hub api
   link: https://cumulocity.com/guides/datahub/datahub-overview/
 
+# TODO
+# Auditing (time in milliseconds)
+# System log:  /service/datahub/auditlog?limit=10&offset=0&mints=1679180400000&maxts=1679266799999&status=[SUCCEEDED|FAILED|RUNNING]
+# Query log:  /service/datahub/usagemetrics/raw?type=[OFFLOADING|QUERY]&mints=1679180400000&maxts=1679266799999&filter=&encodedFilter=&offset=0&limit=10
+
+# Administration
+# Compaction status: /service/datahub/scheduler/latestjobs?nextOffset=10&jobType=COMPACTION&offset=10&limit=10  => data.jobExecutions
+# Usage statistics:  /service/datahub/usagemetrics/monthly?year=2023&month=3   => data.usageStatisticsByDay
+# System status
+  # /service/datahub/isalive  => data.version
+  # /service/datahub/system/properties  =>  data.[EnvironmentVariables|SystemProperties]
+
 endpoints:
   - name: query
     method: POST
@@ -45,7 +57,7 @@ endpoints:
         required: false
         description: The SQL query to execute
         pipeline: true
-      
+
       - name: limit
         type: integer
         default: "1000"

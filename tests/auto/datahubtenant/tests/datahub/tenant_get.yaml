@@ -1,0 +1,8 @@
+tests:
+    datahub/tenant_get_List the datahub users:
+        command: c8y datahub tenant get
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /service/datahub/tenant

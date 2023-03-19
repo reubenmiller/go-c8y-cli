@@ -4,6 +4,7 @@ tests:
         exit-code: 0
         stdout:
             json:
+                body.expiresInMinutes: "1440"
                 body.subscriber: testSubscriber
                 body.subscription: testSubscription
                 method: POST
@@ -13,6 +14,7 @@ tests:
         exit-code: 0
         stdout:
             json:
+                body.expiresInMinutes: "30"
                 body.subscriber: testSubscriber
                 body.subscription: testSubscription
                 method: POST

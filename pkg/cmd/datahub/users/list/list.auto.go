@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package listresults
+package list
 
 import (
 	"fmt"
@@ -17,28 +17,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// ListResultsCmd command
-type ListResultsCmd struct {
+// ListCmd command
+type ListCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewListResultsCmd creates a command to Retrieve the query results given the ID of the Dremio job that has executed the query
-func NewListResultsCmd(f *cmdutil.Factory) *ListResultsCmd {
-	ccmd := &ListResultsCmd{
+// NewListCmd creates a command to List the data hub users
+func NewListCmd(f *cmdutil.Factory) *ListCmd {
+	ccmd := &ListCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "listResults",
-		Short: "Retrieve the query results given the ID of the Dremio job that has executed the query",
-		Long:  `Retrieve the query results given the ID of the Dremio job that has executed the query`,
+		Use:   "list",
+		Short: "List the data hub users",
+		Long:  `List the data hub users`,
 		Example: heredoc.Doc(`
-$ c8y datahub jobs listResults --id "22feee74-875a-561c-5508-04114bdda000"
-Retrieve results from a datahub job
-
-$ c8y datahub jobs listResults --id "22feee74-875a-561c-5508-04114bdda000" --offset 2 --pageSize 100
-Retrieve results from a datahub job with custom datahub pagination
+$ c8y datahub users list
+List the datahub users
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -48,9 +45,6 @@ Retrieve results from a datahub job with custom datahub pagination
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "The unique identifier of a Dremio job (required) (accepts pipeline)")
-	cmd.Flags().Int("offset", 0, "The offset of the paginated results")
-
 	completion.WithOptions(
 		cmd,
 	)
@@ -58,9 +52,9 @@ Retrieve results from a datahub job with custom datahub pagination
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("id", "id", true, "id"),
+		flags.WithExtendedPipelineSupport("", "", false),
 
-		flags.WithCollectionProperty("rows"),
+		flags.WithCollectionProperty("data.users"),
 	)
 
 	// Required flags
@@ -71,7 +65,7 @@ Retrieve results from a datahub job with custom datahub pagination
 }
 
 // RunE executes the command
-func (n *ListResultsCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -97,7 +91,6 @@ func (n *ListResultsCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithIntValue("offset", "offset"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -106,7 +99,7 @@ func (n *ListResultsCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-	commonOptions.AddQueryParametersWithMapping(query, map[string]string{"pageSize": "limit"})
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -149,12 +142,11 @@ func (n *ListResultsCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("service/datahub/dremio/api/v3/job/{id}/results")
+	path := flags.NewStringTemplate("service/datahub/dremio/users")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err

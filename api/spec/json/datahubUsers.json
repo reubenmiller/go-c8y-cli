@@ -1,0 +1,38 @@
+{
+  "information": {
+    "name": "datahub/users",
+    "description": "Cumulocity IoT DataHub Users",
+    "descriptionLong": "Cumulocity IoT DataHub Users",
+    "link": "https://cumulocity.com/guides/datahub/datahub-overview/"
+  },
+  "endpoints": [
+    {
+      "name": "list",
+      "method": "GET",
+      "path": "service/datahub/dremio/users",
+      "accept": "application/json",
+      "description": "List the data hub users",
+      "descriptionLong": "List the data hub users",
+      "collectionProperty": "data.users",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-DataHubUserCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "List the datahub users",
+            "command": "Get-DataHubUserCollection",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "List the datahub users",
+            "command": "c8y datahub users list"
+          }
+        ]
+      }
+    }
+  ]
+}

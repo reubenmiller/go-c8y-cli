@@ -7,9 +7,11 @@ tests:
                 method: GET
                 path: /service/datahub/dremio/api/v3/job/22feee74-875a-561c-5508-04114bdda000/results
     datahub/jobs_listResults_Retrieve results from a datahub job with custom datahub pagination:
-        command: c8y datahub jobs listResults --id "22feee74-875a-561c-5508-04114bdda000" --offset 2 --limit 100
+        command: c8y datahub jobs listResults --id "22feee74-875a-561c-5508-04114bdda000" --offset 2 --pageSize 100
         exit-code: 0
         stdout:
             json:
                 method: GET
                 path: /service/datahub/dremio/api/v3/job/22feee74-875a-561c-5508-04114bdda000/results
+            contains:
+                - offset=2

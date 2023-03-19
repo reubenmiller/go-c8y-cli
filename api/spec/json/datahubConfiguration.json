@@ -1,0 +1,57 @@
+{
+  "information": {
+    "name": "datahub/configuration",
+    "description": "Cumulocity IoT DataHub Configurations",
+    "descriptionLong": "Cumulocity IoT DataHub Configurations",
+    "link": "https://cumulocity.com/guides/datahub/datahub-overview/"
+  },
+  "endpoints": [
+    {
+      "name": "list",
+      "method": "GET",
+      "path": "service/datahub/offloadingconfigurations",
+      "accept": "application/json",
+      "description": "Get offloading configurations",
+      "descriptionLong": "Get offloading configurations",
+      "collectionProperty": "data.offloadingConfigurations",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-DataHubConfigurationCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "List the datahub offloading configurations",
+            "command": "Get-DataHubConfigurationCollection",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "List the datahub offloading configurations",
+            "command": "c8y datahub configurations list"
+          }
+        ]
+      },
+      "flagMapping": [
+        {
+          "name": "pageSize",
+          "property": "limit"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "lastMaxReportedUUID",
+          "type": "string",
+          "description": "Last max reported UUID"
+        },
+        {
+          "name": "locale",
+          "type": "string",
+          "description": "",
+          "default": "en"
+        }
+      ]
+    }
+  ]
+}

@@ -21,6 +21,7 @@ tests:
         exit-code: 0
         stdout:
             json:
+                body.limit: "2000"
                 body.sql: SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms
                 method: POST
                 path: /service/datahub/sql

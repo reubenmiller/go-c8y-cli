@@ -1,8 +1,8 @@
 {
   "information": {
     "name": "datahub/jobs",
-    "description": "Cumulocity IoT Data Hub api",
-    "descriptionLong": "Cumulocity IoT Data Hub api",
+    "description": "Cumulocity IoT DataHub Jobs",
+    "descriptionLong": "Cumulocity IoT DataHub Jobs",
     "link": "https://cumulocity.com/guides/datahub/datahub-overview/"
   },
   "endpoints": [
@@ -184,7 +184,7 @@
           },
           {
             "description": "Retrieve results from a datahub job with custom datahub pagination",
-            "command": "c8y datahub jobs listResults --id \"22feee74-875a-561c-5508-04114bdda000\" --offset 2 --limit 100"
+            "command": "c8y datahub jobs listResults --id \"22feee74-875a-561c-5508-04114bdda000\" --offset 2 --pageSize 100"
           }
         ]
       },
@@ -200,16 +200,17 @@
           ]
         }
       ],
+      "flagMapping": [
+        {
+          "name": "pageSize",
+          "property": "limit"
+        }
+      ],
       "queryParameters": [
         {
           "name": "offset",
           "type": "integer",
           "description": "The offset of the paginated results"
-        },
-        {
-          "name": "limit",
-          "type": "integer",
-          "description": "The limit of the paginated results"
         }
       ]
     }
