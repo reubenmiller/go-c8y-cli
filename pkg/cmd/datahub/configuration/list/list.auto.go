@@ -34,7 +34,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get offloading configurations",
 		Long:  `Get offloading configurations`,
 		Example: heredoc.Doc(`
-$ c8y datahub configurations list
+$ c8y datahub configuration list
 List the datahub offloading configurations
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -46,7 +46,7 @@ List the datahub offloading configurations
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("lastMaxReportedUUID", "", "Last max reported UUID")
-	cmd.Flags().String("locale", "en", "")
+	cmd.Flags().String("locale", "en", "Locale")
 
 	completion.WithOptions(
 		cmd,

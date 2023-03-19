@@ -1,6 +1,6 @@
 tests:
     datahub/configuration_list_List the datahub offloading configurations:
-        command: c8y datahub configurations list
+        command: c8y datahub configuration list
         exit-code: 0
         stdout:
             json:

@@ -27,7 +27,7 @@ List the datahub offloading configurations
         [string]
         $LastMaxReportedUUID,
 
-        # 
+        # Locale
         [Parameter()]
         [string]
         $Locale

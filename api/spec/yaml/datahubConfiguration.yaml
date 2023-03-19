@@ -25,7 +25,7 @@ endpoints:
 
       go:
         - description: List the datahub offloading configurations
-          command: c8y datahub configurations list
+          command: c8y datahub configuration list
     
     flagMapping:
       - name: pageSize
@@ -38,5 +38,5 @@ endpoints:
 
       - name: locale
         type: string
-        description: ""
+        description: "Locale"
         default: en
