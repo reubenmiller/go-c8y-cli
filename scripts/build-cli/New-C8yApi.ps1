@@ -32,6 +32,11 @@
                 continue
             }
 
+            if ($Specification.information.skip -eq $true) {
+                Write-Warning "Skipping spec: Specification is marked to be skipped using information.skip property. This is required. file=$Path"
+                continue
+            }
+
             # Create root command (golang convention is to use lower case packages names)
             $packageName = $Specification.information.name.ToLower()
             $CommandOutput = Join-Path $OutputDir -ChildPath $packageName

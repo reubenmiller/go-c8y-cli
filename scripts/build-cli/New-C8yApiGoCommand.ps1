@@ -443,7 +443,16 @@
             return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
         }
 "@)
-        $null = $RESTQueryBuilderPost.AppendLine("commonOptions.AddQueryParameters(query)")
+        # Support mapping common flags to custom query parameters (e.g. if a service uses limit instead of pageSize)
+        # but for consistency the flag --pageSize will still be used and mapped to 'limit'.
+        if ($Specification.flagMapping) {
+            $flagAliases = foreach ($item in $Specification.flagMapping) {
+                "`"$($item.name)`":`"$($item.property)`""
+            }
+            $null = $RESTQueryBuilderPost.AppendLine("commonOptions.AddQueryParametersWithMapping(query, map[string]string{$($flagAliases -join ',')})")
+        } else {
+            $null = $RESTQueryBuilderPost.AppendLine("commonOptions.AddQueryParameters(query)")
+        }
     }
 
     #

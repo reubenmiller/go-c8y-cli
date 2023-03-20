@@ -4,5 +4,6 @@ tests:
         exit-code: 0
         stdout:
             json:
+                body.maximumAge: "90"
                 method: PUT
                 path: /retention/retentions/12345

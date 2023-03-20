@@ -295,6 +295,11 @@
           "type": "boolean",
           "title": "Command should be hidden",
           "description": "The command will still work but it will not be visible in the documentation and completions"
+        },
+        "skip": {
+          "type": "boolean",
+          "title": "All commands should be ignored",
+          "description": "ignore specification file"
         }
       },
       "required": [
@@ -491,6 +496,23 @@
               "powershell",
               "go"
             ]
+          },
+          "flagMapping": {
+            "type": "array",
+            "description": "Common flag mapping. Customize where common flags are mapped to, e.g. pageSize => limit",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Current property to map"
+                },
+                "property": {
+                  "type": "string",
+                  "description": "Value where the name should be mapped to"
+                }
+              }
+            }
           },
           "headerParameters": {
             "type": "array",

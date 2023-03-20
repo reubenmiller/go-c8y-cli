@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=../schema.json
+---
+information:
+  name: datahub
+  description: Cumulocity IoT Data Hub api
+  descriptionLong: Data Hub api
+  link: https://cumulocity.com/guides/datahub/datahub-overview/
+
+# TODO
+# Auditing (time in milliseconds)
+# System log:  /service/datahub/auditlog?limit=10&offset=0&mints=1679180400000&maxts=1679266799999&status=[SUCCEEDED|FAILED|RUNNING]
+# Query log:  /service/datahub/usagemetrics/raw?type=[OFFLOADING|QUERY]&mints=1679180400000&maxts=1679266799999&filter=&encodedFilter=&offset=0&limit=10
+
+# Administration
+# Compaction status: /service/datahub/scheduler/latestjobs?nextOffset=10&jobType=COMPACTION&offset=10&limit=10  => data.jobExecutions
+# Usage statistics:  /service/datahub/usagemetrics/monthly?year=2023&month=3   => data.usageStatisticsByDay
+# System status
+  # /service/datahub/isalive  => data.version
+  # /service/datahub/system/properties  =>  data.[EnvironmentVariables|SystemProperties]
+
+endpoints:
+  - name: query
+    method: POST
+    path: service/datahub/sql
+    accept: application/json
+    description: Execute a SQL query and retrieve the results
+    descriptionLong: Execute a SQL query and retrieve the results
+    collectionProperty: rows
+    alias:
+        go: query
+        powershell: Get-DataHubQueryResult
+    examples:
+      powershell:
+        - description: Get a list of alarms from datahub
+          command: Get-DataHubQueryResult -Sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms"
+          skipTest: true
+
+      go:
+        - description: Get a list of alarms from datahub
+          command: c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms"
+
+        - description: Get a list of alarms from datahub with custom limit
+          command: c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms" --limit 2000
+
+        - description: "Get a list of alarms from datahub using the PANDAS format (note the raw format is necessary here)"
+          command: c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms" --format PANDAS --raw
+
+    queryParameters:
+      - name: version
+        type: string
+        default: v1
+        description: The version of the high-performance API
+
+    body:
+      - name: sql
+        type: string
+        required: false
+        description: The SQL query to execute
+        pipeline: true
+
+      - name: limit
+        type: integer
+        default: "1000"
+        required: false
+        description: The maximum number of query results
+
+      - name: format
+        type: string
+        validationSet:
+          - DREMIO
+          - PANDAS
+        required: false
+        description: The response format, which is either DREMIO or PANDAS. The DREMIO format is the same response format as provided by the sql endpoint of the Standard API. The PANDAS format fits to the data format the Pandas library for Python expects.
+
+      - name: data
+        type: json
+        description: Additional properties
+
+    bodyRequiredKeys:
+      - sql
+      - limit

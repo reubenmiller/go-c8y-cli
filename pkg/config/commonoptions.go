@@ -43,3 +43,41 @@ func (options CommonCommandOptions) AddQueryParameters(query *flags.QueryTemplat
 		query.SetVariable(flags.FlagWithTotalElements, "true")
 	}
 }
+
+func (options CommonCommandOptions) AddQueryParametersWithMapping(query *flags.QueryTemplate, aliases map[string]string) {
+	if query == nil {
+		return
+	}
+
+	if options.CurrentPage > 0 {
+		if alias, ok := aliases[flags.FlagCurrentPage]; ok {
+			query.SetVariable(alias, options.CurrentPage)
+		} else {
+			query.SetVariable(flags.FlagCurrentPage, options.CurrentPage)
+		}
+	}
+
+	if options.PageSize > 0 {
+		if alias, ok := aliases[flags.FlagPageSize]; ok {
+			query.SetVariable(alias, options.PageSize)
+		} else {
+			query.SetVariable(flags.FlagPageSize, options.PageSize)
+		}
+	}
+
+	if options.WithTotalPages {
+		if alias, ok := aliases[flags.FlagWithTotalPages]; ok {
+			query.SetVariable(alias, "true")
+		} else {
+			query.SetVariable(flags.FlagWithTotalPages, "true")
+		}
+	}
+
+	if options.WithTotalElements {
+		if alias, ok := aliases[flags.FlagWithTotalElements]; ok {
+			query.SetVariable(alias, "true")
+		} else {
+			query.SetVariable(flags.FlagWithTotalElements, "true")
+		}
+	}
+}

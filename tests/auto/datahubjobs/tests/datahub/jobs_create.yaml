@@ -1,0 +1,21 @@
+tests:
+    datahub/jobs_create_Create a new datahub job:
+        command: c8y datahub jobs create --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms"
+        exit-code: 0
+        stdout:
+            json:
+                body.sql: SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms
+                method: POST
+                path: /service/datahub/dremio/api/v3/sql
+    datahub/jobs_create_Create a new datahub job using context:
+        command: c8y datahub jobs create --sql "SELECT * FROM alarms" --context myTenantIdDataLake,Dremio,myTenantId
+        exit-code: 0
+        stdout:
+            json:
+                body.context.#: "3"
+                body.context.0: myTenantIdDataLake
+                body.context.1: Dremio
+                body.context.2: myTenantId
+                body.sql: SELECT * FROM alarms
+                method: POST
+                path: /service/datahub/dremio/api/v3/sql

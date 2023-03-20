@@ -1,0 +1,27 @@
+tests:
+    datahub_query_Get a list of alarms from datahub:
+        command: c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms"
+        exit-code: 0
+        stdout:
+            json:
+                body.sql: SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms
+                method: POST
+                path: /service/datahub/sql
+    datahub_query_Get a list of alarms from datahub using the PANDAS format (note the raw format is necessary here):
+        command: c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms" --format PANDAS --raw
+        exit-code: 0
+        stdout:
+            json:
+                body.format: PANDAS
+                body.sql: SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms
+                method: POST
+                path: /service/datahub/sql
+    datahub_query_Get a list of alarms from datahub with custom limit:
+        command: c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms" --limit 2000
+        exit-code: 0
+        stdout:
+            json:
+                body.limit: "2000"
+                body.sql: SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms
+                method: POST
+                path: /service/datahub/sql

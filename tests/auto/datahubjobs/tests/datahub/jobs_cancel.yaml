@@ -1,0 +1,8 @@
+tests:
+    datahub/jobs_cancel_Cancel a datahub job:
+        command: c8y datahub jobs cancel --id "22feee74-875a-561c-5508-04114bdda000"
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /service/datahub/dremio/api/v3/job/22feee74-875a-561c-5508-04114bdda000/cancel

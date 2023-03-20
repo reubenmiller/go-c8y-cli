@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -169,6 +170,12 @@ func CreateFakeCommand(parentCmd string, endpoint *models.EndPoint) *cobra.Comma
 		} else if parameter.Type == "boolean" || parameter.Type == "optional_fragment" || parameter.Type == "booleanDefault" {
 			defaultValue := parameter.Default == "true"
 			cmd.Flags().Bool(parameter.Name, defaultValue, "")
+		} else if parameter.Type == "integer" {
+			defaultValue := 0
+			if v, err := strconv.Atoi(parameter.Default); err == nil {
+				defaultValue = v
+			}
+			cmd.Flags().Int(parameter.Name, defaultValue, "")
 		} else {
 			cmd.Flags().String(parameter.Name, "", "")
 		}
@@ -185,6 +192,7 @@ func CreateFakeCommand(parentCmd string, endpoint *models.EndPoint) *cobra.Comma
 
 	cmd.Flags().String("outputFileRaw", "", "")
 	cmd.Flags().String("outputFile", "", "")
+	cmd.Flags().Bool("raw", false, "")
 	return cmd
 }
 
@@ -350,7 +358,7 @@ func getParameterValue(cmd *cobra.Command, parameter *models.Parameter) (value s
 	}
 	switch parameter.Type {
 	case "integer":
-		v, err := cmd.Flags().GetInt64(parameter.Name)
+		v, err := cmd.Flags().GetInt(parameter.Name)
 		if err == nil {
 			value = fmt.Sprintf("%d", v)
 		}
@@ -492,6 +500,13 @@ func main() {
 	if err != nil {
 		os.Exit(2)
 	}
+
+	// Ignore skipped specs
+	if gen.Spec.Information.Skip {
+		loggerS.Fatalf("Specification is marked as skipped. Ignoring. file=%s", os.Args[2])
+		os.Exit(0)
+	}
+
 	outDir := os.Args[3]
 	if err := gen.CreateTests(outDir); err != nil {
 		os.Exit(3)

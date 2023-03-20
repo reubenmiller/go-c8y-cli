@@ -5,5 +5,6 @@ tests:
         stdout:
             json:
                 body.dataType: ALARM
+                body.maximumAge: "180"
                 method: POST
                 path: /retention/retentions

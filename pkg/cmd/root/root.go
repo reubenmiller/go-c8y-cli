@@ -30,6 +30,8 @@ import (
 	currenttenantCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currenttenant"
 	currentuserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentuser"
 	databrokerCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker"
+	datahubCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub"
+	datahubJobsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/jobs"
 	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups"
 	devicegroupsChildrenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/children"
 	deviceManagementCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement"
@@ -324,6 +326,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	measurements.AddCommand(measurementsAssertCmd.NewSubCommand(f).GetCommand())
 	measurements.AddCommand(measurementsCreateBulkCmd.NewCreateBulkCmd(f).GetCommand())
 	cmd.AddCommand(measurements)
+
+	// datahub
+	datahub := datahubCmd.NewSubCommand(f).GetCommand()
+	datahub.AddCommand(datahubJobsCmd.NewSubCommand(f).GetCommand())
+	cmd.AddCommand(datahub)
 
 	// device management
 	devicemanagement := deviceManagementCmd.NewSubCommand(f).GetCommand()

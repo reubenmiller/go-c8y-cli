@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=../schema.json
+---
+information:
+  name: datahub/scheduler
+  description: Cumulocity IoT DataHub Scheduler
+  descriptionLong: Cumulocity IoT DataHub Scheduler
+  link: https://cumulocity.com/guides/datahub/datahub-overview/
+  skip: true
+
+endpoints:
+  - name: list
+    method: GET
+    path: service/datahub/scheduler/latestjobs
+    accept: application/json
+    description: List scheduler items
+    descriptionLong: List scheduler items
+    # TODO: Data is stored as an object instead of an array, so the collectionProperty logic needs to change to support selecting the keys
+    # e.g. data.jobExecutions.<key>.*
+    # jq query: '.data.jobExecutions|to_entries | .[].value'
+    collectionProperty: "-"
+    alias:
+        go: list
+        powershell: Get-DataHubSchedulerCollection
+    examples:
+      powershell:
+        - description: List the datahub scheduled items
+          command: Get-DataHubSchedulerCollection
+          skipTest: true
+
+      go:
+        - description: List the datahub scheduled items
+          command: c8y datahub scheduler list
+
+    flagMapping:
+      - name: pageSize
+        property: limit
+
+    queryParameters:
+      - name: jobType
+        type: string
+        default: "COMPACTION"
+        validationSet:
+          - COMPACTION
+        description: Job type
+
+      - name: offset
+        type: integer
+        default: "0"
+        description: Offset
+
+      - name: nextOffset
+        type: integer
+        default: "0"
+        description: Next offset
