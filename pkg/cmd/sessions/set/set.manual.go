@@ -66,7 +66,7 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 	cmd.Flags().StringVar(&ccmd.sessionFilter, "sessionFilter", "", "Filter to be applied to the list of sessions even before the values can be selected")
 	cmd.Flags().StringVar(&ccmd.TFACode, "tfaCode", "", "Two Factor Authentication code")
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", defaultShell, "Shell type to return the environment variables")
-	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL or BASIC")
+	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared")
 	cmd.Flags().BoolVar(&ccmd.ClearToken, "clear", false, "Clear any existing tokens")
 
 	completion.WithOptions(
@@ -123,6 +123,16 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 				if len(parts) == 2 {
 					os.Unsetenv(parts[0])
 				}
+			}
+		}
+
+		// Clear existing token when using basic auth
+		if n.LoginType == c8y.AuthMethodBasic {
+			cfg.Logger.Infof("Clearing any existing token when using %s auth", c8y.AuthMethodBasic)
+			os.Unsetenv("C8Y_TOKEN")
+			if cfg.MustGetToken() != "" {
+				cfg.SetToken("")
+				n.onSave(nil)
 			}
 		}
 
