@@ -295,6 +295,11 @@
           "type": "boolean",
           "title": "Command should be hidden",
           "description": "The command will still work but it will not be visible in the documentation and completions"
+        },
+        "skip": {
+          "type": "boolean",
+          "title": "All commands should be ignored",
+          "description": "ignore specification file"
         }
       },
       "required": [

@@ -13,6 +13,11 @@
     $Name = $Specification.information.name.ToLower()
     $BaseName = Split-Path -Path $Specification.information.name.ToLower() -Leaf
 
+    if ($Specification.information.skip -eq $true) {
+        Write-Information "Specification is marked to be ignored"
+        return
+    }
+
     if (!$Name) {
         Write-Error "Missing root command name"
         return

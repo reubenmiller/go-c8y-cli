@@ -12,6 +12,7 @@ type SpecificationInformation struct {
 	Description     string `yaml:"description"`
 	DescriptionLong string `yaml:"descriptionLong"`
 	Link            string `yaml:"link"`
+	Skip            bool   `yaml:"skip"`
 }
 
 type EndPoint struct {

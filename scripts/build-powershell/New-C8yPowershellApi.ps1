@@ -26,6 +26,11 @@
 
             $Specification = Get-Content $Path -Raw -Encoding utf8 | ConvertFrom-Json
 
+            if ($Specification.information.skip -eq $true) {
+                Write-Verbose ("Skipping [{0}]" -f $Path)
+                continue
+            }
+
 			foreach ($iSpec in $Specification.endpoints) {
                 if ($iSpec.skip -eq $true) {
                     Write-Verbose ("Skipping [{0}]" -f $iSpec.name)

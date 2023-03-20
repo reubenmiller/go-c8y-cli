@@ -500,6 +500,13 @@ func main() {
 	if err != nil {
 		os.Exit(2)
 	}
+
+	// Ignore skipped specs
+	if gen.Spec.Information.Skip {
+		loggerS.Fatalf("Specification is marked as skipped. Ignoring. file=%s", os.Args[2])
+		os.Exit(0)
+	}
+
 	outDir := os.Args[3]
 	if err := gen.CreateTests(outDir); err != nil {
 		os.Exit(3)
