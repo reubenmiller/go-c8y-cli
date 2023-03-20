@@ -31,11 +31,7 @@ import (
 	currentuserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentuser"
 	databrokerCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker"
 	datahubCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub"
-	datahubConfigurationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/configuration"
 	datahubJobsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/jobs"
-	datahubSchedulerCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/scheduler"
-	datahubTenantCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/tenant"
-	datahubUsersCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/users"
 	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups"
 	devicegroupsChildrenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/children"
 	deviceManagementCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement"
@@ -334,10 +330,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// datahub
 	datahub := datahubCmd.NewSubCommand(f).GetCommand()
 	datahub.AddCommand(datahubJobsCmd.NewSubCommand(f).GetCommand())
-	datahub.AddCommand(datahubConfigurationCmd.NewSubCommand(f).GetCommand())
-	datahub.AddCommand(datahubSchedulerCmd.NewSubCommand(f).GetCommand())
-	datahub.AddCommand(datahubTenantCmd.NewSubCommand(f).GetCommand())
-	datahub.AddCommand(datahubUsersCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(datahub)
 
 	// device management

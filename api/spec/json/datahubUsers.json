@@ -3,7 +3,8 @@
     "name": "datahub/users",
     "description": "Cumulocity IoT DataHub Users",
     "descriptionLong": "Cumulocity IoT DataHub Users",
-    "link": "https://cumulocity.com/guides/datahub/datahub-overview/"
+    "link": "https://cumulocity.com/guides/datahub/datahub-overview/",
+    "skip": true
   },
   "endpoints": [
     {

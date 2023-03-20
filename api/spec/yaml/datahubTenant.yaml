@@ -5,6 +5,7 @@ information:
   description: Cumulocity IoT DataHub Tenant information
   descriptionLong: Cumulocity IoT DataHub Tenant information
   link: https://cumulocity.com/guides/datahub/datahub-overview/
+  skip: true
 
 endpoints:
   - name: get

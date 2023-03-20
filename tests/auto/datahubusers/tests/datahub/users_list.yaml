@@ -1,8 +1,0 @@
-tests:
-    datahub/users_list_List the datahub users:
-        command: c8y datahub users list
-        exit-code: 0
-        stdout:
-            json:
-                method: GET
-                path: /service/datahub/dremio/users

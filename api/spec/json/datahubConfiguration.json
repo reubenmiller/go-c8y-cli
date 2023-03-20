@@ -3,7 +3,8 @@
     "name": "datahub/configuration",
     "description": "Cumulocity IoT DataHub Configurations",
     "descriptionLong": "Cumulocity IoT DataHub Configurations",
-    "link": "https://cumulocity.com/guides/datahub/datahub-overview/"
+    "link": "https://cumulocity.com/guides/datahub/datahub-overview/",
+    "skip": true
   },
   "endpoints": [
     {

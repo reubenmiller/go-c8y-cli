@@ -5,7 +5,7 @@ information:
   description: Cumulocity IoT DataHub Scheduler
   descriptionLong: Cumulocity IoT DataHub Scheduler
   link: https://cumulocity.com/guides/datahub/datahub-overview/
-  hidden: true
+  skip: true
 
 endpoints:
   - name: list
