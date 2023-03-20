@@ -74,7 +74,10 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 			log.Printf("Ignoring dir: %+v", info.Name())
 			return filepath.SkipDir
 		}
-
+		if info.IsDir() && info.Name() == ".git" {
+			log.Printf("Ignoring dir: %+v", info.Name())
+			return filepath.SkipDir
+		}
 		if info.IsDir() {
 			return nil
 		}
