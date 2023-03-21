@@ -68,6 +68,7 @@ Get a list of alarms from datahub using the PANDAS format (note the raw format i
 		flags.WithExtendedPipelineSupport("sql", "sql", false, "id"),
 
 		flags.WithCollectionProperty("rows"),
+		flags.WithSemanticMethod("GET"),
 	)
 
 	// Required flags
