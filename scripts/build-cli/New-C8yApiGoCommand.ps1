@@ -507,11 +507,15 @@
     #
     # Pre run validation (disable some commands without switch flags)
     #
-    $PreRunFunction = switch ($Specification.method) {
-        "POST" { "f.CreateModeEnabled()" }
-        "PUT" { "f.UpdateModeEnabled()" }
-        "DELETE" { "f.DeleteModeEnabled()" }
-        default { "nil" }
+    if ($Specification.confirmation.disable -eq $true) {
+        $PreRunFunction = "nil"
+    } else {
+        $PreRunFunction = switch ($Specification.method) {
+            "POST" { "f.CreateModeEnabled()" }
+            "PUT" { "f.UpdateModeEnabled()" }
+            "DELETE" { "f.DeleteModeEnabled()" }
+            default { "nil" }
+        }
     }
 
     # Additional options

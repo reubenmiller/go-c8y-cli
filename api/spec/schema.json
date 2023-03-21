@@ -327,6 +327,16 @@
               "DELETE"
             ]
           },
+          "confirmation": {
+            "type": "object",
+            "title": "Custom control over the confirmation",
+            "properties": {
+              "disable": {
+                "type": "boolean",
+                "title": "Disable the confirmation for the command"
+              }
+            }
+          },
           "description": {
             "type": "string",
             "title": "Description of the endpoint"
