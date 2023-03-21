@@ -507,15 +507,17 @@
     #
     # Pre run validation (disable some commands without switch flags)
     #
-    if ($Specification.confirmation.disable -eq $true) {
-        $PreRunFunction = "nil"
+     $FunctionalMethod = if ($Specification.semanticMethod) {
+        $Specification.semanticMethod
     } else {
-        $PreRunFunction = switch ($Specification.method) {
-            "POST" { "f.CreateModeEnabled()" }
-            "PUT" { "f.UpdateModeEnabled()" }
-            "DELETE" { "f.DeleteModeEnabled()" }
-            default { "nil" }
-        }
+        $Specification.method
+    }
+
+    $PreRunFunction = switch ($FunctionalMethod) {
+        "POST" { "f.CreateModeEnabled()" }
+        "PUT" { "f.UpdateModeEnabled()" }
+        "DELETE" { "f.DeleteModeEnabled()" }
+        default { "nil" }
     }
 
     # Additional options
@@ -628,12 +630,13 @@ $($Examples -join "`n`n")
         )
         $(
             if ($collectionProperty) {
-                "flags.WithCollectionProperty(`"$collectionProperty`"),"
+                "flags.WithCollectionProperty(`"$collectionProperty`"),`n"
             }
-        )
-        $(
             if ($DeprecationNotice) {
-                "flags.WithDeprecationNotice(`"$DeprecationNotice`"),"
+                "flags.WithDeprecationNotice(`"$DeprecationNotice`"),`n"
+            }
+            if ($Specification.semanticMethod) {
+                "flags.WithSemanticMethod(`"$($Specification.semanticMethod)`"),`n"
             }
         )
 	)

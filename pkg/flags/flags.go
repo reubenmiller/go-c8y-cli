@@ -29,6 +29,7 @@ const (
 	AnnotationValueFromPipelineData   = "valueFromPipeline.data"
 	AnnotationValueCollectionProperty = "collectionProperty"
 	AnnotationValueDeprecated         = "deprecatedNotice"
+	AnnotationValueSemanticMethod     = "semanticMethod"
 )
 
 // Option adds flags to a given command
@@ -263,6 +264,34 @@ func GetDeprecationNoticeFromAnnotation(cmd *cobra.Command) (value string) {
 		return
 	}
 	if v, ok := cmd.Annotations[AnnotationValueDeprecated]; ok {
+		value = v
+	}
+	return
+}
+
+// WithSemanticMethod sets a semantic REST method which may be different to the actual REST method used
+// useful to be more descriptive about how the action should behave (e.g. prompting).
+func WithSemanticMethod(v string) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		if v != "" {
+			if cmd.Annotations == nil {
+				cmd.Annotations = map[string]string{}
+			}
+			cmd.Annotations[AnnotationValueSemanticMethod] = v
+		}
+		return cmd
+	}
+}
+
+// GetSemanticMethodFromAnnotation returns semantic REST method related to the action from the annotations
+func GetSemanticMethodFromAnnotation(cmd *cobra.Command) (value string) {
+	if cmd == nil {
+		return
+	}
+	if cmd.Annotations == nil {
+		return
+	}
+	if v, ok := cmd.Annotations[AnnotationValueSemanticMethod]; ok {
 		value = v
 	}
 	return
