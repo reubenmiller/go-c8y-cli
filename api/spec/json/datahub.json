@@ -10,6 +10,9 @@
       "name": "query",
       "method": "POST",
       "path": "service/datahub/sql",
+      "confirmation": {
+        "disable": true
+      },
       "accept": "application/json",
       "description": "Execute a SQL query and retrieve the results",
       "descriptionLong": "Execute a SQL query and retrieve the results",
