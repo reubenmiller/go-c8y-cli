@@ -1,40 +1,38 @@
 ---
-category: sessions
-title: c8y sessions set
+category: jobs
+title: c8y datahub jobs create
 ---
-Set Cumulocity session
+Submit a SQL query and retrieve the ID of the Dremio job executing this query
 
 ### Synopsis
 
-Set a session, login and test the session and get either OAuth2 token, or using two factor authentication
+Submit a SQL query and retrieve the ID of the Dremio job executing this query. The request is asynchronous, i.e., the response does not wait for the query execution to complete.
 
 ```
-c8y sessions set [flags]
+c8y datahub jobs create [flags]
 ```
 
 ### Examples
 
 ```
-$ eval $( c8y session set )
-Set a session interactively
+$ c8y datahub jobs create --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms"
+Create a new datahub job
 
-$ eval $( c8y sessions set --sessionFilter "company dev" )
-Set a session but only include session matching company AND dev
-
-$ eval $( c8y sessions set --session myfile.json --tfaCode 123456 )
-Set a session using a given file (non-interactively)
-
+$ c8y datahub jobs create --sql "SELECT * FROM alarms" --context myTenantIdDataLake,Dremio,myTenantId
+Create a new datahub job using context
+        
 ```
 
 ### Options
 
 ```
-      --clear                  Clear any existing tokens
-  -h, --help                   help for set
-      --loginType string       Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared
-      --sessionFilter string   Filter to be applied to the list of sessions even before the values can be selected
-      --shell string           Shell type to return the environment variables
-      --tfaCode string         Two Factor Authentication code
+      --context strings            The context in which the query is executed
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help                       help for create
+      --processingMode string      Cumulocity processing mode
+      --sql string                 The SQL query to execute. The table to query is either referred to with the full path or with the table name if the context defines the path (accepts pipeline)
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands

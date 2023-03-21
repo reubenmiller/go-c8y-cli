@@ -1,40 +1,17 @@
 ---
-category: sessions
-title: c8y sessions set
+category: datahub
+title: c8y datahub
 ---
-Set Cumulocity session
+Cumulocity IoT Data Hub api
 
 ### Synopsis
 
-Set a session, login and test the session and get either OAuth2 token, or using two factor authentication
-
-```
-c8y sessions set [flags]
-```
-
-### Examples
-
-```
-$ eval $( c8y session set )
-Set a session interactively
-
-$ eval $( c8y sessions set --sessionFilter "company dev" )
-Set a session but only include session matching company AND dev
-
-$ eval $( c8y sessions set --session myfile.json --tfaCode 123456 )
-Set a session using a given file (non-interactively)
-
-```
+Data Hub api
 
 ### Options
 
 ```
-      --clear                  Clear any existing tokens
-  -h, --help                   help for set
-      --loginType string       Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared
-      --sessionFilter string   Filter to be applied to the list of sessions even before the values can be selected
-      --shell string           Shell type to return the environment variables
-      --tfaCode string         Two Factor Authentication code
+  -h, --help   help for datahub
 ```
 
 ### Options inherited from parent commands

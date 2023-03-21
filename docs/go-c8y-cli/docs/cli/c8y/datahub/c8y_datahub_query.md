@@ -1,40 +1,43 @@
 ---
-category: sessions
-title: c8y sessions set
+category: datahub
+title: c8y datahub query
 ---
-Set Cumulocity session
+Execute a SQL query and retrieve the results
 
 ### Synopsis
 
-Set a session, login and test the session and get either OAuth2 token, or using two factor authentication
+Execute a SQL query and retrieve the results
 
 ```
-c8y sessions set [flags]
+c8y datahub query [flags]
 ```
 
 ### Examples
 
 ```
-$ eval $( c8y session set )
-Set a session interactively
+$ c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms"
+Get a list of alarms from datahub
 
-$ eval $( c8y sessions set --sessionFilter "company dev" )
-Set a session but only include session matching company AND dev
+$ c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms" --limit 2000
+Get a list of alarms from datahub with custom limit
 
-$ eval $( c8y sessions set --session myfile.json --tfaCode 123456 )
-Set a session using a given file (non-interactively)
-
+$ c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms" --format PANDAS --raw
+Get a list of alarms from datahub using the PANDAS format (note the raw format is necessary here)
+        
 ```
 
 ### Options
 
 ```
-      --clear                  Clear any existing tokens
-  -h, --help                   help for set
-      --loginType string       Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared
-      --sessionFilter string   Filter to be applied to the list of sessions even before the values can be selected
-      --shell string           Shell type to return the environment variables
-      --tfaCode string         Two Factor Authentication code
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --format string              The response format, which is either DREMIO or PANDAS. The DREMIO format is the same response format as provided by the sql endpoint of the Standard API. The PANDAS format fits to the data format the Pandas library for Python expects.
+  -h, --help                       help for query
+      --limit int                  The maximum number of query results (default 1000)
+      --processingMode string      Cumulocity processing mode
+      --sql string                 The SQL query to execute (accepts pipeline)
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --version string             The version of the high-performance API (default "v1")
 ```
 
 ### Options inherited from parent commands
