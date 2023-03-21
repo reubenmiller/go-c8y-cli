@@ -35,6 +35,7 @@ type BatchOptions struct {
 	Delay             time.Duration
 	DelayBefore       time.Duration
 	AbortOnErrorCount int
+	SemanticMethod    string
 
 	PostActions []flags.Action
 
@@ -114,6 +115,7 @@ func (w *Worker) getBatchOptions(cmd *cobra.Command) (*BatchOptions, error) {
 		TotalWorkers:      w.config.GetWorkers(),
 		Delay:             w.config.WorkerDelay(),
 		DelayBefore:       w.config.WorkerDelayBefore(),
+		SemanticMethod:    flags.GetSemanticMethodFromAnnotation(cmd),
 	}
 
 	if v, err := cmd.Flags().GetInt("count"); err == nil {
@@ -263,7 +265,12 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			w.logger.Debugf("adding job: %d", jobID)
 
 			if request != nil {
-				shouldConfirm = w.config.ShouldConfirm(request.Method)
+				if batchOptions.SemanticMethod != "" {
+					// Use a custom method which controls how the request should be handled but is not the actual request
+					shouldConfirm = w.config.ShouldConfirm(batchOptions.SemanticMethod)
+				} else {
+					shouldConfirm = w.config.ShouldConfirm(request.Method)
+				}
 			}
 
 			// confirm action

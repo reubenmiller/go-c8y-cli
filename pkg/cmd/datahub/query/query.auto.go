@@ -43,7 +43,7 @@ $ c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.al
 Get a list of alarms from datahub using the PANDAS format (note the raw format is necessary here)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return nil
 		},
 		RunE: ccmd.RunE,
 	}
@@ -68,6 +68,7 @@ Get a list of alarms from datahub using the PANDAS format (note the raw format i
 		flags.WithExtendedPipelineSupport("sql", "sql", false, "id"),
 
 		flags.WithCollectionProperty("rows"),
+		flags.WithSemanticMethod("GET"),
 	)
 
 	// Required flags

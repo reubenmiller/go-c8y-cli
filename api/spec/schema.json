@@ -327,6 +327,17 @@
               "DELETE"
             ]
           },
+          "semanticMethod": {
+            "type": "string",
+            "title": "Semantic REST method",
+            "description": "How the call should be handled internally. This will override how the request is processed in respect to confirmation, create/update/delete modes etc.",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "DELETE"
+            ]
+          },
           "description": {
             "type": "string",
             "title": "Description of the endpoint"
