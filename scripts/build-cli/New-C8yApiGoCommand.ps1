@@ -519,14 +519,6 @@
         default { "nil" }
     }
 
-    # Additional options
-    $RequestOptionsBuilder = New-Object System.Text.StringBuilder
-    if ($Specification.responseType -eq "array") {
-        $null = $RequestOptionsBuilder.AppendLine("ResponseData: make([]map[string]interface{}, 0),")
-    } elseif ($Specification.responseType -eq "object") {
-        # Do nothing, so it already defaults to a map[string]interface{}
-    }
-
     #
     # Template
     #

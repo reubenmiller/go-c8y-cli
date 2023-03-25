@@ -71,7 +71,6 @@
       "path": "/tenant/statistics/allTenantsSummary",
       "accept": "application/json",
       "collectionProperty": "-",
-      "responseType": "array",
       "permissions": [
         "managementTenant"
       ],
