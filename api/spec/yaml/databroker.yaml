@@ -15,7 +15,7 @@ commands:
     path: /databroker/connectors
     accept: application/vnd.com.nsn.cumulocity.databrokerConnectorCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.databrokerConnector+json
-    collectionProperty: connectors
+    collectionProperty: .connectors[]
     alias:
         go: list
         powershell: Get-DataBrokerConnectorCollection

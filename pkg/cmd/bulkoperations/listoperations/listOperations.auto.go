@@ -70,7 +70,7 @@ Check all bulk operations if they have any related operations still in executing
 		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
 
-		flags.WithCollectionProperty("operations"),
+		flags.WithCollectionProperty(".operations[]"),
 	)
 
 	// Required flags

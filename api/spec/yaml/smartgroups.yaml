@@ -249,7 +249,7 @@ commands:
     path: inventory/managedObjects
     accept: application/vnd.com.nsn.cumulocity.managedObjectCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
-    collectionProperty: managedObjects
+    collectionProperty: .managedObjects[]
     alias:
         go: list
         powershell: Get-SmartGroupCollection

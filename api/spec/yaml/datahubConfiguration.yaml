@@ -14,7 +14,7 @@ commands:
     accept: application/json
     description: Get offloading configurations
     descriptionLong: Get offloading configurations
-    collectionProperty: "data.offloadingConfigurations"
+    collectionProperty: .data.offloadingConfigurations[]
     alias:
         go: list
         powershell: Get-DataHubConfigurationCollection

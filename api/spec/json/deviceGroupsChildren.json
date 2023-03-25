@@ -14,7 +14,7 @@
       "path": "inventory/managedObjects/{id}/{childType}",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "collectionProperty": "references.#.managedObject",
+      "collectionProperty": ".references[].managedObject",
       "alias": {
         "go": "list",
         "powershell": "Get-DeviceGroupChildCollection"
@@ -114,7 +114,7 @@
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "description": "Assign child",
       "descriptionLong": "Assign an existing managed object as a child to an existing managed object",
-      "collectionProperty": "managedObject",
+      "collectionProperty": ".managedObject",
       "alias": {
         "go": "assign",
         "powershell": "Add-DeviceGroupChild"
@@ -320,7 +320,7 @@
       "method": "GET",
       "path": "inventory/managedObjects/{id}/{childType}/{child}",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
-      "collectionProperty": "managedObject",
+      "collectionProperty": ".managedObject",
       "alias": {
         "go": "get",
         "powershell": "Get-DeviceGroupChild"

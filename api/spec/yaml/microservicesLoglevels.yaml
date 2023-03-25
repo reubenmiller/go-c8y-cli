@@ -19,7 +19,7 @@ commands:
     method: GET
     path: /service/{name}/loggers
     accept: application/json
-    collectionProperty: loggers
+    collectionProperty: .loggers
     alias:
         go: list
         powershell: Get-MicroserviceLogLevelCollection

@@ -15,7 +15,7 @@ commands:
     path: /tenant/tenants
     accept: application/vnd.com.nsn.cumulocity.tenantCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.tenant+json
-    collectionProperty: tenants
+    collectionProperty: .tenants[]
     alias:
         go: list
         powershell: Get-TenantCollection
@@ -270,7 +270,7 @@ commands:
     path: /tenant/tenants/{tenant}/applications
     accept: application/vnd.com.nsn.cumulocity.applicationReferenceCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.applicationReference+json
-    collectionProperty: references
+    collectionProperty: .references[]
     alias:
         go: listReferences
         powershell: Get-ApplicationReferenceCollection

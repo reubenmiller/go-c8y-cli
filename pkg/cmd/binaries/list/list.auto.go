@@ -69,7 +69,7 @@ Get a list of binaries with the type package_debian
 		flags.WithExtendedPipelineSupport("type", "type", false, "type"),
 		flags.WithPipelineAliases("childDeviceId", "deviceId", "source.id", "managedObject.id", "id"),
 
-		flags.WithCollectionProperty("managedObjects"),
+		flags.WithCollectionProperty(".managedObjects[]"),
 	)
 
 	// Required flags

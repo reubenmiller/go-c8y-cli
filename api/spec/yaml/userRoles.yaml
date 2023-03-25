@@ -15,7 +15,7 @@ commands:
     path: /user/roles
     accept: application/vnd.com.nsn.cumulocity.roleCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.role+json
-    collectionProperty: roles
+    collectionProperty: .roles[]
     alias:
         go: list
         powershell: Get-RoleCollection
@@ -222,7 +222,7 @@ commands:
     path: /user/{tenant}/users/{user}/roles
     accept: application/vnd.com.nsn.cumulocity.roleReferenceCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.roleReference+json
-    collectionProperty: references
+    collectionProperty: .references[]
     alias:
         go: getRoleReferenceCollectionFromUser
         powershell: Get-RoleReferenceCollectionFromUser
@@ -257,7 +257,7 @@ commands:
     path: /user/{tenant}/groups/{group}/roles
     accept: application/vnd.com.nsn.cumulocity.roleReferenceCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.roleReference+json
-    collectionProperty: references
+    collectionProperty: .references[]
     alias:
         go: getRoleReferenceCollectionFromGroup
         powershell: Get-RoleReferenceCollectionFromGroup

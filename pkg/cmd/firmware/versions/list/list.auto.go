@@ -74,7 +74,7 @@ Get all versions of a firmware using an existing version object
 
 		flags.WithExtendedPipelineSupport("firmware", "firmware", true, "additionParents.references.0.managedObject.id", "id"),
 
-		flags.WithCollectionProperty("managedObjects"),
+		flags.WithCollectionProperty(".managedObjects[]"),
 	)
 
 	// Required flags

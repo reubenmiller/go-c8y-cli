@@ -63,7 +63,7 @@ Get microservice status (using pipeline)
 		flags.WithExtendedPipelineSupport("id", "id", true),
 		flags.WithPipelineAliases("id", "id"),
 
-		flags.WithCollectionProperty("managedObjects"),
+		flags.WithCollectionProperty(".managedObjects[]"),
 	)
 
 	// Required flags

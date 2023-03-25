@@ -14,7 +14,7 @@
       "path": "devicecontrol/bulkoperations",
       "accept": "application/vnd.com.nsn.cumulocity.bulkOperationCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.bulkoperation+json",
-      "collectionProperty": "bulkOperations",
+      "collectionProperty": ".bulkOperations[]",
       "alias": {
         "go": "list",
         "powershell": "Get-BulkOperationCollection"
@@ -349,7 +349,7 @@
       "path": "devicecontrol/operations",
       "accept": "application/vnd.com.nsn.cumulocity.operationCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.operation+json",
-      "collectionProperty": "operations",
+      "collectionProperty": ".operations[]",
       "alias": {
         "go": "listOperations",
         "powershell": "Get-BulkOperationOperationCollection"

@@ -19,7 +19,7 @@ commands:
     method: GET
     path: /tenant/statistics/device/{tenant}/{type}/{date}
     accept: application/vnd.com.nsn.cumulocity.tenantusagestatisticscollection+json
-    collectionProperty: statistics
+    collectionProperty: .statistics[]
     alias:
         go: list
         powershell: Get-DeviceStatisticsCollection

@@ -74,7 +74,7 @@ Get a list of measurements
 		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
 
-		flags.WithCollectionProperty("measurements"),
+		flags.WithCollectionProperty(".measurements[]"),
 	)
 
 	// Required flags

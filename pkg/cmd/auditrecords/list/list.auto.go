@@ -68,7 +68,7 @@ Get a list of audit records
 		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
 
-		flags.WithCollectionProperty("auditRecords"),
+		flags.WithCollectionProperty(".auditRecords[]"),
 	)
 
 	// Required flags

@@ -54,7 +54,7 @@ Get a list of tenants
 
 		flags.WithExtendedPipelineSupport("", "", false),
 
-		flags.WithCollectionProperty("tenants"),
+		flags.WithCollectionProperty(".tenants[]"),
 	)
 
 	// Required flags

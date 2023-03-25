@@ -16,7 +16,7 @@ commands:
     path: /application/applications
     accept: application/vnd.com.nsn.cumulocity.applicationCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.application+json
-    collectionProperty: applications
+    collectionProperty: .applications[]
     alias:
         go: list
         powershell: Get-MicroserviceCollection
@@ -434,7 +434,7 @@ commands:
     path: /inventory/managedObjects?type=c8y_Application_{id}
     accept: application/json
     collectionType: application/vnd.com.nsn.cumulocity.application+json
-    collectionProperty: managedObjects
+    collectionProperty: .managedObjects[]
     alias:
         go: getStatus
         powershell: Get-MicroserviceStatus
@@ -479,7 +479,7 @@ commands:
     addAccept: true
     accept: application/vnd.com.nsn.cumulocity.applicationLogs+json
     collectionType: application/vnd.com.nsn.cumulocity.application+json
-    collectionProperty: logs
+    collectionProperty: .logs[]
     alias:
         go: getLog
         powershell: Get-MicroserviceLog

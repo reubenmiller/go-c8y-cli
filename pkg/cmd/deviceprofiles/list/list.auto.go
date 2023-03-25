@@ -64,7 +64,7 @@ Get a list of device profiles
 
 		flags.WithExtendedPipelineSupport("name", "name", false, "c8y_Software.name", "name"),
 
-		flags.WithCollectionProperty("managedObjects"),
+		flags.WithCollectionProperty(".managedObjects[]"),
 	)
 
 	// Required flags

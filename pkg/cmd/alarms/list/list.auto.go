@@ -85,7 +85,7 @@ Get collection of active and acknowledged alarms in the last 1d
 		flags.WithPipelineAliases("lastUpdatedFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("lastUpdatedTo", "time", "creationTime", "lastUpdated"),
 
-		flags.WithCollectionProperty("alarms"),
+		flags.WithCollectionProperty(".alarms[]"),
 	)
 
 	// Required flags

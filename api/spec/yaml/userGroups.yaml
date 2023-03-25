@@ -15,7 +15,7 @@ commands:
     path: /user/{tenant}/groups
     accept: application/vnd.com.nsn.cumulocity.groupCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.group+json
-    collectionProperty: groups
+    collectionProperty: .groups[]
     alias:
         go: list
         powershell: Get-UserGroupCollection

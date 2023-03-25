@@ -60,7 +60,7 @@ List all of the binaries related to a Hosted (web) application
 		flags.WithExtendedPipelineSupport("id", "id", true),
 		flags.WithPipelineAliases("id", "id"),
 
-		flags.WithCollectionProperty("attachments"),
+		flags.WithCollectionProperty(".attachments[]"),
 	)
 
 	// Required flags

@@ -54,7 +54,7 @@ Get a list of new device requests
 
 		flags.WithExtendedPipelineSupport("", "", false),
 
-		flags.WithCollectionProperty("newDeviceRequests"),
+		flags.WithCollectionProperty(".newDeviceRequests[]"),
 	)
 
 	// Required flags

@@ -15,7 +15,7 @@ commands:
     path: tenant/tenants/{tenant}/trusted-certificates
     accept: application/vnd.com.nsn.cumulocity.customTrustedCertificateCollection+json
     collectionType: application/json
-    collectionProperty: certificates
+    collectionProperty: .certificates[]
     alias:
         go: list
         powershell: Get-DeviceCertificateCollection

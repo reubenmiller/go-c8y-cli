@@ -14,7 +14,7 @@
       "accept": "application/json",
       "description": "Get tenant configuration",
       "descriptionLong": "Get tenant configuration",
-      "collectionProperty": "data",
+      "collectionProperty": ".data",
       "alias": {
         "go": "get",
         "powershell": "Get-DataHubTenant"

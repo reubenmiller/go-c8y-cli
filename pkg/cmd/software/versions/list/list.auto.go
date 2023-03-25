@@ -71,7 +71,7 @@ Get a list of software package versions from multiple software packages
 
 		flags.WithExtendedPipelineSupport("software", "software", false, "additionParents.references.0.managedObject.id", "id"),
 
-		flags.WithCollectionProperty("managedObjects"),
+		flags.WithCollectionProperty(".managedObjects[]"),
 	)
 
 	// Required flags

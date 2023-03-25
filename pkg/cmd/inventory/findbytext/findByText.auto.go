@@ -69,7 +69,7 @@ Find managed objects which contain the text 'myText' and is a device (using pipe
 
 		flags.WithExtendedPipelineSupport("text", "text", true, "id"),
 
-		flags.WithCollectionProperty("managedObjects"),
+		flags.WithCollectionProperty(".managedObjects[]"),
 	)
 
 	// Required flags

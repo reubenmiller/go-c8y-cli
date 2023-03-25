@@ -15,7 +15,7 @@ commands:
     path: /application/applications
     accept: application/vnd.com.nsn.cumulocity.applicationCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.application+json
-    collectionProperty: applications
+    collectionProperty: .applications[]
     alias:
         go: list
         powershell: Get-ApplicationCollection
@@ -394,7 +394,7 @@ commands:
     path: /application/applications/{id}/binaries
     accept: application/vnd.com.nsn.cumulocity.customAttachmentCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.customBinaryAttachment+json
-    collectionProperty: attachments
+    collectionProperty: .attachments[]
     alias:
         go: listApplicationBinaries
         powershell: Get-ApplicationBinaryCollection

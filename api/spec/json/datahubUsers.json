@@ -14,7 +14,7 @@
       "accept": "application/json",
       "description": "List the data hub users",
       "descriptionLong": "List the data hub users",
-      "collectionProperty": "data.users",
+      "collectionProperty": ".data.users[]",
       "alias": {
         "go": "list",
         "powershell": "Get-DataHubUserCollection"

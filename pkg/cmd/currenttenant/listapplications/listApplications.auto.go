@@ -54,7 +54,7 @@ Get a list of applications in the current tenant
 
 		flags.WithExtendedPipelineSupport("", "", false),
 
-		flags.WithCollectionProperty("applications.references.#.application"),
+		flags.WithCollectionProperty(".applications.references[].application"),
 	)
 
 	// Required flags

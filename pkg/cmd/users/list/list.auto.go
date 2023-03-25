@@ -63,7 +63,7 @@ Get a list of users
 		flags.WithExtendedPipelineSupport("", "", false),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 
-		flags.WithCollectionProperty("users"),
+		flags.WithCollectionProperty(".users[]"),
 	)
 
 	// Required flags

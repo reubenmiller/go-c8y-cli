@@ -14,7 +14,7 @@
       "accept": "application/json",
       "description": "List scheduler items",
       "descriptionLong": "List scheduler items",
-      "collectionProperty": "-",
+      "collectionProperty": ".data.jobExecutions|to_entries|.[].value",
       "alias": {
         "go": "list",
         "powershell": "Get-DataHubSchedulerCollection"
