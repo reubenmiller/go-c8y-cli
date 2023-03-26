@@ -12,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -111,7 +112,12 @@ func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
 		MaxMessages: n.flagCount,
 		ActionTypes: n.actionTypes,
 		OnMessage: func(msg string) error {
-			return n.factory.WriteJSONToConsole(cfg, cmd, "", []byte(msg))
+			data := make(map[string]interface{})
+			err := jsonUtilities.DecodeJSON([]byte(msg), &data)
+			if err != nil {
+				return err
+			}
+			return n.factory.WriteJSONToConsole(cfg, cmd, "", data)
 		},
 	}
 	return c8ysubscribe.Subscribe(client, log, c8y.RealtimeAlarms(device), opts)

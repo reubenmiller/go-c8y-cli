@@ -109,7 +109,7 @@ func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
 		MaxMessages: n.flagCount,
 		ActionTypes: n.actionTypes,
 		OnMessage: func(msg string) error {
-			return n.factory.WriteJSONToConsole(cfg, cmd, "", []byte(msg))
+			return n.factory.WriteJSONToConsole(cfg, cmd, "", msg)
 		},
 	}
 	return c8ysubscribe.Subscribe(client, log, c8y.RealtimeManagedObjects(device), opts)
