@@ -344,6 +344,12 @@ type Config struct {
 	Logger *logger.Logger
 
 	sessionFile string
+
+	// private caching to improve performance
+	// by preventing expensive system calls for each iteration
+	outputFileRaw *string
+	outputFile    *string
+	commonOptions *CommonCommandOptions
 }
 
 // NewConfig returns a new CLI configuration object
@@ -1245,12 +1251,20 @@ func (c *Config) GetConfirmationMethods() string {
 
 // GetOutputFileRaw file path where the raw output file will be saved to
 func (c *Config) GetOutputFileRaw() string {
-	return c.ExpandHomePath(c.viper.GetString(SettingsOutputFileRaw))
+	if c.outputFileRaw == nil {
+		value := c.ExpandHomePath(c.viper.GetString(SettingsOutputFileRaw))
+		c.outputFileRaw = &value
+	}
+	return *c.outputFileRaw
 }
 
 // GetOutputFileRaw file path where the parsed response will be saved to
 func (c *Config) GetOutputFile() string {
-	return c.ExpandHomePath(c.viper.GetString(SettingsOutputFile))
+	if c.outputFile == nil {
+		value := c.ExpandHomePath(c.viper.GetString(SettingsOutputFile))
+		c.outputFile = &value
+	}
+	return *c.outputFile
 }
 
 // GetOutputFormat Get output format type, i.e. json, csv, table etc.
@@ -1416,6 +1430,9 @@ func (c *Config) GetJSONSelect() []string {
 
 // GetOutputCommonOptions get common output options which controls how the output should be handled i.e. json filter, selects, csv etc.
 func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
+	if c.commonOptions != nil {
+		return *c.commonOptions, nil
+	}
 	options := CommonCommandOptions{
 		OutputFile:    c.GetOutputFile(),
 		OutputFileRaw: c.GetOutputFileRaw(),
@@ -1457,6 +1474,7 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 		options.ConfirmText = cmd.Short
 	}
 
+	c.commonOptions = &options
 	return options, nil
 }
 
