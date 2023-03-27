@@ -224,12 +224,12 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	baseURL, _ := url.Parse(uri)
-
 	// query parameters
 	query := flags.NewQueryTemplate()
-	for key, values := range baseURL.Query() {
-		query.SetVariable(key, values)
+	if baseURL, err := url.Parse(uri); err == nil {
+		for key, values := range baseURL.Query() {
+			query.SetVariable(key, values)
+		}
 	}
 
 	err = flags.WithQueryParameters(
@@ -262,10 +262,16 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		host = n.flagHost
 	}
 
+	// Get base path without query parameter (for when an iterator is not used)
+	urlPath := path.GetTemplate()
+	if i := strings.Index(path.GetTemplate(), "?"); i != -1 {
+		urlPath = path.GetTemplate()[0:i]
+	}
+
 	req := c8y.RequestOptions{
 		Method:       method,
 		Host:         host,
-		Path:         baseURL.Path,
+		Path:         urlPath,
 		Query:        queryValue,
 		Header:       headers,
 		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
