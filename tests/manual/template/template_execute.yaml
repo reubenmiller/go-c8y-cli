@@ -1,6 +1,14 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
 
 tests:
+  It does not include piped input without referencing it:
+    command: |
+      echo "1" | c8y template execute --template "{}"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {}
+
   It preserves double quotes in bash/zsh:
     command: |
       c8y template execute --template "{\"email\": \"he llo@ex ample.com\"}"

@@ -60,7 +60,7 @@ Pass external json data into the template, and reference it via the "input.value
 		cmd,
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("input", "input", false),
+		flags.WithExtendedPipelineSupport("input", "", false),
 	)
 
 	cmdutil.DisableAuthCheck(cmd)
