@@ -46,6 +46,25 @@ tests:
         body.name: "hello"
         body.url: "12345"
 
+  It can pipe simple text to a url:
+    command: >
+      echo "1" | c8y api --method DELETE "/endpoint/%s" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: DELETE
+        path: /endpoint/1
+
+  It can pipe simple text to a url query parameters:
+    command: >
+      echo "1" | c8y api DELETE "/endpoint?id=%s" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: DELETE
+        path: /endpoint
+        query: id=1
+
   It sends a PUT request using piped json and a format style url template:
     command: >
       echo "{\"url\": \"12345\", \"name\":\"hello\"}" | c8y api --method PUT --url "/test/%s/endpoint" --template "input.value" --dry
