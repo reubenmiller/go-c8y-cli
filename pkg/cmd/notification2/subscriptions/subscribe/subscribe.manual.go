@@ -118,6 +118,12 @@ func (n *SubscribeCmd) RunE(cmd *cobra.Command, args []string) error {
 			Subscription:     n.Subscription,
 			ExpiresInMinutes: n.ExpiresInMinutes,
 		},
+		ConnectionOptions: notification2.ConnectionOptions{
+			PingInterval: 60 * time.Second,
+			PongWait:     180 * time.Second,
+			WriteWait:    60 * time.Second,
+			Insecure:     cfg.SkipSSLVerify(),
+		},
 	})
 
 	if err != nil {
