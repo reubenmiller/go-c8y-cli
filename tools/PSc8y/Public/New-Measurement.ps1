@@ -11,7 +11,7 @@ Create a new measurement
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/measurements_create
 
 .EXAMPLE
-PS> New-Measurement -Device {{ randomdevice }} -Time "0s" -Type "myType" -Data @{ c8y_Winding = @{ temperature = @{ value = 1.2345; unit = "°C" } } }
+PS> New-Measurement -Device {{ randomdevice }} -Time "0s" -Type "myType" -Data @{ c8y_Winding = @{ temperature = @{ value = 25.0; unit = "°C" } } }
 
 Create measurement
 

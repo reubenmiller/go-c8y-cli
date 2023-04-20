@@ -8,16 +8,57 @@ tests:
                 body.source.id: "22222"
                 method: POST
                 path: /measurement/measurements
-    measurements_create_Create measurement:
-        command: 'c8y measurements create --device 12345 --time "0s" --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 1.2345,\"unit\":\"°C\"}}}"'
+    measurements_create_Create measurement using a template (more portable across shells):
+        command: |
+            c8y measurements create --device 12345 --type "myType" --template "{c8y_Winding:{temperature:{value: 25.0,unit:'°C'}}}"
         exit-code: 0
         stdout:
             json:
-                body.c8y_Winding.temperature.unit: °C
-                body.c8y_Winding.temperature.value: "1.2345"
                 body.source.id: "12345"
                 body.type: myType
                 method: POST
                 path: /measurement/measurements
-            contains:
-                - '"time":'
+    measurements_create_Create measurement using a template file:
+        command: |
+            c8y measurements create --device 12345 --type "myType" --template ./mymeasurement.jsonnet
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.source.id: "12345"
+                body.type: myType
+                method: POST
+                path: /measurement/measurements
+    measurements_create_Create measurement using json data (powershell only):
+        command: |
+            c8y measurements create --device 12345 --type "myType" --data '{\"c8y_Winding\":{\"temperature\":{\"value\": 25,\"unit\":\"C\"}}}'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.source.id: "12345"
+                body.type: myType
+                method: POST
+                path: /measurement/measurements
+    measurements_create_Create measurement using json data (sh/bash/zsh/fish only):
+        command: |
+            c8y measurements create --device 12345 --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 25,\"unit\":\"°C\"}}}"
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_Winding.temperature.unit: °C
+                body.c8y_Winding.temperature.value: "25"
+                body.source.id: "12345"
+                body.type: myType
+                method: POST
+                path: /measurement/measurements
+    measurements_create_Create measurement using shorthand data:
+        command: |
+            c8y measurements create --device 12345 --type "myType" --data "c8y_Winding.temperature.value=25.0,c8y_Winding.temperature.unit=°C"
+        exit-code: 0
+        stdout:
+            json:
+                body.source.id: "12345"
+                body.type: myType
+                method: POST
+                path: /measurement/measurements

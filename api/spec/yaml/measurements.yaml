@@ -253,11 +253,30 @@ endpoints:
     examples:
       powershell:
         - description: Create measurement
-          command: New-Measurement -Device {{ randomdevice }} -Time "0s" -Type "myType" -Data @{ c8y_Winding = @{ temperature = @{ value = 1.2345; unit = "°C" } } }
+          command: New-Measurement -Device {{ randomdevice }} -Time "0s" -Type "myType" -Data @{ c8y_Winding = @{ temperature = @{ value = 25.0; unit = "°C" } } }
 
       go:
-        - description: Create measurement
-          command: 'c8y measurements create --device 12345 --time "0s" --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 1.2345,\"unit\":\"°C\"}}}"'
+        - description: Create measurement using shorthand data
+          command: |
+            c8y measurements create --device 12345 --type "myType" --data "c8y_Winding.temperature.value=25.0,c8y_Winding.temperature.unit=°C"
+
+        - description: Create measurement using a template (more portable across shells)
+          command: |
+            c8y measurements create --device 12345 --type "myType" --template "{c8y_Winding:{temperature:{value: 25.0,unit:'°C'}}}"
+
+        - description: Create measurement using a template file
+          command: |
+            c8y measurements create --device 12345 --type "myType" --template ./mymeasurement.jsonnet
+          skipTest: true
+
+        - description: Create measurement using json data (sh/bash/zsh/fish only)
+          command: |
+            c8y measurements create --device 12345 --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 25,\"unit\":\"°C\"}}}"
+
+        - description: Create measurement using json data (powershell only)
+          command: |
+            c8y measurements create --device 12345 --type "myType" --data '{\"c8y_Winding\":{\"temperature\":{\"value\": 25,\"unit\":\"C\"}}}'
+          skipTest: true
 
         - description: Copy measurements from one device to another
           command: c8y measurements list --device 12345 --select '!id,**' | c8y measurements create --device 22222 --template input.value
