@@ -29,7 +29,7 @@
     $DescriptionLong = $Specification.descriptionLong
     $Examples = foreach ($iExample in $Specification.examples.go) {
         if ($iExample.command) {
-            $ExampleText = "`$ {0}`n{1}" -f $iExample.command, $iExample.description
+            $ExampleText = "`$ {0}`n{1}" -f $iExample.command.TrimEnd(), $iExample.description
         } else {
             $ExampleText = $iExample
         }

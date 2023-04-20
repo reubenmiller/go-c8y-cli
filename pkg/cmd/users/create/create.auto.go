@@ -37,7 +37,6 @@ $ c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" 
 Create a user
 
 $ c8y users create --template "{email: 'test@me.com', userName: $.email, firstName: 'Peter'}" --sendPasswordResetEmail
-
 Create a user using a template
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
