@@ -19,11 +19,9 @@ $ c8y notification2 subscriptions create --name deviceSub --device 12345 --conte
 Create a new subscription to operations for a specific device
 
 $ echo -e "1111\n2222" | c8y notification2 subscriptions create --name devicegroup --context mo --apiFilter operations
-
 Create a subscription which groups all devices in a single subscription name
 
 $ c8y devices list | c8y notification2 subscriptions create --name devicegroup --context mo --apiFilter operations
-
 Create a subscription which groups all devices in a single subscription name
         
 ```

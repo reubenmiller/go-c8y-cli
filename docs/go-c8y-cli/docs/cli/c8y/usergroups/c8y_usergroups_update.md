@@ -19,7 +19,6 @@ $ c8y usergroups update --id 12345 --name "customGroup2"
 Update a user group
 
 $ c8y usergroups update --id 12345 --name "customGroup2" --template "{example: 'value'}"
-
 Update a user group with custom properties
         
 ```

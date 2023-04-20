@@ -22,7 +22,6 @@ $ c8y binaries create --file "myConfig.json" --type c8y_upload --data "c8y_Globa
 Upload a config file and make it globally accessible for all users
 
 $ c8y binaries create --file "myConfig.json" --file "device01-myConfig.json" --type c8y_upload --template "{collectedAt: _.Now('-5min')}"
-
 Upload a file with a custom name and custom meta information
         
 ```

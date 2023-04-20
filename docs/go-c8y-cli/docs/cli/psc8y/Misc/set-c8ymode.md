@@ -1,12 +1,12 @@
 ---
 category: Misc
 external help file: PSc8y-help.xml
-id: set-c8ymode
+id: Set-c8yMode
 Module Name: PSc8y
 online version:
 schema: 2.0.0
 slug: /docs/cli/psc8y/Misc/set-c8ymode
-title: set-c8ymode
+title: Set-c8yMode
 ---
 
 
@@ -17,7 +17,7 @@ Set cli mode temporarily
 ## SYNTAX
 
 ```
-set-c8ymode
+Set-c8yMode
 	[-Mode] <String>
 	[<CommonParameters>]
 ```

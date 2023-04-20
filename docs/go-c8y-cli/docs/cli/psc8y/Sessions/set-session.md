@@ -1,12 +1,12 @@
 ---
 category: Sessions
 external help file: PSc8y-help.xml
-id: set-session
+id: Set-Session
 Module Name: PSc8y
 online version:
 schema: 2.0.0
 slug: /docs/cli/psc8y/Sessions/set-session
-title: set-session
+title: Set-Session
 ---
 
 
@@ -17,7 +17,7 @@ Set/activate a Cumulocity Session.
 ## SYNTAX
 
 ```
-set-session
+Set-Session
 	[[-SessionFilter] <String[]>]
 	[-TfaCode <String>]
 	[-Clear]
