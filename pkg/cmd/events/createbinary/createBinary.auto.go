@@ -39,7 +39,6 @@ $ c8y events createBinary --id 12345 --file ./myfile.log
 Add a binary to an event
 
 $ c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-31.log"
-
 Add a binary to an event using a custom name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

@@ -34,8 +34,20 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create measurement",
 		Long:  `Create a new measurement`,
 		Example: heredoc.Doc(`
-$ c8y measurements create --device 12345 --time "0s" --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 1.2345,\"unit\":\"°C\"}}}"
-Create measurement
+$ c8y measurements create --device 12345 --type "myType" --data "c8y_Winding.temperature.value=25.0,c8y_Winding.temperature.unit=°C"
+Create measurement using shorthand data
+
+$ c8y measurements create --device 12345 --type "myType" --template "{c8y_Winding:{temperature:{value: 25.0,unit:'°C'}}}"
+Create measurement using a template (more portable across shells)
+
+$ c8y measurements create --device 12345 --type "myType" --template ./mymeasurement.jsonnet
+Create measurement using a template file
+
+$ c8y measurements create --device 12345 --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 25,\"unit\":\"°C\"}}}"
+Create measurement using json data (sh/bash/zsh/fish only)
+
+$ c8y measurements create --device 12345 --type "myType" --data '{\"c8y_Winding\":{\"temperature\":{\"value\": 25,\"unit\":\"C\"}}}'
+Create measurement using json data (powershell only)
 
 $ c8y measurements list --device 12345 --select '!id,**' | c8y measurements create --device 22222 --template input.value
 Copy measurements from one device to another
