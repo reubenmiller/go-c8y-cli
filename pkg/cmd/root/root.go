@@ -2,7 +2,9 @@ package root
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -99,6 +101,7 @@ import (
 	utilCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/util"
 	versionCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/version"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdparser"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
@@ -462,6 +465,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 	// Enable flag parsing when using tab completion, otherwise disable it
 	// as it affects passing the arguments to the extension binary
 	disableFlagParsing := !isTabCompletionCommand()
+	_ = disableFlagParsing
 
 	for _, ext := range extensions {
 		commands, _ := ext.Commands()
@@ -476,8 +480,44 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 		}
 		extCommandTree[extName] = extRoot
 
-		for _, command := range commands {
+		//
+		// API/Spec commands
+		//
+		// Parse all api files
+		apiDir := filepath.Join(ext.Path(), "api")
+		if _, err := os.Stat(apiDir); !os.IsNotExist(err) {
+			filepath.WalkDir(apiDir, func(path string, d fs.DirEntry, walkErr error) error {
+				if walkErr != nil {
+					return walkErr
+				}
 
+				if d.IsDir() {
+					return nil
+				}
+
+				if filepath.Ext(path) != ".yaml" {
+					return nil
+				}
+
+				spec, err := os.Open(path)
+				if err != nil {
+					return err
+				}
+				defer spec.Close()
+				extCommand, err := cmdparser.ParseCommand(spec, f)
+				if err != nil {
+					return err
+				}
+
+				extRoot.AddCommand(extCommand)
+				return nil
+			})
+		}
+
+		//
+		// Shell commands
+		//
+		for _, command := range commands {
 			path := extName + " " + command.Name()
 			key := path
 			name := path
@@ -547,12 +587,10 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 				extRoot.AddCommand(iCmd)
 			}
 		}
-	}
 
-	// Only add root items
-	for p, c := range extCommandTree {
-		if !strings.Contains(p, " ") {
-			cmd.AddCommand(c)
+		// Only add if the is at least 1 command
+		if len(extRoot.Commands()) > 0 {
+			cmd.AddCommand(extRoot)
 		}
 	}
 	return nil
