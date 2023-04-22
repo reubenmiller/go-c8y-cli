@@ -392,7 +392,7 @@
                     "exampleList": {
                         "type": "array",
                         "description": "List of examples",
-                        "minItems": 1,
+                        "minItems": 0,
                         "items": {
                             "type": "object",
                             "properties": {
