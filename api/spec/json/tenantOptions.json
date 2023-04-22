@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "tenantOptions",
     "description": "Cumulocity tenantOptions",
     "descriptionLong": "REST endpoint to interact with Cumulocity tenantOptions\nOptions are category-key-value tuples, storing tenant configuration. Some categories of options allow creation of new one, other are limited to predefined set of keys.\n\nAny option of any tenant can be defined as \"non-editable\" by \"management\" tenant. Afterwards, any PUT or DELETE requests made on that option by the owner tenant, will result in 403 error (Unauthorized).\n",
     "link": "https://cumulocity.com/guides/reference/tenants/#tenants"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getTenantOptionCollection",
       "description": "Get tenant option collection",

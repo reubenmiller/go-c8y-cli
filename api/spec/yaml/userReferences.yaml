@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: userreferences
   description: Cumulocity user references
   descriptionLong: 'REST endpoint to interact with Cumulocity user references'
   link: https://cumulocity.com/guides/reference/users/#user-reference-collection
 
-endpoints:
+commands:
   - name: addUserToGroup
     description: Add user to group
     descriptionLong: Add an existing user to a group

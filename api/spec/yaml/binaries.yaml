@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: binaries
   description: Cumulocity binaries
   descriptionLong: 'REST endpoint to interact with Cumulocity binaries'
   link: https://cumulocity.com/guides/reference/binaries/
 
-endpoints:
+commands:
   - name: getBinaryCollection
     description: Get binary collection
     descriptionLong: |

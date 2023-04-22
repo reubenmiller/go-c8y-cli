@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "software",
     "description": "Cumulocity software management",
     "descriptionLong": "Software management to create/list/delete packages and versions",
     "link": "https://cumulocity.com/guides/users-guide/device-management/#software-repo"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getSoftwareCollection",
       "method": "GET",

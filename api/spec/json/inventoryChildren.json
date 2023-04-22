@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "inventory/children",
     "description": "Cumulocity managed object child references",
     "descriptionLong": "Manage child entities (assets, additions and device) for managed objects",
     "link": "https://cumulocity.com/guides/reference/inventory/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "listChildCollection",
       "method": "GET",

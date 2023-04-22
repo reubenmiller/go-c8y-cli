@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: firmware/patches
   description: Cumulocity firmware patch management
   descriptionLong: Firmware patch management to create/list/delete patches
   link: https://cumulocity.com/guides/users-guide/device-management/#firmware-repo
 
-endpoints:
+commands:
   - name: getFirmwarePatchCollection
     method: GET
     description: Get firmware patch collection

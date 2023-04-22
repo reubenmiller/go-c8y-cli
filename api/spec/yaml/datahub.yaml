@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: datahub
   description: Cumulocity IoT Data Hub api
   descriptionLong: Data Hub api
@@ -18,7 +18,7 @@ information:
   # /service/datahub/isalive  => data.version
   # /service/datahub/system/properties  =>  data.[EnvironmentVariables|SystemProperties]
 
-endpoints:
+commands:
   - name: query
     method: POST
     semanticMethod: GET

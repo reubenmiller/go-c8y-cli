@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "notification2/subscriptions",
     "description": "Cumulocity notification2 subscriptions",
     "descriptionLong": "Methods to create, retrieve and delete notification subscriptions",
     "link": "https://cumulocity.com/guides/reference/notifications/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "listSubscriptions",
       "method": "GET",

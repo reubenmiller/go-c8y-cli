@@ -260,7 +260,7 @@
     }
   },
   "properties": {
-    "information": {
+    "group": {
       "type": "object",
       "properties": {
         "name": {
@@ -309,7 +309,7 @@
         "link"
       ]
     },
-    "endpoints": {
+    "commands": {
       "type": "array",
       "minItems": 0,
       "items": {
@@ -426,6 +426,29 @@
                 "description": "The command is no longer used"
               }
             }
+          },
+          "exampleList": {
+            "type": "array",
+              "description": "List of examples",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string",
+                    "title": "Description of what the example (command) does. This will be used in the auto generated documentation within the cli tool"
+                  },
+                  "command": {
+                    "type": "string",
+                    "title": "Command line code which shows the usage of the command for the current endpoint",
+                    "description": "This command should be what you run when using the native golang cli tool. i.e. mycliapp users list --pageSize 100"
+                  }
+                },
+                "required": [
+                  "description",
+                  "command"
+                ]
+              }
           },
           "examples": {
             "type": "object",
@@ -742,7 +765,7 @@
     }
   },
   "required": [
-    "information",
-    "endpoints"
+    "group",
+    "commands"
   ]
 }

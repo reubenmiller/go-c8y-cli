@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "identity",
     "description": "Cumulocity external identity",
     "descriptionLong": "REST endpoint to interact with Cumulocity external identity objects",
     "link": "https://cumulocity.com/guides/reference/identity/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getExternalIDCollection",
       "method": "GET",

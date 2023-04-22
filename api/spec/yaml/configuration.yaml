@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: configuration
   description: Cumulocity configuration repository management
   descriptionLong: Configuration management to create/list/delete configurations
   link: https://cumulocity.com/guides/users-guide/device-management/#configuration-repository
 
-endpoints:
+commands:
   - name: getConfigurationCollection
     method: GET
     description: Get configuration collection

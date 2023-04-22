@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "users",
     "description": "Cumulocity users",
     "descriptionLong": "REST endpoint to interact with Cumulocity users",
     "link": "https://cumulocity.com/guides/reference/users/#user"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getInventoryRoleCollection",
       "description": "Get inventory role collection",

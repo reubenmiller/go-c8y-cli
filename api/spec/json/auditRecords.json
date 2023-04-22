@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "auditRecords",
     "description": "Cumulocity auditRecords",
     "descriptionLong": "REST endpoint to interact with Cumulocity auditRecords",
     "link": "https://cumulocity.com/guides/reference/auditing/#audit-api"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "newAudit",
       "description": "Create audit record",

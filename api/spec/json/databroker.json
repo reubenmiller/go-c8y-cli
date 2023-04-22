@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "databroker",
     "description": "Cumulocity databroker",
     "descriptionLong": "REST endpoint to interact with Cumulocity databroker",
     "link": "https://cumulocity.com/guides/users-guide/enterprise-tenant/#data-broker"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getDataBrokerConnectorCollection",
       "description": "Get data broker collection",

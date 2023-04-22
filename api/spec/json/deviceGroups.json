@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "devicegroups",
     "description": "Cumulocity device groups",
     "descriptionLong": "REST endpoint to interact with Cumulocity device groups",
     "link": "https://cumulocity.com/guides/reference/inventory/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "listDeviceGroups",
       "description": "Get device group collection",

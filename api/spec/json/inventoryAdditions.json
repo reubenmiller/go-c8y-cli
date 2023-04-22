@@ -1,5 +1,5 @@
 {
-  "information": {
+  "group": {
     "name": "inventory/additions",
     "description": "Cumulocity managed object additions",
     "descriptionLong": "Managed additions to managed objects",
@@ -8,7 +8,7 @@
     "deprecated": "please use 'c8y inventory children [command] --childType addition'",
     "hidden": true
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "listChildAdditionCollection",
       "method": "GET",

@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "deviceprofiles",
     "description": "Cumulocity device profile management",
     "descriptionLong": "Commands to managed Cumulocity device profiles",
     "link": "https://cumulocity.com/guides/users-guide/device-management/#managing-device-profiles"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getDeviceProfileCollection",
       "method": "GET",

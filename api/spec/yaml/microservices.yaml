@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: microservices
   description: Cumulocity microservices
   descriptionLong: 'REST endpoint to interact with Cumulocity microservices'
   link: https://cumulocity.com/guides/reference/applications/
 
-endpoints:
+commands:
   - name: getMicroserviceCollection
     description: Get microservice collection
     descriptionLong: |

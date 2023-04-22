@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "operations",
     "description": "Cumulocity operations",
     "descriptionLong": "REST endpoint to interact with Cumulocity operations",
     "link": "https://cumulocity.com/guides/reference/device-control/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getOperationCollection",
       "method": "GET",

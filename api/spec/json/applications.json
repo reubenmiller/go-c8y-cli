@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "applications",
     "description": "Cumulocity applications",
     "descriptionLong": "REST endpoint to interact with Cumulocity applications",
     "link": "https://cumulocity.com/guides/reference/applications/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getApplicationCollection",
       "description": "Get application collection",

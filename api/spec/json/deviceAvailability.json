@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "devices/availability",
     "description": "Cumulocity device availability",
     "descriptionLong": "REST endpoint to interact with Cumulocity devices",
     "link": "https://cumulocity.com/guides/reference/inventory/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "setDeviceRequiredAvailability",
       "description": "Set required availability",

@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "devices/services",
     "description": "Cumulocity device services",
     "descriptionLong": "Managed device services (introduced in 10.14)",
     "link": "https://cumulocity.com/guides/10.14.0/reference/device-management-library/#services"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "findServices",
       "method": "GET",

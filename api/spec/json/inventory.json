@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "inventory",
     "description": "Cumulocity managed objects",
     "descriptionLong": "REST endpoint to interact with Cumulocity managed objects",
     "link": "https://cumulocity.com/guides/reference/inventory/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getManagedObjectCollection",
       "method": "GET",

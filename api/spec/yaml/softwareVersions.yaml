@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: software/versions
   description: Cumulocity software version management
   descriptionLong: Software version management to create/list/delete versions
   link: https://cumulocity.com/guides/users-guide/device-management/#software-repo
 
-endpoints:
+commands:
   - name: getSoftwareVersionCollection
     method: GET
     description: Get software package version collection

@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "currenttenant",
     "description": "Cumulocity current tenant",
     "descriptionLong": "Cumulocity current tenant commands",
     "link": "https://cumulocity.com/guides/reference/tenants/#tenants"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "currentTenant",
       "description": "Get current tenant",

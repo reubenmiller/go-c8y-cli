@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: events
   description: Cumulocity events
   descriptionLong: 'REST endpoint to interact with Cumulocity events'
   link: https://cumulocity.com/guides/reference/events/
 
-endpoints:
+commands:
   - name: getEventCollection
     method: GET
     description: Get event collection

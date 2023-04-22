@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: alarms
   description: Cumulocity alarms
   descriptionLong: 'REST endpoint to interact with Cumulocity alarms'
   link: https://cumulocity.com/guides/reference/alarms/
 
-endpoints:
+commands:
   - name: getAlarmCollection
     method: GET
     description: Get alarm collection

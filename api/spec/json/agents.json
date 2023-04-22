@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "agents",
     "description": "Cumulocity agents",
     "descriptionLong": "REST endpoint to interact with Cumulocity agents",
     "link": "https://cumulocity.com/guides/reference/inventory/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "listAgents",
       "description": "Get agent collection",

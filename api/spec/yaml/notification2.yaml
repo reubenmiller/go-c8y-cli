@@ -1,9 +1,9 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: notification2
   description: Cumulocity Notification2
   descriptionLong: Managed tokens and subscriptions for notifications
   link: https://cumulocity.com/guides/reference/notifications/
 
-endpoints: []
+commands: []

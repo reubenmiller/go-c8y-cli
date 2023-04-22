@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: currentuser
   description: Cumulocity current user
   descriptionLong: 'REST endpoint to interact with the current Cumulocity user'
   link: https://cumulocity.com/guides/reference/users/#user
 
-endpoints:
+commands:
   - name: getCurrentUser
     description: Get current user
     descriptionLong: Get the user representation associated with the current credentials used by the request

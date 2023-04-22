@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "notification2/tokens",
     "description": "Cumulocity notification2 tokens",
     "descriptionLong": "In order to receive subscribed notifications, a consumer application or microservice\nmust obtain an authorization token that provides proof that the holder is allowed to\nreceive subscribed notifications.\n",
     "link": "https://cumulocity.com/guides/reference/notifications/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "newToken",
       "method": "POST",

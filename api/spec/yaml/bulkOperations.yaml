@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: bulkOperations
   description: Cumulocity bulk operations
   descriptionLong: 'REST endpoint to interact with Cumulocity bulk operations'
   link: https://cumulocity.com/guides/reference/device-control/#bulk-operation-collection
 
-endpoints:
+commands:
   - name: getBulkOperationCollection
     method: GET
     description: Get bulk operation collection

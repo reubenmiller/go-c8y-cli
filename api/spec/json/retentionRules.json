@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "retentionRules",
     "description": "Cumulocity retentionRules",
     "descriptionLong": "REST endpoint to interact with Cumulocity retentionRules",
     "link": "https://cumulocity.com/guides/reference/retention-rules/#retention-rules"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getRetentionRuleCollection",
       "description": "Get retention rule collection",

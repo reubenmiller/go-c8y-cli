@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: measurements
   description: Cumulocity measurements
   descriptionLong: 'REST endpoint to interact with Cumulocity measurements'
   link: https://cumulocity.com/guides/reference/measurements/
 
-endpoints:
+commands:
   - name: getMeasurementCollection
     method: GET
     description: Get measurement collection

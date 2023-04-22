@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: userGroups
   description: Cumulocity user groups
   descriptionLong: 'REST endpoint to interact with Cumulocity user groups'
   link: https://cumulocity.com/guides/reference/users/#user-reference-collection
 
-endpoints:
+commands:
   - name: getUserGroupCollection
     description: Get user group collection
     descriptionLong: Get collection of (user) groups

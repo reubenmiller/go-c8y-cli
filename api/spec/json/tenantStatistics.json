@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "tenantStatistics",
     "description": "Cumulocity tenant statistics",
     "descriptionLong": "REST endpoint to interact with Cumulocity tenant statistics",
     "link": "https://cumulocity.com/guides/reference/tenants/#tenant-usage-statistics"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getTenantUsageStatisticsCollection",
       "description": "Get tenant usage statistics",

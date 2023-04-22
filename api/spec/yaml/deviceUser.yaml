@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: devices/user
   description: Cumulocity device user management
   descriptionLong: Managed the device user related to a device
   link: https://cumulocity.com/guides/reference/inventory/
 
-endpoints:
+commands:
   - name: getDeviceUser
     description: Get device user
     descriptionLong: Retrieve the device owner's username and state (enabled or disabled) of a specific managed object

@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: microservices/loglevels
   description: Cumulocity microservice log levels
   descriptionLong: |
@@ -10,7 +10,7 @@ information:
     (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
   link: https://cumulocity.com/guides/reference/applications/
 
-endpoints:
+commands:
   - name: list
     description: List log levels of microservice
     descriptionLong: |

@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: devices/statistics
   description: Cumulocity device statistics (for a single tenant) statistics
   descriptionLong: |
@@ -10,7 +10,7 @@ information:
     Device statistics are counted with daily and monthly rate. All requests are considered when counting device statistics, no matter which processing mode is used.
   link: https://cumulocity.com/api/latest/#tag/Device-statistics
 
-endpoints:
+commands:
 
   - name: listStatisticsCollection
     description: Retrieve device statistics

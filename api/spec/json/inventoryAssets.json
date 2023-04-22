@@ -1,5 +1,5 @@
 {
-  "information": {
+  "group": {
     "name": "inventory/assets",
     "description": "Cumulocity inventory assets",
     "descriptionLong": "REST endpoint to interact with Cumulocity managed objects",
@@ -8,7 +8,7 @@
     "deprecated": "please use 'c8y inventory children [command] --childType asset'",
     "hidden": true
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "listChildAssetCollection",
       "method": "GET",

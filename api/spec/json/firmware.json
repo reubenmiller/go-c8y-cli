@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "firmware",
     "description": "Cumulocity firmware management",
     "descriptionLong": "Firmware management to create/list/delete packages, versions and patches",
     "link": "https://cumulocity.com/guides/users-guide/device-management/#firmware-repo"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getFirmwareCollection",
       "method": "GET",

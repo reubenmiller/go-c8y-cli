@@ -1,12 +1,12 @@
 {
-  "information": {
+  "group": {
     "name": "datahub/users",
     "description": "Cumulocity IoT DataHub Users",
     "descriptionLong": "Cumulocity IoT DataHub Users",
     "link": "https://cumulocity.com/guides/datahub/datahub-overview/",
     "skip": true
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "list",
       "method": "GET",
