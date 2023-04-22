@@ -1,0 +1,651 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "definitions": {
+        "parameterDefinition": {
+            "type": "object",
+            "title": "Parameter definition",
+            "properties": {
+                "name": {
+                    "$ref": "#/definitions/argumentName"
+                },
+                "type": {
+                    "$ref": "#/definitions/cliArgumentType"
+                },
+                "property": {
+                    "type": "string"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/parameterDefinition"
+                    }
+                },
+                "pipeline": {
+                    "type": "boolean"
+                },
+                "pipelineAliases": {
+                    "$ref": "#/definitions/pipelineAliases"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "format": {
+                    "type": "string"
+                },
+                "default": {
+                    "type": "string"
+                },
+                "required": {
+                    "$ref": "#/definitions/requiredParameter"
+                },
+                "hidden": {
+                    "$ref": "#/definitions/hiddenParameter"
+                },
+                "position": {
+                    "$ref": "#/definitions/argumentPosition"
+                },
+                "validationSet": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "dependsOn": {
+                    "$ref": "#/definitions/dependsOn"
+                },
+                "skip": {
+                    "$ref": "#/definitions/skipParameter"
+                }
+            },
+            "required": [
+                "name",
+                "type",
+                "description"
+            ]
+        },
+        "outputAssertion": {
+            "type": "object",
+            "properties": {
+                "json": {
+                    "type": "object",
+                    "title": "expected json properties",
+                    "description": "JSON properties which are expected to be matched in the command output"
+                },
+                "contains": {
+                    "type": "array",
+                    "title": "List of strings which are expected to be inside the response.",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "assertion": {
+            "type": "object",
+            "properties": {
+                "json": {
+                    "type": "object",
+                    "title": "JSON property assertions"
+                },
+                "exit-code": {
+                    "type": "integer",
+                    "title": "Expected exit code"
+                },
+                "skip": {
+                    "type": "boolean",
+                    "title": "Skip test"
+                },
+                "line-count": {
+                    "type": "integer",
+                    "title": "Expected number of lines (exact match)"
+                },
+                "contains": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "title": "Output contains given values"
+                }
+            }
+        },
+        "bodyTemplate": {
+            "type": "object",
+            "description": "Use a template when constructing the body of the http request. This can be used to force values, have defaults, or perform custom logic (depending on the template engine). At the moment on jsonnet is supported",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Templating engine. Current only supports jsonnet",
+                    "enum": [
+                        "jsonnet",
+                        "none"
+                    ]
+                },
+                "applyLast": {
+                    "type": "boolean",
+                    "description": "Apply the json template after the existing parameters have been processed. This is useful if values needs to be forced, or if you want the user to be able to override defaults"
+                },
+                "template": {
+                    "type": "string",
+                    "description": "Template in the given template engine language"
+                }
+            },
+            "required": [
+                "type"
+            ]
+        },
+        "bodyRequiredKeys": {
+            "type": "array",
+            "description": "List of the required body keys. The keys will be checked after any templating logic",
+            "items": {
+                "type": "string"
+            }
+        },
+        "skipParameter": {
+            "type": "boolean",
+            "title": "Skip (ignore) parameter",
+            "description": "Skip the parameter from the command. Useful if preparing for future versions of the c8y api tool"
+        },
+        "requiredParameter": {
+            "type": "boolean",
+            "title": "Is Required",
+            "description": "The parameter is required/mandatory and needs input from the user/pipeline in order to correctly use the command"
+        },
+        "hiddenParameter": {
+            "type": "boolean",
+            "title": "Is Hidden",
+            "description": "The parameter should be hidden from docs and completions but is still parsed. This is used to deprecate a flag without breaking existing scripts"
+        },
+        "defaultValue": {
+            "type": "string",
+            "title": "Default value",
+            "description": "Default value to use"
+        },
+        "skip-test": {
+            "type": "boolean",
+            "title": "Skip (ignore) test",
+            "description": "Skip the test when generating the test code. Useful if the test is currently not possible due to limited access or functionality is missing in the test environment"
+        },
+        "argumentName": {
+            "type": "string",
+            "description": "Parameter name. It should start with a lower case character, and only include characters [a-zA-Z]",
+            "pattern": "^[a-z][a-zA-Z]+$"
+        },
+        "dependsOn": {
+            "type": "array",
+            "title": "Parameter is depend on the list of parameters for completions or other lookups",
+            "description": "Additional links to parameters which the current parameter is dependent on",
+            "items": {
+                "type": "string"
+            }
+        },
+        "cliArgumentType": {
+            "type": "string",
+            "description": "CLI Argument type",
+            "enum": [
+                "application",
+                "applicationname",
+                "hostedapplication",
+                "boolean",
+                "booleanDefault",
+                "optional_fragment",
+                "integer",
+                "certificatefile",
+                "file",
+                "float",
+                "fileContents",
+                "attachment",
+                "binaryUploadURL",
+                "date",
+                "datetime",
+                "json",
+                "json_custom",
+                "microservice",
+                "microservicename",
+                "microserviceinstance",
+                "queryExpression",
+                "string",
+                "stringStatic",
+                "inventoryChildType",
+                "source",
+                "subscriptionId",
+                "subscriptionName",
+                "tenant",
+                "tenantname",
+                "[]devicerequest",
+                "[]deviceservice",
+                "[]id",
+                "[]agent",
+                "[]certificate",
+                "[]configuration",
+                "configurationDetails",
+                "[]deviceprofile",
+                "[]firmware",
+                "[]firmwareversion",
+                "[]firmwarepatch",
+                "firmwareName",
+                "firmwareVersionName",
+                "firmwareDetails",
+                "firmwarepatchName",
+                "[]software",
+                "softwareDetails",
+                "softwareName",
+                "[]softwareversion",
+                "softwareversionName",
+                "[]string",
+                "[]stringcsv",
+                "[]device",
+                "[]devicegroup",
+                "[]usergroup",
+                "[]userself",
+                "[]roleself",
+                "[]role",
+                "[]user",
+                "[]smartgroup"
+            ]
+        },
+        "pipelineAliases": {
+            "type": "array",
+            "description": "Aliases to use when searching for the piped json data property to bind to. Only the first match will be used",
+            "items": {
+                "type": "string"
+            }
+        },
+        "argumentPosition": {
+            "type": "integer",
+            "description": "Argument position / order",
+            "minimum": 0,
+            "maximum": 99
+        }
+    },
+    "properties": {
+        "group": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "title": "endpoint name / category for the cli",
+                    "description": "The name will be used for the command line tool category and is case sensitive"
+                },
+                "description": {
+                    "type": "string",
+                    "title": "Description of the endpoint category"
+                },
+                "descriptionLong": {
+                    "type": "string",
+                    "title": "Detailed description of the endpoint category"
+                },
+                "link": {
+                    "type": "string",
+                    "title": "Link to Cumulocity documentation"
+                },
+                "deprecated": {
+                    "type": "string",
+                    "title": "Deprecation message to be displayed to the user",
+                    "description": "The command will still visible to the user but always generate a warning"
+                },
+                "deprecatedAt": {
+                    "type": "string",
+                    "title": "Deprecated At",
+                    "format": "date",
+                    "description": "Date when the command was deprecated"
+                },
+                "hidden": {
+                    "type": "boolean",
+                    "title": "Command should be hidden",
+                    "description": "The command will still work but it will not be visible in the documentation and completions"
+                },
+                "skip": {
+                    "type": "boolean",
+                    "title": "All commands should be ignored",
+                    "description": "ignore specification file"
+                }
+            },
+            "required": [
+                "name",
+                "description"
+            ]
+        },
+        "commands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "method": {
+                        "type": "string",
+                        "enum": [
+                            "GET",
+                            "POST",
+                            "PUT",
+                            "DELETE"
+                        ]
+                    },
+                    "semanticMethod": {
+                        "type": "string",
+                        "title": "Semantic REST method",
+                        "description": "How the call should be handled internally. This will override how the request is processed in respect to confirmation, create/update/delete modes etc.",
+                        "enum": [
+                            "GET",
+                            "POST",
+                            "PUT",
+                            "DELETE"
+                        ]
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description of the endpoint"
+                    },
+                    "descriptionLong": {
+                        "type": "string",
+                        "title": "Detailed description of the endpoint"
+                    },
+                    "path": {
+                        "type": "string",
+                        "title": "Partial url i.e. /alarm/alarms"
+                    },
+                    "accept": {
+                        "type": "string",
+                        "description": "Accept header value. Data to be returned from the platform. The accept header will also control how the data will be displayed within the PowerShell module"
+                    },
+                    "collectionType": {
+                        "type": "string",
+                        "description": "Type of the raw response from the platform. The collectionType is the raw response type, and then the collectionProperty, is the type to be used for the array of items that are represented in the collectionType"
+                    },
+                    "collectionProperty": {
+                        "type": "string",
+                        "description": "Type of each item in the array related to the collectionType. Use '-' disable any automatic guessing"
+                    },
+                    "responseType": {
+                        "type": "string",
+                        "description": "Expected response type returned by the server. If not provided a JSON object is assumed",
+                        "enum": [
+                            "object",
+                            "array"
+                        ]
+                    },
+                    "skip": {
+                        "type": "boolean",
+                        "title": "Skip parameter",
+                        "description": "Skip the parameter from the command. Useful if preparing for future versions of the c8y api tool"
+                    },
+                    "deprecated": {
+                        "type": "string",
+                        "title": "Deprecation message to be displayed to the user",
+                        "description": "The command will still visible to the user but always generate a warning"
+                    },
+                    "deprecatedAt": {
+                        "type": "string",
+                        "title": "Deprecated At",
+                        "format": "date",
+                        "description": "Date when the command was deprecated"
+                    },
+                    "hidden": {
+                        "type": "boolean",
+                        "title": "Command should be hidden",
+                        "description": "The command will still work but it will not be visible in the documentation and completions"
+                    },
+                    "exampleList": {
+                        "type": "array",
+                        "description": "List of examples",
+                        "minItems": 1,
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "description": {
+                                    "type": "string",
+                                    "title": "Description of what the example (command) does. This will be used in the auto generated documentation within the cli tool"
+                                },
+                                "command": {
+                                    "type": "string",
+                                    "title": "Command line code which shows the usage of the command for the current endpoint",
+                                    "description": "This command should be what you run when using the native golang cli tool. i.e. mycliapp users list --pageSize 100"
+                                }
+                            },
+                            "required": [
+                                "description",
+                                "command"
+                            ]
+                        }
+                    },
+                    "flagMapping": {
+                        "type": "array",
+                        "description": "Common flag mapping. Customize where common flags are mapped to, e.g. pageSize => limit",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "Current property to map"
+                                },
+                                "property": {
+                                    "type": "string",
+                                    "description": "Value where the name should be mapped to"
+                                }
+                            }
+                        }
+                    },
+                    "headerParameters": {
+                        "type": "array",
+                        "description": "Configure header parameters from input arguments",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "Name of the argument to be used in the cli"
+                                },
+                                "type": {
+                                    "$ref": "#/definitions/cliArgumentType"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "property": {
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "type": "string"
+                                },
+                                "required": {
+                                    "$ref": "#/definitions/requiredParameter"
+                                },
+                                "hidden": {
+                                    "$ref": "#/definitions/hiddenParameter"
+                                },
+                                "position": {
+                                    "$ref": "#/definitions/argumentPosition"
+                                },
+                                "dependsOn": {
+                                    "$ref": "#/definitions/dependsOn"
+                                },
+                                "skip": {
+                                    "$ref": "#/definitions/skipParameter"
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "type",
+                                "description"
+                            ]
+                        }
+                    },
+                    "queryParameters": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "$ref": "#/definitions/parameterDefinition"
+                        }
+                    },
+                    "pathParameters": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "$ref": "#/definitions/argumentName"
+                                },
+                                "type": {
+                                    "$ref": "#/definitions/cliArgumentType"
+                                },
+                                "property": {
+                                    "type": "string"
+                                },
+                                "pipeline": {
+                                    "type": "boolean"
+                                },
+                                "pipelineAliases": {
+                                    "$ref": "#/definitions/pipelineAliases"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "required": {
+                                    "$ref": "#/definitions/requiredParameter"
+                                },
+                                "hidden": {
+                                    "$ref": "#/definitions/hiddenParameter"
+                                },
+                                "position": {
+                                    "$ref": "#/definitions/argumentPosition"
+                                },
+                                "validationSet": {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "dependsOn": {
+                                    "$ref": "#/definitions/dependsOn"
+                                },
+                                "skip": {
+                                    "$ref": "#/definitions/skipParameter"
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "type",
+                                "description"
+                            ]
+                        }
+                    },
+                    "bodyContent": {
+                        "type": "object",
+                        "description": "Description of body content",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "description": "Body content type. Only used to identify binary contents",
+                                "enum": [
+                                    "binary",
+                                    "formdata"
+                                ]
+                            }
+                        }
+                    },
+                    "bodyTemplates": {
+                        "type": "array",
+                        "description": "List of templates to apply when constructing the body of the http request. This can be used to force values, have defaults, or perform custom logic (depending on the template engine). At the moment on jsonnet is supported",
+                        "items": {
+                            "$ref": "#/definitions/bodyTemplate"
+                        }
+                    },
+                    "bodyRequiredKeys": {
+                        "type": "array",
+                        "description": "List of the required body keys. The keys will be checked after any templating logic",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "bodyTemplateOptions": {
+                        "type": "object",
+                        "description": "Body Templating options",
+                        "properties": {
+                            "enabled": {
+                                "type": "boolean",
+                                "default": true,
+                                "description": "Body templating is supported"
+                            }
+                        }
+                    },
+                    "body": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "$ref": "#/definitions/argumentName"
+                                },
+                                "type": {
+                                    "$ref": "#/definitions/cliArgumentType"
+                                },
+                                "property": {
+                                    "type": "string"
+                                },
+                                "pipeline": {
+                                    "type": "boolean"
+                                },
+                                "pipelineAliases": {
+                                    "$ref": "#/definitions/pipelineAliases"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "required": {
+                                    "$ref": "#/definitions/requiredParameter"
+                                },
+                                "hidden": {
+                                    "$ref": "#/definitions/hiddenParameter"
+                                },
+                                "default": {
+                                    "$ref": "#/definitions/defaultValue"
+                                },
+                                "position": {
+                                    "$ref": "#/definitions/argumentPosition"
+                                },
+                                "validationSet": {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "dependsOn": {
+                                    "$ref": "#/definitions/dependsOn"
+                                },
+                                "skip": {
+                                    "$ref": "#/definitions/skipParameter"
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "type",
+                                "description"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "method",
+                    "path",
+                    "description",
+                    "exampleList"
+                ]
+            },
+            "title": "List of commands",
+            "description": "Logically grouped commands"
+        }
+    },
+    "required": [
+        "group",
+        "commands"
+    ]
+}
