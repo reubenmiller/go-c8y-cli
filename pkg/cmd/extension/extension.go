@@ -15,6 +15,7 @@ const manifestName = "manifest.yml"
 const fileAlias = "extension.yaml"
 const templateName = "templates"
 const viewsName = "views"
+const apiName = "api"
 const commandsName = "commands"
 
 type ExtensionKind int

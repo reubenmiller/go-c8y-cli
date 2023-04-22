@@ -756,6 +756,9 @@ var exampleJsonnet []byte
 //go:embed ext_tmpls/exampleDevice.json
 var exampleView []byte
 
+//go:embed ext_tmpls/commandGroup.yaml
+var commandGroupTmpl string
+
 func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error {
 	exe, err := m.lookPath("git")
 	if err != nil {
@@ -773,7 +776,7 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 	}
 
 	readme := fmt.Sprintf(readmeTmpl, name)
-	if err := writeFile(filepath.Join(name, "README.md"), []byte(readme), 0755); err != nil {
+	if err := writeFile(filepath.Join(name, "README.md"), []byte(readme), 0644); err != nil {
 		return err
 	}
 
@@ -786,11 +789,19 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 		return err
 	}
 
+	apiDir := filepath.Join(name, apiName)
+	if err := os.MkdirAll(apiDir, 0755); err != nil {
+		return err
+	}
+	if err := writeFile(filepath.Join(apiDir, "features.yaml"), []byte(commandGroupTmpl), 0644); err != nil {
+		return err
+	}
+
 	templatesDir := filepath.Join(name, templateName)
 	if err := os.MkdirAll(templatesDir, 0755); err != nil {
 		return err
 	}
-	if err := writeFile(filepath.Join(templatesDir, "customCommand.jsonnet"), exampleJsonnet, 0755); err != nil {
+	if err := writeFile(filepath.Join(templatesDir, "customCommand.jsonnet"), exampleJsonnet, 0644); err != nil {
 		return err
 	}
 
@@ -798,7 +809,7 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 	if err := os.MkdirAll(viewsDir, 0755); err != nil {
 		return err
 	}
-	if err := writeFile(filepath.Join(viewsDir, "exampleDevice.json"), exampleView, 0755); err != nil {
+	if err := writeFile(filepath.Join(viewsDir, "exampleDevice.json"), exampleView, 0644); err != nil {
 		return err
 	}
 
