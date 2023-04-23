@@ -79,6 +79,7 @@
             ],
             "anyOf": [
                 {"required" : ["fragments"]},
+                {"required" : ["requestPath"]},
                 {"required" : ["type"]},
                 {"required" : ["self"]},
                 {"required" : ["contentType"]}
