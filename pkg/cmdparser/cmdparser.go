@@ -32,6 +32,10 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory) (*cobra.Command, error)
 		return nil, err
 	}
 
+	if spec.Group.Skip {
+		return nil, nil
+	}
+
 	cmd := &cobra.Command{
 		Use:   spec.Group.Name,
 		Short: spec.Group.Description,
@@ -64,7 +68,7 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory) (*cobra.Command, error)
 			}
 
 			if param.AcceptsPipeline() {
-				subcmd.Runtime = append(subcmd.Runtime, flags.WithExtendedPipelineSupport(param.Name, param.GetTargetProperty(), param.IsRequired()))
+				subcmd.Runtime = append(subcmd.Runtime, flags.WithExtendedPipelineSupport(param.Name, param.GetTargetProperty(), param.IsRequired(), param.PipelineAliases...))
 				subcmd.Runtime = append(subcmd.Runtime, flags.WithPipelineAliases(param.Name, param.PipelineAliases...))
 			}
 
@@ -96,6 +100,15 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory) (*cobra.Command, error)
 
 		if item.SupportsProcessingMode() {
 			subcmd.Runtime = append(subcmd.Runtime, flags.WithProcessingMode())
+		}
+
+		// Add template/data support by default
+		if item.SupportsTemplates() {
+			subcmd.Runtime = append(
+				subcmd.Runtime,
+				flags.WithData(),
+				factory.WithTemplateFlag(subcmd.Command),
+			)
 		}
 
 		cmd.AddCommand(subcmd.NewRuntimeCommand(factory).SubCommand.GetCommand())
@@ -188,11 +201,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.Description)
 
 	case "json":
-		cmd.Runtime = append(
-			cmd.Runtime,
-			flags.WithData(),
-			factory.WithTemplateFlag(cmd.Command),
-		)
+		// Ignore, as it is add by default to all PUT and POST requests
 
 	case "datefrom", "dateto", "datetime", "date":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())

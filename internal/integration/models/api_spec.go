@@ -3,6 +3,7 @@ package models
 import "strings"
 
 type Specification struct {
+	Version  string    `yaml:"version"`
 	Group    Group     `yaml:"group"`
 	Commands []Command `yaml:"commands"`
 }
@@ -50,6 +51,7 @@ type Command struct {
 func (c *Command) SupportsProcessingMode() bool {
 	return c.Method == "DELETE" || c.Method == "PUT" || c.Method == "POST"
 }
+
 func (c *Command) IsHidden() bool {
 	return c.Hidden != nil && *c.Hidden
 }
@@ -143,6 +145,26 @@ func (c *Command) GetQueryParameters() []Parameter {
 	return parameters
 }
 
+func (c *Command) IsCollection() bool {
+	return strings.EqualFold(c.Method, "GET") &&
+		(c.CollectionProperty != "" || strings.Contains(strings.ToLower(c.Accept), "collection"))
+}
+
+func (c *Command) SupportsTemplates() bool {
+	return strings.EqualFold(c.Method, "PUT") || strings.EqualFold(c.Method, "POST")
+}
+
+func (c *Command) IsBodyFormData() bool {
+	return c.BodyContent != nil && c.BodyContent.Type == "formdata"
+}
+
+func (c *Command) GetBodyContentType() string {
+	if c.BodyContent == nil {
+		return ""
+	}
+	return c.BodyContent.Type
+}
+
 type Aliases struct {
 	Go         string `yaml:"go"`
 	PowerShell string `yaml:"powershell"`
@@ -227,26 +249,6 @@ func (p *Parameter) GetTargetProperty() string {
 		return p.Property
 	}
 	return p.Name
-}
-
-func (p *Command) IsCollection() bool {
-	return strings.EqualFold(p.Method, "GET") &&
-		(p.CollectionProperty != "" || strings.Contains(strings.ToLower(p.Accept), "collection"))
-}
-
-func (p *Command) SupportsTemplates() bool {
-	return strings.EqualFold(p.Method, "PUT") || strings.EqualFold(p.Method, "POST")
-}
-
-func (p *Command) IsBodyFormData() bool {
-	return p.BodyContent != nil && p.BodyContent.Type == "formdata"
-}
-
-func (p *Command) GetBodyContentType() string {
-	if p.BodyContent == nil {
-		return ""
-	}
-	return p.BodyContent.Type
 }
 
 func (p *Parameter) IsTypeDateTime() bool {

@@ -260,6 +260,12 @@
         }
     },
     "properties": {
+        "version": {
+            "type": "string",
+            "title": "Specification version",
+            "description": "Specification version.",
+            "default": "v1"
+        },
         "group": {
             "type": "object",
             "properties": {
@@ -396,19 +402,19 @@
                         "items": {
                             "type": "object",
                             "properties": {
-                                "description": {
-                                    "type": "string",
-                                    "title": "Description of what the example (command) does. This will be used in the auto generated documentation within the cli tool"
-                                },
                                 "command": {
                                     "type": "string",
                                     "title": "Command line code which shows the usage of the command for the current endpoint",
                                     "description": "This command should be what you run when using the native golang cli tool. i.e. mycliapp users list --pageSize 100"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "title": "Description of what the example (command) does. This will be used in the auto generated documentation within the cli tool"
                                 }
                             },
                             "required": [
-                                "description",
-                                "command"
+                                "command",
+                                "description"
                             ]
                         }
                     },

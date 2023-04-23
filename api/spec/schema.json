@@ -260,6 +260,12 @@
     }
   },
   "properties": {
+    "version": {
+      "type": "string",
+      "title": "Specification version",
+      "description": "Specification version.",
+      "default": "v1"
+    },
     "group": {
       "type": "object",
       "properties": {

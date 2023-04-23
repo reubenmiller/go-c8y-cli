@@ -509,7 +509,9 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 					return err
 				}
 
-				extRoot.AddCommand(extCommand)
+				if extCommand != nil {
+					extRoot.AddCommand(extCommand)
+				}
 				return nil
 			})
 		}

@@ -17,7 +17,7 @@ commands:
       - name: query
         property: q
         type: queryExpression
-        description: Query expresssion
+        description: Query expression
         children:
           - name: name
             type: string
@@ -86,10 +86,6 @@ commands:
           - example1
           - example2
 
-      - name: data
-        type: json
-        description: Custom data
-
     bodyTemplates:
       - type: jsonnet
         template: "{example: true}"
@@ -109,10 +105,6 @@ commands:
         type: string
         description: Profile name
         required: true
-      
-      - name: data
-        type: json
-        description: Custom data
 
   - name: hidden
     description: Hidden command

@@ -21,6 +21,7 @@ The different elements of an extension and where they are stored within the exte
 | Type | Path | Description |
 |-----------|------|-------------|
 | Aliases | extension.yaml | Convenience commands which are easily accessible under the root command. e.g. `c8y my-alias` |
+| API | `api/` | Commands which are generated via API to reuse the same go-c8y-cli logic |
 | Commands | `commands/` | More complex commands which can be written in language  (e.g. bash, python etc.). The commands can call other go-c8y-cli commands or any other tooling |
 | Templates | `templates/` | Any go-c8y-cli templates that can be referenced by when using the `template` flag |
 | Views | `views/` | Any go-c8y-cli view definitions that control which fragments are shown for which items, e.g. show custom fragments for specific device types etc. |
@@ -31,6 +32,10 @@ Below shows an example extension `c8y-myext` and a tree representation of the fi
 c8y-myext/
 │
 ├── extension.yaml
+│
+├── api/
+│   ├── devices.yaml
+│   └── datapoints.yaml
 │
 ├── commands/
 │   ├── do-something
