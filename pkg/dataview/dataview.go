@@ -271,7 +271,7 @@ func (v *DataView) GetView(r *ViewData) ([]string, error) {
 			}
 		}
 
-		if r.ContentType != "" {
+		if definition.ContentType != "" {
 			if match, err := regexp.MatchString("(?i)"+definition.ContentType, r.ContentType); err == nil && !match {
 				isMatch = false
 			}
@@ -287,13 +287,19 @@ func (v *DataView) GetView(r *ViewData) ([]string, error) {
 			}
 		}
 
-		if r.Request != nil {
-			if definition.RequestPath != "" {
+		if definition.RequestPath != "" {
+			if r.Request == nil {
+				isMatch = false
+			} else {
 				if match, err := regexp.MatchString("(?i)"+definition.RequestPath, r.Request.URL.Path); err == nil && !match {
 					isMatch = false
 				}
 			}
-			if definition.RequestMethod != "" {
+		}
+		if definition.RequestMethod != "" {
+			if r.Request == nil {
+				isMatch = false
+			} else {
 				if match, err := regexp.MatchString("(?i)"+definition.RequestMethod, r.Request.Method); err == nil && !match {
 					isMatch = false
 				}
