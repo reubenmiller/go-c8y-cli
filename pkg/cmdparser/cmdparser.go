@@ -32,16 +32,6 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory) (*cobra.Command, error)
 		return nil, err
 	}
 
-	// TODO: Use client() function rather than actual client and cfg as it does not exist yet
-	client, err := factory.Client()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	cfg, err := factory.Config()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	cmd := &cobra.Command{
 		Use:   spec.Group.Name,
 		Short: spec.Group.Description,
@@ -62,30 +52,30 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory) (*cobra.Command, error)
 		}, item)
 
 		flagNames := make(map[string]interface{})
-		for _, args := range item.GetAllParameters() {
+		for _, param := range item.GetAllParameters() {
 			// Ignore duplicated flags
-			if _, ok := flagNames[args.Name]; ok {
-				cfg.Logger.Warnf("Duplicated flag detected. name=%s", args.Name)
+			if _, ok := flagNames[param.Name]; ok {
 				continue
 			}
-			flagNames[args.Name] = 0
+			flagNames[param.Name] = 0
 
-			if err := AddFlag(subcmd, &args, factory, cfg, client); err != nil {
+			if err := AddFlag(subcmd, &param, factory); err != nil {
 				return nil, err
 			}
 
-			if args.AcceptsPipeline() {
-				subcmd.Runtime = append(subcmd.Runtime, flags.WithExtendedPipelineSupport(args.Name, args.GetTargetProperty(), args.IsRequired()))
-				subcmd.Runtime = append(subcmd.Runtime, flags.WithPipelineAliases(args.Name, args.PipelineAliases...))
+			if param.AcceptsPipeline() {
+				subcmd.Runtime = append(subcmd.Runtime, flags.WithExtendedPipelineSupport(param.Name, param.GetTargetProperty(), param.IsRequired()))
+				subcmd.Runtime = append(subcmd.Runtime, flags.WithPipelineAliases(param.Name, param.PipelineAliases...))
 			}
 
-			if len(args.ValidationSet) > 0 {
-				subcmd.Completion = append(subcmd.Completion, completion.WithValidateSet(args.Name, args.ValidationSet...))
+			if len(param.ValidationSet) > 0 {
+				subcmd.Completion = append(subcmd.Completion, completion.WithValidateSet(param.Name, param.ValidationSet...))
 			}
-		}
 
-		if len(item.BodyRequiredKeys) > 0 {
-			subcmd.Body.Options = append(subcmd.Body.Options, flags.WithRequiredProperties(item.BodyRequiredKeys...))
+			// Add completions
+			if comp := GetCompletionOptions(subcmd, &param, factory); comp != nil {
+				subcmd.Completion = append(subcmd.Completion, comp)
+			}
 		}
 
 		// Misc. options
@@ -104,69 +94,8 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory) (*cobra.Command, error)
 			subcmd.Runtime = append(subcmd.Runtime, flags.WithDeprecationNotice(item.Deprecated))
 		}
 
-		// path
-		for _, p := range item.PathParameters {
-			subcmd.Path.Options = append(subcmd.Path.Options, GetOption(subcmd, &p, factory, cfg, client)...)
-		}
-		subcmd.Path.Template = item.Path
-
-		// header
-		subcmd.Header = append(subcmd.Header, flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"))
-		for _, p := range item.HeaderParameters {
-			subcmd.Header = append(subcmd.Header, GetOption(subcmd, &p, factory, cfg, client)...)
-		}
-
 		if item.SupportsProcessingMode() {
 			subcmd.Runtime = append(subcmd.Runtime, flags.WithProcessingMode())
-			subcmd.Header = append(subcmd.Header, flags.WithProcessingModeValue())
-		}
-
-		// query
-		subcmd.QueryParameter = append(subcmd.QueryParameter, flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"))
-
-		for _, p := range item.QueryParameters {
-			subcmd.QueryParameter = append(subcmd.QueryParameter, GetOption(subcmd, &p, factory, cfg, client)...)
-
-			// Support Cumulocity Query builder
-			if len(p.Children) > 0 {
-				queryOptions := []flags.GetOption{}
-				for _, child := range p.Children {
-					// Ignore special in-built values as these are handled separately
-					if child.Name == "queryTemplate" || child.Name == "orderBy" {
-						continue
-					}
-					queryOptions = append(queryOptions, GetOption(subcmd, &child, factory, cfg, client)...)
-				}
-				subcmd.QueryParameter = append(subcmd.QueryParameter, flags.WithCumulocityQuery(queryOptions, p.GetTargetProperty()))
-			}
-		}
-
-		// body
-		if len(item.Body) > 0 {
-			if item.Method == "PUT" || item.Method == "POST" {
-				subcmd.Body.Initialize = true
-			}
-		}
-
-		switch item.GetBodyContentType() {
-		case "binary":
-			subcmd.Body.IsBinary = true
-		case "formdata":
-		default:
-			subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDataFlagValue())
-		}
-		for _, p := range item.Body {
-			subcmd.Body.Options = append(subcmd.Body.Options, GetOption(subcmd, &p, factory, cfg, client)...)
-		}
-
-		subcmd.Body.Options = append(subcmd.Body.Options, cmdutil.WithTemplateValue(factory, cfg))
-		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithTemplateVariablesValue())
-
-		for _, bodyTemplate := range item.BodyTemplates {
-			// TODO: Check if other body templates should be supported or not
-			if bodyTemplate.Type == "jsonnet" {
-				subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDefaultTemplateString(bodyTemplate.Template))
-			}
 		}
 
 		cmd.AddCommand(subcmd.NewRuntimeCommand(factory).SubCommand.GetCommand())
@@ -187,8 +116,7 @@ func MapCommandAPI(cmd *CmdOptions, param *models.Parameter, typeName string) {
 	}
 }
 
-func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, cfg *config.Config, client *c8y.Client) completion.Option {
-	// opts := []flags.GetOption{}
+func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) completion.Option {
 	switch p.Type {
 	case "application", "applicationname":
 		return completion.WithApplication(p.Name, func() (*c8y.Client, error) { return factory.Client() })
@@ -254,7 +182,7 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 	return nil
 }
 
-func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, cfg *config.Config, client *c8y.Client) error {
+func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) error {
 	switch p.Type {
 	case "string", "stringStatic", "json_custom", "directory", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "binaryUploadURL", "inventoryChildType", "subscriptionName", "subscriptionId", "file", "attachment", "fileContents", "certificatefile":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.Description)
@@ -345,11 +273,8 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, cfg
 	return nil
 }
 
-func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, cfg *config.Config, client *c8y.Client) []flags.GetOption {
+func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, cfg *config.Config, client *c8y.Client, args []string) []flags.GetOption {
 	targetProp := p.GetTargetProperty()
-
-	// TODO: Add support for passing the following required values
-	args := []string{}
 
 	opts := []flags.GetOption{}
 	switch p.Type {
@@ -368,10 +293,11 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, c
 		opts = append(opts, flags.WithOptionalFragment(p.Name, targetProp, p.Value))
 
 	case "datetime":
-		// TODO: The value must be encoded when using within a query parameter, ideally this
-		// should be done automatically by the query parameter builder and not via the flag
-		// flags.WithEncodedRelativeTimestamp(p.Name, targetProp, p.Format)
-		opts = append(opts, flags.WithRelativeTimestamp(p.Name, targetProp, p.Format))
+		if p.TargetType == models.ParamPath || p.TargetType == models.ParamQueryParameter {
+			opts = append(opts, flags.WithEncodedRelativeTimestamp(p.Name, targetProp, p.Format))
+		} else {
+			opts = append(opts, flags.WithRelativeTimestamp(p.Name, targetProp, p.Format))
+		}
 	case "date":
 		opts = append(opts, flags.WithRelativeDate(false, p.Name, targetProp, p.Format))
 
@@ -473,7 +399,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, c
 }
 
 type CmdOptions struct {
-	Endpoint       models.Command
+	Spec           models.Command
 	Completion     []completion.Option
 	Command        *cobra.Command
 	Runtime        []flags.Option
@@ -496,7 +422,7 @@ func (c *CmdOptions) NewRuntimeCommand(f *cmdutil.Factory) *RuntimeCmd {
 
 func NewCommandWithOptions(cmd *cobra.Command, endpoint models.Command) *CmdOptions {
 	return &CmdOptions{
-		Endpoint:       endpoint,
+		Spec:           endpoint,
 		Command:        cmd,
 		Runtime:        make([]flags.Option, 0),
 		Completion:     make([]completion.Option, 0),

@@ -95,29 +95,33 @@ func (c *Command) GetMethod() string {
 func (c *Command) GetAllParameters() []Parameter {
 	parameters := make([]Parameter, 0)
 	if len(c.QueryParameters) > 0 {
-		for _, param := range c.QueryParameters {
+		for i, param := range c.QueryParameters {
 			if len(param.Children) > 0 {
 				parameters = append(parameters, param.Children...)
 			} else {
+				c.QueryParameters[i].TargetType = ParamQueryParameter
 				param.TargetType = ParamQueryParameter
 				parameters = append(parameters, param)
 			}
 		}
 	}
 	if len(c.PathParameters) > 0 {
-		for _, p := range c.PathParameters {
+		for i, p := range c.PathParameters {
+			c.PathParameters[i].TargetType = ParamPath
 			p.TargetType = ParamPath
 		}
 		parameters = append(parameters, c.PathParameters...)
 	}
 	if len(c.HeaderParameters) > 0 {
-		for _, p := range c.HeaderParameters {
+		for i, p := range c.HeaderParameters {
+			c.HeaderParameters[i].TargetType = ParamHeader
 			p.TargetType = ParamHeader
 		}
 		parameters = append(parameters, c.HeaderParameters...)
 	}
 	if len(c.Body) > 0 {
-		for _, p := range c.Body {
+		for i, p := range c.Body {
+			c.Body[i].TargetType = ParamBody
 			p.TargetType = ParamBody
 		}
 		parameters = append(parameters, c.Body...)

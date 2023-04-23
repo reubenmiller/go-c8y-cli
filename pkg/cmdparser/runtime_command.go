@@ -31,7 +31,7 @@ func NewRuntimeCmd(f *cmdutil.Factory, options *CmdOptions) *RuntimeCmd {
 	cmd := options.Command
 	cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
 		// Mode checks
-		switch options.Endpoint.GetMethod() {
+		switch options.Spec.GetMethod() {
 		case "POST":
 			return f.CreateModeEnabled()
 		case "PUT":
@@ -58,8 +58,98 @@ func NewRuntimeCmd(f *cmdutil.Factory, options *CmdOptions) *RuntimeCmd {
 	return ccmd
 }
 
+func (n *RuntimeCmd) Prepare(args []string) error {
+	item := n.options.Spec
+	subcmd := n.options
+	factory := n.factory
+
+	client, err := factory.Client()
+	if err != nil {
+		return err
+	}
+	cfg, err := factory.Config()
+	if err != nil {
+		return err
+	}
+
+	// path
+	for _, p := range item.PathParameters {
+		subcmd.Path.Options = append(subcmd.Path.Options, GetOption(subcmd, &p, factory, cfg, client, args)...)
+	}
+	subcmd.Path.Template = item.Path
+
+	// header
+	subcmd.Header = append(subcmd.Header, flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"))
+	for _, p := range item.HeaderParameters {
+		subcmd.Header = append(subcmd.Header, GetOption(subcmd, &p, factory, cfg, client, args)...)
+	}
+
+	if item.SupportsProcessingMode() {
+		subcmd.Header = append(subcmd.Header, flags.WithProcessingModeValue())
+	}
+
+	// query
+	subcmd.QueryParameter = append(subcmd.QueryParameter, flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"))
+
+	for _, p := range item.QueryParameters {
+		subcmd.QueryParameter = append(subcmd.QueryParameter, GetOption(subcmd, &p, factory, cfg, client, args)...)
+
+		// Support Cumulocity Query builder
+		if len(p.Children) > 0 {
+			queryOptions := []flags.GetOption{}
+			for _, child := range p.Children {
+				// Ignore special in-built values as these are handled separately
+				if child.Name == "queryTemplate" || child.Name == "orderBy" {
+					continue
+				}
+				queryOptions = append(queryOptions, GetOption(subcmd, &child, factory, cfg, client, args)...)
+			}
+			subcmd.QueryParameter = append(subcmd.QueryParameter, flags.WithCumulocityQuery(queryOptions, p.GetTargetProperty()))
+		}
+	}
+
+	// body
+	if len(item.BodyRequiredKeys) > 0 {
+		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithRequiredProperties(item.BodyRequiredKeys...))
+	}
+
+	if len(item.Body) > 0 {
+		if item.Method == "PUT" || item.Method == "POST" {
+			subcmd.Body.Initialize = true
+		}
+	}
+
+	switch item.GetBodyContentType() {
+	case "binary":
+		subcmd.Body.IsBinary = true
+	case "formdata":
+	default:
+		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDataFlagValue())
+	}
+	for _, p := range item.Body {
+		subcmd.Body.Options = append(subcmd.Body.Options, GetOption(subcmd, &p, factory, cfg, client, args)...)
+	}
+
+	subcmd.Body.Options = append(subcmd.Body.Options, cmdutil.WithTemplateValue(factory, cfg))
+	subcmd.Body.Options = append(subcmd.Body.Options, flags.WithTemplateVariablesValue())
+
+	for _, bodyTemplate := range item.BodyTemplates {
+		// TODO: Check if other body templates should be supported or not
+		if bodyTemplate.Type == "jsonnet" {
+			subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDefaultTemplateString(bodyTemplate.Template))
+		}
+	}
+
+	return nil
+}
+
 // RunE executes the command
 func (n *RuntimeCmd) RunE(cmd *cobra.Command, args []string) error {
+
+	if err := n.Prepare(args); err != nil {
+		return err
+	}
+
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -152,7 +242,7 @@ func (n *RuntimeCmd) RunE(cmd *cobra.Command, args []string) error {
 	var req *c8y.RequestOptions
 	if n.options.Body.IsBinary {
 		req = &c8y.RequestOptions{
-			Method:       n.options.Endpoint.Method,
+			Method:       n.options.Spec.Method,
 			Path:         path.GetTemplate(),
 			Query:        queryValue,
 			Body:         body.GetFileContents(),
@@ -163,7 +253,7 @@ func (n *RuntimeCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		req = &c8y.RequestOptions{
-			Method:       n.options.Endpoint.Method,
+			Method:       n.options.Spec.Method,
 			Path:         path.GetTemplate(),
 			Query:        queryValue,
 			Body:         body,
