@@ -18,7 +18,7 @@ type Group struct {
 
 type BodyTemplate struct {
 	Type      string `yaml:"type"`
-	ApplyLast string `yaml:"applyLast"`
+	ApplyLast bool   `yaml:"applyLast"`
 	Template  string `yaml:"template"`
 }
 

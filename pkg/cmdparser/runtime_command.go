@@ -141,9 +141,12 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 	subcmd.Body.Options = append(subcmd.Body.Options, flags.WithTemplateVariablesValue())
 
 	for _, bodyTemplate := range item.BodyTemplates {
-		// TODO: Check if other body templates should be supported or not
 		if bodyTemplate.Type == "jsonnet" {
-			subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDefaultTemplateString(bodyTemplate.Template))
+			if bodyTemplate.ApplyLast {
+				subcmd.Body.Options = append(subcmd.Body.Options, flags.WithRequiredTemplateString(bodyTemplate.Template))
+			} else {
+				subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDefaultTemplateString(bodyTemplate.Template))
+			}
 		}
 	}
 
