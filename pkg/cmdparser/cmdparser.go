@@ -141,7 +141,7 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 		return completion.WithMicroservice(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "microserviceinstance":
 		return completion.WithMicroserviceInstance(p.Name, "id", func() (*c8y.Client, error) { return factory.Client() })
-	case "role":
+	case "[]role", "[]roleself":
 		return completion.WithUserRole(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "[]devicerequest":
 		return completion.WithDeviceRegistrationRequest(p.Name, func() (*c8y.Client, error) { return factory.Client() })
@@ -211,7 +211,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "id", "source.id", "managedObject.id", "deviceId")
 
-	case "[]string", "stringcsv", "[]devicerequest", "[]software", "[]softwareversion", "[]firmware", "[]firmwareversion", "[]firmwarepatch", "[]configuration", "[]deviceprofile", "[]deviceservice", "[]id", "[]user", "[]userself", "[]certificate":
+	case "[]string", "[]stringcsv", "[]devicerequest", "[]software", "[]softwareversion", "[]firmware", "[]firmwareversion", "[]firmwarepatch", "[]configuration", "[]deviceprofile", "[]deviceservice", "[]id", "[]user", "[]userself", "[]certificate":
 		cmd.Command.Flags().StringSliceP(p.Name, p.ShortName, []string{p.Default}, p.GetDescription())
 
 	case "[]device", "[]agent":
@@ -340,6 +340,9 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, c
 
 	case "[]id", "[]devicerequest":
 		opts = append(opts, c8yfetcher.WithIDSlice(args, p.Name, targetProp, p.Format))
+
+	case "application":
+		opts = append(opts, c8yfetcher.WithApplicationByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
 
 	case "[]software":
 		opts = append(opts, c8yfetcher.WithSoftwareByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
