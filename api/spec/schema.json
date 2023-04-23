@@ -364,6 +364,10 @@
             "type": "string",
             "description": "Accept header value. Data to be returned from the platform. The accept header will also control how the data will be displayed within the PowerShell module"
           },
+          "contentType": {
+            "type": "string",
+            "description": "Content-Type header value. This is meant to be the MIME type of the body"
+          },
           "collectionType": {
             "type": "string",
             "description": "Type of the raw response from the platform. The collectionType is the raw response type, and then the collectionProperty, is the type to be used for the array of items that are represented in the collectionType"

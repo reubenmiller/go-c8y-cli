@@ -31,6 +31,7 @@ type Command struct {
 	Method             string         `yaml:"method"`
 	SemanticMethod     string         `yaml:"semanticMethod"`
 	Accept             string         `yaml:"accept,omitempty"`
+	ContentType        string         `yaml:"contentType,omitempty"`
 	CollectionType     string         `yaml:"collectionType,omitempty"`
 	CollectionProperty string         `yaml:"collectionProperty,omitempty"`
 	Path               string         `yaml:"path"`

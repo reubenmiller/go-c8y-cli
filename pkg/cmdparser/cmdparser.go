@@ -288,12 +288,12 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, c
 	opts := []flags.GetOption{}
 	switch p.Type {
 	case "file":
-		opts = append(opts, flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(factory, cfg), p.Name, "data")...)
+		opts = append(opts, flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(factory, cfg), p.Name, flags.FlagDataName)...)
+	case "attachment":
+		opts = append(opts, flags.WithFormDataFile(p.Name, flags.FlagDataName)...)
+
 	case "fileContents":
 		opts = append(opts, flags.WithFilePath(p.Name, targetProp, p.Value))
-	case "attachment":
-		opts = append(opts, flags.WithFormDataFile(p.Name, "data")...)
-
 	case "boolean":
 		opts = append(opts, flags.WithBoolValue(p.Name, targetProp, p.Value))
 	case "booleanDefault":
@@ -423,9 +423,10 @@ type CmdOptions struct {
 }
 
 type BodyOptions struct {
-	Options    []flags.GetOption
-	IsBinary   bool
-	Initialize bool
+	Options              []flags.GetOption
+	IsBinary             bool
+	Initialize           bool
+	UploadProgressSource string
 }
 
 func (c *CmdOptions) NewRuntimeCommand(f *cmdutil.Factory) *RuntimeCmd {

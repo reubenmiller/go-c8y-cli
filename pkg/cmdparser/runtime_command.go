@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -84,6 +85,14 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 		subcmd.Header = append(subcmd.Header, GetOption(subcmd, &p, factory, cfg, client, args)...)
 	}
 
+	if subcmd.Spec.ContentType != "" {
+		subcmd.Header = append(subcmd.Header, flags.WithStaticStringValue("Content-Type", subcmd.Spec.ContentType))
+	}
+
+	if subcmd.Spec.Accept != "" {
+		subcmd.Header = append(subcmd.Header, flags.WithStaticStringValue("Accept", subcmd.Spec.Accept))
+	}
+
 	if item.SupportsProcessingMode() {
 		subcmd.Header = append(subcmd.Header, flags.WithProcessingModeValue())
 	}
@@ -134,7 +143,16 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDataFlagValue())
 	}
 	for _, p := range item.Body {
-		subcmd.Body.Options = append(subcmd.Body.Options, GetOption(subcmd, &p, factory, cfg, client, args)...)
+		switch p.Type {
+		case "file", "attachment":
+			subcmd.Body.UploadProgressSource = p.Name
+			subcmd.FormData = append(subcmd.FormData, GetOption(subcmd, &p, factory, cfg, client, args)...)
+		case "fileContents":
+			subcmd.Body.UploadProgressSource = p.Name
+			fallthrough
+		default:
+			subcmd.Body.Options = append(subcmd.Body.Options, GetOption(subcmd, &p, factory, cfg, client, args)...)
+		}
 	}
 
 	subcmd.Body.Options = append(subcmd.Body.Options, cmdutil.WithTemplateValue(factory, cfg))
@@ -272,6 +290,15 @@ func (n *RuntimeCmd) RunE(cmd *cobra.Command, args []string) error {
 			IgnoreAccept: cfg.IgnoreAcceptHeader(),
 			DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 		}
+	}
+
+	// add upload progress bar
+	if n.options.Body.UploadProgressSource != "" {
+		req.PrepareRequest = c8ybinary.AddProgress(
+			cmd,
+			n.options.Body.UploadProgressSource,
+			cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY()),
+		)
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, req, inputIterators)
