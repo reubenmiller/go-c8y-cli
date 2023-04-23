@@ -9,7 +9,7 @@
                     "type": "string",
                     "title": "View name",
                     "description": "Human readable name which can be referenced by the user",
-                    "default": "myview",
+                    "default": "myView",
                     "minLength": 1
                 },
                 "priority": {
@@ -40,6 +40,20 @@
                     "minLength": 1,
                     "default": "vnd.com.nsn.cumulocity.managedObject\\+json"
                 },
+                "requestPath": {
+                    "type": "string",
+                    "title": "Match by the request's path",
+                    "description": "Match against the request's path. Accepts regex",
+                    "minLength": 1,
+                    "default": ""
+                },
+                "requestMethod": {
+                    "type": "string",
+                    "title": "Match by the request's method",
+                    "description": "Match against the request's method. Accepts regex",
+                    "minLength": 1,
+                    "default": ""
+                },
                 "self": {
                     "type": "string",
                     "title": "Match by .self value",
@@ -56,7 +70,7 @@
                     },
                     "minItems": 1,
                     "default": ["id", "type", "**.id"]
-                },
+                }
             },
             "required": [
                 "name",

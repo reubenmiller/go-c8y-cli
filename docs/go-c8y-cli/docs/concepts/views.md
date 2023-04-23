@@ -92,6 +92,8 @@ A view definition supports matching by the following criteria:
 * `self` - `.self` value of first entry (supports regex)
 * `type` - `.type` value of first entry (supports regex)
 * `fragments` - List of fragments (all fragments must exist)
+* `requestPath` - Match the outgoing request PATH (supports regex)
+* `requestMethod` - Match the outgoing request Method (e.g. GET, POST etc.) (supports regex)
 
 :::note
 The matching criteria can be combined to provide more precise matching.

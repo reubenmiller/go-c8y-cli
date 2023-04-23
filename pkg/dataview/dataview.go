@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -21,15 +22,17 @@ var NamespaceSeparator = "::"
 
 // Definition contains the view definition of when to use a specific view
 type Definition struct {
-	FileName    string   `json:"-"`
-	Extension   string   `json:"-"`
-	Name        string   `json:"name,omitempty"`
-	Priority    int      `json:"priority,omitempty"`
-	Fragments   []string `json:"fragments,omitempty"`
-	Type        string   `json:"type,omitempty"`
-	ContentType string   `json:"contentType,omitempty"`
-	Self        string   `json:"self,omitempty"`
-	Columns     []string `json:"columns,omitempty"`
+	FileName      string   `json:"-"`
+	Extension     string   `json:"-"`
+	Name          string   `json:"name,omitempty"`
+	Priority      int      `json:"priority,omitempty"`
+	Fragments     []string `json:"fragments,omitempty"`
+	Type          string   `json:"type,omitempty"`
+	RequestPath   string   `json:"requestPath,omitempty"`
+	RequestMethod string   `json:"requestMethod,omitempty"`
+	ContentType   string   `json:"contentType,omitempty"`
+	Self          string   `json:"self,omitempty"`
+	Columns       []string `json:"columns,omitempty"`
 }
 
 func (d *Definition) FQDN() string {
@@ -219,12 +222,20 @@ func (v *DataView) ClearActiveView() {
 	v.ActiveView = nil
 }
 
-func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string, error) {
+type ViewData struct {
+	ResponseBody *gjson.Result
+	ContentType  string
+	Response     *http.Response
+	Request      *http.Request
+}
+
+func (v *DataView) GetView(r *ViewData) ([]string, error) {
 	if view := v.GetActiveView(); view != nil {
 		v.Logger.Debugf("Using already active view")
 		return view.Columns, nil
 	}
 
+	data := r.ResponseBody
 	err := v.LoadDefinitions()
 	if err != nil {
 		return nil, err
@@ -260,8 +271,8 @@ func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string,
 			}
 		}
 
-		if len(contentType) > 0 {
-			if match, err := regexp.MatchString("(?i)"+definition.ContentType, contentType[0]); err == nil && !match {
+		if r.ContentType != "" {
+			if match, err := regexp.MatchString("(?i)"+definition.ContentType, r.ContentType); err == nil && !match {
 				isMatch = false
 			}
 		}
@@ -273,6 +284,19 @@ func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string,
 				}
 			} else {
 				isMatch = false
+			}
+		}
+
+		if r.Request != nil {
+			if definition.RequestPath != "" {
+				if match, err := regexp.MatchString("(?i)"+definition.RequestPath, r.Request.URL.Path); err == nil && !match {
+					isMatch = false
+				}
+			}
+			if definition.RequestMethod != "" {
+				if match, err := regexp.MatchString("(?i)"+definition.RequestMethod, r.Request.Method); err == nil && !match {
+					isMatch = false
+				}
 			}
 		}
 

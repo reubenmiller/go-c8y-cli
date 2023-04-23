@@ -189,7 +189,7 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 
 // GetViewProperties Look up the view properties to display
 func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, output []byte) ([]string, error) {
-	dataview, err := f.DataView()
+	dataView, err := f.DataView()
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +211,9 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 		return []string{"**"}, nil
 	case config.ViewsAuto:
 		jsonResponse := gjson.ParseBytes(output)
-		props, err := dataview.GetView(&jsonResponse, "")
+		props, err := dataView.GetView(&dataview.ViewData{
+			ResponseBody: &jsonResponse,
+		})
 
 		if err != nil || len(props) == 0 {
 			if err != nil {
@@ -226,7 +228,7 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 		}
 	default:
 		// manual view
-		props, err := dataview.GetViewByName(view)
+		props, err := dataView.GetViewByName(view)
 		if err != nil || len(props) == 0 {
 			if err != nil {
 				cfg.Logger.Warnf("no matching view found. %s, name=%s", err, view)
