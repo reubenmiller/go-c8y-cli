@@ -109,8 +109,15 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 	}
 
 	// body
-	if len(item.BodyRequiredKeys) > 0 {
-		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithRequiredProperties(item.BodyRequiredKeys...))
+	requiredBodyKeys := []string{}
+	requiredBodyKeys = append(requiredBodyKeys, item.BodyRequiredKeys...)
+	for _, p := range item.Body {
+		if p.IsRequired() {
+			requiredBodyKeys = append(requiredBodyKeys, p.GetTargetProperty())
+		}
+	}
+	if len(requiredBodyKeys) > 0 {
+		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithRequiredProperties(requiredBodyKeys...))
 	}
 
 	if len(item.Body) > 0 {
