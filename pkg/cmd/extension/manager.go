@@ -239,7 +239,7 @@ func (m *Manager) parseExtensionFile(fi fs.DirEntry) (Extension, error) {
 		if err != nil {
 			return ext, err
 		}
-		exePath = filepath.Join(p, fi.Name())
+		exePath = p
 	}
 	ext.path = exePath
 	return ext, nil
