@@ -57,6 +57,12 @@
                 },
                 "skip": {
                     "$ref": "#/definitions/skipParameter"
+                },
+                "completion": {
+                    "$ref": "#/definitions/externalCommand"
+                },
+                "lookup": {
+                    "$ref": "#/definitions/externalCommand"
                 }
             },
             "required": [
@@ -76,6 +82,25 @@
                 "contains": {
                     "type": "array",
                     "title": "List of strings which are expected to be inside the response.",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "externalCommand": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "title": "External Command Type",
+                    "description": "Type of external command. Reserved for future use.",
+                    "enum": ["external"]
+                },
+                "command": {
+                    "type": "array",
+                    "title": "Command to execute",
+                    "description": "First item should be the binary to execute, and the rest are the arguments",
                     "items": {
                         "type": "string"
                     }
@@ -358,6 +383,10 @@
                         "type": "string",
                         "description": "Accept header value. Data to be returned from the platform. The accept header will also control how the data will be displayed within the PowerShell module"
                     },
+                    "contentType": {
+                        "type": "string",
+                        "description": "Content-Type header value. This is meant to be the MIME type of the body"
+                    },
                     "collectionType": {
                         "type": "string",
                         "description": "Type of the raw response from the platform. The collectionType is the raw response type, and then the collectionProperty, is the type to be used for the array of items that are represented in the collectionType"
@@ -471,6 +500,12 @@
                                 },
                                 "skip": {
                                     "$ref": "#/definitions/skipParameter"
+                                },
+                                "completion": {
+                                    "$ref": "#/definitions/externalCommand"
+                                },
+                                "lookup": {
+                                    "$ref": "#/definitions/externalCommand"
                                 }
                             },
                             "required": [
@@ -532,6 +567,12 @@
                                 },
                                 "skip": {
                                     "$ref": "#/definitions/skipParameter"
+                                },
+                                "completion": {
+                                    "$ref": "#/definitions/externalCommand"
+                                },
+                                "lookup": {
+                                    "$ref": "#/definitions/externalCommand"
                                 }
                             },
                             "required": [
@@ -628,6 +669,12 @@
                                 },
                                 "skip": {
                                     "$ref": "#/definitions/skipParameter"
+                                },
+                                "completion": {
+                                    "$ref": "#/definitions/externalCommand"
+                                },
+                                "lookup": {
+                                    "$ref": "#/definitions/externalCommand"
                                 }
                             },
                             "required": [

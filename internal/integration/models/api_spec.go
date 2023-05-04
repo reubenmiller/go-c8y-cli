@@ -195,6 +195,8 @@ type Parameter struct {
 	ShortName       string      `yaml:"shortname,omitempty"`
 	Type            string      `yaml:"type,omitempty"`
 	Value           string      `yaml:"value,omitempty"`
+	Completion      Completion  `yaml:"completion,omitempty"`
+	NamedLookup     NamedLookup `yaml:"lookup,omitempty"`
 	Format          string      `yaml:"format,omitempty"`
 	Property        string      `yaml:"property,omitempty"`
 	Hidden          *bool       `yaml:"hidden,omitempty"`
@@ -210,6 +212,16 @@ type Parameter struct {
 	DependsOn       []string    `yaml:"dependsOn,omitempty"`
 
 	TargetType TargetType `yaml:"-"`
+}
+
+type Completion struct {
+	Type    string   `yaml:"type,omitempty"`
+	Command []string `yaml:"command,omitempty"`
+}
+
+type NamedLookup struct {
+	Type    string   `yaml:"type,omitempty"`
+	Command []string `yaml:"command,omitempty"`
 }
 
 type TargetType int

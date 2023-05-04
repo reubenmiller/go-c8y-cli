@@ -130,6 +130,13 @@ func MapCommandAPI(cmd *CmdOptions, param *models.Parameter, typeName string) {
 }
 
 func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) completion.Option {
+	// External flags
+	switch p.Completion.Type {
+	case "external":
+		return completion.WithExternalCompletion(p.Name, p.Completion.Command)
+	}
+
+	// Internal flags
 	switch p.Type {
 	case "application", "applicationname":
 		return completion.WithApplication(p.Name, func() (*c8y.Client, error) { return factory.Client() })
@@ -286,6 +293,18 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, c
 	targetProp := p.GetTargetProperty()
 
 	opts := []flags.GetOption{}
+
+	switch p.NamedLookup.Type {
+	case "external":
+		opts = append(opts, c8yfetcher.WithExternalCommandByNameFirstMatch(client, args, p.NamedLookup.Command, p.Name, targetProp, p.Format))
+		return opts
+	}
+
+	// return early if options have already been set
+	if len(opts) > 0 {
+		return opts
+	}
+
 	switch p.Type {
 	case "file":
 		opts = append(opts, flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(factory, cfg), p.Name, flags.FlagDataName)...)

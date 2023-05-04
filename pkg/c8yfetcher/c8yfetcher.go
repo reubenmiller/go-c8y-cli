@@ -1033,3 +1033,11 @@ func WithCertificateByNameFirstMatch(client *c8y.Client, args []string, opts ...
 		return opt(cmd, inputIterators)
 	}
 }
+
+// WithSoftwareVersionByNameFirstMatch add reference by name matching for software version via cli args. Only the first match will be used
+func WithExternalCommandByNameFirstMatch(client *c8y.Client, args []string, externalCommand []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(client, NewExternalFetcher(externalCommand), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
