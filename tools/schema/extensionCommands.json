@@ -105,7 +105,11 @@
                         "type": "string"
                     }
                 }
-            }
+            },
+            "required": [
+                "type",
+                "command"
+            ]
         },
         "assertion": {
             "type": "object",
@@ -502,9 +506,13 @@
                                     "$ref": "#/definitions/skipParameter"
                                 },
                                 "completion": {
+                                    "title": "External completion",
+                                    "description": "Use an external command to provide tab completion options",
                                     "$ref": "#/definitions/externalCommand"
                                 },
                                 "lookup": {
+                                    "title": "External lookup",
+                                    "description": "Use an external command to lookup a value by name",
                                     "$ref": "#/definitions/externalCommand"
                                 }
                             },
