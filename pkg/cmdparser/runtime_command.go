@@ -77,7 +77,7 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 	if subcmd.Spec.HasPreset() {
 		var values *[]flags.GetOption
 		switch subcmd.Spec.Preset.Type {
-		case "inventoryQuery":
+		case PresetDeviceQuery:
 			values = &subcmd.QueryParameter
 		}
 		if values != nil {

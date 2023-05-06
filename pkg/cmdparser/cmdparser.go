@@ -17,6 +17,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var PresetDeviceQuery = "deviceQuery"
+
 type Command struct {
 	Name string `yaml:"name"`
 }
@@ -439,7 +441,7 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 
 	queryOptions := []flags.GetOption{}
 	switch template.Type {
-	case "inventoryQuery":
+	case PresetDeviceQuery:
 		// Cumulocity inventory query
 		cmd.Spec.Method = "GET"
 		cmd.Spec.Path = "inventory/managedObjects"
