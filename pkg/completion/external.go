@@ -34,29 +34,11 @@ func WithExternalCompletion(flagName string, externalCommand []string) Option {
 			// eg. // rowParts = append(rowParts, fmt.Sprintf("%s: %s", fields[i], col))
 			options := []string{}
 			for _, row := range strings.Split(string(output), "\n") {
-				cols := strings.Split(row, ",")
-				if len(cols) > 0 {
-					options = append(options, cols[0])
+				if len(row) > 0 {
+					options = append(options, strings.ReplaceAll(row, ",", "\t"))
 				}
 			}
 			return options, cobra.ShellCompDirectiveNoFileComp
-
-			// TODO: Check if c8y commands can be run directly using the already running instance
-			// rootCmd := cmd.Root()
-			// cmdArgs := []string{}
-			// cmdArgs = append(cmdArgs, externalCommand...)
-			// cmdArgs = append(cmdArgs, args...)
-			// rootCmd.SetArgs(cmdArgs)
-
-			// stdout := bytes.NewBufferString("")
-			// rootCmd.SetOut(stdout)
-
-			// if err := rootCmd.Execute(); err != nil {
-			// 	return []string{err.Error()}, cobra.ShellCompDirectiveDefault
-			// }
-
-			// results := strings.Split(stdout.String(), "\n")
-			// return results, cobra.ShellCompDirectiveDefault
 		})
 		return cmd
 	}

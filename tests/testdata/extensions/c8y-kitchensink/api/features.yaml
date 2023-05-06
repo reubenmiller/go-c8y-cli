@@ -214,7 +214,7 @@ commands:
             - --type=MICROSERVICE
             - --filter
             - name like %s*
-            - --select=name
+            - --select=name,type,id
 
         lookup:
           type: external
