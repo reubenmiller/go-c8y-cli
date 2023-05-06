@@ -233,7 +233,8 @@ func setArgs(cmd *cobra.Command, cmdFactory *cmdutil.Factory) ([]string, error) 
 		for name, value := range v.GetStringMapString(config.SettingsAliases) {
 			aliases[name] = value
 		}
-		// TODO: Get aliases from extensions. Is it possible to read from
+
+		// add any aliases defined in the extensions
 		for _, ext := range cmdFactory.ExtensionManager().List() {
 			if extAliases, err := ext.Aliases(); err == nil {
 				for _, alias := range extAliases {

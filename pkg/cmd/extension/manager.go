@@ -79,7 +79,6 @@ func (m *Manager) Dispatch(args []string, stdin io.Reader, stdout, stderr io.Wri
 
 	forwardArgs := []string{}
 
-	// TODO: Detect which part is the extension and which part is the command
 	cArgs := strings.Join(args[1:], " ")
 
 	exts, _ := m.list(false)
@@ -201,7 +200,6 @@ func (m *Manager) list(includeMetadata bool) ([]Extension, error) {
 
 	var results []Extension
 	for _, f := range entries {
-		// TODO: Check if this filter is really needed
 		if !strings.HasPrefix(f.Name(), ExtPrefix) && !strings.Contains(f.Name(), ExtPrefix) {
 			continue
 		}

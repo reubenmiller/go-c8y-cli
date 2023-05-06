@@ -179,7 +179,6 @@ func WithTemplateValue(factory *Factory, cfg *config.Config) flags.GetOption {
 func NewTemplateResolver(factory *Factory, cfg *config.Config) *TemplatePathResolver {
 	paths := cfg.GetTemplatePaths()
 
-	// TODO: Get extension templates
 	for _, ext := range factory.ExtensionManager().List() {
 		path := ext.TemplatePath()
 		if path != "" {

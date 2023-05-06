@@ -92,9 +92,6 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command)
 		}
 
 		// Misc. options
-		// TODO: Check if pipeline should always be added if no pipeline argument is supported
-		// flags.WithExtendedPipelineSupport("", "", false),
-
 		if item.CollectionProperty != "" {
 			subcmd.Runtime = append(subcmd.Runtime, flags.WithCollectionProperty(item.CollectionProperty))
 		}

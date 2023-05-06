@@ -325,8 +325,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	cmd.AddCommand(commands...)
 
-	// todo: merge custom commands
-	//
 	alarms := alarmsCmd.NewSubCommand(f).GetCommand()
 	alarms.AddCommand(alarmsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
 	alarms.AddCommand(alarmsAssertCmd.NewSubCommand(f).GetCommand())
@@ -445,7 +443,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.AddCommand(apiCmd.NewSubCommand(f).GetCommand())
 
 	// Add sub commands for the extensions
-	// TODO: How to efficiently add a dynamic command only when it is required
 	extensions := f.ExtensionManager().List()
 	ConvertToCobraCommands(f, cmd, extensions)
 
