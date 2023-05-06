@@ -1,0 +1,291 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRY_FORMAT: json
+
+tests:
+  It can create/update/delete an extension:
+    command: c8y kitchensink features
+    exit-code: 0
+
+  It can upload file contents:
+    command: |
+      c8y kitchensink features uploadFileContents --file manual/extensions/file1.txt --dry --dryFormat json |
+          c8y util show --select body -o csv
+    stdout:
+      exactly: one\ntwo\nthree
+
+  It can upload a binary:
+    command: |
+      c8y kitchensink features uploadFile --file manual/extensions/file1.txt --dryFormat dump
+    stdout:
+      lines:
+        8: 'Content-Disposition: form-data; name="file"; filename="file1.txt"'
+        9: "Content-Type: application/octet-stream"
+        11: one
+        12: two
+        13: three
+        15: 'Content-Disposition: form-data; name="object"'
+        17: '{"name":"file1.txt","type":"text/plain; charset=utf-8"}'
+
+  optional_fragment:
+    command: |
+      c8y kitchensink features addFragment --fragment
+    stdout:
+      json:
+        body.c8y_MyFragment: "{}"
+
+  optional_fragment (without):
+    command: |
+      c8y kitchensink features addFragment
+    stdout:
+      json:
+        body: "{}"
+
+  binaryUploadURL:
+    # requires a dummy file
+    skip: true
+    command: |
+      c8y kitchensink features binaryUploadURL --file dummyfile
+    stdout:
+      json:
+        body.myUrl: r/https://.+/inventory/binaries/\d+$
+
+  lookup addDeviceGroup:
+    command: |
+      c8y kitchensink features lookup --devicegroup "My Group"
+    stdout:
+      json:
+        body.devicegroup: r/^\d+$
+
+  lookup application:
+    command: |
+      c8y kitchensink features lookup --application cockpit
+    stdout:
+      json:
+        body.application: r/^\d+$
+
+  lookup applicationname:
+    command: |
+      c8y kitchensink features lookup --applicationname cockpit
+    stdout:
+      json:
+        body.applicationname: cockpit
+
+  lookup agent:
+    command: |
+      c8y kitchensink features lookup --agent agent01
+    stdout:
+      json:
+        body.agent: r/^\d+$
+
+  lookup device:
+    command: |
+      c8y kitchensink features lookup --device device01
+    stdout:
+      json:
+        body.device: r/^\d+$
+
+  lookup deviceprofile:
+    command: |
+      c8y kitchensink features lookup --deviceprofile profile01
+    stdout:
+      json:
+        body.deviceprofile: r/^\d+$
+
+  lookup tenantname:
+    command: |
+      c8y kitchensink features lookup --tenantname $C8Y_TENANT
+    stdout:
+      json:
+        body.tenantname: r/^$C8Y_TENANT$
+
+  lookup role:
+    command: |
+      c8y kitchensink features lookup --role "ROLE_ALARM_REA*"
+    stdout:
+      json:
+        body.role: ROLE_ALARM_READ
+
+  lookup roleself:
+    command: |
+      c8y kitchensink features lookup --roleself "ROLE_ALARM_REA*"
+    stdout:
+      json:
+        body.roleself: r/^https://.+/user/roles/ROLE_ALARM_READ$
+
+  lookup source:
+    command: |
+      echo "1\n2" | c8y kitchensink features lookup --source - | c8y util show --select body.source -o csv
+    stdout:
+      exactly: |
+        1
+        2
+
+  data boolean true:
+    command: |
+      c8y kitchensink features simpleData --boolean
+    stdout:
+      json:
+        body.boolean: "true"
+
+  data boolean false:
+    command: |
+      c8y kitchensink features simpleData --boolean=false
+    stdout:
+      json:
+        body.boolean: "false"
+
+  data boolean notset:
+    command: |
+      c8y kitchensink features simpleData
+    stdout:
+      json:
+        body: "{}"
+
+  data integer positive:
+    command: |
+      c8y kitchensink features simpleData --integer 10
+    stdout:
+      json:
+        body.integer: "10"
+
+  data integer negative:
+    command: |
+      c8y kitchensink features simpleData --integer -10
+    stdout:
+      json:
+        body.integer: "-10"
+
+  data float positive:
+    command: |
+      c8y kitchensink features simpleData --float 120.5
+    stdout:
+      json:
+        body.float: "120.5"
+
+  data float negative:
+    command: |
+      c8y kitchensink features simpleData --float -10.5
+    stdout:
+      json:
+        body.float: "-10.5"
+
+  data string:
+    command: |
+      c8y kitchensink features simpleData --string "hello world"
+    stdout:
+      json:
+        body.string: "hello world"
+
+  data date relative:
+    command: |
+      c8y kitchensink features simpleData --date "0d"
+    stdout:
+      json:
+        body.date: r/^\d\d\d\d-\d\d-\d\d$
+
+  data date fixed:
+    command: |
+      c8y kitchensink features simpleData --date "2023-03-31"
+    stdout:
+      json:
+        body.date: "2023-03-31"
+
+  data datetime relative:
+    command: |
+      c8y kitchensink features simpleData --datetime "-1h"
+    stdout:
+      json:
+        body.datetime: r/^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(.\d+)?(Z|[+-]\d\d:\d\d)$
+
+  data datetime fixed with no timezone:
+    command: |
+      c8y kitchensink features simpleData --datetime "2023-03-31"
+    stdout:
+      json:
+        body.datetime: "2023-03-31T00:00:00Z"
+
+  data datetime fixed with timezone:
+    command: |
+      c8y kitchensink features simpleData --datetime "2023-03-31T00:00:00+02:00"
+    stdout:
+      json:
+        body.datetime: "2023-03-31T00:00:00+02:00"
+
+  data stringArray as separate arguments:
+    command: |
+      c8y kitchensink features simpleData --stringArray "hello" --stringArray "world"
+    stdout:
+      json:
+        body.stringArray.0: "hello"
+        body.stringArray.1: "world"
+
+  data stringArray as csv:
+    command: |
+      c8y kitchensink features simpleData --stringArray "hello,world"
+    stdout:
+      json:
+        body.stringArray.0: "hello"
+        body.stringArray.1: "world"
+
+  data stringcsv:
+    command: |
+      c8y kitchensink features simpleData --stringcsv "hello,world" --stringcsv again
+    stdout:
+      json:
+        body.stringcsv: "hello,world,again"
+
+  data booleanDefault set:
+    command: |
+      c8y kitchensink features booleanDefault --active --enabled
+    stdout:
+      json:
+        body.active: "true"
+        body.enabled: "true"
+
+  data booleanDefault not-set:
+    command: |
+      c8y kitchensink features booleanDefault
+    stdout:
+      json:
+        body.active: "true"
+        body.enabled: "false"
+
+  data booleanDefault false:
+    command: |
+      c8y kitchensink features booleanDefault --active=false --enabled=false
+    stdout:
+      json:
+        body.active: "false"
+        body.enabled: "false"
+
+  data stringStatic not-set:
+    command: |
+      c8y kitchensink features stringStatic
+    stdout:
+      json:
+        body.value: "some value"
+
+  data stringStatic set:
+    command: |
+      c8y kitchensink features stringStatic --value "some other value"
+    stdout:
+      json:
+        body.value: "some value"
+
+  data id:
+    command: |
+      c8y kitchensink features idslices --id 1,2 3 4 5
+    stdout:
+      json:
+        body.id.0: "1"
+        body.id.1: "2"
+        body.id.2: "3"
+        body.id.3: "4"
+        body.id.4: "5"

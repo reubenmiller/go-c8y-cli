@@ -24,6 +24,7 @@ setup () {
     create_agent "agent01"
     create_agent "device01"
     create_smartgroup "my smartgroup"
+    create_devicegroup "My Group"
 
     create_child_device "agentParent01" "child"
     create_device_with_assets "agentAssetInfo01" "childAsset"
@@ -87,6 +88,13 @@ create_smartgroup () {
         c8y smartgroups create \
             --name "$name" \
             --query "name eq '*'"
+}
+
+create_devicegroup () {
+    local name="$1"
+    c8y devicegroups get --id "$name" --silentStatusCodes 404 ||
+        c8y devicegroups create \
+            --name "$name"
 }
 
 create_agent () {

@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+---
+group:
+  name: presets
+  description: Example features
+
+commands:
+  - name: query-inventory-default
+    description: List device collection with defaults
+    preset:
+      type: query-inventory
+
+  - name: query-inventory-device
+    description: List device collection
+    preset:
+      type: query-inventory
+      options:
+        param: q
+        value: (type eq 'fixedValue')
+
+  - name: query-inventory-mo
+    description: List inventory collection
+    preset:
+      type: query-inventory
+      options:
+        param: query
+        value: (type eq 'company_myType')
+      extensions:
+        - name: option
+          type: string
+          format: some.value eq '%s'
+          description: option
+
+  - name: get-identity-default
+    description: Get identity with defaults
+    preset:
+      type: get-identity
+      options:
+        value: my_Type
+
+  - name: get-identity-with-options
+    description: Get identity with defaults
+    preset:
+      type: get-identity
+      options:
+        value: my_Type
+      extensions:
+        - name: one
+          type: string
+          description: One filter
+    queryParameters:
+      - name: withValues
+        type: boolean
+        description: Custom bool

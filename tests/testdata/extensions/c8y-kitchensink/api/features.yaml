@@ -1,0 +1,244 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+---
+group:
+  name: features
+  description: Example features
+
+commands:
+  - name: preset-query-inventory-default
+    description: Use query-inventory preset
+    preset:
+      type: query-inventory
+
+  - name: preset-query-inventory-device
+    description: List devices with custom query
+    preset:
+      type: query-inventory
+      options:
+        param: q
+        value: (type eq '*')
+
+  - name: preset-query-inventory-mo
+    description: List devices with custom query
+    preset:
+      type: query-inventory
+      options:
+        param: query
+        value: (type eq '*')
+  
+  - name: preset-get-identity-default
+    description: Get identity
+    preset:
+      type: get-identity
+      options:
+        value: my_Type
+
+  - name: uploadFileContents
+    path: inventory/binaries
+    description: Upload contents of a file
+    method: POST
+    body:
+      - name: file
+        type: fileContents
+        description: file
+
+  - name: uploadFile
+    path: inventory/binaries
+    description: Upload contents of a file
+    method: POST
+    body:
+      - name: file
+        type: file
+        description: File
+      
+      - name: name
+        type: string
+        description: Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
+
+      - name: type
+        type: string
+        required: false
+        description: Custom type. If left blank, the MIME type will be detected from the file extension
+
+  - name: binaryUploadURL
+    path: inventory/managedObjects
+    description: Add fragment via boolean flag
+    method: POST
+    body:
+      - name: file
+        type: binaryUploadURL
+        property: myUrl
+        description: url of the uploaded binary
+
+  - name: addFragment
+    path: inventory/managedObjects
+    description: Add fragment via boolean flag
+    method: POST
+    body:
+      - name: fragment
+        type: optional_fragment
+        property: c8y_MyFragment
+        description: optional_fragment
+
+  - name: simpleData
+    path: inventory/managedObjects
+    description: Build simple data
+    method: POST
+    body:
+      - name: boolean
+        type: boolean
+        description: boolean
+
+      - name: integer
+        type: integer
+        description: integer
+
+      - name: float
+        type: float
+        description: float
+
+      - name: string
+        type: string
+        description: string
+
+      - name: date
+        type: date
+        description: date
+
+      - name: datetime
+        type: datetime
+        description: datetime
+
+      - name: stringArray
+        type: "[]string"
+        description: stringArray
+
+      - name: stringcsv
+        type: "[]stringcsv"
+        description: stringcsv
+
+  - name: booleanDefault
+    path: inventory/managedObjects
+    description: Boolean with default value
+    method: POST
+    body:
+      - name: active
+        type: booleanDefault
+        description: booleanDefault
+        default: "true"
+
+      - name: enabled
+        type: booleanDefault
+        description: enabled
+
+  - name: stringStatic
+    path: inventory/managedObjects
+    description: Static string
+    method: POST
+    body:
+      - name: value
+        type: stringStatic
+        description: stringStatic
+        hidden: true
+        value: some value
+
+  - name: idslices
+    path: inventory/managedObjects
+    description: Slices
+    method: POST
+    body:
+      - name: id
+        type: "[]id"
+        description: id
+
+  - name: lookup
+    path: inventory/managedObjects
+    description: Device group
+    method: POST
+    body:
+      - name: application
+        type: application
+        description: application
+
+      - name: applicationname
+        type: applicationname
+        description: applicationname
+
+      - name: devicegroup
+        type: "[]devicegroup"
+        description: devicegroup
+      
+      - name: agent
+        type: "[]agent"
+        description: agent
+
+      - name: device
+        type: "[]device"
+        description: device
+
+      - name: deviceprofile
+        type: "[]deviceprofile"
+        description: deviceprofile
+
+      - name: tenantname
+        type: tenantname
+        description: tenantname
+      
+      - name: role
+        type: "[]role"
+        description: role
+
+      - name: roleself
+        type: "[]roleself"
+        description: roleself
+
+      - name: source
+        type: source
+        description: source
+
+  - name: completion
+    path: application/applications/{id}
+    method: GET
+    description: Get application
+    pathParameters:
+      - name: id
+        type: string
+        description: Application lookup
+        completion:
+          type: external
+          command:
+            - c8y
+            - applications
+            - list
+            - --pageSize=100
+            - --type=MICROSERVICE
+            - --filter
+            - name like %s*
+            - --select=name
+
+        lookup:
+          type: external
+          command:
+            - c8y
+            - applications
+            - list
+            - --pageSize=100
+            - --type=MICROSERVICE
+            - --filter
+            - name like %s*
+            - --select=id
+
+  - name: completion2
+    path: inventory/managedObjects
+    method: GET
+    description: Get device collection
+    queryParameters:
+      - name: type
+        type: string
+        description: Device lookup with custom completions
+        completion:
+          type: external
+          command:
+            - pwsh
+            - -c
+            - c8y devices list -p 100 --query "has(enercon_Scada) and type eq 'WEC*'" --select type -o csv | sort | uniq

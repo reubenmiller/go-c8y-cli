@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -e
+
+# Describe how to use your command
+help() {
+  cat <<EOF
+Example description about what your command does
+
+Usage:
+    c8y kitchensink services list [FLAGS]
+EOF
+}
+
+examples () {
+  cat <<EOF
+Examples:
+    c8y kitchensink services list
+    # List items
+
+    c8y kitchensink services list --pageSize 100
+    # List the first 100 items
+EOF
+}
+
+# Print log messages on stderr so it does not mix with results which is generally printed on stdout
+echo "Running custom services list command" >&2

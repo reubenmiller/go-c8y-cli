@@ -53,8 +53,6 @@ c8y __complete inventory list --view "$EXTNAME::" | grep "^$EXTNAME::customDevic
 c8y extensions update "$EXTNAME" 2>&1 | grep -E "Failed updating extension $EXTNAME: local extensions can not be updated"
 c8y extensions update --all
 
-# ls -l "$C8Y_SETTINGS_EXTENSIONS_DATADIR/extensions"
-
 # Delete
 c8y extensions delete "$EXTNAME"
 c8y extensions list --select name -o csv | grep -v "$EXTNAME"

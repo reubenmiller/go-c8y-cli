@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extension.json
+version: "v1"
+aliases:
+  - name: lookup
+    description: Lookup external identity by name
+    command: |
+      identity get --name "$1"
+    shell: false
+  
+  - name: customCommand
+    description: Example description
+    command: |
+      c8y devices list --type "myType"
+    shell: true
