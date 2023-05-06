@@ -85,9 +85,7 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command)
 			}
 
 			// Add completions
-			if comp := GetCompletionOptions(subcmd, &param, factory); comp != nil {
-				subcmd.Completion = append(subcmd.Completion, comp)
-			}
+			subcmd.Completion = AppendCompletionOptions(subcmd.Completion, subcmd, &param, factory)
 		}
 
 		// Misc. options
@@ -135,6 +133,17 @@ func MapCommandAPI(cmd *CmdOptions, param *models.Parameter, typeName string) {
 		}
 		cmd.Command.Flags().Int64(param.Name, 0, param.Description)
 	}
+}
+
+func AppendCompletionOptions(opts []completion.Option, cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) []completion.Option {
+	if len(p.ValidationSet) > 0 {
+		opts = append(opts, completion.WithValidateSet(p.Name, p.ValidationSet...))
+	}
+
+	if comp := GetCompletionOptions(cmd, p, factory); comp != nil {
+		opts = append(opts, comp)
+	}
+	return opts
 }
 
 func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) completion.Option {
@@ -516,9 +525,7 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 	// Add flags/completions for preset extensions
 	for _, p := range template.Extensions {
 		AddFlag(cmd, &p, factory)
-		if comp := GetCompletionOptions(cmd, &p, factory); comp != nil {
-			cmd.Completion = append(cmd.Completion, comp)
-		}
+		cmd.Completion = AppendCompletionOptions(cmd.Completion, cmd, &p, factory)
 	}
 
 	cmd.QueryParameter = append(cmd.QueryParameter, queryOptions...)
