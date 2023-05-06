@@ -467,9 +467,11 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 	disableFlagParsing := !isTabCompletionCommand()
 	_ = disableFlagParsing
 
+	var extError error
 	for _, ext := range extensions {
-		commands, _ := ext.Commands()
-		if len(commands) == 0 {
+		commands, err := ext.Commands()
+		if err != nil {
+			extError = fmt.Errorf("%w", err)
 			continue
 		}
 
@@ -504,7 +506,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 					return err
 				}
 				defer spec.Close()
-				extCommand, err := cmdparser.ParseCommand(spec, f)
+				extCommand, err := cmdparser.ParseCommand(spec, f, cmd.Root())
 				if err != nil {
 					return err
 				}
@@ -595,7 +597,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 			cmd.AddCommand(extRoot)
 		}
 	}
-	return nil
+	return extError
 }
 
 func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug bool) error {

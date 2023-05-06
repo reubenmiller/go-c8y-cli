@@ -123,6 +123,10 @@ func (e *Extension) Commands() ([]extensions.Command, error) {
 		return nil
 	})
 
+	// Ignore if the folder does not exist, as commands are not mandatory
+	if os.IsNotExist(err) {
+		return commands, nil
+	}
 	return commands, err
 }
 

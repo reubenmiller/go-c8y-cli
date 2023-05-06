@@ -73,6 +73,20 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 		return err
 	}
 
+	// Presets
+	if subcmd.Spec.HasPreset() {
+		var values *[]flags.GetOption
+		switch subcmd.Spec.Preset.Type {
+		case "inventoryQuery":
+			values = &subcmd.QueryParameter
+		}
+		if values != nil {
+			for _, p := range subcmd.Spec.Preset.Extensions {
+				*values = append(*values, GetOption(subcmd, &p, factory, cfg, client, args)...)
+			}
+		}
+	}
+
 	// path
 	for _, p := range item.PathParameters {
 		subcmd.Path.Options = append(subcmd.Path.Options, GetOption(subcmd, &p, factory, cfg, client, args)...)

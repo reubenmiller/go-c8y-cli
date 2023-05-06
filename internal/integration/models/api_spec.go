@@ -22,10 +22,21 @@ type BodyTemplate struct {
 	Template  string `yaml:"template"`
 }
 
+type CommandPreset struct {
+	Type       string                 `yaml:"type"`
+	Options    CommandTemplateOptions `yaml:"options"`
+	Extensions []Parameter            `yaml:"extensions,omitempty"`
+}
+
+type CommandTemplateOptions struct {
+	Value string `yaml:"value"`
+}
+
 type Command struct {
 	Name               string         `yaml:"name"`
 	Description        string         `yaml:"description"`
 	DescriptionLong    string         `yaml:"descriptionLong"`
+	Preset             CommandPreset  `yaml:"preset"`
 	Deprecated         string         `yaml:"deprecated"`
 	DeprecatedAt       string         `yaml:"deprecatedAt"`
 	Method             string         `yaml:"method"`
@@ -47,6 +58,10 @@ type Command struct {
 	BodyContent        *BodyContent   `yaml:"bodyContent,omitempty"`
 	BodyTemplates      []BodyTemplate `yaml:"bodyTemplates,omitempty"`
 	BodyRequiredKeys   []string       `yaml:"bodyRequiredKeys,omitempty"`
+}
+
+func (c *Command) HasPreset() bool {
+	return c.Preset.Type != ""
 }
 
 func (c *Command) SupportsProcessingMode() bool {

@@ -21,7 +21,7 @@ type Command struct {
 	Name string `yaml:"name"`
 }
 
-func ParseCommand(r io.Reader, factory *cmdutil.Factory) (*cobra.Command, error) {
+func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command) (*cobra.Command, error) {
 	spec := &models.Specification{}
 	b, err := io.ReadAll(r)
 	if err != nil {
@@ -42,6 +42,7 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory) (*cobra.Command, error)
 		Long:  spec.Group.DescriptionLong,
 	}
 
+	// commands
 	for _, item := range spec.Commands {
 		if item.ShouldIgnore() {
 			continue
@@ -54,6 +55,11 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory) (*cobra.Command, error)
 			Example: item.GetExamples(),
 			Hidden:  item.IsHidden(),
 		}, item)
+
+		// Use a preset to populate some common flags/options
+		if item.HasPreset() {
+			AddPredefinedGroupsFlags(subcmd, factory, item.Preset)
+		}
 
 		flagNames := make(map[string]interface{})
 		for _, param := range item.GetAllParameters() {
@@ -428,6 +434,110 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, c
 
 	return opts
 }
+
+func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, template models.CommandPreset) {
+
+	queryOptions := []flags.GetOption{}
+	switch template.Type {
+	case "inventoryQuery":
+		// Cumulocity inventory query
+		cmd.Spec.Method = "GET"
+		cmd.Spec.Path = "inventory/managedObjects"
+
+		// flags
+		cmd.Command.Flags().String("query", "", "Additional query filter (accepts pipeline)")
+		cmd.Command.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
+		cmd.Command.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+		cmd.Command.Flags().String("name", "", "Filter by name")
+		cmd.Command.Flags().String("type", "", "Filter by type")
+		cmd.Command.Flags().Bool("agents", false, "Only include agents")
+		cmd.Command.Flags().String("fragmentType", "", "Filter by fragment type")
+		cmd.Command.Flags().String("owner", "", "Filter by owner")
+		cmd.Command.Flags().String("availability", "", "Filter by c8y_Availability.status")
+		cmd.Command.Flags().String("lastMessageDateTo", "", "Filter c8y_Availability.lastMessage to a specific date")
+		cmd.Command.Flags().String("lastMessageDateFrom", "", "Filter c8y_Availability.lastMessage from a specific date")
+		cmd.Command.Flags().String("creationTimeDateTo", "", "Filter creationTime.date to a specific date")
+		cmd.Command.Flags().String("creationTimeDateFrom", "", "Filter creationTime.date from a specific date")
+		cmd.Command.Flags().StringSlice("group", []string{""}, "Filter by group inclusion")
+		cmd.Command.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")
+		cmd.Command.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
+		cmd.Command.Flags().Bool("withChildrenCount", false, "When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)")
+		cmd.Command.Flags().Bool("withGroups", false, "When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.")
+		cmd.Command.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
+
+		// completions
+		cmd.Completion = append(
+			cmd.Completion,
+			completion.WithValidateSet("availability", "AVAILABLE", "UNAVAILABLE", "MAINTENANCE"),
+			completion.WithDeviceGroup("group", func() (*c8y.Client, error) { return factory.Client() }),
+		)
+
+		// options
+		queryOptions = append(
+			queryOptions,
+
+			flags.WithBoolValue("skipChildrenNames", "skipChildrenNames", ""),
+			flags.WithBoolValue("withChildren", "withChildren", ""),
+			flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
+			flags.WithBoolValue("withGroups", "withGroups", ""),
+			flags.WithBoolValue("withParents", "withParents", ""),
+
+			flags.WithCumulocityQuery(
+				[]flags.GetOption{
+					flags.WithStaticStringValue("fixed", template.Options.Value),
+					flags.WithStringValue("query", "query", "%s"),
+					flags.WithStringValue("name", "name", "(name eq '%s')"),
+					flags.WithStringValue("type", "type", "(type eq '%s')"),
+					flags.WithDefaultBoolValue("agents", "agents", "has(com_cumulocity_model_Agent)"),
+					flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
+					flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
+					flags.WithStringValue("availability", "availability", "(c8y_Availability.status eq '%s')"),
+					flags.WithEncodedRelativeTimestamp("lastMessageDateTo", "lastMessageDateTo", "(c8y_Availability.lastMessage le '%s')"),
+					flags.WithEncodedRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
+					flags.WithEncodedRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "(creationTime.date le '%s')"),
+					flags.WithEncodedRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "(creationTime.date ge '%s')"),
+					// c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "group", "bygroupid(%s)"),
+				},
+				"q",
+			),
+		)
+
+		//flag
+	}
+
+	for _, p := range template.Extensions {
+		AddFlag(cmd, &p, factory)
+
+		if comp := GetCompletionOptions(cmd, &p, factory); comp != nil {
+			cmd.Completion = append(cmd.Completion, comp)
+		}
+
+	}
+
+	cmd.QueryParameter = append(cmd.QueryParameter, queryOptions...)
+}
+
+var (
+	CommonFlagsQuery                = "query"
+	CommonFlagsTemplate             = "queryTemplate"
+	CommonFlagsOrderBy              = "orderBy"
+	CommonFlagsName                 = "name"
+	CommonFlagsType                 = "type"
+	CommonFlagsAgents               = "agents"
+	CommonFlagsFragmentType         = "fragmentType"
+	CommonFlagsOwner                = "owner"
+	CommonFlagsAvailability         = "availability"
+	CommonFlagsLastMessageDateTo    = "lastMessageDateTo"
+	CommonFlagsLastMessageDateFrom  = "lastMessageDateFrom"
+	CommonFlagsCreationTimeDateTo   = "creationTimeDateTo"
+	CommonFlagsCreationTimeDateFrom = "creationTimeDateFrom"
+	CommonFlagsGroup                = "group"
+	CommonFlagsSkipChildrenNames    = "skipChildrenNames"
+	CommonFlagsWithChildren         = "withChildren"
+	CommonFlagsWithChildrenCount    = "withChildrenCount"
+	CommonFlagsWithGroups           = "withGroups"
+	CommonFlagsWithParents          = "withParents"
+)
 
 type CmdOptions struct {
 	Spec           models.Command

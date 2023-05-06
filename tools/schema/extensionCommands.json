@@ -379,6 +379,40 @@
                         "type": "string",
                         "title": "Detailed description of the endpoint"
                     },
+                    "preset": {
+                        "type": "object",
+                        "title": "Command presets",
+                        "description": "Use a command preset to inherit command options from a pre-defined list",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Preset type",
+                                "description": "The preset to inherit the command options from",
+                                "enum": [
+                                    "inventoryQuery"
+                                ]
+                            },
+                            "options": {
+                                "type": "object",
+                                "properties": {
+                                    "value": {
+                                        "type": "string",
+                                        "title": "Options that are related to the specific command preset",
+                                        "description": "The value is optionally used by the preset to tweak the preset. Checkout the preset documentation for an exact description what it does"
+                                    }
+                                }
+                            },
+                            "extensions": {
+                                "type": "array",
+                                "title": "Additional flags/options to be added to the command",
+                                "description": "Additional command flags/options can be added to a preset command to further customize it. Though the values should not clash with the existing values",
+                                "minItems": 1,
+                                "items": {
+                                    "$ref": "#/definitions/parameterDefinition"
+                                }
+                            }
+                        }
+                    },
                     "path": {
                         "type": "string",
                         "title": "Partial url i.e. /alarm/alarms"
