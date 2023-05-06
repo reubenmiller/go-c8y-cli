@@ -2,6 +2,7 @@ package c8yfetcher
 
 import (
 	"bytes"
+	"regexp"
 
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extexec"
@@ -9,13 +10,28 @@ import (
 
 type ExternalFetcher struct {
 	externalCommand []string
+	IDPattern       *regexp.Regexp
 	*DefaultFetcher
 }
 
-func NewExternalFetcher(externalCommand []string) *ExternalFetcher {
-	return &ExternalFetcher{
+func NewExternalFetcher(externalCommand []string, idPattern string) *ExternalFetcher {
+	opt := ExternalFetcher{
 		externalCommand: externalCommand,
 	}
+
+	if idPattern != "" {
+		if p, err := regexp.Compile(idPattern); err != nil {
+			opt.IDPattern = p
+		}
+	}
+	return &opt
+}
+
+func (f *ExternalFetcher) IsID(v string) bool {
+	if f.IDPattern != nil {
+		return f.IDPattern.MatchString(v)
+	}
+	return false
 }
 
 func (f *ExternalFetcher) getByID(id string) ([]fetcherResultSet, error) {
