@@ -474,6 +474,28 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 			completion.WithDeviceGroup("group", func() (*c8y.Client, error) { return factory.Client() }),
 		)
 
+		// TODO: Remove client, cfg arguments from flags and just use factory to enable lazy setting of the client
+		c8yQueryOptions := []flags.GetOption{
+			flags.WithStaticStringValue("fixed", template.Options.Value),
+			flags.WithStringValue("query", "query", "%s"),
+			flags.WithStringValue("name", "name", "(name eq '%s')"),
+			flags.WithStringValue("type", "type", "(type eq '%s')"),
+			flags.WithDefaultBoolValue("agents", "agents", "has(com_cumulocity_model_Agent)"),
+			flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
+			flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
+			flags.WithStringValue("availability", "availability", "(c8y_Availability.status eq '%s')"),
+			flags.WithEncodedRelativeTimestamp("lastMessageDateTo", "lastMessageDateTo", "(c8y_Availability.lastMessage le '%s')"),
+			flags.WithEncodedRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
+			flags.WithEncodedRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "(creationTime.date le '%s')"),
+			flags.WithEncodedRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "(creationTime.date ge '%s')"),
+			// c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "group", "bygroupid(%s)"),
+		}
+
+		// Add extensions to cumulocity query builder
+		for _, p := range template.Extensions {
+			c8yQueryOptions = append(c8yQueryOptions, GetOption(cmd, &p, factory, nil, nil, nil)...)
+		}
+
 		// options
 		queryOptions = append(
 			queryOptions,
@@ -485,35 +507,18 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 			flags.WithBoolValue("withParents", "withParents", ""),
 
 			flags.WithCumulocityQuery(
-				[]flags.GetOption{
-					flags.WithStaticStringValue("fixed", template.Options.Value),
-					flags.WithStringValue("query", "query", "%s"),
-					flags.WithStringValue("name", "name", "(name eq '%s')"),
-					flags.WithStringValue("type", "type", "(type eq '%s')"),
-					flags.WithDefaultBoolValue("agents", "agents", "has(com_cumulocity_model_Agent)"),
-					flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
-					flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
-					flags.WithStringValue("availability", "availability", "(c8y_Availability.status eq '%s')"),
-					flags.WithEncodedRelativeTimestamp("lastMessageDateTo", "lastMessageDateTo", "(c8y_Availability.lastMessage le '%s')"),
-					flags.WithEncodedRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
-					flags.WithEncodedRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "(creationTime.date le '%s')"),
-					flags.WithEncodedRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "(creationTime.date ge '%s')"),
-					// c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "group", "bygroupid(%s)"),
-				},
+				c8yQueryOptions,
 				"q",
 			),
 		)
-
-		//flag
 	}
 
+	// Add flags/completions for preset extensions
 	for _, p := range template.Extensions {
 		AddFlag(cmd, &p, factory)
-
 		if comp := GetCompletionOptions(cmd, &p, factory); comp != nil {
 			cmd.Completion = append(cmd.Completion, comp)
 		}
-
 	}
 
 	cmd.QueryParameter = append(cmd.QueryParameter, queryOptions...)
