@@ -77,6 +77,8 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 	if subcmd.Spec.HasPreset() {
 		var values *[]flags.GetOption
 		switch subcmd.Spec.Preset.Type {
+		case PresetGetIdentity:
+			values = &subcmd.QueryParameter
 		}
 		if values != nil {
 			for _, p := range subcmd.Spec.Preset.Extensions {
@@ -128,7 +130,7 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 
 			if subcmd.Spec.HasPreset() {
 				switch subcmd.Spec.Preset.Type {
-				case PresetDeviceQuery:
+				case PresetQueryInventory:
 					for _, p := range subcmd.Spec.Preset.Extensions {
 						queryOptions = append(queryOptions, GetOption(subcmd, &p, factory, cfg, client, args)...)
 					}

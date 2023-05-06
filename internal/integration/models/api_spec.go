@@ -23,13 +23,19 @@ type BodyTemplate struct {
 }
 
 type CommandPreset struct {
-	Type       string                 `yaml:"type"`
-	Options    CommandTemplateOptions `yaml:"options"`
-	Extensions []Parameter            `yaml:"extensions,omitempty"`
+	Type       string            `yaml:"type"`
+	Options    map[string]string `yaml:"options,omitempty"`
+	Extensions []Parameter       `yaml:"extensions,omitempty"`
 }
 
-type CommandTemplateOptions struct {
-	Value string `yaml:"value"`
+func (cp *CommandPreset) GetOption(k string, defaultValue ...string) string {
+	if v, ok := cp.Options[k]; ok {
+		return v
+	}
+	if len(defaultValue) > 0 {
+		return defaultValue[0]
+	}
+	return ""
 }
 
 type Command struct {

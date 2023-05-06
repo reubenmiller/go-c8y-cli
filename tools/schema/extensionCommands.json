@@ -389,7 +389,8 @@
                                 "title": "Preset type",
                                 "description": "The preset to inherit the command options from",
                                 "enum": [
-                                    "deviceQuery"
+                                    "query-inventory",
+                                    "get-identity"
                                 ]
                             },
                             "options": {
@@ -401,9 +402,7 @@
                                         "description": "The value is optionally used by the preset to tweak the preset. Checkout the preset documentation for an exact description what it does"
                                     }
                                 },
-                                "required":[
-                                    "value"
-                                ]
+                                "additionalProperties": true
                             },
                             "extensions": {
                                 "type": "array",

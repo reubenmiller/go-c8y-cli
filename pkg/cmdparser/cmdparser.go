@@ -17,7 +17,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var PresetDeviceQuery = "deviceQuery"
+var (
+	PresetQueryInventory = "query-inventory"
+	PresetGetIdentity    = "get-identity"
+)
 
 type Command struct {
 	Name string `yaml:"name"`
@@ -451,7 +454,32 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 
 	queryOptions := []flags.GetOption{}
 	switch template.Type {
-	case PresetDeviceQuery:
+	case PresetGetIdentity:
+		cmd.Spec.Method = "GET"
+
+		if identityType := cmd.Spec.Preset.GetOption("value"); identityType != "" {
+			cmd.Spec.Path = fmt.Sprintf("/identity/externalIds/%s/{name}", identityType)
+			cmd.Command.Flags().String("name", "", "External identity id/name (required) (accepts pipeline)")
+			cmd.Path.Options = append(
+				cmd.Path.Options,
+				[]flags.GetOption{
+					flags.WithStringValue("name", "name", "%s"),
+				}...,
+			)
+		} else {
+			cmd.Spec.Path = "/identity/externalIds/{type}/{name}"
+			cmd.Command.Flags().String("type", "c8y_Serial", "External identity type")
+			cmd.Command.Flags().String("name", "", "External identity id/name (required) (accepts pipeline)")
+			cmd.Path.Options = append(
+				cmd.Path.Options,
+				[]flags.GetOption{
+					flags.WithStringValue("type", "type", "%s"),
+					flags.WithStringValue("name", "name", "%s"),
+				}...,
+			)
+		}
+
+	case PresetQueryInventory:
 		// Cumulocity inventory query
 		cmd.Spec.Method = "GET"
 		cmd.Spec.Path = "inventory/managedObjects"
@@ -485,8 +513,9 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 		)
 
 		// TODO: Remove client, cfg arguments from flags and just use factory to enable lazy setting of the client
+
 		c8yQueryOptions := []flags.GetOption{
-			flags.WithStaticStringValue("fixed", template.Options.Value),
+			flags.WithStaticStringValue("fixed", template.GetOption("value")),
 			flags.WithStringValue("query", "query", "%s"),
 			flags.WithStringValue("name", "name", "(name eq '%s')"),
 			flags.WithStringValue("type", "type", "(type eq '%s')"),
@@ -518,7 +547,7 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 
 			flags.WithCumulocityQuery(
 				c8yQueryOptions,
-				"q",
+				template.GetOption("param", "q"),
 			),
 		)
 	}
