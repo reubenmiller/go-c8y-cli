@@ -867,7 +867,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 				!isJSONResponse,
 				jsonformatter.WithFileOutput(commonOptions.OutputFile != "", commonOptions.OutputFile, false),
 				jsonformatter.WithTrimSpace(true),
-				jsonformatter.WithJSONStreamOutput(isJSONResponse, consol.IsJSONStream(), consol.IsCSV()),
+				jsonformatter.WithJSONStreamOutput(isJSONResponse, consol.IsJSONStream(), consol.IsTextOutput()),
 				jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
 			)
 		}

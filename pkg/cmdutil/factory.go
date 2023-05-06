@@ -277,7 +277,7 @@ func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, pro
 		false,
 		jsonformatter.WithFileOutput(commonOptions.OutputFile != "", commonOptions.OutputFile, false),
 		jsonformatter.WithTrimSpace(true),
-		jsonformatter.WithJSONStreamOutput(true, consol.IsJSONStream(), consol.IsCSV()),
+		jsonformatter.WithJSONStreamOutput(true, consol.IsJSONStream(), consol.IsTextOutput()),
 		jsonformatter.WithSuffix(len(output) > 0, "\n"),
 	)
 	return nil

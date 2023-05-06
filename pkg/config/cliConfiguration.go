@@ -1296,6 +1296,16 @@ func (c *Config) IsCSVOutput() bool {
 	return format == OutputCSV || format == OutputCSVWithHeader
 }
 
+func (c *Config) IsTSVOutput() bool {
+	format := c.GetOutputFormat()
+	return format == OutputTSV
+}
+
+func (c *Config) IsCompletionOutput() bool {
+	format := c.GetOutputFormat()
+	return format == OutputCompletion
+}
+
 // IsResponseOutput check if raw server response should be used
 func (c *Config) IsResponseOutput() bool {
 	return c.GetOutputFormat() == OutputServerResponse
@@ -1473,6 +1483,8 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 	// Filters and selectors
 	filters := jsonfilter.NewJSONFilters(c.Logger)
 	filters.AsCSV = c.IsCSVOutput()
+	filters.AsTSV = c.IsTSVOutput()
+	filters.AsCompletionFormat = c.IsCompletionOutput()
 	filters.Flatten = c.FlattenJSON()
 	filters.Pluck = c.GetJSONSelect()
 	if err := filters.AddRawFilters(c.GetJSONFilter()); err != nil {

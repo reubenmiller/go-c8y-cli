@@ -35,7 +35,7 @@ func WithExternalCompletion(flagName string, externalCommand []string) Option {
 			options := []string{}
 			for _, row := range strings.Split(string(output), "\n") {
 				if len(row) > 0 {
-					options = append(options, strings.ReplaceAll(row, ",", "\t"))
+					options = append(options, row)
 				}
 			}
 			return options, cobra.ShellCompDirectiveNoFileComp

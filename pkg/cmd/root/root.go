@@ -278,6 +278,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			config.OutputTable.String()+"\ttable format",
 			config.OutputCSV.String()+"\tcsv format without headers",
 			config.OutputCSVWithHeader.String()+"\tcsv format with headers",
+			config.OutputTSV.String()+"\ttab delimited format",
 			config.OutputServerResponse.String()+"\tUnparsed server response",
 		),
 		completion.WithSessionFile("session", config.ConfigExtensions, func() string {

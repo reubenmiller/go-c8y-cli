@@ -64,7 +64,7 @@ func ExecuteExternalCommand(name string, fixed_args []string, optional_args ...s
 		args[1:]...,
 	)
 
-	binaryCommand.Env = append(os.Environ(), "C8Y_SETTINGS_DEFAULTS_OUTPUT=csv", "C8Y_SETTINGS_DEFAULTS_PAGESIZE=20")
+	binaryCommand.Env = append(os.Environ(), "C8Y_SETTINGS_DEFAULTS_OUTPUT=completion", "C8Y_SETTINGS_DEFAULTS_PAGESIZE=20")
 	binaryCommand.Dir = "."
 	return binaryCommand.Output()
 }
