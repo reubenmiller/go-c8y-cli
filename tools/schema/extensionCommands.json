@@ -389,7 +389,7 @@
                                 "title": "Preset type",
                                 "description": "The preset to inherit the command options from",
                                 "enum": [
-                                    "inventoryQuery"
+                                    "deviceQuery"
                                 ]
                             },
                             "options": {
