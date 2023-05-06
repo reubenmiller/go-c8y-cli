@@ -756,7 +756,7 @@ var exampleJsonnet []byte
 //go:embed ext_tmpls/exampleDevice.json
 var exampleView []byte
 
-//go:embed ext_tmpls/commandGroup.yaml
+//go:embed ext_tmpls/apiCommandTemplate.yaml
 var commandGroupTmpl string
 
 func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error {
@@ -793,7 +793,7 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 	if err := os.MkdirAll(apiDir, 0755); err != nil {
 		return err
 	}
-	if err := writeFile(filepath.Join(apiDir, "features.yaml"), []byte(commandGroupTmpl), 0644); err != nil {
+	if err := writeFile(filepath.Join(apiDir, "devices.yaml"), []byte(commandGroupTmpl), 0644); err != nil {
 		return err
 	}
 
