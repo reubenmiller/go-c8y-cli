@@ -18,7 +18,7 @@ tests:
   
   It returns writes errors to stderr:
     command: |
-      c8y events get --iiiiid 0
+      c8y events get --iiiiid 0 --noColor
     exit-code: 100
     stderr:
       match-pattern: |
@@ -28,7 +28,7 @@ tests:
 
   It returns errors as json on stdout:
     command: |
-      c8y events get --withError --iiiiid 0
+      c8y events get --withError --iiiiid 0 --noColor
     exit-code: 100
     stderr:
       match-pattern: "ERROR\\s+commandError: unknown flag: --iiiiid"
