@@ -3,6 +3,7 @@ package c8yfetcher
 import (
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -10,12 +11,18 @@ type SoftwareVersionFetcher struct {
 	*ManagedObjectFetcher
 }
 
-func NewSoftwareVersionFetcher(client *c8y.Client, software string) *SoftwareVersionFetcher {
+func NewSoftwareVersionFetcher(factory *cmdutil.Factory, software string) *SoftwareVersionFetcher {
 	return &SoftwareVersionFetcher{
 		ManagedObjectFetcher: &ManagedObjectFetcher{
-			client: client,
+			CumulocityFetcher: &CumulocityFetcher{
+				factory: factory,
+			},
 			Query: func(s string) string {
 				// Check
+				client, err := factory.Client()
+				if err != nil {
+					return ""
+				}
 
 				if !IsID(software) {
 					// Lookup software by name

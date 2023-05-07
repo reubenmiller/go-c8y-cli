@@ -148,7 +148,7 @@ func (n *SetCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("logLevel", "configuredLevel"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("configuredLevel"),
 	)

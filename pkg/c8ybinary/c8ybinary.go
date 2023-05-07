@@ -23,6 +23,8 @@ const BarFiller = "[━━ ]"
 
 // const BarFiller = "[██-]"
 
+type ClientFunc func() (*c8y.Client, error)
+
 func CreateBinaryWithProgress(ctx context.Context, client *c8y.Client, path string, filename string, properties interface{}, progress *mpb.Progress) (*c8y.Response, error) {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -178,7 +180,7 @@ func NewProxyReader(progress *mpb.Progress, r io.ReadCloser, filename string) (i
 }
 
 // WithBinaryUploadURL uploads an inventory binary and returns the URL to it
-func WithBinaryUploadURL(client *c8y.Client, progress *mpb.Progress, opts ...string) flags.GetOption {
+func WithBinaryUploadURL(clientFunc ClientFunc, progress *mpb.Progress, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := flags.UnpackGetterOptions("%s", opts...)
 
@@ -210,6 +212,11 @@ func WithBinaryUploadURL(client *c8y.Client, progress *mpb.Progress, opts ...str
 			binary.WithFileProperties(filename),
 			binary.WithGlobal(),
 		)
+		if err != nil {
+			return "", nil, err
+		}
+
+		client, err := clientFunc()
 		if err != nil {
 			return "", nil, err
 		}

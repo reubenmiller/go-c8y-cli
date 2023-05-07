@@ -64,10 +64,6 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 	subcmd := n.options
 	factory := n.factory
 
-	client, err := factory.Client()
-	if err != nil {
-		return err
-	}
 	cfg, err := factory.Config()
 	if err != nil {
 		return err
@@ -82,21 +78,21 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 		}
 		if values != nil {
 			for _, p := range subcmd.Spec.Preset.Extensions {
-				*values = append(*values, GetOption(subcmd, &p, factory, cfg, client, args)...)
+				*values = append(*values, GetOption(subcmd, &p, factory, args)...)
 			}
 		}
 	}
 
 	// path
 	for _, p := range item.PathParameters {
-		subcmd.Path.Options = append(subcmd.Path.Options, GetOption(subcmd, &p, factory, cfg, client, args)...)
+		subcmd.Path.Options = append(subcmd.Path.Options, GetOption(subcmd, &p, factory, args)...)
 	}
 	subcmd.Path.Template = item.Path
 
 	// header
 	subcmd.Header = append(subcmd.Header, flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"))
 	for _, p := range item.HeaderParameters {
-		subcmd.Header = append(subcmd.Header, GetOption(subcmd, &p, factory, cfg, client, args)...)
+		subcmd.Header = append(subcmd.Header, GetOption(subcmd, &p, factory, args)...)
 	}
 
 	if subcmd.Spec.ContentType != "" {
@@ -115,7 +111,7 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 	subcmd.QueryParameter = append(subcmd.QueryParameter, flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"))
 
 	for _, p := range item.QueryParameters {
-		subcmd.QueryParameter = append(subcmd.QueryParameter, GetOption(subcmd, &p, factory, cfg, client, args)...)
+		subcmd.QueryParameter = append(subcmd.QueryParameter, GetOption(subcmd, &p, factory, args)...)
 
 		// Support Cumulocity Query builder
 		if len(p.Children) > 0 {
@@ -125,18 +121,18 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 				if child.Name == "queryTemplate" || child.Name == "orderBy" {
 					continue
 				}
-				queryOptions = append(queryOptions, GetOption(subcmd, &child, factory, cfg, client, args)...)
+				queryOptions = append(queryOptions, GetOption(subcmd, &child, factory, args)...)
 			}
 
 			if subcmd.Spec.HasPreset() {
 				switch subcmd.Spec.Preset.Type {
 				case PresetQueryInventory:
 					for _, p := range subcmd.Spec.Preset.Extensions {
-						queryOptions = append(queryOptions, GetOption(subcmd, &p, factory, cfg, client, args)...)
+						queryOptions = append(queryOptions, GetOption(subcmd, &p, factory, args)...)
 					}
 				case PresetQueryInventoryChildren:
 					for _, p := range subcmd.Spec.Preset.Extensions {
-						queryOptions = append(queryOptions, GetOption(subcmd, &p, factory, cfg, client, args)...)
+						queryOptions = append(queryOptions, GetOption(subcmd, &p, factory, args)...)
 					}
 				}
 			}
@@ -174,16 +170,16 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 		switch p.Type {
 		case "file", "attachment":
 			subcmd.Body.UploadProgressSource = p.Name
-			subcmd.FormData = append(subcmd.FormData, GetOption(subcmd, &p, factory, cfg, client, args)...)
+			subcmd.FormData = append(subcmd.FormData, GetOption(subcmd, &p, factory, args)...)
 		case "fileContents":
 			subcmd.Body.UploadProgressSource = p.Name
 			fallthrough
 		default:
-			subcmd.Body.Options = append(subcmd.Body.Options, GetOption(subcmd, &p, factory, cfg, client, args)...)
+			subcmd.Body.Options = append(subcmd.Body.Options, GetOption(subcmd, &p, factory, args)...)
 		}
 	}
 
-	subcmd.Body.Options = append(subcmd.Body.Options, cmdutil.WithTemplateValue(factory, cfg))
+	subcmd.Body.Options = append(subcmd.Body.Options, cmdutil.WithTemplateValue(factory))
 	subcmd.Body.Options = append(subcmd.Body.Options, flags.WithTemplateVariablesValue())
 
 	for _, bodyTemplate := range item.BodyTemplates {

@@ -150,7 +150,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("resourcesUsername", "resourcesUsername"),
 		flags.WithStringValue("resourcesPassword", "resourcesPassword"),
 		flags.WithStringValue("externalUrl", "externalUrl"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

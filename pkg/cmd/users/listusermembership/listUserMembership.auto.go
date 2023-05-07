@@ -154,8 +154,8 @@ func (n *ListUserMembershipCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithUserByNameFirstMatch(client, args, "id", "id"),
-		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		c8yfetcher.WithUserByNameFirstMatch(n.factory, args, "id", "id"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
 	)
 	if err != nil {
 		return err

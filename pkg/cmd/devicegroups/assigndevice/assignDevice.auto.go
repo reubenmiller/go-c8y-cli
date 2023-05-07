@@ -148,8 +148,8 @@ func (n *AssignDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "newChildDevice", "managedObject.id"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "newChildDevice", "managedObject.id"),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -162,7 +162,7 @@ func (n *AssignDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "id"),
+		c8yfetcher.WithDeviceGroupByNameFirstMatch(n.factory, args, "group", "id"),
 	)
 	if err != nil {
 		return err

@@ -147,7 +147,7 @@ func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 				flags.WithEncodedRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
 				flags.WithEncodedRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "(creationTime.date le '%s')"),
 				flags.WithEncodedRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "(creationTime.date ge '%s')"),
-				c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "group", "bygroupid(%s)"),
+				c8yfetcher.WithDeviceGroupByNameFirstMatch(n.factory, args, "group", "group", "bygroupid(%s)"),
 				flags.WithDefaultBoolValue("onlyDevices", "onlyDevices", "has(c8y_IsDevice)"),
 			},
 			"query",

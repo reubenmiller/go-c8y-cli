@@ -143,7 +143,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithOptionalFragment("global", "c8y_Global", ""),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -156,7 +156,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "id", "id"),
 		flags.WithInventoryChildType("childType", "childType"),
 	)
 	if err != nil {

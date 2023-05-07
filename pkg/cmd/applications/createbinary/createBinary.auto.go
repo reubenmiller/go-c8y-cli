@@ -134,7 +134,7 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		formData,
 		inputIterators,
-		flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(n.factory, cfg), "file", "data")...,
+		flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(n.factory), "file", "data")...,
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -147,7 +147,7 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -160,7 +160,7 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithApplicationByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

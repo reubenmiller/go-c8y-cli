@@ -155,7 +155,7 @@ func (n *CopyCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithApplicationByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

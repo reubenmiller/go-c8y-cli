@@ -153,9 +153,9 @@ func (n *DeleteRoleFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithUserGroupByNameFirstMatch(client, args, "group", "group"),
-		c8yfetcher.WithRoleByNameFirstMatch(client, args, "role", "role"),
-		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		c8yfetcher.WithUserGroupByNameFirstMatch(n.factory, args, "group", "group"),
+		c8yfetcher.WithRoleByNameFirstMatch(n.factory, args, "role", "role"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
 	)
 	if err != nil {
 		return err

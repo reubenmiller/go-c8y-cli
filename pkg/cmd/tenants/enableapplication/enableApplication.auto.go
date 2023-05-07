@@ -139,8 +139,8 @@ func (n *EnableApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithApplicationByNameFirstMatch(client, args, "application", "application.id"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, "application", "application.id"),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -153,7 +153,7 @@ func (n *EnableApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
 	)
 	if err != nil {
 		return err

@@ -149,7 +149,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithBoolValue("invisible", "c8y_IsDynamicGroup.invisible", "{}"),
 		flags.WithRequiredTemplateString(`
 {type: 'c8y_DynamicGroup', c8y_DeviceQueryString: '', c8y_IsDynamicGroup: {}}`),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("name", "c8y_DeviceQueryString"),
 	)

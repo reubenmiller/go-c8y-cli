@@ -104,7 +104,7 @@ func (n *GetSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "source"),
 		flags.WithStringSliceValues("series", "series", ""),
 		flags.WithStringValue("aggregationType", "aggregationType"),
 		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom"),

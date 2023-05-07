@@ -149,7 +149,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringDefaultValue(client.TenantName, "id", "id"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "id", "id"),
 	)
 	if err != nil {
 		return err

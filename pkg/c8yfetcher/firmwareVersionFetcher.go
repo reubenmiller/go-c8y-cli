@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -11,11 +12,17 @@ type FirmwareVersionFetcher struct {
 	*ManagedObjectFetcher
 }
 
-func NewFirmwareVersionFetcher(client *c8y.Client, firmware string, includePatch bool) *FirmwareVersionFetcher {
+func NewFirmwareVersionFetcher(factory *cmdutil.Factory, firmware string, includePatch bool) *FirmwareVersionFetcher {
 	return &FirmwareVersionFetcher{
 		ManagedObjectFetcher: &ManagedObjectFetcher{
-			client: client,
+			CumulocityFetcher: &CumulocityFetcher{
+				factory: factory,
+			},
 			Query: func(s string) string {
+				client, err := factory.Client()
+				if err != nil {
+					return ""
+				}
 				var firmwareID string
 				if IsID(firmware) {
 					firmwareID = firmware

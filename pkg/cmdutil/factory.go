@@ -418,6 +418,14 @@ func (f *Factory) ResolveTemplates(pattern string, withFullPath bool) ([]string,
 	return allMatches, nil
 }
 
+func (f *Factory) GetTenant() string {
+	client, err := f.Client()
+	if err != nil {
+		return ""
+	}
+	return client.TenantName
+}
+
 // NewRequestInputIterators create a request iterator based on pipe line configuration
 func NewRequestInputIterators(cmd *cobra.Command, cfg *config.Config) (*flags.RequestInputIterators, error) {
 	pipeOpts, err := flags.GetPipeOptionsFromAnnotation(cmd)

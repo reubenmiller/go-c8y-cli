@@ -143,7 +143,7 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

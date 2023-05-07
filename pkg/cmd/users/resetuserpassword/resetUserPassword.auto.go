@@ -142,7 +142,7 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("newPassword", "password"),
 		flags.WithRequiredTemplateString(`
 {sendPasswordResetEmail: !std.objectHas(self, 'password')}`),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -155,8 +155,8 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithUserByNameFirstMatch(client, args, "id", "id"),
-		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		c8yfetcher.WithUserByNameFirstMatch(n.factory, args, "id", "id"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
 	)
 	if err != nil {
 		return err

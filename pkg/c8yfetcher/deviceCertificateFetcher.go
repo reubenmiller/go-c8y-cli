@@ -4,18 +4,21 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/matcher"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 type DeviceCertificateFetcher struct {
-	client *c8y.Client
+	*CumulocityFetcher
 	*IDNameFetcher
 }
 
-func NewDeviceCertificateFetcher(client *c8y.Client) *DeviceCertificateFetcher {
+func NewDeviceCertificateFetcher(factory *cmdutil.Factory) *DeviceCertificateFetcher {
 	return &DeviceCertificateFetcher{
-		client: client,
+		CumulocityFetcher: &CumulocityFetcher{
+			factory: factory,
+		},
 	}
 }
 
@@ -32,8 +35,8 @@ func (f *DeviceCertificateFetcher) IsID(id string) bool {
 }
 
 func (f *DeviceCertificateFetcher) getByID(id string) ([]fetcherResultSet, error) {
-	cert, resp, err := f.client.DeviceCertificate.GetCertificate(
-		WithDisabledDryRunContext(f.client),
+	cert, resp, err := f.Client().DeviceCertificate.GetCertificate(
+		WithDisabledDryRunContext(f.Client()),
 		id,
 	)
 
@@ -53,8 +56,8 @@ func (f *DeviceCertificateFetcher) getByID(id string) ([]fetcherResultSet, error
 
 func (f *DeviceCertificateFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	// check if already resolved, so we can save a lookup
-	col, _, err := f.client.DeviceCertificate.GetCertificates(
-		WithDisabledDryRunContext(f.client),
+	col, _, err := f.Client().DeviceCertificate.GetCertificates(
+		WithDisabledDryRunContext(f.Client()),
 		&c8y.DeviceCertificateCollectionOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(100),
 		},

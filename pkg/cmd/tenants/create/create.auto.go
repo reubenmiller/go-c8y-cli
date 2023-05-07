@@ -148,7 +148,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("contactName", "contactName"),
 		flags.WithStringValue("contactPhone", "contact_phone"),
 		flags.WithStringValue("tenantId", "tenantId"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("company", "domain"),
 	)

@@ -141,7 +141,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("newName", "name"),
 		flags.WithStringValue("query", "c8y_DeviceQueryString"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -154,7 +154,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithSmartGroupByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithSmartGroupByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

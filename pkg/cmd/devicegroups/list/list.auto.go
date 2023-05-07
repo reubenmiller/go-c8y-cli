@@ -124,7 +124,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 				flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
 				flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
 				flags.WithDefaultBoolValue("excludeRootGroup", "excludeRootGroup", "not(type eq 'c8y_DeviceGroup')"),
-				c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "group", "bygroupid(%s)"),
+				c8yfetcher.WithDeviceGroupByNameFirstMatch(n.factory, args, "group", "group", "bygroupid(%s)"),
 			},
 			"query",
 		),

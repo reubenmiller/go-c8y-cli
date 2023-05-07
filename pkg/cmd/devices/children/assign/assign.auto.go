@@ -145,7 +145,7 @@ func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithOverrideValue("child", "managedObject.id"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("child", "managedObject.id"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -158,7 +158,7 @@ func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "id", "id"),
 		flags.WithInventoryChildType("childType", "childType"),
 	)
 	if err != nil {

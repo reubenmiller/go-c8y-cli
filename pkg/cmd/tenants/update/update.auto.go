@@ -148,7 +148,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("adminPass", "adminPass"),
 		flags.WithStringValue("contactName", "contactName"),
 		flags.WithStringValue("contactPhone", "contact_phone"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -161,7 +161,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringDefaultValue(client.TenantName, "id", "id"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "id", "id"),
 	)
 	if err != nil {
 		return err

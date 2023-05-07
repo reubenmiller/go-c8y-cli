@@ -151,7 +151,7 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithHostedApplicationByNameFirstMatch(client, args, "application", "application"),
+		c8yfetcher.WithHostedApplicationByNameFirstMatch(n.factory, args, "application", "application"),
 		c8yfetcher.WithIDSlice(args, "binaryId", "binaryId"),
 	)
 	if err != nil {

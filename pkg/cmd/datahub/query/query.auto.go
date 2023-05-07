@@ -152,7 +152,7 @@ func (n *QueryCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("sql", "sql"),
 		flags.WithIntValue("limit", "limit"),
 		flags.WithStringValue("format", "format"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("sql", "limit"),
 	)

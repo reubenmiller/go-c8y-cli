@@ -10,7 +10,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -313,7 +312,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 	return nil
 }
 
-func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, cfg *config.Config, client *c8y.Client, args []string) []flags.GetOption {
+func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, args []string) []flags.GetOption {
 	targetProp := p.GetTargetProperty()
 
 	opts := []flags.GetOption{}
@@ -321,7 +320,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, c
 	switch p.NamedLookup.Type {
 	case "external":
 		// TODO: Support controlling what looks like an ID what does not via a regex
-		opts = append(opts, c8yfetcher.WithExternalCommandByNameFirstMatch(client, args, p.NamedLookup.Command, "", p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithExternalCommandByNameFirstMatch(factory, args, p.NamedLookup.Command, "", p.Name, targetProp, p.Format))
 		return opts
 	}
 
@@ -332,7 +331,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, c
 
 	switch p.Type {
 	case "file":
-		opts = append(opts, flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(factory, cfg), p.Name, flags.FlagDataName)...)
+		opts = append(opts, flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(factory), p.Name, flags.FlagDataName)...)
 	case "attachment":
 		opts = append(opts, flags.WithFormDataFile(p.Name, flags.FlagDataName)...)
 
@@ -375,80 +374,80 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, c
 	case "json_custom":
 		opts = append(opts, flags.WithDataValue(p.Name, targetProp, p.Format))
 	case "binaryUploadURL":
-		opts = append(opts, c8ybinary.WithBinaryUploadURL(client, factory.IOStreams.ProgressIndicator(), p.Name, targetProp, p.Format))
+		opts = append(opts, c8ybinary.WithBinaryUploadURL(factory.Client, factory.IOStreams.ProgressIndicator(), p.Name, targetProp, p.Format))
 	case "json":
 		// don't do anything because it should be manually set)
 
 	case "tenant":
-		opts = append(opts, flags.WithStringDefaultValue(client.TenantName, p.Name, targetProp, p.Format))
+		opts = append(opts, flags.WithStringDefaultValue(factory.GetTenant(), p.Name, targetProp, p.Format))
 
 	case "[]id", "[]devicerequest":
 		opts = append(opts, c8yfetcher.WithIDSlice(args, p.Name, targetProp, p.Format))
 
 	case "application":
-		opts = append(opts, c8yfetcher.WithApplicationByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithApplicationByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "[]software":
-		opts = append(opts, c8yfetcher.WithSoftwareByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithSoftwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "softwareDetails":
-		opts = append(opts, c8yfetcher.WithSoftwareVersionData(client, "software", "version", "url", args, "", targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithSoftwareVersionData(factory, "software", "version", "url", args, "", targetProp, p.Format))
 
 	case "configurationDetails":
-		opts = append(opts, c8yfetcher.WithConfigurationFileData(client, "configuration", "configurationType", "url", args, "", targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithConfigurationFileData(factory, "configuration", "configurationType", "url", args, "", targetProp, p.Format))
 
 	case "[]softwareversion":
-		opts = append(opts, c8yfetcher.WithSoftwareVersionByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithSoftwareVersionByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "[]deviceservice":
-		opts = append(opts, c8yfetcher.WithDeviceServiceByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithDeviceServiceByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "certificatefile":
 		opts = append(opts, flags.WithCertificateFile(p.Name, targetProp))
 	case "[]certificate":
-		opts = append(opts, c8yfetcher.WithCertificateByNameFirstMatch(client, args, p.Name, targetProp))
+		opts = append(opts, c8yfetcher.WithCertificateByNameFirstMatch(factory, args, p.Name, targetProp))
 
 	case "[]firmware":
-		opts = append(opts, c8yfetcher.WithFirmwareByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithFirmwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 	case "[]firmwareversion":
-		opts = append(opts, c8yfetcher.WithFirmwareVersionByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithFirmwareVersionByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 	case "firmwareDetails":
-		opts = append(opts, c8yfetcher.WithFirmwareVersionData(client, "firmware", "version", "url", args, "", targetProp))
+		opts = append(opts, c8yfetcher.WithFirmwareVersionData(factory, "firmware", "version", "url", args, "", targetProp))
 	case "[]firmwarepatch":
-		opts = append(opts, c8yfetcher.WithFirmwarePatchByNameFirstMatch(client, args, p.Name, targetProp))
+		opts = append(opts, c8yfetcher.WithFirmwarePatchByNameFirstMatch(factory, args, p.Name, targetProp))
 
 	case "[]configuration":
-		opts = append(opts, c8yfetcher.WithConfigurationByNameFirstMatch(client, args, p.Name, targetProp))
+		opts = append(opts, c8yfetcher.WithConfigurationByNameFirstMatch(factory, args, p.Name, targetProp))
 
 	case "[]deviceprofile":
-		opts = append(opts, c8yfetcher.WithDeviceProfileByNameFirstMatch(client, args, p.Name, targetProp))
+		opts = append(opts, c8yfetcher.WithDeviceProfileByNameFirstMatch(factory, args, p.Name, targetProp))
 
 	case "[]device":
-		opts = append(opts, c8yfetcher.WithDeviceByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithDeviceByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "[]agent":
-		opts = append(opts, c8yfetcher.WithAgentByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithAgentByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "[]devicegroup":
-		opts = append(opts, c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithDeviceGroupByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "[]smartgroup":
-		opts = append(opts, c8yfetcher.WithSmartGroupByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithSmartGroupByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "[]user":
-		opts = append(opts, c8yfetcher.WithUserByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithUserByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "[]userself":
-		opts = append(opts, c8yfetcher.WithUserSelfByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithUserSelfByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "[]roleself":
-		opts = append(opts, c8yfetcher.WithRoleSelfByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithRoleSelfByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "[]role":
-		opts = append(opts, c8yfetcher.WithRoleByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithRoleByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "[]usergroup":
-		opts = append(opts, c8yfetcher.WithUserGroupByNameFirstMatch(client, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithUserGroupByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 	}
 
 	return opts
@@ -534,7 +533,7 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 
 		// Add extensions to cumulocity query builder
 		for _, p := range template.Extensions {
-			c8yQueryOptions = append(c8yQueryOptions, GetOption(cmd, &p, factory, nil, nil, nil)...)
+			c8yQueryOptions = append(c8yQueryOptions, GetOption(cmd, &p, factory, nil)...)
 		}
 
 		// options
@@ -591,8 +590,6 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 			completion.WithDeviceGroup("group", func() (*c8y.Client, error) { return factory.Client() }),
 		)
 
-		// TODO: Remove client, cfg arguments from flags and just use factory to enable lazy setting of the client
-
 		c8yQueryOptions := []flags.GetOption{
 			flags.WithStaticStringValue("fixed", template.GetOption("value")),
 			flags.WithStringValue("query", "query", "%s"),
@@ -606,12 +603,12 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 			flags.WithEncodedRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
 			flags.WithEncodedRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "(creationTime.date le '%s')"),
 			flags.WithEncodedRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "(creationTime.date ge '%s')"),
-			// c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "group", "bygroupid(%s)"),
+			c8yfetcher.WithDeviceGroupByNameFirstMatch(factory, []string{}, "group", "group", "bygroupid(%s)"),
 		}
 
 		// Add extensions to cumulocity query builder
 		for _, p := range template.Extensions {
-			c8yQueryOptions = append(c8yQueryOptions, GetOption(cmd, &p, factory, nil, nil, nil)...)
+			c8yQueryOptions = append(c8yQueryOptions, GetOption(cmd, &p, factory, nil)...)
 		}
 
 		// options

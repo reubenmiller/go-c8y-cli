@@ -136,7 +136,7 @@ func (n *GetCredentialsCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithIDSlice(args, "id", "id"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

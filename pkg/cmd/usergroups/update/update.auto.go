@@ -145,7 +145,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -158,8 +158,8 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
-		c8yfetcher.WithUserGroupByNameFirstMatch(client, args, "id", "id"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
+		c8yfetcher.WithUserGroupByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

@@ -142,7 +142,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("category", "category"),
 		flags.WithStringValue("key", "key"),
 		flags.WithStringValue("value", "value"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("category", "key", "value"),
 	)

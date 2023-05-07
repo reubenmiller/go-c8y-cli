@@ -142,8 +142,8 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithRoleSelfByNameFirstMatch(client, args, "role", "role.self"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		c8yfetcher.WithRoleSelfByNameFirstMatch(n.factory, args, "role", "role.self"),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -156,8 +156,8 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
-		c8yfetcher.WithUserByNameFirstMatch(client, args, "user", "user"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
+		c8yfetcher.WithUserByNameFirstMatch(n.factory, args, "user", "user"),
 	)
 	if err != nil {
 		return err

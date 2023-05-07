@@ -147,7 +147,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("serviceType", "serviceType"),
 		flags.WithStringValue("status", "status"),
 		flags.WithStaticStringValue("type", "c8y_Service"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("name", "status", "type", "serviceType"),
 	)
@@ -161,7 +161,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "id"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "id"),
 	)
 	if err != nil {
 		return err

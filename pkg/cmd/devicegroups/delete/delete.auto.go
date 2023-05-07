@@ -149,7 +149,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithDeviceGroupByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

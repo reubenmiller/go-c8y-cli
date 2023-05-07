@@ -149,11 +149,11 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "deviceId"),
 		flags.WithStringValue("firmware", "c8y_Firmware.name"),
 		flags.WithStringValue("version", "c8y_Firmware.version"),
 		flags.WithStringValue("url", "c8y_Firmware.url"),
-		c8yfetcher.WithFirmwareVersionData(client, "firmware", "version", "url", args, "", "c8y_Firmware"),
+		c8yfetcher.WithFirmwareVersionData(n.factory, "firmware", "version", "url", args, "", "c8y_Firmware"),
 		flags.WithStringValue("description", "description"),
 		flags.WithDefaultTemplateString(`
 {
@@ -163,7 +163,7 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
     + (if self._version != "" then " (%s)" % self._version else "")
 }
 `),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("deviceId", "c8y_Firmware.name", "c8y_Firmware.version"),
 	)

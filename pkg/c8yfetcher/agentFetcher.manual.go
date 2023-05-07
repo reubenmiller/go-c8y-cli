@@ -4,23 +4,25 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 type AgentFetcher struct {
-	client *c8y.Client
-	*DefaultFetcher
+	*CumulocityFetcher
 }
 
-func NewAgentFetcher(client *c8y.Client) *AgentFetcher {
+func NewAgentFetcher(factory *cmdutil.Factory) *AgentFetcher {
 	return &AgentFetcher{
-		client: client,
+		CumulocityFetcher: &CumulocityFetcher{
+			factory: factory,
+		},
 	}
 }
 
 func (f *AgentFetcher) getByID(id string) ([]fetcherResultSet, error) {
-	mo, resp, err := f.client.Inventory.GetManagedObject(
-		WithDisabledDryRunContext(f.client),
+	mo, resp, err := f.Client().Inventory.GetManagedObject(
+		WithDisabledDryRunContext(f.Client()),
 		id,
 		nil,
 	)
@@ -39,8 +41,8 @@ func (f *AgentFetcher) getByID(id string) ([]fetcherResultSet, error) {
 }
 
 func (f *AgentFetcher) getByName(name string) ([]fetcherResultSet, error) {
-	mcol, _, err := f.client.Inventory.GetManagedObjects(
-		WithDisabledDryRunContext(f.client),
+	mcol, _, err := f.Client().Inventory.GetManagedObjects(
+		WithDisabledDryRunContext(f.Client()),
 		&c8y.ManagedObjectOptions{
 			// fmt.Sprintf("$filter=%s+$orderby=name", filter)
 			Query:             fmt.Sprintf("$filter=has(com_cumulocity_model_Agent) and name eq '%s' $orderby=name", name),

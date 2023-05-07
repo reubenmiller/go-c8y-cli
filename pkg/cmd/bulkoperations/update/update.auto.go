@@ -137,7 +137,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithFloatValue("creationRampSec", "creationRamp"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("creationRamp"),
 	)

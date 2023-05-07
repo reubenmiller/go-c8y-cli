@@ -156,7 +156,7 @@ func (n *GetStatusCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithMicroserviceByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithMicroserviceByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

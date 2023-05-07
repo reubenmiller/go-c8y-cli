@@ -149,7 +149,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("status", "status"),
 		flags.WithBoolValue("autoRegistrationEnabled", "autoRegistrationEnabled", ""),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -162,8 +162,8 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithCertificateByNameFirstMatch(client, args, "id", "id"),
-		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		c8yfetcher.WithCertificateByNameFirstMatch(n.factory, args, "id", "id"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
 	)
 	if err != nil {
 		return err

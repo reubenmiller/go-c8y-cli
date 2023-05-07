@@ -154,8 +154,8 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
-		c8yfetcher.WithUserByNameFirstMatch(client, args, "user", "user"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
+		c8yfetcher.WithUserByNameFirstMatch(n.factory, args, "user", "user"),
 	)
 	if err != nil {
 		return err

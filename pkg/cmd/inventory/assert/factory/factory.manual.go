@@ -212,7 +212,7 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 			cmd,
 			path,
 			inputIterators,
-			c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
+			c8yfetcher.WithDeviceByNameFirstMatch(f, args, "device", "device"),
 		)
 		if err != nil {
 			return err

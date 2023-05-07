@@ -147,7 +147,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "externalId"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_Serial'}`),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "externalId"),
 	)
@@ -161,7 +161,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
 	)
 	if err != nil {
 		return err

@@ -4,23 +4,25 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 type SmartGroupFetcher struct {
-	client *c8y.Client
-	*DefaultFetcher
+	*CumulocityFetcher
 }
 
-func NewSmartGroupFetcher(client *c8y.Client) *SmartGroupFetcher {
+func NewSmartGroupFetcher(factory *cmdutil.Factory) *SmartGroupFetcher {
 	return &SmartGroupFetcher{
-		client: client,
+		CumulocityFetcher: &CumulocityFetcher{
+			factory: factory,
+		},
 	}
 }
 
 func (f *SmartGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
-	mo, resp, err := f.client.Inventory.GetManagedObject(
-		WithDisabledDryRunContext(f.client),
+	mo, resp, err := f.Client().Inventory.GetManagedObject(
+		WithDisabledDryRunContext(f.Client()),
 		id,
 		nil,
 	)
@@ -39,8 +41,8 @@ func (f *SmartGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 }
 
 func (f *SmartGroupFetcher) getByName(name string) ([]fetcherResultSet, error) {
-	mcol, _, err := f.client.Inventory.GetManagedObjects(
-		WithDisabledDryRunContext(f.client),
+	mcol, _, err := f.Client().Inventory.GetManagedObjects(
+		WithDisabledDryRunContext(f.Client()),
 		&c8y.ManagedObjectOptions{
 			Query:             fmt.Sprintf("type eq 'c8y_DynamicGroup' and name eq '%s'", name),
 			PaginationOptions: *c8y.NewPaginationOptions(5),

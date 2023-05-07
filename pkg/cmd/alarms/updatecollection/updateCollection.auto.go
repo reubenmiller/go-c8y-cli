@@ -110,7 +110,7 @@ func (n *UpdateCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "source"),
 		flags.WithStringValue("status", "status"),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithBoolValue("resolved", "resolved", ""),
@@ -161,7 +161,7 @@ func (n *UpdateCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("newStatus", "status"),
 		flags.WithRelativeTimestamp("createdFrom", "createdFrom"),
 		flags.WithRelativeTimestamp("createdTo", "createdTo"),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("status"),
 	)

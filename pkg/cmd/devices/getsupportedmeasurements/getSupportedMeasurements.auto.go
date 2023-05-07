@@ -153,7 +153,7 @@ func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) er
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
 	)
 	if err != nil {
 		return err

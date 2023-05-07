@@ -363,7 +363,7 @@
         # Add support for user defined templates to control body
         #
         if ($Specification.bodyTemplates.type -ne "none") {
-            $null = $RESTBodyBuilderOptions.AppendLine("cmdutil.WithTemplateValue(n.factory, cfg),")
+            $null = $RESTBodyBuilderOptions.AppendLine("cmdutil.WithTemplateValue(n.factory),")
             $null = $RESTBodyBuilderOptions.AppendLine("flags.WithTemplateVariablesValue(),")
         }
 

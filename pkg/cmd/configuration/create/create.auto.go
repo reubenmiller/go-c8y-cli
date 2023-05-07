@@ -153,10 +153,10 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("configurationType", "configurationType"),
 		flags.WithStringValue("url", "url"),
 		flags.WithStringValue("deviceType", "deviceType"),
-		c8ybinary.WithBinaryUploadURL(client, n.factory.IOStreams.ProgressIndicator(), "file", "url"),
+		c8ybinary.WithBinaryUploadURL(n.factory.Client, n.factory.IOStreams.ProgressIndicator(), "file", "url"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_ConfigurationDump', c8y_Global:{}}`),
-		cmdutil.WithTemplateValue(n.factory, cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "name", "url"),
 	)
