@@ -209,7 +209,7 @@
         "argumentName": {
             "type": "string",
             "description": "Parameter name. It should start with a lower case character, and only include characters [a-zA-Z0-9]",
-            "pattern": "^[a-z][a-zA-Z0-9]+$"
+            "pattern": "^[a-z][a-zA-Z0-9_-]*$"
         },
         "dependsOn": {
             "type": "array",
@@ -364,7 +364,7 @@
                         "type": "string",
                         "title": "Command name",
                         "description": "This will be the command name which is typed by the users on the command line",
-                        "pattern": "^[a-z][a-zA-Z0-9]*$"
+                        "pattern": "^[a-z][a-zA-Z0-9_-]*$"
                     },
                     "method": {
                         "type": "string",
