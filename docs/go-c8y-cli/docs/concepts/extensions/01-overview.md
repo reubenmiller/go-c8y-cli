@@ -1,5 +1,5 @@
 ---
-title: Extensions
+title: Overview
 ---
 
 import CodeExample from '@site/src/components/CodeExample';
@@ -20,8 +20,8 @@ The different elements of an extension and where they are stored within the exte
 
 | Type | Path | Description |
 |-----------|------|-------------|
-| Aliases | extension.yaml | Convenience commands which are easily accessible under the root command. e.g. `c8y my-alias` |
-| API | `api/` | Commands which are generated via API to reuse the same go-c8y-cli logic |
+| Aliases | `extension.yaml` | Convenience commands which are easily accessible under the root command. e.g. `c8y my-alias` |
+| API | `api/` | Commands which are generated via an API specification which re-use the same go-c8y-cli logic for in-built commands |
 | Commands | `commands/` | More complex commands which can be written in language  (e.g. bash, python etc.). The commands can call other go-c8y-cli commands or any other tooling |
 | Templates | `templates/` | Any go-c8y-cli templates that can be referenced by when using the `template` flag |
 | Views | `views/` | Any go-c8y-cli view definitions that control which fragments are shown for which items, e.g. show custom fragments for specific device types etc. |
@@ -84,8 +84,64 @@ c8y mo 12345
 
 </CodeExample>
 
+### API based commands
 
-### Commands
+Extensions support an API based approach where a specification is used to define commands in an extension. The specification is provided in the form of a YAML file which details a list of commands to be included. Multiple API specifications can be provided where each file represents a command group with it's own child commands. All of the command groups are then placed under the extension name.
+
+Since API commands are interpreted by the go-c8y-cli parsing engine, the commands can offer the same look and feel as the in-built commands, so the following features are available:
+
+* pipeline support
+* flag completion using in-built types
+* flag completion using external commands calls
+* help text
+
+The above features are not supported in script based commands.
+
+:::note Fun Fact
+The API YAML specification uses a similar specification which is used by go-c8y-cli to generate the in-built commands. Therefore should an extension become so popular that it warrants including it as an in-built command, then the same specification file can be included very quickly.
+:::
+
+A schema is available to help guide you through the large set of options. Below shows a short example of the API specification.
+
+```yaml title="file: ./api/devices.yaml"
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+---
+group:
+  name: devices
+  description: Manage devices
+  descriptionLong: |
+    Manage devices which allows you to create/update/get/delete devices using a convenient commands
+    Examples
+      c8y organizer devices list | c8y organizer devices update --name "otherName"
+
+commands:
+  - name : list
+    description: Get collection of devices
+    descriptionLong: |
+      Some more detailed instructions on how to use the command
+      It can also use come additional context. This command uses a the 'query-inventory' preset
+      so that you don't have to define all of the other flags yourself.
+    exampleList:
+      - command: c8y organizer devices list
+        description: List devices
+    preset:
+      type: query-inventory
+      options:
+        param: q
+        value: has(c8y_IsLinux)
+      extensions:
+        - name: model
+          type: string
+          format: c8y_Hardware.model eq '%s'
+          description: Filter by model
+
+        - name: excludeAgents
+          type: booleanDefault
+          description: Exclude agents
+          value: 'not(has(com_cumulocity_model_Agent))'
+```
+
+### Script based commands
 
 An extension can include any number of commands. The structure of the commands is based on the folder structure, so you can group commands by placing them under the same sub folder. There is no limit to the number of sub folders, however you should keep it under 4-5 levels so it is not annoying for users to type.
 
@@ -104,7 +160,7 @@ Below is a simple example of a bash-based script.
 ```bash title="file: ./commands/list"
 #!/usr/bin/env bash
 set -e
-echo "Hey look at my" >&2
+echo "Hey look at me" >&2
 ```
 
 :::note
