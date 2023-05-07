@@ -13,7 +13,9 @@
                     "$ref": "#/definitions/cliArgumentType"
                 },
                 "property": {
-                    "type": "string"
+                    "type": "string",
+                    "title": "Target property",
+                    "description": "The property where the flag's value will be mapped to. If not set, then the flag name will be used. Useful to be able to separate the flag from where the value should be written to."
                 },
                 "children": {
                     "type": "array",
@@ -22,19 +24,30 @@
                     }
                 },
                 "pipeline": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "title": "Accept pipeline",
+                    "description": "The flag should be marked as the default flag where piped input is automatically mapped to. There should only be one parameter marked with the pipeline for a single command"
                 },
                 "pipelineAliases": {
                     "$ref": "#/definitions/pipelineAliases"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "title": "Flag description",
+                    "description": "Description of what the flag does. This will appear in the command's help text"
                 },
                 "format": {
-                    "type": "string"
+                    "type": "string",
+                    "title": "Format string",
+                    "description": "Format string which is applied to the flag's value. Useful if you want to wrap the flag's value in a static string. Reference the flag's value using '%s'. Example 'has(%s)'"
                 },
                 "default": {
-                    "type": "string"
+                    "type": "string",
+                    "title": "Default value",
+                    "description": "Default value to be given to the flag. Though most flags will not automatically be processed if they are not explicitly specified by the user"
+                },
+                "value": {
+                    "$ref": "#/definitions/value"
                 },
                 "required": {
                     "$ref": "#/definitions/requiredParameter"
@@ -47,6 +60,8 @@
                 },
                 "validationSet": {
                     "type": "array",
+                    "title": "List of recommended values",
+                    "description": "These values will appear as tab completion options. Though the user is still allowed to use other values",
                     "minItems": 1,
                     "items": {
                         "type": "string"
@@ -70,23 +85,6 @@
                 "type",
                 "description"
             ]
-        },
-        "outputAssertion": {
-            "type": "object",
-            "properties": {
-                "json": {
-                    "type": "object",
-                    "title": "expected json properties",
-                    "description": "JSON properties which are expected to be matched in the command output"
-                },
-                "contains": {
-                    "type": "array",
-                    "title": "List of strings which are expected to be inside the response.",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
         },
         "completionCommand": {
             "type": "object",
@@ -151,34 +149,6 @@
                 "command"
             ]
         },
-        "assertion": {
-            "type": "object",
-            "properties": {
-                "json": {
-                    "type": "object",
-                    "title": "JSON property assertions"
-                },
-                "exit-code": {
-                    "type": "integer",
-                    "title": "Expected exit code"
-                },
-                "skip": {
-                    "type": "boolean",
-                    "title": "Skip test"
-                },
-                "line-count": {
-                    "type": "integer",
-                    "title": "Expected number of lines (exact match)"
-                },
-                "contains": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "title": "Output contains given values"
-                }
-            }
-        },
         "bodyTemplate": {
             "type": "object",
             "description": "Use a template when constructing the body of the http request. This can be used to force values, have defaults, or perform custom logic (depending on the template engine). At the moment on jsonnet is supported",
@@ -231,10 +201,10 @@
             "title": "Default value",
             "description": "Default value to use"
         },
-        "skip-test": {
-            "type": "boolean",
-            "title": "Skip (ignore) test",
-            "description": "Skip the test when generating the test code. Useful if the test is currently not possible due to limited access or functionality is missing in the test environment"
+        "value": {
+            "type": "string",
+            "title": "Value to be applied to the property",
+            "description": "Value to be added if the flag is present"
         },
         "argumentName": {
             "type": "string",
@@ -251,7 +221,8 @@
         },
         "cliArgumentType": {
             "type": "string",
-            "description": "CLI Argument type",
+            "title": "Flag type",
+            "description": "Flag type which will be applied. Some types include automatic tab completion and named lookups. If you don't want any completions or lookups, then use the simple types like; string, integer, boolean",
             "enum": [
                 "application",
                 "applicationname",
@@ -316,6 +287,7 @@
         },
         "pipelineAliases": {
             "type": "array",
+            "title": "pipeline aliases",
             "description": "Aliases to use when searching for the piped json data property to bind to. Only the first match will be used",
             "items": {
                 "type": "string"
@@ -389,10 +361,15 @@
                 "type": "object",
                 "properties": {
                     "name": {
-                        "type": "string"
+                        "type": "string",
+                        "title": "Command name",
+                        "description": "This will be the command name which is typed by the users on the command line",
+                        "pattern": "^[a-z][a-zA-Z0-9]*$"
                     },
                     "method": {
                         "type": "string",
+                        "title": "HTTP request method",
+                        "description": "HTTP request method to be used in the API call",
                         "enum": [
                             "GET",
                             "POST",
@@ -403,7 +380,7 @@
                     "semanticMethod": {
                         "type": "string",
                         "title": "Semantic REST method",
-                        "description": "How the call should be handled internally. This will override how the request is processed in respect to confirmation, create/update/delete modes etc.",
+                        "description": "How the command should be handled internally. This will override how the request is processed in respect to confirmation, create/update/delete modes etc.",
                         "enum": [
                             "GET",
                             "POST",
@@ -413,11 +390,13 @@
                     },
                     "description": {
                         "type": "string",
-                        "title": "Description of the endpoint"
+                        "title": "Description of the command",
+                        "description": "Short description about the command. It should only be a one line description"
                     },
                     "descriptionLong": {
                         "type": "string",
-                        "title": "Detailed description of the endpoint"
+                        "title": "Detailed description of the endpoint",
+                        "description": "Include any additional context about the command which might be helpful for users."
                     },
                     "preset": {
                         "type": "object",
@@ -461,27 +440,33 @@
                     },
                     "path": {
                         "type": "string",
-                        "title": "Partial url i.e. /alarm/alarms"
+                        "title": "Partial url i.e. /alarm/alarms",
+                        "description": "HTTP request path to be used in the API call, e.g. /alarm/alarms"
                     },
                     "accept": {
                         "type": "string",
+                        "title": "HTTP Accept header value",
                         "description": "Accept header value. Data to be returned from the platform. The accept header will also control how the data will be displayed within the PowerShell module"
                     },
                     "contentType": {
                         "type": "string",
-                        "description": "Content-Type header value. This is meant to be the MIME type of the body"
+                        "title": "HTTP Content Type header",
+                        "description": "Content-Type header value. This is meant to be the MIME type of the body. Only set for HTTP methods which accept a body"
                     },
                     "collectionType": {
                         "type": "string",
+                        "title": "Collection Type",
                         "description": "Type of the raw response from the platform. The collectionType is the raw response type, and then the collectionProperty, is the type to be used for the array of items that are represented in the collectionType"
                     },
                     "collectionProperty": {
                         "type": "string",
-                        "description": "Type of each item in the array related to the collectionType. Use '-' disable any automatic guessing"
+                        "title": "Collection property",
+                        "description": "The property pointing to the array containing the result list. Each item in the array will be treated with the type defined in 'collectionType'. Use '-' disable any automatic guessing"
                     },
                     "responseType": {
                         "type": "string",
-                        "description": "Expected response type returned by the server. If not provided a JSON object is assumed",
+                        "title": "JSON response body type",
+                        "description": "Expected json response type returned by the server, e.g. is the server responding with an array objects or an object? If not provided, a JSON object is assumed",
                         "enum": [
                             "object",
                             "array"
@@ -522,7 +507,8 @@
                                 },
                                 "description": {
                                     "type": "string",
-                                    "title": "Description of what the example (command) does. This will be used in the auto generated documentation within the cli tool"
+                                    "title": "Example description",
+                                    "description": "Description of what the example (command) does. This will be used in the auto generated documentation within the cli tool"
                                 }
                             },
                             "required": [
@@ -533,7 +519,8 @@
                     },
                     "flagMapping": {
                         "type": "array",
-                        "description": "Common flag mapping. Customize where common flags are mapped to, e.g. pageSize => limit",
+                        "title": "Common/global flag mapping",
+                        "description": "Customize where common flags are mapped to in the request, e.g. pageSize => limit",
                         "items": {
                             "type": "object",
                             "properties": {
@@ -550,128 +537,47 @@
                     },
                     "headerParameters": {
                         "type": "array",
-                        "description": "Configure header parameters from input arguments",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "name": {
-                                    "type": "string",
-                                    "description": "Name of the argument to be used in the cli"
-                                },
-                                "type": {
-                                    "$ref": "#/definitions/cliArgumentType"
-                                },
-                                "description": {
-                                    "type": "string"
-                                },
-                                "property": {
-                                    "type": "string"
-                                },
-                                "value": {
-                                    "type": "string"
-                                },
-                                "required": {
-                                    "$ref": "#/definitions/requiredParameter"
-                                },
-                                "hidden": {
-                                    "$ref": "#/definitions/hiddenParameter"
-                                },
-                                "position": {
-                                    "$ref": "#/definitions/argumentPosition"
-                                },
-                                "dependsOn": {
-                                    "$ref": "#/definitions/dependsOn"
-                                },
-                                "skip": {
-                                    "$ref": "#/definitions/skipParameter"
-                                },
-                                "completion": {
-                                    "$ref": "#/definitions/completionCommand"
-                                },
-                                "lookup": {
-                                    "$ref": "#/definitions/namedLookupCommand"
-                                }
-                            },
-                            "required": [
-                                "name",
-                                "type",
-                                "description"
-                            ]
-                        }
-                    },
-                    "queryParameters": {
-                        "type": "array",
-                        "minItems": 1,
+                        "title": "HTTP request headers",
+                        "description": "Set HTTP request headers from flags",
                         "items": {
                             "$ref": "#/definitions/parameterDefinition"
                         }
                     },
                     "pathParameters": {
                         "type": "array",
+                        "title": "HTTP request path",
+                        "description": "Set the HTTP request path from flags",
                         "minItems": 1,
                         "items": {
-                            "type": "object",
-                            "properties": {
-                                "name": {
-                                    "$ref": "#/definitions/argumentName"
-                                },
-                                "type": {
-                                    "$ref": "#/definitions/cliArgumentType"
-                                },
-                                "property": {
-                                    "type": "string"
-                                },
-                                "pipeline": {
-                                    "type": "boolean"
-                                },
-                                "pipelineAliases": {
-                                    "$ref": "#/definitions/pipelineAliases"
-                                },
-                                "description": {
-                                    "type": "string"
-                                },
-                                "required": {
-                                    "$ref": "#/definitions/requiredParameter"
-                                },
-                                "hidden": {
-                                    "$ref": "#/definitions/hiddenParameter"
-                                },
-                                "position": {
-                                    "$ref": "#/definitions/argumentPosition"
-                                },
-                                "validationSet": {
-                                    "type": "array",
-                                    "minItems": 1,
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                },
-                                "dependsOn": {
-                                    "$ref": "#/definitions/dependsOn"
-                                },
-                                "skip": {
-                                    "$ref": "#/definitions/skipParameter"
-                                },
-                                "completion": {
-                                    "$ref": "#/definitions/completionCommand"
-                                },
-                                "lookup": {
-                                    "$ref": "#/definitions/namedLookupCommand"
-                                }
-                            },
-                            "required": [
-                                "name",
-                                "type",
-                                "description"
-                            ]
+                            "$ref": "#/definitions/parameterDefinition"
+                        }
+                    },
+                    "queryParameters": {
+                        "type": "array",
+                        "title": "HTTP request query parameters",
+                        "description": "Set HTTP query parameters from flags",
+                        "minItems": 1,
+                        "items": {
+                            "$ref": "#/definitions/parameterDefinition"
+                        }
+                    },
+                    "body": {
+                        "type": "array",
+                        "title": "HTTP request body",
+                        "description": "Build the HTTP request body from flags",
+                        "minItems": 1,
+                        "items": {
+                            "$ref": "#/definitions/parameterDefinition"
                         }
                     },
                     "bodyContent": {
                         "type": "object",
-                        "description": "Description of body content",
+                        "title": "Body content type",
+                        "description": "Type of body when used to build the HTTP request. Only required when using non json based bodies",
                         "properties": {
                             "type": {
                                 "type": "string",
+                                "title": "body content type",
                                 "description": "Body content type. Only used to identify binary contents",
                                 "enum": [
                                     "binary",
@@ -682,90 +588,29 @@
                     },
                     "bodyTemplates": {
                         "type": "array",
-                        "description": "List of templates to apply when constructing the body of the http request. This can be used to force values, have defaults, or perform custom logic (depending on the template engine). At the moment on jsonnet is supported",
+                        "title": "body templates",
+                        "description": "List of static templates to apply when constructing the body of the http request. This can be used to force values, have defaults, or perform custom logic (depending on the template engine). At the moment only jsonnet is supported",
                         "items": {
                             "$ref": "#/definitions/bodyTemplate"
                         }
                     },
                     "bodyRequiredKeys": {
                         "type": "array",
-                        "description": "List of the required body keys. The keys will be checked after any templating logic",
+                        "description": "List of the required body keys. The keys will be checked after any template logic",
                         "items": {
                             "type": "string"
                         }
                     },
                     "bodyTemplateOptions": {
                         "type": "object",
-                        "description": "Body Templating options",
+                        "description": "Body template options",
                         "properties": {
                             "enabled": {
                                 "type": "boolean",
                                 "default": true,
-                                "description": "Body templating is supported"
+                                "title": "Enable/disable template support",
+                                "description": "Templates are enabled by default. Use this is you want to disable it. Usually it only makes sense to do for non-json based bodies"
                             }
-                        }
-                    },
-                    "body": {
-                        "type": "array",
-                        "minItems": 1,
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "name": {
-                                    "$ref": "#/definitions/argumentName"
-                                },
-                                "type": {
-                                    "$ref": "#/definitions/cliArgumentType"
-                                },
-                                "property": {
-                                    "type": "string"
-                                },
-                                "pipeline": {
-                                    "type": "boolean"
-                                },
-                                "pipelineAliases": {
-                                    "$ref": "#/definitions/pipelineAliases"
-                                },
-                                "description": {
-                                    "type": "string"
-                                },
-                                "required": {
-                                    "$ref": "#/definitions/requiredParameter"
-                                },
-                                "hidden": {
-                                    "$ref": "#/definitions/hiddenParameter"
-                                },
-                                "default": {
-                                    "$ref": "#/definitions/defaultValue"
-                                },
-                                "position": {
-                                    "$ref": "#/definitions/argumentPosition"
-                                },
-                                "validationSet": {
-                                    "type": "array",
-                                    "minItems": 1,
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                },
-                                "dependsOn": {
-                                    "$ref": "#/definitions/dependsOn"
-                                },
-                                "skip": {
-                                    "$ref": "#/definitions/skipParameter"
-                                },
-                                "completion": {
-                                    "$ref": "#/definitions/completionCommand"
-                                },
-                                "lookup": {
-                                    "$ref": "#/definitions/namedLookupCommand"
-                                }
-                            },
-                            "required": [
-                                "name",
-                                "type",
-                                "description"
-                            ]
                         }
                     }
                 },
