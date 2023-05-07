@@ -313,6 +313,34 @@ func getOutputHeaders(c *console.Console, cfg *config.Config, input []string) (h
 	return append(bytes.Join(columns, []byte(",")), []byte("\n")...)
 }
 
+// GetInitLoggerOptions create a simple logger with a best-guess log level based on the given arguments
+// It will not activate on any environment variables, however it will do a simplistic parsing of
+// the common logging options before the configuration has been read which enables debugging around
+// the configuration and extensions etc.
+func GetInitLoggerOptions(args []string) logger.Options {
+	color := true
+	level := zapcore.WarnLevel
+	debug := false
+
+	for _, item := range args {
+		switch item {
+		case "--debug", "--debug=true":
+			level = zapcore.DebugLevel
+			debug = true
+		case "--verbose", "-v", "--verbose=true":
+			level = zapcore.InfoLevel
+		case "--noColor", "--noColor=true", "-M", "-M=true":
+			color = false
+		}
+	}
+
+	return logger.Options{
+		Level: level,
+		Debug: debug,
+		Color: color,
+	}
+}
+
 // Initialize initializes the configuration manager and c8y client
 func Initialize() (*root.CmdRoot, error) {
 
@@ -324,10 +352,7 @@ func Initialize() (*root.CmdRoot, error) {
 	var configHandler = config.NewConfig(viper.GetViper())
 
 	// init logger
-	logHandler = logger.NewLogger(module, logger.Options{
-		Level: zapcore.WarnLevel,
-		Debug: false,
-	})
+	logHandler = logger.NewLogger(module, GetInitLoggerOptions(os.Args))
 
 	if _, err := configHandler.ReadConfigFiles(nil); err != nil {
 		logHandler.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)

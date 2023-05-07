@@ -445,7 +445,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// Add sub commands for the extensions
 	extensions := f.ExtensionManager().List()
-	ConvertToCobraCommands(f, cmd, extensions)
+	if err := ConvertToCobraCommands(f, cmd, extensions); err != nil {
+		if log, logErr := f.Logger(); logErr == nil {
+			log.Fatalf("Invalid extension.  %s", err)
+		}
+	}
 
 	// Handle errors (not in cobra library)
 	cmd.SilenceErrors = true
@@ -464,6 +468,11 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 	// as it affects passing the arguments to the extension binary
 	disableFlagParsing := !isTabCompletionCommand()
 	_ = disableFlagParsing
+
+	log, err := f.Logger()
+	if err != nil {
+		return err
+	}
 
 	var extError error
 	for _, ext := range extensions {
@@ -486,7 +495,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 		// Parse all api files
 		apiDir := filepath.Join(ext.Path(), "api")
 		if _, err := os.Stat(apiDir); !os.IsNotExist(err) {
-			filepath.WalkDir(apiDir, func(path string, d fs.DirEntry, walkErr error) error {
+			walkErr := filepath.WalkDir(apiDir, func(path string, d fs.DirEntry, walkErr error) error {
 				if walkErr != nil {
 					return walkErr
 				}
@@ -495,10 +504,11 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 					return nil
 				}
 
-				if filepath.Ext(path) != ".yaml" {
+				if ext := filepath.Ext(path); ext != ".yaml" && ext != ".yml" {
 					return nil
 				}
 
+				log.Debugf("Reading extension file: %s", path)
 				spec, err := os.Open(path)
 				if err != nil {
 					return err
@@ -506,7 +516,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 				defer spec.Close()
 				extCommand, err := cmdparser.ParseCommand(spec, f, cmd.Root())
 				if err != nil {
-					return err
+					return fmt.Errorf("%w. file=%s", err, path)
 				}
 
 				if extCommand != nil {
@@ -514,6 +524,9 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 				}
 				return nil
 			})
+			if walkErr != nil {
+				return fmt.Errorf("%w. extension_name=%s", walkErr, ext.Name())
+			}
 		}
 
 		//

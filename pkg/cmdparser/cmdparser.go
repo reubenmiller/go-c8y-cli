@@ -27,6 +27,12 @@ type Command struct {
 }
 
 func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command) (*cobra.Command, error) {
+
+	log, err := factory.Logger()
+	if err != nil {
+		return nil, err
+	}
+
 	spec := &models.Specification{}
 	b, err := io.ReadAll(r)
 	if err != nil {
@@ -53,6 +59,7 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command)
 			continue
 		}
 
+		log.Debugf("Adding command. name=%s", item.Name)
 		subcmd := NewCommandWithOptions(&cobra.Command{
 			Use:     item.Name,
 			Short:   item.Description,
@@ -220,10 +227,15 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 }
 
 func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) error {
+	log, err := factory.Logger()
+	if err != nil {
+		return err
+	}
 	existingFlag := cmd.Command.Flags().Lookup(p.Name)
 	if existingFlag != nil {
 		// TODO: Update the existing flag rather than ignoring it
 		// TODO: Should an error be returned?
+		log.Debugf("Ignoring duplicated flag. name=%s", p.Name)
 		return nil
 	}
 	switch p.Type {
