@@ -140,7 +140,8 @@
                         "idPattern": {
                             "type": "string",
                             "title": "Regular expression which indicates if the value is already an id value",
-                            "description": "This controls whether a value should be looked up or not. For example if set to '^\\d$', this indicates that if a number is provided, then no lookup will be done when a number is provided."
+                            "description": "This controls whether a value should be looked up or not. For example if set to '^\\d$', this indicates that if a number is provided, then no lookup will be done when a number is provided.",
+                            "default": "^[0-9]+$"
                         }
                     }
                 }
