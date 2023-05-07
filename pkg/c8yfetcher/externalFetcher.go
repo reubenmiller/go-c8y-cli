@@ -20,7 +20,7 @@ func NewExternalFetcher(externalCommand []string, idPattern string) *ExternalFet
 	}
 
 	if idPattern != "" {
-		if p, err := regexp.Compile(idPattern); err != nil {
+		if p, err := regexp.Compile(idPattern); err == nil {
 			opt.IDPattern = p
 		}
 	}

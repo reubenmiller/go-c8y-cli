@@ -331,8 +331,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 
 	switch p.NamedLookup.Type {
 	case "external":
-		// TODO: Support controlling what looks like an ID what does not via a regex
-		opts = append(opts, c8yfetcher.WithExternalCommandByNameFirstMatch(factory, args, p.NamedLookup.Command, "", p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithExternalCommandByNameFirstMatch(factory, args, p.NamedLookup.Command, p.NamedLookup.Options.IDPattern, p.Name, targetProp, p.Format))
 		return opts
 	}
 

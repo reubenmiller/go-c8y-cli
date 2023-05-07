@@ -241,8 +241,13 @@ type Completion struct {
 }
 
 type NamedLookup struct {
-	Type    string   `yaml:"type,omitempty"`
-	Command []string `yaml:"command,omitempty"`
+	Type    string             `yaml:"type,omitempty"`
+	Command []string           `yaml:"command,omitempty"`
+	Options NamedLookupOptions `yaml:"options"`
+}
+
+type NamedLookupOptions struct {
+	IDPattern string `yaml:"idPattern,omitempty"`
 }
 
 type TargetType int

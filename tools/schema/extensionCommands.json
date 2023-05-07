@@ -59,10 +59,10 @@
                     "$ref": "#/definitions/skipParameter"
                 },
                 "completion": {
-                    "$ref": "#/definitions/externalCommand"
+                    "$ref": "#/definitions/completionCommand"
                 },
                 "lookup": {
-                    "$ref": "#/definitions/externalCommand"
+                    "$ref": "#/definitions/namedLookupCommand"
                 }
             },
             "required": [
@@ -88,21 +88,60 @@
                 }
             }
         },
-        "externalCommand": {
+        "namedLookupCommand": {
             "type": "object",
+            "title": "Named lookup command",
+            "description": "Command to be executed when the user provides a name. The response should be a newline delimited list of single string values",
             "properties": {
                 "type": {
                     "type": "string",
                     "title": "External Command Type",
-                    "description": "Type of external command. Reserved for future use.",
+                    "description": "Type of command",
+                    "default": "external",
                     "enum": ["external"]
                 },
                 "command": {
                     "type": "array",
                     "title": "Command to execute",
-                    "description": "First item should be the binary to execute, and the rest are the arguments",
+                    "description": "First item should be the binary to execute, and the rest are the arguments. Any references to %s will be replaced by the current value entered in by the user",
                     "items": {
                         "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "command"
+            ]
+        },
+        "completionCommand": {
+            "type": "object",
+            "title": "Completion command",
+            "description": "Command to be executed when the user tries to tab complete a value. Any references to %s will be replaced by the current value entered in by the user",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "title": "External Command Type",
+                    "description": "Type of command",
+                    "default": "external",
+                    "enum": ["external"]
+                },
+                "command": {
+                    "type": "array",
+                    "title": "Command to execute",
+                    "description": "First item should be the binary to execute, and the rest are the arguments. Any references to %s will be replaced by the current value entered in by the user",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "idPattern": {
+                            "type": "string",
+                            "title": "Regular expression which indicates if the value is already an id value",
+                            "description": "This controls whether a value should be looked up or not. For example if set to '^\\d$', this indicates that if a number is provided, then no lookup will be done when a number is provided."
+                        }
                     }
                 }
             },
@@ -546,14 +585,10 @@
                                     "$ref": "#/definitions/skipParameter"
                                 },
                                 "completion": {
-                                    "title": "External completion",
-                                    "description": "Use an external command to provide tab completion options",
-                                    "$ref": "#/definitions/externalCommand"
+                                    "$ref": "#/definitions/completionCommand"
                                 },
                                 "lookup": {
-                                    "title": "External lookup",
-                                    "description": "Use an external command to lookup a value by name",
-                                    "$ref": "#/definitions/externalCommand"
+                                    "$ref": "#/definitions/namedLookupCommand"
                                 }
                             },
                             "required": [
@@ -617,10 +652,10 @@
                                     "$ref": "#/definitions/skipParameter"
                                 },
                                 "completion": {
-                                    "$ref": "#/definitions/externalCommand"
+                                    "$ref": "#/definitions/completionCommand"
                                 },
                                 "lookup": {
-                                    "$ref": "#/definitions/externalCommand"
+                                    "$ref": "#/definitions/namedLookupCommand"
                                 }
                             },
                             "required": [
@@ -719,10 +754,10 @@
                                     "$ref": "#/definitions/skipParameter"
                                 },
                                 "completion": {
-                                    "$ref": "#/definitions/externalCommand"
+                                    "$ref": "#/definitions/completionCommand"
                                 },
                                 "lookup": {
-                                    "$ref": "#/definitions/externalCommand"
+                                    "$ref": "#/definitions/namedLookupCommand"
                                 }
                             },
                             "required": [
