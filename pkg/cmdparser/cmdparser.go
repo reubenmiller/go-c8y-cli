@@ -18,8 +18,9 @@ import (
 )
 
 var (
-	PresetQueryInventory = "query-inventory"
-	PresetGetIdentity    = "get-identity"
+	PresetQueryInventory         = "query-inventory"
+	PresetGetIdentity            = "get-identity"
+	PresetQueryInventoryChildren = "query-inventory-children"
 )
 
 type Command struct {
@@ -220,6 +221,12 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 }
 
 func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) error {
+	existingFlag := cmd.Command.Flags().Lookup(p.Name)
+	if existingFlag != nil {
+		// TODO: Update the existing flag rather than ignoring it
+		// TODO: Should an error be returned?
+		return nil
+	}
 	switch p.Type {
 	case "string", "stringStatic", "json_custom", "directory", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "binaryUploadURL", "inventoryChildType", "subscriptionName", "subscriptionId", "file", "attachment", "fileContents", "certificatefile":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.Description)
@@ -476,6 +483,81 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 			)
 		}
 
+	case PresetQueryInventoryChildren:
+		cmd.Spec.Method = "GET"
+		cmd.Spec.Path = fmt.Sprintf("inventory/managedObjects/{id}/%s", cmd.Spec.Preset.GetOption("type", "childDevices"))
+
+		cmd.Command.Flags().StringSlice("id", []string{""}, "Managed object id. (required) (accepts pipeline)")
+		cmd.Command.Flags().String("query", "", "Additional query filter")
+		cmd.Command.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
+		cmd.Command.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+		cmd.Command.Flags().String("name", "", "Filter by name")
+		cmd.Command.Flags().String("type", "", "Filter by type")
+		cmd.Command.Flags().Bool("agents", false, "Only include agents")
+		cmd.Command.Flags().String("fragmentType", "", "Filter by fragment type")
+		cmd.Command.Flags().String("owner", "", "Filter by owner")
+		cmd.Command.Flags().String("availability", "", "Filter by c8y_Availability.status")
+		cmd.Command.Flags().String("lastMessageDateTo", "", "Filter c8y_Availability.lastMessage to a specific date")
+		cmd.Command.Flags().String("lastMessageDateFrom", "", "Filter c8y_Availability.lastMessage from a specific date")
+		cmd.Command.Flags().String("creationTimeDateTo", "", "Filter creationTime.date to a specific date")
+		cmd.Command.Flags().String("creationTimeDateFrom", "", "Filter creationTime.date from a specific date")
+		// cmd.Command.Flags().StringSlice("group", []string{""}, "Filter by group inclusion")
+		cmd.Command.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")
+		cmd.Command.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
+		cmd.Command.Flags().Bool("withChildrenCount", false, "When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)")
+		cmd.Command.Flags().Bool("withGroups", false, "When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.")
+		cmd.Command.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
+
+		cmd.Path.Options = append(
+			cmd.Path.Options,
+			[]flags.GetOption{
+				// c8yfetcher.WithDeviceByNameFirstMatch(client, args, "id", "id"),
+				flags.WithStringSliceValues("id", "id", "%s"),
+			}...,
+		)
+
+		c8yQueryOptions := []flags.GetOption{
+			flags.WithStaticStringValue("fixed", template.GetOption("value")),
+			flags.WithStringValue("query", "query", "%s"),
+			flags.WithStringValue("name", "name", "(name eq '%s')"),
+			flags.WithStringValue("type", "type", "(type eq '%s')"),
+			flags.WithDefaultBoolValue("agents", "agents", "has(com_cumulocity_model_Agent)"),
+			flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
+			flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
+			flags.WithStringValue("availability", "availability", "(c8y_Availability.status eq '%s')"),
+			flags.WithEncodedRelativeTimestamp("lastMessageDateTo", "lastMessageDateTo", "(c8y_Availability.lastMessage le '%s')"),
+			flags.WithEncodedRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
+			flags.WithEncodedRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "(creationTime.date le '%s')"),
+			flags.WithEncodedRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "(creationTime.date ge '%s')"),
+			// c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "group", "bygroupid(%s)"),
+		}
+
+		// Add extensions to cumulocity query builder
+		for _, p := range template.Extensions {
+			c8yQueryOptions = append(c8yQueryOptions, GetOption(cmd, &p, factory, nil, nil, nil)...)
+		}
+
+		// options
+		queryOptions = append(
+			queryOptions,
+
+			flags.WithBoolValue("skipChildrenNames", "skipChildrenNames", ""),
+			flags.WithBoolValue("withChildren", "withChildren", ""),
+			flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
+			flags.WithBoolValue("withGroups", "withGroups", ""),
+			flags.WithBoolValue("withParents", "withParents", ""),
+
+			flags.WithCumulocityQuery(
+				c8yQueryOptions,
+				template.GetOption("param", "query"),
+			),
+		)
+
+		cmd.Runtime = append(cmd.Runtime,
+			flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
+			flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
+		)
+
 	case PresetQueryInventory:
 		// Cumulocity inventory query
 		cmd.Spec.Method = "GET"
@@ -546,6 +628,17 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 				c8yQueryOptions,
 				template.GetOption("param", "q"),
 			),
+		)
+
+		cmd.Runtime = append(cmd.Runtime,
+			flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
+			flags.WithPipelineAliases("lastMessageDateTo", "time", "creationTime", "lastUpdated"),
+			flags.WithPipelineAliases("lastMessageDateFrom", "time", "creationTime", "lastUpdated"),
+			flags.WithPipelineAliases("creationTimeDateTo", "time", "creationTime", "lastUpdated"),
+			flags.WithPipelineAliases("creationTimeDateFrom", "time", "creationTime", "lastUpdated"),
+			flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
+
+			flags.WithCollectionProperty("managedObjects"),
 		)
 	}
 

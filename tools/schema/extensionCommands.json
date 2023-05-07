@@ -390,6 +390,7 @@
                                 "description": "The preset to inherit the command options from",
                                 "enum": [
                                     "query-inventory",
+                                    "query-inventory-children",
                                     "get-identity"
                                 ]
                             },

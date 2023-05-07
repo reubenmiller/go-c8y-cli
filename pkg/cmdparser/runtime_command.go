@@ -134,6 +134,10 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 					for _, p := range subcmd.Spec.Preset.Extensions {
 						queryOptions = append(queryOptions, GetOption(subcmd, &p, factory, cfg, client, args)...)
 					}
+				case PresetQueryInventoryChildren:
+					for _, p := range subcmd.Spec.Preset.Extensions {
+						queryOptions = append(queryOptions, GetOption(subcmd, &p, factory, cfg, client, args)...)
+					}
 				}
 			}
 
