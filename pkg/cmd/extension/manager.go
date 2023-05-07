@@ -817,13 +817,7 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 		return nil
 	}
 
-	script := fmt.Sprintf(scriptInventoryTmpl, cmdName, "list")
-	if err := writeFile(filepath.Join(commandsDir, "list"), []byte(script), 0755); err != nil {
-		return err
-	}
-	m.newCommand(exe, "-C", name, "add", filepath.Join(commandsName, "list"), "--chmod=+x").Run()
-
-	script = fmt.Sprintf(scriptTmpl, cmdName, "services list")
+	script := fmt.Sprintf(scriptTmpl, cmdName, "services list")
 	if err := writeFile(filepath.Join(subCommandsDir, "list"), []byte(script), 0755); err != nil {
 		return err
 	}

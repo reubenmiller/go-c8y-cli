@@ -128,7 +128,7 @@ commands:
     bodyTemplates:
       # Apply a static template to enforce specific fragments
       - type: jsonnet
-        template: "{com_cumulocity_model_Agent: {}, c8y_IsLinux:{}}"
+        template: "{com_cumulocity_model_Agent:{}, c8y_IsDevice:{}, c8y_IsLinux:{}}"
 
   - name: hidden
     description: Hidden command

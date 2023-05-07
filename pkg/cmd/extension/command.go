@@ -432,7 +432,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					var goBinChecks string
 
 					steps := fmt.Sprintf(
-						"- run 'cd %[1]s; c8y extensions install .; c8y %[2]s list' to see your new extension in action",
+						"- run 'cd %[1]s; c8y extensions install .; c8y %[2]s --help' to see your new extension in action",
 						fullName, extName)
 
 					cs := io.ColorScheme()
