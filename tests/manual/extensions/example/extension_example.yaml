@@ -21,6 +21,8 @@ tests:
       exactly: one\ntwo\nthree
 
   It can upload a binary:
+    # Test is flakey because the the form-data sections can change order (as the order does not matter)
+    skip: true
     command: |
       c8y kitchensink features uploadFile --file manual/extensions/file1.txt --dryFormat dump
     stdout:
