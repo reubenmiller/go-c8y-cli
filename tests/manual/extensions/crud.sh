@@ -35,8 +35,8 @@ c8y extensions list --select name -o csv --filter "name eq $EXTNAME" | grep -E "
 c8y extensions list --select name -o csv --filter "name eq defaults" | grep -E "^defaults$"
 
 # Use command
-OUTPUT=$(c8y customext01 list 2>&1)
-echo "$OUTPUT" | grep "Running custom list command"
+OUTPUT=$(c8y customext01 services list 2>&1)
+echo "$OUTPUT" | grep "Running custom services list command"
 
 # Use template
 c8y inventory create --template "${EXTNAME}::customCommand.jsonnet" --dry

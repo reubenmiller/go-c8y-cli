@@ -9,7 +9,7 @@ config:
     C8Y_SETTINGS_DEFAULTS_DRY_FORMAT: json
 
 tests:
-  It can create/update/delete an extension:
+  It supports subcommands:
     command: c8y kitchensink features
     exit-code: 0
 
