@@ -88,10 +88,10 @@
                 }
             }
         },
-        "namedLookupCommand": {
+        "completionCommand": {
             "type": "object",
-            "title": "Named lookup command",
-            "description": "Command to be executed when the user provides a name. The response should be a newline delimited list of single string values",
+            "title": "Completion command",
+            "description": "Command to be executed when the user tries to tab complete a value. Any references to %s will be replaced by the current value entered in by the user",
             "properties": {
                 "type": {
                     "type": "string",
@@ -114,10 +114,10 @@
                 "command"
             ]
         },
-        "completionCommand": {
+        "namedLookupCommand": {
             "type": "object",
-            "title": "Completion command",
-            "description": "Command to be executed when the user tries to tab complete a value. Any references to %s will be replaced by the current value entered in by the user",
+            "title": "Named lookup command",
+            "description": "Command to be executed when the user provides a name. The response should be a newline delimited list of single string values",
             "properties": {
                 "type": {
                     "type": "string",
