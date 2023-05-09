@@ -7,6 +7,79 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import CodeExample from '@site/src/components/CodeExample';
 
+## Pre-requisite
+
+:rotating_light: Warning :rotating_light:
+
+This extension relies on an up-coming go-c8y-cli [extensions](https://github.com/reubenmiller/go-c8y-cli/blob/feat/extensions-manager/docs/go-c8y-cli/docs/concepts/extensions.md) feature which has not been officially released yet, so in order to try it out you will have to install the pre-release version via the following instructions.
+
+This section will be removed when `extensions` are included in the official release.
+
+:::caution
+Building `go-c8y-cli` requires go version ≥ 1.20.
+:::
+
+<CodeExample transform="false">
+
+```bash
+go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@9df45aed7f5f09f2a0f5781f0ce30c64bd92e630
+
+# Add the go bin folder to your path variable (ideally add this to your shell profile (.zshrc for zsh or .bashrc for bash)
+export PATH="$(go env GOPATH)/bin:$PATH"
+```
+
+```powershell
+go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@9df45aed7f5f09f2a0f5781f0ce30c64bd92e630
+
+# Add the go bin folder to the path variable and set a powershell alias to it
+if ($IsWindows) {
+    $env:PATH = "$(go env GOPATH)/bin" + ";" + $env:PATH
+    Set-Alias c8y "$(go env GOPATH)/bin/c8y.exe"
+} else {
+    $env:PATH = "$(go env GOPATH)/bin" + ":" + $env:PATH
+    Set-Alias c8y "$(go env GOPATH)/bin/c8y"
+}
+```
+
+```powershell
+go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@9df45aed7f5f09f2a0f5781f0ce30c64bd92e630
+
+# Add the go bin folder to the path variable and set a powershell alias to it
+if ($IsWindows) {
+    $env:PATH = "$(go env GOPATH)/bin" + ";" + $env:PATH
+    Set-Alias c8y "$(go env GOPATH)/bin/c8y.exe"
+} else {
+    $env:PATH = "$(go env GOPATH)/bin" + ":" + $env:PATH
+    Set-Alias c8y "$(go env GOPATH)/bin/c8y"
+}
+```
+
+</CodeExample>
+
+
+### Post-installation verification
+
+Once you have installed the pre-release version of **go-c8y-cli**, you can confirm that you have the correct version by running the following command:
+
+
+<CodeExample>
+
+```bash
+c8y version
+```
+
+</CodeExample>
+
+The version suffix should be the first part of the git commit id from the `go install` command, for example:
+
+```sh title="Output"
+| branch         | version                                    |
+|----------------|--------------------------------------------|
+| (unknown)      | v2.22.5-0.20230508083235-9df45aed7f5f      |
+```
+
+---
+
 ## Preface
 
 Extensions support an api which is not so dissimilar to the [OpenAPI Specification](https://swagger.io/specification/). It was by design that the command spec should not use OpenAPI spec as there is usually a useability layer on top of the API to make the command more user-friendly.
