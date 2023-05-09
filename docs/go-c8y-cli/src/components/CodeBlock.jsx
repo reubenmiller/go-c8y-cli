@@ -152,7 +152,8 @@ function transformToPowerShell(code = '') {
 
 
 export default ({ children, className = 'bash', live = false, render = false, transform = false }) => {
-    const { isDarkTheme } = useColorMode();
+    const { colorMode } = useColorMode();
+    const isDarkTheme = colorMode === "dark";
     if (live) {
         return (
             <div style={{ marginTop: '40px' }}>
