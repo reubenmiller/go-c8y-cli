@@ -239,7 +239,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		return nil
 	}
 	switch p.Type {
-	case "string", "stringStatic", "json_custom", "directory", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "binaryUploadURL", "inventoryChildType", "subscriptionName", "subscriptionId", "file", "attachment", "fileContents", "certificatefile":
+	case "string", "stringStatic", "json_custom", "directory", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "binaryUploadURL", "inventoryChildType", "subscriptionName", "subscriptionId", "file", "attachment", "fileContents", "fileContentsAsString", "certificatefile":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.Description)
 
 	case "json":
@@ -348,6 +348,8 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 
 	case "fileContents":
 		opts = append(opts, flags.WithFilePath(p.Name, targetProp, p.Value))
+	case "fileContentsAsString":
+		opts = append(opts, flags.WithFileContentsAsString(p.Name, targetProp, p.Value))
 	case "boolean":
 		opts = append(opts, flags.WithBoolValue(p.Name, targetProp, p.Value))
 	case "booleanDefault":
