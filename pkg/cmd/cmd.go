@@ -99,20 +99,22 @@ func MainRun() {
 			extAliases, aliasErr := ext.Aliases()
 			if aliasErr == nil {
 				for _, iAlias := range extAliases {
+					aliasName := iAlias.GetName()
+					if strings.HasPrefix(aliasName, toComplete) {
+						var s string
+						desc := iAlias.GetDescription()
+						if len(desc) > 80 {
+							desc = desc[:80] + "..."
+						}
+						if iAlias.IsShell() {
+							s = fmt.Sprintf("%s\tExtension shell alias %s", aliasName, desc)
+						} else {
+							s = fmt.Sprintf("%s\tExtension alias to %s", aliasName, desc)
+						}
 
-					var s string
-					desc := iAlias.GetDescription()
-					if len(desc) > 80 {
-						desc = desc[:80] + "..."
+						s += fmt.Sprintf(" |%s", ext.Name())
+						results = append(results, s)
 					}
-					if iAlias.IsShell() {
-						s = fmt.Sprintf("%s\tExtension shell alias %s", iAlias.GetName(), desc)
-					} else {
-						s = fmt.Sprintf("%s\tExtension alias to %s", iAlias.GetName(), desc)
-					}
-
-					s += fmt.Sprintf(" |%s", ext.Name())
-					results = append(results, s)
 				}
 			}
 		}
