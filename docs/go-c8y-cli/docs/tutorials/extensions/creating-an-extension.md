@@ -174,7 +174,15 @@ Run the following steps to remove the unwanted items from our new extension:
   <CodeExample>
 
   ```bash
-  rm api/*
+  rm -f api/*
+  ```
+
+  ```powershell
+  Remove-Item api/*
+  ```
+
+  ```powershell
+  Remove-Item api/*
   ```
 
   </CodeExample>
@@ -184,7 +192,15 @@ Run the following steps to remove the unwanted items from our new extension:
   <CodeExample>
 
   ```bash
-  rm commands/*
+  rm -rf commands/
+  ```
+
+  ```powershell
+  Remove-Item commands -Recurse
+  ```
+
+  ```powershell
+  Remove-Item commands -Recurse
   ```
 
   </CodeExample>
