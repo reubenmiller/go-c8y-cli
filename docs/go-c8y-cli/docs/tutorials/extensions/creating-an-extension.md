@@ -184,7 +184,7 @@ Run the following steps to remove the unwanted items from our new extension:
   <CodeExample>
 
   ```bash
-  rm api/*
+  rm commands/*
   ```
 
   </CodeExample>
@@ -230,8 +230,6 @@ Though a command groups without any commands does not make much sense, so let's 
 
 ### Step 4: Add the get command
 
-The `commands` section is an array containing all of the commands. You can add any
-
 In this step, we'll be adding a single command called `get`. It is responsible for getting a single asset from our microservice.
 
 Add the following `commands` section to your `api/assets.yaml` file.
@@ -251,6 +249,12 @@ commands:
         type: string
         description: Asset
 ```
+
+:::note
+The `commands` section is an array containing all of the commands. There can be any number of commands defined per group, but a good rule of thumb is to keep it under 10, as large number of commands is generally a sign that you haven't done enough thought on how to group your commands.
+:::
+
+The table below describes what each of the properties represents.
 
 |Name|Description|
 |----|-----------|
