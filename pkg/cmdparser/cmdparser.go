@@ -172,51 +172,51 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 		return completion.WithMicroservice(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "microserviceinstance":
 		return completion.WithMicroserviceInstance(p.Name, "id", func() (*c8y.Client, error) { return factory.Client() })
-	case "[]role", "[]roleself":
+	case "role[]", "roleself[]":
 		return completion.WithUserRole(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]devicerequest":
+	case "devicerequest[]":
 		return completion.WithDeviceRegistrationRequest(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]user", "[]userself":
+	case "user[]", "userself[]":
 		return completion.WithUser(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]usergroup":
+	case "usergroup[]":
 		return completion.WithUserGroup(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]devicegroup":
+	case "devicegroup[]":
 		return completion.WithDeviceGroup(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]smartgroup":
+	case "smartgroup[]":
 		return completion.WithSmartGroup(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "[]tenant":
 		return completion.WithTenantID(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "tenantname":
 		return completion.WithTenantID(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]device":
+	case "device[]":
 		return completion.WithDevice(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]agent":
+	case "agent[]":
 		return completion.WithAgent(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]software", "softwareName":
+	case "software[]", "softwareName":
 		return completion.WithSoftware(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]softwareversion", "softwareversionName":
+	case "softwareversion[]", "softwareversionName":
 		if len(p.DependsOn) > 0 {
 			return completion.WithSoftwareVersion(p.Name, p.DependsOn[0], func() (*c8y.Client, error) { return factory.Client() })
 		}
-	case "[]firmware(name)":
+	case "firmware[]":
 		return completion.WithFirmware(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]firmwareversion", "firmwareVersionName":
+	case "firmwareversion[]", "firmwareVersionName":
 		if len(p.DependsOn) > 0 {
 			return completion.WithFirmwareVersion(p.Name, p.DependsOn[0], func() (*c8y.Client, error) { return factory.Client() })
 		}
-	case "[]firmwarepatch", "firmwarepatchName":
+	case "firmwarepatch[]", "firmwarepatchName":
 		if len(p.DependsOn) > 0 {
 			return completion.WithFirmwarePatch(p.Name, p.DependsOn[0], func() (*c8y.Client, error) { return factory.Client() })
 		}
-	case "[]configuration":
+	case "configuration[]":
 		return completion.WithConfiguration(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]deviceprofile":
+	case "deviceprofile[]":
 		return completion.WithDeviceProfile(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]deviceservice":
+	case "deviceservice[]":
 		if len(p.DependsOn) > 0 {
 			return completion.WithDeviceService(p.Name, p.DependsOn[0], func() (*c8y.Client, error) { return factory.Client() })
 		}
-	case "[]certificate":
+	case "certificate[]":
 		return completion.WithDeviceCertificate(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "subscriptionName":
 		return completion.WithNotification2SubscriptionName(p.Name, func() (*c8y.Client, error) { return factory.Client() })
@@ -253,26 +253,26 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "id", "source.id", "managedObject.id", "deviceId")
 
-	case "[]string", "[]stringcsv", "[]devicerequest", "[]software", "[]softwareversion", "[]firmware", "[]firmwareversion", "[]firmwarepatch", "[]configuration", "[]deviceprofile", "[]deviceservice", "[]id", "[]user", "[]userself", "[]certificate":
+	case "string[]", "stringcsv[]", "devicerequest[]", "software[]", "softwareversion[]", "firmware[]", "firmwareversion[]", "firmwarepatch[]", "configuration[]", "deviceprofile[]", "deviceservice[]", "id[]", "user[]", "userself[]", "certificate[]":
 		cmd.Command.Flags().StringSliceP(p.Name, p.ShortName, []string{p.Default}, p.GetDescription())
 
-	case "[]device", "[]agent":
+	case "device[]", "agent[]":
 		cmd.Command.Flags().StringSliceP(p.Name, p.ShortName, []string{p.Default}, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "deviceId", "source.id", "managedObject.id", "id")
 
-	case "[]devicegroup":
+	case "devicegroup[]":
 		cmd.Command.Flags().StringSliceP(p.Name, p.ShortName, []string{p.Default}, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "source.id", "managedObject.id", "id")
 
-	case "[]smartgroup":
+	case "smartgroup[]":
 		cmd.Command.Flags().StringSliceP(p.Name, p.ShortName, []string{p.Default}, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "managedObject.id")
 
-	case "[]roleself":
+	case "roleself[]":
 		cmd.Command.Flags().StringSliceP(p.Name, p.ShortName, []string{p.Default}, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "self", "id")
 
-	case "[]role", "[]usergroup":
+	case "role[]", "usergroup[]":
 		cmd.Command.Flags().StringSliceP(p.Name, p.ShortName, []string{p.Default}, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "id")
 
@@ -366,9 +366,9 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "date":
 		opts = append(opts, flags.WithRelativeDate(false, p.Name, targetProp, p.Format))
 
-	case "[]string":
+	case "string[]":
 		opts = append(opts, flags.WithStringSliceValues(p.Name, targetProp, p.Value))
-	case "[]stringcsv":
+	case "stringcsv[]":
 		opts = append(opts, flags.WithStringSliceCSV(p.Name, targetProp, p.Value))
 
 	case "inventoryChildType":
@@ -394,13 +394,13 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "tenant":
 		opts = append(opts, flags.WithStringDefaultValue(factory.GetTenant(), p.Name, targetProp, p.Format))
 
-	case "[]id", "[]devicerequest":
+	case "id[]", "devicerequest[]":
 		opts = append(opts, c8yfetcher.WithIDSlice(args, p.Name, targetProp, p.Format))
 
 	case "application":
 		opts = append(opts, c8yfetcher.WithApplicationByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
-	case "[]software":
+	case "software[]":
 		opts = append(opts, c8yfetcher.WithSoftwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "softwareDetails":
@@ -409,57 +409,57 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "configurationDetails":
 		opts = append(opts, c8yfetcher.WithConfigurationFileData(factory, "configuration", "configurationType", "url", args, "", targetProp, p.Format))
 
-	case "[]softwareversion":
+	case "softwareversion[]":
 		opts = append(opts, c8yfetcher.WithSoftwareVersionByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
-	case "[]deviceservice":
+	case "deviceservice[]":
 		opts = append(opts, c8yfetcher.WithDeviceServiceByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "certificatefile":
 		opts = append(opts, flags.WithCertificateFile(p.Name, targetProp))
-	case "[]certificate":
+	case "certificate[]":
 		opts = append(opts, c8yfetcher.WithCertificateByNameFirstMatch(factory, args, p.Name, targetProp))
 
-	case "[]firmware":
+	case "firmware[]":
 		opts = append(opts, c8yfetcher.WithFirmwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
-	case "[]firmwareversion":
+	case "firmwareversion[]":
 		opts = append(opts, c8yfetcher.WithFirmwareVersionByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 	case "firmwareDetails":
 		opts = append(opts, c8yfetcher.WithFirmwareVersionData(factory, "firmware", "version", "url", args, "", targetProp))
-	case "[]firmwarepatch":
+	case "firmwarepatch[]":
 		opts = append(opts, c8yfetcher.WithFirmwarePatchByNameFirstMatch(factory, args, p.Name, targetProp))
 
-	case "[]configuration":
+	case "configuration[]":
 		opts = append(opts, c8yfetcher.WithConfigurationByNameFirstMatch(factory, args, p.Name, targetProp))
 
-	case "[]deviceprofile":
+	case "deviceprofile[]":
 		opts = append(opts, c8yfetcher.WithDeviceProfileByNameFirstMatch(factory, args, p.Name, targetProp))
 
-	case "[]device":
+	case "device[]":
 		opts = append(opts, c8yfetcher.WithDeviceByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
-	case "[]agent":
+	case "agent[]":
 		opts = append(opts, c8yfetcher.WithAgentByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
-	case "[]devicegroup":
+	case "devicegroup[]":
 		opts = append(opts, c8yfetcher.WithDeviceGroupByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
-	case "[]smartgroup":
+	case "smartgroup[]":
 		opts = append(opts, c8yfetcher.WithSmartGroupByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
-	case "[]user":
+	case "user[]":
 		opts = append(opts, c8yfetcher.WithUserByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
-	case "[]userself":
+	case "userself[]":
 		opts = append(opts, c8yfetcher.WithUserSelfByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
-	case "[]roleself":
+	case "roleself[]":
 		opts = append(opts, c8yfetcher.WithRoleSelfByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
-	case "[]role":
+	case "role[]":
 		opts = append(opts, c8yfetcher.WithRoleByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
-	case "[]usergroup":
+	case "usergroup[]":
 		opts = append(opts, c8yfetcher.WithUserGroupByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 	}
 

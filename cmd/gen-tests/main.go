@@ -253,7 +253,7 @@ func buildAssertions(parentCmd string, endpoint *models.Command, exampleIdx int)
 					assertions.Contains = append(assertions.Contains, fmt.Sprintf("%s=", parameter.GetTargetProperty()))
 				} else {
 					switch parameter.Type {
-					case "[]string":
+					case "string[]":
 						for _, v := range strings.Split(value, ",") {
 							assertions.Contains = append(assertions.Contains, fmt.Sprintf("%s=%s", parameter.GetTargetProperty(), v))
 						}

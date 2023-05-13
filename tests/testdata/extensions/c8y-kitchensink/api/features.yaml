@@ -110,11 +110,11 @@ commands:
         description: datetime
 
       - name: stringArray
-        type: "[]string"
+        type: string[]
         description: stringArray
 
       - name: stringcsv
-        type: "[]stringcsv"
+        type: stringcsv[]
         description: stringcsv
 
   - name: booleanDefault
@@ -148,7 +148,7 @@ commands:
     method: POST
     body:
       - name: id
-        type: "[]id"
+        type: id[]
         description: id
 
   - name: lookup
@@ -165,19 +165,19 @@ commands:
         description: applicationname
 
       - name: devicegroup
-        type: "[]devicegroup"
+        type: devicegroup[]
         description: devicegroup
       
       - name: agent
-        type: "[]agent"
+        type: agent[]
         description: agent
 
       - name: device
-        type: "[]device"
+        type: device[]
         description: device
 
       - name: deviceprofile
-        type: "[]deviceprofile"
+        type: deviceprofile[]
         description: deviceprofile
 
       - name: tenantname
@@ -185,11 +185,11 @@ commands:
         description: tenantname
       
       - name: role
-        type: "[]role"
+        type: role[]
         description: role
 
       - name: roleself
-        type: "[]roleself"
+        type: roleself[]
         description: roleself
 
       - name: source
@@ -242,3 +242,42 @@ commands:
             - pwsh
             - -c
             - c8y devices list -p 100 --query "has(enercon_Scada) and type eq 'WEC*'" --select type -o csv | sort | uniq
+
+  - name: applications
+    description: application lookups
+    path: inventory/managedObjects
+    method: POST
+    body:
+      - name: id
+        type: microservice
+        description: Microservice
+
+      - name: instance
+        type: microserviceinstance
+        description: Microservice instance
+
+  - name: devicerequests
+    description: application lookups
+    path: inventory/managedObjects
+    method: POST
+    body:
+      - name: id
+        type: devicerequest[]
+        description: device request
+
+  - name: user
+    description: user lookups
+    path: inventory/managedObjects
+    method: POST
+    body:
+      - name: user
+        type: user[]
+        description: user
+
+      - name: userself
+        type: userself[]
+        description: User self
+
+      - name: usergroup
+        type: usergroup[]
+        description: Usergroup
