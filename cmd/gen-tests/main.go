@@ -504,7 +504,7 @@ func main() {
 
 	// Ignore skipped specs
 	if gen.Spec.Group.Skip {
-		loggerS.Fatalf("Specification is marked as skipped. Ignoring. file=%s", os.Args[2])
+		loggerS.Warnf("Specification is marked as skipped. Ignoring. file=%s", os.Args[2])
 		os.Exit(0)
 	}
 
