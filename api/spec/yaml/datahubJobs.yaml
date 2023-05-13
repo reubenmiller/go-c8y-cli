@@ -51,7 +51,7 @@ commands:
         pipeline: true
 
       - name: context
-        type: '[]string'
+        type: string[]
         required: false
         description: The context in which the query is executed
 

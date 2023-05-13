@@ -92,7 +92,7 @@
         },
         {
           "name": "deviceProperties",
-          "type": "[]string",
+          "type": "string[]",
           "description": "List of device permissions"
         },
         {
@@ -142,7 +142,7 @@
         },
         {
           "name": "id",
-          "type": "[]usergroup",
+          "type": "usergroup[]",
           "pipeline": true,
           "description": "Group id"
         }
@@ -240,7 +240,7 @@
         },
         {
           "name": "id",
-          "type": "[]usergroup",
+          "type": "usergroup[]",
           "required": true,
           "pipeline": true,
           "description": "Group id"
@@ -308,7 +308,7 @@
         },
         {
           "name": "id",
-          "type": "[]usergroup",
+          "type": "usergroup[]",
           "required": true,
           "pipeline": true,
           "description": "Group id"

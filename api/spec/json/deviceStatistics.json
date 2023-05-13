@@ -95,7 +95,7 @@
         {
           "name": "device",
           "property": "deviceId",
-          "type": "[]device",
+          "type": "device[]",
           "description": "The ID of the device to search for.",
           "pipeline": true,
           "required": false

@@ -85,7 +85,7 @@
             },
             {
               "name": "firmware",
-              "type": "[]firmware",
+              "type": "firmware[]",
               "description": "Firmware package id or name",
               "format": "bygroupid(%s)",
               "required": true,
@@ -190,7 +190,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]firmwareversion",
+          "type": "firmwareversion[]",
           "dependsOn": [
             "firmware"
           ],
@@ -200,7 +200,7 @@
         },
         {
           "name": "firmware",
-          "type": "[]firmware",
+          "type": "firmware[]",
           "required": false,
           "description": "Firmware package id or name (used to help completion be more accurate)"
         }
@@ -281,7 +281,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]firmwareversion",
+          "type": "firmwareversion[]",
           "dependsOn": [
             "firmware"
           ],
@@ -291,7 +291,7 @@
         },
         {
           "name": "firmware",
-          "type": "[]firmware",
+          "type": "firmware[]",
           "required": false,
           "description": "Firmware package id or name (used to help completion be more accurate)"
         }
@@ -346,7 +346,7 @@
       "pathParameters": [
         {
           "name": "url",
-          "type": "[]string",
+          "type": "string[]",
           "required": true,
           "pipeline": true,
           "description": "Firmware url",
@@ -390,7 +390,7 @@
       "body": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "deviceId",
           "description": "Device or agent where the firmware should be installed",
           "pipeline": true

@@ -208,7 +208,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]software'
+        type: software[]
         pipeline: true
         required: true
         description: Software package (managedObject) id
@@ -286,7 +286,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]software'
+        type: software[]
         pipeline: true
         description: Software package (managedObject) id
         required: true
@@ -324,7 +324,7 @@ commands:
           command: c8y software delete --id 12345 --forceCascade=false
     pathParameters:
       - name: id
-        type: '[]software'
+        type: software[]
         pipeline: true
         required: true
         description: Software Package (managedObject) id

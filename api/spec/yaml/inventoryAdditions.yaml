@@ -50,7 +50,7 @@ commands:
           command: c8y inventory additions list --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         pipeline: true
         pipelineAliases:
           - "deviceId"
@@ -115,7 +115,7 @@ commands:
             command: c8y inventory additions assign --id 12345 --child 6789
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         property: id
         required: true
         description: Managed object id where the child addition will be added to
@@ -162,7 +162,7 @@ commands:
           command: c8y inventory additions unassign --id 12345 --child 22553
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         description: Managed object id
 
@@ -209,7 +209,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         property: id
         required: true
         pipeline: true
@@ -257,7 +257,7 @@ commands:
             command: c8y inventory additions get --id 12345 --child 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         pipeline: true
         pipelineAliases:
           - "deviceId"
@@ -268,6 +268,6 @@ commands:
         description: Managed object id
 
       - name: child
-        type: '[]id'
+        type: id[]
         required: true
         description: Child managed object id

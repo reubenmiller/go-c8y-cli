@@ -163,7 +163,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]deviceprofile'
+        type: deviceprofile[]
         pipeline: true
         required: true
         description: DeviceProfile (managedObject) id
@@ -236,7 +236,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]deviceprofile'
+        type: deviceprofile[]
         pipeline: true
         description: Device profile (managedObject) id
         required: true
@@ -271,7 +271,7 @@ commands:
           command: c8y deviceprofiles delete --id 12345
     pathParameters:
       - name: id
-        type: '[]deviceprofile'
+        type: deviceprofile[]
         pipeline: true
         required: true
         description: DeviceProfile Package (managedObject) id

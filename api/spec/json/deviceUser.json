@@ -60,7 +60,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "Device ID"
@@ -116,7 +116,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "Device ID"

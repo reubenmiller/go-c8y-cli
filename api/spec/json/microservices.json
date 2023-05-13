@@ -78,7 +78,7 @@
         },
         {
           "name": "user",
-          "type": "[]user",
+          "type": "user[]",
           "description": "The ID of a user that has access to the applications.",
           "pipeline": true
         }

@@ -69,7 +69,7 @@
       "queryParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "property": "source",
           "description": "Device ID"
@@ -172,7 +172,7 @@
       "queryParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "source",
           "pipeline": true,
           "description": "Device ID"
@@ -242,7 +242,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Event id"
@@ -297,7 +297,7 @@
       "body": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "required": false,
           "pipeline": true,
           "property": "source.id",
@@ -403,7 +403,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Event id"
@@ -451,7 +451,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Event id"
@@ -502,7 +502,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Event id"
@@ -551,7 +551,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Event id"
@@ -608,7 +608,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Event id"
@@ -669,7 +669,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Event id"

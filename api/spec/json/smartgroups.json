@@ -59,7 +59,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]smartgroup",
+          "type": "smartgroup[]",
           "pipeline": true,
           "required": true,
           "description": "Smart group ID"
@@ -147,7 +147,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]smartgroup",
+          "type": "smartgroup[]",
           "pipeline": true,
           "required": true,
           "description": "Smart group ID"
@@ -213,7 +213,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]smartgroup",
+          "type": "smartgroup[]",
           "pipeline": true,
           "required": true,
           "description": "Smart group ID",

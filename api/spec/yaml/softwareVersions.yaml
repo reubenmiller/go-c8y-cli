@@ -62,7 +62,7 @@ commands:
             default: creationTime.date desc,creationTime desc
           
           - name: software
-            type: '[]software'
+            type: software[]
             description: "Software package id or name"
             format: "bygroupid(%s)"
             pipeline: true
@@ -143,7 +143,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]softwareversion'
+        type: softwareversion[]
         dependsOn:
           - software
         pipeline: true
@@ -152,7 +152,7 @@ commands:
 
       # Dummy value (to limit versions to the given package)
       - name: software
-        type: '[]software'
+        type: software[]
         required: false
         description: Software package id (used to help completion be more accurate)
 
@@ -219,7 +219,7 @@ commands:
           command: c8y software versions delete --id 12345 --forceCascade=false
     pathParameters:
       - name: id
-        type: '[]softwareversion'
+        type: softwareversion[]
         dependsOn:
           - software
         pipeline: true
@@ -227,7 +227,7 @@ commands:
         description: Software Package version id or name
       # Dummy value (to limit versions to the given package)
       - name: software
-        type: '[]software'
+        type: software[]
         required: false
         description: Software package id (used to help completion be more accurate)
 
@@ -266,7 +266,7 @@ commands:
 
     body:
       - name: device
-        type: '[]device'
+        type: device[]
         property: deviceId
         description: Device or agent where the software should be installed
         pipeline: true
@@ -345,7 +345,7 @@ commands:
 
     body:
       - name: device
-        type: '[]device'
+        type: device[]
         property: deviceId
         description: Device or agent where the software should be installed
         pipeline: true

@@ -81,7 +81,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]certificate",
+          "type": "certificate[]",
           "pipeline": true,
           "required": false,
           "description": "Certificate fingerprint or name",
@@ -143,7 +143,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]certificate",
+          "type": "certificate[]",
           "pipeline": true,
           "required": false,
           "description": "Certificate fingerprint or name",
@@ -226,7 +226,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]certificate",
+          "type": "certificate[]",
           "pipeline": true,
           "required": false,
           "description": "Certificate fingerprint or name",

@@ -85,7 +85,7 @@ commands:
             value: not(type eq 'c8y_DeviceGroup')
 
           - name: group
-            type: '[]devicegroup'
+            type: devicegroup[]
             description: Filter by group inclusion
             format: bygroupid(%s)
 
@@ -142,7 +142,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]devicegroup'
+        type: devicegroup[]
         pipeline: true
         required: true
         description: Device group ID
@@ -207,7 +207,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]devicegroup'
+        type: devicegroup[]
         pipeline: true
         required: true
         description: Device group ID
@@ -250,7 +250,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]devicegroup'
+        type: devicegroup[]
         pipeline: true
         required: true
         description: Device group ID
@@ -357,13 +357,13 @@ commands:
 
     pathParameters:
       - name: group
-        type: '[]devicegroup'
+        type: devicegroup[]
         property: id
         required: true
         description: Group
     body:
       - name: newChildDevice
-        type: '[]device'
+        type: device[]
         required: true
         pipeline: true
         property: 'managedObject.id'
@@ -419,13 +419,13 @@ commands:
 
     pathParameters:
       - name: group
-        type: '[]devicegroup'
+        type: devicegroup[]
         property: id
         required: true
         description: Group
     body:
       - name: newChildGroup
-        type: '[]devicegroup'
+        type: devicegroup[]
         pipeline: true
         required: true
         property: 'managedObject.id'
@@ -463,12 +463,12 @@ commands:
           command: c8y devicegroups unassignDevice --group 12345 --childDevice 22553
     pathParameters:
       - name: group
-        type: '[]devicegroup'
+        type: devicegroup[]
         required: true
         description: Asset id
 
       - name: childDevice
-        type: '[]device'
+        type: device[]
         property: reference
         pipeline: true
         required: true
@@ -505,12 +505,12 @@ commands:
           command: c8y devicegroups unassignGroup --id 12345 --child 22553
     pathParameters:
       - name: id
-        type: '[]devicegroup'
+        type: devicegroup[]
         required: true
         description: Device group
 
       - name: child
-        type: '[]devicegroup'
+        type: devicegroup[]
         property: child
         required: true
         pipeline: true
@@ -559,7 +559,7 @@ commands:
           command: c8y devicegroups listAssets --id 12345
     pathParameters:
       - name: id
-        type: '[]devicegroup'
+        type: devicegroup[]
         pipeline: true
         required: true
         description: Device Group.

@@ -118,7 +118,7 @@ commands:
           command: c8y retentionrules get --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Retention rule id
@@ -149,7 +149,7 @@ commands:
           command: c8y retentionrules delete --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Retention rule id
@@ -185,7 +185,7 @@ commands:
           command: c8y retentionrules update --id 12345 --maximumAge 90
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Retention rule id

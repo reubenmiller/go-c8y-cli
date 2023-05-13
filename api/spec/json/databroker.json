@@ -64,7 +64,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Data broker connector id"
@@ -100,7 +100,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Data broker connector id"

@@ -62,7 +62,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Role id. Note: lookup by name is not yet supported"
@@ -281,7 +281,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]user",
+          "type": "user[]",
           "required": true,
           "pipeline": true,
           "description": "User id"
@@ -381,7 +381,7 @@
         },
         {
           "name": "id",
-          "type": "[]user",
+          "type": "user[]",
           "required": true,
           "pipeline": true,
           "description": "User id"
@@ -427,7 +427,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]user",
+          "type": "user[]",
           "required": true,
           "pipeline": true,
           "description": "User id"
@@ -544,7 +544,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]user",
+          "type": "user[]",
           "required": true,
           "pipeline": true,
           "description": "User id"
@@ -613,7 +613,7 @@
         },
         {
           "name": "id",
-          "type": "[]user",
+          "type": "user[]",
           "required": true,
           "pipeline": true,
           "description": "User id"
@@ -653,7 +653,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]user",
+          "type": "user[]",
           "required": true,
           "pipeline": true,
           "description": "User"

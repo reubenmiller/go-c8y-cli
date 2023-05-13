@@ -204,7 +204,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]firmware'
+        type: firmware[]
         description: Firmware package (managedObject) id
         required: true
         pipeline: true
@@ -293,7 +293,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]firmware'
+        type: firmware[]
         description: Firmware package (managedObject) id
         required: true
         pipeline: true
@@ -339,7 +339,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]firmware'
+        type: firmware[]
         pipeline: true
         required: true
         pipelineAliases:

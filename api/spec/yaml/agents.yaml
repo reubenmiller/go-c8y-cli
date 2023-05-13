@@ -126,7 +126,7 @@ commands:
             format: (creationTime.date ge '%s')
 
           - name: group
-            type: '[]devicegroup'
+            type: devicegroup[]
             description: Filter by group inclusion
             format: bygroupid(%s)
 
@@ -181,7 +181,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]agent'
+        type: agent[]
         pipeline: true
         required: true
         description: Agent ID
@@ -245,7 +245,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]agent'
+        type: agent[]
         pipeline: true
         required: true
         description: Agent ID
@@ -309,7 +309,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]agent'
+        type: agent[]
         pipeline: true
         required: true
         description: Agent ID

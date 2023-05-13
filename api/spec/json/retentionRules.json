@@ -161,7 +161,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Retention rule id"
@@ -205,7 +205,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Retention rule id"
@@ -256,7 +256,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Retention rule id"

@@ -64,7 +64,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "pipeline": true,
           "pipelineAliases": [
             "deviceId",
@@ -154,7 +154,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "property": "id",
           "required": true,
           "description": "Managed object id where the child addition will be added to",
@@ -219,7 +219,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "description": "Managed object id"
         },
@@ -284,7 +284,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "property": "id",
           "required": true,
           "pipeline": true,
@@ -352,7 +352,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "pipeline": true,
           "pipelineAliases": [
             "deviceId",
@@ -365,7 +365,7 @@
         },
         {
           "name": "child",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "description": "Child managed object id"
         }

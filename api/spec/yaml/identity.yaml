@@ -46,7 +46,7 @@ commands:
 
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         required: true
         pipeline: true
         description: Device id
@@ -186,7 +186,7 @@ commands:
 
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         required: true
         pipeline: true
         description: The ManagedObject linked to the external ID.

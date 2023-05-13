@@ -67,7 +67,7 @@ commands:
             default: creationTime.date desc
           
           - name: firmware
-            type: '[]firmware'
+            type: firmware[]
             description: "Firmware package id or name"
             format: "bygroupid(%s)"
             required: true
@@ -149,7 +149,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]firmwarepatch'
+        type: firmwarepatch[]
         dependsOn:
           - firmware
         pipeline: true
@@ -158,7 +158,7 @@ commands:
 
       # Dummy value (to limit versions to the given package)
       - name: firmware
-        type: '[]firmware'
+        type: firmware[]
         required: false
         description: Firmware package id or name (used to help completion be more accurate)
     
@@ -227,7 +227,7 @@ commands:
           command: c8y firmware patches delete --id 12345 --forceCascade=false
     pathParameters:
       - name: id
-        type: '[]firmwarepatch'
+        type: firmwarepatch[]
         dependsOn:
           - firmware
         pipeline: true
@@ -236,7 +236,7 @@ commands:
 
       # Dummy value (to limit versions to the given package)
       - name: firmware
-        type: '[]firmware'
+        type: firmware[]
         required: false
         description: Firmware id or name (used to help completion be more accurate)
 

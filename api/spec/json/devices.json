@@ -173,7 +173,7 @@
             },
             {
               "name": "group",
-              "type": "[]devicegroup",
+              "type": "devicegroup[]",
               "description": "Filter by group inclusion",
               "format": "bygroupid(%s)"
             }
@@ -250,7 +250,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "Device ID"
@@ -353,7 +353,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "Device ID"
@@ -437,7 +437,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "Device ID",
@@ -594,7 +594,7 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "Device ID"
@@ -648,7 +648,7 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "Device ID"
@@ -692,7 +692,7 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "required": true,
           "description": "Device."
         }
@@ -700,7 +700,7 @@
       "body": [
         {
           "name": "newChild",
-          "type": "[]device",
+          "type": "device[]",
           "required": true,
           "pipeline": true,
           "property": "managedObject.id",
@@ -751,13 +751,13 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "required": true,
           "description": "ManagedObject id"
         },
         {
           "name": "childDevice",
-          "type": "[]device",
+          "type": "device[]",
           "required": true,
           "pipeline": true,
           "description": "Child device reference"
@@ -822,7 +822,7 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "Device."
@@ -877,14 +877,14 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "ManagedObject id"
         },
         {
           "name": "reference",
-          "type": "[]device",
+          "type": "device[]",
           "required": true,
           "description": "Device reference id"
         }
@@ -950,7 +950,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "Device."

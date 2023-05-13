@@ -46,7 +46,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "pipeline": true,
           "pipelineAliases": [
             "deviceId",
@@ -137,7 +137,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "property": "id",
           "required": true,
           "description": "Managed object id where the child will be assigned to",
@@ -206,7 +206,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "required": true,
           "description": "Managed object id"
         },
@@ -274,7 +274,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "property": "id",
           "required": true,
           "pipeline": true,
@@ -343,7 +343,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "pipeline": true,
           "pipelineAliases": [
             "deviceId",
@@ -367,7 +367,7 @@
         },
         {
           "name": "child",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "required": true,
           "description": "Child managed object id"
         }

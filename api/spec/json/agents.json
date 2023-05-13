@@ -155,7 +155,7 @@
             },
             {
               "name": "group",
-              "type": "[]devicegroup",
+              "type": "devicegroup[]",
               "description": "Filter by group inclusion",
               "format": "bygroupid(%s)"
             }
@@ -232,7 +232,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]agent",
+          "type": "agent[]",
           "pipeline": true,
           "required": true,
           "description": "Agent ID"
@@ -320,7 +320,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]agent",
+          "type": "agent[]",
           "pipeline": true,
           "required": true,
           "description": "Agent ID"
@@ -404,7 +404,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]agent",
+          "type": "agent[]",
           "pipeline": true,
           "required": true,
           "description": "Agent ID"

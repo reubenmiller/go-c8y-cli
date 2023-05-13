@@ -134,7 +134,7 @@ commands:
 
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         pipeline: true
         pipelineAliases:
           - "deviceId"
@@ -211,7 +211,7 @@ commands:
 
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         property: id
         required: true
         pipeline: true
@@ -285,11 +285,11 @@ commands:
 
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         description: Device id (required for name lookup)
 
       - name: id
-        type: '[]deviceservice'
+        type: deviceservice[]
         property: id
         required: true
         pipeline: true
@@ -348,11 +348,11 @@ commands:
 
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         description: Device id (required for name lookup)
 
       - name: id
-        type: '[]deviceservice'
+        type: deviceservice[]
         property: id
         required: true
         pipeline: true
@@ -415,11 +415,11 @@ commands:
 
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         description: Device id (required for name lookup)
 
       - name: id
-        type: '[]deviceservice'
+        type: deviceservice[]
         property: id
         required: true
         pipeline: true

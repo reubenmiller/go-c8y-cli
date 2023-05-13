@@ -274,7 +274,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]software",
+          "type": "software[]",
           "pipeline": true,
           "required": true,
           "description": "Software package (managedObject) id"
@@ -379,7 +379,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]software",
+          "type": "software[]",
           "pipeline": true,
           "description": "Software package (managedObject) id",
           "required": true
@@ -434,7 +434,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]software",
+          "type": "software[]",
           "pipeline": true,
           "required": true,
           "description": "Software Package (managedObject) id"

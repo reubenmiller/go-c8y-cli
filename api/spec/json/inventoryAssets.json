@@ -57,7 +57,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "pipelineAliases": [
@@ -147,7 +147,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "property": "id",
           "required": true,
           "description": "Managed object id"
@@ -156,7 +156,7 @@
       "body": [
         {
           "name": "childDevice",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": false,
           "property": "managedObject.id",
@@ -164,7 +164,7 @@
         },
         {
           "name": "childGroup",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "required": false,
           "property": "managedObject.id",
           "description": "New child device group to be added to the group as an asset"
@@ -214,7 +214,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "pipeline": true,
           "pipelineAliases": [
             "deviceId",
@@ -227,7 +227,7 @@
         },
         {
           "name": "child",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "description": "Child managed object id"
         }
@@ -273,7 +273,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "description": "Asset id",
           "required": true
         },

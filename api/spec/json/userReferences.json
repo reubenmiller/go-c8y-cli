@@ -60,7 +60,7 @@
       "pathParameters": [
         {
           "name": "group",
-          "type": "[]usergroup",
+          "type": "usergroup[]",
           "required": true,
           "description": "Group ID"
         },
@@ -74,7 +74,7 @@
       "body": [
         {
           "name": "user",
-          "type": "[]userself",
+          "type": "userself[]",
           "pipeline": true,
           "required": true,
           "property": "user.self",
@@ -135,13 +135,13 @@
       "pathParameters": [
         {
           "name": "group",
-          "type": "[]usergroup",
+          "type": "usergroup[]",
           "required": true,
           "description": "Group ID"
         },
         {
           "name": "user",
-          "type": "[]user",
+          "type": "user[]",
           "required": true,
           "pipeline": true,
           "description": "User id/username"
@@ -214,7 +214,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]usergroup",
+          "type": "usergroup[]",
           "required": true,
           "pipeline": true,
           "description": "Group ID"

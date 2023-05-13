@@ -86,7 +86,7 @@
             },
             {
               "name": "firmware",
-              "type": "[]firmware",
+              "type": "firmware[]",
               "description": "Firmware package id or name",
               "format": "bygroupid(%s)",
               "required": true,
@@ -195,7 +195,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]firmwarepatch",
+          "type": "firmwarepatch[]",
           "dependsOn": [
             "firmware"
           ],
@@ -205,7 +205,7 @@
         },
         {
           "name": "firmware",
-          "type": "[]firmware",
+          "type": "firmware[]",
           "required": false,
           "description": "Firmware package id or name (used to help completion be more accurate)"
         }
@@ -300,7 +300,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]firmwarepatch",
+          "type": "firmwarepatch[]",
           "dependsOn": [
             "firmware"
           ],
@@ -310,7 +310,7 @@
         },
         {
           "name": "firmware",
-          "type": "[]firmware",
+          "type": "firmware[]",
           "required": false,
           "description": "Firmware id or name (used to help completion be more accurate)"
         }

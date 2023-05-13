@@ -71,13 +71,13 @@ commands:
         description: Tenant
 
       - name: user
-        type: '[]user'
+        type: user[]
         required: true
         description: User prefix or full username
 
     body:
       - name: role
-        type: '[]roleself'
+        type: roleself[]
         pipeline: true
         property: role.self
         description: User role id
@@ -107,12 +107,12 @@ commands:
             command: c8y userroles deleteRoleFromUser --user "peterpi@example.com" --role "ROLE_MEASUREMENT_READ"
     pathParameters:
       - name: user
-        type: '[]user'
+        type: user[]
         required: true
         description: User
 
       - name: role
-        type: '[]role'
+        type: role[]
         required: true
         pipeline: true
         description: Role name
@@ -162,13 +162,13 @@ commands:
         description: Tenant
 
       - name: group
-        type: '[]usergroup'
+        type: usergroup[]
         required: true
         description: Group ID
 
     body:
       - name: role
-        type: '[]roleself'
+        type: roleself[]
         pipeline: true
         required: true
         property: role.self
@@ -199,12 +199,12 @@ commands:
             command: c8y userroles deleteRoleFromGroup --group 12345 --role "ROLE_MEASUREMENT_READ"
     pathParameters:
       - name: group
-        type: '[]usergroup'
+        type: usergroup[]
         required: true
         description: Group id
 
       - name: role
-        type: '[]role'
+        type: role[]
         required: true
         pipeline: true
         description: Role name, e.g. ROLE_TENANT_MANAGEMENT_ADMIN
@@ -245,7 +245,7 @@ commands:
         description: Tenant
 
       - name: user
-        type: '[]user'
+        type: user[]
         required: true
         pipeline: true
         description: User
@@ -277,7 +277,7 @@ commands:
         description: Tenant
 
       - name: group
-        type: '[]usergroup'
+        type: usergroup[]
         required: true
         pipeline: true
         description: Group id

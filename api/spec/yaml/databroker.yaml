@@ -50,7 +50,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Data broker connector id
@@ -76,7 +76,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Data broker connector id

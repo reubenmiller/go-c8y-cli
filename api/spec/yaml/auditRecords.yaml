@@ -194,7 +194,7 @@ commands:
           command: c8y auditrecords get --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Audit id

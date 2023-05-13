@@ -62,7 +62,7 @@ commands:
         description: The ID of a tenant that is subscribed to the applications.
 
       - name: user
-        type: '[]user'
+        type: user[]
         description: The ID of a user that has access to the applications.
         pipeline: true
 

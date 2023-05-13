@@ -64,7 +64,7 @@ commands:
 
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         property: source
         pipeline: true
         description: Device ID
@@ -140,7 +140,7 @@ commands:
 
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         property: source
         pipeline: true
         description: Device ID
@@ -187,13 +187,13 @@ commands:
           command: c8y measurements getSeries --device 12345 --series app_Weather.temperature --series app_Weather.barometer --dateFrom "-10min" --dateTo "0s"
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         property: source
         pipeline: true
         description: Device ID
 
       - name: series
-        type: "[]string"
+        type: string[]
         description: measurement type and series name, e.g. c8y_AccelerationMeasurement.acceleration
 
       - name: aggregationType
@@ -236,7 +236,7 @@ commands:
           command: c8y measurements get --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Measurement id
@@ -283,7 +283,7 @@ commands:
           skipTest: true
     body:
       - name: device
-        type: '[]device'
+        type: device[]
         pipeline: true
         required: false
         property: source.id
@@ -335,7 +335,7 @@ commands:
           command: c8y measurements delete --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Measurement id
@@ -363,7 +363,7 @@ commands:
           command: c8y measurements deleteCollection --device 12345
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         property: source
         pipeline: true
         description: Device ID

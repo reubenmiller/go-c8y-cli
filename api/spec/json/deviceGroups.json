@@ -105,7 +105,7 @@
             },
             {
               "name": "group",
-              "type": "[]devicegroup",
+              "type": "devicegroup[]",
               "description": "Filter by group inclusion",
               "format": "bygroupid(%s)"
             }
@@ -183,7 +183,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "pipeline": true,
           "required": true,
           "description": "Device group ID"
@@ -271,7 +271,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "pipeline": true,
           "required": true,
           "description": "Device group ID"
@@ -329,7 +329,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "pipeline": true,
           "required": true,
           "description": "Device group ID",
@@ -476,7 +476,7 @@
       "pathParameters": [
         {
           "name": "group",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "property": "id",
           "required": true,
           "description": "Group"
@@ -485,7 +485,7 @@
       "body": [
         {
           "name": "newChildDevice",
-          "type": "[]device",
+          "type": "device[]",
           "required": true,
           "pipeline": true,
           "property": "managedObject.id",
@@ -557,7 +557,7 @@
       "pathParameters": [
         {
           "name": "group",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "property": "id",
           "required": true,
           "description": "Group"
@@ -566,7 +566,7 @@
       "body": [
         {
           "name": "newChildGroup",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "pipeline": true,
           "required": true,
           "property": "managedObject.id",
@@ -618,13 +618,13 @@
       "pathParameters": [
         {
           "name": "group",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "required": true,
           "description": "Asset id"
         },
         {
           "name": "childDevice",
-          "type": "[]device",
+          "type": "device[]",
           "property": "reference",
           "pipeline": true,
           "required": true,
@@ -675,13 +675,13 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "required": true,
           "description": "Device group"
         },
         {
           "name": "child",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "property": "child",
           "required": true,
           "pipeline": true,
@@ -747,7 +747,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "pipeline": true,
           "required": true,
           "description": "Device Group."

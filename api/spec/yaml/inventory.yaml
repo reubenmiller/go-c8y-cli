@@ -47,7 +47,7 @@ commands:
 
     queryParameters:
       - name: ids
-        type: '[]stringcsv'
+        type: stringcsv[]
         property: ids
         description: List of ids.
 
@@ -84,7 +84,7 @@ commands:
         description: Search for a specific child asset and list all the groups to which it belongs.
 
       - name: childDeviceId
-        type: '[]device'
+        type: device[]
         description: Search for a specific child device and list all the groups to which it belongs.
 
       - name: skipChildrenNames
@@ -138,7 +138,7 @@ commands:
 
     queryParameters:
       - name: ids
-        type: '[]stringcsv'
+        type: stringcsv[]
         property: ids
         description: List of ids.
 
@@ -171,7 +171,7 @@ commands:
         description: Search for a specific child asset and list all the groups to which it belongs.
 
       - name: childDeviceId
-        type: '[]device'
+        type: device[]
         description: Search for a specific child device and list all the groups to which it belongs.
 
 
@@ -360,7 +360,7 @@ commands:
             format: (creationTime.date ge '%s')
 
           - name: group
-            type: '[]devicegroup'
+            type: devicegroup[]
             description: Filter by group inclusion
             format: bygroupid(%s)
 
@@ -470,7 +470,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         pipeline: true
         required: true
         description: ManagedObject id
@@ -545,7 +545,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         pipeline: true
         description: ManagedObject id
         required: true
@@ -604,7 +604,7 @@ commands:
 
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         pipeline: true
         required: true
         description: ManagedObject id

@@ -120,7 +120,7 @@
             $PipelineVariableProperty = if ($iArg.Property) { $iArg.Property } else { $iArg.Name }
             $PipelineVariableAliases = $iArg.pipelineAliases
             if (!$PipelineVariableAliases) {
-                if ($PipelineVariableName -match "device$" -or $iArg.type -match "device$") {
+                if ($PipelineVariableName -match "device$" -or $iArg.type -eq "device[]") {
                     $PipelineVariableAliases = @(
                         "deviceId",
                         "source.id",
@@ -132,7 +132,7 @@
                 }
             }
 
-            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|hostedapplication|software\b|softwareName\b|deviceservice\b|softwareversion\b|softwareversionName\b|firmware\b|firmwareName\b|firmwareversion\b|firmwareversionName\b|firmwarepatch\b|firmwarepatchName\b|configuration\b|deviceprofile\b|microservice|\[\]id|\[\]devicerequest") {
+            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|hostedapplication|software\b|softwareName\b|deviceservice\b|softwareversion\b|softwareversionName\b|firmware\b|firmwareName\b|firmwareversion\b|firmwareversionName\b|firmwarepatch\b|firmwarepatchName\b|configuration\b|deviceprofile\b|microservice|id\[\]|devicerequest\[\]") {
                 if ($RESTMethod -match "POST" -and $iArg.ArgSource -eq "body") {
                     # Add override capability to piped arguments, so the user can still override piped data with the argument
                     [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
@@ -191,33 +191,32 @@
 
         # Add Completions based on type
         $ArgType = $iArg.type
-        switch -Regex ($ArgType) {
-            "^application|applicationname" { [void] $CompletionBuilderOptions.AppendLine("completion.WithApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+        switch ($ArgType) {
+            { @("application", "applicationname") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "hostedapplication" { [void] $CompletionBuilderOptions.AppendLine("completion.WithHostedApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "microservice\b" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "microservicename\b" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "microserviceinstance\b" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroserviceInstance(`"$($iArg.Name)`", `"id`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "role" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUserRole(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?devicerequest$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceRegistrationRequest(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "\[\]user(self)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUser(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?usergroup$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUserGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?devicegroup$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?smartgroup$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithSmartGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?tenant$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithTenantID(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?tenantname$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithTenantID(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?device$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDevice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?agent$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithAgent(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?software(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithSoftware(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?softwareversion(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithSoftwareVersion(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?firmware(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmware(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?firmwareversion(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwareVersion(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?firmwarepatch(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwarePatch(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?configuration$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithConfiguration(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?deviceprofile$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceProfile(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?deviceservice$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceService(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "(\[\])?certificate$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceCertificate(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "subscriptionName$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionName(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "subscriptionId$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionId(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "microservice" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "microservicename" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "microserviceinstance" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroserviceInstance(`"$($iArg.Name)`", `"id`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("role[]", "roleself[]") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithUserRole(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "devicerequest[]" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceRegistrationRequest(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("user[]", "userself[]") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithUser(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "usergroup[]" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUserGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "devicegroup[]" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "smartgroup[]" { [void] $CompletionBuilderOptions.AppendLine("completion.WithSmartGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("tenant", "tenantname") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithTenantID(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "device[]" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDevice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "agent[]" { [void] $CompletionBuilderOptions.AppendLine("completion.WithAgent(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("software[]", "softwareName") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithSoftware(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("softwareversion[]", "softwareversionName") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithSoftwareVersion(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("firmware[]", "firmwareName") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmware(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("firmwareversion[]", "firmwareVersionName") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwareVersion(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("firmwarepatch[]", "firmwarepatchName") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwarePatch(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "configuration[]" { [void] $CompletionBuilderOptions.AppendLine("completion.WithConfiguration(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "deviceprofile[]" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceProfile(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "deviceservice[]" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceService(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "certificate[]" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceCertificate(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "subscriptionName" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionName(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "subscriptionId" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionId(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
         }
 
         $ArgParams = @{
@@ -886,7 +885,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]string" {
+        "string[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSlice(`"${Name}`", `"${OptionName}`", []string{`"${Default}`"}, `"${Description}`")"
             } else {
@@ -897,7 +896,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]stringcsv" {
+        "stringcsv[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSlice(`"${Name}`", `"${OptionName}`", []string{`"${Default}`"}, `"${Description}`")"
             } else {
@@ -909,7 +908,7 @@ Function Get-C8yGoArgs {
             break
         }
 
-        "[]device" {
+        "device[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -922,7 +921,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]agent" {
+        "agent[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -936,7 +935,7 @@ Function Get-C8yGoArgs {
         }
 
         # Management repository types
-        { $_ -in "[]software", "[]softwareversion", "[]firmware", "[]firmwareversion", "[]firmwarepatch", "[]configuration", "[]deviceprofile" } {
+        { $_ -in "software[]", "softwareversion[]", "firmware[]", "firmwareversion[]", "firmwarepatch[]", "configuration[]", "deviceprofile[]" } {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -949,7 +948,7 @@ Function Get-C8yGoArgs {
         }
 
         # Device extensions
-        { $_ -in @("[]deviceservice") } {
+        { $_ -in @("deviceservice[]") } {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -985,7 +984,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]devicegroup" {
+        "devicegroup[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -998,7 +997,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]id" {
+        "id[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -1010,7 +1009,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]smartgroup" {
+        "smartgroup[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -1023,7 +1022,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]roleself" {
+        "roleself[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -1036,7 +1035,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]role" {
+        "role[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -1049,7 +1048,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]usergroup" {
+        "usergroup[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -1158,7 +1157,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]devicerequest" {
+        "devicerequest[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -1270,7 +1269,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]user" {
+        "user[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -1282,7 +1281,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "[]userself" {
+        "userself[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {
@@ -1295,7 +1294,7 @@ Function Get-C8yGoArgs {
         }
 
         # Trusted device certficates
-        "[]certificate" {
+        "certificate[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSlice(`"${Name}`", `"${OptionName}`", []string{`"${Default}`"}, `"${Description}`")"
             } else {
