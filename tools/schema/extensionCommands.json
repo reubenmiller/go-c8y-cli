@@ -315,6 +315,12 @@
         }
     },
     "properties": {
+        "$schema": {
+            "type": "string",
+            "title": "JSON Schema",
+            "description": "JSON Schema reference used to validate the file",
+            "default": "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json"
+        },
         "version": {
             "type": "string",
             "title": "Specification version",
@@ -663,7 +669,8 @@
         "commands"
     ],
     "patternProperties": {
-        "^[Xx]-": {}
+        "^[Xx]-": {},
+        "$schema": {"type": "string"}
     },
     "additionalProperties": false
 }
