@@ -21,18 +21,18 @@ tests:
       exactly: one\ntwo\nthree
 
   It can upload a binary:
-    # Test is flakey because the the form-data sections can change order (as the order does not matter)
-    skip: true
     command: |
       c8y kitchensink features uploadFile --file manual/extensions/file1.txt --dryFormat dump
     stdout:
       lines:
         8: 'Content-Disposition: form-data; name="file"; filename="file1.txt"'
         9: "Content-Type: application/octet-stream"
+        10: ''
         11: one
         12: two
         13: three
         15: 'Content-Disposition: form-data; name="object"'
+        16: ''
         17: '{"name":"file1.txt","type":"text/plain; charset=utf-8"}'
 
   optional_fragment:

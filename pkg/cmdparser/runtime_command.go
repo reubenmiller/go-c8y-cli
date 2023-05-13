@@ -159,10 +159,14 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 		}
 	}
 
+	supportsFormData := false
 	switch item.GetBodyContentType() {
 	case "binary":
 		subcmd.Body.IsBinary = true
+		supportsFormData = true
 	case "formdata":
+		supportsFormData = true
+		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDataFlagValue())
 	default:
 		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDataFlagValue())
 	}
@@ -175,7 +179,11 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 			subcmd.Body.UploadProgressSource = p.Name
 			fallthrough
 		default:
-			subcmd.Body.Options = append(subcmd.Body.Options, GetOption(subcmd, &p, factory, args)...)
+			if supportsFormData {
+				subcmd.FormData = append(subcmd.FormData, GetOption(subcmd, &p, factory, args)...)
+			} else {
+				subcmd.Body.Options = append(subcmd.Body.Options, GetOption(subcmd, &p, factory, args)...)
+			}
 		}
 	}
 
