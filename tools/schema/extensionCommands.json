@@ -84,7 +84,11 @@
                 "name",
                 "type",
                 "description"
-            ]
+            ],
+            "patternProperties": {
+                "^[Xx]-": {}
+            },
+            "additionalProperties": false
         },
         "completionCommand": {
             "type": "object",
@@ -110,7 +114,11 @@
             "required": [
                 "type",
                 "command"
-            ]
+            ],
+            "patternProperties": {
+                "^[Xx]-": {}
+            },
+            "additionalProperties": false
         },
         "namedLookupCommand": {
             "type": "object",
@@ -147,7 +155,11 @@
             "required": [
                 "type",
                 "command"
-            ]
+            ],
+            "patternProperties": {
+                "^[Xx]-": {}
+            },
+            "additionalProperties": false
         },
         "bodyTemplate": {
             "type": "object",
@@ -170,6 +182,7 @@
                     "description": "Template in the given template engine language"
                 }
             },
+            "additionalProperties": false,
             "required": [
                 "type"
             ]
@@ -353,7 +366,8 @@
             "required": [
                 "name",
                 "description"
-            ]
+            ],
+            "additionalProperties": false
         },
         "commands": {
             "type": "array",
@@ -585,7 +599,8 @@
                                     "formdata"
                                 ]
                             }
-                        }
+                        },
+                        "additionalProperties": false
                     },
                     "bodyTemplates": {
                         "type": "array",
@@ -600,7 +615,8 @@
                         "description": "List of the required body keys. The keys will be checked after any template logic",
                         "items": {
                             "type": "string"
-                        }
+                        },
+                        "additionalProperties": false
                     },
                     "bodyTemplateOptions": {
                         "type": "object",
@@ -612,9 +628,14 @@
                                 "title": "Enable/disable template support",
                                 "description": "Templates are enabled by default. Use this is you want to disable it. Usually it only makes sense to do for non-json based bodies"
                             }
-                        }
+                        },
+                        "additionalProperties": false
                     }
                 },
+                "patternProperties": {
+                    "^[Xx]-": {}
+                },
+                "additionalProperties": false,
                 "oneOf": [
                     {
                         "required": [
@@ -640,5 +661,9 @@
     "required": [
         "group",
         "commands"
-    ]
+    ],
+    "patternProperties": {
+        "^[Xx]-": {}
+    },
+    "additionalProperties": false
 }
