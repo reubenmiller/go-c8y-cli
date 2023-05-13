@@ -16,20 +16,25 @@ This extension relies on an up-coming go-c8y-cli [extensions](https://github.com
 This section will be removed when `extensions` are included in the official release.
 
 :::caution
+Breaking changes were introduced in the preview version where all array types were renamed from the format `[]device` to `device[]`.
+The schema has been updated, so it should show you the errors. This change was made to make it easier to write the yaml spec, as `device[]` does not require surrounding quotes so it plays nicer with any tab completion in VS Code.
+:::
+
+:::caution
 Building `go-c8y-cli` requires go version ≥ 1.20.
 :::
 
 <CodeExample transform="false">
 
 ```bash
-go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@9df45aed7f5f09f2a0f5781f0ce30c64bd92e630
+go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@414bd985a5554dd4301716660b6d54255236b4be
 
 # Add the go bin folder to your path variable (ideally add this to your shell profile (.zshrc for zsh or .bashrc for bash)
 export PATH="$(go env GOPATH)/bin:$PATH"
 ```
 
 ```powershell
-go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@9df45aed7f5f09f2a0f5781f0ce30c64bd92e630
+go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@414bd985a5554dd4301716660b6d54255236b4be
 
 # Add the go bin folder to the path variable and set a powershell alias to it
 if ($IsWindows) {
@@ -42,7 +47,7 @@ if ($IsWindows) {
 ```
 
 ```powershell
-go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@9df45aed7f5f09f2a0f5781f0ce30c64bd92e630
+go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@414bd985a5554dd4301716660b6d54255236b4be
 
 # Add the go bin folder to the path variable and set a powershell alias to it
 if ($IsWindows) {
@@ -345,7 +350,7 @@ There are a lot of different types that you can use when building your commands 
 
 Tab completion is a very useful feature which saves the user looking up things themselves as they can just press `<TAB><TAB>` and select an option from the response.
 
-Some parameter types (such as `[]device` and `[]application`) include built-in tab completion and named lookups, however if you don't find any types that meet your exact need then you can use the external tab completion option. The external tab completion mechanism allows you to execute another `c8y` command, or a shell of your choosing, to provide the completion values that should be displayed to the user.
+Some parameter types (such as `device[]` and `application[]`) include built-in tab completion and named lookups, however if you don't find any types that meet your exact need then you can use the external tab completion option. The external tab completion mechanism allows you to execute another `c8y` command, or a shell of your choosing, to provide the completion values that should be displayed to the user.
 
 Below shows an example of an external completion which uses the `c8y devices list` to provide the device names (with the device id being shown in the option's description for more context).
 
