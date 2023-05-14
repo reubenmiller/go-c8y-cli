@@ -314,10 +314,11 @@ func WithIDSlice(args []string, opts ...string) flags.GetOption {
 		// check for arguments which could override the value
 		values, err := cmd.Flags().GetStringSlice(src)
 		if err != nil {
-			singleValue, err := cmd.Flags().GetString(src)
-			if err != nil {
-				return "", "", err
+			singleValue, singleErr := cmd.Flags().GetString(src)
+			if singleErr != nil {
+				return "", "", singleErr
 			}
+			err = nil
 			values = []string{singleValue}
 		}
 
@@ -366,10 +367,11 @@ func WithReferenceByName(factory *cmdutil.Factory, fetcher EntityFetcher, args [
 		// check for arguments which could override the value
 		values, err := cmd.Flags().GetStringSlice(src)
 		if err != nil {
-			singleValue, err := cmd.Flags().GetString(src)
-			if err != nil {
-				return "", "", err
+			singleValue, singleErr := cmd.Flags().GetString(src)
+			if singleErr != nil {
+				return "", "", singleErr
 			}
+			err = nil
 			values = []string{singleValue}
 		}
 
@@ -452,10 +454,11 @@ func WithSelfReferenceByName(factory *cmdutil.Factory, fetcher EntityFetcher, ar
 		// check for arguments which could override the value
 		values, err := cmd.Flags().GetStringSlice(src)
 		if err != nil {
-			singleValue, err := cmd.Flags().GetString(src)
-			if err != nil {
-				return "", "", err
+			singleValue, singleErr := cmd.Flags().GetString(src)
+			if singleErr != nil {
+				return "", "", singleErr
 			}
+			err = nil
 			values = []string{singleValue}
 		}
 
@@ -463,7 +466,7 @@ func WithSelfReferenceByName(factory *cmdutil.Factory, fetcher EntityFetcher, ar
 
 		var overrideValue iterator.Iterator
 		if len(values) > 0 {
-			overrideValue = iterator.NewSliceIterator(values)
+			overrideValue = iterator.NewSliceIterator(values, format)
 		}
 
 		if inputIterators != nil && inputIterators.PipeOptions.Name == src {
