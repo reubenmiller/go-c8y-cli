@@ -9,6 +9,17 @@ Parameter (or flag) types are used to defined how a flag's value should be inter
 This page is not finished yet, so don't bother reading it just yet.
 :::
 
+:white_check_mark:
+:black_square_button:
+
+# Introduction
+
+```yaml
+- name: enable
+  type: optional_fragment
+  property: c8y_IsDevice
+```
+
 # Available types
 
 ## Basic types
@@ -65,17 +76,16 @@ This page is not finished yet, so don't bother reading it just yet.
 
 ## Cumulocity specific types
 
-### Application
+### Applications
 
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
 |`application`|Application|`--application administration`|`"12"`|
 |`applicationname`|Application name|`--application cockpit`|`"cockpit"`|
-|`hostedapplication`|Hosted application (e.g. type=`HOSTED`)|`--application devicemanagement`|`"12"`|
+|`hostedapplication`|Hosted application (in tenant only!) (e.g. type=`HOSTED`)|`--application devicemanagement`|`"12"`|
 |`microservice`|Microservice (type=`MICROSERVICE`)|`--microservice report-agent`|`"8"`|
 |`microservicename`|Microservice name|`--microservice report-agent`|`"report-agent"`|
-|`microserviceinstance`|Microservice instance|`--id advanced-software-mgmt --instance <TAB><TAB>`|`"advanced-software-mgmt-scope-management-deployment-7597ddb65lj6"`|
-
+|`microserviceinstance`|Microservice instance (completion only) (use `.dependsOn` field to specify related microservice|`--id advanced-software-mgmt --instance <TAB><TAB>`|`"advanced-software-mgmt-scope-management-deployment-7597ddb65lj6"`|
 
 ### Devices / Agents / Sources
 
@@ -85,6 +95,13 @@ This page is not finished yet, so don't bother reading it just yet.
 |`id[]`|List of ids| `--id 1 --id 2` |`"12345"`|
 |`agent[]`|List of agents| `--agent 1 --id 2` |`"1", "2"`|
 |`device[]`|List of devices| `--device 1 --id 2` |`"1", "2"`|
+
+### Device Groups
+
+|Type|Description|Example usage|Example output|
+|----|----|----|----|
+|`devicegroup[]`|Device group| `--group "germany"` |`"12345"`|
+|`smartgroup[]`|Smart group| `--group "australia"` |`"12345"`|
 
 
 ### Inventory Query API
@@ -104,20 +121,43 @@ queryExpression
 
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
-|`certificate[]`|Trusted device certificate| `--cert abcdefg` |`"abcdefg"`|
+|`certificate[]`|Trusted device certificate| `--cert 4fd8df0378f2cafd5e322c1aaa8b87300704e9a5` |`"4fd8df0378f2cafd5e322c1aaa8b87300704e9a5"`|
 |`certificatefile`|Certificate file| `--certfile ./my.cert` |`<<contents of file>>`|
-
-
-inventoryChildType
-
 
 ### Device management
 
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
-|`deviceservice[]`|Device service| `--service my` (Also requires `--device 12345`) to be set |`"abcdefg"`|
+|`deviceservice[]`|Device service| `--device 12345 --service my` (use `.dependsOn` to set which flag provides the device) to be set |`"abcdefg"`|
 
 **TODO**: Add example which shows the dependsOn usage
+
+
+### Device requests
+
+|Type|Description|Example usage|Example output|
+|----|----|----|----|
+|`devicerequest`|Device request|`--id abcdef`|`"abcdef"`|
+|`devicerequest[]`|Device request array|`--id abcdef`|`["abcdef"]`|
+
+
+### Notifications 2
+
+|Type|Description|Example usage|Example output|
+|----|----|----|----|
+|`subscriptionId`|Subscription id|`--id abcdef`|`"abcdef"`|
+|`subscriptionName`|Subscription name|`--name abcdef`|`"abcdef"`|
+
+
+### Users / User groups / Roles
+
+|Type|Description|Example usage|Example output|
+|----|----|----|----|
+|`role[]`|User role| `--role ROLE_ALARM_*` |`"ROLE_ALARM_READ"`|
+|`roleself[]`|User role url| `--role ROLE_ALARM_*` |`"https://{host}/user/roles/ROLE_ALARM_READ"`|
+|`user[]`|User id| `--user john*` |`"john.smith@example.com"`|
+|`userself[]`|User self url| `--user john*` |`"https://{host}/user/{tenant}/users/john.smith@example.com"`|
+|`usergroup[]`|User group| `--usergroup admins` |`"2"`|
 
 
 ### Repository
@@ -156,35 +196,3 @@ inventoryChildType
 |`softwareDetails`|Software details| - | `--software vim` |`"value"`|
 |`softwareversion[]`|Software version| - | `--version 1.0.0` |`""`|
 |`softwareversionName`|Software version name| - | `--version 1.0.0` |`""`|
-
-
-### Device requests
-
-|Type|Description|Example usage|Example output|
-|----|----|----|----|
-|`devicerequest[]`|Device request|`--id abcdef`|`["abcdef"]`|
-
-### Notifications 2
-
-|Type|Description|Example usage|Example output|
-|----|----|----|----|
-|`subscriptionId`|Subscription id|`--id abcdef`|`"abcdef"`|
-|`subscriptionName`|Subscription name|`--name abcdef`|`"abcdef"`|
-
-### Devices Groups
-
-|Type|Description|Example usage|Example output|
-|----|----|----|----|
-|`devicegroup[]`|Device group| `--group "germany"` |`"12345"`|
-|`smartgroup[]`|Smart group| `--group "australia"` |`"12345"`|
-
-
-### Users / User groups / Roles
-
-|Type|Description|Example usage|Example output|
-|----|----|----|----|
-|`role[]`|User role| `--role ROLE_ALARM_*` |`"ROLE_ALARM_READ"`|
-|`roleself[]`|User role url| `--role ROLE_ALARM_*` |`"https://{host}/user/roles/ROLE_ALARM_READ"`|
-|`user[]`|User id| `--user john*` |`"john.smith@example.com"`|
-|`userself[]`|User self url| `--user john*` |`"https://{host}/user/{tenant}/users/john.smith@example.com"`|
-|`usergroup[]`|User group| `--usergroup admins` |`"2"`|

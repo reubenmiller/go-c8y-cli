@@ -5,21 +5,6 @@ group:
   description: body
 
 commands:
-  - name: upload
-    path: inventory/binaries
-    description: Upload contents of a file
-    method: POST
-    bodyContent:
-      type: formdata
-    body:
-      - name: file
-        type: file
-        description: File
-
-      - name: foo
-        type: string[]
-        description: foo
-
   #
   # Boolean
   #
@@ -159,6 +144,22 @@ commands:
         type: string
         required: false
         description: Custom type. If left blank, the MIME type will be detected from the file extension
+  
+  # TODO: Create a test for bodyContent.type formdata
+  - name: upload
+    path: inventory/binaries
+    description: Upload contents of a file
+    method: POST
+    bodyContent:
+      type: formdata
+    body:
+      - name: file
+        type: file
+        description: File
+
+      - name: foo
+        type: string[]
+        description: foo
 
   - name: fileContents
     path: inventory/binaries

@@ -1,0 +1,274 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+---
+group:
+  name: body_complex
+  description: body
+
+commands:
+  #
+  # Applications
+  #
+  - name: application
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: application
+        description: application
+
+  - name: applicationname
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: name
+        type: applicationname
+        description: applicationname
+
+  - name: hostedapplication
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: hostedapplication
+        description: hostedapplication
+
+  - name: microservice
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: microservice
+        description: microservice
+
+  - name: microservicename
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: name
+        type: microservicename
+        description: microservicename
+
+  - name: microserviceinstance
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: microservice
+        type: microservice
+        description: microservice
+
+      - name: instance
+        type: microserviceinstance
+        dependsOn:
+          - microservice
+        description: microserviceinstance
+
+  #
+  # Devices / Agents / Sources
+  #
+  - name: source
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: source
+        description: source
+
+  - name: idArray
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: id[]
+        description: id
+
+  - name: agent
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: agent[]
+        description: agent
+
+  - name: device
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: device[]
+        description: device
+
+  #
+  # Device Groups
+  #
+  - name: devicegroup
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: devicegroup[]
+        description: devicegroup
+
+  - name: smartgroup
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: smartgroup[]
+        description: smartgroup
+
+  #
+  # Tenant
+  #
+  - name: tenant
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: tenant
+        description: tenant
+
+  - name: tenantname
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: name
+        type: tenantname
+        description: tenantname
+
+  #
+  # Misc
+  #
+  - name: certificate
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: certificate[]
+        description: id
+
+  - name: certificatefile
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: file
+        type: certificatefile
+        description: file
+
+  #
+  # Device management
+  #
+  - name: deviceservice
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: device
+        type: device[]
+        description: device
+
+      - name: service
+        type: deviceservice[]
+        dependsOn:
+          - device
+        description: deviceservice
+
+  #
+  # Device requests
+  #
+  - name: devicerequest
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: devicerequest
+        description: devicerequest
+
+  - name: devicerequestArray
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: devicerequest[]
+        description: devicerequest
+  
+  #
+  # Repository: TODO
+  #
+
+  #
+  # Users / User groups / Roles
+  #
+  - name: role
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: role
+        type: role[]
+        description: role
+
+  - name: roleself
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: roleself
+        type: roleself[]
+        description: roleself
+
+  - name: user
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: user
+        type: user[]
+        description: user
+
+  - name: userself
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: user
+        type: userself[]
+        description: user
+
+  - name: usergroup
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: group
+        type: usergroup[]
+        description: usergroup
+
+  #
+  # TODO: Reorganize commands below
+  #
+  - name: deviceprofile
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: deviceprofile[]
+        description: deviceprofile
