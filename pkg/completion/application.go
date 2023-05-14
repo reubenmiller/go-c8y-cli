@@ -114,6 +114,20 @@ func WithHostedApplication(flagName string, clientFunc func() (*c8y.Client, erro
 					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
 				}
 			}
+
+			// If no results, then included applications that are not owned by the current tenant
+			if len(values) == 0 {
+				for _, item := range items.Applications {
+					if !strings.EqualFold(item.Type, "HOSTED") {
+						continue
+					}
+
+					if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
+						values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+					}
+				}
+			}
+
 			return values, cobra.ShellCompDirectiveNoFileComp
 		})
 		return cmd

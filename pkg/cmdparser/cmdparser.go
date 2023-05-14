@@ -400,6 +400,9 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "application":
 		opts = append(opts, c8yfetcher.WithApplicationByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
+	case "hostedapplication":
+		opts = append(opts, c8yfetcher.WithHostedApplicationByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+
 	case "software[]":
 		opts = append(opts, c8yfetcher.WithSoftwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 

@@ -93,11 +93,6 @@ func (f *HostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, e
 	if len(results) == 0 {
 		for i, app := range col.Applications {
 			if app.Type == "HOSTED" && pattern.MatchString(app.Name) {
-				if app.Owner != nil && app.Owner.Tenant != nil && app.Owner.Tenant.ID != "" {
-					if app.Owner.Tenant.ID != f.Client().TenantName {
-						continue
-					}
-				}
 				results = append(results, fetcherResultSet{
 					ID:    app.ID,
 					Name:  app.Name,
