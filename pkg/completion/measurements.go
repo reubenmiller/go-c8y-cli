@@ -1,7 +1,6 @@
 package completion
 
 import (
-	"context"
 	"errors"
 	"strings"
 
@@ -27,7 +26,7 @@ func getSupportedSeries(cmd *cobra.Command, flagNameDevice string, client *c8y.C
 
 	if !c8ydata.IsID(deviceID) {
 		matchingDevices, _, err := client.Inventory.GetDevicesByName(
-			context.Background(),
+			WithDisabledDryRunContext(client),
 			deviceID,
 			c8y.NewPaginationOptions(1),
 		)
@@ -42,7 +41,7 @@ func getSupportedSeries(cmd *cobra.Command, flagNameDevice string, client *c8y.C
 
 	pattern := "*" + toComplete + "*"
 	items, _, err := client.Inventory.GetSupportedSeries(
-		context.Background(),
+		WithDisabledDryRunContext(client),
 		deviceID,
 	)
 

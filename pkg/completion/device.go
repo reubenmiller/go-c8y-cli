@@ -1,7 +1,6 @@
 package completion
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -19,7 +18,7 @@ func WithDevice(flagName string, clientFunc func() (*c8y.Client, error)) Option 
 
 			pattern := "*" + toComplete + "*"
 			items, _, err := client.Inventory.GetDevicesByName(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				pattern,
 				c8y.NewPaginationOptions(100),
 			)
@@ -55,7 +54,7 @@ func WithAgent(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 				PaginationOptions: *c8y.NewPaginationOptions(100),
 			}
 			items, _, err := client.Inventory.GetManagedObjects(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				opt,
 			)
 

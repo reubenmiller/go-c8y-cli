@@ -1,7 +1,6 @@
 package completion
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -20,7 +19,7 @@ func WithApplication(flagName string, clientFunc func() (*c8y.Client, error)) Op
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
 			items, _, err := client.Application.GetApplications(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				&c8y.ApplicationOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(2000),
 				},
@@ -52,7 +51,7 @@ func WithApplicationContext(flagName string, clientFunc func() (*c8y.Client, err
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
 			items, _, err := client.Application.GetApplications(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				&c8y.ApplicationOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(2000),
 				},
@@ -84,7 +83,7 @@ func WithHostedApplication(flagName string, clientFunc func() (*c8y.Client, erro
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
 			items, _, err := client.Application.GetApplications(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				&c8y.ApplicationOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(2000),
 				},
@@ -143,7 +142,7 @@ func WithMicroservice(flagName string, clientFunc func() (*c8y.Client, error)) O
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
 			items, _, err := client.Application.GetApplications(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				&c8y.ApplicationOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(2000),
 				},
@@ -184,10 +183,13 @@ func WithMicroserviceLoggers(flagName string, flagNameMicroserviceName string, c
 			}
 
 			values := []string{}
-			resp, err := client.SendRequest(context.Background(), c8y.RequestOptions{
-				Method: "GET",
-				Path:   "/service/" + microserviceName + "/loggers",
-			})
+			resp, err := client.SendRequest(
+				WithDisabledDryRunContext(client),
+				c8y.RequestOptions{
+					Method: "GET",
+					Path:   "/service/" + microserviceName + "/loggers",
+				},
+			)
 
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
@@ -211,7 +213,7 @@ func WithMicroserviceLoggers(flagName string, flagNameMicroserviceName string, c
 
 func getMicroserviceByName(client *c8y.Client, name string) (string, error) {
 	apps, _, err := client.Application.GetApplicationsByName(
-		context.Background(),
+		WithDisabledDryRunContext(client),
 		name,
 		&c8y.ApplicationOptions{
 			Type:              c8y.ApplicationTypeMicroservice,
@@ -255,7 +257,7 @@ func getMicroserviceInstances(cmd *cobra.Command, flagApplicationID string, clie
 
 	pattern := "*" + toComplete + "*"
 	items, _, err := client.Inventory.GetManagedObjects(
-		context.Background(),
+		WithDisabledDryRunContext(client),
 		&c8y.ManagedObjectOptions{
 			Type:              "c8y_Application_" + deviceID,
 			PaginationOptions: *c8y.NewPaginationOptions(1),

@@ -1,7 +1,6 @@
 package completion
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -17,7 +16,7 @@ func WithDeviceCertificate(flagName string, clientFunc func() (*c8y.Client, erro
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
 			items, _, err := client.DeviceCertificate.GetCertificates(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				&c8y.DeviceCertificateCollectionOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(100),
 				},

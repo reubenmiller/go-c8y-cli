@@ -1,7 +1,6 @@
 package completion
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -19,7 +18,7 @@ func WithFirmware(flagName string, clientFunc func() (*c8y.Client, error)) Optio
 
 			pattern := "*" + toComplete + "*"
 			items, _, err := client.Firmware.GetFirmwareByName(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				pattern,
 				c8y.NewPaginationOptions(100),
 			)
