@@ -184,7 +184,7 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 		return completion.WithDeviceGroup(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "smartgroup[]":
 		return completion.WithSmartGroup(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "[]tenant":
+	case "tenant":
 		return completion.WithTenantID(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "tenantname":
 		return completion.WithTenantID(p.Name, func() (*c8y.Client, error) { return factory.Client() })
