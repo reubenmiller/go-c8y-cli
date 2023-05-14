@@ -174,7 +174,7 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 		return completion.WithMicroserviceInstance(p.Name, p.GetDependentProperty("id"), func() (*c8y.Client, error) { return factory.Client() })
 	case "role[]", "roleself[]":
 		return completion.WithUserRole(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "devicerequest[]":
+	case "devicerequest", "devicerequest[]":
 		return completion.WithDeviceRegistrationRequest(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "user[]", "userself[]":
 		return completion.WithUser(p.Name, func() (*c8y.Client, error) { return factory.Client() })
@@ -239,7 +239,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		return nil
 	}
 	switch p.Type {
-	case "string", "stringStatic", "json_custom", "directory", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "binaryUploadURL", "inventoryChildType", "subscriptionName", "subscriptionId", "file", "attachment", "fileContents", "fileContentsAsString", "certificatefile":
+	case "string", "stringStatic", "devicerequest", "json_custom", "directory", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "binaryUploadURL", "inventoryChildType", "subscriptionName", "subscriptionId", "file", "attachment", "fileContents", "fileContentsAsString", "certificatefile":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.Description)
 
 	case "json":
@@ -374,7 +374,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "inventoryChildType":
 		opts = append(opts, flags.WithInventoryChildType(p.Name, targetProp, p.Format))
 
-	case "string", "source", "tenantname", "subscriptionName", "subscriptionId", "applicationname", "microserviceinstance", "microservicename", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName":
+	case "string", "source", "tenantname", "devicerequest", "subscriptionName", "subscriptionId", "applicationname", "microserviceinstance", "microservicename", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName":
 		opts = append(opts, flags.WithStringValue(p.Name, targetProp, p.Format))
 
 	case "stringStatic":
