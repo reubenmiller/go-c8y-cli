@@ -792,10 +792,10 @@ func WithSoftwareVersionByNameFirstMatch(factory *cmdutil.Factory, args []string
 }
 
 // WithSoftwareVersionByNameFirstMatch add reference by name matching for software version via cli args. Only the first match will be used
-func WithDeviceServiceByNameFirstMatch(factory *cmdutil.Factory, args []string, opts ...string) flags.GetOption {
+func WithDeviceServiceByNameFirstMatch(factory *cmdutil.Factory, flagDevice string, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		device := ""
-		if v, err := cmd.Flags().GetStringSlice("device"); err == nil && len(v) > 0 {
+		if v, err := cmd.Flags().GetStringSlice(flagDevice); err == nil && len(v) > 0 {
 			device = v[0]
 		}
 		opt := WithReferenceByNameFirstMatch(factory, NewDeviceServiceFetcher(factory, device), args, opts...)

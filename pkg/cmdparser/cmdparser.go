@@ -419,7 +419,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 		opts = append(opts, c8yfetcher.WithSoftwareVersionByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "deviceservice[]":
-		opts = append(opts, c8yfetcher.WithDeviceServiceByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithDeviceServiceByNameFirstMatch(factory, p.GetDependentProperty("device"), args, p.Name, targetProp, p.Format))
 
 	case "certificatefile":
 		opts = append(opts, flags.WithCertificateFile(p.Name, targetProp))

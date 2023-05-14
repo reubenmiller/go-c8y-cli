@@ -170,7 +170,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
-		c8yfetcher.WithDeviceServiceByNameFirstMatch(n.factory, args, "id", "id"),
+		c8yfetcher.WithDeviceServiceByNameFirstMatch(n.factory, "device", args, "id", "id"),
 	)
 	if err != nil {
 		return err
