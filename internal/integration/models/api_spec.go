@@ -290,6 +290,15 @@ func (p *Parameter) GetTargetProperty() string {
 	return p.Name
 }
 
+// Get the first dependent property name defined for the current parameter.
+// Return a default value if no dependent property is defined
+func (p *Parameter) GetDependentProperty(defaultValue string) string {
+	if len(p.DependsOn) > 0 {
+		return p.DependsOn[0]
+	}
+	return defaultValue
+}
+
 func (p *Parameter) IsTypeDateTime() bool {
 	return strings.EqualFold(p.Type, "datetime")
 }
