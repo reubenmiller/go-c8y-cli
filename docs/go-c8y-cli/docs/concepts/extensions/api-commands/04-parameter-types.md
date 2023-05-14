@@ -62,7 +62,7 @@ This page is not finished yet, so don't bother reading it just yet.
 |----|----|----|----|
 |`file`|File upload with optional meta data (Multipart FormData request)| `--file ./foobar.txt` |`<<raw file contents>>`|
 |`fileContents`|File contents (for binary uploads)| `--file ./foobar.txt` |`<<raw file contents>>`|
-|`fileContentsAsString`|File contents as a string (for usage in a json body)| `--file ./foobar.txt` |`"name":"<<json escaped file contents>>"`|
+|`fileContentsAsString`|File contents as a string (for usage in a json body)| `--file ./foobar.txt` |`"file":"<<json escaped file contents>>"`|
 |`attachment`|File upload without optional meta data (Multipart FormData request)| `--file ./foobar.txt` |`<<raw file contents>>`|
 |`binaryUploadURL`|Upload file as Inventory binary and return the URL| `--file ./foobar.txt` |`"https://{host}/inventory/binaries/12345"`|
 
@@ -82,7 +82,7 @@ This page is not finished yet, so don't bother reading it just yet.
 |----|----|----|----|
 |`application`|Application|`--application administration`|`"12"`|
 |`applicationname`|Application name|`--application cockpit`|`"cockpit"`|
-|`hostedapplication`|Hosted application (in tenant only!) (e.g. type=`HOSTED`)|`--application devicemanagement`|`"12"`|
+|`hostedapplication`|Hosted application (e.g. type=`HOSTED`)|`--application devicemanagement`|`"12"`|
 |`microservice`|Microservice (type=`MICROSERVICE`)|`--microservice report-agent`|`"8"`|
 |`microservicename`|Microservice name|`--microservice report-agent`|`"report-agent"`|
 |`microserviceinstance`|Microservice instance (completion only) (use `.dependsOn` field to specify related microservice|`--id advanced-software-mgmt --instance <TAB><TAB>`|`"advanced-software-mgmt-scope-management-deployment-7597ddb65lj6"`|
@@ -104,34 +104,11 @@ This page is not finished yet, so don't bother reading it just yet.
 |`smartgroup[]`|Smart group| `--group "australia"` |`"12345"`|
 
 
-### Inventory Query API
-
-queryExpression
-
-
-### Tenant
-
-|Type|Description|Example usage|Example output|
-|----|----|----|----|
-|`tenant`|Tenant id| `--tenant t12345` |`"t12345"`|
-|`tenantname`|Tenant name| `--tenant mytenant` |`"mytenant"`|
-
-
-### Misc
-
-|Type|Description|Example usage|Example output|
-|----|----|----|----|
-|`certificate[]`|Trusted device certificate| `--cert 4fd8df0378f2cafd5e322c1aaa8b87300704e9a5` |`"4fd8df0378f2cafd5e322c1aaa8b87300704e9a5"`|
-|`certificatefile`|Certificate file| `--certfile ./my.cert` |`<<contents of file>>`|
-
 ### Device management
 
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
 |`deviceservice[]`|Device service| `--device 12345 --service my` (use `.dependsOn` to set which flag provides the device) to be set |`"abcdefg"`|
-
-**TODO**: Add example which shows the dependsOn usage
-
 
 ### Device requests
 
@@ -141,12 +118,70 @@ queryExpression
 |`devicerequest[]`|Device request array|`--id abcdef`|`["abcdef"]`|
 
 
-### Notifications 2
+### Inventory Query API
+
+queryExpression
+
+
+### Misc.
+
+|Type|Description|Example usage|Example output|
+|----|----|----|----|
+|`certificate[]`|Trusted device certificate| `--cert 4fd8df0378f2cafd5e322c1aaa8b87300704e9a5` |`"4fd8df0378f2cafd5e322c1aaa8b87300704e9a5"`|
+|`certificatefile`|Certificate file| `--certfile ./my.cert` |`<<contents of file>>`|
+
+
+### Notifications2
 
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
 |`subscriptionId`|Subscription id|`--id abcdef`|`"abcdef"`|
 |`subscriptionName`|Subscription name|`--name abcdef`|`"abcdef"`|
+
+
+### Repository
+
+#### Configuration
+|Type|Description|Depends On|Example usage|Example output|
+|----|----|----|----|----|
+|`configuration[]`|Configuration repository item| - | `--config linux_conf` |`"12345"`|
+|`configurationDetails`|Configuration repository item details| - | `--config linux_conf` |`{"configuration": {"name": "example-config","type": "agentConfig","url": "https://test.com/content/raw/app.json"}}`|
+
+#### Device profile
+
+|Type|Description|Depends On|Example usage|Example output|
+|----|----|----|----|----|
+|`deviceprofile[]`|Device profile| - | `--profile bundle-deployment` |`"12345"`|
+
+
+#### Firmware
+
+|Type|Description|Depends On|Example usage|Example output|
+|----|----|----|----|----|
+|`firmware[]`|Firmware repository item| - | `--firmware ubuntu-22_04` |`"12345"`|
+|`firmwarename`|Firmware name| - | `--firmware ubuntu-22_04` |`"ubuntu-22_04"`|
+|`firmwareversion[]`|Firmware version| `firmware` | `--version 1.0.0` |`"12345"`|
+|`firmwareversionName`|Firmware version name| `firmware` | `--version 2.0.0` |`"2.0.0"`|
+|`firmwarepatch[]`|Firmware patch| `firmware` | `--patch 1.0.1` |`"12345"`|
+|`firmwarepatchName`|Firmware patch name| `firmware` | `--patch 1.0.1` |`"1.0.1"`|
+|`firmwareDetails`|Firmware version details| `firmware` | `--firmware "ubuntu-22_04" --version "1.0.1"` |`{"version":{"name":"ubuntu-22_04","version":"1.0.1","url":"https://example.com"}}`|
+
+#### Software
+
+|Type|Description|Depends On|Example usage|Example output|
+|----|----|----|----|----|
+|`software[]`|Software| - | `--software vim` |`"12345"`|
+|`softwareName`|Software name| - | `--software vim` |`"vim"`|
+|`softwareDetails`|Software version details| `software` | `--software vim --version ""` |`"12345"`|
+|`softwareversion[]`|Software version| `software` | `--software vim --version 1.0.0` |`"98765"`|
+|`softwareversionName`|Software version name| `software` | `--software vim --version 1.0.0` |`"1.0.0"`|
+
+### Tenant
+
+|Type|Description|Example usage|Example output|
+|----|----|----|----|
+|`tenant`|Tenant id| `--tenant t12345` |`"t12345"`|
+|`tenantname`|Tenant name| `--tenant mytenant` |`"mytenant"`|
 
 
 ### Users / User groups / Roles
@@ -158,41 +193,3 @@ queryExpression
 |`user[]`|User id| `--user john*` |`"john.smith@example.com"`|
 |`userself[]`|User self url| `--user john*` |`"https://{host}/user/{tenant}/users/john.smith@example.com"`|
 |`usergroup[]`|User group| `--usergroup admins` |`"2"`|
-
-
-### Repository
-
-#### Configuration
-|Type|Description|Depends On|Example usage|Example output|
-|----|----|----|----|----|
-|`configuration[]`|Configuration repository item| - | `--config linux_conf` |`"12345"`|
-|`configurationDetails`|Configuration repository item details| - | `--config linux_conf` |`TODO`|
-
-#### Device profile
-
-|Type|Description|Depends On|Example usage|Example output|
-|----|----|----|----|----|
-|`deviceprofile[]`|Device profile| - | `--profile bundle-deployment` |`TODO`|
-
-
-#### Firmware
-
-|Type|Description|Depends On|Example usage|Example output|
-|----|----|----|----|----|
-|`firmware[]`|Firmware repository item| - | `--firmware ubuntu-22_04` |`TODO`|
-|`firmwarename`|Firmware name| - | `--firmware ubuntu-22_04` |`TODO`|
-|`firmwareversion[]`|Firmware version| - | `--version 1.0.0` |`TODO`|
-|`firmwarepatch[]`|Firmware patch| - | `--patch 1.0.1` |`TODO`|
-|`firmwarepatchName`|Firmware patch name| - | `--patch 1.0.1` |`TODO`|
-|`firmwareVersionName`|Firmware version name| - | `--version 1.0.1` |`TODO`|
-|`firmwareDetails`|Firmware details| - | `--firmware 1.0.1 ` |`TODO`|
-
-#### Software
-
-|Type|Description|Depends On|Example usage|Example output|
-|----|----|----|----|----|
-|`software[]`|Software| - | `--software vim` |`"value"`|
-|`softwareName`|Software name| - | `--software vim` |`"value"`|
-|`softwareDetails`|Software details| - | `--software vim` |`"value"`|
-|`softwareversion[]`|Software version| - | `--version 1.0.0` |`""`|
-|`softwareversionName`|Software version name| - | `--version 1.0.0` |`""`|

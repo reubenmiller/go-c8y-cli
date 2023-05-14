@@ -15,7 +15,7 @@ This extension relies on an up-coming go-c8y-cli [extensions](https://github.com
 
 This section will be removed when `extensions` are included in the official release.
 
-:::caution
+:::danger Preview users
 Breaking changes were introduced in the preview version where all array types were renamed from the format `[]device` to `device[]`.
 The schema has been updated, so it should show you the errors. This change was made to make it easier to write the yaml spec, as `device[]` does not require surrounding quotes so it plays nicer with any tab completion in VS Code.
 :::
