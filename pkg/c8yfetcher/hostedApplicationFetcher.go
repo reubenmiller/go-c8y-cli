@@ -66,6 +66,7 @@ func (f *HostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, e
 
 	results := make([]fetcherResultSet, 0)
 
+	// First check for hosted applications owned by the current tenant
 	for i, app := range col.Applications {
 		if app.Type == "HOSTED" && pattern.MatchString(app.Name) {
 
@@ -86,7 +87,24 @@ func (f *HostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, e
 				Value: col.Items[i],
 			})
 		}
+	}
 
+	// If not results are found, then also include any matches (not just in the current tenant)
+	if len(results) == 0 {
+		for i, app := range col.Applications {
+			if app.Type == "HOSTED" && pattern.MatchString(app.Name) {
+				if app.Owner != nil && app.Owner.Tenant != nil && app.Owner.Tenant.ID != "" {
+					if app.Owner.Tenant.ID != f.Client().TenantName {
+						continue
+					}
+				}
+				results = append(results, fetcherResultSet{
+					ID:    app.ID,
+					Name:  app.Name,
+					Value: col.Items[i],
+				})
+			}
+		}
 	}
 
 	return results, nil
