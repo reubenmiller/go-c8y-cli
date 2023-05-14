@@ -1,0 +1,272 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRY_FORMAT: json
+
+tests:
+  #
+  # Boolean
+  #
+  boolean:
+    command: |
+      c8y kitchensink body boolean --enable
+    stdout:
+      json:
+        body.enable: "true"
+
+  boolean true:
+    command: |
+      c8y kitchensink body boolean --enable
+    stdout:
+      json:
+        body.enable: "true"
+
+  boolean false:
+    command: |
+      c8y kitchensink body boolean --enable=false
+    stdout:
+      json:
+        body.enable: "false"
+
+  boolean notset:
+    command: |
+      c8y kitchensink body boolean
+    stdout:
+      json:
+        body: "{}"
+
+  booleanDefault:
+    command: |
+      c8y kitchensink body booleanDefault --enable
+    stdout:
+      json:
+        body.enable: "true"
+
+  booleanDefault set:
+    command: |
+      c8y kitchensink body booleanDefault --active --enable
+    stdout:
+      json:
+        body.active: "true"
+        body.enable: "true"
+
+  booleanDefault not-set:
+    command: |
+      c8y kitchensink body booleanDefault
+    stdout:
+      json:
+        body.active: "true"
+        body.enable: "false"
+
+  booleanDefault false:
+    command: |
+      c8y kitchensink body booleanDefault --active=false --enable=false
+    stdout:
+      json:
+        body.active: "false"
+        body.enable: "false"
+
+  optional_fragment:
+    command: |
+      c8y kitchensink body optional_fragment --enable
+    stdout:
+      json:
+        body.enable: "{}"
+
+  optional_fragment (without):
+    command: |
+      c8y kitchensink body optional_fragment
+    stdout:
+      json:
+        body: "{}"
+
+  #
+  # Date / Time
+  #
+  data date relative:
+    command: |
+      c8y kitchensink body date --dateFrom "0d"
+    stdout:
+      json:
+        body.dateFrom: r/^\d\d\d\d-\d\d-\d\d$
+
+  data date fixed:
+    command: |
+      c8y kitchensink body date --dateFrom "2023-03-31"
+    stdout:
+      json:
+        body.dateFrom: "2023-03-31"
+
+  data datetime relative:
+    command: |
+      c8y kitchensink body datetime --dateFrom "-1h"
+    stdout:
+      json:
+        body.dateFrom: r/^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(.\d+)?(Z|[+-]\d\d:\d\d)$
+
+  data datetime fixed with no timezone:
+    command: |
+      c8y kitchensink body datetime --dateFrom "2023-03-31"
+    stdout:
+      json:
+        body.dateFrom: "2023-03-31T00:00:00Z"
+
+  data datetime fixed with timezone:
+    command: |
+      c8y kitchensink body datetime --dateFrom "2023-03-31T00:00:00+02:00"
+    stdout:
+      json:
+        body.dateFrom: "2023-03-31T00:00:00+02:00"
+
+  #
+  # Numbers
+  #
+  #
+  data integer positive:
+    command: |
+      c8y kitchensink body integer --value 10
+    stdout:
+      json:
+        body.value: "10"
+
+  data integer negative:
+    command: |
+      c8y kitchensink body integer --value -10
+    stdout:
+      json:
+        body.value: "-10"
+
+  data float positive:
+    command: |
+      c8y kitchensink body float --value 120.5
+    stdout:
+      json:
+        body.value: "120.5"
+
+  data float negative:
+    command: |
+      c8y kitchensink body float --value -10.5
+    stdout:
+      json:
+        body.value: "-10.5"
+
+  #
+  # String
+  #
+  string:
+    command: |
+      c8y kitchensink body string --value "hello world"
+    stdout:
+      json:
+        body.value: "hello world"
+
+  stringStatic not-set:
+    command: |
+      c8y kitchensink body stringStatic
+    stdout:
+      json:
+        body.value: "some value"
+
+  ? stringStatic set and it does not change value (as it should be hidden from the user)
+  : command: |
+      c8y kitchensink body stringStatic --value "some other value"
+    stdout:
+      json:
+        body.value: "some value"
+
+  string[] as separate arguments:
+    command: |
+      c8y kitchensink body stringArray --value "hello" --value "world"
+    stdout:
+      json:
+        body.value.0: "hello"
+        body.value.1: "world"
+
+  string[] as csv:
+    command: |
+      c8y kitchensink body stringArray --value "hello,world"
+    stdout:
+      json:
+        body.value.0: "hello"
+        body.value.1: "world"
+
+  stringcsv[]:
+    command: |
+      c8y kitchensink body stringcsvArray --value "hello,world" --value again
+    stdout:
+      json:
+        body.value: "hello,world,again"
+
+  #
+  # File based
+  #
+  file - It can upload a binary:
+    command: |
+      c8y kitchensink body file --file manual/extensions/file1.txt --dryFormat dump
+    stdout:
+      lines:
+        8: 'Content-Disposition: form-data; name="file"; filename="file1.txt"'
+        9: "Content-Type: application/octet-stream"
+        10: ""
+        11: one
+        12: two
+        13: three
+        15: 'Content-Disposition: form-data; name="object"'
+        16: ""
+        17: '{"name":"file1.txt","type":"text/plain; charset=utf-8"}'
+
+  fileContents - It can upload file contents:
+    command: |
+      c8y kitchensink body fileContents --file manual/extensions/file1.txt --dry --dryFormat json |
+          c8y util show --select body -o csv
+    stdout:
+      exactly: one\ntwo\nthree
+
+  fileContentsAsString:
+    command: |
+      c8y kitchensink body fileContentsAsString --file manual/extensions/file1.txt --dry --dryFormat json |
+        c8y util show --select body
+    stdout:
+      exactly: |
+        {"body":{"file":"one\ntwo\nthree"}}
+
+  attachment - multipart formdata upload without meta info:
+    command: |
+      c8y kitchensink body attachment --file manual/extensions/file1.txt --dry --dryFormat dump
+    stdout:
+      line-count-max: 14
+      lines:
+        5: "r/^Content-Type: multipart/form-data; boundary=[a-zA-Z0-9]+$"
+        6: ""
+        7: r/^--[a-zA-Z0-9]+$
+        8: 'Content-Disposition: form-data; name="file"; filename="file1.txt"'
+        9: "Content-Type: application/octet-stream"
+        10: ""
+        11: one
+        12: two
+        13: three
+        14: r/^--[a-zA-Z0-9]+--$
+
+  binaryUploadURL:
+    # File does not get deleted after test and dry mode does not work here
+    skip: true
+    command: |
+      c8y kitchensink body binaryUploadURL --file dummyfile
+    stdout:
+      json:
+        body.myUrl: r/https://.+/inventory/binaries/\d+$
+
+  #
+  # JSON
+  #
+  json_custom:
+    command: |
+      c8y kitchensink body json --mydata foo.bar=true
+    stdout:
+      json:
+        body.mydata.foo.bar: "true"

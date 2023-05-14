@@ -1,0 +1,210 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+---
+group:
+  name: body
+  description: body
+
+commands:
+  - name: upload
+    path: inventory/binaries
+    description: Upload contents of a file
+    method: POST
+    bodyContent:
+      type: formdata
+    body:
+      - name: file
+        type: file
+        description: File
+
+      - name: foo
+        type: string[]
+        description: foo
+
+  #
+  # Boolean
+  #
+  - name: boolean
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: enable
+        type: boolean
+        description: enable
+
+  - name: booleanDefault
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: enable
+        type: booleanDefault
+        default: "false"
+        description: enable
+
+      - name: active
+        type: booleanDefault
+        description: booleanDefault
+        default: "true"
+
+  - name: optional_fragment
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: enable
+        type: optional_fragment
+        description: enable
+
+  #
+  # Date / Time
+  #
+  - name: datetime
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: dateFrom
+        type: datetime
+        description: dateFrom
+
+  - name: date
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: dateFrom
+        type: date
+        description: dateFrom
+
+  #
+  # Numbers
+  #
+  - name: integer
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: value
+        type: integer
+        description: value
+
+  - name: float
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: value
+        type: float
+        description: value
+
+  #
+  # String
+  #
+  - name: string
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: value
+        type: string
+        description: value
+
+  - name: stringStatic
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: value
+        type: stringStatic
+        description: value
+        hidden: true
+        value: some value
+
+  - name: stringArray
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: value
+        type: string[]
+        description: value
+
+  - name: stringcsvArray
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: value
+        type: stringcsv[]
+        description: value
+
+  #
+  # File based
+  #
+  - name: file
+    path: inventory/binaries
+    description: Upload contents of a file
+    method: POST
+    body:
+      - name: file
+        type: file
+        description: File
+      
+      - name: name
+        type: string
+        description: Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
+
+      - name: type
+        type: string
+        required: false
+        description: Custom type. If left blank, the MIME type will be detected from the file extension
+
+  - name: fileContents
+    path: inventory/binaries
+    description: Upload contents of a file
+    method: POST
+    body:
+      - name: file
+        type: fileContents
+        description: file
+
+  - name: fileContentsAsString
+    path: inventory/binaries
+    description: Read file and upload contents as part of a json request
+    method: POST
+    body:
+      - name: file
+        type: fileContentsAsString
+        description: file
+
+  - name: attachment
+    path: inventory/binaries
+    description: Upload file contents as binary
+    method: POST
+    body:
+      - name: file
+        type: attachment
+        description: file
+
+  - name: binaryUploadURL
+    path: inventory/managedObjects
+    description: Add fragment via boolean flag
+    method: POST
+    body:
+      - name: file
+        type: binaryUploadURL
+        property: myUrl
+        description: url of the uploaded binary
+
+  #
+  # JSON
+  #
+  - name: json
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: mydata
+        type: json_custom
+        description: json
