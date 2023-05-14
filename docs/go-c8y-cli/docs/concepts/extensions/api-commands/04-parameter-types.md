@@ -18,10 +18,10 @@ This page is not finished yet, so don't bother reading it just yet.
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
 |`boolean`|Boolean value| `--enable` |`true` or `false`|
-|`booleanDefault`|Boolean value with default| `--enable` |`true` or `false` (depending on the `.value`)|
-|`optional_fragment`|Add optional fragment| `--enable` |`"fragment":{}` (fragment is defined by the `.value` property|
+|`booleanDefault`|Boolean value with default| `--enable` |`true` or `false` (depending on the `.default` value)|
+|`optional_fragment`|Add optional fragment (empty json object)| `--enable` |`{}`|
 
-### Dates
+### Date / Time
 
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
@@ -32,15 +32,15 @@ This page is not finished yet, so don't bother reading it just yet.
 
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
-|`integer`|Integer value| `--item 42` |`42`|
-|`float`|Float value| `--item 42.1` |`42.1`|
+|`integer`|Integer value| `--value 42` |`42`|
+|`float`|Float value| `--value 42.1` |`42.1`|
 
 ### String
 
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
 |`string`|String value| `--item "text value"` |`"text value"`|
-|`stringStatic`|Fixed string which is always added|N/A|`"foobar"`|
+|`stringStatic`|Fixed string which is always added (set by `.value`)|N/A|`"foobar"`|
 |`string[]`|List of strings|`--item one --item two`|`["one", "two"]`|
 |`stringcsv[]`|List of strings as csv list|`--item one --item two`|`"one,two"`|
 
@@ -49,19 +49,18 @@ This page is not finished yet, so don't bother reading it just yet.
 
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
-|`file`|File| `--file ./foobar.txt` |`<<raw text contents>>`|
-|`fileContents`|File contents| `--file ./foobar.txt` |`<<raw text contents>>`|
-|`fileContentsAsString`|File contents as a string (for usage in a json body)| `--file ./foobar.txt` |`"name":"{{json escaped file contents}}"`|
-|`attachment`|File as an attachment| `--file ./foobar.txt` |`<<raw text contents>>`|
-|`binaryUploadURL`|Upload file as Inventory binary and return the URL| `--file ./foobar.txt` |`https://{host}/inventory/binaries/12345`|
+|`file`|File upload with optional meta data (Multipart FormData request)| `--file ./foobar.txt` |`<<raw file contents>>`|
+|`fileContents`|File contents (for binary uploads)| `--file ./foobar.txt` |`<<raw file contents>>`|
+|`fileContentsAsString`|File contents as a string (for usage in a json body)| `--file ./foobar.txt` |`"name":"<<json escaped file contents>>"`|
+|`attachment`|File upload without optional meta data (Multipart FormData request)| `--file ./foobar.txt` |`<<raw file contents>>`|
+|`binaryUploadURL`|Upload file as Inventory binary and return the URL| `--file ./foobar.txt` |`"https://{host}/inventory/binaries/12345"`|
 
 
 ### JSON
 
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
-|`json`|JSON or json short form| `--mydata "foo.bar=true"` |`{"foo":{"bar":true}}`|
-|`json_custom`|Custom json body| `--mydata "foo=bar"` |`{"foo":{"bar":true}}`|
+|`json_custom`|JSON shorthand (or json string)| `--mydata "foo.bar=true"` |`{"mydata":{"foo":{"bar":true}}}`|
 
 
 ## Cumulocity specific types
