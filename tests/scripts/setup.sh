@@ -29,12 +29,15 @@ setup () {
     create_child_device "agentParent01" "child"
     create_device_with_assets "agentAssetInfo01" "childAsset"
     create_device_with_additions "agentAdditionInfo01" "childAddition"
+    create_device_with_service "device02" "sshd" "systemd" "up"
 
     create_app "my-example-app"
     create_service_user "technician"
 
+    create_configuration "example-config" "agentConfig" "https://test.com/content/raw/app.json"
     create_firmware "iot-linux"
     create_firmware_version "iot-linux" "1.0.0" "https://example.com"
+    create_firmware_patch_version "iot-linux" "1.0.1" "https://example.com/patch1"
 
     create_software "my-app"
     create_software_version "my-app" "1.2.3" "https://example.com/debian/my-app-1.2.3.deb"
@@ -147,6 +150,17 @@ create_device_with_additions () {
     create_mo_with_name "${childNamePrefix}02" | c8y inventory update --data 'type=custominfo' | c8y devices children assign --childType addition --id "$parent" --silentStatusCodes 409 --silentExit
 }
 
+create_device_with_service () {
+    local parentName="$1"
+    local serviceName="$2"
+    local serviceType="$3"
+    local serviceStatus="$4"
+
+    parent=$(create_agent "$parentName" | c8y util show --select id --output csv )
+    c8y devices services get --device "$parent" --id "$serviceName" --silentStatusCodes 404 ||
+        c8y devices services create --device "$parent" --name "$serviceName" --serviceType "$serviceType" --status "$serviceStatus"
+}
+
 create_firmware () {
     local name="$1"
     c8y firmware get --id "$name" --silentStatusCodes 404 ||
@@ -159,6 +173,27 @@ create_firmware_version () {
     local url="$3"
     c8y firmware versions get --firmware "$name" --id "$version" --silentStatusCodes 404 ||
         c8y firmware versions create --firmware "$name" --version "$version" --url "$url"
+}
+
+create_firmware_patch_version () {
+    local name="$1"
+    local version="$2"
+    local dep_version="$3"
+    local url="$4"
+    c8y firmware patches get --firmware "$name" --id "$version" --silentStatusCodes 404 ||
+        c8y firmware patches create --firmware "$name" --version "$version" --dependencyVersion "$dep_version" --url "$url"
+}
+
+create_configuration () {
+    local name="$1"
+    local configurationType="$2"
+    local url="$3"
+    c8y configuration get --id "$name" --silentStatusCodes 404 ||
+        c8y configuration create \
+            --name "$name" \
+            --description "Example config" \
+            --configurationType "$configurationType" \
+            --url "$url"
 }
 
 create_software () {

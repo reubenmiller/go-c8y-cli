@@ -171,7 +171,7 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 	case "microservicename":
 		return completion.WithMicroservice(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "microserviceinstance":
-		return completion.WithMicroserviceInstance(p.Name, p.GetDependentProperty("id"), func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithMicroserviceInstance(p.Name, p.GetDependentProperty(0, "id"), func() (*c8y.Client, error) { return factory.Client() })
 	case "role[]", "roleself[]":
 		return completion.WithUserRole(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "devicerequest", "devicerequest[]":
@@ -194,28 +194,20 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 		return completion.WithAgent(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "software[]", "softwareName":
 		return completion.WithSoftware(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "softwareversion[]", "softwareversionName":
-		if len(p.DependsOn) > 0 {
-			return completion.WithSoftwareVersion(p.Name, p.DependsOn[0], func() (*c8y.Client, error) { return factory.Client() })
-		}
+	case "softwareversion[]", "softwareversionName", "softwareDetails":
+		return completion.WithSoftwareVersion(p.Name, p.GetDependentProperty(0, "software"), func() (*c8y.Client, error) { return factory.Client() })
 	case "firmware[]":
 		return completion.WithFirmware(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "firmwareversion[]", "firmwareVersionName":
-		if len(p.DependsOn) > 0 {
-			return completion.WithFirmwareVersion(p.Name, p.DependsOn[0], func() (*c8y.Client, error) { return factory.Client() })
-		}
+	case "firmwareversion[]", "firmwareversionName", "firmwareDetails":
+		return completion.WithFirmwareVersion(p.Name, p.GetDependentProperty(0, "firmware"), func() (*c8y.Client, error) { return factory.Client() })
 	case "firmwarepatch[]", "firmwarepatchName":
-		if len(p.DependsOn) > 0 {
-			return completion.WithFirmwarePatch(p.Name, p.DependsOn[0], func() (*c8y.Client, error) { return factory.Client() })
-		}
-	case "configuration[]":
+		return completion.WithFirmwarePatch(p.Name, p.GetDependentProperty(0, "firmware"), func() (*c8y.Client, error) { return factory.Client() })
+	case "configuration[]", "configurationDetails":
 		return completion.WithConfiguration(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "deviceprofile[]":
 		return completion.WithDeviceProfile(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "deviceservice[]":
-		if len(p.DependsOn) > 0 {
-			return completion.WithDeviceService(p.Name, p.DependsOn[0], func() (*c8y.Client, error) { return factory.Client() })
-		}
+		return completion.WithDeviceService(p.Name, p.GetDependentProperty(0, "device"), func() (*c8y.Client, error) { return factory.Client() })
 	case "certificate[]":
 		return completion.WithDeviceCertificate(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "subscriptionName":
@@ -239,7 +231,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		return nil
 	}
 	switch p.Type {
-	case "string", "stringStatic", "devicerequest", "json_custom", "directory", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "binaryUploadURL", "inventoryChildType", "subscriptionName", "subscriptionId", "file", "attachment", "fileContents", "fileContentsAsString", "certificatefile":
+	case "string", "stringStatic", "devicerequest", "json_custom", "directory", "softwareName", "softwareversionName", "softwareDetails", "firmwareName", "firmwareversionName", "firmwarepatchName", "firmwareDetails", "binaryUploadURL", "inventoryChildType", "subscriptionName", "subscriptionId", "file", "attachment", "fileContents", "fileContentsAsString", "certificatefile":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.Description)
 
 	case "json":
@@ -253,7 +245,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "id", "source.id", "managedObject.id", "deviceId")
 
-	case "string[]", "stringcsv[]", "devicerequest[]", "software[]", "softwareversion[]", "firmware[]", "firmwareversion[]", "firmwarepatch[]", "configuration[]", "deviceprofile[]", "deviceservice[]", "id[]", "user[]", "userself[]", "certificate[]":
+	case "string[]", "stringcsv[]", "devicerequest[]", "software[]", "softwareversion[]", "firmware[]", "firmwareversion[]", "firmwarepatch[]", "configuration[]", "configurationDetails", "deviceprofile[]", "deviceservice[]", "id[]", "user[]", "userself[]", "certificate[]":
 		cmd.Command.Flags().StringSliceP(p.Name, p.ShortName, []string{p.Default}, p.GetDescription())
 
 	case "device[]", "agent[]":
@@ -410,16 +402,16 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 		opts = append(opts, c8yfetcher.WithSoftwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "softwareDetails":
-		opts = append(opts, c8yfetcher.WithSoftwareVersionData(factory, "software", "version", "url", args, "", targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithSoftwareVersionData(factory, p.GetDependentProperty(0, "software"), p.Name, p.GetDependentProperty(1, "url"), args, "", targetProp, p.Format))
 
 	case "configurationDetails":
-		opts = append(opts, c8yfetcher.WithConfigurationFileData(factory, "configuration", "configurationType", "url", args, "", targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithConfigurationFileData(factory, p.Name, p.GetDependentProperty(0, "configurationType"), p.GetDependentProperty(1, "url"), args, "", targetProp, p.Format))
 
 	case "softwareversion[]":
-		opts = append(opts, c8yfetcher.WithSoftwareVersionByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithSoftwareVersionByNameFirstMatch(factory, p.GetDependentProperty(0, "software"), args, p.Name, targetProp, p.Format))
 
 	case "deviceservice[]":
-		opts = append(opts, c8yfetcher.WithDeviceServiceByNameFirstMatch(factory, p.GetDependentProperty("device"), args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithDeviceServiceByNameFirstMatch(factory, p.GetDependentProperty(0, "device"), args, p.Name, targetProp, p.Format))
 
 	case "certificatefile":
 		opts = append(opts, flags.WithCertificateFile(p.Name, targetProp))
@@ -429,11 +421,11 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "firmware[]":
 		opts = append(opts, c8yfetcher.WithFirmwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 	case "firmwareversion[]":
-		opts = append(opts, c8yfetcher.WithFirmwareVersionByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithFirmwareVersionByNameFirstMatch(factory, p.GetDependentProperty(0, "firmware"), args, p.Name, targetProp, p.Format))
 	case "firmwareDetails":
-		opts = append(opts, c8yfetcher.WithFirmwareVersionData(factory, "firmware", "version", "url", args, "", targetProp))
+		opts = append(opts, c8yfetcher.WithFirmwareVersionData(factory, p.GetDependentProperty(0, "firmware"), p.Name, p.GetDependentProperty(1, "url"), args, "", targetProp))
 	case "firmwarepatch[]":
-		opts = append(opts, c8yfetcher.WithFirmwarePatchByNameFirstMatch(factory, args, p.Name, targetProp))
+		opts = append(opts, c8yfetcher.WithFirmwarePatchByNameFirstMatch(factory, p.GetDependentProperty(0, "firmware"), args, p.Name, targetProp))
 
 	case "configuration[]":
 		opts = append(opts, c8yfetcher.WithConfigurationByNameFirstMatch(factory, args, p.Name, targetProp))

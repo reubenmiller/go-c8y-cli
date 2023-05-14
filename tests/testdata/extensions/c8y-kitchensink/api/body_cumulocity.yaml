@@ -210,10 +210,6 @@ commands:
         description: devicerequest
   
   #
-  # Repository: TODO
-  #
-
-  #
   # Users / User groups / Roles
   #
   - name: role
@@ -261,8 +257,33 @@ commands:
         type: usergroup[]
         description: usergroup
 
+  # --------------------------------
+  # Repository
+  # --------------------------------
   #
-  # TODO: Reorganize commands below
+  # Configuration
+  #
+  - name: configuration
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: configuration[]
+        description: configuration
+
+  - name: configurationDetails
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: configurationDetails
+        property: c8y_Configuration
+        description: configurationDetails
+
+  #
+  # Device Profiles
   #
   - name: deviceprofile
     path: inventory/managedObjects
@@ -272,3 +293,167 @@ commands:
       - name: id
         type: deviceprofile[]
         description: deviceprofile
+
+  #
+  # Firmware
+  #
+  - name: firmware
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: firmware[]
+        description: firmware
+
+  - name: firmwarename
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: name
+        type: firmwareName
+        description: firmware
+
+  - name: firmwareversion
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: sourceFirmware
+        type: firmware[]
+        description: firmware
+
+      - name: version
+        type: firmwareversion[]
+        description: firmwareversion
+        dependsOn:
+          - sourceFirmware
+
+  - name: firmwareversionName
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: firmware
+        type: firmware[]
+        description: firmware
+
+      - name: version
+        type: firmwareversionName
+        description: firmwareversion
+        dependsOn:
+          - firmware
+
+  - name: firmwarepatch
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: sourceFirmware
+        type: firmware[]
+        description: firmware
+
+      - name: patch
+        type: firmwarepatch[]
+        description: firmwarepatch
+        dependsOn:
+          - sourceFirmware
+
+  - name: firmwarepatchName
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: firmware
+        type: firmware[]
+        description: firmware
+
+      - name: patch
+        type: firmwarepatchName
+        description: firmwarepatchName
+        dependsOn:
+          - firmware
+
+  - name: firmwareDetails
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: sourceFirmware
+        type: firmware[]
+        description: firmware
+
+      - name: version
+        type: firmwareDetails
+        property: c8y_Firmware
+        description: firmware version
+        dependsOn:
+          - sourceFirmware
+
+  #
+  # Software
+  #
+  - name: software
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: id
+        type: software[]
+        description: software
+
+  - name: softwareName
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: name
+        type: softwareName
+        description: softwareName
+
+  - name: softwareDetails
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: software
+        type: software[]
+        description: software
+
+      - name: version
+        type: softwareDetails
+        property: c8y_Software
+        description: version
+        dependsOn:
+          - software
+
+  - name: softwareversion
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: software
+        type: software[]
+        description: software
+
+      - name: version
+        type: softwareversion[]
+        description: version
+        dependsOn:
+          - software
+
+  - name: softwareversionName
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: sourceSoftware
+        type: software[]
+        description: software
+
+      - name: version
+        type: softwareversionName
+        description: version
+        dependsOn:
+          - sourceSoftware

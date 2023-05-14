@@ -292,9 +292,12 @@ func (p *Parameter) GetTargetProperty() string {
 
 // Get the first dependent property name defined for the current parameter.
 // Return a default value if no dependent property is defined
-func (p *Parameter) GetDependentProperty(defaultValue string) string {
-	if len(p.DependsOn) > 0 {
-		return p.DependsOn[0]
+func (p *Parameter) GetDependentProperty(index int, defaultValue string) string {
+	if len(p.DependsOn) == 0 {
+		return defaultValue
+	}
+	if index < len(p.DependsOn) {
+		return p.DependsOn[index]
 	}
 	return defaultValue
 }

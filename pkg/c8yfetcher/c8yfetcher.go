@@ -653,7 +653,7 @@ func WithApplicationByNameFirstMatch(factory *cmdutil.Factory, args []string, op
 // WithHostedApplicationByNameFirstMatch add reference by name matching for hosted (web) applications via cli args. Only the first match will be used
 func WithHostedApplicationByNameFirstMatch(factory *cmdutil.Factory, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
-		opt := WithReferenceByNameFirstMatch(factory, NewHostedApplicationFetcher(factory), args, opts...)
+		opt := WithReferenceByNameFirstMatch(factory, NewHostedApplicationFetcher(factory, false), args, opts...)
 		return opt(cmd, inputIterators)
 	}
 }
@@ -768,10 +768,10 @@ func WithSoftwareVersionData(factory *cmdutil.Factory, flagSoftware, flagVersion
 }
 
 // WithSoftwareVersionUrl add software version url
-func WithSoftwareVersionUrlByNameFirstMatch(factory *cmdutil.Factory, args []string, opts ...string) flags.GetOption {
+func WithSoftwareVersionUrlByNameFirstMatch(factory *cmdutil.Factory, softwareFlag string, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		software := ""
-		if v, err := flags.GetFlagStringValues(cmd, "software"); err == nil && len(v) > 0 {
+		if v, err := flags.GetFlagStringValues(cmd, softwareFlag); err == nil && len(v) > 0 {
 			software = v[0]
 		}
 		opt := WithManagedObjectPropertyFirstMatch(factory, NewSoftwareVersionFetcher(factory, software), args, "c8y_Software.url", opts...)
@@ -780,10 +780,10 @@ func WithSoftwareVersionUrlByNameFirstMatch(factory *cmdutil.Factory, args []str
 }
 
 // WithSoftwareVersionByNameFirstMatch add reference by name matching for software version via cli args. Only the first match will be used
-func WithSoftwareVersionByNameFirstMatch(factory *cmdutil.Factory, args []string, opts ...string) flags.GetOption {
+func WithSoftwareVersionByNameFirstMatch(factory *cmdutil.Factory, softwareFlag string, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		software := ""
-		if v, err := cmd.Flags().GetStringSlice("software"); err == nil && len(v) > 0 {
+		if v, err := cmd.Flags().GetStringSlice(softwareFlag); err == nil && len(v) > 0 {
 			software = v[0]
 		}
 		opt := WithReferenceByNameFirstMatch(factory, NewSoftwareVersionFetcher(factory, software), args, opts...)
@@ -812,11 +812,11 @@ func WithFirmwareByNameFirstMatch(factory *cmdutil.Factory, args []string, opts 
 }
 
 // WithFirmwareVersionByNameFirstMatch add reference by name matching for firmware version via cli args. Only the first match will be used
-func WithFirmwareVersionByNameFirstMatch(factory *cmdutil.Factory, args []string, opts ...string) flags.GetOption {
+func WithFirmwareVersionByNameFirstMatch(factory *cmdutil.Factory, flagFirmware string, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		firmware := ""
 		// Note: Lookup of firmware does not work if "firmware" is piped input
-		if v, err := cmd.Flags().GetStringSlice("firmware"); err == nil && len(v) > 0 {
+		if v, err := cmd.Flags().GetStringSlice(flagFirmware); err == nil && len(v) > 0 {
 			firmware = v[0]
 		}
 		opt := WithReferenceByNameFirstMatch(factory, NewFirmwareVersionFetcher(factory, firmware, false), args, opts...)
@@ -894,11 +894,11 @@ func WithFirmwareVersionData(factory *cmdutil.Factory, flagFirmware, flagVersion
 }
 
 // WithFirmwarePatchByNameFirstMatch add reference by name matching for firmware version via cli args. Only the first match will be used
-func WithFirmwarePatchByNameFirstMatch(factory *cmdutil.Factory, args []string, opts ...string) flags.GetOption {
+func WithFirmwarePatchByNameFirstMatch(factory *cmdutil.Factory, firmwareFlag string, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		firmware := ""
 		// Note: Lookup of firmware does not work if "firmware" is piped input
-		if v, err := cmd.Flags().GetStringSlice("firmware"); err == nil && len(v) > 0 {
+		if v, err := cmd.Flags().GetStringSlice(firmwareFlag); err == nil && len(v) > 0 {
 			firmware = v[0]
 		}
 		opt := WithReferenceByNameFirstMatch(factory, NewFirmwareVersionFetcher(factory, firmware, true), args, opts...)

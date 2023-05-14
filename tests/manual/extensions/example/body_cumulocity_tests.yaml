@@ -145,12 +145,12 @@ tests:
         body.file: MIIBoDCCAUagAwIBAgIISOLoBRYAHmwwCgYIKoZIzj0EAwIwPDEQMA4GA1UEAwwHdGVkZ2UwNDESMBAGA1UECgwJVGhpbiBFZGdlMRQwEgYDVQQLDAtUZXN0IERldmljZTAeFw0yMjA2MTcxMzQ3MzNaFw0yMzA2MTcxMzQ3MzNaMDwxEDAOBgNVBAMMB3RlZGdlMDQxEjAQBgNVBAoMCVRoaW4gRWRnZTEUMBIGA1UECwwLVGVzdCBEZXZpY2UwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASw2fovoPAzOtH8qH0KiAycbssZkuW0kRBXxLzp2XlBX7RFuXz9iATdANGIbhruG9AfwFu5Bm+5YDGEMfF9q/TWozIwMDAdBgNVHQ4EFgQUbB4AFgXo4kirlR9b4UVQ0DhcLC0wDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNIADBFAiAwByF4Si/A6aUzmKdq5Ehj6ViAXrMtqN4MquxCZt5w6gIhAMNRdQZTFFocbI+Ybok+Gb35043kXLtQK7YgbQB/mYre
 
   #
-  # Device management: TODO - requires a device with a service
+  # Device management
   #
   lookup device service:
     skip: true
     command: |
-      c8y kitchensink body_complex deviceservice --device 1111 --service 2222
+      c8y kitchensink body_complex deviceservice --device device02 --service sshd
     stdout:
       json:
         body.device: r/^\d+$
@@ -212,7 +212,30 @@ tests:
         body.group: r/^\d+$
 
   #
-  # TODO: refactor and sort tests below
+  # Repository
+  #
+
+  #
+  # Configuration
+  #
+  lookup configuration:
+    command: |
+      c8y kitchensink body_complex configuration --id example-config
+    stdout:
+      json:
+        body.id: r/^\d+$
+
+  lookup configurationDetails:
+    command: |
+      c8y kitchensink body_complex configurationDetails --id example-config
+    stdout:
+      json:
+        body.c8y_Configuration.name: "example-config"
+        body.c8y_Configuration.type: "agentConfig"
+        body.c8y_Configuration.url: "https://test.com/content/raw/app.json"
+
+  #
+  # Device profile
   #
   lookup deviceprofile:
     command: |
@@ -220,3 +243,105 @@ tests:
     stdout:
       json:
         body.id: r/^\d+$
+
+  #
+  # Firmware
+  #
+  lookup firmware:
+    command: |
+      c8y kitchensink body_complex firmware --id iot-linux
+    stdout:
+      json:
+        body.id: r/^\d+$
+
+  lookup firmwarename:
+    command: |
+      c8y kitchensink body_complex firmwarename --name iot-linux
+    stdout:
+      json:
+        body.name: iot-linux
+
+  lookup firmwareversion:
+    command: |
+      c8y kitchensink body_complex firmwareversion --sourceFirmware iot-linux --version 1.0.0
+    stdout:
+      json:
+        body.sourceFirmware: r/^\d+$
+        body.version: r/^\d+$
+
+  lookup firmwareversionName:
+    command: |
+      c8y kitchensink body_complex firmwareversionName --firmware iot-linux --version 1.0.0
+    stdout:
+      json:
+        body.firmware: r/^\d+$
+        body.version: "1.0.0"
+
+  lookup firmwarepatch:
+    command: |
+      c8y kitchensink body_complex firmwarepatch --sourceFirmware iot-linux --patch 1.0.1
+    stdout:
+      json:
+        body.sourceFirmware: r/^\d+$
+        body.patch: r/^\d+$
+
+  lookup firmwarepatchName:
+    command: |
+      c8y kitchensink body_complex firmwarepatchName --firmware iot-linux --patch 1.0.1
+    stdout:
+      json:
+        body.firmware: r/^\d+$
+        body.patch: "1.0.1"
+
+  lookup firmwareDetails:
+    command: |
+      c8y kitchensink body_complex firmwareDetails --sourceFirmware iot-linux --version 1.0.0
+    stdout:
+      json:
+        body.sourceFirmware: r/^\d+$
+        body.c8y_Firmware.name: "iot-linux"
+        body.c8y_Firmware.url: "https://example.com"
+        body.c8y_Firmware.version: "1.0.0"
+
+  #
+  # Software
+  #
+  lookup software:
+    command: |
+      c8y kitchensink body_complex software --id my-app
+    stdout:
+      json:
+        body.id: r/^\d+$
+
+  lookup softwareName:
+    command: |
+      c8y kitchensink body_complex softwareName --name my-app
+    stdout:
+      json:
+        body.name: my-app
+
+  lookup softwareDetails:  
+    command: |
+      c8y kitchensink body_complex softwareDetails --software my-app --version "1.2.3"
+    stdout:
+      json:
+        body.software: r/^\d+$
+        body.c8y_Software.name: my-app
+        body.c8y_Software.version: "1.2.3"
+        body.c8y_Software.url: "https://example.com/debian/my-app-1.2.3.deb"
+
+  lookup softwareversion:
+    command: |
+      c8y kitchensink body_complex softwareversion --software my-app --version "1.2.3"
+    stdout:
+      json:
+        body.software: r/^\d+$
+        body.version: r/^\d+$
+
+  lookup softwareversionName:
+    command: |
+      c8y kitchensink body_complex softwareversionName --sourceSoftware my-app --version "1.2.3"
+    stdout:
+      json:
+        body.sourceSoftware: r/^\d+$
+        body.version: "1.2.3"

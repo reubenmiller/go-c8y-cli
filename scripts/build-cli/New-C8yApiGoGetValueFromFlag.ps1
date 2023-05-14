@@ -136,7 +136,7 @@
         "softwareName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
         
         # software version array
-        "softwareversion[]" = "c8yfetcher.WithSoftwareVersionByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
+        "softwareversion[]" = "c8yfetcher.WithSoftwareVersionByNameFirstMatch(n.factory, `"software`", args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         "deviceservice[]" = "c8yfetcher.WithDeviceServiceByNameFirstMatch(n.factory, `"device`", args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
@@ -156,7 +156,7 @@
         "firmwareName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # firmware version array
-        "firmwareversion[]" = "c8yfetcher.WithFirmwareVersionByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
+        "firmwareversion[]" = "c8yfetcher.WithFirmwareVersionByNameFirstMatch(n.factory, `"firmware`", args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # firmware version name
         "firmwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
@@ -166,7 +166,7 @@
         ) -join "`n"
 
         # firmware version patch array
-        "firmwarepatch[]" = "c8yfetcher.WithFirmwarePatchByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"),"
+        "firmwarepatch[]" = "c8yfetcher.WithFirmwarePatchByNameFirstMatch(n.factory, `"firmware`", args, `"${prop}`", `"${queryParam}`"),"
 
         # firmware patch name
         "firmwarepatchName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"

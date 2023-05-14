@@ -225,7 +225,7 @@
         "firmwareversion[]",
         "firmwarepatch[]",
         "firmwareName",
-        "firmwareVersionName",
+        "firmwareversionName",
         "firmwareDetails",
         "firmwarepatchName",
         "software[]",

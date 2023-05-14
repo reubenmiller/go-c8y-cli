@@ -265,7 +265,7 @@
                 "firmwarepatch[]",
                 "firmwarepatchName",
                 "firmwareversion[]",
-                "firmwareVersionName",
+                "firmwareversionName",
                 "float",
                 "hostedapplication",
                 "id[]",

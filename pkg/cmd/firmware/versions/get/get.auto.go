@@ -164,7 +164,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithFirmwareVersionByNameFirstMatch(n.factory, args, "id", "id"),
+		c8yfetcher.WithFirmwareVersionByNameFirstMatch(n.factory, "firmware", args, "id", "id"),
 		c8yfetcher.WithFirmwareByNameFirstMatch(n.factory, args, "firmware", "firmware"),
 	)
 	if err != nil {

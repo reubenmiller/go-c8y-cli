@@ -10,11 +10,13 @@ import (
 )
 
 type HostedApplicationFetcher struct {
+	excludeParentTenant bool
 	*CumulocityFetcher
 }
 
-func NewHostedApplicationFetcher(factory *cmdutil.Factory) *HostedApplicationFetcher {
+func NewHostedApplicationFetcher(factory *cmdutil.Factory, excludeParentTenant bool) *HostedApplicationFetcher {
 	return &HostedApplicationFetcher{
+		excludeParentTenant: excludeParentTenant,
 		CumulocityFetcher: &CumulocityFetcher{
 			factory: factory,
 		},
@@ -90,7 +92,7 @@ func (f *HostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, e
 	}
 
 	// If not results are found, then also include any matches (not just in the current tenant)
-	if len(results) == 0 {
+	if len(results) == 0 && !f.excludeParentTenant {
 		for i, app := range col.Applications {
 			if app.Type == "HOSTED" && pattern.MatchString(app.Name) {
 				results = append(results, fetcherResultSet{
@@ -108,8 +110,8 @@ func (f *HostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, e
 // FindHostedApplications returns hosted applications given either an id or search text
 // @values: An array of ids, or names (with wildcards)
 // @lookupID: Lookup the data if an id is given. If a non-id text is given, the result will always be looked up.
-func FindHostedApplications(factory *cmdutil.Factory, values []string, lookupID bool, format string) ([]entityReference, error) {
-	f := NewHostedApplicationFetcher(factory)
+func FindHostedApplications(factory *cmdutil.Factory, values []string, lookupID bool, format string, excludeParentTenant bool) ([]entityReference, error) {
+	f := NewHostedApplicationFetcher(factory, excludeParentTenant)
 
 	formattedValues, err := lookupEntity(f, values, lookupID, format)
 

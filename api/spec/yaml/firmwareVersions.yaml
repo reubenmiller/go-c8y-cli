@@ -312,7 +312,7 @@ commands:
         description: Firmware name
 
       - name: version
-        type: firmwareVersionName
+        type: firmwareversionName
         dependsOn:
           - firmware
         required: false
