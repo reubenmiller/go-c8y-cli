@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -51,26 +50,57 @@ func (f *JSONFilters) AddSelectors(props ...string) {
 	f.Selectors = append(f.Selectors, props...)
 }
 
+func splitFilter(s string, sep rune, maxSplit int) []string {
+	quoted := false
+	openedQuote := ' ' // Use a default character which is not valid quote
+	a := strings.FieldsFunc(s, func(r rune) bool {
+		// Support both single and double quotes surrounding a string
+		if r == '"' || r == '\'' {
+			if !quoted {
+				openedQuote = r
+				quoted = !quoted
+			} else if r == openedQuote {
+				quoted = !quoted
+			}
+		}
+		return !quoted && r == sep
+	})
+
+	// Join rest columns
+	if len(a) > maxSplit {
+		b := a[0 : maxSplit-1]
+		b = append(b, strings.Join(a[maxSplit-1:], string(sep)))
+		return b
+	}
+	return a
+}
+
 // AddRawFilters add list of raw filters
 func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
 	for _, item := range rawFilters {
-		sepPattern := regexp.MustCompile(`(\s*[\-]?(has|nothas|hasnot|missing|keyIn|keyNotIn|like|match|notlike|notmatch|newerthan|olderthan|datelte|datelt|dategt|dategte|version|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWith|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
 
-		parts := sepPattern.Split(item, 2)
+		property := ""
+		operator := ""
+		value := ""
 
-		if len(parts) != 2 {
-			continue
+		fields := splitFilter(item, ' ', 3)
+		switch len(fields) {
+		case 0, 1:
+		case 2:
+			operator = fields[0]
+			value = fields[1]
+		default: // len > 3
+			property = fields[0]
+			operator = fields[1]
+			value = fields[2]
 		}
-		operator := sepPattern.FindString(item)
 
 		if operator == "" {
 			operator = "contains"
 		}
-		operator = strings.TrimSpace(operator)
-		operator = strings.ReplaceAll(operator, " ", "")
-		value := strings.TrimSpace(parts[1])
+
 		if isQuotedString(value) {
-			f.Add(strings.TrimSpace(parts[0]), operator, strings.Trim(value, "\"'"))
+			f.Add(property, operator, strings.Trim(value, "\"'"))
 			continue
 		}
 
@@ -88,28 +118,28 @@ func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
 		if v, err := strconv.ParseFloat(value, 64); err == nil {
 			if strings.Contains(value, ".") {
 				// use float
-				f.Add(strings.TrimSpace(parts[0]), operator, v)
+				f.Add(strings.TrimSpace(property), operator, v)
 			} else {
 				// use int (required by jsonq in some cases, i.e. array length operators like leneq etc.)
-				f.Add(strings.TrimSpace(parts[0]), operator, int(v))
+				f.Add(strings.TrimSpace(property), operator, int(v))
 			}
 		} else if v, err := strconv.ParseBool(value); err == nil {
 			// Check boolean values
-			f.Add(strings.TrimSpace(parts[0]), operator, bool(v))
+			f.Add(strings.TrimSpace(property), operator, bool(v))
 		} else {
-			if parts[0] == "" {
+			if property == "" {
 				// Support keyIn and keyNotIn operators which don't take
 				if strings.Contains(value, ".") {
 					lastIdx := strings.LastIndex(value, ".")
-					parts[0] = value[0:lastIdx]
+					property = value[0:lastIdx]
 					value = value[lastIdx+1:]
 				} else {
 					// Default to root element
-					parts[0] = "."
+					property = "."
 				}
 			}
 
-			f.Add(strings.TrimSpace(parts[0]), operator, value)
+			f.Add(strings.TrimSpace(property), operator, value)
 		}
 	}
 	return nil
