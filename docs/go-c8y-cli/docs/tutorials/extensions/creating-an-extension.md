@@ -27,14 +27,14 @@ Building `go-c8y-cli` requires go version ≥ 1.20.
 <CodeExample transform="false">
 
 ```bash
-go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@414bd985a5554dd4301716660b6d54255236b4be
+go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@219a3eb7fb2f13ef86203e43758cfab00d700c12
 
 # Add the go bin folder to your path variable (ideally add this to your shell profile (.zshrc for zsh or .bashrc for bash)
 export PATH="$(go env GOPATH)/bin:$PATH"
 ```
 
 ```powershell
-go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@414bd985a5554dd4301716660b6d54255236b4be
+go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@219a3eb7fb2f13ef86203e43758cfab00d700c12
 
 # Add the go bin folder to the path variable and set a powershell alias to it
 if ($IsWindows) {
@@ -47,7 +47,7 @@ if ($IsWindows) {
 ```
 
 ```powershell
-go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@414bd985a5554dd4301716660b6d54255236b4be
+go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@219a3eb7fb2f13ef86203e43758cfab00d700c12
 
 # Add the go bin folder to the path variable and set a powershell alias to it
 if ($IsWindows) {
