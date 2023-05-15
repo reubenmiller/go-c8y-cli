@@ -508,3 +508,56 @@ tests:
     stdout:
       line-count: 0
       match-pattern: "^$"
+
+  It filters a domain property:
+    command: |
+      echo '{"domain": "c8y.com"}' | c8y util show --filter "domain like c8y*" -o json -c
+    exit-code: 0
+    stdout:
+      line-count: 1
+      exactly: |
+        {"domain":"c8y.com"}
+
+  It filters using a property matching an operator name:
+    command: |
+      echo '{"in": "test"}' | c8y util show --filter "in eq test" -o json -c
+    exit-code: 0
+    stdout:
+      line-count: 1
+      exactly: |
+        {"in":"test"}
+
+  It supports filtering by the has operator (match):
+    command: |
+      echo '{"in": "test"}' | c8y util show --filter "has in" -o json -c
+    exit-code: 0
+    stdout:
+      line-count: 1
+      exactly: |
+        {"in":"test"}
+
+  It supports filtering by the has operator (no match):
+    command: |
+      echo '{"in2": "test"}' | c8y util show --filter "has in" -o json -c
+    exit-code: 0
+    stdout:
+      line-count: 0
+      match-pattern: "^$"
+
+  It supports double quotes:
+    command: |
+      echo '{"in": "test"}' | c8y util show --filter "in eq \"test\"" -o json -c
+    exit-code: 0
+    stdout:
+      line-count: 1
+      exactly: |
+        {"in":"test"}
+
+  It supports single quotes:
+    command: |
+      echo '{"in": "test"}' | c8y util show --filter "in eq 'test'" -o json -c
+    exit-code: 0
+    stdout:
+      line-count: 1
+      exactly: |
+        {"in":"test"}
