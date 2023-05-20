@@ -447,7 +447,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	extensions := f.ExtensionManager().List()
 	if err := ConvertToCobraCommands(f, cmd, extensions); err != nil {
 		if log, logErr := f.Logger(); logErr == nil {
-			log.Fatalf("Invalid extension.  %s", err)
+			log.Warnf("Errors while loading some extensions. Functionality may be reduced. %s", err)
 		}
 	}
 
@@ -516,12 +516,15 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 				defer spec.Close()
 				extCommand, err := cmdparser.ParseCommand(spec, f, cmd.Root())
 				if err != nil {
-					return fmt.Errorf("%w. file=%s", err, path)
+					// Only log a warning for the user, don't prevent the whole cli from working
+					log.Warnf("Invalid extension file. reason=%s. file=%s", err, path)
+					// return fmt.Errorf("%w. file=%s", err, path)
+				} else {
+					if extCommand != nil {
+						extRoot.AddCommand(extCommand)
+					}
 				}
 
-				if extCommand != nil {
-					extRoot.AddCommand(extCommand)
-				}
 				return nil
 			})
 			if walkErr != nil {

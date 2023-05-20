@@ -3,6 +3,7 @@ package cmdparser
 import (
 	"fmt"
 	"io"
+	"os"
 	"strconv"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/integration/models"
@@ -82,7 +83,14 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command)
 			flagNames[param.Name] = 0
 
 			if err := AddFlag(subcmd, &param, factory); err != nil {
-				return nil, err
+				if file, ok := r.(*os.File); ok {
+					log.Warnf("Extension: Ignoring invalid flag. details=%s, command=%s, file=%s", err, item.Name, file.Name())
+				} else {
+					log.Warnf("Extension: Ignoring invalid flag. details=%s, command=%s", err, item.Name)
+				}
+				// TODO: Is it better to be more forgiving or should it fail hard?
+				// return nil, err
+				continue
 			}
 
 			if param.AcceptsPipeline() {
