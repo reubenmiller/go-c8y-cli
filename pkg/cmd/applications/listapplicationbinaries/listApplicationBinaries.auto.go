@@ -153,7 +153,7 @@ func (n *ListApplicationBinariesCmd) RunE(cmd *cobra.Command, args []string) err
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithHostedApplicationByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithHostedApplicationByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

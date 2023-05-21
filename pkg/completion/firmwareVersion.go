@@ -1,7 +1,6 @@
 package completion
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
@@ -46,7 +45,7 @@ func WithFirmwareVersion(flagVersion string, flagNameFirmware string, clientFunc
 				} else {
 					// Lookup by name
 					packages, _, err := client.Inventory.GetManagedObjects(
-						context.Background(),
+						WithDisabledDryRunContext(client),
 						&c8y.ManagedObjectOptions{
 							Query: fmt.Sprintf("$filter=(type eq '%s') and name eq '%s' $orderby=name,creationTime", "c8y_Firmware", firmwareName),
 						},
@@ -60,7 +59,7 @@ func WithFirmwareVersion(flagVersion string, flagNameFirmware string, clientFunc
 			}
 
 			items, _, err := client.Inventory.GetManagedObjects(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				opt,
 			)
 

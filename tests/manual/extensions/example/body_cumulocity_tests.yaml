@@ -1,0 +1,347 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRY_FORMAT: json
+
+tests:
+  #
+  # Applications
+  #
+  application:
+    command: |
+      c8y kitchensink body_complex application --id administration
+    stdout:
+      json:
+        body.id: r/^[1-9][0-9]*$
+
+  applicationname:
+    command: |
+      c8y kitchensink body_complex applicationname --name cockpit
+    stdout:
+      json:
+        body.name: cockpit
+
+  hostedapplication:
+    command: |
+      c8y kitchensink body_complex hostedapplication --id cockpit
+    stdout:
+      json:
+        body.id: r/^[1-9][0-9]*$
+
+  microservice:
+    command: |
+      c8y kitchensink body_complex microservice --id report-agent
+    stdout:
+      json:
+        body.id: r/^[1-9][0-9]*$
+
+  microservicename:
+    command: |
+      c8y kitchensink body_complex microservicename --name report-agent
+    stdout:
+      json:
+        body.name: report-agent
+
+  microserviceinstance (completion):
+    # Only do completion check because lookups are not supported
+    command: |
+      c8y __complete kitchensink body_complex microserviceinstance --microservice advanced-software-mgmt --dry --instance ""
+    stdout:
+      lines:
+        1: r/advanced-software-mgmt-scope.*
+        # 2: ":0"
+        # 3: "Completion ended with directive: ShellCompDirectiveDefault"
+
+  #
+  # Devices / Agents / Sources
+  #
+  lookup source:
+    command: |
+      echo "1\n2" | c8y kitchensink body_complex source --id - | c8y util show --select body.id -o csv
+    stdout:
+      exactly: |
+        1
+        2
+
+  lookup id:
+    command: |
+      c8y kitchensink body_complex idArray --id 1,2 3 4 5
+    stdout:
+      json:
+        body.id.0: "1"
+        body.id.1: "2"
+        body.id.2: "3"
+        body.id.3: "4"
+        body.id.4: "5"
+
+  lookup agent:
+    command: |
+      c8y kitchensink body_complex agent --id agent01
+    stdout:
+      json:
+        body.id: r/^\d+$
+
+  lookup device:
+    command: |
+      c8y kitchensink body_complex device --id device01
+    stdout:
+      json:
+        body.id: r/^\d+$
+
+  #
+  # Device Groups
+  #
+  lookup devicegroup:
+    command: |
+      c8y kitchensink body_complex devicegroup --id "My Group"
+    stdout:
+      json:
+        body.id: r/^\d+$
+
+  lookup smartgroup:
+    command: |
+      c8y kitchensink body_complex smartgroup --id "my smartgroup"
+    stdout:
+      json:
+        body.id: r/^\d+$
+
+  #
+  # Tenant
+  #
+  lookup tenant:
+    command: |
+      c8y kitchensink body_complex tenant --id $C8Y_TENANT
+    stdout:
+      json:
+        body.id: r/^$C8Y_TENANT$
+
+  lookup tenantname:
+    command: |
+      c8y kitchensink body_complex tenantname --name $C8Y_TENANT
+    stdout:
+      json:
+        body.name: r/^$C8Y_TENANT$
+
+  #
+  # Misc
+  #
+  lookup certificate:
+    command: |
+      c8y kitchensink body_complex certificate --id MyCert
+    stdout:
+      json:
+        body.id: r/^[0-9a-zA-Z]+$
+
+  lookup certificatefile:
+    command: |
+      c8y kitchensink body_complex certificatefile --file testdata/trustedcert.pem
+    stdout:
+      json:
+        body.file: MIIBoDCCAUagAwIBAgIISOLoBRYAHmwwCgYIKoZIzj0EAwIwPDEQMA4GA1UEAwwHdGVkZ2UwNDESMBAGA1UECgwJVGhpbiBFZGdlMRQwEgYDVQQLDAtUZXN0IERldmljZTAeFw0yMjA2MTcxMzQ3MzNaFw0yMzA2MTcxMzQ3MzNaMDwxEDAOBgNVBAMMB3RlZGdlMDQxEjAQBgNVBAoMCVRoaW4gRWRnZTEUMBIGA1UECwwLVGVzdCBEZXZpY2UwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASw2fovoPAzOtH8qH0KiAycbssZkuW0kRBXxLzp2XlBX7RFuXz9iATdANGIbhruG9AfwFu5Bm+5YDGEMfF9q/TWozIwMDAdBgNVHQ4EFgQUbB4AFgXo4kirlR9b4UVQ0DhcLC0wDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNIADBFAiAwByF4Si/A6aUzmKdq5Ehj6ViAXrMtqN4MquxCZt5w6gIhAMNRdQZTFFocbI+Ybok+Gb35043kXLtQK7YgbQB/mYre
+
+  #
+  # Device management
+  #
+  lookup device service:
+    skip: true
+    command: |
+      c8y kitchensink body_complex deviceservice --device device02 --service sshd
+    stdout:
+      json:
+        body.device: r/^\d+$
+        body.service: r/^\d+$
+
+  #
+  # Device requests
+  #
+  lookup devicerequest:
+    command: |
+      c8y kitchensink body_complex devicerequest --id myspecialdevice
+    stdout:
+      json:
+        body.id: myspecialdevice
+
+  lookup devicerequestArray:
+    command: |
+      c8y kitchensink body_complex devicerequestArray --id myspecialdevice
+    stdout:
+      json:
+        body.id.0: myspecialdevice
+
+  #
+  # Users / User groups / Roles
+  #
+  lookup role:
+    command: |
+      c8y kitchensink body_complex role --role "ROLE_ALARM_REA*"
+    stdout:
+      json:
+        body.role: ROLE_ALARM_READ
+
+  lookup roleself:
+    command: |
+      c8y kitchensink body_complex roleself --roleself "ROLE_ALARM_REA*"
+    stdout:
+      json:
+        body.roleself: r/^https://.+/user/roles/ROLE_ALARM_READ$
+  
+  lookup user:
+    command: |
+      c8y kitchensink body_complex user --user "peterpi@example.com"
+    stdout:
+      json:
+        body.user: peterpi@example.com
+
+  lookup userself:
+    command: |
+      c8y kitchensink body_complex userself --user "peterpi@example.com"
+    stdout:
+      json:
+        body.user: r/^https://.*/user/$C8Y_TENANT/users/peterpi@example.com$
+
+  lookup usergroup:
+    command: |
+      c8y kitchensink body_complex usergroup --group "admins"
+    stdout:
+      json:
+        body.group: r/^\d+$
+
+  #
+  # Repository
+  #
+
+  #
+  # Configuration
+  #
+  lookup configuration:
+    command: |
+      c8y kitchensink body_complex configuration --id example-config
+    stdout:
+      json:
+        body.id: r/^\d+$
+
+  lookup configurationDetails:
+    command: |
+      c8y kitchensink body_complex configurationDetails --id example-config
+    stdout:
+      json:
+        body.c8y_Configuration.name: "example-config"
+        body.c8y_Configuration.type: "agentConfig"
+        body.c8y_Configuration.url: "https://test.com/content/raw/app.json"
+
+  #
+  # Device profile
+  #
+  lookup deviceprofile:
+    command: |
+      c8y kitchensink body_complex deviceprofile --id profile01
+    stdout:
+      json:
+        body.id: r/^\d+$
+
+  #
+  # Firmware
+  #
+  lookup firmware:
+    command: |
+      c8y kitchensink body_complex firmware --id iot-linux
+    stdout:
+      json:
+        body.id: r/^\d+$
+
+  lookup firmwarename:
+    command: |
+      c8y kitchensink body_complex firmwarename --name iot-linux
+    stdout:
+      json:
+        body.name: iot-linux
+
+  lookup firmwareversion:
+    command: |
+      c8y kitchensink body_complex firmwareversion --sourceFirmware iot-linux --version 1.0.0
+    stdout:
+      json:
+        body.sourceFirmware: r/^\d+$
+        body.version: r/^\d+$
+
+  lookup firmwareversionName:
+    command: |
+      c8y kitchensink body_complex firmwareversionName --firmware iot-linux --version 1.0.0
+    stdout:
+      json:
+        body.firmware: r/^\d+$
+        body.version: "1.0.0"
+
+  lookup firmwarepatch:
+    command: |
+      c8y kitchensink body_complex firmwarepatch --sourceFirmware iot-linux --patch 1.0.1
+    stdout:
+      json:
+        body.sourceFirmware: r/^\d+$
+        body.patch: r/^\d+$
+
+  lookup firmwarepatchName:
+    command: |
+      c8y kitchensink body_complex firmwarepatchName --firmware iot-linux --patch 1.0.1
+    stdout:
+      json:
+        body.firmware: r/^\d+$
+        body.patch: "1.0.1"
+
+  lookup firmwareDetails:
+    command: |
+      c8y kitchensink body_complex firmwareDetails --sourceFirmware iot-linux --version 1.0.0
+    stdout:
+      json:
+        body.sourceFirmware: r/^\d+$
+        body.c8y_Firmware.name: "iot-linux"
+        body.c8y_Firmware.url: "https://example.com"
+        body.c8y_Firmware.version: "1.0.0"
+
+  #
+  # Software
+  #
+  lookup software:
+    command: |
+      c8y kitchensink body_complex software --id my-app
+    stdout:
+      json:
+        body.id: r/^\d+$
+
+  lookup softwareName:
+    command: |
+      c8y kitchensink body_complex softwareName --name my-app
+    stdout:
+      json:
+        body.name: my-app
+
+  lookup softwareDetails:  
+    command: |
+      c8y kitchensink body_complex softwareDetails --software my-app --version "1.2.3"
+    stdout:
+      json:
+        body.software: r/^\d+$
+        body.c8y_Software.name: my-app
+        body.c8y_Software.version: "1.2.3"
+        body.c8y_Software.url: "https://example.com/debian/my-app-1.2.3.deb"
+
+  lookup softwareversion:
+    command: |
+      c8y kitchensink body_complex softwareversion --software my-app --version "1.2.3"
+    stdout:
+      json:
+        body.software: r/^\d+$
+        body.version: r/^\d+$
+
+  lookup softwareversionName:
+    command: |
+      c8y kitchensink body_complex softwareversionName --sourceSoftware my-app --version "1.2.3"
+    stdout:
+      json:
+        body.sourceSoftware: r/^\d+$
+        body.version: "1.2.3"

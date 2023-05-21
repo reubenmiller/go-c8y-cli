@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: users
   description: Cumulocity users
   descriptionLong: 'REST endpoint to interact with Cumulocity users'
   link: https://cumulocity.com/guides/reference/users/#user
 
-endpoints:
+commands:
   # Inventory Roles
   - name: getInventoryRoleCollection
     description: Get inventory role collection
@@ -46,7 +46,7 @@ endpoints:
           command: c8y users getInventoryRole --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: 'Role id. Note: lookup by name is not yet supported'
@@ -210,7 +210,7 @@ endpoints:
           command: c8y users get --id "myuser"
     pathParameters:
       - name: id
-        type: '[]user'
+        type: user[]
         required: true
         pipeline: true
         description: User id
@@ -282,7 +282,7 @@ endpoints:
         description: Tenant
 
       - name: id
-        type: '[]user'
+        type: user[]
         required: true
         pipeline: true
         description: User id
@@ -315,7 +315,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]user'
+        type: user[]
         required: true
         pipeline: true
         description: User id
@@ -404,7 +404,7 @@ endpoints:
           command: c8y users resetUserPassword --id "myuser"
     pathParameters:
       - name: id
-        type: '[]user'
+        type: user[]
         required: true
         pipeline: true
         description: User id
@@ -456,7 +456,7 @@ endpoints:
         description: Tenant
 
       - name: id
-        type: '[]user'
+        type: user[]
         required: true
         pipeline: true
         description: User id
@@ -487,7 +487,7 @@ endpoints:
           command: c8y users listUserMembership --id "myuser"
     pathParameters:
       - name: id
-        type: '[]user'
+        type: user[]
         required: true
         pipeline: true
         description: User

@@ -155,12 +155,12 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source.id"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "source.id"),
 		flags.WithRelativeTimestamp("time", "time"),
 		flags.WithStringValue("type", "type"),
 		flags.WithDefaultTemplateString(`
 {time: _.Now('0s')}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "time", "source.id"),
 	)

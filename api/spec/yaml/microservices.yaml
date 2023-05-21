@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: microservices
   description: Cumulocity microservices
   descriptionLong: 'REST endpoint to interact with Cumulocity microservices'
   link: https://cumulocity.com/guides/reference/applications/
 
-endpoints:
+commands:
   - name: getMicroserviceCollection
     description: Get microservice collection
     descriptionLong: |
@@ -62,7 +62,7 @@ endpoints:
         description: The ID of a tenant that is subscribed to the applications.
 
       - name: user
-        type: '[]user'
+        type: user[]
         description: The ID of a user that has access to the applications.
         pipeline: true
 

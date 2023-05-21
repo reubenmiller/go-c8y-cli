@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: binaries
   description: Cumulocity binaries
   descriptionLong: 'REST endpoint to interact with Cumulocity binaries'
   link: https://cumulocity.com/guides/reference/binaries/
 
-endpoints:
+commands:
   - name: getBinaryCollection
     description: Get binary collection
     descriptionLong: |
@@ -39,7 +39,7 @@ endpoints:
 
     queryParameters:
       - name: ids
-        type: '[]stringcsv'
+        type: stringcsv[]
         property: ids
         description: The managed object IDs to search for.
 
@@ -68,7 +68,7 @@ endpoints:
         description: Search for a specific child asset and list all the groups to which it belongs.
 
       - name: childDeviceId
-        type: '[]device'
+        type: device[]
         description: Search for a specific child device and list all the groups to which it belongs.
 
   - name: download
@@ -112,7 +112,7 @@ endpoints:
           command: c8y binaries get --id 12345 --outputFileRaw "./download-binary1.txt"
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Inventory binary id
@@ -208,7 +208,7 @@ endpoints:
           command: c8y binaries update --id 12345 --file ./myfile.log
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Inventory binary id
@@ -245,7 +245,7 @@ endpoints:
           command: c8y binaries delete --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Inventory binary id

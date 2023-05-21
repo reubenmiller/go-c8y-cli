@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "datahub",
     "description": "Cumulocity IoT Data Hub api",
     "descriptionLong": "Data Hub api",
     "link": "https://cumulocity.com/guides/datahub/datahub-overview/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "query",
       "method": "POST",

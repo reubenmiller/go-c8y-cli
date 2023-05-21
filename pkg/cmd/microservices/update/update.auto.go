@@ -147,7 +147,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("availability", "availability"),
 		flags.WithStringValue("contextPath", "contextPath"),
 		flags.WithStringValue("resourcesUrl", "resourcesUrl"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -160,7 +160,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithMicroserviceByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithMicroserviceByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

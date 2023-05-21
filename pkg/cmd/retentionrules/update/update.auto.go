@@ -149,7 +149,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("source", "source"),
 		flags.WithIntValue("maximumAge", "maximumAge"),
 		flags.WithBoolValue("editable", "editable", ""),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

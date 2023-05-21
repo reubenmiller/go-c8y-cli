@@ -3,11 +3,12 @@ package models
 import "strings"
 
 type Specification struct {
-	Information SpecificationInformation `yaml:"information"`
-	Endpoints   []EndPoint               `yaml:"endpoints"`
+	Version  string    `yaml:"version"`
+	Group    Group     `yaml:"group"`
+	Commands []Command `yaml:"commands"`
 }
 
-type SpecificationInformation struct {
+type Group struct {
 	Name            string `yaml:"name"`
 	Description     string `yaml:"description"`
 	DescriptionLong string `yaml:"descriptionLong"`
@@ -15,27 +16,147 @@ type SpecificationInformation struct {
 	Skip            bool   `yaml:"skip"`
 }
 
-type EndPoint struct {
-	Name               string       `yaml:"name"`
-	Method             string       `yaml:"method"`
-	Accept             string       `yaml:"accept,omitempty"`
-	CollectionType     string       `yaml:"collectionType,omitempty"`
-	CollectionProperty string       `yaml:"collectionProperty,omitempty"`
-	Path               string       `yaml:"path"`
-	Examples           Examples     `yaml:"examples"`
-	Alias              Aliases      `yaml:"alias"`
-	Skip               *bool        `yaml:"skip,omitempty"`
-	QueryParameters    []Parameter  `yaml:"queryParameters,omitempty"`
-	PathParameters     []Parameter  `yaml:"pathParameters,omitempty"`
-	HeaderParameters   []Parameter  `yaml:"headerParameters,omitempty"`
-	Body               []Parameter  `yaml:"body,omitempty"`
-	BodyContent        *BodyContent `yaml:"bodyContent,omitempty"`
+type BodyTemplate struct {
+	Type      string `yaml:"type"`
+	ApplyLast bool   `yaml:"applyLast"`
+	Template  string `yaml:"template"`
 }
 
-func (p *EndPoint) GetAllParameters() []Parameter {
+type CommandPreset struct {
+	Type       string            `yaml:"type"`
+	Options    map[string]string `yaml:"options,omitempty"`
+	Extensions []Parameter       `yaml:"extensions,omitempty"`
+}
+
+func (cp *CommandPreset) GetOption(k string, defaultValue ...string) string {
+	if v, ok := cp.Options[k]; ok {
+		return v
+	}
+	if len(defaultValue) > 0 {
+		return defaultValue[0]
+	}
+	return ""
+}
+
+type Command struct {
+	Name               string         `yaml:"name"`
+	Description        string         `yaml:"description"`
+	DescriptionLong    string         `yaml:"descriptionLong"`
+	Preset             CommandPreset  `yaml:"preset"`
+	Deprecated         string         `yaml:"deprecated"`
+	DeprecatedAt       string         `yaml:"deprecatedAt"`
+	Method             string         `yaml:"method"`
+	SemanticMethod     string         `yaml:"semanticMethod"`
+	Accept             string         `yaml:"accept,omitempty"`
+	ContentType        string         `yaml:"contentType,omitempty"`
+	CollectionType     string         `yaml:"collectionType,omitempty"`
+	CollectionProperty string         `yaml:"collectionProperty,omitempty"`
+	Path               string         `yaml:"path"`
+	Examples           Examples       `yaml:"examples"`
+	ExampleList        []Example      `yaml:"exampleList"`
+	Alias              Aliases        `yaml:"alias"`
+	Hidden             *bool          `yaml:"hidden,omitempty"`
+	Skip               *bool          `yaml:"skip,omitempty"`
+	QueryParameters    []Parameter    `yaml:"queryParameters,omitempty"`
+	PathParameters     []Parameter    `yaml:"pathParameters,omitempty"`
+	HeaderParameters   []Parameter    `yaml:"headerParameters,omitempty"`
+	Body               []Parameter    `yaml:"body,omitempty"`
+	BodyContent        *BodyContent   `yaml:"bodyContent,omitempty"`
+	BodyTemplates      []BodyTemplate `yaml:"bodyTemplates,omitempty"`
+	BodyRequiredKeys   []string       `yaml:"bodyRequiredKeys,omitempty"`
+}
+
+func (c *Command) HasPreset() bool {
+	return c.Preset.Type != ""
+}
+
+func (c *Command) SupportsProcessingMode() bool {
+	return c.Method == "DELETE" || c.Method == "PUT" || c.Method == "POST"
+}
+
+func (c *Command) IsHidden() bool {
+	return c.Hidden != nil && *c.Hidden
+}
+
+func (c *Command) ShouldIgnore() bool {
+	return c.Skip != nil && *c.Skip
+}
+
+func (c *Command) GetDescriptionLong() string {
+	var sb strings.Builder
+
+	if c.Description != "" {
+		sb.WriteString(c.Description)
+	}
+	if c.DescriptionLong != "" {
+		sb.WriteString("\n\n")
+		sb.WriteString(c.DescriptionLong)
+	}
+	return sb.String()
+
+}
+
+func (c *Command) IsDeprecated() bool {
+	return c.Deprecated != ""
+}
+
+func (c *Command) GetExamples() string {
+	var sb strings.Builder
+	for _, ex := range c.ExampleList {
+		sb.WriteString("  $ " + strings.TrimSpace(ex.Command) + "\n")
+		sb.WriteString("  " + strings.TrimSpace(ex.Description) + "\n\n")
+	}
+	return strings.TrimRight(sb.String(), "\n")
+}
+
+func (c *Command) GetMethod() string {
+	if c.SemanticMethod != "" {
+		return c.SemanticMethod
+	}
+	return c.Method
+}
+
+func (c *Command) GetAllParameters() []Parameter {
 	parameters := make([]Parameter, 0)
-	if len(p.QueryParameters) > 0 {
-		for _, param := range p.QueryParameters {
+	if len(c.QueryParameters) > 0 {
+		for i, param := range c.QueryParameters {
+			if len(param.Children) > 0 {
+				parameters = append(parameters, param.Children...)
+			} else {
+				c.QueryParameters[i].TargetType = ParamQueryParameter
+				param.TargetType = ParamQueryParameter
+				parameters = append(parameters, param)
+			}
+		}
+	}
+	if len(c.PathParameters) > 0 {
+		for i, p := range c.PathParameters {
+			c.PathParameters[i].TargetType = ParamPath
+			p.TargetType = ParamPath
+		}
+		parameters = append(parameters, c.PathParameters...)
+	}
+	if len(c.HeaderParameters) > 0 {
+		for i, p := range c.HeaderParameters {
+			c.HeaderParameters[i].TargetType = ParamHeader
+			p.TargetType = ParamHeader
+		}
+		parameters = append(parameters, c.HeaderParameters...)
+	}
+	if len(c.Body) > 0 {
+		for i, p := range c.Body {
+			c.Body[i].TargetType = ParamBody
+			p.TargetType = ParamBody
+		}
+		parameters = append(parameters, c.Body...)
+	}
+	return parameters
+}
+
+func (c *Command) GetQueryParameters() []Parameter {
+	parameters := make([]Parameter, 0)
+	if len(c.QueryParameters) > 0 {
+		for _, param := range c.QueryParameters {
 			if len(param.Children) > 0 {
 				parameters = append(parameters, param.Children...)
 			} else {
@@ -43,30 +164,27 @@ func (p *EndPoint) GetAllParameters() []Parameter {
 			}
 		}
 	}
-	if len(p.PathParameters) > 0 {
-		parameters = append(parameters, p.PathParameters...)
-	}
-	if len(p.HeaderParameters) > 0 {
-		parameters = append(parameters, p.HeaderParameters...)
-	}
-	if len(p.Body) > 0 {
-		parameters = append(parameters, p.Body...)
-	}
 	return parameters
 }
 
-func (p *EndPoint) GetQueryParameters() []Parameter {
-	parameters := make([]Parameter, 0)
-	if len(p.QueryParameters) > 0 {
-		for _, param := range p.QueryParameters {
-			if len(param.Children) > 0 {
-				parameters = append(parameters, param.Children...)
-			} else {
-				parameters = append(parameters, param)
-			}
-		}
+func (c *Command) IsCollection() bool {
+	return strings.EqualFold(c.Method, "GET") &&
+		(c.CollectionProperty != "" || strings.Contains(strings.ToLower(c.Accept), "collection"))
+}
+
+func (c *Command) SupportsTemplates() bool {
+	return strings.EqualFold(c.Method, "PUT") || strings.EqualFold(c.Method, "POST")
+}
+
+func (c *Command) IsBodyFormData() bool {
+	return c.BodyContent != nil && c.BodyContent.Type == "formdata"
+}
+
+func (c *Command) GetBodyContentType() string {
+	if c.BodyContent == nil {
+		return ""
 	}
-	return parameters
+	return c.BodyContent.Type
 }
 
 type Aliases struct {
@@ -95,10 +213,14 @@ type BodyContent struct {
 
 type Parameter struct {
 	Name            string      `yaml:"name,omitempty"`
+	ShortName       string      `yaml:"shortname,omitempty"`
 	Type            string      `yaml:"type,omitempty"`
 	Value           string      `yaml:"value,omitempty"`
+	Completion      Completion  `yaml:"completion,omitempty"`
+	NamedLookup     NamedLookup `yaml:"lookup,omitempty"`
 	Format          string      `yaml:"format,omitempty"`
 	Property        string      `yaml:"property,omitempty"`
+	Hidden          *bool       `yaml:"hidden,omitempty"`
 	Pipeline        *bool       `yaml:"pipeline,omitempty"`
 	PipelineAliases []string    `yaml:"pipelineAliases,omitempty"`
 	Required        *bool       `yaml:"required,omitempty"`
@@ -108,6 +230,57 @@ type Parameter struct {
 	ValidationSet   []string    `yaml:"validationSet,omitempty"`
 	Skip            *bool       `yaml:"skip,omitempty"`
 	Children        []Parameter `yaml:"children,omitempty"`
+	DependsOn       []string    `yaml:"dependsOn,omitempty"`
+
+	TargetType TargetType `yaml:"-"`
+}
+
+type Completion struct {
+	Type    string   `yaml:"type,omitempty"`
+	Command []string `yaml:"command,omitempty"`
+}
+
+type NamedLookup struct {
+	Type    string             `yaml:"type,omitempty"`
+	Command []string           `yaml:"command,omitempty"`
+	Options NamedLookupOptions `yaml:"options"`
+}
+
+type NamedLookupOptions struct {
+	IDPattern string `yaml:"idPattern,omitempty"`
+}
+
+type TargetType int
+
+const (
+	ParamHeader TargetType = iota
+	ParamBody
+	ParamPath
+	ParamQueryParameter
+)
+
+func (p *Parameter) IsRequired() bool {
+	return p.Required != nil && *p.Required
+}
+
+func (p *Parameter) AcceptsPipeline() bool {
+	return p.Pipeline != nil && *p.Pipeline
+}
+
+func (p *Parameter) IsHidden() bool {
+	return p.Hidden != nil && *p.Hidden
+}
+
+func (p *Parameter) GetDescription() string {
+	var sb strings.Builder
+	sb.WriteString(p.Description)
+	if p.Required != nil && *p.Required {
+		sb.WriteString(" (required)")
+	}
+	if p.Pipeline != nil && *p.Pipeline {
+		sb.WriteString(" (accepts pipeline)")
+	}
+	return sb.String()
 }
 
 func (p *Parameter) GetTargetProperty() string {
@@ -117,17 +290,16 @@ func (p *Parameter) GetTargetProperty() string {
 	return p.Name
 }
 
-func (p *EndPoint) IsCollection() bool {
-	return strings.EqualFold(p.Method, "GET") &&
-		(p.CollectionProperty != "" || strings.Contains(strings.ToLower(p.Accept), "collection"))
-}
-
-func (p *EndPoint) SupportsTemplates() bool {
-	return strings.EqualFold(p.Method, "PUT") || strings.EqualFold(p.Method, "POST")
-}
-
-func (p *EndPoint) IsBodyFormData() bool {
-	return p.BodyContent != nil && p.BodyContent.Type == "formdata"
+// Get the first dependent property name defined for the current parameter.
+// Return a default value if no dependent property is defined
+func (p *Parameter) GetDependentProperty(index int, defaultValue string) string {
+	if len(p.DependsOn) == 0 {
+		return defaultValue
+	}
+	if index < len(p.DependsOn) {
+		return p.DependsOn[index]
+	}
+	return defaultValue
 }
 
 func (p *Parameter) IsTypeDateTime() bool {

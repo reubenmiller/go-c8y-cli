@@ -151,7 +151,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDefaultTemplateString(`
 {"configuredLevel":null}
 `),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

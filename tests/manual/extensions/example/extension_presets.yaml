@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRY_FORMAT: json
+
+tests:
+  # query-inventory
+  List device collection:
+    command: c8y kitchensink presets query-inventory-default
+    exit-code: 0
+    stdout:
+      json:
+        pathEncoded: /inventory/managedObjects?q=%24filter%3D+%24orderby%3Dname
+
+  Device query with a fixed query:
+    command: c8y kitchensink presets query-inventory-device
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /inventory/managedObjects
+        pathEncoded: /inventory/managedObjects?q=%24filter%3D%28type+eq+%27fixedValue%27%29+%24orderby%3Dname
+
+  Inventory query with a fixed query:
+    command: c8y kitchensink presets query-inventory-mo --option myvalue
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /inventory/managedObjects
+        pathEncoded: /inventory/managedObjects?query=%24filter%3D%28type+eq+%27company_myType%27%29+and+some.value+eq+%27myvalue%27+%24orderby%3Dname
+
+  # get-identity
+  Custom identity query:
+    command: c8y kitchensink presets get-identity-default --name abcdef01234
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /identity/externalIds/my_Type/abcdef01234
+
+  Custom identity query with additional options:
+    command: c8y kitchensink presets get-identity-with-options --name abcdef01234 --withValues
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /identity/externalIds/my_Type/abcdef01234?withValues=true

@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: bulkOperations
   description: Cumulocity bulk operations
   descriptionLong: 'REST endpoint to interact with Cumulocity bulk operations'
   link: https://cumulocity.com/guides/reference/device-control/#bulk-operation-collection
 
-endpoints:
+commands:
   - name: getBulkOperationCollection
     method: GET
     description: Get bulk operation collection
@@ -68,7 +68,7 @@ endpoints:
 
       - name: status
         property: generalStatus
-        type: '[]string'
+        type: string[]
         description: Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
         validationSet: [CANCELED, SCHEDULED, EXECUTING, EXECUTING_WITH_ERROR, FAILED]
 
@@ -98,7 +98,7 @@ endpoints:
         powershell: Get-BulkOperation
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Bulk Operation id
@@ -127,7 +127,7 @@ endpoints:
         powershell: Remove-BulkOperation
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Bulk Operation id
@@ -167,7 +167,7 @@ endpoints:
         powershell: New-BulkOperation
     body:
       - name: group
-        type: '[]devicegroup'
+        type: devicegroup[]
         property: groupId
         required: false
         pipeline: true
@@ -241,7 +241,7 @@ endpoints:
     pathParameters:
       # Note: id is actually an integer but it should be handled as a string because it is being applied to a path parameter (and piped input are strings)
       - name: id
-        type: '[]id'
+        type: id[]
         description: Bulk Operation id
         pipeline: true
         required: true
@@ -285,7 +285,7 @@ endpoints:
     queryParameters:
       # Use string type, as an integer will default to 0 when not present in powershell
       - name: id
-        type: '[]id'
+        type: id[]
         property: bulkOperationId
         pipeline: true
         required: true

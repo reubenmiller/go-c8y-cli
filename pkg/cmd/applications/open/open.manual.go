@@ -138,7 +138,7 @@ func (n *OpenCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithStringValue("page", "page"),
 		flags.WithStringValue("application", "application"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
 	)
 	if err != nil {
 		return err

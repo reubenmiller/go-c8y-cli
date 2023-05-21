@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: devicegroups/children
   description: Cumulocity managed object child references
   descriptionLong: Manage child entities (assets, additions and device) for device groups
   link: https://cumulocity.com/guides/reference/inventory/
 
-endpoints:
+commands:
   - name: listChildCollection
     method: GET
     description: Get child collection
@@ -36,7 +36,7 @@ endpoints:
           command: c8y inventory children list --id 12345 --childType device
     pathParameters:
       - name: id
-        type: '[]devicegroup'
+        type: devicegroup[]
         pipeline: true
         pipelineAliases:
           - "deviceId"
@@ -103,7 +103,7 @@ endpoints:
             command: c8y inventory children assign --id 12345 --child 6789 --childType addition
     pathParameters:
       - name: id
-        type: '[]devicegroup'
+        type: devicegroup[]
         property: id
         required: true
         description: Managed object id where the child will be assigned to
@@ -154,7 +154,7 @@ endpoints:
           command: c8y inventory children unassign --id 12345 --child 22553 --childType device
     pathParameters:
       - name: id
-        type: '[]devicegroup'
+        type: devicegroup[]
         required: true
         description: Managed object id
       
@@ -205,7 +205,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]devicegroup'
+        type: devicegroup[]
         property: id
         required: true
         pipeline: true
@@ -255,7 +255,7 @@ endpoints:
             command: c8y inventory children get --id 12345 --child 12345 --childType addition
     pathParameters:
       - name: id
-        type: '[]devicegroup'
+        type: devicegroup[]
         pipeline: true
         pipelineAliases:
           - "deviceId"
@@ -275,6 +275,6 @@ endpoints:
           - device
 
       - name: child
-        type: '[]devicegroup'
+        type: devicegroup[]
         required: true
         description: Child managed object id

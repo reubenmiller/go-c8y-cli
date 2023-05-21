@@ -143,8 +143,8 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithRoleSelfByNameFirstMatch(client, args, "role", "role.self"),
-		cmdutil.WithTemplateValue(cfg),
+		c8yfetcher.WithRoleSelfByNameFirstMatch(n.factory, args, "role", "role.self"),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -157,8 +157,8 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
-		c8yfetcher.WithUserGroupByNameFirstMatch(client, args, "group", "group"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
+		c8yfetcher.WithUserGroupByNameFirstMatch(n.factory, args, "group", "group"),
 	)
 	if err != nil {
 		return err

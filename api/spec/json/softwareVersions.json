@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "software/versions",
     "description": "Cumulocity software version management",
     "descriptionLong": "Software version management to create/list/delete versions",
     "link": "https://cumulocity.com/guides/users-guide/device-management/#software-repo"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getSoftwareVersionCollection",
       "method": "GET",
@@ -79,7 +79,7 @@
             },
             {
               "name": "software",
-              "type": "[]software",
+              "type": "software[]",
               "description": "Software package id or name",
               "format": "bygroupid(%s)",
               "pipeline": true,
@@ -188,7 +188,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]softwareversion",
+          "type": "softwareversion[]",
           "dependsOn": [
             "software"
           ],
@@ -198,7 +198,7 @@
         },
         {
           "name": "software",
-          "type": "[]software",
+          "type": "software[]",
           "required": false,
           "description": "Software package id (used to help completion be more accurate)"
         }
@@ -290,7 +290,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]softwareversion",
+          "type": "softwareversion[]",
           "dependsOn": [
             "software"
           ],
@@ -300,7 +300,7 @@
         },
         {
           "name": "software",
-          "type": "[]software",
+          "type": "software[]",
           "required": false,
           "description": "Software package id (used to help completion be more accurate)"
         }
@@ -349,7 +349,7 @@
       "body": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "deviceId",
           "description": "Device or agent where the software should be installed",
           "pipeline": true
@@ -445,7 +445,7 @@
       "body": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "deviceId",
           "description": "Device or agent where the software should be installed",
           "pipeline": true

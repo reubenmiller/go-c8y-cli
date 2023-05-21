@@ -158,12 +158,12 @@ func (n *SendCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "deviceId"),
 		flags.WithStringValue("description", "description"),
 		flags.WithStringValue("configurationType", "c8y_DownloadConfigFile.type"),
 		flags.WithStringValue("url", "c8y_DownloadConfigFile.url"),
-		c8yfetcher.WithConfigurationByNameFirstMatch(client, args, "configuration", "__tmp_configuration"),
-		c8yfetcher.WithConfigurationFileData(client, "configuration", "configurationType", "url", args, "", "c8y_DownloadConfigFile"),
+		c8yfetcher.WithConfigurationByNameFirstMatch(n.factory, args, "configuration", "__tmp_configuration"),
+		c8yfetcher.WithConfigurationFileData(n.factory, "configuration", "configurationType", "url", args, "", "c8y_DownloadConfigFile"),
 		flags.WithDefaultTemplateString(`
 {
   description:
@@ -176,7 +176,7 @@ func (n *SendCmd) RunE(cmd *cobra.Command, args []string) error {
   c8y_DownloadConfigFile+: {name:: null},
 }
 `),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("deviceId"),
 	)

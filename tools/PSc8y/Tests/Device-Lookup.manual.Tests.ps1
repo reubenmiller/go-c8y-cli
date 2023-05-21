@@ -73,7 +73,7 @@ Describe -Name "Device lookup up manual tests" {
     }
 
     It "Accepts multiple named values in the --id parameter" {
-        $output = c8y devices get --id $Device.name,$Device2.name --select id,name --output csv
+        $output = c8y devices get --id "$($Device.name),$($Device2.name)" --select id,name --output csv
         $LASTEXITCODE | Should -Be 0
         $output | Should -HaveCount 2
         $output[0] | Should -BeExactly "$($Device.id),$($($Device.name))"

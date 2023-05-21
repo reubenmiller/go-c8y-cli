@@ -94,7 +94,7 @@ func NewGenerator(name string, mockConfig *models.MockConfiguration) (gen *Gener
 
 func (g *Generator) CreateTests(outDir string) error {
 
-	for _, endpoint := range g.Spec.Endpoints {
+	for _, endpoint := range g.Spec.Commands {
 		if endpoint.Skip != nil && *endpoint.Skip {
 			continue
 		}
@@ -108,7 +108,7 @@ func (g *Generator) CreateTests(outDir string) error {
 				Skip:     example.SkipTest,
 			}
 
-			key := CreateKey(i, g.Spec.Information.Name, &endpoint)
+			key := CreateKey(i, g.Spec.Group.Name, &endpoint)
 			testcase.Command = example.Command
 
 			// Replace mock files
@@ -121,7 +121,7 @@ func (g *Generator) CreateTests(outDir string) error {
 			}
 
 			loggerS.Debugf("Processing endpoint: %s", testcase.Command)
-			testcase.StdOut = buildAssertions(g.Spec.Information.Name, &endpoint, i)
+			testcase.StdOut = buildAssertions(g.Spec.Group.Name, &endpoint, i)
 
 			testsuite.Tests[key] = *testcase
 		}
@@ -136,7 +136,7 @@ func (g *Generator) CreateTests(outDir string) error {
 	return nil
 }
 
-func parseCommand(parentCmd string, command string, endpoint *models.EndPoint) []string {
+func parseCommand(parentCmd string, command string, endpoint *models.Command) []string {
 	commands := strings.Split(command, "|")
 	if len(commands) > 1 {
 		currentCmd := ""
@@ -154,7 +154,7 @@ func parseCommand(parentCmd string, command string, endpoint *models.EndPoint) [
 	}
 }
 
-func CreateFakeCommand(parentCmd string, endpoint *models.EndPoint) *cobra.Command {
+func CreateFakeCommand(parentCmd string, endpoint *models.Command) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: endpoint.Alias.Go,
 	}
@@ -196,7 +196,7 @@ func CreateFakeCommand(parentCmd string, endpoint *models.EndPoint) *cobra.Comma
 	return cmd
 }
 
-func parseFakeCommand(parentCmd string, command string, endpoint *models.EndPoint) *cobra.Command {
+func parseFakeCommand(parentCmd string, command string, endpoint *models.Command) *cobra.Command {
 	cmd := CreateFakeCommand(parentCmd, endpoint)
 	if err := cmd.ParseFlags(parseCommand(parentCmd, command, endpoint)); err != nil {
 		loggerS.Fatalf("Failed to parse command. command=%s, err=%s", command, err)
@@ -205,7 +205,7 @@ func parseFakeCommand(parentCmd string, command string, endpoint *models.EndPoin
 	return cmd
 }
 
-func buildAssertions(parentCmd string, endpoint *models.EndPoint, exampleIdx int) (assertions *models.OutputAssertion) {
+func buildAssertions(parentCmd string, endpoint *models.Command, exampleIdx int) (assertions *models.OutputAssertion) {
 	cmd := parseFakeCommand(parentCmd, endpoint.Examples.Go[exampleIdx].Command, endpoint)
 
 	assertions = &models.OutputAssertion{
@@ -253,7 +253,7 @@ func buildAssertions(parentCmd string, endpoint *models.EndPoint, exampleIdx int
 					assertions.Contains = append(assertions.Contains, fmt.Sprintf("%s=", parameter.GetTargetProperty()))
 				} else {
 					switch parameter.Type {
-					case "[]string":
+					case "string[]":
 						for _, v := range strings.Split(value, ",") {
 							assertions.Contains = append(assertions.Contains, fmt.Sprintf("%s=%s", parameter.GetTargetProperty(), v))
 						}
@@ -396,7 +396,7 @@ func getParameterValue(cmd *cobra.Command, parameter *models.Parameter) (value s
 	return
 }
 
-func substituteVariables(cmd *cobra.Command, endpoint *models.EndPoint) (out string) {
+func substituteVariables(cmd *cobra.Command, endpoint *models.Command) (out string) {
 
 	out = endpoint.Path
 	if !strings.HasPrefix(out, "/") {
@@ -457,11 +457,11 @@ func WriteTestSuite(t *models.TestSuite, id string, outDir string) (err error) {
 	return
 }
 
-func CreateSuiteKey(spec *models.Specification, endpoint *models.EndPoint) string {
-	return fmt.Sprintf("%s_%s", strings.ToLower(spec.Information.Name), endpoint.Alias.Go)
+func CreateSuiteKey(spec *models.Specification, endpoint *models.Command) string {
+	return fmt.Sprintf("%s_%s", strings.ToLower(spec.Group.Name), endpoint.Alias.Go)
 }
 
-func CreateKey(index int, parent string, endpoint *models.EndPoint) string {
+func CreateKey(index int, parent string, endpoint *models.Command) string {
 	return fmt.Sprintf(
 		"%s_%s_%s",
 		parent,
@@ -503,8 +503,8 @@ func main() {
 	}
 
 	// Ignore skipped specs
-	if gen.Spec.Information.Skip {
-		loggerS.Fatalf("Specification is marked as skipped. Ignoring. file=%s", os.Args[2])
+	if gen.Spec.Group.Skip {
+		loggerS.Warnf("Specification is marked as skipped. Ignoring. file=%s", os.Args[2])
 		os.Exit(0)
 	}
 

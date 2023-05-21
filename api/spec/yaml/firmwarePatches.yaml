@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: firmware/patches
   description: Cumulocity firmware patch management
   descriptionLong: Firmware patch management to create/list/delete patches
   link: https://cumulocity.com/guides/users-guide/device-management/#firmware-repo
 
-endpoints:
+commands:
   - name: getFirmwarePatchCollection
     method: GET
     description: Get firmware patch collection
@@ -67,7 +67,7 @@ endpoints:
             default: creationTime.date desc
           
           - name: firmware
-            type: '[]firmware'
+            type: firmware[]
             description: "Firmware package id or name"
             format: "bygroupid(%s)"
             required: true
@@ -149,7 +149,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]firmwarepatch'
+        type: firmwarepatch[]
         dependsOn:
           - firmware
         pipeline: true
@@ -158,7 +158,7 @@ endpoints:
 
       # Dummy value (to limit versions to the given package)
       - name: firmware
-        type: '[]firmware'
+        type: firmware[]
         required: false
         description: Firmware package id or name (used to help completion be more accurate)
     
@@ -227,7 +227,7 @@ endpoints:
           command: c8y firmware patches delete --id 12345 --forceCascade=false
     pathParameters:
       - name: id
-        type: '[]firmwarepatch'
+        type: firmwarepatch[]
         dependsOn:
           - firmware
         pipeline: true
@@ -236,7 +236,7 @@ endpoints:
 
       # Dummy value (to limit versions to the given package)
       - name: firmware
-        type: '[]firmware'
+        type: firmware[]
         required: false
         description: Firmware id or name (used to help completion be more accurate)
 

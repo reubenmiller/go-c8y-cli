@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: alarms
   description: Cumulocity alarms
   descriptionLong: 'REST endpoint to interact with Cumulocity alarms'
   link: https://cumulocity.com/guides/reference/alarms/
 
-endpoints:
+commands:
   - name: getAlarmCollection
     method: GET
     description: Get alarm collection
@@ -50,7 +50,7 @@ endpoints:
         powershell: Get-AlarmCollection
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         pipeline: true
         property: source
         description: Source device id.
@@ -68,7 +68,7 @@ endpoints:
         description: Alarm type.
 
       - name: status
-        type: '[]stringcsv'
+        type: stringcsv[]
         description: Comma separated alarm statuses, for example ACTIVE,CLEARED.
         validationSet: [ACTIVE, ACKNOWLEDGED, CLEARED]
 
@@ -135,7 +135,7 @@ endpoints:
         powershell: New-Alarm
     body:
       - name: device
-        type: '[]device'
+        type: device[]
         required: false
         pipeline: true
         property: source.id
@@ -242,7 +242,7 @@ endpoints:
 
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         property: source
         pipeline: true
         description: The ManagedObject that the alarm originated from
@@ -288,7 +288,7 @@ endpoints:
         powershell: Get-Alarm
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         pipeline: true
         required: true
         description: Alarm id
@@ -358,7 +358,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         pipeline: true
         description: Alarm id
         required: true
@@ -403,7 +403,7 @@ endpoints:
         powershell: Remove-AlarmCollection
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         property: source
         pipeline: true
         description: 'Source device id.'
@@ -431,7 +431,7 @@ endpoints:
         description: 'Alarm type.'
 
       - name: status
-        type: '[]stringcsv'
+        type: stringcsv[]
         description: Comma separated alarm statuses, for example ACTIVE,CLEARED.
         validationSet: [ACTIVE, ACKNOWLEDGED, CLEARED]
 
@@ -506,7 +506,7 @@ endpoints:
         powershell: Get-AlarmCount
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         pipeline: true
         property: source
         description: Source device id.
@@ -524,7 +524,7 @@ endpoints:
         description: Alarm type.
 
       - name: status
-        type: '[]stringcsv'
+        type: stringcsv[]
         description: Comma separated alarm statuses, for example ACTIVE,CLEARED.
         validationSet: [ACTIVE, ACKNOWLEDGED, CLEARED]
 

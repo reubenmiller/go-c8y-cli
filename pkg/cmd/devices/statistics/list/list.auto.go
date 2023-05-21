@@ -113,7 +113,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "deviceId"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -172,7 +172,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithRelativeDate(false, "date", "date"),
 		flags.WithStringValue("type", "type"),
-		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
 	)
 	if err != nil {
 		return err

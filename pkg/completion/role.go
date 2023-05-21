@@ -1,7 +1,6 @@
 package completion
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -17,7 +16,7 @@ func WithUserRole(flagName string, clientFunc func() (*c8y.Client, error)) Optio
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
 			items, _, err := client.User.GetRoles(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				&c8y.RoleOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(2000),
 				},

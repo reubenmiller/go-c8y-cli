@@ -1,0 +1,144 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+---
+group:
+  name: devices
+  description: Manage devices
+
+# Use can use yaml anchors to reduce the amount of boilerplate
+x-types-device: &type-device
+  type: string
+  description: Device. It support a custom completion/lookup using other c8y commands
+  pipeline: true
+  completion:
+    type: external
+    command:
+      - c8y
+      - devices
+      - list
+      - --query
+      - "name eq '%s*'"
+      - --select=name
+  lookup:
+    type: external
+    command:
+      - c8y
+      - devices
+      - list
+      - --query
+      - "name eq '%s*'"
+      - --select=id
+
+commands:
+  - name: list
+    description: Simple list command
+    descriptionLong: |
+      Some more detailed instructions on how to use the command
+
+      It can also use come additional context. This command uses a the 'query-inventory' preset
+      so that you don't have to define all of the other flags yourself.
+    exampleList:
+      - command: c8y %[1]s devices list
+        description: List devices
+    preset:
+      type: query-inventory
+      options:
+        param: q
+        value: has(c8y_IsLinux)
+      extensions:
+        - name: model
+          type: string
+          format: c8y_Hardware.model eq '%s'
+          description: Filter by model
+
+        - name: excludeAgents
+          type: booleanDefault
+          description: Exclude agents
+          value: 'not(has(com_cumulocity_model_Agent))'
+
+  - name: get
+    description: Get device
+    descriptionLong: Get a device using a simple GET request
+    method: GET
+    path: inventory/managedObjects/{id}
+    exampleList:
+      - command: c8y %[1]s devices get --id 1234
+        description: Get a device by id
+      - command: c8y %[1]s devices get --id linux
+        description: Get a device by name
+    pathParameters:
+      - name: id
+        <<: *type-device
+  
+  - name: update
+    description: Update object
+    descriptionLong: Update
+    method: PUT
+    path: inventory/managedObjects/{id}
+    pathParameters:
+      - name: id
+        <<: *type-device
+    body:
+      - name: name
+        type: string
+        description: Profile name
+        required: true
+
+  - name: delete
+    description: Delete device
+    method: DELETE
+    path: inventory/managedObjects/{id}
+    pathParameters:
+      - name: id
+        <<: *type-device
+
+  - name: create
+    description: Create device
+    descriptionLong: |
+      Create a device by building the body via commands or the template.
+    method: POST
+    path: inventory/managedObjects
+    exampleList:
+      - command: |
+          c8y %[1]s create --name "linux device 001" --template "{one: 1}"
+        description: Create a new managed object using a template
+
+      - command: c8y %[1]s create --template %[1]s::device.jsonnet
+        description: Create a device using the template provided by the extension
+    body:
+      - name: name
+        type: string
+        description: Name
+        pipeline: true
+      
+      - name: time
+        type: datetime
+        description: Timestamp (ISO-8601 format). Supports fixed or relative time
+
+      - name: day
+        type: date
+        description: Date (without time, e.g. 2023-04-23). Supports fixed or relative time
+
+      - name: subType
+        type: string
+        description: Sub type with a static list of suggested values
+        validationSet:
+          - example1
+          - example2
+
+    bodyTemplates:
+      # Apply a static template to enforce specific fragments
+      - type: jsonnet
+        template: "{com_cumulocity_model_Agent:{}, c8y_IsDevice:{}, c8y_IsLinux:{}}"
+
+  - name: hidden
+    description: Hidden command
+    descriptionLong: |
+      Hidden commands don't appear in the list of commands, however you can still
+      use them if you know the name. This is great for keeping backwards compatibility
+      when renaming commands.
+    exampleList:
+      - command: c8y oee features hidden --help
+        description: Show help for the hidden command
+    hidden: true
+    path: something/secret
+    method: POST

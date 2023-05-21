@@ -133,7 +133,7 @@ func (n *SetRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []string) err
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithIntValue("interval", "c8y_RequiredAvailability.responseInterval"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {

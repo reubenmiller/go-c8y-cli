@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "operations",
     "description": "Cumulocity operations",
     "descriptionLong": "REST endpoint to interact with Cumulocity operations",
     "link": "https://cumulocity.com/guides/reference/device-control/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getOperationCollection",
       "method": "GET",
@@ -80,14 +80,14 @@
       "queryParameters": [
         {
           "name": "agent",
-          "type": "[]device",
+          "type": "device[]",
           "property": "agentId",
           "description": "Agent ID",
           "pipeline": false
         },
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "deviceId",
           "description": "Device ID",
           "pipeline": true
@@ -158,7 +158,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Operation id"
@@ -209,7 +209,7 @@
       "body": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "deviceId",
           "required": false,
           "pipeline": true,
@@ -299,7 +299,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "description": "Operation id",
           "pipeline": true,
           "required": true
@@ -334,13 +334,13 @@
       "queryParameters": [
         {
           "name": "agent",
-          "type": "[]device",
+          "type": "device[]",
           "property": "agentId",
           "description": "Agent ID"
         },
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "deviceId",
           "description": "Device ID",
           "pipeline": true

@@ -2,7 +2,9 @@ package root
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -47,6 +49,7 @@ import (
 	eventsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/events"
 	eventsAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/events/assert"
 	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/events/subscribe"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/extension"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/factory"
 	firmwareCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware"
 	firmwareVersionsPatchesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/patches"
@@ -98,10 +101,12 @@ import (
 	utilCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/util"
 	versionCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/version"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdparser"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
@@ -152,7 +157,23 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		`),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			disableEncryptionCheck := !cmdutil.IsConfigEncryptionCheckEnabled(cmd)
-			if err := ccmd.Configure(disableEncryptionCheck); err != nil {
+
+			// Note: Support setting verbose/debug mode even when flag parsing
+			// is disabled so that logging still works as expected. Extensions make
+			// use of this
+			forceVerbose := false
+			forceDebug := false
+			if cmd.DisableFlagParsing {
+				for _, v := range args {
+					if v == "-v" || v == "-v=true" || v == "--verbose" || v == "--verbose=true" {
+						forceVerbose = true
+					}
+					if v == "--debug" || v == "--debug=true" {
+						forceDebug = true
+					}
+				}
+			}
+			if err := ccmd.Configure(disableEncryptionCheck, forceVerbose, forceDebug); err != nil {
 				return err
 			}
 			if notice := flags.GetDeprecationNoticeFromAnnotation(cmd); notice != "" {
@@ -257,6 +278,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			config.OutputTable.String()+"\ttable format",
 			config.OutputCSV.String()+"\tcsv format without headers",
 			config.OutputCSVWithHeader.String()+"\tcsv format with headers",
+			config.OutputTSV.String()+"\ttab delimited format",
 			config.OutputServerResponse.String()+"\tUnparsed server response",
 		),
 		completion.WithSessionFile("session", config.ConfigExtensions, func() string {
@@ -299,12 +321,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		currenttenantCmd.NewSubCommand(f).GetCommand(),
 		currentuserCmd.NewSubCommand(f).GetCommand(),
 		activityLogCmd.NewSubCommand(f).GetCommand(),
+		extension.NewCmdExtension(f),
 	}
 
 	cmd.AddCommand(commands...)
 
-	// todo: merge custom commands
-	//
 	alarms := alarmsCmd.NewSubCommand(f).GetCommand()
 	alarms.AddCommand(alarmsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
 	alarms.AddCommand(alarmsAssertCmd.NewSubCommand(f).GetCommand())
@@ -422,14 +443,178 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.AddCommand(aliasCmd.NewCmdAlias(f))
 	cmd.AddCommand(apiCmd.NewSubCommand(f).GetCommand())
 
-	// Handle errors (not in cobra libary)
+	// Add sub commands for the extensions
+	extensions := f.ExtensionManager().List()
+	if err := ConvertToCobraCommands(f, cmd, extensions); err != nil {
+		if log, logErr := f.Logger(); logErr == nil {
+			log.Warnf("Errors while loading some extensions. Functionality may be reduced. %s", err)
+		}
+	}
+
+	// Handle errors (not in cobra library)
 	cmd.SilenceErrors = true
 
 	ccmd.Command = cmd
 	return ccmd
 }
 
-func (c *CmdRoot) Configure(disableEncryptionCheck bool) error {
+func isTabCompletionCommand() bool {
+	return strings.HasPrefix(strings.Join(os.Args[1:], ""), "__complete")
+}
+
+func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions []extensions.Extension) error {
+	extCommandTree := make(map[string]*cobra.Command)
+	// Enable flag parsing when using tab completion, otherwise disable it
+	// as it affects passing the arguments to the extension binary
+	disableFlagParsing := !isTabCompletionCommand()
+	_ = disableFlagParsing
+
+	log, err := f.Logger()
+	if err != nil {
+		return err
+	}
+
+	var extError error
+	for _, ext := range extensions {
+		commands, err := ext.Commands()
+		if err != nil {
+			extError = fmt.Errorf("%w", err)
+			continue
+		}
+
+		extName := ext.Name()
+		extRoot := &cobra.Command{
+			Use:   extName,
+			Short: extName + " extension",
+		}
+		extCommandTree[extName] = extRoot
+
+		//
+		// API/Spec commands
+		//
+		// Parse all api files
+		apiDir := filepath.Join(ext.Path(), "api")
+		if _, err := os.Stat(apiDir); !os.IsNotExist(err) {
+			walkErr := filepath.WalkDir(apiDir, func(path string, d fs.DirEntry, walkErr error) error {
+				if walkErr != nil {
+					return walkErr
+				}
+
+				if d.IsDir() {
+					return nil
+				}
+
+				if ext := filepath.Ext(path); ext != ".yaml" && ext != ".yml" {
+					return nil
+				}
+
+				log.Debugf("Reading extension file: %s", path)
+				spec, err := os.Open(path)
+				if err != nil {
+					return err
+				}
+				defer spec.Close()
+				extCommand, err := cmdparser.ParseCommand(spec, f, cmd.Root())
+				if err != nil {
+					// Only log a warning for the user, don't prevent the whole cli from working
+					log.Warnf("Invalid extension file. reason=%s. file=%s", err, path)
+					// return fmt.Errorf("%w. file=%s", err, path)
+				} else {
+					if extCommand != nil {
+						extRoot.AddCommand(extCommand)
+					}
+				}
+
+				return nil
+			})
+			if walkErr != nil {
+				return fmt.Errorf("%w. extension_name=%s", walkErr, ext.Name())
+			}
+		}
+
+		//
+		// Shell commands
+		//
+		for _, command := range commands {
+			path := extName + " " + command.Name()
+			key := path
+			name := path
+			var parentCmd *cobra.Command
+			exists := false
+
+			parts := strings.Split(path, " ")
+
+			if len(parts) > 1 {
+				name = parts[len(parts)-1]
+				key = strings.Join(parts[0:len(parts)-1], " ")
+				parentName := parts[0]
+				if len(parts) > 2 {
+					parentName = parts[len(parts)-2]
+				}
+				parentCmd, exists = extCommandTree[key]
+				if !exists {
+					parentCmd = &cobra.Command{
+						Use:   parentName,
+						Short: fmt.Sprintf("%s command group", parentName),
+					}
+					if len(parts) == 3 {
+						extRoot.AddCommand(parentCmd)
+					}
+					extCommandTree[key] = parentCmd
+				}
+
+				iCmd := &cobra.Command{
+					Use:                name,
+					Short:              fmt.Sprintf("Run %s command", name),
+					FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+					DisableFlagParsing: disableFlagParsing,
+					RunE: func(name, exe string) func(*cobra.Command, []string) error {
+						return func(cmd *cobra.Command, args []string) error {
+							log, err := f.Logger()
+							if err != nil {
+								return err
+							}
+							log.Infof("Executing extension. name: %s, command: %s, args: %v", name, exe, args)
+							_, err = f.ExtensionManager().Execute(exe, args, false, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
+							return err
+						}
+					}(extName, command.Command()),
+				}
+
+				if parentCmd != nil {
+					parentCmd.AddCommand(iCmd)
+				}
+			} else {
+				iCmd := &cobra.Command{
+					Use:                key,
+					Short:              fmt.Sprintf("%s command group", key),
+					FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+					DisableFlagParsing: disableFlagParsing,
+					RunE: func(name, exe string) func(*cobra.Command, []string) error {
+						return func(cmd *cobra.Command, args []string) error {
+							log, err := f.Logger()
+							if err != nil {
+								return err
+							}
+							log.Infof("Executing extension. name: %s, command: %s, args: %v", name, exe, args)
+							_, err = f.ExtensionManager().Execute(exe, args, false, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
+							return err
+						}
+					}(extName, command.Command()),
+				}
+				extRoot.AddCommand(iCmd)
+			}
+		}
+
+		// Only add if the is at least 1 command
+		if len(extRoot.Commands()) > 0 {
+			cmd.AddCommand(extRoot)
+		}
+	}
+	return extError
+}
+
+func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug bool) error {
 	cfg, err := c.Factory.Config()
 	if err != nil {
 		return err
@@ -489,10 +674,10 @@ func (c *CmdRoot) Configure(disableEncryptionCheck bool) error {
 			// mode errors
 			logOptions.Silent = false
 		} else {
-			if cfg.Verbose() {
+			if cfg.Verbose() || forceVerbose {
 				logOptions.Level = zapcore.InfoLevel
 			}
-			if cfg.Debug() {
+			if cfg.Debug() || forceDebug {
 				logOptions.Level = zapcore.DebugLevel
 			}
 		}
@@ -525,7 +710,17 @@ func (c *CmdRoot) Configure(disableEncryptionCheck bool) error {
 		}
 
 		l, _ := c.Factory.Logger()
-		dv, err := dataview.NewDataView(".*", ".json", l, cfg.GetViewPaths()...)
+		viewPaths := cfg.GetViewPaths()
+
+		// Add extensions
+		for _, ext := range c.Factory.ExtensionManager().List() {
+			path := ext.ViewPath()
+			if path != "" {
+				viewPaths = append(viewPaths, cmdutil.BuildTemplatePath(ext.Name(), path))
+			}
+		}
+
+		dv, err := dataview.NewDataView(".*", ".json", l, viewPaths...)
 		c.dataview = dv
 		return dv, err
 	}

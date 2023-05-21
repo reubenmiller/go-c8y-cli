@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "devices/services",
     "description": "Cumulocity device services",
     "descriptionLong": "Managed device services (introduced in 10.14)",
     "link": "https://cumulocity.com/guides/10.14.0/reference/device-management-library/#services"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "findServices",
       "method": "GET",
@@ -174,7 +174,7 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "pipelineAliases": [
             "deviceId",
@@ -276,7 +276,7 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "id",
           "required": true,
           "pipeline": true,
@@ -371,12 +371,12 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "description": "Device id (required for name lookup)"
         },
         {
           "name": "id",
-          "type": "[]deviceservice",
+          "type": "deviceservice[]",
           "property": "id",
           "required": true,
           "pipeline": true,
@@ -455,12 +455,12 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "description": "Device id (required for name lookup)"
         },
         {
           "name": "id",
-          "type": "[]deviceservice",
+          "type": "deviceservice[]",
           "property": "id",
           "required": true,
           "pipeline": true,
@@ -544,12 +544,12 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "description": "Device id (required for name lookup)"
         },
         {
           "name": "id",
-          "type": "[]deviceservice",
+          "type": "deviceservice[]",
           "property": "id",
           "required": true,
           "pipeline": true,

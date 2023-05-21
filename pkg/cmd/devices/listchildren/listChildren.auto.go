@@ -156,7 +156,7 @@ func (n *ListChildrenCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
 		flags.WithBoolValue("withChildren", "withChildren", ""),
 	)
 	if err != nil {

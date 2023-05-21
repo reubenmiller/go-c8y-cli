@@ -225,7 +225,7 @@
                     break
                 }
 
-                "[]stringcsv" {
+                "stringcsv[]" {
                     "`${0} -join ','" -f $item.Name
                     break
                 }
@@ -382,12 +382,12 @@
                     $null = $RESTQueryBuilder.AppendLine("")
                 }
 
-                "[]device" {
+                "device[]" {
                     $null = $RESTQueryBuilder.AppendLine("")
                 }
 
                 # Array of strings
-                "[]string" {
+                "string[]" {
                     $null = $RESTQueryBuilder.AppendLine("")
                 }
 
@@ -575,13 +575,13 @@ Function Get-IteratorFunction {
     )
 
     $ExpandFunction = switch ($Type) {
-        "[]device" { "(PSc8y\Expand-Device $Variable)" }
-        "[]id" { "(PSc8y\Expand-Id $Variable)" }
-        "[]role" { "(PSc8y\Expand-Id $Variable)" }
-        "[]roleself" { "(PSc8y\Expand-Id $Variable)" }
-        "[]tenant" { "(PSc8y\Expand-Tenant $Variable)" }
-        "[]userself" { "(PSc8y\Expand-User $Variable)" }
-        "[]user" { "(PSc8y\Expand-User $Variable)" }
+        "device[]" { "(PSc8y\Expand-Device $Variable)" }
+        "id[]" { "(PSc8y\Expand-Id $Variable)" }
+        "role[]" { "(PSc8y\Expand-Id $Variable)" }
+        "roleself[]" { "(PSc8y\Expand-Id $Variable)" }
+        "tenant[]" { "(PSc8y\Expand-Tenant $Variable)" }
+        "userself[]" { "(PSc8y\Expand-User $Variable)" }
+        "user[]" { "(PSc8y\Expand-User $Variable)" }
         "application" { "(PSc8y\Expand-Application $Variable)" }
         "hostedapplication" { "(PSc8y\Expand-Application $Variable)" }
         "microservice" { "(PSc8y\Expand-Microservice $Variable)" }

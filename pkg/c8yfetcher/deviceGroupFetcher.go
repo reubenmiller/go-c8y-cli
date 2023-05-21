@@ -4,23 +4,25 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 type DeviceGroupFetcher struct {
-	client *c8y.Client
-	*DefaultFetcher
+	*CumulocityFetcher
 }
 
-func NewDeviceGroupFetcher(client *c8y.Client) *DeviceGroupFetcher {
+func NewDeviceGroupFetcher(factory *cmdutil.Factory) *DeviceGroupFetcher {
 	return &DeviceGroupFetcher{
-		client: client,
+		CumulocityFetcher: &CumulocityFetcher{
+			factory: factory,
+		},
 	}
 }
 
 func (f *DeviceGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
-	mo, resp, err := f.client.Inventory.GetManagedObject(
-		WithDisabledDryRunContext(f.client),
+	mo, resp, err := f.Client().Inventory.GetManagedObject(
+		WithDisabledDryRunContext(f.Client()),
 		id,
 		nil,
 	)
@@ -39,8 +41,8 @@ func (f *DeviceGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 }
 
 func (f *DeviceGroupFetcher) getByName(name string) ([]fetcherResultSet, error) {
-	mcol, _, err := f.client.Inventory.GetManagedObjects(
-		WithDisabledDryRunContext(f.client),
+	mcol, _, err := f.Client().Inventory.GetManagedObjects(
+		WithDisabledDryRunContext(f.Client()),
 		&c8y.ManagedObjectOptions{
 			Query:             fmt.Sprintf("has(c8y_IsDeviceGroup) and name eq '%s'", name),
 			PaginationOptions: *c8y.NewPaginationOptions(5),

@@ -1,7 +1,6 @@
 package flags
 
 import (
-	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -14,7 +13,7 @@ func resolveContents(content string) string {
 		return content
 	}
 
-	fileContent, err := ioutil.ReadFile(content)
+	fileContent, err := os.ReadFile(content)
 	if err != nil {
 		return content
 	}

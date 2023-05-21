@@ -3,6 +3,7 @@ package c8yfetcher
 import (
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -10,11 +11,19 @@ type DeviceServiceFetcher struct {
 	*ManagedObjectFetcher
 }
 
-func NewDeviceServiceFetcher(client *c8y.Client, device string) *DeviceServiceFetcher {
+func NewDeviceServiceFetcher(factory *cmdutil.Factory, device string) *DeviceServiceFetcher {
 	return &DeviceServiceFetcher{
 		ManagedObjectFetcher: &ManagedObjectFetcher{
-			client: client,
+			CumulocityFetcher: &CumulocityFetcher{
+				factory: factory,
+			},
 			Query: func(s string) string {
+
+				client, err := factory.Client()
+				if err != nil {
+					return ""
+				}
+
 				if !IsID(device) {
 					// Lookup software by name
 					moDevice, _, err := client.Inventory.GetDevicesByName(WithDisabledDryRunContext(client), device, &c8y.PaginationOptions{

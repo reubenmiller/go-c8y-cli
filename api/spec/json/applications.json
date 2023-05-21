@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "applications",
     "description": "Cumulocity applications",
     "descriptionLong": "REST endpoint to interact with Cumulocity applications",
     "link": "https://cumulocity.com/guides/reference/applications/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getApplicationCollection",
       "description": "Get application collection",
@@ -76,7 +76,7 @@
         },
         {
           "name": "user",
-          "type": "[]user",
+          "type": "user[]",
           "description": "The ID of a user that has access to the applications."
         }
       ]
@@ -624,7 +624,7 @@
         {
           "name": "binaryId",
           "alias": "id",
-          "type": "[]id",
+          "type": "id[]",
           "pipeline": true,
           "required": true,
           "description": "Application binary id"

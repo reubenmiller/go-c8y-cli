@@ -158,8 +158,8 @@ func (n *GetChildCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "reference", "reference"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "reference", "reference"),
 	)
 	if err != nil {
 		return err

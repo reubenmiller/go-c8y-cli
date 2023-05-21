@@ -159,9 +159,9 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithDeviceGroupByNameFirstMatch(n.factory, args, "id", "id"),
 		flags.WithInventoryChildType("childType", "childType"),
-		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "child", "child"),
+		c8yfetcher.WithDeviceGroupByNameFirstMatch(n.factory, args, "child", "child"),
 	)
 	if err != nil {
 		return err

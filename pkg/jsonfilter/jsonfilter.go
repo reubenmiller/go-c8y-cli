@@ -32,12 +32,14 @@ func init() {
 }
 
 type JSONFilters struct {
-	Logger    *logger.Logger
-	Filters   []JSONFilter
-	Selectors []string
-	Pluck     []string
-	Flatten   bool
-	AsCSV     bool
+	Logger             *logger.Logger
+	Filters            []JSONFilter
+	Selectors          []string
+	Pluck              []string
+	Flatten            bool
+	AsCSV              bool
+	AsTSV              bool
+	AsCompletionFormat bool
 }
 
 func (f JSONFilters) Apply(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) ([]byte, error) {
@@ -212,7 +214,7 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 		sourceKeys[i] = key
 		i++
 	}
-	// Use natural sorting to sory array in an user friendly way
+	// Use natural sorting to sort array in an user friendly way
 	// i.e. 1, 10, 2 => 1, 2, 10
 	// Skip sorting for very large key sets
 	if len(sourceKeys) <= 2000000 {
@@ -421,7 +423,7 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 			for _, myval := range formattedJSON.Array() {
 
 				if myval.IsObject() {
-					if line, keys := f.pluckJsonValues(&myval, f.Pluck, f.Flatten, f.AsCSV); line != "" {
+					if line, keys := f.pluckJsonValues(&myval, f.Pluck); line != "" {
 						outputValues = append(outputValues, line)
 						setHeaderFunc(strings.Join(keys, ","))
 					}
@@ -432,7 +434,7 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 			return []byte(strings.Join(outputValues, "\n")), formatErrors(jq.Errors())
 		}
 
-		if line, keys := f.pluckJsonValues(&formattedJSON, f.Pluck, f.Flatten, f.AsCSV); line != "" {
+		if line, keys := f.pluckJsonValues(&formattedJSON, f.Pluck); line != "" {
 			setHeaderFunc(strings.Join(keys, ","))
 			return []byte(line), formatErrors(jq.Errors())
 		}
@@ -489,7 +491,7 @@ func resolveKeyName(item *gjson.Result, key string) (name string, value interfac
 	return key, nil, nil
 }
 
-func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string, flat bool, asCSV bool) (string, []string) {
+func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string) (string, []string) {
 	if item == nil {
 		return "", nil
 	}
@@ -514,10 +516,13 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string, fl
 
 	// json output
 	var v []byte
-	if flat || asCSV {
-		if asCSV {
-			return convertToCSV(flatMap, flatKeys), flatKeys
-		}
+	if f.AsCSV {
+		return convertToCSV(flatMap, flatKeys, ","), flatKeys
+	} else if f.AsTSV {
+		return convertToCSV(flatMap, flatKeys, "\t"), flatKeys
+	} else if f.AsCompletionFormat {
+		return convertToLine(flatMap, flatKeys), flatKeys
+	} else if f.Flatten {
 		v, err = json.Marshal(flatMap)
 	} else {
 		// unflatten
@@ -560,17 +565,50 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string, fl
 	return output.String(), flatKeys
 }
 
-func convertToCSV(flatMap map[string]interface{}, keys []string) string {
+func convertToCSV(flatMap map[string]interface{}, keys []string, separator string) string {
 	buf := bytes.Buffer{}
+	if separator == "" {
+		separator = ","
+	}
 	for i, key := range keys {
 		if i != 0 {
-			// handle for empty non-existant values by leaving it blank
-			buf.WriteByte(',')
+			// handle for empty non-existent values by leaving it blank
+			buf.WriteString(separator)
 		}
 		if value, ok := flatMap[key]; ok {
 			if marshalledValue, err := json.Marshal(value); err != nil {
 				Logger.Warningf("failed to marshal value. value=%v, err=%s", value, err)
 			} else {
+				if !bytes.Contains(marshalledValue, []byte(",")) {
+					buf.Write(bytes.Trim(marshalledValue, "\""))
+				} else {
+					buf.Write(marshalledValue)
+				}
+			}
+		}
+	}
+	return buf.String()
+}
+
+func convertToLine(flatMap map[string]interface{}, keys []string) string {
+	buf := bytes.Buffer{}
+	for i, key := range keys {
+		if i != 0 {
+			// handle for empty non-existent values by leaving it blank
+			if i == 1 {
+				buf.WriteString("\t")
+			} else {
+				buf.WriteString(" | ")
+			}
+		}
+		if value, ok := flatMap[key]; ok {
+			if marshalledValue, err := json.Marshal(value); err != nil {
+				Logger.Warningf("failed to marshal value. value=%v, err=%s", value, err)
+			} else {
+				if i != 0 {
+					buf.WriteString(key)
+					buf.WriteString(": ")
+				}
 				if !bytes.Contains(marshalledValue, []byte(",")) {
 					buf.Write(bytes.Trim(marshalledValue, "\""))
 				} else {

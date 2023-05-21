@@ -1,7 +1,6 @@
 package completion
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -45,7 +44,7 @@ func WithDeviceService(flagService string, flagDevice string, clientFunc func() 
 			} else {
 				// lookup via name
 				items, _, err := client.Inventory.GetDevicesByName(
-					context.Background(),
+					WithDisabledDryRunContext(client),
 					deviceName,
 					c8y.NewPaginationOptions(100),
 				)
@@ -62,7 +61,7 @@ func WithDeviceService(flagService string, flagDevice string, clientFunc func() 
 			query := fmt.Sprintf("type eq 'c8y_Service' and name eq '%s' and bygroupid(%s)", serviceNamePattern, deviceID)
 
 			items, _, err := client.Inventory.GetManagedObjects(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				&c8y.ManagedObjectOptions{
 					Query:             query,
 					PaginationOptions: *c8y.NewPaginationOptions(100),

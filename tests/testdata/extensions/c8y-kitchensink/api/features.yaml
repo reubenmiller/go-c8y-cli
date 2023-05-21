@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+---
+group:
+  name: features
+  description: Example features
+
+commands:
+  - name: completion
+    path: application/applications/{id}
+    method: GET
+    description: Get application
+    pathParameters:
+      - name: id
+        type: string
+        description: Application lookup
+        completion:
+          type: external
+          command:
+            - c8y
+            - applications
+            - list
+            - --pageSize=100
+            - --type=MICROSERVICE
+            - --filter
+            - name like %s*
+            - --select=name,type,id
+
+        lookup:
+          type: external
+          command:
+            - c8y
+            - applications
+            - list
+            - --pageSize=100
+            - --type=MICROSERVICE
+            - --filter
+            - name like %s*
+            - --select=id
+
+  - name: completion2
+    path: inventory/managedObjects
+    method: GET
+    description: Get device collection
+    queryParameters:
+      - name: type
+        type: string
+        description: Device lookup with custom completions
+        completion:
+          type: external
+          command:
+            - pwsh
+            - -c
+            - c8y devices list -p 100 --query "has(enercon_Scada) and type eq 'WEC*'" --select type -o csv | sort | uniq
+
+  - name: applications
+    description: application lookups
+    path: inventory/managedObjects
+    method: POST
+    body:
+      - name: id
+        type: microservice
+        description: Microservice
+
+      - name: instance
+        type: microserviceinstance
+        description: Microservice instance
+
+  - name: devicerequests
+    description: application lookups
+    path: inventory/managedObjects
+    method: POST
+    body:
+      - name: id
+        type: devicerequest[]
+        description: device request
+
+  - name: user
+    description: user lookups
+    path: inventory/managedObjects
+    method: POST
+    body:
+      - name: user
+        type: user[]
+        description: user
+
+      - name: userself
+        type: userself[]
+        description: User self
+
+      - name: usergroup
+        type: usergroup[]
+        description: Usergroup

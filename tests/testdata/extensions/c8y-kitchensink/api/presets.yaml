@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+---
+group:
+  name: presets
+  description: Example features
+
+commands:
+  - name: query-inventory-default
+    description: List device collection with defaults
+    preset:
+      type: query-inventory
+
+  - name: query-inventory-device
+    description: List device collection
+    preset:
+      type: query-inventory
+      options:
+        param: q
+        value: (type eq 'fixedValue')
+
+  - name: query-inventory-mo
+    description: List inventory collection
+    preset:
+      type: query-inventory
+      options:
+        param: query
+        value: (type eq 'company_myType')
+      extensions:
+        - name: option
+          type: string
+          format: some.value eq '%s'
+          description: option
+  
+  # child query
+  - name: query-inventory-children
+    description: List inventory collection
+    preset:
+      type: query-inventory-children
+      options:
+        param: query
+        value: (type eq 'company_myType')
+      extensions:
+        - name: option
+          type: string
+          format: some.value eq '%s'
+          description: option
+    pathParameters:
+      - name: id
+        property: id
+        type: id[]
+        description: test
+        pipeline: true
+        completion:
+          type: external
+          command:
+            - c8y
+            - devices
+            - list
+            - --type=WEC*
+            - --select=name,type,id
+        lookup:
+          type: external
+          command:
+            - c8y
+            - devices
+            - list
+            - --name=%s
+            - --type=WEC*
+            - --select=id
+
+  # identity
+  - name: get-identity-default
+    description: Get identity with defaults
+    preset:
+      type: get-identity
+      options:
+        value: my_Type
+
+  - name: get-identity-with-options
+    description: Get identity with defaults
+    preset:
+      type: get-identity
+      options:
+        value: my_Type
+      extensions:
+        - name: one
+          type: string
+          description: One filter
+    queryParameters:
+      - name: withValues
+        type: boolean
+        description: Custom bool

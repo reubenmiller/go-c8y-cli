@@ -87,7 +87,7 @@ func (n *CmdSubscribeAll) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		flags.WithStringDefaultValue("*", "device", "device"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
 	)
 	if err != nil {
 		return err

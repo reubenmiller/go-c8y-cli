@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: smartgroups
   description: Cumulocity smart groups
   descriptionLong: 'REST endpoint to interact with Cumulocity smart groups. A smart group is an inventory managed object and can also be managed via the Inventory api.'
   link: https://cumulocity.com/guides/reference/inventory/
 
-endpoints:
+commands:
   - name: getSmartGroup
     description: Get smart group
     descriptionLong: Get an smart group
@@ -44,7 +44,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]smartgroup'
+        type: smartgroup[]
         pipeline: true
         required: true
         description: Smart group ID
@@ -108,7 +108,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]smartgroup'
+        type: smartgroup[]
         pipeline: true
         required: true
         description: Smart group ID
@@ -158,7 +158,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]smartgroup'
+        type: smartgroup[]
         pipeline: true
         required: true
         description: Smart group ID

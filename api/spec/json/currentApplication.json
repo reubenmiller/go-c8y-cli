@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "currentApplication",
     "description": "Cumulocity currentApplication",
     "descriptionLong": "REST endpoint to interact with Cumulocity currentApplication",
     "link": "https://cumulocity.com/guides/reference/applications/#current-application"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getCurrentApplication",
       "description": "Get current application",

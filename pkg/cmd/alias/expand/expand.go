@@ -15,7 +15,7 @@ import (
 
 // ExpandAlias processes argv to see if it should be rewritten according to a user's aliases. The
 // second return value indicates whether the alias should be executed in a new shell process instead
-// of running gh itself.
+// of running c8y itself.
 func ExpandAlias(aliases map[string]string, args []string, findShFunc func() (string, error)) (expanded []string, isShell bool, err error) {
 	if len(args) < 2 {
 		// the command is lacking a subcommand

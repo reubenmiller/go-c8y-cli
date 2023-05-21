@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: inventory/assets
   description: Cumulocity inventory assets
   descriptionLong: 'REST endpoint to interact with Cumulocity managed objects'
@@ -9,7 +9,7 @@ information:
   deprecated: "please use 'c8y inventory children [command] --childType asset'"
   hidden: true
 
-endpoints:
+commands:
   - name: listChildAssetCollection
     method: GET
     description: Get child asset collection
@@ -46,7 +46,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         pipelineAliases:
@@ -111,20 +111,20 @@ endpoints:
             command: c8y inventory assets assign --id 12345 --childGroup 43234
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         property: id
         required: true
         description: Managed object id
     body:
       - name: childDevice
-        type: '[]device'
+        type: device[]
         pipeline: true
         required: false
         property: 'managedObject.id'
         description: New child device to be added to the group as an asset
 
       - name: childGroup
-        type: '[]devicegroup'
+        type: devicegroup[]
         required: false
         property: 'managedObject.id'
         description: New child device group to be added to the group as an asset
@@ -159,7 +159,7 @@ endpoints:
             command: c8y inventory assets get --id 12345 --child 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         pipeline: true
         pipelineAliases:
           - "deviceId"
@@ -170,7 +170,7 @@ endpoints:
         description: Managed object id
 
       - name: child
-        type: '[]id'
+        type: id[]
         required: true
         description: Child managed object id
 
@@ -202,7 +202,7 @@ endpoints:
           command: c8y inventory assets unassign --id 12345 --child 22553
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         description: Asset id
         required: true
 

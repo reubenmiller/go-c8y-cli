@@ -159,7 +159,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithSoftwareByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithSoftwareByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

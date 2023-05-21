@@ -1,0 +1,675 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "definitions": {
+        "parameterDefinition": {
+            "type": "object",
+            "title": "Parameter definition",
+            "properties": {
+                "name": {
+                    "$ref": "#/definitions/argumentName"
+                },
+                "type": {
+                    "$ref": "#/definitions/cliArgumentType"
+                },
+                "property": {
+                    "type": "string",
+                    "title": "Target property",
+                    "description": "The property where the flag's value will be mapped to. If not set, then the flag name will be used. Useful to be able to separate the flag from where the value should be written to."
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/parameterDefinition"
+                    }
+                },
+                "pipeline": {
+                    "type": "boolean",
+                    "title": "Accept pipeline",
+                    "description": "The flag should be marked as the default flag where piped input is automatically mapped to. There should only be one parameter marked with the pipeline for a single command"
+                },
+                "pipelineAliases": {
+                    "$ref": "#/definitions/pipelineAliases"
+                },
+                "description": {
+                    "type": "string",
+                    "title": "Flag description",
+                    "description": "Description of what the flag does. This will appear in the command's help text"
+                },
+                "format": {
+                    "type": "string",
+                    "title": "Format string",
+                    "description": "Format string which is applied to the flag's value. Useful if you want to wrap the flag's value in a static string. Reference the flag's value using '%s'. Example 'has(%s)'"
+                },
+                "default": {
+                    "type": "string",
+                    "title": "Default value",
+                    "description": "Default value to be given to the flag. Though most flags will not automatically be processed if they are not explicitly specified by the user"
+                },
+                "value": {
+                    "$ref": "#/definitions/value"
+                },
+                "required": {
+                    "$ref": "#/definitions/requiredParameter"
+                },
+                "hidden": {
+                    "$ref": "#/definitions/hiddenParameter"
+                },
+                "position": {
+                    "$ref": "#/definitions/argumentPosition"
+                },
+                "validationSet": {
+                    "type": "array",
+                    "title": "List of recommended values",
+                    "description": "These values will appear as tab completion options. Though the user is still allowed to use other values",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "dependsOn": {
+                    "$ref": "#/definitions/dependsOn"
+                },
+                "skip": {
+                    "$ref": "#/definitions/skipParameter"
+                },
+                "completion": {
+                    "$ref": "#/definitions/completionCommand"
+                },
+                "lookup": {
+                    "$ref": "#/definitions/namedLookupCommand"
+                }
+            },
+            "required": [
+                "name",
+                "type",
+                "description"
+            ],
+            "patternProperties": {
+                "^[Xx]-": {}
+            },
+            "additionalProperties": false
+        },
+        "completionCommand": {
+            "type": "object",
+            "title": "Completion command",
+            "description": "Command to be executed when the user tries to tab complete a value. Any references to %s will be replaced by the current value entered in by the user",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "title": "External Command Type",
+                    "description": "Type of command",
+                    "default": "external",
+                    "enum": ["external"]
+                },
+                "command": {
+                    "type": "array",
+                    "title": "Command to execute",
+                    "description": "First item should be the binary to execute, and the rest are the arguments. Any references to %s will be replaced by the current value entered in by the user",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "command"
+            ],
+            "patternProperties": {
+                "^[Xx]-": {}
+            },
+            "additionalProperties": false
+        },
+        "namedLookupCommand": {
+            "type": "object",
+            "title": "Named lookup command",
+            "description": "Command to be executed when the user provides a name. The response should be a newline delimited list of single string values",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "title": "External Command Type",
+                    "description": "Type of command",
+                    "default": "external",
+                    "enum": ["external"]
+                },
+                "command": {
+                    "type": "array",
+                    "title": "Command to execute",
+                    "description": "First item should be the binary to execute, and the rest are the arguments. Any references to %s will be replaced by the current value entered in by the user",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "idPattern": {
+                            "type": "string",
+                            "title": "Regular expression which indicates if the value is already an id value",
+                            "description": "This controls whether a value should be looked up or not. For example if set to '^\\d$', this indicates that if a number is provided, then no lookup will be done when a number is provided.",
+                            "default": "^[0-9]+$"
+                        }
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "command"
+            ],
+            "patternProperties": {
+                "^[Xx]-": {}
+            },
+            "additionalProperties": false
+        },
+        "bodyTemplate": {
+            "type": "object",
+            "description": "Use a template when constructing the body of the http request. This can be used to force values, have defaults, or perform custom logic (depending on the template engine). At the moment on jsonnet is supported",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Templating engine. Current only supports jsonnet",
+                    "enum": [
+                        "jsonnet",
+                        "none"
+                    ]
+                },
+                "applyLast": {
+                    "type": "boolean",
+                    "description": "Apply the json template after the existing parameters have been processed. This is useful if values needs to be forced, or if you want the user to be able to override defaults"
+                },
+                "template": {
+                    "type": "string",
+                    "description": "Template in the given template engine language"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "type"
+            ]
+        },
+        "bodyRequiredKeys": {
+            "type": "array",
+            "description": "List of the required body keys. The keys will be checked after any templating logic",
+            "items": {
+                "type": "string"
+            }
+        },
+        "skipParameter": {
+            "type": "boolean",
+            "title": "Skip (ignore) parameter",
+            "description": "Skip the parameter from the command. Useful if preparing for future versions of the c8y api tool"
+        },
+        "requiredParameter": {
+            "type": "boolean",
+            "title": "Is Required",
+            "description": "The parameter is required/mandatory and needs input from the user/pipeline in order to correctly use the command"
+        },
+        "hiddenParameter": {
+            "type": "boolean",
+            "title": "Is Hidden",
+            "description": "The parameter should be hidden from docs and completions but is still parsed. This is used to deprecate a flag without breaking existing scripts"
+        },
+        "defaultValue": {
+            "type": "string",
+            "title": "Default value",
+            "description": "Default value to use"
+        },
+        "value": {
+            "type": "string",
+            "title": "Value to be applied to the property",
+            "description": "Value to be added if the flag is present"
+        },
+        "argumentName": {
+            "type": "string",
+            "description": "Parameter name. It should start with a lower case character, and only include characters [a-zA-Z0-9]",
+            "pattern": "^[a-z][a-zA-Z0-9_-]*$"
+        },
+        "dependsOn": {
+            "type": "array",
+            "title": "Parameter is depend on the list of parameters for completions or other lookups",
+            "description": "Additional links to parameters which the current parameter is dependent on",
+            "items": {
+                "type": "string"
+            }
+        },
+        "cliArgumentType": {
+            "type": "string",
+            "title": "Flag type",
+            "description": "Flag type which will be applied. Some types include automatic tab completion and named lookups. If you don't want any completions or lookups, then use the simple types like; string, integer, boolean",
+            "enum": [
+                "agent[]",
+                "application",
+                "applicationname",
+                "attachment",
+                "binaryUploadURL",
+                "boolean",
+                "booleanDefault",
+                "certificate[]",
+                "certificatefile",
+                "configuration[]",
+                "configurationDetails",
+                "date",
+                "datetime",
+                "device[]",
+                "devicegroup[]",
+                "deviceprofile[]",
+                "devicerequest",
+                "devicerequest[]",
+                "deviceservice[]",
+                "file",
+                "fileContents",
+                "fileContentsAsString",
+                "firmware[]",
+                "firmwareDetails",
+                "firmwareName",
+                "firmwarepatch[]",
+                "firmwarepatchName",
+                "firmwareversion[]",
+                "firmwareversionName",
+                "float",
+                "hostedapplication",
+                "id[]",
+                "integer",
+                "json_custom",
+                "microservice",
+                "microserviceinstance",
+                "microservicename",
+                "optional_fragment",
+                "queryExpression",
+                "role[]",
+                "roleself[]",
+                "smartgroup[]",
+                "software[]",
+                "softwareDetails",
+                "softwareName",
+                "softwareversion[]",
+                "softwareversionName",
+                "source",
+                "string",
+                "string[]",
+                "stringcsv[]",
+                "stringStatic",
+                "subscriptionId",
+                "subscriptionName",
+                "tenant",
+                "tenantname",
+                "user[]",
+                "usergroup[]",
+                "userself[]"
+            ]
+        },
+        "pipelineAliases": {
+            "type": "array",
+            "title": "pipeline aliases",
+            "description": "Aliases to use when searching for the piped json data property to bind to. Only the first match will be used",
+            "items": {
+                "type": "string"
+            }
+        },
+        "argumentPosition": {
+            "type": "integer",
+            "description": "Argument position / order",
+            "minimum": 0,
+            "maximum": 99
+        }
+    },
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "title": "JSON Schema",
+            "description": "JSON Schema reference used to validate the file",
+            "default": "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json"
+        },
+        "version": {
+            "type": "string",
+            "title": "Specification version",
+            "description": "Specification version.",
+            "default": "v1"
+        },
+        "group": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "title": "endpoint name / category for the cli",
+                    "description": "The name will be used for the command line tool category and is case sensitive"
+                },
+                "description": {
+                    "type": "string",
+                    "title": "Description of the endpoint category"
+                },
+                "descriptionLong": {
+                    "type": "string",
+                    "title": "Detailed description of the endpoint category"
+                },
+                "link": {
+                    "type": "string",
+                    "title": "Link to Cumulocity documentation"
+                },
+                "deprecated": {
+                    "type": "string",
+                    "title": "Deprecation message to be displayed to the user",
+                    "description": "The command will still visible to the user but always generate a warning"
+                },
+                "deprecatedAt": {
+                    "type": "string",
+                    "title": "Deprecated At",
+                    "format": "date",
+                    "description": "Date when the command was deprecated"
+                },
+                "hidden": {
+                    "type": "boolean",
+                    "title": "Command should be hidden",
+                    "description": "The command will still work but it will not be visible in the documentation and completions"
+                },
+                "skip": {
+                    "type": "boolean",
+                    "title": "All commands should be ignored",
+                    "description": "ignore specification file"
+                }
+            },
+            "required": [
+                "name",
+                "description"
+            ],
+            "additionalProperties": false
+        },
+        "commands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Command name",
+                        "description": "This will be the command name which is typed by the users on the command line",
+                        "pattern": "^[a-z][a-zA-Z0-9_-]*$"
+                    },
+                    "method": {
+                        "type": "string",
+                        "title": "HTTP request method",
+                        "description": "HTTP request method to be used in the API call",
+                        "enum": [
+                            "GET",
+                            "POST",
+                            "PUT",
+                            "DELETE"
+                        ]
+                    },
+                    "semanticMethod": {
+                        "type": "string",
+                        "title": "Semantic REST method",
+                        "description": "How the command should be handled internally. This will override how the request is processed in respect to confirmation, create/update/delete modes etc.",
+                        "enum": [
+                            "GET",
+                            "POST",
+                            "PUT",
+                            "DELETE"
+                        ]
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description of the command",
+                        "description": "Short description about the command. It should only be a one line description"
+                    },
+                    "descriptionLong": {
+                        "type": "string",
+                        "title": "Detailed description of the endpoint",
+                        "description": "Include any additional context about the command which might be helpful for users."
+                    },
+                    "preset": {
+                        "type": "object",
+                        "title": "Command presets",
+                        "description": "Use a command preset to inherit command options from a pre-defined list",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Preset type",
+                                "description": "The preset to inherit the command options from",
+                                "enum": [
+                                    "query-inventory",
+                                    "query-inventory-children",
+                                    "get-identity"
+                                ]
+                            },
+                            "options": {
+                                "type": "object",
+                                "properties": {
+                                    "value": {
+                                        "type": "string",
+                                        "title": "Options that are related to the specific command preset",
+                                        "description": "The value is optionally used by the preset to tweak the preset. Checkout the preset documentation for an exact description what it does"
+                                    }
+                                },
+                                "additionalProperties": true
+                            },
+                            "extensions": {
+                                "type": "array",
+                                "title": "Additional flags/options to be added to the command",
+                                "description": "Additional command flags/options can be added to a preset command to further customize it. Though the values should not clash with the existing values",
+                                "minItems": 1,
+                                "items": {
+                                    "$ref": "#/definitions/parameterDefinition"
+                                }
+                            }
+                        },
+                        "required":[
+                            "type"
+                        ]
+                    },
+                    "path": {
+                        "type": "string",
+                        "title": "Partial url i.e. /alarm/alarms",
+                        "description": "HTTP request path to be used in the API call, e.g. /alarm/alarms"
+                    },
+                    "accept": {
+                        "type": "string",
+                        "title": "HTTP Accept header value",
+                        "description": "Accept header value. Data to be returned from the platform. The accept header will also control how the data will be displayed within the PowerShell module"
+                    },
+                    "contentType": {
+                        "type": "string",
+                        "title": "HTTP Content Type header",
+                        "description": "Content-Type header value. This is meant to be the MIME type of the body. Only set for HTTP methods which accept a body"
+                    },
+                    "collectionType": {
+                        "type": "string",
+                        "title": "Collection Type",
+                        "description": "Type of the raw response from the platform. The collectionType is the raw response type, and then the collectionProperty, is the type to be used for the array of items that are represented in the collectionType"
+                    },
+                    "collectionProperty": {
+                        "type": "string",
+                        "title": "Collection property",
+                        "description": "The property pointing to the array containing the result list. Each item in the array will be treated with the type defined in 'collectionType'. Use '-' disable any automatic guessing"
+                    },
+                    "responseType": {
+                        "type": "string",
+                        "title": "JSON response body type",
+                        "description": "Expected json response type returned by the server, e.g. is the server responding with an array objects or an object? If not provided, a JSON object is assumed",
+                        "enum": [
+                            "object",
+                            "array"
+                        ]
+                    },
+                    "skip": {
+                        "type": "boolean",
+                        "title": "Skip parameter",
+                        "description": "Skip the parameter from the command. Useful if preparing for future versions of the c8y api tool"
+                    },
+                    "deprecated": {
+                        "type": "string",
+                        "title": "Deprecation message to be displayed to the user",
+                        "description": "The command will still visible to the user but always generate a warning"
+                    },
+                    "deprecatedAt": {
+                        "type": "string",
+                        "title": "Deprecated At",
+                        "format": "date",
+                        "description": "Date when the command was deprecated"
+                    },
+                    "hidden": {
+                        "type": "boolean",
+                        "title": "Command should be hidden",
+                        "description": "The command will still work but it will not be visible in the documentation and completions"
+                    },
+                    "exampleList": {
+                        "type": "array",
+                        "description": "List of examples",
+                        "minItems": 0,
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "command": {
+                                    "type": "string",
+                                    "title": "Command line code which shows the usage of the command for the current endpoint",
+                                    "description": "This command should be what you run when using the native golang cli tool. i.e. mycliapp users list --pageSize 100"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "title": "Example description",
+                                    "description": "Description of what the example (command) does. This will be used in the auto generated documentation within the cli tool"
+                                }
+                            },
+                            "required": [
+                                "command",
+                                "description"
+                            ]
+                        }
+                    },
+                    "flagMapping": {
+                        "type": "array",
+                        "title": "Common/global flag mapping",
+                        "description": "Customize where common flags are mapped to in the request, e.g. pageSize => limit",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "Current property to map"
+                                },
+                                "property": {
+                                    "type": "string",
+                                    "description": "Value where the name should be mapped to"
+                                }
+                            }
+                        }
+                    },
+                    "headerParameters": {
+                        "type": "array",
+                        "title": "HTTP request headers",
+                        "description": "Set HTTP request headers from flags",
+                        "items": {
+                            "$ref": "#/definitions/parameterDefinition"
+                        }
+                    },
+                    "pathParameters": {
+                        "type": "array",
+                        "title": "HTTP request path",
+                        "description": "Set the HTTP request path from flags",
+                        "minItems": 1,
+                        "items": {
+                            "$ref": "#/definitions/parameterDefinition"
+                        }
+                    },
+                    "queryParameters": {
+                        "type": "array",
+                        "title": "HTTP request query parameters",
+                        "description": "Set HTTP query parameters from flags",
+                        "minItems": 1,
+                        "items": {
+                            "$ref": "#/definitions/parameterDefinition"
+                        }
+                    },
+                    "body": {
+                        "type": "array",
+                        "title": "HTTP request body",
+                        "description": "Build the HTTP request body from flags",
+                        "minItems": 1,
+                        "items": {
+                            "$ref": "#/definitions/parameterDefinition"
+                        }
+                    },
+                    "bodyContent": {
+                        "type": "object",
+                        "title": "Body content type",
+                        "description": "Type of body when used to build the HTTP request. Only required when using non json based bodies",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "body content type",
+                                "description": "Body content type. Only used to identify binary contents",
+                                "enum": [
+                                    "binary",
+                                    "formdata"
+                                ]
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "bodyTemplates": {
+                        "type": "array",
+                        "title": "body templates",
+                        "description": "List of static templates to apply when constructing the body of the http request. This can be used to force values, have defaults, or perform custom logic (depending on the template engine). At the moment only jsonnet is supported",
+                        "items": {
+                            "$ref": "#/definitions/bodyTemplate"
+                        }
+                    },
+                    "bodyRequiredKeys": {
+                        "type": "array",
+                        "description": "List of the required body keys. The keys will be checked after any template logic",
+                        "items": {
+                            "type": "string"
+                        },
+                        "additionalProperties": false
+                    },
+                    "bodyTemplateOptions": {
+                        "type": "object",
+                        "description": "Body template options",
+                        "properties": {
+                            "enabled": {
+                                "type": "boolean",
+                                "default": true,
+                                "title": "Enable/disable template support",
+                                "description": "Templates are enabled by default. Use this is you want to disable it. Usually it only makes sense to do for non-json based bodies"
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "patternProperties": {
+                    "^[Xx]-": {}
+                },
+                "additionalProperties": false,
+                "oneOf": [
+                    {
+                        "required": [
+                            "name",
+                            "preset",
+                            "description"
+                        ]
+                    },
+                    {
+                        "required": [
+                            "name",
+                            "method",
+                            "path",
+                            "description"
+                        ]
+                    }
+                ]
+            },
+            "title": "List of commands",
+            "description": "Logically grouped commands"
+        }
+    },
+    "required": [
+        "group",
+        "commands"
+    ],
+    "patternProperties": {
+        "^[Xx]-": {},
+        "$schema": {"type": "string"}
+    },
+    "additionalProperties": false
+}

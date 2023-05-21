@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "firmware",
     "description": "Cumulocity firmware management",
     "descriptionLong": "Firmware management to create/list/delete packages, versions and patches",
     "link": "https://cumulocity.com/guides/users-guide/device-management/#firmware-repo"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getFirmwareCollection",
       "method": "GET",
@@ -269,7 +269,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]firmware",
+          "type": "firmware[]",
           "description": "Firmware package (managedObject) id",
           "required": true,
           "pipeline": true,
@@ -388,7 +388,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]firmware",
+          "type": "firmware[]",
           "description": "Firmware package (managedObject) id",
           "required": true,
           "pipeline": true,
@@ -451,7 +451,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]firmware",
+          "type": "firmware[]",
           "pipeline": true,
           "required": true,
           "pipelineAliases": [

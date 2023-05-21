@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: software
   description: Cumulocity software management
   descriptionLong: Software management to create/list/delete packages and versions
   link: https://cumulocity.com/guides/users-guide/device-management/#software-repo
 
-endpoints:
+commands:
   - name: getSoftwareCollection
     method: GET
     description: Get software collection
@@ -208,7 +208,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]software'
+        type: software[]
         pipeline: true
         required: true
         description: Software package (managedObject) id
@@ -286,7 +286,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]software'
+        type: software[]
         pipeline: true
         description: Software package (managedObject) id
         required: true
@@ -324,7 +324,7 @@ endpoints:
           command: c8y software delete --id 12345 --forceCascade=false
     pathParameters:
       - name: id
-        type: '[]software'
+        type: software[]
         pipeline: true
         required: true
         description: Software Package (managedObject) id

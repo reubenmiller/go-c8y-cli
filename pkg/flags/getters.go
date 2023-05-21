@@ -6,6 +6,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -861,6 +862,30 @@ func WithFilePath(opts ...string) GetOption {
 	}
 }
 
+// WithFileContentsAsString read the file contents and provide the value as a string
+func WithFileContentsAsString(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		src, dst, _ := UnpackGetterOptions("%s", opts...)
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+		file, err := os.Open(value)
+
+		if err != nil {
+			return "", "", err
+		}
+
+		contents, err := io.ReadAll(file)
+		if err != nil {
+			return "", "", err
+		}
+
+		return dst, string(contents), err
+	}
+}
+
 // RawString raw string type
 type RawString string
 
@@ -1054,6 +1079,7 @@ type PipelineOptions struct {
 	Property    string              `json:"property"`
 	Aliases     []string            `json:"aliases"`
 	IsID        bool                `json:"isID"`
+	Values      []string            `json:"values"`
 	Validator   iterator.Validator  `json:"-"`
 	Formatter   func([]byte) []byte `json:"-"`
 	Format      string              `json:"-"`

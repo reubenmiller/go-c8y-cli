@@ -1,7 +1,6 @@
 package completion
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -18,7 +17,7 @@ func WithNotification2SubscriptionName(flagName string, clientFunc func() (*c8y.
 				return []string{err.Error()}, cobra.ShellCompDirectiveError
 			}
 			items, _, err := client.Notification2.GetSubscriptions(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				&c8y.Notification2SubscriptionCollectionOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(2000),
 				},
@@ -73,7 +72,7 @@ func WithNotification2SubscriptionId(flagName string, clientFunc func() (*c8y.Cl
 				return []string{err.Error()}, cobra.ShellCompDirectiveError
 			}
 			items, _, err := client.Notification2.GetSubscriptions(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				&c8y.Notification2SubscriptionCollectionOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(2000),
 				},

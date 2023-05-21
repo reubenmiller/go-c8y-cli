@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "measurements",
     "description": "Cumulocity measurements",
     "descriptionLong": "REST endpoint to interact with Cumulocity measurements",
     "link": "https://cumulocity.com/guides/reference/measurements/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getMeasurementCollection",
       "method": "GET",
@@ -84,7 +84,7 @@
       "queryParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "source",
           "pipeline": true,
           "description": "Device ID"
@@ -184,7 +184,7 @@
       "queryParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "source",
           "pipeline": true,
           "description": "Device ID"
@@ -248,14 +248,14 @@
       "queryParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "source",
           "pipeline": true,
           "description": "Device ID"
         },
         {
           "name": "series",
-          "type": "[]string",
+          "type": "string[]",
           "description": "measurement type and series name, e.g. c8y_AccelerationMeasurement.acceleration"
         },
         {
@@ -318,7 +318,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Measurement id"
@@ -376,7 +376,7 @@
       "body": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": false,
           "property": "source.id",
@@ -448,7 +448,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Measurement id"
@@ -489,7 +489,7 @@
       "queryParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "source",
           "pipeline": true,
           "description": "Device ID"

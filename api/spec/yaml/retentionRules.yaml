@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: retentionRules
   description: Cumulocity retentionRules
   descriptionLong: 'REST endpoint to interact with Cumulocity retentionRules'
   link: https://cumulocity.com/guides/reference/retention-rules/#retention-rules
 
-endpoints:
+commands:
   - name: getRetentionRuleCollection
     description: Get retention rule collection
     descriptionLong: |
@@ -118,7 +118,7 @@ endpoints:
           command: c8y retentionrules get --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Retention rule id
@@ -149,7 +149,7 @@ endpoints:
           command: c8y retentionrules delete --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Retention rule id
@@ -185,7 +185,7 @@ endpoints:
           command: c8y retentionrules update --id 12345 --maximumAge 90
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Retention rule id

@@ -109,7 +109,7 @@ func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithOverrideValue("input", "input"),
 		flags.WithDataFlagValue(),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithStringValue("input", "input", ""),
 	)

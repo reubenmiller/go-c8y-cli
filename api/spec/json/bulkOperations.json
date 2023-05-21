@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "bulkOperations",
     "description": "Cumulocity bulk operations",
     "descriptionLong": "REST endpoint to interact with Cumulocity bulk operations",
     "link": "https://cumulocity.com/guides/reference/device-control/#bulk-operation-collection"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getBulkOperationCollection",
       "method": "GET",
@@ -88,7 +88,7 @@
         {
           "name": "status",
           "property": "generalStatus",
-          "type": "[]string",
+          "type": "string[]",
           "description": "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.",
           "validationSet": [
             "CANCELED",
@@ -136,7 +136,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Bulk Operation id"
@@ -177,7 +177,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "required": true,
           "pipeline": true,
           "description": "Bulk Operation id"
@@ -234,7 +234,7 @@
       "body": [
         {
           "name": "group",
-          "type": "[]devicegroup",
+          "type": "devicegroup[]",
           "property": "groupId",
           "required": false,
           "pipeline": true,
@@ -334,7 +334,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "description": "Bulk Operation id",
           "pipeline": true,
           "required": true
@@ -391,7 +391,7 @@
       "queryParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "id[]",
           "property": "bulkOperationId",
           "pipeline": true,
           "required": true,

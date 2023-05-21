@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: datahub/tenant
   description: Cumulocity IoT DataHub Tenant information
   descriptionLong: Cumulocity IoT DataHub Tenant information
   link: https://cumulocity.com/guides/datahub/datahub-overview/
   skip: true
 
-endpoints:
+commands:
   - name: get
     method: GET
     path: service/datahub/tenant

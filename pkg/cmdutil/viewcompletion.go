@@ -31,7 +31,11 @@ func WithViewCompletion(flagName string, dataviewFunc func() (*dataview.DataView
 				config.ViewsAuto + "\tAuto detect view",
 			}
 			for _, item := range items {
-				values = append(values, fmt.Sprintf("%s\t%v | file: %s", item.Name, item.Columns, item.FileName))
+				if item.Extension != "" {
+					values = append(values, fmt.Sprintf("%s%s%s\t%v | extension: %s, file: %s, ", item.Extension, NamespaceSeparator, item.Name, item.Columns, item.Extension, item.FileName))
+				} else {
+					values = append(values, fmt.Sprintf("%s\t%v | file: %s", item.Name, item.Columns, item.FileName))
+				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp
 		})

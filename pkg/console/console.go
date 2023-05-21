@@ -82,6 +82,10 @@ func (c *Console) IsCSV() bool {
 	return c.Format == config.OutputCSV || c.Format == config.OutputCSVWithHeader
 }
 
+func (c *Console) IsTextOutput() bool {
+	return c.Format == config.OutputCSV || c.Format == config.OutputCSVWithHeader || c.Format == config.OutputTSV || c.Format == config.OutputCompletion
+}
+
 // WithCSVHeader returns true if the csv output should include a header
 func (c *Console) WithCSVHeader() bool {
 	return c.Format == config.OutputCSVWithHeader

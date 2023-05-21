@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "deviceprofiles",
     "description": "Cumulocity device profile management",
     "descriptionLong": "Commands to managed Cumulocity device profiles",
     "link": "https://cumulocity.com/guides/users-guide/device-management/#managing-device-profiles"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getDeviceProfileCollection",
       "method": "GET",
@@ -219,7 +219,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]deviceprofile",
+          "type": "deviceprofile[]",
           "pipeline": true,
           "required": true,
           "description": "DeviceProfile (managedObject) id"
@@ -318,7 +318,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]deviceprofile",
+          "type": "deviceprofile[]",
           "pipeline": true,
           "description": "Device profile (managedObject) id",
           "required": true
@@ -369,7 +369,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]deviceprofile",
+          "type": "deviceprofile[]",
           "pipeline": true,
           "required": true,
           "description": "DeviceProfile Package (managedObject) id"

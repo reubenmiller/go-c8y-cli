@@ -112,7 +112,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("text", "text"),
 		flags.WithStringValue("childAdditionId", "childAdditionId"),
 		flags.WithStringValue("childAssetId", "childAssetId"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "childDeviceId", "childDeviceId"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "childDeviceId", "childDeviceId"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

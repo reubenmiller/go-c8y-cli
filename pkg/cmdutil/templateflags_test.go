@@ -38,7 +38,7 @@ func Test_WithTemplateValue(t *testing.T) {
 		cmd,
 		body,
 		inputIterator,
-		WithTemplateValue(nil),
+		WithTemplateValue(nil, nil),
 		flags.WithTemplateVariablesValue(),
 	)
 

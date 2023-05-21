@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: deviceprofiles
   description: Cumulocity device profile management
   descriptionLong: 'Commands to managed Cumulocity device profiles'
   link: https://cumulocity.com/guides/users-guide/device-management/#managing-device-profiles
 
-endpoints:
+commands:
   - name: getDeviceProfileCollection
     method: GET
     description: Get device profile collection
@@ -163,7 +163,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]deviceprofile'
+        type: deviceprofile[]
         pipeline: true
         required: true
         description: DeviceProfile (managedObject) id
@@ -236,7 +236,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]deviceprofile'
+        type: deviceprofile[]
         pipeline: true
         description: Device profile (managedObject) id
         required: true
@@ -271,7 +271,7 @@ endpoints:
           command: c8y deviceprofiles delete --id 12345
     pathParameters:
       - name: id
-        type: '[]deviceprofile'
+        type: deviceprofile[]
         pipeline: true
         required: true
         description: DeviceProfile Package (managedObject) id

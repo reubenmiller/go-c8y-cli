@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: devices
   description: Cumulocity devices
   descriptionLong: 'REST endpoint to interact with Cumulocity devices'
   link: https://cumulocity.com/guides/reference/inventory/
 
-endpoints:
+commands:
   - name: listDevices
     description: Get device collection
     descriptionLong: Get a collection of devices based on filter parameters
@@ -136,7 +136,7 @@ endpoints:
             format: (creationTime.date ge '%s')
 
           - name: group
-            type: '[]devicegroup'
+            type: devicegroup[]
             description: Filter by group inclusion
             format: bygroupid(%s)
 
@@ -191,7 +191,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]device'
+        type: device[]
         pipeline: true
         required: true
         description: Device ID
@@ -267,7 +267,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]device'
+        type: device[]
         pipeline: true
         required: true
         description: Device ID
@@ -330,7 +330,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]device'
+        type: device[]
         pipeline: true
         required: true
         description: Device ID
@@ -447,7 +447,7 @@ endpoints:
 
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         pipeline: true
         required: true
         description: Device ID
@@ -487,7 +487,7 @@ endpoints:
 
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         pipeline: true
         required: true
         description: Device ID
@@ -520,12 +520,12 @@ endpoints:
           command: c8y devices assignChild --device 12345 --newChild 44235
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         required: true
         description: Device.
     body:
       - name: newChild
-        type: '[]device'
+        type: device[]
         required: true
         pipeline: true
         property: 'managedObject.id'
@@ -563,12 +563,12 @@ endpoints:
           command: c8y devices unassignChild --device 12345 --childDevice 22553
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         required: true
         description: ManagedObject id
 
       - name: childDevice
-        type: '[]device'
+        type: device[]
         required: true
         pipeline: true
         description: Child device reference
@@ -616,7 +616,7 @@ endpoints:
           command: c8y devices listChildren --device 12345
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         pipeline: true
         required: true
         description: Device.
@@ -655,13 +655,13 @@ endpoints:
             command: c8y devices getChild --device 12345 --reference 12345
     pathParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         pipeline: true
         required: true
         description: ManagedObject id
 
       - name: reference
-        type: '[]device'
+        type: device[]
         required: true
         description: Device reference id
 
@@ -710,7 +710,7 @@ endpoints:
           command: c8y devices listAssets --id 12345
     pathParameters:
       - name: id
-        type: '[]device'
+        type: device[]
         pipeline: true
         required: true
         description: Device.

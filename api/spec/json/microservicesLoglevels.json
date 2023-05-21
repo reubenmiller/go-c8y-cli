@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "microservices/loglevels",
     "description": "Cumulocity microservice log levels",
     "descriptionLong": "Manage log levels of microservices.\nLoggers define the log levels based on the qualified name of the Java class.\n(This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)\n",
     "link": "https://cumulocity.com/guides/reference/applications/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "list",
       "description": "List log levels of microservice",

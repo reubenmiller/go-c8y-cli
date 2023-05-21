@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: userGroups
   description: Cumulocity user groups
   descriptionLong: 'REST endpoint to interact with Cumulocity user groups'
   link: https://cumulocity.com/guides/reference/users/#user-reference-collection
 
-endpoints:
+commands:
   - name: getUserGroupCollection
     description: Get user group collection
     descriptionLong: Get collection of (user) groups
@@ -68,7 +68,7 @@ endpoints:
           - "name"
 
       - name: deviceProperties
-        type: '[]string'
+        type: string[]
         description: List of device permissions
 
       - name: data
@@ -103,7 +103,7 @@ endpoints:
         position: 99
 
       - name: id
-        type: '[]usergroup'
+        type: usergroup[]
         pipeline: true
         description: Group id
 
@@ -171,7 +171,7 @@ endpoints:
         position: 99
 
       - name: id
-        type: '[]usergroup'
+        type: usergroup[]
         required: true
         pipeline: true
         description: Group id
@@ -220,7 +220,7 @@ endpoints:
         position: 99
 
       - name: id
-        type: '[]usergroup'
+        type: usergroup[]
         required: true
         pipeline: true
         description: Group id

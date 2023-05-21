@@ -120,7 +120,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithCumulocityQuery(
 			[]flags.GetOption{
 				flags.WithStringValue("query", "query", "%s"),
-				c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmware", "firmware", "bygroupid(%s)"),
+				c8yfetcher.WithFirmwareByNameFirstMatch(n.factory, args, "firmware", "firmware", "bygroupid(%s)"),
 				flags.WithStaticStringValue("ignorePatches", "not(has(c8y_Patch))"),
 				flags.WithStringValue("version", "version", "(c8y_Firmware.version eq '%s')"),
 				flags.WithStringValue("url", "url", "(c8y_Firmware.url eq '%s')"),

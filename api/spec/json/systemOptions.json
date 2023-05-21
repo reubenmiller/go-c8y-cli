@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "systemOptions",
     "description": "Cumulocity systemOptions",
     "descriptionLong": "REST endpoint to interact with Cumulocity systemOptions",
     "link": "https://cumulocity.com/guides/reference/tenants/#system-options"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getSystemOptionCollection",
       "description": "Get system option collection",

@@ -1,13 +1,18 @@
 package factory
 
 import (
+	"crypto/tls"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/extension"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -34,6 +39,10 @@ func New(appVersion string, buildBranch string, configFunc func() (*config.Confi
 		BuildBranch:    buildBranch,
 	}
 	f.Browser = browser(f)
+	f.ExtensionManager = func() extensions.ExtensionManager {
+		// cfg, err := f.Config()
+		return extensionManager(f)
+	}
 	return f
 }
 
@@ -55,4 +64,35 @@ func browserLauncher(f *cmdutil.Factory) string {
 	}
 
 	return os.Getenv("BROWSER")
+}
+
+func extensionManager(f *cmdutil.Factory) *extension.Manager {
+	cfg, err := f.Config()
+	if err != nil {
+		return extension.NewManager(f.IOStreams, cfg)
+	}
+	em := extension.NewManager(f.IOStreams, cfg)
+
+	defaultTransport := http.DefaultTransport.(*http.Transport)
+	tr := &http.Transport{
+		Proxy:                 defaultTransport.Proxy,
+		DialContext:           defaultTransport.DialContext,
+		MaxIdleConns:          defaultTransport.MaxIdleConns,
+		IdleConnTimeout:       defaultTransport.IdleConnTimeout,
+		ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
+		TLSHandshakeTimeout:   defaultTransport.TLSHandshakeTimeout,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: false,
+		},
+	}
+
+	httpClient := &http.Client{
+		Transport: tr,
+		Timeout:   time.Second * 30,
+	}
+
+	em.SetClient(httpClient)
+	// em.SetClient(api.NewCachedHTTPClient(client, time.Second*30))
+
+	return em
 }

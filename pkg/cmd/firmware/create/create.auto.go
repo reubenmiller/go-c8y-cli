@@ -145,7 +145,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("deviceType", "c8y_Filter.type"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_Firmware', c8y_Global:{}}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "name"),
 	)

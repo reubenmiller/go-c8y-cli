@@ -10,10 +10,10 @@
         [string] $OutputDir = "./"
     )
 
-    $Name = $Specification.information.name.ToLower()
-    $BaseName = Split-Path -Path $Specification.information.name.ToLower() -Leaf
+    $Name = $Specification.group.name.ToLower()
+    $BaseName = Split-Path -Path $Specification.group.name.ToLower() -Leaf
 
-    if ($Specification.information.skip -eq $true) {
+    if ($Specification.group.skip -eq $true) {
         Write-Information "Specification is marked to be ignored"
         return
     }
@@ -24,9 +24,9 @@
     }
     $BaseNameLowercase = $BaseName.ToLower()
     $NameCamel = $BaseNameLowercase[0].ToString().ToUpperInvariant() + $BaseNameLowercase.Substring(1)
-    $Description = $Specification.information.description
-    $DescriptionLong = $Specification.information.descriptionLong
-    $Hidden = $Specification.information.hidden
+    $Description = $Specification.group.description
+    $DescriptionLong = $Specification.group.descriptionLong
+    $Hidden = $Specification.group.hidden
 
     $SubcommandsCode = New-Object System.Text.StringBuilder
     $RootImportCode = New-Object System.Text.StringBuilder
@@ -35,7 +35,7 @@
 
     $File = Join-Path -Path $OutputDir -ChildPath ("{0}.auto.go" -f $BaseNameLowercase)
 
-    foreach ($endpoint in $Specification.endpoints) {
+    foreach ($endpoint in $Specification.commands) {
         if ($endpoint.skip -eq $true) {
             Write-Verbose ("Skipping [{0}]" -f $endpoint.name)
             continue

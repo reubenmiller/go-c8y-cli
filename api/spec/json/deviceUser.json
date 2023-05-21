@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "devices/user",
     "description": "Cumulocity device user management",
     "descriptionLong": "Managed the device user related to a device",
     "link": "https://cumulocity.com/guides/reference/inventory/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getDeviceUser",
       "description": "Get device user",
@@ -60,7 +60,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "Device ID"
@@ -116,7 +116,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "required": true,
           "description": "Device ID"

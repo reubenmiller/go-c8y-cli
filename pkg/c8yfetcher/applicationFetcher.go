@@ -4,23 +4,25 @@ import (
 	"regexp"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 type ApplicationFetcher struct {
-	client *c8y.Client
-	*DefaultFetcher
+	*CumulocityFetcher
 }
 
-func NewApplicationFetcher(client *c8y.Client) *ApplicationFetcher {
+func NewApplicationFetcher(factory *cmdutil.Factory) *ApplicationFetcher {
 	return &ApplicationFetcher{
-		client: client,
+		CumulocityFetcher: &CumulocityFetcher{
+			factory: factory,
+		},
 	}
 }
 
 func (f *ApplicationFetcher) getByID(id string) ([]fetcherResultSet, error) {
-	app, resp, err := f.client.Application.GetApplication(
-		WithDisabledDryRunContext(f.client),
+	app, resp, err := f.Client().Application.GetApplication(
+		WithDisabledDryRunContext(f.Client()),
 		id,
 	)
 
@@ -39,8 +41,8 @@ func (f *ApplicationFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 // getByName returns applications matching a given using regular expression
 func (f *ApplicationFetcher) getByName(name string) ([]fetcherResultSet, error) {
-	col, _, err := f.client.Application.GetApplications(
-		WithDisabledDryRunContext(f.client),
+	col, _, err := f.Client().Application.GetApplications(
+		WithDisabledDryRunContext(f.Client()),
 		&c8y.ApplicationOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(2000),
 		},

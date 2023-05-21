@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
 
-information:
+group:
   name: userreferences
   description: Cumulocity user references
   descriptionLong: 'REST endpoint to interact with Cumulocity user references'
   link: https://cumulocity.com/guides/reference/users/#user-reference-collection
 
-endpoints:
+commands:
   - name: addUserToGroup
     description: Add user to group
     descriptionLong: Add an existing user to a group
@@ -45,7 +45,7 @@ endpoints:
           skipTest: true
     pathParameters:
       - name: group
-        type: '[]usergroup'
+        type: usergroup[]
         required: true
         description: Group ID
 
@@ -56,7 +56,7 @@ endpoints:
 
     body:
       - name: user
-        type: '[]userself'
+        type: userself[]
         pipeline: true
         required: true
         property: user.self
@@ -99,12 +99,12 @@ endpoints:
               path: r//user/$C8Y_TENANT/groups/1/users/peterpi@example.com
     pathParameters:
       - name: group
-        type: '[]usergroup'
+        type: usergroup[]
         required: true
         description: Group ID
 
       - name: user
-        type: '[]user'
+        type: user[]
         required: true
         pipeline: true
         description: User id/username
@@ -157,7 +157,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]usergroup'
+        type: usergroup[]
         required: true
         pipeline: true
         description: Group ID

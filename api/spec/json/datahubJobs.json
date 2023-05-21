@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "datahub/jobs",
     "description": "Cumulocity IoT DataHub Jobs",
     "descriptionLong": "Cumulocity IoT DataHub Jobs",
     "link": "https://cumulocity.com/guides/datahub/datahub-overview/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "createJob",
       "method": "POST",
@@ -63,7 +63,7 @@
         },
         {
           "name": "context",
-          "type": "[]string",
+          "type": "string[]",
           "required": false,
           "description": "The context in which the query is executed"
         },

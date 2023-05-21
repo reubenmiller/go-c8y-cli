@@ -302,6 +302,11 @@ const (
 
 	// SettingsBrowser default browser
 	SettingsBrowser = "settings.browser"
+
+	// Extensions
+	SettingsExtensionDataDir         = "settings.extensions.datadir"
+	SettingsExtensionDefaultHost     = "settings.extensions.defaultHost"
+	SettingsExtensionDefaultUsername = "settings.extensions.defaultUsername"
 )
 
 var (
@@ -457,6 +462,10 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsCacheDir, filepath.Join(os.TempDir(), "go-c8y-cli-cache")),
 
 		WithBindEnv(SettingsBrowser, ""),
+
+		// Extensions
+		WithBindEnv(SettingsExtensionDataDir, ""),
+		WithBindEnv(SettingsExtensionDefaultHost, "github.com"),
 	)
 
 	if err != nil {
@@ -928,8 +937,10 @@ func (c *Config) DecryptSession() error {
 }
 
 // CommonAliases Get common aliases from the global configuration file
+// deprecated in favor of extensions
 func (c *Config) CommonAliases() map[string]string {
-	return c.viper.GetStringMapString(SettingsCommonAliases)
+	return map[string]string{}
+	// return c.viper.GetStringMapString(SettingsCommonAliases)
 }
 
 // Aliases get aliases configured in the current session
@@ -1212,8 +1223,9 @@ func (c *Config) StorePassword() bool {
 }
 
 // GetTemplatePaths template folders where the template files are located
-func (c *Config) GetTemplatePaths() (paths []string) {
+func (c *Config) GetTemplatePaths() []string {
 	// Prefer custom path over default path
+	paths := make([]string, 0)
 	paths = append(paths, c.GetPathSlice(SettingsTemplateCustomPaths)...)
 	paths = append(paths, c.GetPathSlice(SettingsTemplatePath)...)
 	return paths
@@ -1284,6 +1296,16 @@ func (c *Config) IsCSVOutput() bool {
 	return format == OutputCSV || format == OutputCSVWithHeader
 }
 
+func (c *Config) IsTSVOutput() bool {
+	format := c.GetOutputFormat()
+	return format == OutputTSV
+}
+
+func (c *Config) IsCompletionOutput() bool {
+	format := c.GetOutputFormat()
+	return format == OutputCompletion
+}
+
 // IsResponseOutput check if raw server response should be used
 func (c *Config) IsResponseOutput() bool {
 	return c.GetOutputFormat() == OutputServerResponse
@@ -1331,9 +1353,9 @@ func (c *Config) GetConfigPath() string {
 
 // GetViewPaths get list of view paths
 func (c *Config) GetViewPaths() []string {
-	viewPaths := c.GetPathSlice(SettingsViewsCommonPaths)
-	viewPaths = append(viewPaths, c.GetPathSlice(SettingsViewsCustomPaths)...)
-	return viewPaths
+	paths := c.GetPathSlice(SettingsViewsCommonPaths)
+	paths = append(paths, c.GetPathSlice(SettingsViewsCustomPaths)...)
+	return paths
 }
 
 // GetJSONFilter get json filter to be applied to the output
@@ -1409,6 +1431,23 @@ func (c *Config) Browser() string {
 	return c.viper.GetString(SettingsBrowser)
 }
 
+// Get Extension Data Directory
+func (c *Config) ExtensionsDataDir() string {
+	dir := c.viper.GetString(SettingsExtensionDataDir)
+	if dir == "" {
+		dir = c.GetSessionHomeDir()
+	}
+	return filepath.Join(dir, "extensions")
+}
+
+func (c *Config) DefaultHost() string {
+	return c.viper.GetString(SettingsExtensionDefaultHost)
+}
+
+func (c *Config) ExtensionDefaultUsername() string {
+	return c.viper.GetString(SettingsExtensionDefaultUsername)
+}
+
 // GetJSONSelect get json properties to be selected from the output. Only the given properties will be returned
 func (c *Config) GetJSONSelect() []string {
 	// Note: select is stored as an cobra Array String, which add special formating of values.
@@ -1444,6 +1483,8 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 	// Filters and selectors
 	filters := jsonfilter.NewJSONFilters(c.Logger)
 	filters.AsCSV = c.IsCSVOutput()
+	filters.AsTSV = c.IsTSVOutput()
+	filters.AsCompletionFormat = c.IsCompletionOutput()
 	filters.Flatten = c.FlattenJSON()
 	filters.Pluck = c.GetJSONSelect()
 	if err := filters.AddRawFilters(c.GetJSONFilter()); err != nil {

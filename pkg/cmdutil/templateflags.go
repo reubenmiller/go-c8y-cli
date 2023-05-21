@@ -9,11 +9,16 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/spf13/cobra"
 )
+
+var NamespaceSeparator = "::"
+
+func BuildTemplatePath(namespace, name string) string {
+	return fmt.Sprintf("%s%s%s", namespace, NamespaceSeparator, name)
+}
 
 type TemplatePathResolver struct {
 	Paths []string
@@ -29,32 +34,50 @@ func matchFilePath(paths []string, pattern string, extensions []string, ignoreDi
 		return pattern, nil
 	}
 
+	sourcePattern := ""
+	if a, b, ok := strings.Cut(pattern, NamespaceSeparator); ok {
+		sourcePattern = a
+		pattern = b
+	}
+
 	// abort if template path does not exist
 	validPaths := []string{}
 	for _, sourceDir := range paths {
+		sourceName := ""
+		sourcePath := sourceDir
+		if a, b, ok := strings.Cut(sourceDir, NamespaceSeparator); ok {
+			sourceName = a
+			sourcePath = b
+		}
 
-		if stat, err := os.Stat(sourceDir); err == nil && stat.IsDir() {
+		if sourcePattern != "" {
+			if sourceMatch, _ := filepath.Match(sourceName, sourcePattern); !sourceMatch {
+				continue
+			}
+		}
+
+		if stat, err := os.Stat(sourcePath); err == nil && stat.IsDir() {
 			// path exists under template path (return early)
-			fullPath := path.Join(sourceDir, pattern)
+			fullPath := path.Join(sourcePath, pattern)
 			if stat, err := os.Stat(fullPath); err == nil && !stat.IsDir() {
 				return fullPath, nil
 			}
 
-			validPaths = append(validPaths, sourceDir)
+			validPaths = append(validPaths, sourcePath)
 		}
 	}
 	if len(validPaths) == 0 {
-		return "", fmt.Errorf("Template paths do not exist. %v", paths)
+		return "", fmt.Errorf("template paths do not exist. %v", paths)
 	}
 
 	// try to resolve path in nested
-	names, err := pathresolver.ResolvePaths(paths, pattern, extensions, ignoreDir)
+	names, err := pathresolver.ResolvePaths(validPaths, pattern, extensions, ignoreDir)
 	if err != nil {
 		return "", err
 	}
 
 	if len(names) == 0 {
-		return "", fmt.Errorf("No matching files found")
+		return "", fmt.Errorf("no matching files found")
 	}
 
 	return names[0], nil
@@ -63,20 +86,16 @@ func matchFilePath(paths []string, pattern string, extensions []string, ignoreDi
 // WithTemplateFlag add template flag with completion
 func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 	return func(cmd *cobra.Command) *cobra.Command {
-		cfg, err := f.Config()
-		if err != nil {
-			return nil
-		}
+		// cfg, err := f.Config()
+		// if err != nil {
+		// 	return nil
+		// }
 		cmd.Flags().String(flags.FlagDataTemplateName, "", "Body template")
 		cmd.Flags().StringArray(flags.FlagDataTemplateVariablesName, []string{}, "Body template variables")
 
 		_ = cmd.RegisterFlagCompletionFunc(flags.FlagDataTemplateName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			templatePath := cfg.GetTemplatePaths()
 
-			matches, err := pathresolver.ResolvePaths(templatePath, "*"+toComplete+"*", []string{".jsonnet"}, "ignore")
-			for i, match := range matches {
-				matches[i] = filepath.Base(match)
-			}
+			matches, err := f.ResolveTemplates("*"+toComplete+"*", false)
 
 			if err != nil {
 				return []string{"jsonnet"}, cobra.ShellCompDirectiveFilterFileExt
@@ -85,12 +104,13 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 		})
 
 		_ = cmd.RegisterFlagCompletionFunc(flags.FlagDataTemplateVariablesName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			templatePath := cfg.GetTemplatePaths()
 			templateFlag, err := cmd.Flags().GetString(flags.FlagDataTemplateName)
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveNoSpace
 			}
-			matches, err := pathresolver.ResolvePaths(templatePath, templateFlag, []string{".jsonnet"}, "ignore")
+
+			matches, err := f.ResolveTemplates(templateFlag, true)
+			// matches, err := pathresolver.ResolvePaths(templatePath, templateFlag, []string{".jsonnet"}, "ignore")
 
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveNoSpace
@@ -151,12 +171,25 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 }
 
 // WithTemplateValue get the template value using the path resolver controlled by the configuration
-func WithTemplateValue(cfg *config.Config) flags.GetOption {
-	return flags.WithTemplateValue(flags.FlagDataTemplateName, NewTemplateResolver(cfg))
+func WithTemplateValue(factory *Factory) flags.GetOption {
+	return flags.WithTemplateValue(flags.FlagDataTemplateName, NewTemplateResolver(factory))
 }
 
-func NewTemplateResolver(cfg *config.Config) *TemplatePathResolver {
+func NewTemplateResolver(factory *Factory) *TemplatePathResolver {
+	cfg, err := factory.Config()
+	if err != nil {
+		return nil
+	}
+	paths := cfg.GetTemplatePaths()
+
+	for _, ext := range factory.ExtensionManager().List() {
+		path := ext.TemplatePath()
+		if path != "" {
+			paths = append(paths, BuildTemplatePath(ext.Name(), path))
+		}
+	}
+
 	return &TemplatePathResolver{
-		Paths: cfg.GetTemplatePaths(),
+		Paths: paths,
 	}
 }

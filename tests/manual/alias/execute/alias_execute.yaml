@@ -37,6 +37,7 @@ tests:
         C8Y_SESSION: '/tmp/.cumulocity-alias/mysession.yaml'
         C8Y_SESSION_HOME: '/tmp/.cumulocity-alias'
         C8Y_HOME: '/tmp/.cumulocity-alias'
+        C8Y_SETTINGS_EXTENSIONS_DATADIR: '/tmp/go-c8y-cli'
     command: |
       mkdir -p "$C8Y_HOME"
       rm -f "$C8Y_SESSION"

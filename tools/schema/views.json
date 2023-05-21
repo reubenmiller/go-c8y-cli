@@ -1,0 +1,107 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "type": "object",
+    "definitions": {
+        "view": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "title": "View name",
+                    "description": "Human readable name which can be referenced by the user",
+                    "default": "myView",
+                    "minLength": 1
+                },
+                "priority": {
+                    "type": "integer",
+                    "title": "Priority",
+                    "description": "If multiple matches are found, the view with the lowest number will be used",
+                    "default": 300
+                },
+                "fragments": {
+                    "type": "array",
+                    "title": "Match by fragments",
+                    "description": "List of fragments which must be present for the view to be activated. Regex is NOT supported",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "type": "string",
+                    "title": "Match by type",
+                    "description": "Match against the .type value. Accepts regex",
+                    "minLength": 1,
+                    "default": "my_type"
+                },
+                "contentType": {
+                    "type": "string",
+                    "title": "Match by Content-Type header value",
+                    "description": "Match against the response's Content-Type header. Accepts regex",
+                    "minLength": 1,
+                    "default": "vnd.com.nsn.cumulocity.managedObject\\+json"
+                },
+                "requestPath": {
+                    "type": "string",
+                    "title": "Match by the request's path",
+                    "description": "Match against the request's path. Accepts regex",
+                    "minLength": 1,
+                    "default": ""
+                },
+                "requestMethod": {
+                    "type": "string",
+                    "title": "Match by the request's method",
+                    "description": "Match against the request's method. Accepts regex",
+                    "minLength": 1,
+                    "default": ""
+                },
+                "self": {
+                    "type": "string",
+                    "title": "Match by .self value",
+                    "description": "Match against the response's .self property. Accepts regex",
+                    "minLength": 1,
+                    "default": "tenant/tenants/\\w+/trusted-certificates/"
+                },
+                "columns": {
+                    "type": "array",
+                    "title": "Columns to be displayed when the view is used",
+                    "description": "List of columns which will be used in the view. These can use the same syntax as the --select flag",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "default": ["id", "type", "**.id"]
+                }
+            },
+            "required": [
+                "name",
+                "priority",
+                "columns"
+            ],
+            "anyOf": [
+                {"required" : ["fragments"]},
+                {"required" : ["requestPath"]},
+                {"required" : ["type"]},
+                {"required" : ["self"]},
+                {"required" : ["contentType"]}
+            ]
+        }
+    },
+    "properties":{
+        "version": {
+            "type": "string",
+            "title": "Extension version",
+            "description": "Extension version. Reserved for future use",
+            "default": "v1"
+        },
+        "definitions": {
+            "type": "array",
+            "title": "View definitions",
+            "description": "List of views where each view defines when it should be used and what it should be used to display. Views can use multiple matching definitions",
+            "minItems": 0,
+            "items": {
+                "$ref": "#/definitions/view"
+            }
+        }
+    },
+    "required": ["version", "definitions"]
+}

@@ -2,8 +2,10 @@ package dataview
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -16,16 +18,28 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+var NamespaceSeparator = "::"
+
 // Definition contains the view definition of when to use a specific view
 type Definition struct {
-	FileName    string   `json:"-"`
-	Name        string   `json:"name,omitempty"`
-	Priority    int      `json:"priority,omitempty"`
-	Fragments   []string `json:"fragments,omitempty"`
-	Type        string   `json:"type,omitempty"`
-	ContentType string   `json:"contentType,omitempty"`
-	Self        string   `json:"self,omitempty"`
-	Columns     []string `json:"columns,omitempty"`
+	FileName      string   `json:"-"`
+	Extension     string   `json:"-"`
+	Name          string   `json:"name,omitempty"`
+	Priority      int      `json:"priority,omitempty"`
+	Fragments     []string `json:"fragments,omitempty"`
+	Type          string   `json:"type,omitempty"`
+	RequestPath   string   `json:"requestPath,omitempty"`
+	RequestMethod string   `json:"requestMethod,omitempty"`
+	ContentType   string   `json:"contentType,omitempty"`
+	Self          string   `json:"self,omitempty"`
+	Columns       []string `json:"columns,omitempty"`
+}
+
+func (d *Definition) FQDN() string {
+	if d.Extension != "" {
+		return fmt.Sprintf("%s%s%s", d.Extension, NamespaceSeparator, d.Name)
+	}
+	return d.Name
 }
 
 // DefinitionCollection collection of view definitions
@@ -75,8 +89,18 @@ func (v *DataView) LoadDefinitions() error {
 	for _, path := range v.Paths {
 		v.Logger.Debugf("Current view path: %s", path)
 
+		extName := ""
+		if strings.Contains(path, NamespaceSeparator) {
+			if b, a, ok := strings.Cut(path, NamespaceSeparator); ok {
+				extName = b
+				path = a
+			}
+		}
+
 		if stat, err := os.Stat(path); err != nil {
-			v.Logger.Debugf("Skipping view path because it does not exist. path=%s, error=%s", path, err)
+			if extName == "" {
+				v.Logger.Debugf("Skipping view path because it does not exist. path=%s, error=%s", path, err)
+			}
 			continue
 		} else if !stat.IsDir() {
 			v.Logger.Debugf("Skipping view path because it is not a folder. path=%s", path)
@@ -102,14 +126,20 @@ func (v *DataView) LoadDefinitions() error {
 					return err
 				}
 
-				v.Logger.Debugf("Found view definition: %s", d.Name())
+				if extName != "" {
+					v.Logger.Debugf("Found view definition: %s | extension: %s", d.Name(), extName)
+				} else {
+					v.Logger.Debugf("Found view definition: %s", d.Name())
+				}
 				viewDefinition := &DefinitionCollection{}
 				if err := json.Unmarshal(contents, &viewDefinition); err != nil {
 					v.Logger.Warnf("Could not load view definitions. %s", err)
-					return err
+					// do not prevent walking other folders
+					return nil
 				}
 				for i := range viewDefinition.Definitions {
 					viewDefinition.Definitions[i].FileName = d.Name()
+					viewDefinition.Definitions[i].Extension = extName
 				}
 				definitions = append(definitions, viewDefinition.Definitions...)
 			}
@@ -141,7 +171,7 @@ func (v *DataView) GetViewByName(pattern string) ([]string, error) {
 
 	for _, definition := range v.GetDefinitions() {
 
-		if match, _ := matcher.MatchWithWildcards(definition.Name, pattern); match {
+		if match, _ := matcher.MatchWithWildcards(definition.FQDN(), pattern); match {
 			matchingDefinition = &definition
 			break
 		}
@@ -164,7 +194,7 @@ func (v *DataView) GetViews(pattern string) ([]Definition, error) {
 	matches := []Definition{}
 
 	for _, definition := range v.GetDefinitions() {
-		if match, _ := matcher.MatchWithWildcards(definition.Name, pattern); match {
+		if match, _ := matcher.MatchWithWildcards(definition.FQDN(), pattern); match {
 			matches = append(matches, definition)
 		}
 	}
@@ -192,12 +222,20 @@ func (v *DataView) ClearActiveView() {
 	v.ActiveView = nil
 }
 
-func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string, error) {
+type ViewData struct {
+	ResponseBody *gjson.Result
+	ContentType  string
+	Response     *http.Response
+	Request      *http.Request
+}
+
+func (v *DataView) GetView(r *ViewData) ([]string, error) {
 	if view := v.GetActiveView(); view != nil {
 		v.Logger.Debugf("Using already active view")
 		return view.Columns, nil
 	}
 
+	data := r.ResponseBody
 	err := v.LoadDefinitions()
 	if err != nil {
 		return nil, err
@@ -233,8 +271,8 @@ func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string,
 			}
 		}
 
-		if len(contentType) > 0 {
-			if match, err := regexp.MatchString("(?i)"+definition.ContentType, contentType[0]); err == nil && !match {
+		if definition.ContentType != "" {
+			if match, err := regexp.MatchString("(?i)"+definition.ContentType, r.ContentType); err == nil && !match {
 				isMatch = false
 			}
 		}
@@ -246,6 +284,25 @@ func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string,
 				}
 			} else {
 				isMatch = false
+			}
+		}
+
+		if definition.RequestPath != "" {
+			if r.Request == nil {
+				isMatch = false
+			} else {
+				if match, err := regexp.MatchString("(?i)"+definition.RequestPath, r.Request.URL.Path); err == nil && !match {
+					isMatch = false
+				}
+			}
+		}
+		if definition.RequestMethod != "" {
+			if r.Request == nil {
+				isMatch = false
+			} else {
+				if match, err := regexp.MatchString("(?i)"+definition.RequestMethod, r.Request.Method); err == nil && !match {
+					isMatch = false
+				}
 			}
 		}
 

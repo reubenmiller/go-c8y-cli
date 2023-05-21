@@ -26,12 +26,12 @@
 
             $Specification = Get-Content $Path -Raw -Encoding utf8 | ConvertFrom-Json
 
-            if ($Specification.information.skip -eq $true) {
+            if ($Specification.group.skip -eq $true) {
                 Write-Verbose ("Skipping [{0}]" -f $Path)
                 continue
             }
 
-			foreach ($iSpec in $Specification.endpoints) {
+			foreach ($iSpec in $Specification.commands) {
                 if ($iSpec.skip -eq $true) {
                     Write-Verbose ("Skipping [{0}]" -f $iSpec.name)
                     continue
@@ -44,7 +44,7 @@
 
                 New-C8yApiPowershellCommand `
                     -Specification:$iSpec `
-                    -Noun $Specification.information.name `
+                    -Noun $Specification.group.name `
                     -OutputDir:$OutputDir
 			}
         }

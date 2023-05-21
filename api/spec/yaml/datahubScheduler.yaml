@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: datahub/scheduler
   description: Cumulocity IoT DataHub Scheduler
   descriptionLong: Cumulocity IoT DataHub Scheduler
   link: https://cumulocity.com/guides/datahub/datahub-overview/
   skip: true
 
-endpoints:
+commands:
   - name: list
     method: GET
     path: service/datahub/scheduler/latestjobs

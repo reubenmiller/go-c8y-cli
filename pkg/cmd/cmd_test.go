@@ -463,7 +463,7 @@ func Test_DebugStdinCommand(t *testing.T) {
 	// stdin.Write(`{"source":{"id":"1111"}}` + "\n")
 
 	cmdtext := `
-	api --method GET --url /measurement/measurements --customQueryParam "dateFrom=2022-08-10T14:59:29.561+02:00" --dry=false
+	extension install reubenmiller/c8y-devmgmt
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 

@@ -144,7 +144,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("url", "c8y_Firmware.url"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_FirmwareBinary', c8y_Global:{}}`),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "c8y_Firmware.version"),
 	)
@@ -158,7 +158,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmware", "firmware"),
+		c8yfetcher.WithFirmwareByNameFirstMatch(n.factory, args, "firmware", "firmware"),
 	)
 	if err != nil {
 		return err

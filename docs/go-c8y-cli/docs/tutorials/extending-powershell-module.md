@@ -4,6 +4,12 @@ category: Tutorials - Powershell
 title: Extend using module
 ---
 
+:::tip
+It is recommended to use [extensions](/docs/concepts/extensions/) instead of creating your own PowerShell module. Extensions are available in go-c8y-cli >= 2.30.0 and provide a more portable/native experience. They are just as easy to install and share, and can be used in any shell.
+
+Or just check out the [Tutorials](/docs/tutorials/extensions/).
+:::
+
 An example how to extend the `PSc8y` PowerShell module using another PowerShell module is shown in the following demo project:
 
 [Example PSc8y.example Module](https://github.com/reubenmiller/PSc8y.example)

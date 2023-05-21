@@ -161,9 +161,9 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
     //   anonymizeIP: true,
     // },
     announcementBar: {
-      id: 'v2-major-release',
+      id: 'extensions',
       content:
-        '🎉 go-c8y-cli v2 is now supports linux natively (pipelines and everything)! Check out the installation instructions',
+        '📦 go-c8y-cli now supports extensions. Install the latest version (>=2.30.0) and check out the concepts page 🚀',
     },
     navbar: {
       title: 'go-c8y-cli',

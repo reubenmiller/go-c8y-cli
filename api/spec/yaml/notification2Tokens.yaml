@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: notification2/tokens
   description: Cumulocity notification2 tokens
   descriptionLong: |
@@ -9,7 +9,7 @@ information:
     receive subscribed notifications.
   link: https://cumulocity.com/guides/reference/notifications/
 
-endpoints:
+commands:
   - name: newToken
     method: POST
     path: notification2/token

@@ -787,7 +787,15 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 							commonOptions.Filters.Pluck = []string{"**"}
 						}
 					case config.ViewsAuto:
-						props, err := r.DataView.GetView(&inputData, resp.Response.Header.Get("Content-Type"))
+						viewData := &dataview.ViewData{
+							ResponseBody: &inputData,
+							ContentType:  resp.Response.Header.Get("Content-Type"),
+							Request:      resp.Response.Request,
+						}
+						if resp.Response != nil {
+							viewData.Request = resp.Response.Request
+						}
+						props, err := r.DataView.GetView(viewData)
 
 						if err != nil || len(props) == 0 {
 							if err != nil {
@@ -859,7 +867,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 				!isJSONResponse,
 				jsonformatter.WithFileOutput(commonOptions.OutputFile != "", commonOptions.OutputFile, false),
 				jsonformatter.WithTrimSpace(true),
-				jsonformatter.WithJSONStreamOutput(isJSONResponse, consol.IsJSONStream(), consol.IsCSV()),
+				jsonformatter.WithJSONStreamOutput(isJSONResponse, consol.IsJSONStream(), consol.IsTextOutput()),
 				jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
 			)
 		}

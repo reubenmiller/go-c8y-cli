@@ -1,7 +1,6 @@
 package completion
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -18,7 +17,7 @@ func WithUserGroup(flagName string, clientFunc func() (*c8y.Client, error)) Opti
 			}
 
 			items, _, err := client.User.GetGroups(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				&c8y.GroupOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(100),
 				},

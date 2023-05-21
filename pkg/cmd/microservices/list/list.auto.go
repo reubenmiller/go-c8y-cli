@@ -124,7 +124,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("owner", "owner"),
 		flags.WithStringValue("providedFor", "providedFor"),
 		flags.WithStringValue("subscriber", "subscriber"),
-		c8yfetcher.WithUserByNameFirstMatch(client, args, "user", "user"),
+		c8yfetcher.WithUserByNameFirstMatch(n.factory, args, "user", "user"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "identity",
     "description": "Cumulocity external identity",
     "descriptionLong": "REST endpoint to interact with Cumulocity external identity objects",
     "link": "https://cumulocity.com/guides/reference/identity/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getExternalIDCollection",
       "method": "GET",
@@ -58,7 +58,7 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "required": true,
           "pipeline": true,
           "description": "Device id"
@@ -244,7 +244,7 @@
       "pathParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "required": true,
           "pipeline": true,
           "description": "The ManagedObject linked to the external ID."

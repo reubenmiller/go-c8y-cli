@@ -6,7 +6,7 @@ List your aliases
 
 ### Synopsis
 
-This command prints out all of the aliases gh is configured to use.
+This command prints out all of the aliases c8y is configured to use.
 
 
 ```

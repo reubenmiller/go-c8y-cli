@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "configuration",
     "description": "Cumulocity configuration repository management",
     "descriptionLong": "Configuration management to create/list/delete configurations",
     "link": "https://cumulocity.com/guides/users-guide/device-management/#configuration-repository"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "getConfigurationCollection",
       "method": "GET",
@@ -269,7 +269,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]configuration",
+          "type": "configuration[]",
           "pipeline": true,
           "required": true,
           "description": "Configuration package (managedObject) id"
@@ -392,7 +392,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]configuration",
+          "type": "configuration[]",
           "required": true,
           "pipeline": true,
           "description": "Configuration package (managedObject) id"
@@ -460,7 +460,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]configuration",
+          "type": "configuration[]",
           "pipeline": true,
           "required": true,
           "description": "Configuration file (managedObject) id"
@@ -524,7 +524,7 @@
       "body": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "property": "deviceId",
           "required": false,
           "pipeline": true,
@@ -552,7 +552,7 @@
         },
         {
           "name": "configuration",
-          "type": "[]configuration",
+          "type": "configuration[]",
           "property": "__tmp_configuration",
           "required": false,
           "description": "Configuration name or id"

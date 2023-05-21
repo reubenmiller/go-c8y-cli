@@ -140,7 +140,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("newName", "name"),
 		flags.WithStringValue("deviceType", "c8y_Filter.type"),
-		cmdutil.WithTemplateValue(cfg),
+		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
@@ -153,7 +153,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceProfileByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithDeviceProfileByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

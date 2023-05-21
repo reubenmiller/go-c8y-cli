@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: devicemanagement/certificates
   description: Device Certificate management
   descriptionLong: Manage the trusted certificates which are used by devices.
   link: 'https://cumulocity.com/guides/users-guide/device-management/#trusted-certificates'
 
-endpoints:
+commands:
   - name: listCertificate
     description: 'List device certificates'
     descriptionLong: |
@@ -62,7 +62,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]certificate'
+        type: certificate[]
         pipeline: true
         required: false
         description: Certificate fingerprint or name
@@ -108,7 +108,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]certificate'
+        type: certificate[]
         pipeline: true
         required: false
         description: Certificate fingerprint or name
@@ -171,7 +171,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]certificate'
+        type: certificate[]
         pipeline: true
         required: false
         description: Certificate fingerprint or name

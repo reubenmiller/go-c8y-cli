@@ -3,17 +3,19 @@ package c8yfetcher
 import (
 	"fmt"
 
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 )
 
 type ConfigurationFetcher struct {
 	*ManagedObjectFetcher
 }
 
-func NewConfigurationFetcher(client *c8y.Client) *ConfigurationFetcher {
+func NewConfigurationFetcher(factory *cmdutil.Factory) *ConfigurationFetcher {
 	return &ConfigurationFetcher{
 		ManagedObjectFetcher: &ManagedObjectFetcher{
-			client: client,
+			CumulocityFetcher: &CumulocityFetcher{
+				factory: factory,
+			},
 			Query: func(s string) string {
 				return fmt.Sprintf("(type eq 'c8y_ConfigurationDump') and name eq '%s'", s)
 			},

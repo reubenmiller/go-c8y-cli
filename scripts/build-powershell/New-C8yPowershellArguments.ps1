@@ -51,29 +51,29 @@
 
     # Type Definition
     $DataType = switch ($Type) {
-        "[]agent" { "object[]"; break }
-        "[]certificate" { "object[]"; break }
-        "[]configuration" { "object[]"; break }
-        "[]device" { "object[]"; break }
-        "[]devicegroup" { "object[]"; break }
-        "[]deviceprofile" { "object[]"; break }
-        "[]devicerequest" { "object[]"; break }
-        "[]firmware" { "object[]"; break }
-        "[]firmwarepatch" { "object[]"; break }
-        "[]firmwareversion" { "object[]"; break }
-        "[]id" { "object[]"; break }
-        "[]role" { "object[]"; break }
-        "[]roleself" { "object[]"; break }
-        "[]smartgroup" { "object[]"; break }
-        "[]software" { "object[]"; break }
-        "[]softwareversion" { "object[]"; break }
-        "[]deviceservice" { "object[]"; break }
-        "[]string" { "string[]"; break }
-        "[]stringcsv" { "string[]"; break }
+        "agent[]" { "object[]"; break }
+        "certificate[]" { "object[]"; break }
+        "configuration[]" { "object[]"; break }
+        "device[]" { "object[]"; break }
+        "devicegroup[]" { "object[]"; break }
+        "deviceprofile[]" { "object[]"; break }
+        "devicerequest[]" { "object[]"; break }
+        "firmware[]" { "object[]"; break }
+        "firmwarepatch[]" { "object[]"; break }
+        "firmwareversion[]" { "object[]"; break }
+        "id[]" { "object[]"; break }
+        "role[]" { "object[]"; break }
+        "roleself[]" { "object[]"; break }
+        "smartgroup[]" { "object[]"; break }
+        "software[]" { "object[]"; break }
+        "softwareversion[]" { "object[]"; break }
+        "deviceservice[]" { "object[]"; break }
+        "string[]" { "string[]"; break }
+        "stringcsv[]" { "string[]"; break }
         "[]tenant" { "object[]"; break }
-        "[]user" { "object[]"; break }
-        "[]usergroup" { "object[]"; break }
-        "[]userself" { "object[]"; break }
+        "user[]" { "object[]"; break }
+        "usergroup[]" { "object[]"; break }
+        "userself[]" { "object[]"; break }
         "application" { "object[]"; break }
         "applicationname" { "string"; break }
         "attachment" { "string"; break }

@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: firmware/versions
   description: Cumulocity firmware version management
   descriptionLong: Firmware version management to create/list/delete versions
   link: https://cumulocity.com/guides/users-guide/device-management/#firmware-repo
 
-endpoints:
+commands:
   - name: getFirmwareVersionCollection
     method: GET
     description: Get firmware package version collection
@@ -67,7 +67,7 @@ endpoints:
             default: creationTime.date desc
           
           - name: firmware
-            type: '[]firmware'
+            type: firmware[]
             description: "Firmware package id or name"
             format: "bygroupid(%s)"
             required: true
@@ -146,7 +146,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]firmwareversion'
+        type: firmwareversion[]
         dependsOn:
           - firmware
         pipeline: true
@@ -155,7 +155,7 @@ endpoints:
 
       # Dummy value (to limit versions to the given package)
       - name: firmware
-        type: '[]firmware'
+        type: firmware[]
         required: false
         description: Firmware package id or name (used to help completion be more accurate)
 
@@ -213,7 +213,7 @@ endpoints:
           command: c8y firmware versions delete --id 12345 --forceCascade=false
     pathParameters:
       - name: id
-        type: '[]firmwareversion'
+        type: firmwareversion[]
         dependsOn:
           - firmware
         pipeline: true
@@ -222,7 +222,7 @@ endpoints:
 
       # Dummy value (to limit versions to the given package)
       - name: firmware
-        type: '[]firmware'
+        type: firmware[]
         required: false
         description: Firmware package id or name (used to help completion be more accurate)
 
@@ -266,7 +266,7 @@ endpoints:
           skipTest: true
     pathParameters:
       - name: url
-        type: '[]string'
+        type: string[]
         required: true
         pipeline: true
         description: Firmware url
@@ -300,7 +300,7 @@ endpoints:
 
     body:
       - name: device
-        type: '[]device'
+        type: device[]
         property: deviceId
         description: Device or agent where the firmware should be installed
         pipeline: true
@@ -312,7 +312,7 @@ endpoints:
         description: Firmware name
 
       - name: version
-        type: firmwareVersionName
+        type: firmwareversionName
         dependsOn:
           - firmware
         required: false

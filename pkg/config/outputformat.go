@@ -14,6 +14,12 @@ const (
 	// OutputCSV csv output
 	OutputCSV
 
+	// OutputTSV tsv output
+	OutputTSV
+
+	// OutputCompletion completion output format, e.g. {value}\t{key1}: {value1} | {key2}: {value2}
+	OutputCompletion
+
 	// OutputCSVWithHeader csv output with header
 	OutputCSVWithHeader
 
@@ -26,6 +32,8 @@ func (f OutputFormat) String() string {
 		OutputJSON:           "json",
 		OutputTable:          "table",
 		OutputCSV:            "csv",
+		OutputTSV:            "tsv",
+		OutputCompletion:     "completion",
 		OutputCSVWithHeader:  "csvheader",
 		OutputServerResponse: "serverresponse",
 	}
@@ -41,6 +49,8 @@ func (f OutputFormat) FromString(name string) OutputFormat {
 		"json":           OutputJSON,
 		"table":          OutputTable,
 		"csv":            OutputCSV,
+		"tsv":            OutputTSV,
+		"completion":     OutputCompletion,
 		"csvheader":      OutputCSVWithHeader,
 		"serverresponse": OutputServerResponse,
 	}

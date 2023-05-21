@@ -4,24 +4,27 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/matcher"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 type UserFetcher struct {
-	client *c8y.Client
+	*CumulocityFetcher
 	*IDNameFetcher
 }
 
-func NewUserFetcher(client *c8y.Client) *UserFetcher {
+func NewUserFetcher(factory *cmdutil.Factory) *UserFetcher {
 	return &UserFetcher{
-		client: client,
+		CumulocityFetcher: &CumulocityFetcher{
+			factory: factory,
+		},
 	}
 }
 
 func (f *UserFetcher) getByID(id string) ([]fetcherResultSet, error) {
-	user, resp, err := f.client.User.GetUser(
-		WithDisabledDryRunContext(f.client),
+	user, resp, err := f.Client().User.GetUser(
+		WithDisabledDryRunContext(f.Client()),
 		id,
 	)
 
@@ -39,8 +42,8 @@ func (f *UserFetcher) getByID(id string) ([]fetcherResultSet, error) {
 }
 
 func (f *UserFetcher) getByName(name string) ([]fetcherResultSet, error) {
-	users, _, err := f.client.User.GetUsers(
-		WithDisabledDryRunContext(f.client),
+	users, _, err := f.Client().User.GetUsers(
+		WithDisabledDryRunContext(f.Client()),
 		&c8y.UserOptions{
 			Username:          strings.ReplaceAll(name, "*", ""),
 			PaginationOptions: *c8y.NewPaginationOptions(5),

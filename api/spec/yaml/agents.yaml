@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: agents
   description: Cumulocity agents
   descriptionLong: 'REST endpoint to interact with Cumulocity agents'
   link: https://cumulocity.com/guides/reference/inventory/
 
-endpoints:
+commands:
   # Agent
   - name: listAgents
     description: Get agent collection
@@ -126,7 +126,7 @@ endpoints:
             format: (creationTime.date ge '%s')
 
           - name: group
-            type: '[]devicegroup'
+            type: devicegroup[]
             description: Filter by group inclusion
             format: bygroupid(%s)
 
@@ -181,7 +181,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]agent'
+        type: agent[]
         pipeline: true
         required: true
         description: Agent ID
@@ -245,7 +245,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]agent'
+        type: agent[]
         pipeline: true
         required: true
         description: Agent ID
@@ -309,7 +309,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: '[]agent'
+        type: agent[]
         pipeline: true
         required: true
         description: Agent ID

@@ -1,11 +1,11 @@
 {
-  "information": {
+  "group": {
     "name": "notification2/subscriptions",
     "description": "Cumulocity notification2 subscriptions",
     "descriptionLong": "Methods to create, retrieve and delete notification subscriptions",
     "link": "https://cumulocity.com/guides/reference/notifications/"
   },
-  "endpoints": [
+  "commands": [
     {
       "name": "listSubscriptions",
       "method": "GET",
@@ -45,7 +45,7 @@
       "queryParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "property": "source",
           "description": "The managed object ID to which the subscription is associated."
@@ -110,7 +110,7 @@
       "body": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "property": "source.id",
           "description": "The managed object to which the subscription is associated."
@@ -132,12 +132,12 @@
         },
         {
           "name": "fragmentsToCopy",
-          "type": "[]string",
+          "type": "string[]",
           "description": "Transforms the data to only include specified custom fragments. Each custom fragment is identified by a unique name. If nothing is specified here, the data is forwarded as-is."
         },
         {
           "name": "apiFilter",
-          "type": "[]string",
+          "type": "string[]",
           "property": "subscriptionFilter.apis",
           "validationSet": [
             "alarms",
@@ -240,7 +240,7 @@
       "queryParameters": [
         {
           "name": "device",
-          "type": "[]device",
+          "type": "device[]",
           "pipeline": true,
           "property": "source",
           "description": "The managed object to which the subscription is associated."

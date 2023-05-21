@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: measurements
   description: Cumulocity measurements
   descriptionLong: 'REST endpoint to interact with Cumulocity measurements'
   link: https://cumulocity.com/guides/reference/measurements/
 
-endpoints:
+commands:
   - name: getMeasurementCollection
     method: GET
     description: Get measurement collection
@@ -64,7 +64,7 @@ endpoints:
 
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         property: source
         pipeline: true
         description: Device ID
@@ -140,7 +140,7 @@ endpoints:
 
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         property: source
         pipeline: true
         description: Device ID
@@ -187,13 +187,13 @@ endpoints:
           command: c8y measurements getSeries --device 12345 --series app_Weather.temperature --series app_Weather.barometer --dateFrom "-10min" --dateTo "0s"
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         property: source
         pipeline: true
         description: Device ID
 
       - name: series
-        type: "[]string"
+        type: string[]
         description: measurement type and series name, e.g. c8y_AccelerationMeasurement.acceleration
 
       - name: aggregationType
@@ -236,7 +236,7 @@ endpoints:
           command: c8y measurements get --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Measurement id
@@ -283,7 +283,7 @@ endpoints:
           skipTest: true
     body:
       - name: device
-        type: '[]device'
+        type: device[]
         pipeline: true
         required: false
         property: source.id
@@ -335,7 +335,7 @@ endpoints:
           command: c8y measurements delete --id 12345
     pathParameters:
       - name: id
-        type: '[]id'
+        type: id[]
         required: true
         pipeline: true
         description: Measurement id
@@ -363,7 +363,7 @@ endpoints:
           command: c8y measurements deleteCollection --device 12345
     queryParameters:
       - name: device
-        type: '[]device'
+        type: device[]
         property: source
         pipeline: true
         description: Device ID

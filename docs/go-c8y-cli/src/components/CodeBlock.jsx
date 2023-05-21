@@ -98,51 +98,31 @@ const c8yCommands = {
     
 };
 
+const powershellCommands = {
+    'rm': 'Remove-Item',
+};
+
 function replaceAll(string, search, replace) {
     return string.split(search).join(replace);
 }
 
-function convertToCmdlets(code = '') {
-    const keys = Object.keys(c8yCommands);
+function convertToCmdlets(code, commands) {
+    const keys = Object.keys(commands);
     for (let index = 0; index < keys.length; index++) {
-        const element = c8yCommands[keys[index]];
+        const element = commands[keys[index]];
         code = replaceAll(code, keys[index], element);
     }
     code = code.replace(/\\/g, '`');
     return code;
 }
 
-function getCmdlet(parts) {
-    let cmdlet = '';
-    let prefix = [];
-    let lastIdx = 0;
-    for (let i = 0; i < parts.length; i++) {
-        if (parts[i].startsWith('-')) {
-            break;
-        }
-        prefix.push(parts[i]);
-        lastIdx++;
-    }
-    
-    if (parts.length > 2) {
-        cmdlet = c8yCommands[prefix.join(' ')]
-    }
-
-    if (!cmdlet) {
-        return parts
-    }
-    return [cmdlet, ...parts.slice(lastIdx)]
-}
-
 function transformToPowerShell(code = '') {
-    let parts = convertToCmdlets(code).split(' ');
-
-    // parts = getCmdlet(parts);
+    let parts = convertToCmdlets(code, c8yCommands).split(' ');
 
     if (parts.length) {
         for (let i = 0; i < parts.length; i++) {
             if (parts[i].startsWith('--')) {
-                parts[i] = '-' + parts[i].substr(2, 1).toUpperCase() + parts[i].substr(3)
+                parts[i] = '-' + parts[i].substring(2, 1).toUpperCase() + parts[i].substring(3)
             } else if (parts[i].startsWith('-')) {
             }
         }
@@ -150,9 +130,13 @@ function transformToPowerShell(code = '') {
     return parts.join(' ');
 }
 
+function transformCommonShellCommandsToPowershell(code = '') {
+    return convertToCmdlets(code, powershellCommands).split(' ').join(' ');
+}
 
 export default ({ children, className = 'bash', live = false, render = false, transform = false }) => {
-    const { isDarkTheme } = useColorMode();
+    const { colorMode } = useColorMode();
+    const isDarkTheme = colorMode === "dark";
     if (live) {
         return (
             <div style={{ marginTop: '40px' }}>
@@ -180,13 +164,13 @@ export default ({ children, className = 'bash', live = false, render = false, tr
     }
     let childrenCode = '';
     if (children && typeof children.trim == 'function') {
-        if (`${transform}` == 'true') {
-            childrenCode = transformToPowerShell(children.trim());
-        } else {
-            childrenCode = children.trim();
-            if (className === 'powershell') {
-                childrenCode = childrenCode.replace(/\\/g, '`')
+        childrenCode = children.trim();
+        if (className === 'powershell') {
+            if (`${transform}` == 'true') {
+                childrenCode = transformToPowerShell(children.trim());
             }
+            childrenCode = transformCommonShellCommandsToPowershell(childrenCode);
+            childrenCode = childrenCode.replace(/\\/g, '`');
         }
     }
 

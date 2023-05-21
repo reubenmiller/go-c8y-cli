@@ -1,13 +1,13 @@
 # yaml-language-server: $schema=../schema.json
 ---
-information:
+group:
   name: datahub/configuration
   description: Cumulocity IoT DataHub Configurations
   descriptionLong: Cumulocity IoT DataHub Configurations
   link: https://cumulocity.com/guides/datahub/datahub-overview/
   skip: true
 
-endpoints:
+commands:
   - name: list
     method: GET
     path: service/datahub/offloadingconfigurations

@@ -1,0 +1,4 @@
+tests:
+    It can create/update/delete an extension:
+        command: ./manual/extensions/crud.sh
+        exit-code: 0

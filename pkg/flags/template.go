@@ -2,7 +2,6 @@ package flags
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -82,7 +81,7 @@ func getContents(content string) string {
 		return content
 	}
 
-	fileContent, err := ioutil.ReadFile(content)
+	fileContent, err := os.ReadFile(content)
 	if err != nil {
 		return content
 	}

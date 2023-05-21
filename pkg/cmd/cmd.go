@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math/rand"
 	"os"
@@ -62,7 +62,7 @@ func MainRun() {
 	}
 
 	// Expand any aliases
-	expandedArgs, err := setArgs(rootCmd.Command)
+	expandedArgs, err := setArgs(rootCmd.Command, rootCmd.Factory)
 	if err != nil {
 		Logger.Errorf("Could not expand aliases. %s", err)
 		os.Exit(int(cmderrors.ExitInvalidAlias))
@@ -78,6 +78,7 @@ func MainRun() {
 		}
 
 		var results []string
+
 		for aliasName, aliasValue := range aliases {
 			if strings.HasPrefix(aliasName, toComplete) {
 				var s string
@@ -92,6 +93,33 @@ func MainRun() {
 				results = append(results, s)
 			}
 		}
+
+		// Extension Aliases
+		for _, ext := range rootCmd.Factory.ExtensionManager().List() {
+			extAliases, aliasErr := ext.Aliases()
+			if aliasErr == nil {
+				for _, iAlias := range extAliases {
+					aliasName := iAlias.GetName()
+					if strings.HasPrefix(aliasName, toComplete) {
+						var s string
+						desc := iAlias.GetDescription()
+						if len(desc) > 80 {
+							desc = desc[:80] + "..."
+						}
+						if iAlias.IsShell() {
+							s = fmt.Sprintf("%s\tExtension shell alias %s", aliasName, desc)
+						} else {
+							s = fmt.Sprintf("%s\tExtension alias to %s", aliasName, desc)
+						}
+
+						s += fmt.Sprintf(" |%s", ext.Name())
+						results = append(results, s)
+					}
+				}
+			}
+		}
+		// Note: Extension commands are defined in root.go
+
 		return results, cobra.ShellCompDirectiveNoFileComp
 	}
 
@@ -102,7 +130,7 @@ func MainRun() {
 		err = CheckCommandError(rootCmd.Command, rootCmd.Factory, err)
 
 		// Help is not really error, just a way to exit early
-		// after displaying help to ther user
+		// after displaying help to the user
 		if errors.Is(err, cmderrors.ErrHelp) {
 			os.Exit(int(cmderrors.ExitOK))
 		}
@@ -126,7 +154,7 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 	if logErr != nil {
 		log.Fatalf("Could not configure logger. %s", logErr)
 	}
-	w := ioutil.Discard
+	w := io.Discard
 
 	if errors.Is(err, cmderrors.ErrHelp) {
 		return err
@@ -187,13 +215,18 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 	return err
 }
 
-func setArgs(cmd *cobra.Command) ([]string, error) {
+func hasCommand(rootCmd *cobra.Command, args []string) bool {
+	c, _, err := rootCmd.Traverse(args)
+	return err == nil && c != rootCmd
+}
+
+func setArgs(cmd *cobra.Command, cmdFactory *cmdutil.Factory) ([]string, error) {
 	expandedArgs := []string{}
+	var err error
 	if len(os.Args) > 0 {
 		expandedArgs = os.Args[1:]
 	}
-	cmd, _, err := cmd.Traverse(expandedArgs)
-	if err != nil || cmd == cmd.Root() {
+	if !hasCommand(cmd.Root(), expandedArgs) {
 		originalArgs := expandedArgs
 		isShell := false
 
@@ -202,6 +235,16 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 		for name, value := range v.GetStringMapString(config.SettingsAliases) {
 			aliases[name] = value
 		}
+
+		// add any aliases defined in the extensions
+		for _, ext := range cmdFactory.ExtensionManager().List() {
+			if extAliases, err := ext.Aliases(); err == nil {
+				for _, alias := range extAliases {
+					aliases[alias.GetName()] = alias.GetCommand()
+				}
+			}
+		}
+
 		expandedArgs, isShell, err = expand.ExpandAlias(aliases, os.Args, nil)
 		if err != nil {
 			return nil, err
@@ -230,6 +273,19 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 				return nil, err
 			}
 			os.Exit(int(cmderrors.ExitOK))
+		} else if len(expandedArgs) > 0 && !hasCommand(cmd.Root(), expandedArgs) {
+
+			extensionManager := cmdFactory.ExtensionManager()
+			if found, err := extensionManager.Dispatch(expandedArgs, os.Stdin, os.Stdout, os.Stderr); err != nil {
+				var execError *exec.ExitError
+				if errors.As(err, &execError) {
+					return nil, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCode(execError.ExitCode()), execError)
+				}
+				fmt.Fprintf(cmdFactory.IOStreams.ErrOut, "failed to run extension: %s\n", err)
+				return nil, cmderrors.NewSystemError("failed to run extension")
+			} else if found {
+				return nil, cmderrors.NewErrorWithExitCode(0, nil)
+			}
 		}
 	}
 	return expandedArgs, nil
@@ -259,6 +315,34 @@ func getOutputHeaders(c *console.Console, cfg *config.Config, input []string) (h
 	return append(bytes.Join(columns, []byte(",")), []byte("\n")...)
 }
 
+// GetInitLoggerOptions create a simple logger with a best-guess log level based on the given arguments
+// It will not activate on any environment variables, however it will do a simplistic parsing of
+// the common logging options before the configuration has been read which enables debugging around
+// the configuration and extensions etc.
+func GetInitLoggerOptions(args []string) logger.Options {
+	color := true
+	level := zapcore.WarnLevel
+	debug := false
+
+	for _, item := range args {
+		switch item {
+		case "--debug", "--debug=true":
+			level = zapcore.DebugLevel
+			debug = true
+		case "--verbose", "-v", "--verbose=true":
+			level = zapcore.InfoLevel
+		case "--noColor", "--noColor=true", "-M", "-M=true":
+			color = false
+		}
+	}
+
+	return logger.Options{
+		Level: level,
+		Debug: debug,
+		Color: color,
+	}
+}
+
 // Initialize initializes the configuration manager and c8y client
 func Initialize() (*root.CmdRoot, error) {
 
@@ -270,10 +354,7 @@ func Initialize() (*root.CmdRoot, error) {
 	var configHandler = config.NewConfig(viper.GetViper())
 
 	// init logger
-	logHandler = logger.NewLogger(module, logger.Options{
-		Level: zapcore.WarnLevel,
-		Debug: false,
-	})
+	logHandler = logger.NewLogger(module, GetInitLoggerOptions(os.Args))
 
 	if _, err := configHandler.ReadConfigFiles(nil); err != nil {
 		logHandler.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)

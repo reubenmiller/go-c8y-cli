@@ -1,7 +1,6 @@
 package completion
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -19,7 +18,7 @@ func WithDeviceRegistrationRequest(flagName string, clientFunc func() (*c8y.Clie
 
 			pattern := "*" + toComplete + "*"
 			items, _, err := client.DeviceCredentials.GetNewDeviceRequests(
-				context.Background(),
+				WithDisabledDryRunContext(client),
 				&c8y.NewDeviceRequestOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(100),
 				},

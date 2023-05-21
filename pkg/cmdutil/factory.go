@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
@@ -14,11 +15,13 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonformatter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mode"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -42,6 +45,9 @@ type Factory struct {
 
 	BuildVersion string
 	BuildBranch  string
+
+	// Extension
+	ExtensionManager func() extensions.ExtensionManager
 
 	// Executable is the path to the currently invoked binary
 	Executable string
@@ -183,7 +189,7 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 
 // GetViewProperties Look up the view properties to display
 func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, output []byte) ([]string, error) {
-	dataview, err := f.DataView()
+	dataView, err := f.DataView()
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +211,9 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 		return []string{"**"}, nil
 	case config.ViewsAuto:
 		jsonResponse := gjson.ParseBytes(output)
-		props, err := dataview.GetView(&jsonResponse, "")
+		props, err := dataView.GetView(&dataview.ViewData{
+			ResponseBody: &jsonResponse,
+		})
 
 		if err != nil || len(props) == 0 {
 			if err != nil {
@@ -220,7 +228,7 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 		}
 	default:
 		// manual view
-		props, err := dataview.GetViewByName(view)
+		props, err := dataView.GetViewByName(view)
 		if err != nil || len(props) == 0 {
 			if err != nil {
 				cfg.Logger.Warnf("no matching view found. %s, name=%s", err, view)
@@ -269,7 +277,7 @@ func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, pro
 		false,
 		jsonformatter.WithFileOutput(commonOptions.OutputFile != "", commonOptions.OutputFile, false),
 		jsonformatter.WithTrimSpace(true),
-		jsonformatter.WithJSONStreamOutput(true, consol.IsJSONStream(), consol.IsCSV()),
+		jsonformatter.WithJSONStreamOutput(true, consol.IsJSONStream(), consol.IsTextOutput()),
 		jsonformatter.WithSuffix(len(output) > 0, "\n"),
 	)
 	return nil
@@ -353,6 +361,69 @@ func (f *Factory) CheckPostCommandError(err error) error {
 	}
 
 	return outErr
+}
+
+func (f *Factory) ResolveTemplates(pattern string, withFullPath bool) ([]string, error) {
+	cfg, err := f.Config()
+	if err != nil {
+		return nil, err
+	}
+	paths := cfg.GetTemplatePaths()
+
+	allMatches := []string{}
+
+	// Filter
+	matches, err := pathresolver.ResolvePaths(paths, "*", []string{".jsonnet"}, "ignore")
+	if err != nil {
+		return []string{"jsonnet"}, err
+	}
+
+	// Apply full matches
+	for _, m := range matches {
+		option := filepath.Base(m)
+		if matched, _ := filepath.Match(pattern, option); matched {
+			if withFullPath {
+				allMatches = append(allMatches, m)
+			} else {
+				allMatches = append(allMatches, option)
+			}
+		}
+	}
+
+	// Extensions
+	for _, ext := range f.ExtensionManager().List() {
+		extTemplatePath := ext.TemplatePath()
+		if extTemplatePath == "" {
+			continue
+		}
+		matches, err := pathresolver.ResolvePaths([]string{extTemplatePath}, "*", []string{".jsonnet"}, "ignore")
+		if err != nil {
+			return []string{"jsonnet"}, err
+		}
+
+		// Apply full matches
+		for _, m := range matches {
+			option := fmt.Sprintf("%s::%s", ext.Name(), filepath.Base(m))
+			if matched, _ := filepath.Match(pattern, option); matched {
+				if withFullPath {
+					allMatches = append(allMatches, m)
+				} else {
+					allMatches = append(allMatches, option)
+				}
+			}
+		}
+
+	}
+
+	return allMatches, nil
+}
+
+func (f *Factory) GetTenant() string {
+	client, err := f.Client()
+	if err != nil {
+		return ""
+	}
+	return client.TenantName
 }
 
 // NewRequestInputIterators create a request iterator based on pipe line configuration

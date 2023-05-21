@@ -4,18 +4,21 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/matcher"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 type RoleFetcher struct {
-	client *c8y.Client
+	*CumulocityFetcher
 	*IDNameFetcher
 }
 
-func NewRoleFetcher(client *c8y.Client) *RoleFetcher {
+func NewRoleFetcher(factory *cmdutil.Factory) *RoleFetcher {
 	return &RoleFetcher{
-		client: client,
+		CumulocityFetcher: &CumulocityFetcher{
+			factory: factory,
+		},
 	}
 }
 
@@ -31,8 +34,8 @@ func (f *RoleFetcher) getByID(id string) ([]fetcherResultSet, error) {
 		}, nil
 	}
 
-	role, resp, err := f.client.User.GetRole(
-		WithDisabledDryRunContext(f.client),
+	role, resp, err := f.Client().User.GetRole(
+		WithDisabledDryRunContext(f.Client()),
 		id,
 	)
 
@@ -62,8 +65,8 @@ func (f *RoleFetcher) getByName(name string) ([]fetcherResultSet, error) {
 			},
 		}, nil
 	}
-	roles, _, err := f.client.User.GetRoles(
-		WithDisabledDryRunContext(f.client),
+	roles, _, err := f.Client().User.GetRoles(
+		WithDisabledDryRunContext(f.Client()),
 		&c8y.RoleOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(100),
 		},
