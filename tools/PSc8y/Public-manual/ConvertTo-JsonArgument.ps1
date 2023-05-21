@@ -30,6 +30,11 @@ Converts the hashtable to an escaped json string
         [object] $Data
     )
 
+    # A change in powershell handling of quoting was introduced in Powershell >= 7.3
+    # This complicates a few things...
+    # See issue for more details: https://github.com/PowerShell/PowerShell/issues/18554
+    $NeedsQuotes = ($null -eq $PSNativeCommandArgumentPassing) -or ($PSNativeCommandArgumentPassing -ne 'Standard')
+
     if ($Data -is [string] -or $data -is [System.IO.FileSystemInfo]) {
         if ($Data -and (Test-Path $Data)) {
             # Return path as is (and let c8y binary handle it)
@@ -51,11 +56,17 @@ Converts the hashtable to an escaped json string
         $DataObj = $Data
     }
 
-    # Note: replace \" with the unicode character to prevent intepretation errors on the command line
-    $jsonRaw = (ConvertTo-Json $DataObj -Compress -Depth 100) -replace '\\"', '\u0022'
-    $strArg = "{0}" -f ($jsonRaw -replace '(?<!\\)"', '\"')
+    if ($NeedsQuotes) {
+        $jsonRaw = (ConvertTo-Json $DataObj -Compress -Depth 100)
+        $strArg = "{0}" -f ($jsonRaw -replace '(?<!\\)"', '\"')
 
-    # Replace space with unicode char, as space can have console parsing problems
-    $strArg = $strArg -replace " ", "\u0020"
+        # Replace space with unicode char, as space can have console parsing problems
+        $strArg = $strArg -replace " ", "\u0020"
+    } else {
+        # Note: replace \" with the unicode character to prevent intepretation errors on the command line
+        $jsonRaw = (ConvertTo-Json $DataObj -Compress -Depth 100) -replace '\\"', '\u0022'
+        $strArg = $jsonRaw
+    }
+
     $strArg
 }

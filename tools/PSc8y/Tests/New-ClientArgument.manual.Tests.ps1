@@ -4,7 +4,12 @@ InModuleScope PSc8y {
     Describe "New-ClientArgument" {
         It "Accepts an array of values" {
             $c8yargs = New-ClientArgument -Parameters @{"Ids" = @("1111", "2222")}
-            $c8yargs | Should -BeExactly @("--ids=`"1111,2222`"", "--allowEmptyPipe")
+
+            if ($PSNativeCommandArgumentPassing -ne 'Standard') {
+                $c8yargs | Should -BeExactly @("--ids=`"1111,2222`"", "--allowEmptyPipe")
+            } else {
+                $c8yargs | Should -BeExactly @("--ids=1111,2222", "--allowEmptyPipe")
+            }
         }
 
         It "handles an empty array" {
@@ -22,7 +27,11 @@ InModuleScope PSc8y {
                 @{id="1111"},
                 @{id="2222"}
             )}
-            $c8yargs | Should -BeExactly @("--id=`"1111,2222`"", "--allowEmptyPipe")
+            if ($PSNativeCommandArgumentPassing -ne 'Standard') {
+                $c8yargs | Should -BeExactly @("--id=`"1111,2222`"", "--allowEmptyPipe")
+            } else {
+                $c8yargs | Should -BeExactly @("--id=1111,2222", "--allowEmptyPipe")
+            }
         }
 
         It "Converts hashtables to escapped json" {
@@ -32,7 +41,12 @@ InModuleScope PSc8y {
             $c8yargs = New-ClientArgument -Parameters:$Parameters
             $c8yargs | Should -HaveCount 3
             $c8yargs[0] | Should -BeExactly '--complex'
-            $c8yargs[1] | Should -BeExactly '{\"id\":1}'
+
+            if ($PSNativeCommandArgumentPassing -ne 'Standard') {
+                $c8yargs[1] | Should -BeExactly '{\"id\":1}'
+            } else {
+                $c8yargs[1] | Should -BeExactly '{"id":1}'
+            }
             $c8yargs[2] | Should -BeExactly "--allowEmptyPipe"
         }
     }

@@ -41,6 +41,11 @@ Function New-ClientArgument {
             }
         }
 
+        # A change in powershell handling of quoting was introduced in Powershell >= 7.3
+        # This complicates a few things...
+        # See issue for more details: https://github.com/PowerShell/PowerShell/issues/18554
+        $NeedsQuotes = ($null -eq $PSNativeCommandArgumentPassing) -or ($PSNativeCommandArgumentPassing -ne 'Standard')
+
         foreach ($iKey in $BoundParameters.Keys) {
             $Value = $BoundParameters[$iKey]
 
@@ -79,16 +84,25 @@ Function New-ClientArgument {
                     { $Value -is [array] } {
                         $items = Expand-Id $Value
                         if ($items.Count -eq 1) {
+
                             $null = $c8yargs.Add("--${key}=$($items -join ',')")
 
                         } elseif ($items.Count -gt 1) {
-                            $null = $c8yargs.Add("--${key}=`"$($items -join ',')`"")
+                            if ($NeedsQuotes) {
+                                $null = $c8yargs.Add("--${key}=`"$($items -join ',')`"")
+                            } else {
+                                $null = $c8yargs.Add("--${key}=$($items -join ',')")
+                            }
                         }
                         break
                     }
 
                     { $Value -match " " -and ![string]::IsNullOrWhiteSpace($Value) } {
-                        $null = $c8yargs.Add("--${key}=`"$Value`"")
+                        if ($NeedsQuotes) {
+                            $null = $c8yargs.Add("--${key}=`"$Value`"")
+                        } else {
+                            $null = $c8yargs.Add("--${key}=$Value")
+                        }
                         break
                     }
 
