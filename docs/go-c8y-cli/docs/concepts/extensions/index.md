@@ -5,6 +5,10 @@ title: Extensions
 
 import DocCardList from '@theme/DocCardList';
 
+:::tip
+Extensions are only supported from version 2.30.0 onwards.
+:::
+
 ## Overview
 
 Extensions allow you to customize go-c8y-cli to optimize you and your team's workflows. You can customize how your data is displayed and provide custom commands to simplify repetitive tasks.

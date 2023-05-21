@@ -4,6 +4,12 @@ category: Tutorials - Powershell
 title: Extending cmdlets using scripts and Functions
 ---
 
+:::tip
+It is recommended to use [extensions](/docs/concepts/extensions/) instead of creating your own PowerShell module. Extensions are available in go-c8y-cli >= 2.30.0 and provide a more portable/native experience. They are just as easy to install and share, and can be used in any shell.
+
+Or just check out the [Tutorials](/docs/tutorials/extensions/).
+:::
+
 ## Example 1: Script to export data for specific devices
 
 ### Goal

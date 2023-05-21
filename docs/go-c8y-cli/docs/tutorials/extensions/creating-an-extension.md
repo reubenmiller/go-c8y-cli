@@ -7,83 +7,15 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import CodeExample from '@site/src/components/CodeExample';
 
-## Pre-requisite
-
-:rotating_light: Warning :rotating_light:
-
-This extension relies on an up-coming go-c8y-cli [extensions](https://github.com/reubenmiller/go-c8y-cli/blob/feat/extensions-manager/docs/go-c8y-cli/docs/concepts/extensions.md) feature which has not been officially released yet, so in order to try it out you will have to install the pre-release version via the following instructions.
-
-This section will be removed when `extensions` are included in the official release.
-
-:::danger Preview users
-Breaking changes were introduced in the preview version where all array types were renamed from the format `[]device` to `device[]`.
-The schema has been updated, so it should show you the errors. This change was made to make it easier to write the yaml spec, as `device[]` does not require surrounding quotes so it plays nicer with any tab completion in VS Code.
+:::tip
+Extensions are only supported from version 2.30.0 onwards.
 :::
 
-:::caution
-Building `go-c8y-cli` requires go version ≥ 1.20.
+:::note
+Extensions are a new feature and therefore the documentation could be a little under cooked. However I didn't want to delay it any more because it is a super useful feature. So if you notice something that is not quite right with the docs or the feature, please don't hesitate to [create an issue](https://github.com/reubenmiller/go-c8y-cli/issues/new), or a PR with the fix.
+
+Also, if you like the project please add a star to the [GitHub repository](https://github.com/reubenmiller/go-c8y-cli).
 :::
-
-<CodeExample transform="false">
-
-```bash
-go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@219a3eb7fb2f13ef86203e43758cfab00d700c12
-
-# Add the go bin folder to your path variable (ideally add this to your shell profile (.zshrc for zsh or .bashrc for bash)
-export PATH="$(go env GOPATH)/bin:$PATH"
-```
-
-```powershell
-go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@219a3eb7fb2f13ef86203e43758cfab00d700c12
-
-# Add the go bin folder to the path variable and set a powershell alias to it
-if ($IsWindows) {
-    $env:PATH = "$(go env GOPATH)/bin" + ";" + $env:PATH
-    Set-Alias c8y "$(go env GOPATH)/bin/c8y.exe"
-} else {
-    $env:PATH = "$(go env GOPATH)/bin" + ":" + $env:PATH
-    Set-Alias c8y "$(go env GOPATH)/bin/c8y"
-}
-```
-
-```powershell
-go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@219a3eb7fb2f13ef86203e43758cfab00d700c12
-
-# Add the go bin folder to the path variable and set a powershell alias to it
-if ($IsWindows) {
-    $env:PATH = "$(go env GOPATH)/bin" + ";" + $env:PATH
-    Set-Alias c8y "$(go env GOPATH)/bin/c8y.exe"
-} else {
-    $env:PATH = "$(go env GOPATH)/bin" + ":" + $env:PATH
-    Set-Alias c8y "$(go env GOPATH)/bin/c8y"
-}
-```
-
-</CodeExample>
-
-
-### Post-installation verification
-
-Once you have installed the pre-release version of **go-c8y-cli**, you can confirm that you have the correct version by running the following command:
-
-
-<CodeExample>
-
-```bash
-c8y version
-```
-
-</CodeExample>
-
-The version suffix should be the first part of the git commit id from the `go install` command, for example:
-
-```sh title="Output"
-| branch         | version                                    |
-|----------------|--------------------------------------------|
-| (unknown)      | v2.22.5-0.20230508083235-9df45aed7f5f      |
-```
-
----
 
 ## Preface
 
