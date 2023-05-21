@@ -8,7 +8,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 Extensions allow you to customize go-c8y-cli to optimize you and your team's workflows. You can customize how your data is displayed and provide custom commands to simplify repetitive tasks.
 
-Extensions utilize already existing features but package them as a git repository so they are easy to install and share. This makes it easy for a team to collaborate to add new commands for custom microservices, or just add custom columns to the device view so you can display new custom managed object fragments by default.
+Extensions utilize existing go-c8y-cli features and packages them so they are easy to install and share. This makes it easy for a team to collaborate to add new commands for custom microservices, or just add custom columns to the device view so you can display new custom managed object fragments by default.
 
 By default extensions are accessible across all sessions. Though for scenarios where you would like to limit an extension to a single session or a group of sessions you can change the folder where the extensions are stored based on customer or some other task orientated grouping.
 
@@ -60,7 +60,7 @@ Aliases are defined in the `extension.yaml` file on the root level of the reposi
 
 The aliases should not clash with any existing commands. If the alias is too specific then it might be better to leave the alias out and allow the users to specify their own session-based aliases using `c8y alias set`.
 
-Read the [Aliases concept](https://goc8ycli.netlify.app/docs/configuration/aliases/) page for more details about it.
+Read the [Aliases concept](/docs/configuration/aliases/) page for more details about it.
 
 Below is an example of an `extension.yaml` file which defines one alias called `mo`. `mo` pretty prints a managed object as json when given a managed object's id.
 
@@ -143,35 +143,19 @@ commands:
 
 ### Script based commands
 
-An extension can include any number of commands. The structure of the commands is based on the folder structure, so you can group commands by placing them under the same sub folder. There is no limit to the number of sub folders, however you should keep it under 4-5 levels so it is not annoying for users to type.
+Script based commands allow you run custom logic inside a script. The script are organized as subcommands under the extension based on the folder hierarchy. It allows you to call any additional third-party commands to create more complex commands which can perform a sequence of steps.
 
-Below shows some examples of commands provided by an extension called `c8y-myext` and how each command can be executed.
+For more information about script based commands checkout the dedicated [script base commands](/docs/concepts/extensions/script-based-commands/) section.
 
-| Path | Command called via |
-|-----------|------|
-| `./commands/services/list` | `c8y myext services list` |
-| `./commands/services/get` | `c8y myext services get` |
-| `./commands/list` | `c8y myext list` |
-
-The commands themselves can be written in any script-based language, e.g. `bash`, `python`, `ruby` etc., however they should include a [Shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) so that the correct shell interpreter can be called by the operating system.
-
-Below is a simple example of a bash-based script.
-
-```bash title="file: ./commands/list"
-#!/usr/bin/env bash
-set -e
-echo "Hey look at me" >&2
-```
-
-:::note
-Note: Make sure that your file is executable. On Unix, you can execute `chmod +x file_name` in the command line to make file_name executable. On Windows, you can run `git init -b main`, `git add file_name`, then `git update-index --chmod=+x file_name`.
+:::caution
+Script based commands are less portable than API based commands, so try to avoid them if possible.
 :::
 
 ### Templates
 
 An extension can provide templates which are accessible when using the `template` flag. Templates can be more useful than commands when using them together with the template `var("name")` syntax which enables the user to customize the template values via the `templateVars` flag (which is tab completed).
 
-Information about what a template is and how to create on can be found in the [Templates concept](https://goc8ycli.netlify.app/docs/concepts/templates/) page.
+Information about what a template is and how to create on can be found in the [Templates concept](/docs/concepts/templates/) page.
 
 Below shows an small example of a `jsonnet` template to create a custom operation which accepts one template variable called `action`.
 
@@ -199,7 +183,7 @@ c8y operations create --device 12345 --template myext::custom.operation.jsonnet 
 
 Views allow you to custom what fragments are displayed by default for specific responses. A view definition has a selection criteria which controls when the view is activated and which columns are displayed on the console.
 
-Checkout the [Views concept](https://goc8ycli.netlify.app/docs/concepts/views/) page for more details.
+Checkout the [Views concept](/docs/concepts/views/) page for more details.
 
 Like templates, extension views are also prefixed with `<EXTENSION_NAME>::` (without the `c8y-` prefix) to avoid name clashes amongst extensions and any other user-created views.
 
@@ -234,7 +218,7 @@ c8y extensions list --raw
 
 </CodeExample>
 
-### Installing a new extension
+### Installing an extension
 
 **Prerequisites**
 
@@ -293,7 +277,7 @@ c8y extensions delete my-extension
 
 </CodeExample>
 
-### Creating
+### Creating an extension
 
 To make it easier to create your own extensions, there is an in-built command which generates an extension with some examples. This is done using
 

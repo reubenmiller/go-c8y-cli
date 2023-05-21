@@ -1,28 +1,58 @@
 ---
-category: Tutorials - Extensions
+category: Concepts - Extensions - API based commands
 title: Parameter types
 ---
 
 Parameter (or flag) types are used to defined how a flag's value should be interpreted. The supported parameter types which can be referenced from the API specification are listed below.
 
-:::caution
-This page is not finished yet, so don't bother reading it just yet.
-:::
+## Introduction
 
-:white_check_mark:
-:black_square_button:
+Flags can be added to a command by placing a flag definition under any of the following sections:
 
-# Introduction
+* `pathParameters`
+* `headerParameters`
+* `queryParameters`
+* `body`
+
+A flag definition provides documentation about the flag, and how the flag should be interpreted. The definition not only contains how the value should be interpreted but also where the value should be written to when the API request is being generated.
+
+For example, a minimal flag definition under the `queryParameters` section could look like this:
 
 ```yaml
-- name: enable
-  type: optional_fragment
-  property: c8y_IsDevice
+queryParameters:
+- name: name
+  type: string
 ```
 
-# Available types
+The following table shows how the parameter would be translated to a query parameter used in the outgoing HTTP request.
+
+|Flag|Translated QueryParameter|
+|----|----|
+|`--name example`|`?name=example`|
+
+Sometimes the name of the flag might be different to the corresponding query parameter name. This is an important usability aspect, as commands can provide a contextualized abstraction on top of the REST API, so a flag's meaning can be slighly different to the API's meaning. In this case a custom mapping can be provided by using the `property` field.
+
+Extending the previous snippet, the `name` flag can be changed to write to write to the `fragment` query parameter instead of the `name`.
+
+```yaml
+queryParameters:
+- name: name
+  type: string
+  property: fragment
+```
+
+Now using the value provided via the `--name` flag will be assigned to the `fragment` query parameter.
+
+|Flag|QueryParameter|
+|----|----|
+|`--name example`|`?fragment=example`|
+
+The same mapping principle can be applied to any of the other parameters (e.g. body, pathParameters, headerParameters etc.).
+
 
 ## Basic types
+
+The following basic types are available for use.
 
 ### Boolean
 
@@ -76,6 +106,8 @@ This page is not finished yet, so don't bother reading it just yet.
 
 ## Cumulocity specific types
 
+This section contains Cumulocity IoT specific types which most involve both tab completion and/or lookups depending on the exact type.
+
 ### Applications
 
 |Type|Description|Example usage|Example output|
@@ -116,11 +148,6 @@ This page is not finished yet, so don't bother reading it just yet.
 |----|----|----|----|
 |`devicerequest`|Device request|`--id abcdef`|`"abcdef"`|
 |`devicerequest[]`|Device request array|`--id abcdef`|`["abcdef"]`|
-
-
-### Inventory Query API
-
-queryExpression
 
 
 ### Misc.

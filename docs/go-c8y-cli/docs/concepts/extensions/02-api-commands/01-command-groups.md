@@ -1,5 +1,5 @@
 ---
-category: Tutorials - Extensions
+category: Concepts - Extensions - API based commands
 title: Command groups
 ---
 

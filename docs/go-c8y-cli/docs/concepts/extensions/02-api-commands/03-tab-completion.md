@@ -1,11 +1,11 @@
 ---
-category: Tutorials - Extensions
+category: Concepts - Extensions - API based commands
 title: Tab completion
 ---
 
 Tab completion is the killer feature on the commands line. It improves the useability of the extension and can reduce the reliance on documentation (though it shouldn't be a substitute for good docs :wink:)
 
-This based lists the tab completion mechanisms available for use.
+The following sections detail the different tab completion mechanisms available for use.
 
 ## Tab completion with simple statics lists
 
@@ -53,6 +53,8 @@ The external tab completion is not just limited to `c8y` commands, you can also 
 
 :::warning
 If the extensions uses a shell to execute the completion command then it might make your extension less portable as Windows users might not have access to a bash shell.
+
+Instead try to use the `c8y` command instead of calling a shell if possible.
 :::
 
 The command snippet below shows an example of a `create` command which accepts a type flag when building the request body. The type flag has a tab completion command which queries existing devices in the tenant, and returns a unique list of device types (only based on the first 2000 devices found).
