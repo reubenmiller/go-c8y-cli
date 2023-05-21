@@ -38,6 +38,7 @@ echo "Running custom %[2]s command" >&2
 # Inventory query builder using
 FLAGS=()
 QUERY_PARTS=()
+POSITIONAL_ARGS=()
 
 function join_by {
     local d=${1-} f=${2-}
@@ -77,14 +78,14 @@ while [ $# -gt 0 ]; do
             exit 0
             ;;
         *)
-            REST_ARGS+=("$1")
+            POSITIONAL_ARGS+=("$1")
             ;;
     esac
     shift
 done
 
-# Reset additional arguments which can then be referenced via "$@"
-set -- "${REST_ARGS[@]}"
+# Restore additional arguments which can then be referenced via "$@" and "$1" etc.
+set -- "${POSITIONAL_ARGS[@]}"
 
 if [ "${#QUERY_PARTS[@]}" -gt 0 ]; then
     FLAGS+=(
