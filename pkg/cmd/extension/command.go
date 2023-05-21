@@ -33,7 +33,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 		Use:   "extensions",
 		Short: "Manage c8y extensions",
 		Long: heredoc.Docf(`
-			GitHub CLI extensions are repositories that provide additional c8y commands.
+			go-c8y-cli extensions are repositories that provide additional c8y commands.
 
 			The name of the extension repository must start with "c8y-" and it must contain an
 			executable of the same name. All arguments passed to the %[1]sc8y <extname>%[1]s invocation
