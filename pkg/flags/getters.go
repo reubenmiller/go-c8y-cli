@@ -867,9 +867,18 @@ func WithFileContentsAsString(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
+		// Only try reading the file if the argument as been provided
+		if !cmd.Flags().Changed(src) {
+			return "", "", nil
+		}
+
 		value, err := cmd.Flags().GetString(src)
 		if err != nil {
 			return dst, value, err
+		}
+		// Ignore empty values
+		if value == "" {
+			return "", "", nil
 		}
 		file, err := os.Open(value)
 

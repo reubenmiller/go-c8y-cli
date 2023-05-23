@@ -235,6 +235,22 @@ tests:
       exactly: |
         {"body":{"file":"one\ntwo\nthree"}}
 
+  fileContentsAsString without flag:
+    command: |
+      c8y kitchensink body fileContentsAsString --dry --dryFormat json |
+        c8y util show --select body
+    stdout:
+      exactly: |
+        {"body":{}}
+
+  fileContentsAsString with empty value:
+    command: |
+      c8y kitchensink body fileContentsAsString --file "" --dry --dryFormat json |
+        c8y util show --select body
+    stdout:
+      exactly: |
+        {"body":{}}
+
   attachment - multipart formdata upload without meta info:
     command: |
       c8y kitchensink body attachment --file manual/extensions/file1.txt --dry --dryFormat dump
