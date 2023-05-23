@@ -26,7 +26,7 @@ It is advised to keep the name of the specification file the same as the group n
 The example below defines a command group called `unicorns` and it has three commands. For simplicity all three commands just send a GET request to hardcoded endpoints (including both path and query parameters).
 
 ```yaml title="file: api/unicorns.yaml"
-# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
 ---
 group:
   name: unicorns
