@@ -122,7 +122,7 @@ It is typically used in Cumulocity IoT to add new inventory binaries or applicat
 The file upload scenario can be utilized by using the special `file` type in the body section. The snippet below adds a `utils` group command with a single command called `upload`.
 
 ```yaml title="file: api/utils.yaml"
-# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
 ---
 group:
   name: utils
@@ -218,7 +218,7 @@ Plain binary data can be sent in a request using the `fileContents` type. Using 
 To demonstrate this, a new command can be added called `replace` which sends a PUT request to the inventory binary API to replace an existing binary with the contents from a new file. The api command definition to achieve this is shown below:
 
 ```yaml title="file: api/utils.yaml"
-# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
 ---
 group:
   name: utils

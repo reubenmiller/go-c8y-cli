@@ -165,7 +165,7 @@ The YAML files under the `api/` folder are yaml based API specifications which t
 So to create sub commands which are callable using `c8y organizer assets`, create the following file under the `api/` folder:
 
 ```yaml title="file: api/assets.yaml"
-# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
 group:
   name: assets    # <= sets the name of the command group
   description: Manage assets
@@ -240,7 +240,7 @@ Now let's say that our fictitious API also supports a query parameter to determi
 Below adds the `detailed` parameter which is a boolean. The boolean type is mapped to a flag which does not accept an argument, e.g. `--detailed`. If `--detailed` is not present, then the query parameter is not added to the outgoing request.
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
 commands:
   - name: get
     description: Get asset
@@ -514,7 +514,7 @@ The `type-asset` anchor can then be reused through the YAML specification where 
 Below shows the final API specification after all the commands have been added to it and the `id` parameters reference the `type-asset` anchor (using the slightly obscure but useful YAML syntax `<<: *type-asset`):
 
 ```yaml title="file: api/assets.yaml"
-# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
 ---
 group:
   name: assets

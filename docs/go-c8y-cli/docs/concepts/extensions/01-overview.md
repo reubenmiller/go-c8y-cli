@@ -104,7 +104,7 @@ The API YAML specification uses a similar specification which is used by go-c8y-
 A schema is available to help guide you through the large set of options. Below shows a short example of the API specification.
 
 ```yaml title="file: ./api/devices.yaml"
-# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/feat/extensions-manager/tools/schema/extensionCommands.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
 ---
 group:
   name: devices
