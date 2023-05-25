@@ -90,3 +90,17 @@ commands:
       - name: usergroup
         type: usergroup[]
         description: Usergroup
+
+  - name: disable_pageSize
+    description: Common flags such as pageSize can be disabled
+    path: inventory/managedObjects
+    method: GET
+    flagMapping:
+      pageSize:
+
+  - name: map_pageSize_to_limit
+    description: Common flags such as pageSize can be disabled
+    path: inventory/managedObjects
+    method: GET
+    flagMapping:
+      pageSize: limit
