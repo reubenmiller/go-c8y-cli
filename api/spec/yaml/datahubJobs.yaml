@@ -153,8 +153,7 @@ commands:
           - id
 
     flagMapping:
-      - name: pageSize
-        property: limit
+      pageSize: limit
 
     queryParameters:
       - name: offset

@@ -29,8 +29,7 @@ commands:
           command: c8y datahub configuration list
     
     flagMapping:
-      - name: pageSize
-        property: limit
+      pageSize: limit
 
     queryParameters:
       - name: lastMaxReportedUUID

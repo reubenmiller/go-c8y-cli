@@ -200,12 +200,9 @@
           ]
         }
       ],
-      "flagMapping": [
-        {
-          "name": "pageSize",
-          "property": "limit"
-        }
-      ],
+      "flagMapping": {
+        "pageSize": "limit"
+      },
       "queryParameters": [
         {
           "name": "offset",
