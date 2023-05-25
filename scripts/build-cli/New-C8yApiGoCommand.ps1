@@ -445,8 +445,8 @@
         # Support mapping common flags to custom query parameters (e.g. if a service uses limit instead of pageSize)
         # but for consistency the flag --pageSize will still be used and mapped to 'limit'.
         if ($Specification.flagMapping) {
-            $flagAliases = foreach ($item in $Specification.flagMapping) {
-                "`"$($item.name)`":`"$($item.property)`""
+            $flagAliases = foreach ($item in $Specification.flagMapping.PSObject.Properties) {
+                "`"$($item.Name)`":`"$($item.Value)`""
             }
             $null = $RESTQueryBuilderPost.AppendLine("commonOptions.AddQueryParametersWithMapping(query, map[string]string{$($flagAliases -join ',')})")
         } else {
