@@ -44,6 +44,10 @@ func (options CommonCommandOptions) AddQueryParameters(query *flags.QueryTemplat
 	}
 }
 
+func shouldIgnoreValue(v string) bool {
+	return v == "" || v == "-"
+}
+
 func (options CommonCommandOptions) AddQueryParametersWithMapping(query *flags.QueryTemplate, aliases map[string]string) {
 	if query == nil {
 		return
@@ -51,7 +55,9 @@ func (options CommonCommandOptions) AddQueryParametersWithMapping(query *flags.Q
 
 	if options.CurrentPage > 0 {
 		if alias, ok := aliases[flags.FlagCurrentPage]; ok {
-			query.SetVariable(alias, options.CurrentPage)
+			if !shouldIgnoreValue(alias) {
+				query.SetVariable(alias, options.CurrentPage)
+			}
 		} else {
 			query.SetVariable(flags.FlagCurrentPage, options.CurrentPage)
 		}
@@ -59,7 +65,9 @@ func (options CommonCommandOptions) AddQueryParametersWithMapping(query *flags.Q
 
 	if options.PageSize > 0 {
 		if alias, ok := aliases[flags.FlagPageSize]; ok {
-			query.SetVariable(alias, options.PageSize)
+			if !shouldIgnoreValue(alias) {
+				query.SetVariable(alias, options.PageSize)
+			}
 		} else {
 			query.SetVariable(flags.FlagPageSize, options.PageSize)
 		}
@@ -67,7 +75,9 @@ func (options CommonCommandOptions) AddQueryParametersWithMapping(query *flags.Q
 
 	if options.WithTotalPages {
 		if alias, ok := aliases[flags.FlagWithTotalPages]; ok {
-			query.SetVariable(alias, "true")
+			if !shouldIgnoreValue(alias) {
+				query.SetVariable(alias, "true")
+			}
 		} else {
 			query.SetVariable(flags.FlagWithTotalPages, "true")
 		}
@@ -75,7 +85,9 @@ func (options CommonCommandOptions) AddQueryParametersWithMapping(query *flags.Q
 
 	if options.WithTotalElements {
 		if alias, ok := aliases[flags.FlagWithTotalElements]; ok {
-			query.SetVariable(alias, "true")
+			if !shouldIgnoreValue(alias) {
+				query.SetVariable(alias, "true")
+			}
 		} else {
 			query.SetVariable(flags.FlagWithTotalElements, "true")
 		}

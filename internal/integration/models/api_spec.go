@@ -39,31 +39,32 @@ func (cp *CommandPreset) GetOption(k string, defaultValue ...string) string {
 }
 
 type Command struct {
-	Name               string         `yaml:"name"`
-	Description        string         `yaml:"description"`
-	DescriptionLong    string         `yaml:"descriptionLong"`
-	Preset             CommandPreset  `yaml:"preset"`
-	Deprecated         string         `yaml:"deprecated"`
-	DeprecatedAt       string         `yaml:"deprecatedAt"`
-	Method             string         `yaml:"method"`
-	SemanticMethod     string         `yaml:"semanticMethod"`
-	Accept             string         `yaml:"accept,omitempty"`
-	ContentType        string         `yaml:"contentType,omitempty"`
-	CollectionType     string         `yaml:"collectionType,omitempty"`
-	CollectionProperty string         `yaml:"collectionProperty,omitempty"`
-	Path               string         `yaml:"path"`
-	Examples           Examples       `yaml:"examples"`
-	ExampleList        []Example      `yaml:"exampleList"`
-	Alias              Aliases        `yaml:"alias"`
-	Hidden             *bool          `yaml:"hidden,omitempty"`
-	Skip               *bool          `yaml:"skip,omitempty"`
-	QueryParameters    []Parameter    `yaml:"queryParameters,omitempty"`
-	PathParameters     []Parameter    `yaml:"pathParameters,omitempty"`
-	HeaderParameters   []Parameter    `yaml:"headerParameters,omitempty"`
-	Body               []Parameter    `yaml:"body,omitempty"`
-	BodyContent        *BodyContent   `yaml:"bodyContent,omitempty"`
-	BodyTemplates      []BodyTemplate `yaml:"bodyTemplates,omitempty"`
-	BodyRequiredKeys   []string       `yaml:"bodyRequiredKeys,omitempty"`
+	Name               string            `yaml:"name"`
+	Description        string            `yaml:"description"`
+	DescriptionLong    string            `yaml:"descriptionLong"`
+	Preset             CommandPreset     `yaml:"preset"`
+	Deprecated         string            `yaml:"deprecated"`
+	DeprecatedAt       string            `yaml:"deprecatedAt"`
+	Method             string            `yaml:"method"`
+	SemanticMethod     string            `yaml:"semanticMethod"`
+	Accept             string            `yaml:"accept,omitempty"`
+	ContentType        string            `yaml:"contentType,omitempty"`
+	CollectionType     string            `yaml:"collectionType,omitempty"`
+	CollectionProperty string            `yaml:"collectionProperty,omitempty"`
+	Path               string            `yaml:"path"`
+	Examples           Examples          `yaml:"examples"`
+	ExampleList        []Example         `yaml:"exampleList"`
+	Alias              Aliases           `yaml:"alias"`
+	Hidden             *bool             `yaml:"hidden,omitempty"`
+	Skip               *bool             `yaml:"skip,omitempty"`
+	QueryParameters    []Parameter       `yaml:"queryParameters,omitempty"`
+	PathParameters     []Parameter       `yaml:"pathParameters,omitempty"`
+	HeaderParameters   []Parameter       `yaml:"headerParameters,omitempty"`
+	Body               []Parameter       `yaml:"body,omitempty"`
+	BodyContent        *BodyContent      `yaml:"bodyContent,omitempty"`
+	BodyTemplates      []BodyTemplate    `yaml:"bodyTemplates,omitempty"`
+	BodyRequiredKeys   []string          `yaml:"bodyRequiredKeys,omitempty"`
+	FlagMapping        map[string]string `yaml:"flagMapping"`
 }
 
 func (c *Command) HasPreset() bool {

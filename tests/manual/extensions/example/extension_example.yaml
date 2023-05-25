@@ -12,3 +12,39 @@ tests:
   It supports subcommands:
     command: c8y kitchensink features
     exit-code: 0
+  
+  Default pagesize can be ignored:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_PAGESIZE: "10"
+    command: |
+      c8y kitchensink features disable_pageSize
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /inventory/managedObjects
+
+  Default pagesize can be mapped to another flag value:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_PAGESIZE: "10"
+    command: |
+      c8y kitchensink features map_pageSize_to_limit
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /inventory/managedObjects?limit=10
+
+  Manual pagesize is accepted and mapped to a custom query parameter:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_PAGESIZE: "10"
+    command: |
+      c8y kitchensink features map_pageSize_to_limit --pageSize 11
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /inventory/managedObjects?limit=11
