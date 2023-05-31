@@ -132,7 +132,7 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command)
 			)
 		}
 
-		cmd.AddCommand(subcmd.NewRuntimeCommand(factory).SubCommand.GetCommand())
+		cmd.AddCommand(subcmd.NewRuntimeCommand(factory).SetRequiredFlags(subcmd.RequiredFlags...).GetCommand())
 	}
 
 	return cmd, nil
@@ -310,11 +310,21 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		cmd.Command.Flags().BoolP(p.Name, p.ShortName, defaultValue, p.GetDescription())
 
 	default:
-		return fmt.Errorf("unknown flag type. name=%s, type=%s", p.Name, p.Type)
+		return fmt.Errorf("unknown flag type. name=%s, type=%s, description=%s", p.Name, p.Type, p.GetDescription())
 	}
 
 	if p.IsRequired() && !p.AcceptsPipeline() {
-		cmd.Command.MarkFlagRequired(p.Name)
+		// NOTE: Don't use the MarkFlagRequired from cobra as go-c8y-cli manages
+		// the required flags manually due to supporting lazy flag evaluation
+		// and using the required flag annotation to prioritize the local flags
+		// over the global ones. So just collect the required flags, and set them
+		// to the custom SubCommand wrapper which will check it later on.
+		// The path and body handle the required parameters internally, only the
+		// header and query parameters need to special handling.
+		switch p.TargetType {
+		case models.ParamHeader, models.ParamQueryParameter:
+			cmd.RequiredFlags = append(cmd.RequiredFlags, p.Name)
+		}
 	}
 
 	if p.IsHidden() && !p.AcceptsPipeline() {
@@ -699,6 +709,7 @@ type CmdOptions struct {
 	FormData       []flags.GetOption
 	Body           BodyOptions
 	Path           PathOptions
+	RequiredFlags  []string
 }
 
 type BodyOptions struct {
@@ -721,6 +732,7 @@ func NewCommandWithOptions(cmd *cobra.Command, endpoint models.Command) *CmdOpti
 		Header:         make([]flags.GetOption, 0),
 		QueryParameter: make([]flags.GetOption, 0),
 		FormData:       make([]flags.GetOption, 0),
+		RequiredFlags:  make([]string, 0),
 		Body: BodyOptions{
 			Options: make([]flags.GetOption, 0),
 		},

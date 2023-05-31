@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRY_FORMAT: json
+
+tests:
+  Should return an error if missing query parameters are not provided:
+    command: |
+      c8y kitchensink required queryparameters_withoutpipe
+    exit-code: 100
+    stderr:
+      contains:
+        - Missing required parameter. required_string
+
+  Should return an error if missing query parameters are not provided and not piped:
+    command: |
+      c8y kitchensink required queryparameters_withpipe
+    exit-code: 101
+    stderr:
+      contains:
+        - Missing required parameter. required_string
+
+  Should support piping to a required parameter:
+    command: |
+      echo testme | c8y kitchensink required queryparameters_withpipe
+    exit-code: 0
+    stdout:
+      json:
+        query: required_string=testme
