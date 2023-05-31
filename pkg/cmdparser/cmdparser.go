@@ -240,7 +240,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 	}
 	switch p.Type {
 	case "string", "stringStatic", "devicerequest", "json_custom", "directory", "softwareName", "softwareversionName", "softwareDetails", "firmwareName", "firmwareversionName", "firmwarepatchName", "firmwareDetails", "binaryUploadURL", "inventoryChildType", "subscriptionName", "subscriptionId", "file", "attachment", "fileContents", "fileContentsAsString", "certificatefile":
-		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.Description)
+		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
 
 	case "json":
 		// Ignore, as it is add by default to all PUT and POST requests
