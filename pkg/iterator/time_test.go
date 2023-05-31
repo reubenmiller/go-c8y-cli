@@ -11,7 +11,7 @@ import (
 
 func Test_RelativeTimeIterator(t *testing.T) {
 
-	iter := NewRelativeTimeIterator("0s", false)
+	iter := NewRelativeTimeIterator("0s", false, false)
 
 	v1, _, err1 := iter.GetNext()
 	assert.OK(t, err1)
@@ -31,7 +31,7 @@ func Test_RelativeTimeIterator(t *testing.T) {
 
 func Test_RelativeTimeIteratorWithFormatter(t *testing.T) {
 
-	iter := NewRelativeTimeIterator("0s", false, "value gt '%s'")
+	iter := NewRelativeTimeIterator("0s", false, false, "value gt '%s'")
 
 	v1, _, err1 := iter.GetNext()
 	assert.OK(t, err1)

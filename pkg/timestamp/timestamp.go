@@ -57,14 +57,20 @@ func DecodeC8yTimestamp(value string) string {
 	return strings.ReplaceAll(value, "%2B", "+")
 }
 
-func TryGetTimestamp(value string, encode bool) (string, error) {
+func TryGetTimestamp(value string, encode bool, utc bool) (string, error) {
 	// Try parsing relative timestamp
 	if ts, err := ParseDurationRelativeToNow(value); err == nil {
+		if utc {
+			return FormatC8yTimestamp(ts.UTC(), encode), nil
+		}
 		return FormatC8yTimestamp(*ts, encode), nil
 	}
 
 	// Try parsing timestamp (if valid)
 	if timestamp, err := dateparse.ParseAny(value); err == nil {
+		if utc {
+			return FormatC8yTimestamp(timestamp.UTC(), encode), nil
+		}
 		return FormatC8yTimestamp(timestamp, encode), nil
 	}
 

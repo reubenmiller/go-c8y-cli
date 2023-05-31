@@ -245,7 +245,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 	case "json":
 		// Ignore, as it is add by default to all PUT and POST requests
 
-	case "datefrom", "dateto", "datetime", "date":
+	case "datefrom", "dateto", "datetime", "date", "datetime_utc":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "time", "creationTime", "creationTime", "lastUpdated")
 
@@ -372,6 +372,12 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 			opts = append(opts, flags.WithEncodedRelativeTimestamp(p.Name, targetProp, p.Format))
 		} else {
 			opts = append(opts, flags.WithRelativeTimestamp(p.Name, targetProp, p.Format))
+		}
+	case "datetime_utc":
+		if p.TargetType == models.ParamPath || p.TargetType == models.ParamQueryParameter {
+			opts = append(opts, flags.WithEncodedRelativeTimestampUTC(p.Name, targetProp, p.Format))
+		} else {
+			opts = append(opts, flags.WithRelativeTimestampUTC(p.Name, targetProp, p.Format))
 		}
 	case "date":
 		opts = append(opts, flags.WithRelativeDate(false, p.Name, targetProp, p.Format))

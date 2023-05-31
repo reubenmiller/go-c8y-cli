@@ -67,6 +67,7 @@ The following basic types are available for use.
 |Type|Description|Example usage|Example output|
 |----|----|----|----|
 |`datetime`|Relative or fixed date/time string| `--dateFrom -10d` |`"2023-04-27T22:52:06.622+02:00"`|
+|`datetime_utc`|Relative or fixed date/time string in UTC| `--dateFrom -10d` |`"2023-04-27T20:52:06.622Z"`|
 |`date`|Relative or fixed time string| `--dateFrom -10d` |`"2023-04-27"`|
 
 ### Numbers (integer/float)
