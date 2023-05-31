@@ -94,7 +94,7 @@ func (n *ListDeviceStatisticsCmd) RunE(cmd *cobra.Command, args []string) error 
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "deviceId", "deviceId"),
+		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "deviceId", "deviceId"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
