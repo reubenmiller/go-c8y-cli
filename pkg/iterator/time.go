@@ -7,9 +7,9 @@ import (
 )
 
 // NewRelativeTimeIterator returns a relative time iterator which can generate timestamps based on time.Now when the value is retrieved
-func NewRelativeTimeIterator(relative string, encode bool, format ...string) *FuncIterator {
+func NewRelativeTimeIterator(relative string, encode bool, utc bool, format ...string) *FuncIterator {
 	next := func(i int64) (string, error) {
-		value, err := timestamp.TryGetTimestamp(relative, encode)
+		value, err := timestamp.TryGetTimestamp(relative, encode, utc)
 		if len(format) > 0 {
 			if format[0] != "" {
 				value = fmt.Sprintf(format[0], value)

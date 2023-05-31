@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
+---
+group:
+  name: types
+  description: Example types
+
+commands:
+  - name: dates
+    path: inventory/managedObjects
+    method: GET
+    description: Get inventory list
+    queryParameters:
+      - name: dateFromUTC
+        type: datetime_utc
+        description: Date from

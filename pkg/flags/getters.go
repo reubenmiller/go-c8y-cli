@@ -635,50 +635,23 @@ func WithFloatValue(opts ...string) GetOption {
 
 // WithRelativeTimestamp adds a timestamp (string) value from cli arguments
 func WithRelativeTimestamp(opts ...string) GetOption {
-	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		src, dst, format := UnpackGetterOptions("", opts...)
-		value, err := cmd.Flags().GetString(src)
+	return NewTimestampFromRelative(false, false, opts...)
+}
 
-		if inputIterators != nil {
-			if inputIterators.PipeOptions.Name == src {
-				inputIterators.PipeOptions.Format = format
-				inputIterators.PipeOptions.Formatter = func(b []byte) []byte {
-					if datetime, err := timestamp.TryGetTimestamp(string(b), false); err == nil {
-						if format != "" {
-							return []byte(fmt.Sprintf(format, datetime))
-						}
-						return []byte(datetime)
-					}
-					if format != "" {
-						return []byte(fmt.Sprintf(format, b))
-					}
-					return b
-				}
-				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
-			}
-		}
-
-		if err != nil {
-			return dst, value, err
-		}
-
-		value, err = cmd.Flags().GetString(src)
-		if err != nil {
-			return dst, value, err
-		}
-
-		// ignore empty values
-		if value == "" {
-			return "", value, err
-		}
-
-		// mark iterator as unbound, so it will not increment the input iterators
-		return dst, iterator.NewRelativeTimeIterator(value, false, format), err
-	}
+func WithRelativeTimestampUTC(opts ...string) GetOption {
+	return NewTimestampFromRelative(false, true, opts...)
 }
 
 // WithEncodedRelativeTimestamp adds a encoded timestamp (string) value from cli arguments
 func WithEncodedRelativeTimestamp(opts ...string) GetOption {
+	return NewTimestampFromRelative(true, false, opts...)
+}
+
+func WithEncodedRelativeTimestampUTC(opts ...string) GetOption {
+	return NewTimestampFromRelative(true, true, opts...)
+}
+
+func NewTimestampFromRelative(encode bool, utc bool, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
@@ -687,7 +660,7 @@ func WithEncodedRelativeTimestamp(opts ...string) GetOption {
 			if inputIterators.PipeOptions.Name == src {
 				inputIterators.PipeOptions.Format = format
 				inputIterators.PipeOptions.Formatter = func(b []byte) []byte {
-					if datetime, err := timestamp.TryGetTimestamp(string(b), true); err == nil {
+					if datetime, err := timestamp.TryGetTimestamp(string(b), encode, utc); err == nil {
 						if format != "" {
 							return []byte(fmt.Sprintf(format, datetime))
 						}
@@ -717,7 +690,7 @@ func WithEncodedRelativeTimestamp(opts ...string) GetOption {
 		}
 
 		// mark iterator as unbound, so it will not increment the input iterators
-		return dst, iterator.NewRelativeTimeIterator(value, true, format), err
+		return dst, iterator.NewRelativeTimeIterator(value, encode, utc, format), err
 	}
 }
 

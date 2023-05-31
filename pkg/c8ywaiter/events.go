@@ -30,13 +30,13 @@ func (s *EventCount) Check(m interface{}) (done bool, err error) {
 	if mo, ok := m.(*c8y.ManagedObject); ok {
 		var dateFrom, dateTo string
 		if s.DateFrom != "" {
-			if v, err := timestamp.TryGetTimestamp(s.DateFrom, false); err == nil {
+			if v, err := timestamp.TryGetTimestamp(s.DateFrom, false, false); err == nil {
 				dateFrom = v
 			}
 		}
 
 		if s.DateTo != "" {
-			if v, err := timestamp.TryGetTimestamp(s.DateTo, false); err == nil {
+			if v, err := timestamp.TryGetTimestamp(s.DateTo, false, false); err == nil {
 				dateTo = v
 			}
 		}

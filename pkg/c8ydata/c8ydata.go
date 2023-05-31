@@ -86,7 +86,7 @@ type TransformRelativeTimestamp struct {
 
 func (t *TransformRelativeTimestamp) Run(v interface{}) (resp interface{}, err error) {
 	if value, ok := v.(string); ok {
-		return timestamp.TryGetTimestamp(value, t.Encode)
+		return timestamp.TryGetTimestamp(value, t.Encode, false)
 	}
 	return
 }

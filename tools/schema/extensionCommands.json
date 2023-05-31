@@ -250,6 +250,7 @@
                 "configurationDetails",
                 "date",
                 "datetime",
+                "datetime_utc",
                 "device[]",
                 "devicegroup[]",
                 "deviceprofile[]",

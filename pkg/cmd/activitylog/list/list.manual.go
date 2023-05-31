@@ -84,7 +84,7 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if n.dateFrom != "" {
-		dateFrom, err := timestamp.TryGetTimestamp(n.dateFrom, false)
+		dateFrom, err := timestamp.TryGetTimestamp(n.dateFrom, false, false)
 		if err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if n.dateTo != "" {
-		dateTo, err := timestamp.TryGetTimestamp(n.dateTo, false)
+		dateTo, err := timestamp.TryGetTimestamp(n.dateTo, false, false)
 		if err != nil {
 			return err
 		}

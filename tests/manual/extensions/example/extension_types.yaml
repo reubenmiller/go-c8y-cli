@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRY_FORMAT: json
+
+tests:
+  # datetime_utc
+  datetime_utc returns date in UTC:
+    command: |
+      c8y kitchensink types dates --dateFromUTC '2022-01-01T02:00:00+02' --dry --dryFormat json \
+      | c8y util show --select query,pathEncoded -o json
+    exit-code: 0
+    stdout:
+      json:
+        pathEncoded: /inventory/managedObjects?dateFromUTC=2022-01-01T00%3A00%3A00Z
+        query: dateFromUTC=2022-01-01T00:00:00Z
