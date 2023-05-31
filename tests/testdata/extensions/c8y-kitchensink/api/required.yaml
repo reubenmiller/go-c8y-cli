@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
+---
+group:
+  name: required
+  description: Example required
+
+commands:
+  - name: queryparameters_withoutpipe
+    path: inventory/managedObjects
+    method: GET
+    description: Get inventory list
+    queryParameters:
+      - name: required_string
+        type: string
+        pipeline: false
+        required: true
+        description: Date from
+
+      - name: option1
+        type: string
+        description: Option 1
+
+  - name: queryparameters_withpipe
+    path: inventory/managedObjects
+    method: GET
+    description: Get inventory list
+    queryParameters:
+      - name: required_string
+        type: string
+        pipeline: true
+        required: true
+        description: Date from
