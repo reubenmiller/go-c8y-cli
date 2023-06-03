@@ -250,7 +250,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().StringP("output", "o", defaultOutputFormat, "Output format i.e. table, json, csv, csvheader")
 	cmd.PersistentFlags().String("outputFile", "", "Save JSON output to file (after select/view)")
 	cmd.PersistentFlags().String("outputFileRaw", "", "Save raw response to file (before select/view)")
-	cmd.PersistentFlags().String(flags.FlagOutputTemplate, "", "Output template")
+	cmd.PersistentFlags().String(flags.FlagOutputTemplate, "", "jsonnet template to apply to the output")
 
 	// input parsing
 	cmd.PersistentFlags().BoolP(flags.FlagNullInput, "n", false, "Don't read the input (stdin). Useful if using in shell for/while loops")
