@@ -11,6 +11,8 @@ type CommonCommandOptions struct {
 	ConfirmText       string
 	OutputFile        string
 	OutputFileRaw     string
+	OutputTemplate    string
+	CommandFlags      map[string]string
 	Filters           *jsonfilter.JSONFilters
 	ResultProperty    string
 	IncludeAll        bool

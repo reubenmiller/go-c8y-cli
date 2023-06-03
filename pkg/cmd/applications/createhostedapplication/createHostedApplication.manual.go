@@ -366,7 +366,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 	if err != nil {
 		return err
 	}
-	_, err = handler.ProcessResponse(response, err, commonOptions)
+	_, err = handler.ProcessResponse(response, err, nil, commonOptions)
 	return err
 }
 

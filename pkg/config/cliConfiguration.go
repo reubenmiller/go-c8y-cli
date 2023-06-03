@@ -202,6 +202,9 @@ const (
 	// SettingsOutputFormat Output format i.e. table, json, csv, csvheader
 	SettingsOutputFormat = "settings.defaults.output"
 
+	// SettingsOutputTemplate Output jsonnet template
+	SettingsOutputTemplate = "settings.defaults.outputTemplate"
+
 	// SettingsEncryptionEnabled enables encryption when storing sensitive session data
 	SettingsEncryptionEnabled = "settings.encryption.enabled"
 
@@ -1279,6 +1282,11 @@ func (c *Config) GetOutputFile() string {
 	return *c.outputFile
 }
 
+// GetOutputTemplate returns the output template to use when processing the output
+func (c *Config) GetOutputTemplate() string {
+	return c.viper.GetString(SettingsOutputTemplate)
+}
+
 // GetOutputFormat Get output format type, i.e. json, csv, table etc.
 func (c *Config) GetOutputFormat() OutputFormat {
 	if c.RawOutput() {
@@ -1473,9 +1481,17 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 		return *c.commonOptions, nil
 	}
 	options := CommonCommandOptions{
-		OutputFile:    c.GetOutputFile(),
-		OutputFileRaw: c.GetOutputFileRaw(),
+		OutputFile:     c.GetOutputFile(),
+		OutputFileRaw:  c.GetOutputFileRaw(),
+		OutputTemplate: c.GetOutputTemplate(),
 	}
+
+	// Store flag values for usage in the output template
+	commandFlags := make(map[string]string)
+	cmd.Flags().Visit(func(f *pflag.Flag) {
+		commandFlags[f.Name] = strings.Trim(f.Value.String(), "[]")
+	})
+	options.CommandFlags = commandFlags
 
 	// default return property from the raw response
 	options.ResultProperty = flags.GetCollectionPropertyFromAnnotation(cmd)

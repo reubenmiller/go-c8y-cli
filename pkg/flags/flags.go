@@ -13,6 +13,7 @@ const (
 	FlagDataName                  = "data"
 	FlagDataTemplateName          = "template"
 	FlagDataTemplateVariablesName = "templateVars"
+	FlagOutputTemplate            = "outputTemplate"
 	FlagProcessingModeName        = "processingMode"
 	FlagWithTotalPages            = "withTotalPages"
 	FlagWithTotalElements         = "withTotalElements"

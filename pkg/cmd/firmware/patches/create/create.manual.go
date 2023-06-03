@@ -233,7 +233,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 				})
 		}
 
-		if _, err := handler.ProcessResponse(resp, respErr, commonOptions); err != nil {
+		if _, err := handler.ProcessResponse(resp, respErr, nil, commonOptions); err != nil {
 			return err
 		}
 

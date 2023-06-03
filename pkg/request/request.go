@@ -31,6 +31,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonformatter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/pretty"
@@ -59,7 +60,7 @@ func (r *RequestHandler) GetTimeoutContext() (context.Context, context.CancelFun
 	return context.WithTimeout(context.Background(), r.Config.RequestTimeout())
 }
 
-func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions, commonOptions config.CommonCommandOptions) (*c8y.Response, error) {
+func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions, input any, commonOptions config.CommonCommandOptions) (*c8y.Response, error) {
 
 	if len(requests) > 1 {
 		return nil, cmderrors.NewSystemError("Multiple request handling is currently not supported")
@@ -135,18 +136,18 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 		if isInventoryQuery(&req) {
 			// TODO: Optimize implementation for inventory managed object queries to use the following
 			r.Logger.Info("Using inventory optimized query")
-			if err := r.fetchAllInventoryQueryResults(req, resp, commonOptions); err != nil {
+			if err := r.fetchAllInventoryQueryResults(req, resp, input, commonOptions); err != nil {
 				return nil, err
 			}
 		} else {
-			if err := r.fetchAllResults(req, resp, commonOptions); err != nil {
+			if err := r.fetchAllResults(req, resp, input, commonOptions); err != nil {
 				return nil, err
 			}
 		}
 		return resp, nil
 	}
 
-	_, err = r.ProcessResponse(resp, err, commonOptions)
+	_, err = r.ProcessResponse(resp, err, input, commonOptions)
 	return resp, err
 }
 
@@ -376,7 +377,7 @@ func (r *RequestHandler) GetCurlCommands(req *http.Request) (shell string, pwsh 
 	return
 }
 
-func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions config.CommonCommandOptions) error {
+func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, input any, commonOptions config.CommonCommandOptions) error {
 	if req.DryRun || (resp != nil && resp.StatusCode() == 0) {
 		return nil
 	}
@@ -388,7 +389,7 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 
 	var totalItems int
 
-	totalItems, processErr := r.ProcessResponse(resp, nil, commonOptions)
+	totalItems, processErr := r.ProcessResponse(resp, nil, input, commonOptions)
 
 	if processErr != nil {
 		return cmderrors.NewSystemError("Failed to parse response", processErr)
@@ -458,7 +459,7 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 			durationMS := int64(time.Since(start) / time.Millisecond)
 			r.Logger.Infof("Response time: %dms", durationMS)
 			r.ActivityLogger.LogRequest(resp.Response, resp.JSON(), durationMS)
-			totalItems, processErr = r.ProcessResponse(resp, err, commonOptions)
+			totalItems, processErr = r.ProcessResponse(resp, err, input, commonOptions)
 
 			if processErr != nil {
 				return cmderrors.NewSystemError("Failed to parse response")
@@ -487,7 +488,7 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 	return err
 }
 
-func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions config.CommonCommandOptions) error {
+func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, input any, commonOptions config.CommonCommandOptions) error {
 	if req.DryRun || (resp != nil && resp.StatusCode() == 0) {
 		return nil
 	}
@@ -499,7 +500,7 @@ func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, r
 
 	var totalItems int
 
-	totalItems, processErr := r.ProcessResponse(resp, nil, commonOptions)
+	totalItems, processErr := r.ProcessResponse(resp, nil, input, commonOptions)
 
 	if processErr != nil {
 		return cmderrors.NewSystemError("Failed to parse response", processErr)
@@ -580,7 +581,7 @@ func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, r
 			r.Logger.Infof("Response time: %dms", durationMS)
 			r.ActivityLogger.LogRequest(resp.Response, resp.JSON(), durationMS)
 
-			totalItems, processErr = r.ProcessResponse(resp, err, commonOptions)
+			totalItems, processErr = r.ProcessResponse(resp, err, input, commonOptions)
 
 			if processErr != nil {
 				return cmderrors.NewSystemError("Failed to parse response")
@@ -652,7 +653,53 @@ func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
 	return u
 }
 
-func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, commonOptions config.CommonCommandOptions) (int, error) {
+func ExecuteTemplate(responseText []byte, resp *http.Response, input any, commonOptions config.CommonCommandOptions) ([]byte, error) {
+
+	outputBuilder := mapbuilder.NewInitializedMapBuilder(true)
+	requestData := make(map[string]interface{})
+	requestData["path"] = resp.Request.URL.Path
+	requestData["host"] = resp.Request.URL.Host
+	requestData["url"] = resp.Request.URL.String()
+	requestData["query"] = resp.Request.URL.Query().Encode()
+	requestData["method"] = resp.Request.Method
+	// requestData["header"] = resp.Response.Request.Header
+
+	// TODO: Add a response variable to included the status code, content type,
+	responseData := make(map[string]interface{})
+	responseData["statusCode"] = resp.StatusCode
+	responseData["status"] = resp.Status
+	responseData["contentLength"] = resp.ContentLength
+	responseData["contentType"] = resp.Header.Get("Content-Type")
+	responseData["header"] = resp.Header
+	responseData["proto"] = resp.Proto
+	responseData["body"] = string(responseText)
+
+	inputData := make(map[string]interface{})
+	inputData["request"] = requestData
+	inputData["response"] = responseData
+	inputData["flags"] = commonOptions.CommandFlags
+
+	if json.Valid(responseText) {
+		var data any
+		if err := json.Unmarshal(responseText, &data); err == nil {
+			inputData["output"] = data
+		} else {
+			inputData["output"] = string(responseText)
+		}
+	} else {
+		inputData["output"] = string(responseText)
+	}
+	outputBuilder.SetTemplateVariables(inputData)
+	outputBuilder.AppendTemplate(commonOptions.OutputTemplate)
+	out, outErr := outputBuilder.MarshalJSONWithInput(input)
+
+	if outErr != nil {
+		return out, outErr
+	}
+	return out, nil
+}
+
+func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, input any, commonOptions config.CommonCommandOptions) (int, error) {
 	if resp != nil && resp.StatusCode() != 0 {
 		r.Logger.Infof("Response Content-Type: %s", resp.Response.Header.Get("Content-Type"))
 		r.Logger.Debugf("Response Headers: %v", resp.Header())
@@ -772,6 +819,15 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 			view := r.Config.ViewOption()
 			r.Logger.Infof("View mode: %s", view)
 
+			// Apply output template
+			if commonOptions.OutputTemplate != "" {
+				tmplOutput, tmplErr := ExecuteTemplate(resp.Body(), resp.Response, input, commonOptions)
+				if tmplErr != nil {
+					return unfilteredSize, tmplErr
+				}
+				resp.SetBody(tmplOutput)
+			}
+
 			// Detect view (if no filters are given)
 			if len(commonOptions.Filters.Pluck) == 0 {
 				if len(resp.Body()) > 0 && r.DataView != nil {
@@ -844,7 +900,15 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 			}
 
 		} else {
+			// Apply output template on text based response
 			responseText = resp.Body()
+			if commonOptions.OutputTemplate != "" {
+				tmplOutput, tmplErr := ExecuteTemplate(responseText, resp.Response, input, commonOptions)
+				if tmplErr != nil {
+					return unfilteredSize, tmplErr
+				}
+				responseText = tmplOutput
+			}
 		}
 
 		// replace special escaped unicode sequences
