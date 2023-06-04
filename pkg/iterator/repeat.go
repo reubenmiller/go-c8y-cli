@@ -20,7 +20,7 @@ func (i *RepeatIterator) GetNext() (line []byte, input interface{}, err error) {
 	} else {
 		line = []byte(i.value)
 	}
-	return line, line, err
+	return line, input, err
 }
 
 // MarshalJSON return the value in a json compatible value

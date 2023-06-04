@@ -662,9 +662,10 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 
 	requestData := make(map[string]interface{})
 	requestData["path"] = resp.Request.URL.Path
+	requestData["pathEncoded"] = strings.Replace(resp.Request.URL.String(), resp.Request.URL.Scheme+"://"+resp.Request.URL.Host, "", 1)
 	requestData["host"] = resp.Request.URL.Host
 	requestData["url"] = resp.Request.URL.String()
-	requestData["query"] = resp.Request.URL.Query().Encode()
+	requestData["query"] = tryUnescapeURL(resp.Request.URL.RawQuery)
 	requestData["method"] = resp.Request.Method
 	// requestData["header"] = resp.Response.Request.Header
 	if err := outputBuilder.AddLocalTemplateVariable("request", requestData); err != nil {
@@ -805,6 +806,34 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 			r.Logger.Infof("Unfiltered array size. len=%d", unfilteredSize)
 		}
 
+		// Apply output template (before the data is processed as the template can transform text to json or other way around)
+		if commonOptions.OutputTemplate != "" {
+			var tempBody []byte
+			if showRaw || dataProperty == "" {
+				tempBody = resp.Body()
+			} else {
+				tempBody = []byte(resp.JSON(dataProperty).Raw)
+			}
+			dataProperty = ""
+
+			tmplOutput, tmplErr := ExecuteTemplate(tempBody, resp.Response, input, commonOptions, resp.Duration())
+			if tmplErr != nil {
+				return unfilteredSize, tmplErr
+			}
+
+			if jsonUtilities.IsValidJSON(tmplOutput) {
+				isJSONResponse = true
+				resp.SetBody(pretty.Ugly(tmplOutput))
+			} else {
+				isJSONResponse = false
+				// TODO: Is removing the quotes doing too much, what happens if someone is building csv, and it using quotes around some fields?
+				// e.g. `"my value",100`, that would get transformed to `my value",100`
+				// Trim any quotes wrapping the values
+				tmplOutput = bytes.TrimSpace(tmplOutput)
+				resp.SetBody(bytes.Trim(tmplOutput, "\""))
+			}
+		}
+
 		if isJSONResponse && commonOptions.Filters != nil {
 			if showRaw {
 				dataProperty = ""
@@ -815,15 +844,6 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 			}
 			view := r.Config.ViewOption()
 			r.Logger.Infof("View mode: %s", view)
-
-			// Apply output template
-			if commonOptions.OutputTemplate != "" {
-				tmplOutput, tmplErr := ExecuteTemplate(resp.Body(), resp.Response, input, commonOptions)
-				if tmplErr != nil {
-					return unfilteredSize, tmplErr
-				}
-				resp.SetBody(tmplOutput)
-			}
 
 			// Detect view (if no filters are given)
 			if len(commonOptions.Filters.Pluck) == 0 {
@@ -897,15 +917,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 			}
 
 		} else {
-			// Apply output template on text based response
 			responseText = resp.Body()
-			if commonOptions.OutputTemplate != "" {
-				tmplOutput, tmplErr := ExecuteTemplate(responseText, resp.Response, input, commonOptions, resp.Duration())
-				if tmplErr != nil {
-					return unfilteredSize, tmplErr
-				}
-				responseText = tmplOutput
-			}
 		}
 
 		// replace special escaped unicode sequences
