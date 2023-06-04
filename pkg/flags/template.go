@@ -22,6 +22,15 @@ func WithTemplateOptions(templateName string, variablesName string, pathResolver
 	}
 }
 
+func ResolveTemplate(value string, pathResolver Resolver) string {
+	// ignore errors, as we will try to read the contents
+	contents, err := pathResolver.Resolve(value)
+	if err != nil {
+		return value
+	}
+	return getContents(contents)
+}
+
 func WithTemplateValue(src string, pathResolver Resolver) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		if !cmd.Flags().Changed(src) {
@@ -34,15 +43,7 @@ func WithTemplateValue(src string, pathResolver Resolver) GetOption {
 			return "", nil, err
 		}
 
-		// ignore errors, as we will try to read the contents
-		contents, err := pathResolver.Resolve(value)
-
-		if err != nil {
-			contents = value
-		}
-
-		content := getContents(contents)
-		return src, Template(content), nil
+		return src, Template(ResolveTemplate(value, pathResolver)), nil
 	}
 }
 

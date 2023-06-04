@@ -355,9 +355,11 @@ type Config struct {
 
 	// private caching to improve performance
 	// by preventing expensive system calls for each iteration
-	outputFileRaw *string
-	outputFile    *string
-	commonOptions *CommonCommandOptions
+	outputFileRaw    *string
+	outputFile       *string
+	outputTemplate   *string
+	commonOptions    *CommonCommandOptions
+	templateResolver flags.Resolver
 }
 
 // NewConfig returns a new CLI configuration object
@@ -376,6 +378,10 @@ func NewConfig(v *viper.Viper) *Config {
 	c.prompter.Logger = c.Logger
 	c.bindSettings()
 	return c
+}
+
+func (c *Config) RegisterTemplateResolver(resolver flags.Resolver) {
+	c.templateResolver = resolver
 }
 
 // Option cli configuration option
@@ -1284,7 +1290,11 @@ func (c *Config) GetOutputFile() string {
 
 // GetOutputTemplate returns the output template to use when processing the output
 func (c *Config) GetOutputTemplate() string {
-	return c.viper.GetString(SettingsOutputTemplate)
+	if c.outputTemplate == nil {
+		contents := flags.ResolveTemplate(c.viper.GetString(SettingsOutputTemplate), c.templateResolver)
+		c.outputTemplate = &contents
+	}
+	return *c.outputTemplate
 }
 
 // GetOutputFormat Get output format type, i.e. json, csv, table etc.
