@@ -15,6 +15,7 @@ const c8yCommands = {
     'c8y alarms delete': 'Remove-Alarm',
     'c8y alarms subscribe': 'Watch-Alarm',
     'c8y alarms list': 'Get-AlarmCollection',
+    'c8y alarms count': 'Get-AlarmCount',
 
     // events
     'c8y events create': 'New-Event',
@@ -99,7 +100,7 @@ const c8yCommands = {
 };
 
 const powershellCommands = {
-    'rm': 'Remove-Item',
+    'rm ': 'Remove-Item ',
 };
 
 function replaceAll(string, search, replace) {
@@ -122,7 +123,7 @@ function transformToPowerShell(code = '') {
     if (parts.length) {
         for (let i = 0; i < parts.length; i++) {
             if (parts[i].startsWith('--')) {
-                parts[i] = '-' + parts[i].substring(2, 1).toUpperCase() + parts[i].substring(3)
+                parts[i] = '-' + parts[i].substring(2, 3).toUpperCase() + parts[i].substring(3)
             } else if (parts[i].startsWith('-')) {
             }
         }
