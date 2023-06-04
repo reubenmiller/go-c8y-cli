@@ -65,7 +65,8 @@ func (b *StringTemplate) CheckRequired() error {
 
 // Execute replaces all of the path parameters in a given URI with the provided values
 // Example:
-// 	"alarm/alarms/{id}" => "alarm/alarms/1234" if given a parameter map of {"id": "1234"}
+//
+//	"alarm/alarms/{id}" => "alarm/alarms/1234" if given a parameter map of {"id": "1234"}
 func (b *StringTemplate) Execute(ignoreIterators bool, template ...string) (output string, input interface{}, err error) {
 	if b.templateVariables == nil {
 		return "", "", io.EOF
@@ -76,6 +77,7 @@ func (b *StringTemplate) Execute(ignoreIterators bool, template ...string) (outp
 		output = template[0]
 	}
 	input = output
+	inputSet := false
 
 	for key, value := range b.templateVariables {
 
@@ -89,7 +91,12 @@ func (b *StringTemplate) Execute(ignoreIterators bool, template ...string) (outp
 					return "", "", err
 				}
 
-				input = inputValue
+				// Note: Favour bounded iterator values over unbound
+				if v.IsBound() || !inputSet {
+					input = inputValue
+					inputSet = true
+				}
+
 				currentValue = string(nextValue)
 			}
 		case string:

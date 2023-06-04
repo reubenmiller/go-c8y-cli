@@ -49,6 +49,7 @@ func (b *QueryTemplate) Execute(ignoreIterators bool) (query url.Values, input a
 	if b.templateVariables == nil {
 		return query, nil, io.EOF
 	}
+	inputSet := false
 
 	for key, value := range b.templateVariables {
 
@@ -61,7 +62,13 @@ func (b *QueryTemplate) Execute(ignoreIterators bool) (query url.Values, input a
 				if err != nil {
 					return query, curInput, err
 				}
-				input = curInput
+
+				// Note: Favour bounded iterator values over unbound
+				if v.IsBound() || !inputSet {
+					input = curInput
+					inputSet = true
+				}
+
 				currentValue = string(bValue)
 			}
 
