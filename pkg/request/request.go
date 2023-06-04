@@ -107,7 +107,6 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 			},
 		})
 	defer cancel()
-	start := time.Now()
 
 	// Support both JSON objects or arrays, but default to an object
 	if req.ResponseData == nil {
@@ -120,7 +119,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 	isDryRun := resp != nil && resp.Response.StatusCode == 0 && resp.Response.Request != nil
 
 	if !isDryRun && resp != nil {
-		durationMS := int64(time.Since(start) / time.Millisecond)
+		durationMS := resp.Duration().Milliseconds()
 		r.Logger.Infof("Response time: %dms", durationMS)
 
 		if r.ActivityLogger != nil && resp != nil {
@@ -653,7 +652,7 @@ func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
 	return u
 }
 
-func ExecuteTemplate(responseText []byte, resp *http.Response, input any, commonOptions config.CommonCommandOptions) ([]byte, error) {
+func ExecuteTemplate(responseText []byte, resp *http.Response, input any, commonOptions config.CommonCommandOptions, duration time.Duration) ([]byte, error) {
 
 	outputBuilder := mapbuilder.NewInitializedMapBuilder(true)
 
@@ -676,6 +675,7 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 	responseData := make(map[string]interface{})
 	responseData["statusCode"] = resp.StatusCode
 	responseData["status"] = resp.Status
+	responseData["duration"] = duration.Milliseconds()
 	responseData["contentLength"] = resp.ContentLength
 	responseData["contentType"] = resp.Header.Get("Content-Type")
 	responseData["header"] = resp.Header
@@ -900,7 +900,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 			// Apply output template on text based response
 			responseText = resp.Body()
 			if commonOptions.OutputTemplate != "" {
-				tmplOutput, tmplErr := ExecuteTemplate(responseText, resp.Response, input, commonOptions)
+				tmplOutput, tmplErr := ExecuteTemplate(responseText, resp.Response, input, commonOptions, resp.Duration())
 				if tmplErr != nil {
 					return unfilteredSize, tmplErr
 				}
