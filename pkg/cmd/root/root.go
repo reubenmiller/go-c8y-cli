@@ -290,6 +290,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			return cfg.GetSessionHomeDir()
 		}),
 		cmdutil.WithViewCompletion("view", func() (*dataview.DataView, error) { return ccmd.Factory.DataView() }),
+		ccmd.Factory.WithTemplateCompletion(flags.FlagOutputTemplate),
 	)
 
 	// Child commands
