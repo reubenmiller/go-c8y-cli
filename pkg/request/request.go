@@ -656,6 +656,11 @@ func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
 func ExecuteTemplate(responseText []byte, resp *http.Response, input any, commonOptions config.CommonCommandOptions) ([]byte, error) {
 
 	outputBuilder := mapbuilder.NewInitializedMapBuilder(true)
+
+	if err := outputBuilder.AddLocalTemplateVariable("flags", commonOptions.CommandFlags); err != nil {
+		return nil, err
+	}
+
 	requestData := make(map[string]interface{})
 	requestData["path"] = resp.Request.URL.Path
 	requestData["host"] = resp.Request.URL.Host
@@ -663,6 +668,9 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 	requestData["query"] = resp.Request.URL.Query().Encode()
 	requestData["method"] = resp.Request.Method
 	// requestData["header"] = resp.Response.Request.Header
+	if err := outputBuilder.AddLocalTemplateVariable("request", requestData); err != nil {
+		return nil, err
+	}
 
 	// TODO: Add a response variable to included the status code, content type,
 	responseData := make(map[string]interface{})
@@ -673,23 +681,12 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 	responseData["header"] = resp.Header
 	responseData["proto"] = resp.Proto
 	responseData["body"] = string(responseText)
-
-	inputData := make(map[string]interface{})
-	inputData["request"] = requestData
-	inputData["response"] = responseData
-	inputData["flags"] = commonOptions.CommandFlags
-
-	if json.Valid(responseText) {
-		var data any
-		if err := json.Unmarshal(responseText, &data); err == nil {
-			inputData["output"] = data
-		} else {
-			inputData["output"] = string(responseText)
-		}
-	} else {
-		inputData["output"] = string(responseText)
+	if err := outputBuilder.AddLocalTemplateVariable("response", responseData); err != nil {
+		return nil, err
 	}
-	outputBuilder.SetTemplateVariables(inputData)
+
+	outputBuilder.AddLocalTemplateVariable("output", string(responseText))
+
 	outputBuilder.AppendTemplate(commonOptions.OutputTemplate)
 	out, outErr := outputBuilder.MarshalJSONWithInput(input)
 

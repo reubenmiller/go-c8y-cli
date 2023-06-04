@@ -338,6 +338,11 @@ type IteratorReference struct {
 	Value iterator.Iterator
 }
 
+type LocalVariable struct {
+	Name  string
+	Value any
+}
+
 // MapBuilder creates body builder
 type MapBuilder struct {
 	mu                    sync.Mutex
@@ -354,11 +359,12 @@ type MapBuilder struct {
 	ArrayPrefix string
 	ArraySuffix string
 
-	templateVariables map[string]interface{}
-	requiredKeys      []string
-	autoApplyTemplate bool
-	templates         []string
-	externalInput     []byte
+	templateVariables      map[string]interface{}
+	requiredKeys           []string
+	autoApplyTemplate      bool
+	templates              []string
+	externalInput          []byte
+	localTemplateVariables []LocalVariable
 }
 
 func (b *MapBuilder) HasChanged() bool {
@@ -397,6 +403,54 @@ func (b *MapBuilder) HasChanged() bool {
 func (b *MapBuilder) AppendTemplate(template string) *MapBuilder {
 	b.templates = append(b.templates, template)
 	return b
+}
+
+// AddLocalTemplateVariable will inject new local variables into the jsonnet template
+// using the local name = value; syntax. It allows users to access additional variables
+// more easily
+func (b *MapBuilder) AddLocalTemplateVariable(name string, value any) error {
+	if b.localTemplateVariables == nil {
+		b.localTemplateVariables = make([]LocalVariable, 0, 1)
+	}
+
+	switch v := value.(type) {
+	case string:
+		if json.Valid([]byte(v)) {
+			b.localTemplateVariables = append(b.localTemplateVariables, LocalVariable{
+				Name:  name,
+				Value: string(v),
+			})
+		} else {
+			if outB, err := json.Marshal(v); err == nil {
+				b.localTemplateVariables = append(b.localTemplateVariables, LocalVariable{
+					Name:  name,
+					Value: string(outB),
+				})
+			}
+		}
+
+	case int, int16, int32, int64, float32, float64, bool:
+		b.localTemplateVariables = append(b.localTemplateVariables, LocalVariable{
+			Name:  name,
+			Value: v,
+		})
+	default:
+		jsonV, jsonErr := json.Marshal(v)
+		if jsonErr != nil {
+			// Fallback to a plain string
+			b.localTemplateVariables = append(b.localTemplateVariables, LocalVariable{
+				Name:  name,
+				Value: fmt.Sprintf("'%s'", strings.ReplaceAll(fmt.Sprintf("%v", v), "'", "\\'")),
+			})
+		} else {
+			b.localTemplateVariables = append(b.localTemplateVariables, LocalVariable{
+				Name:  name,
+				Value: string(jsonV),
+			})
+		}
+
+	}
+	return nil
 }
 
 // PrependTemplate prepends a templates to be merged in with the body
@@ -547,7 +601,14 @@ func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []by
 		time.Now().Format(timeFormatRFC3339Micro),
 		time.Now().Format(time.RFC3339Nano),
 	)
-	return fmt.Sprintf("\nlocal vars = %s;\n%s\n%s\n%s\n%s\n", jsonStr, varsHelper, randomHelper, timeHelper, inputHelper), nil
+
+	// add custom local variables
+	var localVariables strings.Builder
+	for _, localVar := range b.localTemplateVariables {
+		localVariables.WriteString(fmt.Sprintf("\nlocal %s = %s;", localVar.Name, localVar.Value))
+	}
+
+	return fmt.Sprintf("\nlocal vars = %s;\n%s\n%s\n%s\n%s\n%s\n", jsonStr, varsHelper, randomHelper, timeHelper, inputHelper, localVariables.String()), nil
 }
 
 // SetMap sets a new map to the body (if not nil). This will remove any existing values in the body
