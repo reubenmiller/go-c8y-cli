@@ -65,7 +65,7 @@ c8y devices list \
 
 With the usage of the `outputTemplate` flag, the output is much more useful as it shows the device id and name and the total acknowledged alarms.
 
-```json title="Output"
+```sh title="Output"
 | deviceId      | deviceName      | totalAlarms |
 |---------------|-----------------|-------------|
 | 211732        | linux001        | 5           |
@@ -134,43 +134,23 @@ Request details about the request sent by the command.
 
 Response details included both the response (as a string), header values, and some additional meta information including statusCode, duration (in milliseconds).
 
-```sh
+```json
 {
   "body": "<response as a string>",
   "contentLength": 7905,
   "contentType": "application/vnd.com.nsn.cumulocity.managedobjectcollection+json;charset=UTF-8;ver=0.9",
   "duration": 86,
   "header": {
-    "Cache-Control": [
-      "no-cache, no-store, max-age=0, must-revalidate"
-    ],
-    "Connection": [
-      "keep-alive"
-    ],
-    "Content-Length": [
-      "7905"
-    ],
-    "Content-Type": [
-      "application/vnd.com.nsn.cumulocity.managedobjectcollection+json;charset=UTF-8;ver=0.9"
-    ],
-    "Date": [
-      "Sun, 04 Jun 2023 17:53:50 GMT"
-    ],
-    "Expires": [
-      "0"
-    ],
-    "Pragma": [
-      "no-cache"
-    ],
-    "Vary": [
-      "Accept-Encoding, User-Agent"
-    ],
-    "X-Content-Type-Options": [
-      "nosniff"
-    ],
-    "X-Frame-Options": [
-      "DENY"
-    ]
+    "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+    "Connection": "keep-alive",
+    "Content-Length": "7905",
+    "Content-Type": "application/vnd.com.nsn.cumulocity.managedobject+json;charset=UTF-8;ver=0.9",
+    "Date": "Sun, 04 Jun 2023 17:53:50 GMT",
+    "Expires": "0",
+    "Pragma": "no-cache",
+    "Vary": "Accept-Encoding, User-Agent",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY"
   },
   "proto": "HTTP/1.1",
   "status": "200 OK",
