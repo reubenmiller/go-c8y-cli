@@ -32,6 +32,7 @@ Update-Microservice
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
+	[-OutputTemplate <String>]
 	[-Proxy]
 	[-NoProxy]
 	[-Timeout <String>]
@@ -650,6 +651,21 @@ Accept wildcard characters: False
 
 ### -OutputFileRaw
 Save raw response to file (before select/view)
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OutputTemplate
+jsonnet template to apply to the output
 
 ```yaml
 Type: String
