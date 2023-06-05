@@ -67,6 +67,7 @@ Update a binary related to an event
   -o, --output string              Output format i.e. table, json, csv, csvheader (default "table")
       --outputFile string          Save JSON output to file (after select/view)
       --outputFileRaw string       Save raw response to file (before select/view)
+      --outputTemplate string      jsonnet template to apply to the output
   -p, --pageSize int               Maximum results per page (default 5)
       --progress                   Show progress bar. This will also disable any other verbose output
       --proxy string               Proxy setting, i.e. http://10.0.0.1:8080
