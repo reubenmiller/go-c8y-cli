@@ -652,6 +652,18 @@ func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
 	return u
 }
 
+func flattenArrayMap[K string, V []string](m map[K]V) map[K]any {
+	out := make(map[K]any)
+	for key, value := range m {
+		if len(value) == 1 {
+			out[key] = value[0]
+		} else {
+			out[key] = value
+		}
+	}
+	return out
+}
+
 func ExecuteTemplate(responseText []byte, resp *http.Response, input any, commonOptions config.CommonCommandOptions, duration time.Duration) ([]byte, error) {
 
 	outputBuilder := mapbuilder.NewInitializedMapBuilder(true)
@@ -666,6 +678,7 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 	requestData["host"] = resp.Request.URL.Host
 	requestData["url"] = resp.Request.URL.String()
 	requestData["query"] = tryUnescapeURL(resp.Request.URL.RawQuery)
+	requestData["queryParams"] = flattenArrayMap(resp.Request.URL.Query())
 	requestData["method"] = resp.Request.Method
 	// requestData["header"] = resp.Response.Request.Header
 	if err := outputBuilder.AddLocalTemplateVariable("request", requestData); err != nil {
@@ -679,7 +692,7 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 	responseData["duration"] = duration.Milliseconds()
 	responseData["contentLength"] = resp.ContentLength
 	responseData["contentType"] = resp.Header.Get("Content-Type")
-	responseData["header"] = resp.Header
+	responseData["header"] = flattenArrayMap(resp.Header)
 	responseData["proto"] = resp.Proto
 	responseData["body"] = string(responseText)
 	if err := outputBuilder.AddLocalTemplateVariable("response", responseData); err != nil {
