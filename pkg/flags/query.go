@@ -36,7 +36,7 @@ func (b *QueryTemplate) HasVariable(name string) bool {
 
 // GetQueryUnescape returns the unescaped query. User can choose whether iterators are evalulated or not
 func (b *QueryTemplate) GetQueryUnescape(ignoreIterators bool) (string, error) {
-	q, err := b.Execute(ignoreIterators)
+	q, _, err := b.Execute(ignoreIterators)
 	if err != nil {
 		return "", err
 	}
@@ -44,11 +44,12 @@ func (b *QueryTemplate) GetQueryUnescape(ignoreIterators bool) (string, error) {
 }
 
 // Execute evalulates the variables and returns a query parameters which can be used for rest requests
-func (b *QueryTemplate) Execute(ignoreIterators bool) (query url.Values, err error) {
+func (b *QueryTemplate) Execute(ignoreIterators bool) (query url.Values, input any, err error) {
 	query = url.Values{}
 	if b.templateVariables == nil {
-		return query, io.EOF
+		return query, nil, io.EOF
 	}
+	inputSet := false
 
 	for key, value := range b.templateVariables {
 
@@ -57,10 +58,17 @@ func (b *QueryTemplate) Execute(ignoreIterators bool) (query url.Values, err err
 		case iterator.Iterator:
 			// Unbound iterators are always evaluated!
 			if !v.IsBound() || (v.IsBound() && !ignoreIterators) {
-				bValue, _, err := v.GetNext()
+				bValue, curInput, err := v.GetNext()
 				if err != nil {
-					return query, err
+					return query, curInput, err
 				}
+
+				// Note: Favour bounded iterator values over unbound
+				if v.IsBound() || !inputSet {
+					input = curInput
+					inputSet = true
+				}
+
 				currentValue = string(bValue)
 			}
 
@@ -89,7 +97,7 @@ func (b *QueryTemplate) Execute(ignoreIterators bool) (query url.Values, err err
 // GetNext returns the next template path
 func (b *QueryTemplate) GetNext() ([]byte, interface{}, error) {
 	// output, err := b.GetQueryUnescape(false)
-	q, err := b.Execute(false)
+	q, input, err := b.Execute(false)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -99,7 +107,7 @@ func (b *QueryTemplate) GetNext() ([]byte, interface{}, error) {
 		return nil, nil, err
 	}
 
-	return []byte(output), q, err
+	return []byte(output), input, err
 }
 
 // IsBound return true if the iterator is bound

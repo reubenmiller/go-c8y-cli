@@ -202,6 +202,9 @@ const (
 	// SettingsOutputFormat Output format i.e. table, json, csv, csvheader
 	SettingsOutputFormat = "settings.defaults.output"
 
+	// SettingsOutputTemplate Output jsonnet template
+	SettingsOutputTemplate = "settings.defaults.outputTemplate"
+
 	// SettingsEncryptionEnabled enables encryption when storing sensitive session data
 	SettingsEncryptionEnabled = "settings.encryption.enabled"
 
@@ -352,9 +355,11 @@ type Config struct {
 
 	// private caching to improve performance
 	// by preventing expensive system calls for each iteration
-	outputFileRaw *string
-	outputFile    *string
-	commonOptions *CommonCommandOptions
+	outputFileRaw    *string
+	outputFile       *string
+	outputTemplate   *string
+	commonOptions    *CommonCommandOptions
+	templateResolver flags.Resolver
 }
 
 // NewConfig returns a new CLI configuration object
@@ -373,6 +378,10 @@ func NewConfig(v *viper.Viper) *Config {
 	c.prompter.Logger = c.Logger
 	c.bindSettings()
 	return c
+}
+
+func (c *Config) RegisterTemplateResolver(resolver flags.Resolver) {
+	c.templateResolver = resolver
 }
 
 // Option cli configuration option
@@ -1279,6 +1288,15 @@ func (c *Config) GetOutputFile() string {
 	return *c.outputFile
 }
 
+// GetOutputTemplate returns the output template to use when processing the output
+func (c *Config) GetOutputTemplate() string {
+	if c.outputTemplate == nil {
+		contents := flags.ResolveTemplate(c.viper.GetString(SettingsOutputTemplate), c.templateResolver)
+		c.outputTemplate = &contents
+	}
+	return *c.outputTemplate
+}
+
 // GetOutputFormat Get output format type, i.e. json, csv, table etc.
 func (c *Config) GetOutputFormat() OutputFormat {
 	if c.RawOutput() {
@@ -1473,9 +1491,17 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 		return *c.commonOptions, nil
 	}
 	options := CommonCommandOptions{
-		OutputFile:    c.GetOutputFile(),
-		OutputFileRaw: c.GetOutputFileRaw(),
+		OutputFile:     c.GetOutputFile(),
+		OutputFileRaw:  c.GetOutputFileRaw(),
+		OutputTemplate: c.GetOutputTemplate(),
 	}
+
+	// Store flag values for usage in the output template
+	commandFlags := make(map[string]string)
+	cmd.Flags().Visit(func(f *pflag.Flag) {
+		commandFlags[f.Name] = strings.Trim(f.Value.String(), "[]")
+	})
+	options.CommandFlags = commandFlags
 
 	// default return property from the raw response
 	options.ResultProperty = flags.GetCollectionPropertyFromAnnotation(cmd)

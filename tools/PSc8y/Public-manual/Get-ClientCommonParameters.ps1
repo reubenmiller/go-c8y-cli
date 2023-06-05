@@ -81,6 +81,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name Raw -Type "switch" -DPDictionary $Dictionary -HelpMessage "Show raw response. This mode will force output=json and view=off"
         New-DynamicParam -Name OutputFile -Type "string" -DPDictionary $Dictionary -HelpMessage "Save JSON output to file (after select/view)"
         New-DynamicParam -Name OutputFileRaw -Type "string" -DPDictionary $Dictionary -HelpMessage "Save raw response to file (before select/view)"
+        New-DynamicParam -Name OutputTemplate -Type "string" -DPDictionary $Dictionary -HelpMessage "jsonnet template to apply to the output"
         New-DynamicParam -Name Proxy -Type "switch" -DPDictionary $Dictionary -HelpMessage "Proxy setting, i.e. http://10.0.0.1:8080"
         New-DynamicParam -Name NoProxy -Type "switch" -DPDictionary $Dictionary -HelpMessage "Ignore the proxy settings"
         New-DynamicParam -Name Timeout -Type "string" -DPDictionary $Dictionary -HelpMessage "Request timeout. It accepts a duration, i.e. 1ms, 0.5s, 1m etc."

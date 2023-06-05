@@ -80,7 +80,7 @@ func NewWorker(log *logger.Logger, cfg *config.Config, iostream *iostreams.IOStr
 	}, nil
 }
 
-type RequestHandler func(requests []c8y.RequestOptions, commonOptions config.CommonCommandOptions) (*c8y.Response, error)
+type RequestHandler func(requests []c8y.RequestOptions, input any, commonOptions config.CommonCommandOptions) (*c8y.Response, error)
 
 type Worker struct {
 	config         *config.Config
@@ -133,6 +133,7 @@ type batchArgument struct {
 	id            int64
 	request       c8y.RequestOptions
 	commonOptions config.CommonCommandOptions
+	input         any
 	batchOptions  BatchOptions
 }
 
@@ -323,6 +324,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			jobs <- batchArgument{
 				id:            jobID,
 				batchOptions:  batchOptions,
+				input:         input,
 				request:       *request,
 				commonOptions: commonOptions,
 			}
@@ -429,7 +431,7 @@ func (w *Worker) batchWorker(id int, jobs <-chan batchArgument, results chan<- e
 		w.logger.Infof("worker %d: started job %d", id, job.id)
 		startTime := time.Now().UnixNano()
 
-		resp, err = w.requestHandler([]c8y.RequestOptions{job.request}, job.commonOptions)
+		resp, err = w.requestHandler([]c8y.RequestOptions{job.request}, job.input, job.commonOptions)
 
 		// Handle post request actions (only if original response was ok)
 		// and stop actions if an error is encountered

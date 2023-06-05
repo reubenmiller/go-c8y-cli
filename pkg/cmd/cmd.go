@@ -398,6 +398,10 @@ func Initialize() (*root.CmdRoot, error) {
 		return consoleHandler, nil
 	}
 	cmdFactory := factory.New(buildVersion, buildBranch, configFunc, clientFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
+
+	// Register the template resolver so the configuration can lookup values as needed
+	configHandler.RegisterTemplateResolver(cmdutil.NewTemplateResolver(cmdFactory))
+
 	rootCmd := root.NewCmdRoot(cmdFactory, buildVersion, "")
 
 	tableOptions := &console.TableOptions{

@@ -132,7 +132,7 @@ func (n *CmdGet) RunE(cmd *cobra.Command, args []string) error {
 		bootstrapCtx := context.WithValue(context.Background(), c8y.GetContextAuthTokenKey(), auth)
 
 		_, resp, err := client.Application.GetCurrentApplicationSubscriptions(bootstrapCtx)
-		if _, err := handler.ProcessResponse(resp, err, commonOptions); err != nil {
+		if _, err := handler.ProcessResponse(resp, err, nil, commonOptions); err != nil {
 			return err
 		}
 	}

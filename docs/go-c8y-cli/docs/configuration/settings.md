@@ -75,6 +75,7 @@ c8y settings list --select "**" --output json
     "output": "json",
     "outputfile": "",
     "outputfileraw": "",
+    "outputtemplate": "",
     "pagesize": 20,
     "progress": false,
     "proxy": "",

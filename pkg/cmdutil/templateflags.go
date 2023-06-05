@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/spf13/cobra"
@@ -83,6 +84,20 @@ func matchFilePath(paths []string, pattern string, extensions []string, ignoreDi
 	return names[0], nil
 }
 
+func (f *Factory) WithTemplateCompletion(flagName string) completion.Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			matches, err := f.ResolveTemplates("*"+toComplete+"*", false)
+
+			if err != nil {
+				return []string{"jsonnet"}, cobra.ShellCompDirectiveFilterFileExt
+			}
+			return matches, cobra.ShellCompDirectiveDefault
+		})
+		return cmd
+	}
+}
+
 // WithTemplateFlag add template flag with completion
 func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 	return func(cmd *cobra.Command) *cobra.Command {
@@ -93,16 +108,7 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 		cmd.Flags().String(flags.FlagDataTemplateName, "", "Body template")
 		cmd.Flags().StringArray(flags.FlagDataTemplateVariablesName, []string{}, "Body template variables")
 
-		_ = cmd.RegisterFlagCompletionFunc(flags.FlagDataTemplateName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-
-			matches, err := f.ResolveTemplates("*"+toComplete+"*", false)
-
-			if err != nil {
-				return []string{"jsonnet"}, cobra.ShellCompDirectiveFilterFileExt
-			}
-			return matches, cobra.ShellCompDirectiveDefault
-		})
-
+		f.WithTemplateCompletion(flags.FlagDataTemplateName)(cmd)
 		_ = cmd.RegisterFlagCompletionFunc(flags.FlagDataTemplateVariablesName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			templateFlag, err := cmd.Flags().GetString(flags.FlagDataTemplateName)
 			if err != nil {

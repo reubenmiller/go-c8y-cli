@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+    C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+    C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+    C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+
+
+tests:
+  It provides access to response and flags:
+    command: |
+      c8y devices get --id agent01 --outputTemplate "{output: output, request: request, response: response, flags: flags}"
+    exit-code: 0
+    stdout:
+      json:
+        flags.id: agent01
+        request.host: r/.+
+        request.method: GET
+        request.path: r//inventory/managedObjects/\d+$
+        request.query: ""
+        request.url: r/.+
+        response.body: r/.+
+        response.statusCode: '200'
+        output.id: r/^\d+$
+
+  It supports reading the output template from a file:
+    command: |
+      c8y devices get --id agent01 --outputTemplate manual/common/outputTemplate/template.jsonnet
+    exit-code: 0
+    stdout:
+      json:
+        flags.id: agent01
+
+  It supports table output:
+    command: |
+      c8y alarms count -n --outputTemplate "{input: input.value, output: output}" -o table | tee
+    exit-code: 0
+    stdout:
+      contains:
+        - "| input      | output     |"
+
+  It supports templates producing string output:
+    command: |
+      c8y devices get --id agent01 --outputTemplate "std.join(',',[output.id, output.name])"
+    exit-code: 0
+    stdout:
+      match-pattern: '^\d+,agent01$'
+
+  It sets input to null if no iteration values are used:
+    command: |
+      c8y devices list --outputTemplate 'input.value'
+    exit-code: 0
+    stdout:
+      exactly: |
+        null
+
+  It maps input.value to the object:
+    command: |
+      c8y devices list -p 1 | c8y alarms count --outputTemplate input.value --status ACKNOWLEDGED --dateFrom -10d
+    exit-code: 0
+    stdout:
+      json:
+        id: r/^\d+$
