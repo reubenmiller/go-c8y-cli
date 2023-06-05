@@ -75,6 +75,57 @@ With the usage of the `outputTemplate` flag, the output is much more useful as i
 | 219268        | linux005        | 3           |
 ```
 
+### Example: Getting number of alarms per device
+
+This is similar to the previous alarm count, however it differs slightly because it uses the paging statistics to get the total count instead of the count endpoint.
+
+<CodeExample>
+
+```bash
+c8y devices list \
+| c8y events list \
+    --withTotalPages \
+    --pageSize 1 \
+    --outputTemplate "input.value + output.statistics" \
+    --select id,name,totalPages
+```
+
+</CodeExample>
+
+
+```sh title="Output"
+| id          | name            | totalPages |
+|-------------|-----------------|------------|
+| 129203      | linux001        | 3          |
+| 105203      | linux002        | 1          |
+| 130313      | linux003        | 3          |
+| 130323      | linux004        | 8          |
+| 130311      | linux005        | 6          |
+```
+
+Now for an explanation about what is going on with the command as there are a few moving parts.
+
+Firstly the total number of events can be retrieved by using a combination of the `--withTotalPages` and `--pageSize 1` which tells Cumulocity to include the `.statistics.totalPages` data will contains the total number of events (since we set the page size to 1).
+
+Then, an output template is applied to the output which combines the piped device along with the statistics. We're doing a slightly lazy version which just merges the device object with the statistics object, as we'll be using a select flag to limit the amount of data.
+
+Finally, the `select` flag is used to only show the `id`, `name` and `totalPages` properties.
+
+Alternatively, an output template could have been used to reduce the data. The following command would also produce the same result.
+
+<CodeExample>
+
+```bash
+c8y devices list \
+| c8y events list \
+    --withTotalPages \
+    --pageSize 1 \
+    --outputTemplate "{id: input.value.id, name: input.value.name, totalPages: output.statistics.totalPages}"
+```
+
+</CodeExample>
+
+
 ## Variables
 
 The output template is very similar to the template engine, however it has a few extra variables which can be referenced when building the output. The following tables details which variables can be used.
@@ -89,7 +140,7 @@ The output template is very similar to the template engine, however it has a few
 |`input.value`|Current pipeline item|
 
 
-The fll
+To show off the variables and example of each, the following command was used:
 
 <CodeExample>
 
@@ -126,6 +177,9 @@ Request details about the request sent by the command.
   "path": "/inventory/managedObjects",
   "pathEncoded": "/inventory/managedObjects?q=%24filter%3D+%24orderby%3Dname",
   "query": "q=$filter= $orderby=name",
+  "queryParams": {
+    "q": "$filter=(name eq 'test*') $orderby=name"
+  },
   "url": "https://test-ci-runner01.latest.stage.c8y.io/inventory/managedObjects?q=%24filter%3D+%24orderby%3Dname"
 }
 ```
