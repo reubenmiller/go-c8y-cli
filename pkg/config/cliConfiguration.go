@@ -681,6 +681,7 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 	host := c.GetHost()
 	domain := c.GetDomain()
 	tenant := c.GetTenant()
+	c8yVersion := c.GetCumulocityVersion()
 	username := c.GetUsername()
 	password := c.MustGetPassword()
 	token := c.MustGetToken()
@@ -724,6 +725,7 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 		"C8Y_HOST":                 host,
 		"C8Y_DOMAIN":               domain,
 		"C8Y_TENANT":               tenant,
+		"C8Y_VERSION":              c8yVersion,
 		"C8Y_USER":                 username,
 		"C8Y_TOKEN":                token,
 		"C8Y_USERNAME":             username,
@@ -883,6 +885,16 @@ func (c *Config) MustGetToken() string {
 		c.Logger.Warningf("Could not decrypt token. %s", err)
 	}
 	return decryptedValue
+}
+
+// SetCumulocityVersion sets the Cumulocity version
+func (c *Config) SetCumulocityVersion(p string) {
+	c.Persistent.Set("version", p)
+}
+
+// GetCumulocityVersion gets Cumulocity version
+func (c *Config) GetCumulocityVersion() string {
+	return c.Persistent.GetString("version")
 }
 
 // SetPassword sets the password
@@ -1561,6 +1573,10 @@ func (c *Config) SaveClientConfig(client *c8y.Client) error {
 			c.SetToken(client.Token)
 		}
 		c.SetTenant(client.TenantName)
+
+		if client.Version != "" {
+			c.SetCumulocityVersion(client.Version)
+		}
 	}
 	return c.WritePersistentConfig()
 }
