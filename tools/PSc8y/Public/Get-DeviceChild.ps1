@@ -5,7 +5,7 @@ Function Get-DeviceChild {
 Get child
 
 .DESCRIPTION
-Get managed object child
+Get a child of a device
 
 .LINK
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_get

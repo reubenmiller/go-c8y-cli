@@ -33,7 +33,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get child asset collection",
-		Long:  `Get a collection of managedObjects child references`,
+		Long:  `Get a collection of child managedObject references`,
 		Example: heredoc.Doc(`
 $ c8y inventory assets list --id 12345
 Get a list of the child devices of an existing device

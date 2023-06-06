@@ -34,7 +34,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create child",
 		Long:  `Create a new managed object and assign it to an existing managed object as a child`,
 		Example: heredoc.Doc(`
-$ c8y inventory children create --id 12345 --data "custom.value=test" --global --childType addition
+$ c8y devices children create --id 12345 --data "custom.value=test" --global --childType addition
 Create a child addition and link it to an existing managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

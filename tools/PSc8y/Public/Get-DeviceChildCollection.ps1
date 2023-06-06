@@ -5,7 +5,7 @@ Function Get-DeviceChildCollection {
 Get child collection
 
 .DESCRIPTION
-Get a collection of managedObjects child
+Get a collection of child managedObjects
 
 .LINK
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_list

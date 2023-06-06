@@ -13,7 +13,7 @@ commands:
   - name: listChildAdditionCollection
     method: GET
     description: Get child addition collection
-    descriptionLong: Get a collection of managedObjects child additions
+    descriptionLong: Get a collection of managedObject child additions
     path: inventory/managedObjects/{id}/childAdditions
     accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json

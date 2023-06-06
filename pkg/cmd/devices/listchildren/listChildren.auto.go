@@ -33,7 +33,7 @@ func NewListChildrenCmd(f *cmdutil.Factory) *ListChildrenCmd {
 	cmd := &cobra.Command{
 		Use:    "listChildren",
 		Short:  "Get child device collection",
-		Long:   `Get a collection of managedObjects child references`,
+		Long:   `Get a collection of child managedObject references`,
 		Hidden: true,
 
 		Example: heredoc.Doc(`
