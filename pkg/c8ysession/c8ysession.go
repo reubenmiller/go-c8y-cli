@@ -23,6 +23,7 @@ type CumulocitySession struct {
 	// ID          string `json:"id"`
 	Host            string `json:"host"`
 	Tenant          string `json:"tenant"`
+	Version         string `json:"version"`
 	Username        string `json:"username"`
 	Password        string `json:"password"`
 	Token           string `json:"token"`
@@ -98,6 +99,9 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "host")), value(cfg.HideSensitiveInformationIfActive(client, session.Host)))
 	if session.Tenant != "" {
 		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "tenant")), value(cfg.HideSensitiveInformationIfActive(client, session.Tenant)))
+	}
+	if session.Version != "" {
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "version")), value(cfg.HideSensitiveInformationIfActive(client, session.Version)))
 	}
 	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(cfg.HideSensitiveInformationIfActive(client, session.Username)))
 	fmt.Fprintf(w, "\n")

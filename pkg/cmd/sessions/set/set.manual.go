@@ -200,6 +200,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		Path:     cfg.GetSessionFile(),
 		Host:     handler.C8Yclient.BaseURL.Host,
 		Tenant:   cfg.GetTenant(),
+		Version:  cfg.GetCumulocityVersion(),
 		Username: handler.C8Yclient.Username,
 	})
 
@@ -216,6 +217,10 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 
 func hasChanged(client *c8y.Client, cfg *config.Config) bool {
 	if client.TenantName != "" && client.TenantName != cfg.GetTenant() {
+		return true
+	}
+
+	if client.Version != "" && client.Version != cfg.GetCumulocityVersion() {
 		return true
 	}
 

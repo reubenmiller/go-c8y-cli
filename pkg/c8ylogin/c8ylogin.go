@@ -452,6 +452,15 @@ func (lh *LoginHandler) verify() {
 			lh.state <- LoginStateAuth
 			lh.Logger.Infof("Detected tenant: %s", tenant.Name)
 			lh.C8Yclient.TenantName = tenant.Name
+
+			// Get Cumulocity system version
+			if lh.C8Yclient.Version == "" {
+				if version, err := lh.C8Yclient.TenantOptions.GetVersion(context.Background()); err == nil {
+					lh.C8Yclient.Version = version
+				} else {
+					lh.Logger.Warnf("Could not get Cumulocity IoT System version. %s", err)
+				}
+			}
 		}
 		return err
 	})
