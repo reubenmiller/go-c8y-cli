@@ -10,7 +10,7 @@
       "name": "listChildCollection",
       "method": "GET",
       "description": "Get child collection",
-      "descriptionLong": "Get a collection of managedObjects child",
+      "descriptionLong": "Get a collection of child managedObjects",
       "path": "inventory/managedObjects/{id}/{childType}",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",

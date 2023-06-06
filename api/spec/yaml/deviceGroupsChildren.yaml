@@ -10,7 +10,7 @@ commands:
   - name: listChildCollection
     method: GET
     description: Get child collection
-    descriptionLong: Get a collection of managedObjects child
+    descriptionLong: Get a collection of child managedObjects
     path: inventory/managedObjects/{id}/{childType}
     accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
@@ -30,10 +30,10 @@ commands:
 
       go:
         - description: Get a list of the child additions of an existing managed object
-          command: c8y inventory children list --id 12345 --childType addition
+          command: c8y devicegroups children list --id 12345 --childType addition
 
         - description: Get a list of the child devices of an existing managed object
-          command: c8y inventory children list --id 12345 --childType device
+          command: c8y devicegroups children list --id 12345 --childType device
     pathParameters:
       - name: id
         type: devicegroup[]
@@ -100,7 +100,7 @@ commands:
             skipTest: true
         go:
           - description: Add a related managed object as a child to an existing managed object
-            command: c8y inventory children assign --id 12345 --child 6789 --childType addition
+            command: c8y devicegroups children assign --id 12345 --child 6789 --childType addition
     pathParameters:
       - name: id
         type: devicegroup[]
@@ -148,10 +148,10 @@ commands:
 
       go:
         - description: Unassign a child addition from a managed object
-          command: c8y inventory children unassign --id 12345 --child 22553 --childType addition
+          command: c8y devicegroups children unassign --id 12345 --child 22553 --childType addition
 
         - description: Unassign a child device from a managed object
-          command: c8y inventory children unassign --id 12345 --child 22553 --childType device
+          command: c8y devicegroups children unassign --id 12345 --child 22553 --childType device
     pathParameters:
       - name: id
         type: devicegroup[]
@@ -196,7 +196,7 @@ commands:
             skipTest: true
         go:
           - description: Create a child addition and link it to an existing managed object
-            command: c8y inventory children create --id 12345 --data "custom.value=test" --global --childType addition
+            command: c8y devicegroups children create --id 12345 --data "custom.value=test" --global --childType addition
             assertStdOut:
               json:
                 path: r//inventory/managedObjects/\d+/childAdditions$
@@ -252,7 +252,7 @@ commands:
             skipTest: true
         go:
           - description: Get an existing child addition reference
-            command: c8y inventory children get --id 12345 --child 12345 --childType addition
+            command: c8y devicegroups children get --id 12345 --child 12345 --childType addition
     pathParameters:
       - name: id
         type: devicegroup[]

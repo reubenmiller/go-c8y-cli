@@ -33,7 +33,7 @@ func NewListAssetsCmd(f *cmdutil.Factory) *ListAssetsCmd {
 	cmd := &cobra.Command{
 		Use:    "listAssets",
 		Short:  "Get child asset collection",
-		Long:   `Get a collection of managedObjects child references`,
+		Long:   `Get a collection of child managedObject references`,
 		Hidden: true,
 
 		Example: heredoc.Doc(`

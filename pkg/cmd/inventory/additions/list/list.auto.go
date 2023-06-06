@@ -33,7 +33,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get child addition collection",
-		Long:  `Get a collection of managedObjects child additions`,
+		Long:  `Get a collection of managedObject child additions`,
 		Example: heredoc.Doc(`
 $ c8y inventory additions list --id 12345
 Get a list of the child additions of an existing managed object

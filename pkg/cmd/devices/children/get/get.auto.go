@@ -33,9 +33,9 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get child",
-		Long:  `Get managed object child`,
+		Long:  `Get a child of a device`,
 		Example: heredoc.Doc(`
-$ c8y inventory children get --id 12345 --child 12345 --childType addition
+$ c8y devices children get --id 12345 --child 12345 --childType addition
 Get an existing child addition reference
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
