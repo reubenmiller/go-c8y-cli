@@ -133,7 +133,7 @@ func Test_QueryParameters(t *testing.T) {
 	)
 	assert.OK(t, err)
 
-	queryValue, err := query.Execute(false)
+	queryValue, _, err := query.Execute(false)
 	assert.OK(t, err)
 	assert.True(t, queryValue.Get("CountValue") == "2")
 	assert.True(t, queryValue.Get("editable") == "true")
