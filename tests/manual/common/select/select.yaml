@@ -106,7 +106,7 @@ tests:
 
   It filters and selects a subset of properties:
     command: |
-      c8y applications list --pageSize 100 --filter "name like cockpi*" --select id,name --compact
+      c8y applications list --pageSize 100 --type HOSTED --filter "name like cockpi*" --select id,name --compact
     stdout:
       line-count: 1
       json:
