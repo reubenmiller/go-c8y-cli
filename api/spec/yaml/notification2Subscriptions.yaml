@@ -116,10 +116,12 @@ commands:
 
       - name: apiFilter
         type: string[]
-        property: subscriptionFilter.apis
+        property: _apis
         validationSet:
           - "alarms"
+          - "alarmsWithChildren"
           - "events"
+          - "eventsWithChildren"
           - "managedobjects"
           - "measurements"
           - "operations"
@@ -127,8 +129,9 @@ commands:
         description: Filter notifications by api
 
       - name: typeFilter
-        type: string
-        property: subscriptionFilter.typeFilter
+        type: string[]
+        property: _typeFilters
+        value: "'%s'"
         description: The data needs to have the specified value in its type property to meet the filter criteria.
 
       - name: nonPersistent
@@ -141,6 +144,18 @@ commands:
     bodyRequiredKeys:
       - "context"
       - "subscription"
+    bodyTemplates:
+      - type: jsonnet
+        applyLast: true
+        template: |
+          {
+            'subscriptionFilter': {
+              [if std.length($._typeFilters) > 0 then 'typeFilter']: std.join(' or ', $._typeFilters),
+              [if std.length($._apis) > 0 then 'apis']: $._apis,
+            },
+            _typeFilters:: [],
+            _apis:: [],
+          }
 
   - name: getSubscription
     description: Get subscription

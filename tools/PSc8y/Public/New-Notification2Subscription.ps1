@@ -46,13 +46,13 @@ Create a new subscription to operations for a specific device
 
         # Filter notifications by api
         [Parameter()]
-        [ValidateSet('alarms','events','managedobjects','measurements','operations','*')]
+        [ValidateSet('alarms','alarmsWithChildren','events','eventsWithChildren','managedobjects','measurements','operations','*')]
         [string[]]
         $ApiFilter,
 
         # The data needs to have the specified value in its type property to meet the filter criteria.
         [Parameter()]
-        [string]
+        [string[]]
         $TypeFilter,
 
         # Indicates whether the messages for this subscription are persistent or non-persistent, meaning they can be lost if consumer is not connected. >= 1016.x

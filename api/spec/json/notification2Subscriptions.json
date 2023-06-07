@@ -148,10 +148,12 @@
         {
           "name": "apiFilter",
           "type": "string[]",
-          "property": "subscriptionFilter.apis",
+          "property": "_apis",
           "validationSet": [
             "alarms",
+            "alarmsWithChildren",
             "events",
+            "eventsWithChildren",
             "managedobjects",
             "measurements",
             "operations",
@@ -161,8 +163,9 @@
         },
         {
           "name": "typeFilter",
-          "type": "string",
-          "property": "subscriptionFilter.typeFilter",
+          "type": "string[]",
+          "property": "_typeFilters",
+          "value": "'%s'",
           "description": "The data needs to have the specified value in its type property to meet the filter criteria."
         },
         {
@@ -179,6 +182,13 @@
       "bodyRequiredKeys": [
         "context",
         "subscription"
+      ],
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": true,
+          "template": "{\n  'subscriptionFilter': {\n    [if std.length($._typeFilters) > 0 then 'typeFilter']: std.join(' or ', $._typeFilters),\n    [if std.length($._apis) > 0 then 'apis']: $._apis,\n  },\n  _typeFilters:: [],\n  _apis:: [],\n}\n"
+        }
       ]
     },
     {
