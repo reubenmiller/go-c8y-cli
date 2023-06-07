@@ -53,7 +53,12 @@ Create a new subscription to operations for a specific device
         # The data needs to have the specified value in its type property to meet the filter criteria.
         [Parameter()]
         [string]
-        $TypeFilter
+        $TypeFilter,
+
+        # Indicates whether the messages for this subscription are persistent or non-persistent, meaning they can be lost if consumer is not connected. >= 1016.x
+        [Parameter()]
+        [switch]
+        $NonPersistent
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template", "Collection"

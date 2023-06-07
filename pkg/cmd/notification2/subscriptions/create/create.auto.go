@@ -57,6 +57,7 @@ Create a subscription which groups all devices in a single subscription name
 	cmd.Flags().StringSlice("fragmentsToCopy", []string{""}, "Transforms the data to only include specified custom fragments. Each custom fragment is identified by a unique name. If nothing is specified here, the data is forwarded as-is.")
 	cmd.Flags().StringSlice("apiFilter", []string{""}, "Filter notifications by api")
 	cmd.Flags().String("typeFilter", "", "The data needs to have the specified value in its type property to meet the filter criteria.")
+	cmd.Flags().Bool("nonPersistent", false, "Indicates whether the messages for this subscription are persistent or non-persistent, meaning they can be lost if consumer is not connected. >= 1016.x")
 
 	completion.WithOptions(
 		cmd,
@@ -157,6 +158,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringSliceValues("fragmentsToCopy", "fragmentsToCopy", ""),
 		flags.WithStringSliceValues("apiFilter", "subscriptionFilter.apis", ""),
 		flags.WithStringValue("typeFilter", "subscriptionFilter.typeFilter"),
+		flags.WithBoolValue("nonPersistent", "nonPersistent", ""),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("context", "subscription"),

@@ -166,6 +166,11 @@
           "description": "The data needs to have the specified value in its type property to meet the filter criteria."
         },
         {
+          "name": "nonPersistent",
+          "type": "boolean",
+          "description": "Indicates whether the messages for this subscription are persistent or non-persistent, meaning they can be lost if consumer is not connected. >= 1016.x"
+        },
+        {
           "name": "data",
           "type": "json",
           "description": "Additional properties"
