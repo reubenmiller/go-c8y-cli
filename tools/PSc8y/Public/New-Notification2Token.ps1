@@ -38,11 +38,26 @@ Create a new token which is valid for 30 minutes
         [long]
         $ExpiresInMinutes,
 
-        # Subscription is shared amongst multiple subscribers
+        # Subscription is shared amongst multiple subscribers. >= 1016.x
         [Parameter()]
-        [ValidateSet('true','false')]
+        [switch]
+        $Shared,
+
+        # The subscription type. Currently the only supported type is notification .Other types may be added in future.
+        [Parameter()]
+        [ValidateSet('notification')]
         [string]
-        $Shared
+        $Type,
+
+        # If true, the token will be securely signed by the Cumulocity IoT platform. >= 1016.x
+        [Parameter()]
+        [switch]
+        $Signed,
+
+        # If true, indicates that the created token refers to the non-persistent variant of the named subscription. >= 1016.x
+        [Parameter()]
+        [switch]
+        $NonPersistent
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"

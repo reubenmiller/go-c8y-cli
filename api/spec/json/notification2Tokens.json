@@ -59,18 +59,38 @@
         },
         {
           "name": "shared",
+          "type": "boolean",
+          "description": "Subscription is shared amongst multiple subscribers. >= 1016.x"
+        },
+        {
+          "name": "type",
           "type": "string",
+          "description": "The subscription type. Currently the only supported type is notification .Other types may be added in future.",
           "validationSet": [
-            "true",
-            "false"
-          ],
-          "required": false,
-          "description": "Subscription is shared amongst multiple subscribers"
+            "notification"
+          ]
+        },
+        {
+          "name": "signed",
+          "type": "boolean",
+          "description": "If true, the token will be securely signed by the Cumulocity IoT platform. >= 1016.x"
+        },
+        {
+          "name": "nonPersistent",
+          "type": "boolean",
+          "description": "If true, indicates that the created token refers to the non-persistent variant of the named subscription. >= 1016.x"
         },
         {
           "name": "data",
           "type": "json",
           "description": "Additional properties."
+        }
+      ],
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "applyLast": false,
+          "template": "{subscriber: 'goc8ycli'}\n"
         }
       ],
       "bodyRequiredKeys": [
