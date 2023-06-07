@@ -32,7 +32,17 @@ Get existing subscriptions
         [Parameter()]
         [ValidateSet('mo','tenant')]
         [string]
-        $Context
+        $Context,
+
+        # The subscription name by which filtering will be done. >= 1016.x
+        [Parameter()]
+        [string]
+        $Subscription,
+
+        # The type used to filter subscriptions. This will check the subscription's subscriptionFilter.typeFilter field. >= 1016.x
+        [Parameter()]
+        [string]
+        $TypeFilter
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

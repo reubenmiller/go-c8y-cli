@@ -48,6 +48,14 @@ commands:
           - "tenant"
         description: The context to which the subscription is associated.
 
+      - name: subscription
+        type: string
+        description: The subscription name by which filtering will be done. >= 1016.x
+
+      - name: typeFilter
+        type: string
+        description: The type used to filter subscriptions. This will check the subscription's subscriptionFilter.typeFilter field. >= 1016.x
+
   - name: createSubscription
     method: POST
     path: notification2/subscriptions
