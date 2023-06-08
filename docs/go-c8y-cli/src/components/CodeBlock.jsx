@@ -86,6 +86,11 @@ const c8yCommands = {
     'c8y microservices disable': 'Disable-Microservice',
     'c8y microservices getBootstrapUser': 'Get-MicroserviceBootstrapUser',
 
+    // notification2
+    'c8y notification2 subscriptions create': 'New-Notification2Subscription',
+    'c8y notification2 subscriptions subscribe': 'Watch-Notification2Subscription',
+    'c8y notification2 tokens create': 'New-Notification2Token',
+
     'c8y template execute': 'Invoke-Template',
     
     'c8y sessions create': 'New-Session',
