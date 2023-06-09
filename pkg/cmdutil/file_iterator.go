@@ -20,7 +20,8 @@ type FileIteratorOptions struct {
 	DelayBefore     time.Duration
 	Delay           time.Duration
 	RandomDelayFunc flags.DurationGenerator
-	Format          func(string, int64) string
+	OutputFunc      func([]byte) error
+	Format          func([]byte, int64) []byte
 }
 
 func ExecuteFileIterator(w io.Writer, log *logger.Logger, files []string, iterFactory func(string) (iterator.Iterator, error), opt FileIteratorOptions) error {
@@ -33,7 +34,7 @@ func ExecuteFileIterator(w io.Writer, log *logger.Logger, files []string, iterFa
 		opt.RandomDelayFunc = func(d time.Duration) time.Duration { return opt.Delay }
 	}
 
-	outputFormatter := func(v string, rowNum int64) string {
+	outputFormatter := func(v []byte, rowNum int64) []byte {
 		return v
 	}
 	if opt.Format != nil {
@@ -80,7 +81,13 @@ func ExecuteFileIterator(w io.Writer, log *logger.Logger, files []string, iterFa
 					time.Sleep(opt.DelayBefore)
 				}
 
-				fmt.Fprintln(w, outputFormatter(string(responseText), outputCount))
+				if opt.OutputFunc != nil {
+					if err := opt.OutputFunc(outputFormatter(responseText, outputCount)); err != nil {
+						return err
+					}
+				} else {
+					fmt.Fprintln(w, outputFormatter(responseText, outputCount))
+				}
 
 				currentDelay := opt.RandomDelayFunc(opt.Delay)
 				if currentDelay > 0 {

@@ -49,8 +49,8 @@ func NewCmdFromCsv(f *cmdutil.Factory) *CmdRepeatCsvFile {
 			$ c8y util repeatcsv *.csv
 			Convert multiple csv files
 
-			$ c8y util repeatcsv input.csv --columns custom1,custom2,custom3
-			Convert csv input using custom header
+			$ c8y util repeatcsv input-without-header-row.csv --columns custom1,custom2,custom3 --noHeader
+			Convert csv file which does not have a header row. Manually define the names of the columns
 		`),
 		Args: cobra.MinimumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -60,8 +60,8 @@ func NewCmdFromCsv(f *cmdutil.Factory) *CmdRepeatCsvFile {
 	}
 
 	cmd.Flags().StringVar(&ccmd.delimiter, "delimiter", "", "Field delimiter. It will be auto detected by default.")
-	cmd.Flags().BoolVar(&ccmd.noHeader, "noHeader", false, "Input data does not have a header row")
-	cmd.Flags().StringSliceVar(&ccmd.columns, "columns", []string{}, "Columns")
+	cmd.Flags().BoolVar(&ccmd.noHeader, "noHeader", false, "Input data does not have a header row. Treat the first row as a data row")
+	cmd.Flags().StringSliceVar(&ccmd.columns, "columns", []string{}, "Manually define the headers/columns used in the csv file")
 	cmd.Flags().Int64Var(&ccmd.first, "first", 0, "only include first x lines. 0 = all lines")
 	cmd.Flags().String("randomDelayMin", "0ms", "random minimum delay after each request, i.e. 5ms, 1.2s. It must be less than randomDelayMax. 0 = disabled")
 	cmd.Flags().String("randomDelayMax", "0ms", "random maximum delay after each request, i.e. 5ms, 1.2s. It must be larger than randomDelayMin. 0 = disabled.")
@@ -114,6 +114,13 @@ func (n *CmdRepeatCsvFile) newTemplate(cmd *cobra.Command, args []string) error 
 		return iterator.NewCSVFileContentsIterator(path, n.delimiter, n.HasHeader(), n.columns)
 	}
 
+	outputHandler := func(output []byte) error {
+		if err := n.factory.WriteJSONToConsole(cfg, cmd, "", output); err != nil {
+			cfg.Logger.Warnf("Could not process line. only json lines are accepted. %s", err)
+		}
+		return nil
+	}
+
 	return cmdutil.ExecuteFileIterator(n.GetCommand().OutOrStdout(), cfg.Logger, files, iterFactory, cmdutil.FileIteratorOptions{
 		Infinite:        n.infinite,
 		Times:           n.times,
@@ -121,6 +128,7 @@ func (n *CmdRepeatCsvFile) newTemplate(cmd *cobra.Command, args []string) error 
 		RandomSkip:      n.randomSkip,
 		RandomDelayFunc: randomDelayFunc,
 		Delay:           delay,
+		OutputFunc:      outputHandler,
 		DelayBefore:     delayBefore,
 	})
 }

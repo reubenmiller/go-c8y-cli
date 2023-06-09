@@ -37,7 +37,6 @@ func (i *CSVFileContentsIterator) DetectDelimiter() (rune, error) {
 	choices = append(choices, []byte(","))
 	choices = append(choices, []byte("\t"))
 	choices = append(choices, []byte(";"))
-	choices = append(choices, []byte(":"))
 
 	maxCount := 0
 	matchIdx := 0

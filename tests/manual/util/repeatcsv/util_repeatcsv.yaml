@@ -49,3 +49,19 @@ tests:
             # Let's assume at least 1 line will match be skipped and not all will be skipped
             line-count-min: 1
             line-count-max: 19
+
+    It supports combining select and filters on the output:
+        command: |
+            c8y util repeatcsv ./manual/util/repeatcsv/input.20rows.csv --select text --filter 'text match row[0-9]$'
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"text":"row1"}
+                {"text":"row2"}
+                {"text":"row3"}
+                {"text":"row4"}
+                {"text":"row5"}
+                {"text":"row6"}
+                {"text":"row7"}
+                {"text":"row8"}
+                {"text":"row9"}
