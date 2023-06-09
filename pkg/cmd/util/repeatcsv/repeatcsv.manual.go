@@ -118,6 +118,7 @@ func (n *CmdRepeatCsvFile) newTemplate(cmd *cobra.Command, args []string) error 
 		Infinite:        n.infinite,
 		Times:           n.times,
 		FirstNRows:      n.first,
+		RandomSkip:      n.randomSkip,
 		RandomDelayFunc: randomDelayFunc,
 		Delay:           delay,
 		DelayBefore:     delayBefore,

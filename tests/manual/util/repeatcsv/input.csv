@@ -1,0 +1,4 @@
+time,text,disabled,threshold,other
+1000,"hello "world",false,12.123,null
+1000,"hello world",false,12.123,null
+1000,"hello world"
