@@ -216,7 +216,12 @@ func getFloatParameter(parameters []interface{}, i int) float64 {
 
 func getStringParameter(parameters []interface{}, i int) string {
 	if len(parameters) > 0 && i < len(parameters) {
-		return fmt.Sprintf("%v", parameters[i])
+		switch v := parameters[i].(type) {
+		case float64, float32:
+			return fmt.Sprintf("%f", v)
+		default:
+			return fmt.Sprintf("%v", parameters[i])
+		}
 	}
 	return ""
 }
@@ -226,8 +231,8 @@ var customJSONNetFunctions = []string{
 	`GetURLPath: std.native("GetURLPath")`,
 	`GetURLHost: std.native("GetURLHost")`,
 	`Password: function(length=32) std.native("Password")(length)`,
-	`Now: function(offset='0s') std.native("Now")(offset)`,
-	`NowNano: function(offset='0s') std.native("NowNano")(offset)`,
+	`Now: function(offset='0s') std.native("Now")(std.toString(offset))`,
+	`NowNano: function(offset='0s') std.native("NowNano")(std.toString(offset))`,
 	`Bool: std.native("Bool")`,
 	`Float: function(max=1,min=0,precision=4) std.native("Float")(max,min,precision)`,
 	`Int: function(max=100,min=0) std.native("Int")(max,min)`,

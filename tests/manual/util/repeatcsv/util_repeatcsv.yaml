@@ -1,0 +1,83 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+tests:
+    It iterates over multiple files:
+        command: |
+            c8y util repeatcsv ./manual/util/repeatcsv/input.csv ./manual/util/repeatcsv/input.tsv
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"disabled":false,"other":null,"text":"hello \"world","threshold":12.123,"time":1000}
+                {"disabled":false,"other":null,"text":"hello world","threshold":12.123,"time":1000}
+                {"disabled":null,"other":null,"text":"hello world","threshold":null,"time":1000}
+                {"disabled":12.123,"other":null,"text":"hello world false","threshold":null,"time":true}
+                {"disabled":null,"other":null,"text":"hello world","threshold":null,"time":2}
+                {"disabled":12.123,"other":null,"text":"hello world false","threshold":null,"time":3}
+    
+    It detects the tsv delimiter:
+        command: |
+            c8y util repeatcsv ./manual/util/repeatcsv/input.tsv
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"disabled":12.123,"other":null,"text":"hello world false","threshold":null,"time":true}
+                {"disabled":null,"other":null,"text":"hello world","threshold":null,"time":2}
+                {"disabled":12.123,"other":null,"text":"hello world false","threshold":null,"time":3}
+
+    It detects the csv delimiter:
+        command: |
+            c8y util repeatcsv ./manual/util/repeatcsv/input.csv
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"disabled":false,"other":null,"text":"hello \"world","threshold":12.123,"time":1000}
+                {"disabled":false,"other":null,"text":"hello world","threshold":12.123,"time":1000}
+                {"disabled":null,"other":null,"text":"hello world","threshold":null,"time":1000}
+
+    It iterates over file contents until first x lines are met:
+        command: |
+            c8y util repeatcsv ./manual/util/repeatcsv/input.csv --infinite --first 2
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"disabled":false,"other":null,"text":"hello \"world","threshold":12.123,"time":1000}
+                {"disabled":false,"other":null,"text":"hello world","threshold":12.123,"time":1000}
+
+    It iterates over file contents randomly skipping lines:
+        command: |
+            c8y util repeatcsv ./manual/util/repeatcsv/input.20rows.csv --randomSkip 0.5
+        exit-code: 0
+        stdout:
+            # Let's assume at least 1 line will match be skipped and not all will be skipped
+            line-count-min: 1
+            line-count-max: 19
+
+    It supports combining select and filters on the output:
+        command: |
+            c8y util repeatcsv ./manual/util/repeatcsv/input.20rows.csv --select text --filter 'text match row[0-9]$'
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"text":"row1"}
+                {"text":"row2"}
+                {"text":"row3"}
+                {"text":"row4"}
+                {"text":"row5"}
+                {"text":"row6"}
+                {"text":"row7"}
+                {"text":"row8"}
+                {"text":"row9"}
+
+    It supports combining with output commands:
+        command: |
+            c8y util repeatcsv ./manual/util/repeatcsv/machine_events.csv \
+            | c8y events create \
+                --template "{time: _.Now(input.value.timestamp), text: input.value.text, type: 'machine_CustomEvent'}" \
+                --device 12345 \
+                --dry --dryFormat json | c8y util show --select 'body,!body.time' -o json -c
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"body":{"source":{"id":"12345"},"text":"Alarm Reset drücken AKTIV<br>Alarm Rücktür AAA offen AKTIV","type":"machine_CustomEvent"}}
+                {"body":{"source":{"id":"12345"},"text":"Alarm Reset drücken INAKTIV<br>Alarm Rücktür AAA offen INAKTIV","type":"machine_CustomEvent"}}
+                {"body":{"source":{"id":"12345"},"text":"Alarm Reset drücken GELÖSCHT<br>Alarm Rücktür AAA offen GELÖSCHT","type":"machine_CustomEvent"}}
+                {"body":{"source":{"id":"12345"},"text":"Alarm Sattelheizung1: Stoppen aktiv AKTIV","type":"machine_CustomEvent"}}
