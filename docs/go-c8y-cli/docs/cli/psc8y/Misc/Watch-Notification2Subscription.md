@@ -1,36 +1,30 @@
 ---
-category: Devices
+category: Misc
 external help file: PSc8y-help.xml
-id: Get-DeviceGroupChildCollection
+id: Watch-Notification2Subscription
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_children_list
+online version: https://goc8ycli.netlify.app/docs/cli/c8y/notification2/subscriptions/c8y_notification2_subscriptions_subscribe/
 schema: 2.0.0
-slug: /docs/cli/psc8y/Devices/get-devicegroupchildcollection
-title: Get-DeviceGroupChildCollection
+slug: /docs/cli/psc8y/Misc/watch-notification2subscription
+title: Watch-Notification2Subscription
 ---
 
 
 
 ## SYNOPSIS
-Get child collection
+Subscribe to a subscription
 
 ## SYNTAX
 
 ```
-Get-DeviceGroupChildCollection
-	[-Id] <Object[]>
-	[-ChildType] <String>
-	[[-Query] <String>]
-	[[-QueryTemplate] <String>]
-	[[-OrderBy] <String>]
-	[-WithChildren]
-	[-WithChildrenCount]
-	[-PageSize <Int32>]
-	[-WithTotalPages]
-	[-WithTotalElements]
-	[-CurrentPage <Int32>]
-	[-TotalPages <Int32>]
-	[-IncludeAll]
+Watch-Notification2Subscription
+	[[-Name] <String>]
+	[[-Token] <String>]
+	[[-Subscriber] <String>]
+	[[-Consumer] <String>]
+	[[-ActionTypes] <String[]>]
+	[[-Duration] <String>]
+	[[-ExpiresInMinutes] <Int32>]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -78,59 +72,76 @@ Get-DeviceGroupChildCollection
 ```
 
 ## DESCRIPTION
-Get a collection of child managedObjects
+Subscribe to an existing subscription.
+If no token is provided, a token will be created automatically before starting the realtime client
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-DeviceGroupChildCollection -Id 12345 -ChildType addition
+Watch-Notification2Subscription -Name registration
 ```
 
-Get a list of the child additions of an existing managed object
+Start listening to a subscription name registration
 
 ### EXAMPLE 2
 ```
-Get-ManagedObject -Id 12345 | Get-DeviceGroupChildCollection -ChildType addition
+Watch-Notification2Subscription -Name registration -ActionTypes CREATE -ActionTypes UPDATE
 ```
 
-Get a list of the child additions of an existing managed object (using pipeline)
+Start listening to a subscription name registration but only include CREATE and UPDATE action types (ignoring DELETE)
+
+### EXAMPLE 3
+```
+Watch-Notification2Subscription -Name registration -Duration 10min
+```
+
+Subscribe to a subscription for 10mins then exit
+
+### EXAMPLE 4
+```
+Watch-Notification2Subscription -Name registration -Token "ey123123123123"
+```
+
+Subscribe using a given token (instead of generating a token)
 
 ## PARAMETERS
 
-### -Id
-Managed object id.
-(required)
-
-```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
-Accept wildcard characters: False
-```
-
-### -ChildType
-Child relationship type (required)
+### -Name
+The subscription name.
+Each subscription is identified by a unique name within a specific context
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Token
+Token for the subscription.
+If not provided, then a token will be created
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
 Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Query
-Additional query filter
+### -Subscriber
+The subscriber name which the client wishes to be identified with.
+Defaults to goc8ycli
 
 ```yaml
 Type: String
@@ -144,9 +155,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -QueryTemplate
-String template to be used when applying the given query.
-Use %s to reference the query/pipeline input
+### -Consumer
+Consumer name.
+Required for shared subscriptions
 
 ```yaml
 Type: String
@@ -160,13 +171,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -OrderBy
-Order by.
-e.g.
-_id asc or name asc or creationTime.date desc
+### -ActionTypes
+Only listen for specific action types, CREATE, UPDATE or DELETE (client side filtering)
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
@@ -177,33 +186,32 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WithChildren
-Determines if children with ID and name should be returned when fetching the managed object.
-Set it to false to improve query performance.
+### -Duration
+Subscription duration
 
 ```yaml
-Type: SwitchParameter
+Type: String
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
-Default value: False
+Position: 6
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WithChildrenCount
-When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
+### -ExpiresInMinutes
+Token expiration duration
 
 ```yaml
-Type: SwitchParameter
+Type: Int32
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
-Default value: False
+Position: 7
+Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -320,21 +328,6 @@ Custom confirmation text
 
 ```yaml
 Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -CurrentPage
-Current page which should be returned
-
-```yaml
-Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -493,21 +486,6 @@ Accept wildcard characters: False
 
 ### -Help
 Show command help
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -IncludeAll
-Include all results by iterating through each page
 
 ```yaml
 Type: SwitchParameter
@@ -703,21 +681,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -PageSize
-Maximum results per page
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Progress
 Show progress bar.
 This will also disable any other verbose output
@@ -877,21 +840,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TotalPages
-Total number of pages to get
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -View
 Use views when displaying data on the terminal.
 Disable using --view off
@@ -910,36 +858,6 @@ Accept wildcard characters: False
 
 ### -WithError
 Errors will be printed on stdout instead of stderr
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithTotalElements
-Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithTotalPages
-Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
 
 ```yaml
 Type: SwitchParameter
@@ -980,5 +898,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_children_list](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_children_list)
+[https://goc8ycli.netlify.app/docs/cli/c8y/notification2/subscriptions/c8y_notification2_subscriptions_subscribe/](https://goc8ycli.netlify.app/docs/cli/c8y/notification2/subscriptions/c8y_notification2_subscriptions_subscribe/)
 

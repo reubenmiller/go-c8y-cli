@@ -78,7 +78,7 @@ Get-DeviceChildCollection
 ```
 
 ## DESCRIPTION
-Get a collection of managedObjects child
+Get a collection of child managedObjects
 
 ## EXAMPLES
 

@@ -20,6 +20,8 @@ Get subscription collection
 Get-Notification2SubscriptionCollection
 	[[-Device] <Object[]>]
 	[[-Context] <String>]
+	[[-Subscription] <String>]
+	[[-TypeFilter] <String>]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-WithTotalElements]
@@ -111,6 +113,39 @@ Aliases:
 
 Required: False
 Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Subscription
+The subscription name by which filtering will be done.
+\>= 1016.x
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TypeFilter
+The type used to filter subscriptions.
+This will check the subscription's subscriptionFilter.typeFilter field.
+\>= 1016.x
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

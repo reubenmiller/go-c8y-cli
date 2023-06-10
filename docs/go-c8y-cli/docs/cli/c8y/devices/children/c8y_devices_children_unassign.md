@@ -15,10 +15,10 @@ c8y devices children unassign [flags]
 ### Examples
 
 ```
-$ c8y inventory children unassign --id 12345 --child 22553 --childType addition
+$ c8y devices children unassign --id 12345 --child 22553 --childType addition
 Unassign a child addition from a managed object
 
-$ c8y inventory children unassign --id 12345 --child 22553 --childType device
+$ c8y devices children unassign --id 12345 --child 22553 --childType device
 Unassign a child device from a managed object
         
 ```

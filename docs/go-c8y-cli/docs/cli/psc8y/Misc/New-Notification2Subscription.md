@@ -23,7 +23,8 @@ New-Notification2Subscription
 	[[-Context] <String>]
 	[[-FragmentsToCopy] <String[]>]
 	[[-ApiFilter] <String[]>]
-	[[-TypeFilter] <String>]
+	[[-TypeFilter] <String[]>]
+	[-NonPersistent]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -178,13 +179,29 @@ Accept wildcard characters: False
 The data needs to have the specified value in its type property to meet the filter criteria.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 6
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NonPersistent
+Indicates whether the messages for this subscription are persistent or non-persistent, meaning they can be lost if consumer is not connected.
+\>= 1016.x
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

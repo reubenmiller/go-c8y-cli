@@ -15,7 +15,7 @@ c8y devices children assign [flags]
 ### Examples
 
 ```
-$ c8y inventory children assign --id 12345 --child 6789 --childType addition
+$ c8y devices children assign --id 12345 --child 6789 --childType addition
 Add a related managed object as a child to an existing managed object
         
 ```

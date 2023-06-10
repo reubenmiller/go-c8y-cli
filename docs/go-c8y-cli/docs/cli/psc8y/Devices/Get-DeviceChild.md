@@ -68,7 +68,7 @@ Get-DeviceChild
 ```
 
 ## DESCRIPTION
-Get managed object child
+Get a child of a device
 
 ## EXAMPLES
 

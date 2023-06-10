@@ -1,43 +1,46 @@
 ---
-category: tokens
-title: c8y notification2 tokens create
+category: util
+title: c8y util repeatcsv
 ---
-Create a token
+Iterate over csv files and convert them to json lines
 
 ### Synopsis
 
-Create a token to use for subscribing to notifications
+Generic utility to iterate over csv files and transform them into newline delimited json objects
+which can be piped to other commands.
+
 
 ```
-c8y notification2 tokens create [flags]
+c8y util repeatcsv <FILE> [...FILE] [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y notification2 tokens create --name testSubscription --subscriber testSubscriber --expiresInMinutes 1440
-Create a new token for a subscription which is valid for 1 day
+$ c8y util repeatcsv input.csv
+Convert the input.csv to json
 
-$ c8y notification2 tokens create --name testSubscription --subscriber testSubscriber --expiresInMinutes 30
-Create a new token which is valid for 30 minutes
-        
+$ c8y util repeatcsv *.csv
+Convert multiple csv files
+
+$ c8y util repeatcsv input-without-header-row.csv --columns custom1,custom2,custom3 --noHeader
+Convert csv file which does not have a header row. Manually define the names of the columns
+
 ```
 
 ### Options
 
 ```
-  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --expiresInMinutes int       The token expiration duration. (default 1440)
-  -h, --help                       help for create
-      --name string                The subscription name. This value must match the same that was used when the subscription was created.
-      --nonPersistent              If true, indicates that the created token refers to the non-persistent variant of the named subscription. >= 1016.x
-      --processingMode string      Cumulocity processing mode
-      --shared                     Subscription is shared amongst multiple subscribers. >= 1016.x
-      --signed                     If true, the token will be securely signed by the Cumulocity IoT platform. >= 1016.x
-      --subscriber string          The subscriber name which the client wishes to be identified with. (accepts pipeline)
-      --template string            Body template
-      --templateVars stringArray   Body template variables
-      --type string                The subscription type. Currently the only supported type is notification .Other types may be added in future.
+      --columns strings         Manually define the headers/columns used in the csv file
+      --delimiter string        Field delimiter. It will be auto detected by default.
+      --first int               only include first x lines. 0 = all lines
+  -h, --help                    help for repeatcsv
+      --infinite                Repeat forever. You will need to ctrl-c it to stop it
+      --noHeader                Input data does not have a header row. Treat the first row as a data row
+      --randomDelayMax string   random maximum delay after each request, i.e. 5ms, 1.2s. It must be larger than randomDelayMin. 0 = disabled. (default "0ms")
+      --randomDelayMin string   random minimum delay after each request, i.e. 5ms, 1.2s. It must be less than randomDelayMax. 0 = disabled (default "0ms")
+      --randomSkip float32      randomly skip line based on a percentage, probability as a float: 0 to 1, 1 = always skip, 0 = never skip, -1 = disabled (default -1)
+      --times int               number of times to repeat the input (default 1)
 ```
 
 ### Options inherited from parent commands

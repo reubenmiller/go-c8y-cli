@@ -15,7 +15,7 @@ c8y devicegroups children get [flags]
 ### Examples
 
 ```
-$ c8y inventory children get --id 12345 --child 12345 --childType addition
+$ c8y devicegroups children get --id 12345 --child 12345 --childType addition
 Get an existing child addition reference
         
 ```
