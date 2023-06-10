@@ -15,7 +15,7 @@ c8y devices children create [flags]
 ### Examples
 
 ```
-$ c8y inventory children create --id 12345 --data "custom.value=test" --global --childType addition
+$ c8y devices children create --id 12345 --data "custom.value=test" --global --childType addition
 Create a child addition and link it to an existing managed object
         
 ```

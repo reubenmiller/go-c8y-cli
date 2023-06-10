@@ -6,7 +6,7 @@ Get child collection
 
 ### Synopsis
 
-Get a collection of managedObjects child
+Get a collection of child managedObjects
 
 ```
 c8y inventory children list [flags]

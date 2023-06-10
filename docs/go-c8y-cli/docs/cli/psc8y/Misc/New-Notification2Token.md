@@ -21,7 +21,10 @@ New-Notification2Token
 	[[-Subscriber] <Object[]>]
 	[[-Name] <String>]
 	[[-ExpiresInMinutes] <Int64>]
-	[[-Shared] <String>]
+	[-Shared]
+	[[-Type] <String>]
+	[-Signed]
+	[-NonPersistent]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -135,7 +138,24 @@ Accept wildcard characters: False
 ```
 
 ### -Shared
-Subscription is shared amongst multiple subscribers
+Subscription is shared amongst multiple subscribers.
+\>= 1016.x
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Type
+The subscription type.
+Currently the only supported type is notification .Other types may be added in future.
 
 ```yaml
 Type: String
@@ -145,6 +165,38 @@ Aliases:
 Required: False
 Position: 4
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Signed
+If true, the token will be securely signed by the Cumulocity IoT platform.
+\>= 1016.x
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NonPersistent
+If true, indicates that the created token refers to the non-persistent variant of the named subscription.
+\>= 1016.x
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

@@ -6,7 +6,7 @@ Get child collection
 
 ### Synopsis
 
-Get a collection of managedObjects child
+Get a collection of child managedObjects
 
 ```
 c8y devices children list [flags]
@@ -15,10 +15,10 @@ c8y devices children list [flags]
 ### Examples
 
 ```
-$ c8y inventory children list --id 12345 --childType addition
+$ c8y devices children list --id 12345 --childType addition
 Get a list of the child additions of an existing managed object
 
-$ c8y inventory children list --id 12345 --childType device
+$ c8y devices children list --id 12345 --childType device
 Get a list of the child devices of an existing managed object
         
 ```

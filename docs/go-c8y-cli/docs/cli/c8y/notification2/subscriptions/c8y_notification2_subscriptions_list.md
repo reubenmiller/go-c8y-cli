@@ -29,9 +29,11 @@ Get all subscriptions related to a specific source
 ### Options
 
 ```
-      --context string   The context to which the subscription is associated.
-      --device strings   The managed object ID to which the subscription is associated. (accepts pipeline)
-  -h, --help             help for list
+      --context string        The context to which the subscription is associated.
+      --device strings        The managed object ID to which the subscription is associated. (accepts pipeline)
+  -h, --help                  help for list
+      --subscription string   The subscription name by which filtering will be done. >= 1016.x
+      --typeFilter string     The type used to filter subscriptions. This will check the subscription's subscriptionFilter.typeFilter field. >= 1016.x
 ```
 
 ### Options inherited from parent commands

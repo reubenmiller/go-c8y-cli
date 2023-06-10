@@ -25,9 +25,6 @@ Start listening to a subscription name registration but only include CREATE and 
 $ c8y notification2 subscriptions subscribe --name registration --duration 10min
 Subscribe to a subscription for 10mins then exit
 
-$ c8y notification2 subscriptions subscribe --name registration --duration 10min
-Subscribe to a subscription for 10mins then exit
-
 $ c8y notification2 subscriptions create --name registration --context tenant --apiFilter managedobjects
 $ c8y notification2 subscriptions subscribe --name registration --consumer client01
 Create a subscription to all managed objects and subscribe to notifications

@@ -36,10 +36,11 @@ Create a subscription which groups all devices in a single subscription name
       --fragmentsToCopy strings    Transforms the data to only include specified custom fragments. Each custom fragment is identified by a unique name. If nothing is specified here, the data is forwarded as-is.
   -h, --help                       help for create
       --name string                The subscription name. Each subscription is identified by a unique name within a specific context.
+      --nonPersistent              Indicates whether the messages for this subscription are persistent or non-persistent, meaning they can be lost if consumer is not connected. >= 1016.x
       --processingMode string      Cumulocity processing mode
       --template string            Body template
       --templateVars stringArray   Body template variables
-      --typeFilter string          The data needs to have the specified value in its type property to meet the filter criteria.
+      --typeFilter strings         The data needs to have the specified value in its type property to meet the filter criteria.
 ```
 
 ### Options inherited from parent commands
