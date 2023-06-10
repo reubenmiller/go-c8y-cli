@@ -216,7 +216,12 @@ func getFloatParameter(parameters []interface{}, i int) float64 {
 
 func getStringParameter(parameters []interface{}, i int) string {
 	if len(parameters) > 0 && i < len(parameters) {
-		return fmt.Sprintf("%v", parameters[i])
+		switch v := parameters[i].(type) {
+		case float64, float32:
+			return fmt.Sprintf("%f", v)
+		default:
+			return fmt.Sprintf("%v", parameters[i])
+		}
 	}
 	return ""
 }
