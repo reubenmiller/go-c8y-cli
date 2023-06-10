@@ -61,7 +61,7 @@ Create a Cumulocity IoT event for each for from a csv file.
 
     However the input data needs to be shaped before the events can be created. We will use the `template` flag to shape the data into the required format. Since we are still defining the correct template, we will limit the amount of csv rows that are processed by using the `--first 1` flag until we get the template correct.
 
-    <CodeExample>
+    <CodeExample transform="false">
     
     ```bash
     c8y util repeatcsv machine_events.csv --first 1 \
@@ -69,6 +69,22 @@ Create a Cumulocity IoT event for each for from a csv file.
         --template "{time: _.Now(input.value.timestamp), text: input.value.text, type: 'machine_CustomEvent'}" \
         --device 12345 \
         --dry
+    ```
+
+    ```powershell
+    c8y util repeatcsv machine_events.csv --first 1 `
+    | c8y events create `
+        --template "{time: _.Now(input.value.timestamp), text: input.value.text, type: 'machine_CustomEvent'}" `
+        --device 12345 `
+        --dry
+    ```
+
+    ```powershell
+    c8y util repeatcsv machine_events.csv --first 1 `
+    | New-Event `
+        -Template "{time: _.Now(input.value.timestamp), text: input.value.text, type: 'machine_CustomEvent'}" `
+        -Device 12345 `
+        -Dry
     ```
 
     </CodeExample>
