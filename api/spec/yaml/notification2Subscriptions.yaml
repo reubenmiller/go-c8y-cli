@@ -48,6 +48,14 @@ commands:
           - "tenant"
         description: The context to which the subscription is associated.
 
+      - name: subscription
+        type: string
+        description: The subscription name by which filtering will be done. >= 1016.x
+
+      - name: typeFilter
+        type: string
+        description: The type used to filter subscriptions. This will check the subscription's subscriptionFilter.typeFilter field. >= 1016.x
+
   - name: createSubscription
     method: POST
     path: notification2/subscriptions
@@ -108,10 +116,12 @@ commands:
 
       - name: apiFilter
         type: string[]
-        property: subscriptionFilter.apis
+        property: _apis
         validationSet:
           - "alarms"
+          - "alarmsWithChildren"
           - "events"
+          - "eventsWithChildren"
           - "managedobjects"
           - "measurements"
           - "operations"
@@ -119,9 +129,14 @@ commands:
         description: Filter notifications by api
 
       - name: typeFilter
-        type: string
-        property: subscriptionFilter.typeFilter
+        type: string[]
+        property: _typeFilters
+        value: "'%s'"
         description: The data needs to have the specified value in its type property to meet the filter criteria.
+
+      - name: nonPersistent
+        type: boolean
+        description: Indicates whether the messages for this subscription are persistent or non-persistent, meaning they can be lost if consumer is not connected. >= 1016.x
 
       - name: data
         type: json
@@ -129,6 +144,18 @@ commands:
     bodyRequiredKeys:
       - "context"
       - "subscription"
+    bodyTemplates:
+      - type: jsonnet
+        applyLast: true
+        template: |
+          {
+            'subscriptionFilter': {
+              [if std.length($._typeFilters) > 0 then 'typeFilter']: std.join(' or ', $._typeFilters),
+              [if std.length($._apis) > 0 then 'apis']: $._apis,
+            },
+            _typeFilters:: [],
+            _apis:: [],
+          }
 
   - name: getSubscription
     description: Get subscription

@@ -56,14 +56,15 @@ Create a subscription which groups all devices in a single subscription name
 	cmd.Flags().String("context", "", "The context to which the subscription is associated.")
 	cmd.Flags().StringSlice("fragmentsToCopy", []string{""}, "Transforms the data to only include specified custom fragments. Each custom fragment is identified by a unique name. If nothing is specified here, the data is forwarded as-is.")
 	cmd.Flags().StringSlice("apiFilter", []string{""}, "Filter notifications by api")
-	cmd.Flags().String("typeFilter", "", "The data needs to have the specified value in its type property to meet the filter criteria.")
+	cmd.Flags().StringSlice("typeFilter", []string{""}, "The data needs to have the specified value in its type property to meet the filter criteria.")
+	cmd.Flags().Bool("nonPersistent", false, "Indicates whether the messages for this subscription are persistent or non-persistent, meaning they can be lost if consumer is not connected. >= 1016.x")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithNotification2SubscriptionName("name", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithValidateSet("context", "mo", "tenant"),
-		completion.WithValidateSet("apiFilter", "alarms", "events", "managedobjects", "measurements", "operations", "*"),
+		completion.WithValidateSet("apiFilter", "alarms", "alarmsWithChildren", "events", "eventsWithChildren", "managedobjects", "measurements", "operations", "*"),
 	)
 
 	flags.WithOptions(
@@ -155,8 +156,19 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "subscription"),
 		flags.WithStringValue("context", "context"),
 		flags.WithStringSliceValues("fragmentsToCopy", "fragmentsToCopy", ""),
-		flags.WithStringSliceValues("apiFilter", "subscriptionFilter.apis", ""),
-		flags.WithStringValue("typeFilter", "subscriptionFilter.typeFilter"),
+		flags.WithStringSliceValues("apiFilter", "_apis", ""),
+		flags.WithStringSliceValues("typeFilter", "_typeFilters", "'%s'"),
+		flags.WithBoolValue("nonPersistent", "nonPersistent", ""),
+		flags.WithRequiredTemplateString(`
+{
+  'subscriptionFilter': {
+    [if std.length($._typeFilters) > 0 then 'typeFilter']: std.join(' or ', $._typeFilters),
+    [if std.length($._apis) > 0 then 'apis']: $._apis,
+  },
+  _typeFilters:: [],
+  _apis:: [],
+}
+`),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("context", "subscription"),

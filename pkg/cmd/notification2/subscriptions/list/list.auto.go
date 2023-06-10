@@ -54,6 +54,8 @@ Get all subscriptions related to a specific source
 
 	cmd.Flags().StringSlice("device", []string{""}, "The managed object ID to which the subscription is associated. (accepts pipeline)")
 	cmd.Flags().String("context", "", "The context to which the subscription is associated.")
+	cmd.Flags().String("subscription", "", "The subscription name by which filtering will be done. >= 1016.x")
+	cmd.Flags().String("typeFilter", "", "The type used to filter subscriptions. This will check the subscription's subscriptionFilter.typeFilter field. >= 1016.x")
 
 	completion.WithOptions(
 		cmd,
@@ -106,6 +108,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "source"),
 		flags.WithStringValue("context", "context"),
+		flags.WithStringValue("subscription", "subscription"),
+		flags.WithStringValue("typeFilter", "typeFilter"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -411,6 +411,7 @@ FunctionsToExport = @(
 	'Watch-ManagedObject',
 	'Watch-Measurement',
 	'Watch-Notification',
+	'Watch-Notification2Subscription',
 	'Watch-NotificationChannel',
 	'Watch-Operation')
 # VariablesToExport = '*'

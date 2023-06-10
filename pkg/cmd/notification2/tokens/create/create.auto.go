@@ -50,12 +50,15 @@ Create a new token which is valid for 30 minutes
 	cmd.Flags().String("subscriber", "", "The subscriber name which the client wishes to be identified with. (accepts pipeline)")
 	cmd.Flags().String("name", "", "The subscription name. This value must match the same that was used when the subscription was created.")
 	cmd.Flags().Int("expiresInMinutes", 1440, "The token expiration duration.")
-	cmd.Flags().String("shared", "", "Subscription is shared amongst multiple subscribers")
+	cmd.Flags().Bool("shared", false, "Subscription is shared amongst multiple subscribers. >= 1016.x")
+	cmd.Flags().String("type", "", "The subscription type. Currently the only supported type is notification .Other types may be added in future.")
+	cmd.Flags().Bool("signed", false, "If true, the token will be securely signed by the Cumulocity IoT platform. >= 1016.x")
+	cmd.Flags().Bool("nonPersistent", false, "If true, indicates that the created token refers to the non-persistent variant of the named subscription. >= 1016.x")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithNotification2SubscriptionName("name", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("shared", "true", "false"),
+		completion.WithValidateSet("type", "notification"),
 	)
 
 	flags.WithOptions(
@@ -146,7 +149,13 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("subscriber", "subscriber"),
 		flags.WithStringValue("name", "subscription"),
 		flags.WithIntValue("expiresInMinutes", "expiresInMinutes"),
-		flags.WithStringValue("shared", "shared"),
+		flags.WithBoolValue("shared", "shared", ""),
+		flags.WithStringValue("type", "type"),
+		flags.WithBoolValue("signed", "signed", ""),
+		flags.WithBoolValue("nonPersistent", "nonPersistent", ""),
+		flags.WithDefaultTemplateString(`
+{subscriber: 'goc8ycli'}
+`),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("subscriber", "subscription"),
