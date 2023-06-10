@@ -49,6 +49,12 @@ const c8yCommands = {
     'c8y devices delete': 'Remove-Device',
     'c8y devices setRequiredAvailability': 'Set-DeviceRequiredAvailability',
 
+    'c8y agents create': 'New-Agent',
+    'c8y agents list': 'Get-AgentCollection',
+    'c8y agents get': 'Get-Agent',
+    'c8y agents update': 'Update-Agent',
+    'c8y agents delete': 'Remove-Agent',
+
     'c8y inventory create': 'New-ManagedObject',
     'c8y inventory get': 'Get-ManagedObject',
     'c8y inventory update': 'Update-ManagedObject',
