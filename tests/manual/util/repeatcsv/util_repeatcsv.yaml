@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
 tests:
     It iterates over multiple files:
         command: |
@@ -65,3 +66,18 @@ tests:
                 {"text":"row7"}
                 {"text":"row8"}
                 {"text":"row9"}
+
+    It supports combining with output commands:
+        command: |
+            c8y util repeatcsv ./manual/util/repeatcsv/machine_events.csv \
+            | c8y events create \
+                --template "{time: _.Now(input.value.timestamp), text: input.value.text, type: 'machine_CustomEvent'}" \
+                --device 12345 \
+                --dry --dryFormat json | c8y util show --select body -o json -c
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"body":{"source":{"id":"12345"},"text":"Alarm Reset drücken AKTIV<br>Alarm Rücktür AAA offen AKTIV","time":"2023-06-10T12:00:00.000+02:00","type":"machine_CustomEvent"}}
+                {"body":{"source":{"id":"12345"},"text":"Alarm Reset drücken INAKTIV<br>Alarm Rücktür AAA offen INAKTIV","time":"2023-06-10T12:10:00.000+02:00","type":"machine_CustomEvent"}}
+                {"body":{"source":{"id":"12345"},"text":"Alarm Reset drücken GELÖSCHT<br>Alarm Rücktür AAA offen GELÖSCHT","time":"2023-06-10T12:20:00.000+02:00","type":"machine_CustomEvent"}}
+                {"body":{"source":{"id":"12345"},"text":"Alarm Sattelheizung1: Stoppen aktiv AKTIV","time":"2023-06-10T12:30:00.000+02:00","type":"machine_CustomEvent"}}
