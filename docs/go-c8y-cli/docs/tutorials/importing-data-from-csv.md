@@ -4,7 +4,7 @@ title: Importing data from csv
 
 import CodeExample from '@site/src/components/CodeExample';
 
-### Example: Import data from csv
+### Example: Create events from each for of data from a csv file
 
 **Scenario**
 
