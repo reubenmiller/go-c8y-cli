@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -188,6 +189,22 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 			return out, nil
 		},
 	})
+
+	vm.NativeFunction(&_jsonnet.NativeFunction{
+		Name:   "ReplacePattern",
+		Params: ast.Identifiers{"value", "from", "to"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			value := getStringParameter(parameters, 0)
+			from := getStringParameter(parameters, 1)
+			to := getStringParameter(parameters, 2)
+
+			pattern, err := regexp.Compile(from)
+			if err != nil {
+				return "", err
+			}
+			return pattern.ReplaceAllString(value, to), nil
+		},
+	})
 }
 
 func getIntParameter(parameters []interface{}, i int) int64 {
@@ -241,7 +258,6 @@ var customJSONNetFunctions = []string{
 	`Digit: function(max=16) std.native("Digit")(max)`,
 	`AlphaNumeric: function(max=16) std.native("AlphaNumeric")(max)`,
 	`StripKeys: function(value={}) value + {lastUpdated::'','self'::'',creationTime::'',additionParents::'',assetParents::'',childAdditions::'',childAssets::'',childDevices::'',deviceParents::''}`,
-	`Get: function(key, value={}, defaultValue={}) if std.type(value) == "object" && std.objectHas(value, key) then {[key]: value[key]} else {[key]: defaultValue}`,
 	`Merge: function(key, a={}, b={}) _.Get(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b}`,
 }
 
@@ -250,7 +266,50 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	vm := jsonnet.MakeVM()
 	registerNativeFuntions(vm)
 
-	jsonnetImport := "\n" + "local _ = {" + strings.Join(customJSONNetFunctions, ",") + "};" + imports
+	// Add functions via jsonnet object
+	localFunctions := `
+	{
+		Get(o, f, default)::
+			local get_(o, ks) =
+				if ! std.objectHas(o, ks[0]) then
+					default
+				else if std.length(ks) == 1 then
+					o[ks[0]]
+				else
+					get_(o[ks[0]], ks[1:]);
+
+			get_(o, std.split(f, '.')),
+
+		Has(o, f)::
+			local has_(o, ks) =
+				if ! std.objectHas(o, ks[0]) then
+					false
+				else if std.length(ks) == 1 then
+					true
+				else
+					has_(o[ks[0]], ks[1:]);
+			has_(o, std.split(f, '.')),
+
+		RecurseReplace(any, from, to)::
+			local recurseReplace_(any, from, to) = (
+				{
+				object: function(x) { [k]: recurseReplace_(x[k], from, to) for k in std.objectFields(x) },
+				array: function(x) [recurseReplace_(e, from, to) for e in x],
+				string: function(x) std.native('ReplacePattern')(x, from, to),
+				#string: function(x) std.strReplace(x, from, to),
+				number: function(x) x,
+				boolean: function(x) x,
+				'function': function(x) x,
+				'null': function(x) x,
+				}[std.type(any)](any)
+			);
+			recurseReplace_(any, from, to),
+
+		ReplacePattern(x, from, to):: std.native('ReplacePattern')(x, from, to),
+	}
+	`
+
+	jsonnetImport := "\n" + "local _ = {" + strings.Join(customJSONNetFunctions, ",") + "}" + localFunctions + "";" + imports
 
 	jsonnetImport += `
 // output
