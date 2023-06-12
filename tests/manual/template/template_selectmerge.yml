@@ -1,0 +1,99 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# Merge function
+tests:
+
+  It selects a root fragment:
+    command: |
+      c8y template execute --template "{name:'peter',nestedProp: {inputList:['existingValue'], othervalue: 'somevalue'}}" |
+      c8y template execute --template "_.Select(input.value, 'nestedProp', {})" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "nestedProp": {
+            "inputList": ["existingValue"],
+            "othervalue": "somevalue"
+          }
+        }
+  
+  It selects a root fragment and uses a default value when it does not exist:
+    command: |
+      c8y template execute --template "{name:'peter'}" |
+      c8y template execute --template "_.Select(input.value, 'nestedProp', {custom: 'values'})" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "nestedProp": {
+            "custom": "values"
+          }
+        }
+
+  It merges values array values:
+    command: |
+      c8y template execute --template "{nestedProp: {inputList:['existingValue'], othervalue: 'somevalue'}}" |
+      c8y template execute --template "_.SelectMerge(input.value, {nestedProp: {inputList+: ['newValue']}})" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "nestedProp": {
+            "inputList": ["existingValue", "newValue"],
+            "othervalue": "somevalue"
+          }
+        }
+  
+  It merges values array values with any empty initial value:
+    command: |
+      c8y template execute --template "{}" |
+      c8y template execute --template "_.SelectMerge(input.value, {nestedProp: {inputList+: ['newValue']}})" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "nestedProp": {
+            "inputList": ["newValue"]
+          }
+        }
+
+  It merges arrays when array is immediate key:
+    command: |
+      c8y template execute --template "{c8y_SupportedOperations:[]}" |
+      c8y template execute --template "_.SelectMerge(input.value, {c8y_SupportedOperations: ['newValue']})" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "c8y_SupportedOperations": ["newValue"]
+        }
+  
+  It merges an array when existing value does not exist:
+    command: |
+      c8y template execute --template "{}" |
+      c8y template execute --template "_.SelectMerge(input.value, {c8y_SupportedOperations: ['newValue']})" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "c8y_SupportedOperations": ["newValue"]
+        }
+  
+  It removes a nested fragment:
+    command: |
+      c8y template execute --template "{c8y_Model:{serialNumber:'123456789', otherValue: 'example'}}" |
+      c8y template execute --template "_.SelectMerge(input.value, {c8y_Model: {otherValue:: null}})" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "c8y_Model": {
+            "serialNumber": "123456789"
+          }
+        }

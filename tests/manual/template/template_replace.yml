@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  RecurseReplace replaces all strings fields based on a regex pattern:
+    command: |
+      c8y template execute --template "{nestedProp:{othervalue: 1, url:'https://helloworld.com'}}" |
+        c8y devices update --id 0 --dry --dryFormat json --template "_.RecurseReplace(input.value, 'https://.*.com', 'https://anotherworld.com')" |
+        c8y util show --select body --compact=false
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "nestedProp": {
+              "othervalue": 1,
+              "url": "https://anotherworld.com"
+            }
+          }
+        }
