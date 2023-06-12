@@ -18,8 +18,10 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/google/go-jsonnet"
 	"github.com/google/go-jsonnet/ast"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flatten"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/randdata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
@@ -206,6 +208,54 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 			return pattern.ReplaceAllString(value, to), nil
 		},
 	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Select",
+		Params: ast.Identifiers{"o", "properties"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			// Provide a function which uses the same style as the
+			// global --select flag
+			if len(parameters) < 2 {
+				return nil, fmt.Errorf("requires 2 arguments")
+			}
+
+			jsonB, err := json.Marshal(parameters[0])
+			if err != nil {
+				return nil, err
+			}
+			patterns := []string{}
+			switch properties := parameters[1].(type) {
+			case []any:
+				for _, v := range properties {
+					patterns = append(patterns, fmt.Sprintf("%v", v))
+				}
+			case string:
+				// Support people providing a csv string list
+				for _, v := range strings.Split(properties, ",") {
+					patterns = append(patterns, strings.TrimSpace(v))
+				}
+			}
+
+			if len(patterns) == 0 {
+				return parameters[0], fmt.Errorf("no select values provided")
+			}
+
+			flatMap, flatKeys, err := jsonfilter.FilterPropertyByWildcard(string(jsonB), "", patterns, false)
+			if err != nil {
+				return nil, err
+			}
+			outB, err := flatten.UnflattenOrdered(flatMap, flatKeys)
+			if err != nil {
+				return nil, err
+			}
+
+			var out any
+			if err := json.Unmarshal(outB, &out); err != nil {
+				return nil, err
+			}
+			return out, nil
+		},
+	})
 }
 
 func getIntParameter(parameters []interface{}, i int) int64 {
@@ -244,6 +294,13 @@ func getStringParameter(parameters []interface{}, i int) string {
 	return ""
 }
 
+func getParameter(parameters []interface{}, i int) any {
+	if len(parameters) > 0 && i < len(parameters) {
+		return parameters[i]
+	}
+	return nil
+}
+
 func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	// Create a JSonnet VM
 	vm := jsonnet.MakeVM()
@@ -269,7 +326,6 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		# TODO: Deprecate Merge=>SelectMerge and Get => Select
 		Merge(key, a={}, b={}):: _.Get(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b},
 		Get(key, o={}, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
-		Select(o={}, key, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
 		SelectMerge(a={}, b={})::
 			local _keys = std.objectFields(b);
 			if std.length(_keys) == 0 then
@@ -318,6 +374,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 			);
 			recurseReplace_(any, from, to),
 		ReplacePattern(x, from, to):: std.native('ReplacePattern')(x, from, to),
+		Select(o, properties=['*']):: std.native('Select')(o, properties),
 	}`)
 
 	jsonnetImport := fmt.Sprintf("\nlocal _ = %s; %s", localFunctions, imports)

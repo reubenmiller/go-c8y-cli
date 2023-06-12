@@ -1,36 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
 # Merge function
 tests:
-
-  It selects a root fragment:
-    command: |
-      c8y template execute --template "{name:'peter',nestedProp: {inputList:['existingValue'], othervalue: 'somevalue'}}" |
-      c8y template execute --template "_.Select(input.value, 'nestedProp', {})" --compact=false
-
-    exit-code: 0
-    stdout:
-      exactly: |
-        {
-          "nestedProp": {
-            "inputList": ["existingValue"],
-            "othervalue": "somevalue"
-          }
-        }
-  
-  It selects a root fragment and uses a default value when it does not exist:
-    command: |
-      c8y template execute --template "{name:'peter'}" |
-      c8y template execute --template "_.Select(input.value, 'nestedProp', {custom: 'values'})" --compact=false
-
-    exit-code: 0
-    stdout:
-      exactly: |
-        {
-          "nestedProp": {
-            "custom": "values"
-          }
-        }
-
   It merges values array values:
     command: |
       c8y template execute --template "{nestedProp: {inputList:['existingValue'], othervalue: 'somevalue'}}" |
