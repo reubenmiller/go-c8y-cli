@@ -130,7 +130,7 @@ c8y cache delete --age 1h
 
 ## Checking if a response is cached or not
 
-The cac
+You can check if a command is cached or not by using the verbose flag (e.g. `-v`). However it should also be fairly obvious if a command is cached as returning a cached response generally takes less than 5 milliseconds, where as any server interaction takes about 10 times longer (depending on the api call).
 
 ```sh
 c8y devices list --cache -v
