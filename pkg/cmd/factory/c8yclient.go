@@ -29,7 +29,7 @@ var EnvCumulocityHostNames = []string{
 func GetHostFromEnvironment() string {
 	var value = ""
 	for _, name := range EnvCumulocityHostNames {
-		value = os.Getenv(name)
+		value = strings.TrimSpace(os.Getenv(name))
 		if value != "" {
 			break
 		}
@@ -146,6 +146,14 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 
 		if domain := cfg.GetDomain(); domain != "" {
 			client.SetDomain(domain)
+		}
+
+		if client == nil {
+			return nil, fmt.Errorf("failed to create client")
+		}
+
+		if client.BaseURL == nil {
+			return nil, fmt.Errorf("invalid client url")
 		}
 
 		client.SetRequestOptions(c8y.DefaultRequestOptions{
