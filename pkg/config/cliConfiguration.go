@@ -562,7 +562,7 @@ func (c *Config) GetTenant() string {
 
 // GetHost returns the Cumulocity host URL
 func (c *Config) GetHost() string {
-	return c.viper.GetString("host")
+	return strings.TrimSpace(c.viper.GetString("host"))
 }
 
 // GetDomain gets the custom Cumulocity domain for cases where it differs from the Host

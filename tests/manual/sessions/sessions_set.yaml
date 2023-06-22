@@ -183,3 +183,25 @@ tests:
     stdout:
       exactly: |
         {"defaults":{"pagesize":110},"includeall":{"pagesize":202}}
+
+  It does not panic when the url is only contains whitespace:
+    config:
+      env:
+        C8Y_HOST: ' '
+        C8Y_URL: ''
+        C8Y_BASEURL: ''
+        C8Y_SESSION: ''
+        C8Y_USER: ''
+        C8Y_USERNAME: ''
+        C8Y_TENANT: ''
+        C8Y_TOKEN: ''
+        C8Y_PASSWORD: ''
+      inherit-env: false
+    command: |
+      c8y devices list
+    exit-code: 102
+    stderr:
+      not-contains:
+        - panic
+      contains:
+        - A c8y session has not been loaded. Please create or activate a session and try again
