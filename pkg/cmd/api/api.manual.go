@@ -16,6 +16,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
+	_url "github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -56,6 +57,13 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 
 			$ c8y api GET "/alarm/alarms&status=ACTIVE" --pageSize 10
 			Get a list of alarms with custom query parameters
+
+			$ c8y api GET "/dosomething" --host localhost:8080
+			Send a GET request to a custom hosted service running on localhost port 8080. You can force https or http by adding them as a prefix to the host.
+
+			$ c8y api GET "/dosomething" --host $C8Y_HOST/service/mymicroservice --dry
+			Send a request to a microservice hosted in the cloud. The /dosomething will be appended to the /service/mymicroservice path provided by the host flag.
+			Results in the following request: GET /service/mymicroservice/dosomething sent to the  current session URL.
 
 			$ c8y api GET "/alarm/alarms&status=ACTIVE" --pageSize 1 --withTotalPages
 			Get a total ACTIVE alarms
@@ -160,6 +168,19 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		uri = args[1]
 	}
 
+	var host string
+	var fixedPathPrefix string
+	if n.flagHost != "" {
+		u, err := _url.ParseURL(n.flagHost)
+		if err != nil {
+			return err
+		}
+		host = fmt.Sprintf("%s://%s", u.Scheme, u.Host)
+		if u.Path != "" {
+			fixedPathPrefix = u.Path
+		}
+	}
+
 	// path parameters
 	urlTemplate := "{url}"
 	if uri != "" {
@@ -174,7 +195,12 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		urlTemplate = strings.Replace(urlTemplate, "%s", "{url}", -1)
 	}
 
-	path := flags.NewStringTemplate(urlTemplate)
+	var path *flags.StringTemplate
+	if fixedPathPrefix == "" {
+		path = flags.NewStringTemplate(urlTemplate)
+	} else {
+		path = flags.NewStringTemplate(fixedPathPrefix + "/" + strings.TrimLeft(urlTemplate, "/"))
+	}
 
 	// set a default uri to prevent unresolved template variables when
 	// stdin is not being used
@@ -255,11 +281,6 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 
 	if err != nil {
 		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	var host string
-	if n.flagHost != "" {
-		host = n.flagHost
 	}
 
 	// Get base path without query parameter (for when an iterator is not used)
