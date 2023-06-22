@@ -217,3 +217,43 @@ tests:
       command: |
         c8y api POST /inventory/managedObjects --data name=test --select id,name --dry=false | c8y inventory delete
       exit-code: 0
+
+  It supports a custom host flag without scheme:
+      command: |
+        c8y api --url "/inventory" --host localhost/service --dry
+      exit-code: 0
+      stdout:
+          json:
+              method: GET
+              path: /service/inventory
+              host: https://localhost
+
+  It supports a custom host flag with only port number:
+      command: |
+        c8y api --url "/inventory" --host localhost:80/service --dry
+      exit-code: 0
+      stdout:
+          json:
+              method: GET
+              path: /service/inventory
+              host: http://localhost
+  
+  It supports a custom host flag with 443 port:
+      command: |
+        c8y api --url "/inventory" --host localhost:443/service --dry
+      exit-code: 0
+      stdout:
+          json:
+              method: GET
+              path: /service/inventory
+              host: https://localhost
+
+  It supports a custom host flag with custom url with schema and port:
+      command: |
+        c8y api --url "/inventory" --host https://localhost:8080/service --dry
+      exit-code: 0
+      stdout:
+          json:
+              method: GET
+              path: /service/inventory
+              host: https://localhost:8080
