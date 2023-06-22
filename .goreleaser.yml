@@ -98,7 +98,7 @@ nfpms:
     license: MIT
     maintainer: Reuben Miller <reuben.d.miller@gmail.com>
     homepage: http://goc8ycli.netlify.app
-    bindir: /usr/local
+    bindir: /usr
     description: Cumulocity's unofficial command line tool
     section: utils
     priority: optional
@@ -122,7 +122,7 @@ nfpms:
         dst: /etc/bash_completion.d/c8y
       
       - src: ./output/zsh/_c8y
-        dst: /usr/local/share/zsh/site-functions/_c8y
+        dst: /usr/share/zsh/site-functions/_c8y
       
       - src: ./output/fish/c8y.fish
         dst: /usr/share/fish/vendor_completions.d/c8y.fish
