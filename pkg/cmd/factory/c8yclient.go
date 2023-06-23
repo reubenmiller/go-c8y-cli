@@ -203,6 +203,17 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 				client.Realtime.SetXSRFToken(client.GetXSRFToken())
 			}
 		}
+
+		if client.TenantName == "" {
+			// Set the tenant either from token, or by looking it up as the tenant is required for a lot of API calls
+			log.Debug("Looking up tenant name as it is not set (it is required by some API)")
+			client.TenantName = client.GetTenantName()
+
+			if client.TenantName == "" {
+				log.Warn("Failed to lookup tenant name. API calls which require the tenant name will not work!")
+			}
+		}
+
 		return client, nil
 	}
 }
