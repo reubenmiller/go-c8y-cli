@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/matcher"
@@ -21,7 +22,7 @@ func NewUserGroupFetcher(factory *cmdutil.Factory) *UserGroupFetcher {
 
 func (f *UserGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	group, resp, err := f.Client().User.GetGroup(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 	)
 
@@ -40,7 +41,7 @@ func (f *UserGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 func (f *UserGroupFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	groups, _, err := f.Client().User.GetGroups(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		&c8y.GroupOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(2000),
 		},

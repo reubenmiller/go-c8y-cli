@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
@@ -21,7 +22,7 @@ func NewChildAdditionFetcher(client *c8y.Client, parentID string) *ChildAddition
 
 func (f *ChildAdditionFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	mo, resp, err := f.client.Inventory.GetManagedObject(
-		WithDisabledDryRunContext(f.client),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 		nil,
 	)
@@ -45,7 +46,7 @@ func (f *ChildAdditionFetcher) getByName(name string) ([]fetcherResultSet, error
 		query = f.Query(name)
 	}
 	mcol, _, err := f.client.Inventory.GetChildAdditions(
-		WithDisabledDryRunContext(f.client),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		f.parentID,
 		&c8y.ManagedObjectOptions{
 			Query:             query,

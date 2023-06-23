@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -22,7 +23,7 @@ func NewSmartGroupFetcher(factory *cmdutil.Factory) *SmartGroupFetcher {
 
 func (f *SmartGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	mo, resp, err := f.Client().Inventory.GetManagedObject(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 		nil,
 	)
@@ -42,7 +43,7 @@ func (f *SmartGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 func (f *SmartGroupFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	mcol, _, err := f.Client().Inventory.GetManagedObjects(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		&c8y.ManagedObjectOptions{
 			Query:             fmt.Sprintf("type eq 'c8y_DynamicGroup' and name eq '%s'", name),
 			PaginationOptions: *c8y.NewPaginationOptions(5),

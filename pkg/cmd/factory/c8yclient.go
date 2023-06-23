@@ -1,6 +1,7 @@
 package factory
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/http"
@@ -207,10 +208,10 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		if client.TenantName == "" {
 			// Set the tenant either from token, or by looking it up as the tenant is required for a lot of API calls
 			log.Debug("Looking up tenant name as it is not set (it is required by some API)")
-			client.TenantName = client.GetTenantName()
+			client.TenantName = client.GetTenantName(c8y.WithDisabledDryRunContext(context.Background()))
 
 			if client.TenantName == "" {
-				log.Warn("Failed to lookup tenant name. API calls which require the tenant name will not work!")
+				log.Info("Failed to lookup tenant name. API calls which require the tenant name will not work!")
 			}
 		}
 

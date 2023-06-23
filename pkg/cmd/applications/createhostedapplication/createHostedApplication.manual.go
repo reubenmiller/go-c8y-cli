@@ -285,7 +285,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 		// Get existing application
 		log.Infof("Getting existing application. id=%s", applicationID)
 		application, response, err = client.Application.GetApplication(
-			c8yfetcher.WithDisabledDryRunContext(client),
+			c8y.WithDisabledDryRunContext(context.Background()),
 			applicationID,
 		)
 

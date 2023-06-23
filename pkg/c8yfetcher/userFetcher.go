@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -24,7 +25,7 @@ func NewUserFetcher(factory *cmdutil.Factory) *UserFetcher {
 
 func (f *UserFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	user, resp, err := f.Client().User.GetUser(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 	)
 
@@ -43,7 +44,7 @@ func (f *UserFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 func (f *UserFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	users, _, err := f.Client().User.GetUsers(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		&c8y.UserOptions{
 			Username:          strings.ReplaceAll(name, "*", ""),
 			PaginationOptions: *c8y.NewPaginationOptions(5),

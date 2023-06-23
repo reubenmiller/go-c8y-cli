@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -22,7 +23,7 @@ func NewAgentFetcher(factory *cmdutil.Factory) *AgentFetcher {
 
 func (f *AgentFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	mo, resp, err := f.Client().Inventory.GetManagedObject(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 		nil,
 	)
@@ -42,7 +43,7 @@ func (f *AgentFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 func (f *AgentFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	mcol, _, err := f.Client().Inventory.GetManagedObjects(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		&c8y.ManagedObjectOptions{
 			// fmt.Sprintf("$filter=%s+$orderby=name", filter)
 			Query:             fmt.Sprintf("$filter=has(com_cumulocity_model_Agent) and name eq '%s' $orderby=name", name),

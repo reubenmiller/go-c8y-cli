@@ -1,6 +1,7 @@
 package completion
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -22,7 +23,7 @@ func WithDeviceGroup(flagName string, clientFunc func() (*c8y.Client, error)) Op
 				PaginationOptions: *c8y.NewPaginationOptions(100),
 			}
 			items, _, err := client.Inventory.GetManagedObjects(
-				WithDisabledDryRunContext(client),
+				c8y.WithDisabledDryRunContext(context.Background()),
 				opt,
 			)
 

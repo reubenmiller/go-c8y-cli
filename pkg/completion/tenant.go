@@ -1,6 +1,7 @@
 package completion
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -17,7 +18,7 @@ func WithTenantID(flagName string, clientFunc func() (*c8y.Client, error)) Optio
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
 			tenants, _, err := client.Tenant.GetTenants(
-				WithDisabledDryRunContext(client),
+				c8y.WithDisabledDryRunContext(context.Background()),
 				c8y.NewPaginationOptions(20),
 			)
 

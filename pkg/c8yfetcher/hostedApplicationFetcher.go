@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 
@@ -25,7 +26,7 @@ func NewHostedApplicationFetcher(factory *cmdutil.Factory, excludeParentTenant b
 
 func (f *HostedApplicationFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	app, resp, err := f.Client().Application.GetApplication(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 	)
 
@@ -45,7 +46,7 @@ func (f *HostedApplicationFetcher) getByID(id string) ([]fetcherResultSet, error
 // getByName returns applications matching a given using regular expression
 func (f *HostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	col, _, err := f.Client().Application.GetApplications(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		&c8y.ApplicationOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(2000),
 

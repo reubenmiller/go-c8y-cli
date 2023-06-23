@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -26,7 +27,7 @@ func NewSoftwareVersionFetcher(factory *cmdutil.Factory, software string) *Softw
 
 				if !IsID(software) {
 					// Lookup software by name
-					moSoftware, _, err := client.Software.GetSoftwareByName(WithDisabledDryRunContext(client), software, &c8y.PaginationOptions{
+					moSoftware, _, err := client.Software.GetSoftwareByName(c8y.WithDisabledDryRunContext(context.Background()), software, &c8y.PaginationOptions{
 						PageSize: 5,
 					})
 					if err == nil && moSoftware != nil && len(moSoftware.ManagedObjects) > 0 {

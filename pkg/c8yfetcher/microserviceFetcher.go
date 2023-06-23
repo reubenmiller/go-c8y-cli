@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 
@@ -23,7 +24,7 @@ func NewMicroserviceFetcher(factory *cmdutil.Factory) *MicroserviceFetcher {
 
 func (f *MicroserviceFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	app, resp, err := f.Client().Application.GetApplication(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 	)
 
@@ -43,7 +44,7 @@ func (f *MicroserviceFetcher) getByID(id string) ([]fetcherResultSet, error) {
 // getByName returns applications matching a given using regular expression
 func (f *MicroserviceFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	col, _, err := f.Client().Application.GetApplications(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		&c8y.ApplicationOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(2000),
 

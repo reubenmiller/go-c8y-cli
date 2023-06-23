@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -36,7 +37,7 @@ func (f *DeviceCertificateFetcher) IsID(id string) bool {
 
 func (f *DeviceCertificateFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	cert, resp, err := f.Client().DeviceCertificate.GetCertificate(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 	)
 
@@ -57,7 +58,7 @@ func (f *DeviceCertificateFetcher) getByID(id string) ([]fetcherResultSet, error
 func (f *DeviceCertificateFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	// check if already resolved, so we can save a lookup
 	col, _, err := f.Client().DeviceCertificate.GetCertificates(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		&c8y.DeviceCertificateCollectionOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(100),
 		},

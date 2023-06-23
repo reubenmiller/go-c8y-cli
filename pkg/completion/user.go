@@ -1,6 +1,7 @@
 package completion
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -18,7 +19,7 @@ func WithUser(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 			}
 
 			items, _, err := client.User.GetUsers(
-				WithDisabledDryRunContext(client),
+				c8y.WithDisabledDryRunContext(context.Background()),
 				&c8y.UserOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(2000),
 				},

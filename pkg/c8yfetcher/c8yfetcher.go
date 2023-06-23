@@ -61,12 +61,6 @@ type idValue struct {
 	raw string
 }
 
-func WithDisabledDryRunContext(c *c8y.Client) context.Context {
-	return c.Context.CommonOptions(c8y.CommonOptions{
-		DryRun: false,
-	})
-}
-
 // NewIDValue returns a new id formatter
 // Example: NewIDValue("12345|deviceName")
 func NewIDValue(raw string) *idValue {
@@ -556,7 +550,7 @@ func WithManagedObjectPropertyFirstMatch(factory *cmdutil.Factory, fetcher Entit
 			}
 
 			moID := NewIDValue(v[0]).GetID()
-			mo, _, err := client.Inventory.GetManagedObject(WithDisabledDryRunContext(client), moID, nil)
+			mo, _, err := client.Inventory.GetManagedObject(c8y.WithDisabledDryRunContext(context.Background()), moID, nil)
 
 			value := mo.Item.Get(property)
 			if !value.Exists() {
@@ -734,7 +728,7 @@ func WithSoftwareVersionData(factory *cmdutil.Factory, flagSoftware, flagVersion
 
 		// Check for explicit managed object id
 		if IsID(version) {
-			mo, _, err := client.Inventory.GetManagedObject(WithDisabledDryRunContext(client), version, &c8y.ManagedObjectOptions{
+			mo, _, err := client.Inventory.GetManagedObject(c8y.WithDisabledDryRunContext(context.Background()), version, &c8y.ManagedObjectOptions{
 				WithParents: true,
 			})
 
@@ -750,7 +744,7 @@ func WithSoftwareVersionData(factory *cmdutil.Factory, flagSoftware, flagVersion
 		}
 
 		// Lookup version (and software if not already resolved)
-		versionCol, _, err := client.Software.GetSoftwareVersionsByName(WithDisabledDryRunContext(client), software, version, true, c8y.NewPaginationOptions(5))
+		versionCol, _, err := client.Software.GetSoftwareVersionsByName(c8y.WithDisabledDryRunContext(context.Background()), software, version, true, c8y.NewPaginationOptions(5))
 		if err != nil {
 			return "", "", err
 		}
@@ -860,7 +854,7 @@ func WithFirmwareVersionData(factory *cmdutil.Factory, flagFirmware, flagVersion
 
 		// Check for explicit managed object id
 		if IsID(version) {
-			mo, _, err := client.Inventory.GetManagedObject(WithDisabledDryRunContext(client), version, &c8y.ManagedObjectOptions{
+			mo, _, err := client.Inventory.GetManagedObject(c8y.WithDisabledDryRunContext(context.Background()), version, &c8y.ManagedObjectOptions{
 				WithParents: true,
 			})
 
@@ -876,7 +870,7 @@ func WithFirmwareVersionData(factory *cmdutil.Factory, flagFirmware, flagVersion
 		}
 
 		// Lookup version (and software if not already resolved)
-		versionCol, _, err := client.Firmware.GetFirmwareVersionsByName(WithDisabledDryRunContext(client), firmware, version, true, c8y.NewPaginationOptions(5))
+		versionCol, _, err := client.Firmware.GetFirmwareVersionsByName(c8y.WithDisabledDryRunContext(context.Background()), firmware, version, true, c8y.NewPaginationOptions(5))
 		if err != nil {
 			return "", "", err
 		}
@@ -942,7 +936,7 @@ func WithConfigurationFileData(factory *cmdutil.Factory, flagConfiguration, flag
 
 		// Check for explicit managed object id
 		if IsID(configuration) {
-			mo, _, err := client.Inventory.GetManagedObject(WithDisabledDryRunContext(client), configuration, &c8y.ManagedObjectOptions{
+			mo, _, err := client.Inventory.GetManagedObject(c8y.WithDisabledDryRunContext(context.Background()), configuration, &c8y.ManagedObjectOptions{
 				WithParents: true,
 			})
 
@@ -963,7 +957,7 @@ func WithConfigurationFileData(factory *cmdutil.Factory, flagConfiguration, flag
 			query += fmt.Sprintf(" and configurationType eq '%s'", configurationType)
 		}
 		col, _, err := client.Inventory.GetManagedObjects(
-			WithDisabledDryRunContext(client),
+			c8y.WithDisabledDryRunContext(context.Background()),
 			&c8y.ManagedObjectOptions{
 				Query:             query,
 				WithParents:       false,

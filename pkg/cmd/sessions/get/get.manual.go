@@ -66,7 +66,7 @@ func (n *CmdGetSession) RunE(cmd *cobra.Command, args []string) error {
 	// Support looking up a session which is only controlled via env variables
 	if sessionPath == "" && client != nil {
 		cfg.Persistent.Set("host", client.GetHostname())
-		cfg.Persistent.Set("tenant", client.GetTenantName())
+		cfg.Persistent.Set("tenant", client.TenantName)
 		cfg.Persistent.Set("username", client.GetUsername())
 
 		version := client.Version
