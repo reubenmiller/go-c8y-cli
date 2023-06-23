@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -239,7 +238,7 @@ func (s *SecureData) EncryptFile(filename string, data []byte, passphrase string
 }
 
 func (s *SecureData) DecryptFile(filename string, passphrase string) ([]byte, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

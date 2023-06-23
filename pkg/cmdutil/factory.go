@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"path/filepath"
 	"strings"
@@ -292,7 +292,7 @@ func (f *Factory) CheckPostCommandError(err error) error {
 	if logErr != nil {
 		log.Fatalf("Could not configure logger. %s", logErr)
 	}
-	w := ioutil.Discard
+	w := io.Discard
 
 	if errors.Is(err, cmderrors.ErrHelp) {
 		return err

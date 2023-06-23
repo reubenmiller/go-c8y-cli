@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -103,7 +102,7 @@ func Test_ExecuteTemplateIndexCommand(t *testing.T) {
 }
 
 func readOutput(t *testing.T, b io.Reader) string {
-	out, err := ioutil.ReadAll(b)
+	out, err := io.ReadAll(b)
 	assert.OK(t, err)
 	return string(out)
 }
@@ -278,7 +277,7 @@ func Test_UpdateEventBinary(t *testing.T) {
 	stdin := bytes.NewBufferString(`testdevice_7ewmxq0a94` + "\n")
 	cmd.SetIn(stdin)
 
-	f, err := ioutil.TempFile(os.TempDir(), "eventBinary")
+	f, err := os.CreateTemp(os.TempDir(), "eventBinary")
 	assert.OK(t, err)
 	_, err = f.WriteString("äüß1234dfÖ")
 	assert.OK(t, err)

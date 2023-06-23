@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
@@ -196,14 +195,14 @@ func (s *IOStreams) ReadUserFile(fn string) ([]byte, error) {
 		}
 	}
 	defer r.Close()
-	return ioutil.ReadAll(r)
+	return io.ReadAll(r)
 }
 
 func (s *IOStreams) TempFile(dir, pattern string) (*os.File, error) {
 	if s.TempFileOverride != nil {
 		return s.TempFileOverride, nil
 	}
-	return ioutil.TempFile(dir, pattern)
+	return os.CreateTemp(dir, pattern)
 }
 
 func (s *IOStreams) ProgressIndicator() *mpb.Progress {
@@ -252,7 +251,7 @@ func Test() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
 	out := &bytes.Buffer{}
 	errOut := &bytes.Buffer{}
 	return &IOStreams{
-		In:     ioutil.NopCloser(in),
+		In:     io.NopCloser(in),
 		Out:    out,
 		ErrOut: errOut,
 	}, in, out, errOut

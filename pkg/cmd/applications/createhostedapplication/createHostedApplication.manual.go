@@ -6,7 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -142,7 +142,7 @@ func (n *CmdCreateHostedApplication) getApplicationDetails(log *logger.Logger) (
 			if err != nil {
 				return nil, err
 			}
-			byteValue, _ := ioutil.ReadAll(jsonFile)
+			byteValue, _ := io.ReadAll(jsonFile)
 
 			if err := json.Unmarshal(byteValue, &app.Manifest); err != nil {
 				log.Warnf("invalid manifest file. Only json or zip files are accepted. %s", strings.TrimSpace(err.Error()))
@@ -193,7 +193,7 @@ func (n *CmdCreateHostedApplication) getApplicationDetails(log *logger.Logger) (
 
 // packageWebApplication zips the given folder path to a zip
 func (n *CmdCreateHostedApplication) packageWebApplication(src string) (string, error) {
-	dir, err := ioutil.TempDir("", "c8y-packer")
+	dir, err := os.MkdirTemp("", "c8y-packer")
 	if err != nil {
 		return "", fmt.Errorf("failed to create temp folder. %w", err)
 	}

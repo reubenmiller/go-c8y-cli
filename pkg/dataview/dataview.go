@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -121,7 +120,7 @@ func (v *DataView) LoadDefinitions() error {
 					return nil
 				}
 
-				contents, err := ioutil.ReadFile(path)
+				contents, err := os.ReadFile(path)
 				if err != nil {
 					return err
 				}

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime"
 	"net/http"
 	"net/http/httputil"
@@ -237,10 +236,10 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	if req.Body != nil && RequestSupportsBody(req.Method) {
 		var buf bytes.Buffer
 		bodyCopy := io.TeeReader(req.Body, &buf)
-		req.Body = ioutil.NopCloser(&buf)
+		req.Body = io.NopCloser(&buf)
 
 		peekBody := io.LimitReader(bodyCopy, 1024*1024)
-		body, err = ioutil.ReadAll(peekBody)
+		body, err = io.ReadAll(peekBody)
 
 		if err != nil {
 			r.Logger.Warnf("Could not read body. %s", err)

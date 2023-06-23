@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -608,7 +607,7 @@ func (c *Config) ReadKeyFile() error {
 	}
 
 	// read from file
-	contents, err := ioutil.ReadFile(c.KeyFile())
+	contents, err := os.ReadFile(c.KeyFile())
 
 	if err == nil {
 		if c.SecureData.IsEncryptedBytes(contents) == 1 {

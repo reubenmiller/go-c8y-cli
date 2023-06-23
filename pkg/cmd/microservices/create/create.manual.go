@@ -6,7 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -125,7 +125,7 @@ func (n *CmdCreate) getApplicationDetails(log *logger.Logger) (*Application, err
 		if err != nil {
 			return nil, err
 		}
-		byteValue, _ := ioutil.ReadAll(jsonFile)
+		byteValue, _ := io.ReadAll(jsonFile)
 
 		if err := json.Unmarshal(byteValue, &app.Manifest); err != nil {
 			log.Warnf("invalid manifest file. Only json or zip files are accepted. %s", strings.TrimSpace(err.Error()))
