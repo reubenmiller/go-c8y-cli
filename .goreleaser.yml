@@ -42,7 +42,7 @@ archives:
   - id: nix
     builds: [linux]
     <<: &archive_defaults
-      name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+      name_template: '{{ .ProjectName }}_{{ .Version }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     wrap_in_directory: "true"
     format: tar.gz
     files:
@@ -59,8 +59,6 @@ archives:
     builds: [macOS]
     <<: *archive_defaults
     wrap_in_directory: "true"
-    replacements:
-      darwin: macOS
     format: tar.gz
     files:
       - LICENSE
@@ -90,9 +88,7 @@ archives:
     builds: [macOS, linux, windows]
     # Don't include the binary in the filename so it is easier to download the latest
     <<: &archive_defaults
-      name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    replacements:
-      darwin: macOS
+      name_template: '{{ .ProjectName }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     format: binary
 
 nfpms:

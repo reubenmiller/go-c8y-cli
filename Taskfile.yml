@@ -180,17 +180,17 @@ tasks:
   build:
     desc: Build
     cmds:
-      - goreleaser build --rm-dist
+      - goreleaser build --clean
   
   build-snapshot:
     desc: Build Snapshot
     cmds:
-      - goreleaser build --rm-dist --snapshot {{.CLI_ARGS}}
+      - goreleaser build --clean --snapshot {{.CLI_ARGS}}
 
   build-snapshot-single:
     desc: Build Snapshot (single) for the current operating system
     cmds:
-      - goreleaser build --rm-dist --snapshot --single-target --id {{.OS_NAME}} {{.CLI_ARGS}}
+      - goreleaser build --clean --snapshot --single-target --id {{.OS_NAME}} {{.CLI_ARGS}}
       - rm -f .bin/c8y
       - mkdir -p .bin
       - cp dist/{{.OS_NAME}}_{{OS}}_{{.ARCH_NAME}}/bin/c8y .bin/c8y
@@ -311,7 +311,7 @@ tasks:
     cmds:
       - git status
       - git diff
-      - goreleaser release --rm-dist --auto-snapshot
+      - goreleaser release --clean --auto-snapshot
 
   publish-powershell:
     desc: Publish powershell module
