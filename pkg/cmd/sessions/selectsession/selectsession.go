@@ -190,12 +190,15 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	var idx int
 	var result string
 
-	if len(filteredSessions) == 1 {
+	switch len(filteredSessions) {
+	case 0:
+		return "", fmt.Errorf("no sessions found")
+	case 1:
 		log.Info("Only 1 session found. Selecting it automatically")
 		idx = 0
 		result = filteredSessions[0].Path
 		err = nil
-	} else {
+	default:
 		// Prevent wrapping errors as promptui expects all templates to only take
 		// up one line. When multiline templates are supported by promptui, then this can be removed
 		// https://github.com/manifoldco/promptui/issues/92

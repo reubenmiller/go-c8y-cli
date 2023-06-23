@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -20,7 +21,7 @@ func NewDeviceFetcher(factory *cmdutil.Factory) *DeviceFetcher {
 
 func (f *DeviceFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	mo, resp, err := f.Client().Inventory.GetManagedObject(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 		nil,
 	)
@@ -40,7 +41,7 @@ func (f *DeviceFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 func (f *DeviceFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	mcol, _, err := f.Client().Inventory.GetDevicesByName(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		name,
 		c8y.NewPaginationOptions(5),
 	)

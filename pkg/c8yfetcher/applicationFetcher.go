@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"regexp"
 
 	"github.com/pkg/errors"
@@ -22,7 +23,7 @@ func NewApplicationFetcher(factory *cmdutil.Factory) *ApplicationFetcher {
 
 func (f *ApplicationFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	app, resp, err := f.Client().Application.GetApplication(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 	)
 
@@ -42,7 +43,7 @@ func (f *ApplicationFetcher) getByID(id string) ([]fetcherResultSet, error) {
 // getByName returns applications matching a given using regular expression
 func (f *ApplicationFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	col, _, err := f.Client().Application.GetApplications(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		&c8y.ApplicationOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(2000),
 		},

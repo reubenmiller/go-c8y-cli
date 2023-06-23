@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -26,7 +27,7 @@ func NewDeviceServiceFetcher(factory *cmdutil.Factory, device string) *DeviceSer
 
 				if !IsID(device) {
 					// Lookup software by name
-					moDevice, _, err := client.Inventory.GetDevicesByName(WithDisabledDryRunContext(client), device, &c8y.PaginationOptions{
+					moDevice, _, err := client.Inventory.GetDevicesByName(c8y.WithDisabledDryRunContext(context.Background()), device, &c8y.PaginationOptions{
 						PageSize: 5,
 					})
 					if err == nil && moDevice != nil && len(moDevice.ManagedObjects) > 0 {

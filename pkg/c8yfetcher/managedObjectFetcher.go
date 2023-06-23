@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -23,7 +24,7 @@ func NewManagedObjectFetcher(factory *cmdutil.Factory) *ManagedObjectFetcher {
 
 func (f *ManagedObjectFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	mo, resp, err := f.Client().Inventory.GetManagedObject(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 		nil,
 	)
@@ -47,7 +48,7 @@ func (f *ManagedObjectFetcher) getByName(name string) ([]fetcherResultSet, error
 		query = f.Query(name)
 	}
 	mcol, _, err := f.Client().Inventory.GetManagedObjects(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		&c8y.ManagedObjectOptions{
 			Query:             query,
 			PaginationOptions: *c8y.NewPaginationOptions(5),

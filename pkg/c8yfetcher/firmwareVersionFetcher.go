@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -27,7 +28,7 @@ func NewFirmwareVersionFetcher(factory *cmdutil.Factory, firmware string, includ
 					firmwareID = firmware
 				} else {
 					// Lookup firmware by name
-					res, _, err := client.Firmware.GetFirmwareByName(WithDisabledDryRunContext(client), firmware, c8y.NewPaginationOptions(5))
+					res, _, err := client.Firmware.GetFirmwareByName(c8y.WithDisabledDryRunContext(context.Background()), firmware, c8y.NewPaginationOptions(5))
 					if err == nil && len(res.ManagedObjects) > 0 {
 						firmwareID = res.ManagedObjects[0].ID
 					}

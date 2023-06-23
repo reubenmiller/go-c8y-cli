@@ -1,6 +1,7 @@
 package completion
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -30,7 +31,7 @@ func WithSoftwareVersion(flagVersion string, flagNameSoftware string, clientFunc
 			}
 
 			items, _, err := client.Software.GetSoftwareVersionsByName(
-				WithDisabledDryRunContext(client),
+				c8y.WithDisabledDryRunContext(context.Background()),
 				softwareName,
 				versionPattern,
 				true,

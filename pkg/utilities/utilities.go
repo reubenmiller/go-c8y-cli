@@ -114,6 +114,7 @@ func ClearEnvironmentVariables(shell ShellType) {
 		"C8Y_USERNAME",
 		"C8Y_PASSWORD",
 		"C8Y_TOKEN",
+		"C8Y_VERSION",
 		"C8Y_SESSION",
 		"C8Y_HEADER",
 		"C8Y_HEADER_AUTHORIZATION",

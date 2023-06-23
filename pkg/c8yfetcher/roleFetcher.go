@@ -1,6 +1,7 @@
 package c8yfetcher
 
 import (
+	"context"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -35,7 +36,7 @@ func (f *RoleFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	}
 
 	role, resp, err := f.Client().User.GetRole(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
 	)
 
@@ -66,7 +67,7 @@ func (f *RoleFetcher) getByName(name string) ([]fetcherResultSet, error) {
 		}, nil
 	}
 	roles, _, err := f.Client().User.GetRoles(
-		WithDisabledDryRunContext(f.Client()),
+		c8y.WithDisabledDryRunContext(context.Background()),
 		&c8y.RoleOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(100),
 		},

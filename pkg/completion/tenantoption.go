@@ -1,6 +1,7 @@
 package completion
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -18,7 +19,7 @@ func WithTenantOptionCategory(flagName string, clientFunc func() (*c8y.Client, e
 
 			pattern := "*" + toComplete + "*"
 			items, _, err := client.TenantOptions.GetOptions(
-				WithDisabledDryRunContext(client),
+				c8y.WithDisabledDryRunContext(context.Background()),
 				c8y.NewPaginationOptions(200),
 			)
 
@@ -58,7 +59,7 @@ func WithTenantOptionKey(flagName string, flagNameCategory string, clientFunc fu
 
 			pattern := "*" + toComplete + "*"
 			items, _, err := client.TenantOptions.GetOptions(
-				WithDisabledDryRunContext(client),
+				c8y.WithDisabledDryRunContext(context.Background()),
 				c8y.NewPaginationOptions(200),
 			)
 
