@@ -534,9 +534,6 @@ func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []by
 
 	varsHelper := `local var(prop, defaultValue="") = if std.objectHas(vars, prop) then vars[prop] else defaultValue;`
 
-	// Seed random otherwise it will not change with execution
-	rand.Seed(time.Now().UTC().UnixNano())
-
 	randomHelper := fmt.Sprintf(`local rand = { bool: %t, int: %d, int2: %d, float: %f, float2: %f, float3: %f, float4: %f, password: "%s" };`,
 		rand.Float32() > 0.5,
 		rand.Intn(100),

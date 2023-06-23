@@ -126,8 +126,6 @@ func (n *CmdRepeat) newTemplate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	rand.Seed(time.Now().UTC().UnixNano())
-
 	var iter iterator.Iterator
 	_, input, err := flags.WithPipelineIterator(&flags.PipelineOptions{
 		Name:        "input",

@@ -106,8 +106,6 @@ func (n *CmdRepeatFile) newTemplate(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	rand.Seed(time.Now().UTC().UnixNano())
-
 	// Random delay generator
 	randomDelayFunc, err := flags.GetDurationGenerator(cmd, "randomDelayMin", "randomDelayMax", true, time.Millisecond)
 	if err != nil {
