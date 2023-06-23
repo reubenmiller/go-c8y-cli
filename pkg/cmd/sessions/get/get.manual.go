@@ -1,6 +1,7 @@
 package get
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -23,7 +24,11 @@ func NewCmdGetSession(f *cmdutil.Factory) *CmdGetSession {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get session",
-		Long:  `Get session infomration and settings`,
+		Long: heredoc.Doc(`
+			Get session information and settings
+
+			The session is either loaded by the session file or from environment variables.
+		`),
 		Example: heredoc.Doc(`
 			$ c8y sessions get
 			Get the details about the current session
@@ -50,12 +55,36 @@ func (n *CmdGetSession) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	cfg.Persistent.Set("path", cfg.GetSessionFile())
-	sessionFileContents := cfg.Persistent.AllSettings()
+	sessionPath := cfg.GetSessionFile()
+	cfg.Persistent.Set("path", sessionPath)
 
+	client, err := n.factory.Client()
+	if err != nil {
+		return err
+	}
+
+	// Support looking up a session which is only controlled via env variables
+	if sessionPath == "" && client != nil {
+		cfg.Persistent.Set("host", client.GetHostname())
+		cfg.Persistent.Set("tenant", client.GetTenantName())
+		cfg.Persistent.Set("username", client.GetUsername())
+
+		version := client.Version
+		if version == "" {
+			serverVersion, err := client.TenantOptions.GetVersion(context.Background())
+			if err != nil {
+				return err
+			}
+			version = serverVersion
+		}
+		cfg.Persistent.Set("version", version)
+	}
+
+	sessionFileContents := cfg.Persistent.AllSettings()
 	b, err := json.Marshal(sessionFileContents)
 	if err != nil {
 		return err
 	}
+
 	return n.factory.WriteJSONToConsole(cfg, cmd, "", b)
 }
