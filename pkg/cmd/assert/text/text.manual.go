@@ -6,10 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math/rand"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
@@ -90,8 +88,6 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-
-	rand.Seed(time.Now().UTC().UnixNano())
 
 	var iter iterator.Iterator
 	_, input, err := flags.WithPipelineIterator(&flags.PipelineOptions{

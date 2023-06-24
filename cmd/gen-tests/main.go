@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -73,7 +73,7 @@ func NewGenerator(name string, mockConfig *models.MockConfiguration) (gen *Gener
 	if err != nil {
 		return nil, err
 	}
-	contents, err := ioutil.ReadAll(f)
+	contents, err := io.ReadAll(f)
 	if err != nil {
 		loggerS.Fatalf("Failed to read spec file. file=%s err=%s", name, err)
 		return
@@ -317,7 +317,7 @@ func formatJsonAssertion(jsonAssertion map[string]string, propType string, prop 
 				switch tv := v.(type) {
 				case map[string]interface{}:
 					if vjson, err := json.Marshal(tv); err == nil {
-						jsonAssertion[k] = fmt.Sprintf("%s", vjson)
+						jsonAssertion[k] = string(vjson)
 					}
 					// if len(tv) == 0 {
 					// 	jsonAssertion[k] = "{}"
@@ -475,7 +475,7 @@ func NewMockConfiguration(path string) (*models.MockConfiguration, error) {
 	if err != nil {
 		return nil, err
 	}
-	contents, err := ioutil.ReadAll(f)
+	contents, err := io.ReadAll(f)
 	if err != nil {
 		return nil, err
 	}

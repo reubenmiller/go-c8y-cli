@@ -3,7 +3,6 @@ package delete
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -136,7 +135,7 @@ func removeEmptyDirectories(w io.Writer, root string, dryRun bool) error {
 			return filepath.SkipDir
 		}
 		if info.IsDir() {
-			files, err := ioutil.ReadDir(path)
+			files, err := os.ReadDir(path)
 
 			if err != nil {
 				return err

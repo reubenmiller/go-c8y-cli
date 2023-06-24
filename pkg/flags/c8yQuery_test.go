@@ -22,7 +22,7 @@ func Test_RelativeTimeIteratorWithFormatter(t *testing.T) {
 	cmd.Flags().Bool("bool1", false, "")
 	cmd.Flags().Bool("bool2", false, "")
 	cmd.SetArgs([]string{"dummy", "--name1", "value1", "--bool2"})
-	cmd.Execute()
+	assert.OK(t, cmd.Execute())
 
 	c8yQueryParts, err := WithC8YQueryOptions(
 		cmd,

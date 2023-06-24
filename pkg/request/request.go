@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime"
 	"net/http"
 	"net/http/httputil"
@@ -183,7 +182,7 @@ type RequestDetails struct {
 
 func (r *RequestHandler) DumpRequest(w io.Writer, req *http.Request) {
 	if out, err := httputil.DumpRequest(req, true); err == nil {
-		fmt.Fprint(w, r.HideSensitive(r.Client, fmt.Sprintf("%s", out)))
+		fmt.Fprint(w, r.HideSensitive(r.Client, string(out)))
 	}
 }
 
@@ -237,10 +236,10 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	if req.Body != nil && RequestSupportsBody(req.Method) {
 		var buf bytes.Buffer
 		bodyCopy := io.TeeReader(req.Body, &buf)
-		req.Body = ioutil.NopCloser(&buf)
+		req.Body = io.NopCloser(&buf)
 
 		peekBody := io.LimitReader(bodyCopy, 1024*1024)
-		body, err = ioutil.ReadAll(peekBody)
+		body, err = io.ReadAll(peekBody)
 
 		if err != nil {
 			r.Logger.Warnf("Could not read body. %s", err)
@@ -699,7 +698,9 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 		return nil, err
 	}
 
-	outputBuilder.AddLocalTemplateVariable("output", string(responseText))
+	if err := outputBuilder.AddLocalTemplateVariable("output", string(responseText)); err != nil {
+		return nil, err
+	}
 
 	outputBuilder.AppendTemplate(commonOptions.OutputTemplate)
 	out, outErr := outputBuilder.MarshalJSONWithInput(input)

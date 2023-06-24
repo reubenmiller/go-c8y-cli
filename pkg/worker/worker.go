@@ -467,7 +467,7 @@ func (w *Worker) getConfirmationMessage(prefix string, request *c8y.RequestOptio
 
 		switch v := input.(type) {
 		case []byte:
-			id = fmt.Sprintf("%s", v)
+			id = string(v)
 			if gjson.ValidBytes(v) {
 				jsonobj := gjson.ParseBytes(v)
 

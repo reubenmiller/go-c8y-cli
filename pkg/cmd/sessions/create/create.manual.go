@@ -3,8 +3,8 @@ package create
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/url"
+	"os"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -352,7 +352,7 @@ func (n *CmdCreate) writeSessionFile(outputDir, outputFile string, session c8yse
 	}
 	log.Debugf("output file: %s", outputPath)
 
-	if err := ioutil.WriteFile(path.Join(outputDir, outputFile), data, 0644); err != nil {
+	if err := os.WriteFile(path.Join(outputDir, outputFile), data, 0644); err != nil {
 		return errors.Wrap(err, "failed to write to file")
 	}
 	return nil

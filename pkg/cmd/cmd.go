@@ -6,11 +6,9 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
 	"os"
 	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/cli/safeexec"
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/run"
@@ -46,9 +44,6 @@ const (
 
 func init() {
 	Logger = logger.NewLogger(module, logger.Options{})
-
-	// set seed for random generation
-	rand.Seed(time.Now().UTC().UnixNano())
 
 	// Enable case insensitive matches
 	cobra.EnableCaseInsensitive = true

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"path/filepath"
 	"strings"
@@ -60,9 +60,11 @@ func (f *Factory) CreateModeEnabled() error {
 		return err
 	}
 
-	cfg.WithOptions(
+	if err := cfg.WithOptions(
 		config.WithBindEnv(config.SettingsDryRun, false),
-	)
+	); err != nil {
+		return err
+	}
 
 	if cfg.DryRun() {
 		return nil
@@ -77,9 +79,11 @@ func (f *Factory) UpdateModeEnabled() error {
 		return err
 	}
 
-	cfg.WithOptions(
+	if err := cfg.WithOptions(
 		config.WithBindEnv(config.SettingsDryRun, false),
-	)
+	); err != nil {
+		return err
+	}
 
 	if cfg.DryRun() {
 		return nil
@@ -94,9 +98,11 @@ func (f *Factory) DeleteModeEnabled() error {
 		return err
 	}
 
-	cfg.WithOptions(
+	if err := cfg.WithOptions(
 		config.WithBindEnv(config.SettingsDryRun, false),
-	)
+	); err != nil {
+		return err
+	}
 
 	if cfg.DryRun() {
 		return nil
@@ -292,7 +298,7 @@ func (f *Factory) CheckPostCommandError(err error) error {
 	if logErr != nil {
 		log.Fatalf("Could not configure logger. %s", logErr)
 	}
-	w := ioutil.Discard
+	w := io.Discard
 
 	if errors.Is(err, cmderrors.ErrHelp) {
 		return err

@@ -74,7 +74,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 	cmd.Flags().Bool("withParents", true, "include a flat list of all parents and grandparents of the given object")
 
 	// Hide withParents as it is fixed
-	cmd.Flags().MarkHidden("withParents")
+	_ = cmd.Flags().MarkHidden("withParents")
 
 	completion.WithOptions(
 		cmd,

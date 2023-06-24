@@ -1,7 +1,6 @@
 package fakestdin
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -12,7 +11,7 @@ type FakeStdin struct {
 }
 
 func (s *FakeStdin) init() {
-	tmpfile, err := ioutil.TempFile("", "fakestdin")
+	tmpfile, err := os.CreateTemp("", "fakestdin")
 	if err != nil {
 		log.Fatal(err)
 	}
