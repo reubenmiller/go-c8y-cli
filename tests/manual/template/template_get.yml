@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+
+  It provides a function to get an optional value:
+    command: |
+      c8y template execute --template "{nestedProp:{othervalue: 1}}" |
+        c8y devices update --id 0 --dry --dryFormat json --template "_.Get(input.value, 'nestedProp', {dummy: 2})" |
+        c8y util show --select body --compact=false
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "othervalue": 1
+          }
+        }
+
+  It provides a function to get nested optional values:
+    command: |
+      c8y template execute --template "{nestedProp:{othervalue: 1}}" |
+        c8y devices update --id 0 --dry --dryFormat json --template "{count: _.Get(input.value, 'nestedProp.othervalue', 0), defaultCount: _.Get(input.value, 'nestedProp.not.exist', -1)}" |
+        c8y util show --select body --compact=false
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "count": 1,
+            "defaultCount": -1
+          }
+        }
+
+  It provides a function to get an optional value and returns a default value if not present:
+    command: |
+      c8y template execute --template "{nestedProp:{othervalue: 1}}" |
+        c8y devices update --id 0 --dry --dryFormat json --template "_.Get(input.value, 'nestedProp2', {dummy: 2})" |
+        c8y util show --select body --compact=false
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "dummy": 2
+          }
+        }

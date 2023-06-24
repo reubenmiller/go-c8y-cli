@@ -1,11 +1,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
 # Merge function
 tests:
-
   It merges values array values:
     command: |
       c8y template execute --template "{nestedProp: {inputList:['existingValue'], othervalue: 'somevalue'}}" |
-      c8y template execute --template "_.DeprecatedMerge('nestedProp', input.value, {inputList+: ['newValue']})" --compact=false
+      c8y template execute --template "_.SelectMerge(input.value, {nestedProp+: {inputList+: ['newValue']}})" --compact=false
 
     exit-code: 0
     stdout:
@@ -20,7 +19,7 @@ tests:
   It merges values array values with any empty initial value:
     command: |
       c8y template execute --template "{}" |
-      c8y template execute --template "_.DeprecatedMerge('nestedProp', input.value, {inputList+: ['newValue']})" --compact=false
+      c8y template execute --template "_.SelectMerge(input.value, {nestedProp: {inputList+: ['newValue']}})" --compact=false
 
     exit-code: 0
     stdout:
@@ -34,7 +33,7 @@ tests:
   It merges arrays when array is immediate key:
     command: |
       c8y template execute --template "{c8y_SupportedOperations:[]}" |
-      c8y template execute --template "_.DeprecatedMerge('c8y_SupportedOperations', input.value, ['newValue'])" --compact=false
+      c8y template execute --template "_.SelectMerge(input.value, {c8y_SupportedOperations: ['newValue']})" --compact=false
 
     exit-code: 0
     stdout:
@@ -46,7 +45,7 @@ tests:
   It merges an array when existing value does not exist:
     command: |
       c8y template execute --template "{}" |
-      c8y template execute --template "_.DeprecatedMerge('c8y_SupportedOperations', input.value, ['newValue'])" --compact=false
+      c8y template execute --template "_.SelectMerge(input.value, {c8y_SupportedOperations: ['newValue']})" --compact=false
 
     exit-code: 0
     stdout:
@@ -58,7 +57,7 @@ tests:
   It removes a nested fragment:
     command: |
       c8y template execute --template "{c8y_Model:{serialNumber:'123456789', otherValue: 'example'}}" |
-      c8y template execute --template "_.DeprecatedMerge('c8y_Model', input.value, {otherValue:: null})" --compact=false
+      c8y template execute --template "_.SelectMerge(input.value, {c8y_Model+: {otherValue:: null}})" --compact=false
 
     exit-code: 0
     stdout:
@@ -68,3 +67,21 @@ tests:
             "serialNumber": "123456789"
           }
         }
+
+  It does not try to merge string values:
+    command: |
+      c8y template execute --template ./manual/template/input.json |
+      c8y template execute --template "_.SelectMerge(input.value, {name:null})" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "name": null
+        }
+
+# Use cases
+# Case 1: Updating a managed object: Only update the relevant fragment merge existing data. Merge data withint 
+# Case 2: Append items to an already existing array (e.g. append an item to the supported operations list)
+# Case 3: 
+# Open questions: Do a deep object merge by default? e.g. append to arrays or not?

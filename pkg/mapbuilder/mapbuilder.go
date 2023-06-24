@@ -9,15 +9,19 @@ import (
 	"math/rand"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/google/go-jsonnet"
 	"github.com/google/go-jsonnet/ast"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flatten"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/randdata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
@@ -188,6 +192,70 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 			return out, nil
 		},
 	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "ReplacePattern",
+		Params: ast.Identifiers{"value", "from", "to"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			value := getStringParameter(parameters, 0)
+			from := getStringParameter(parameters, 1)
+			to := getStringParameter(parameters, 2)
+
+			pattern, err := regexp.Compile(from)
+			if err != nil {
+				return "", err
+			}
+			return pattern.ReplaceAllString(value, to), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Select",
+		Params: ast.Identifiers{"o", "properties"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			// Provide a function which uses the same style as the
+			// global --select flag
+			if len(parameters) < 2 {
+				return nil, fmt.Errorf("requires 2 arguments")
+			}
+
+			jsonB, err := json.Marshal(parameters[0])
+			if err != nil {
+				return nil, err
+			}
+			patterns := []string{}
+			switch properties := parameters[1].(type) {
+			case []any:
+				for _, v := range properties {
+					patterns = append(patterns, fmt.Sprintf("%v", v))
+				}
+			case string:
+				// Support people providing a csv string list
+				for _, v := range strings.Split(properties, ",") {
+					patterns = append(patterns, strings.TrimSpace(v))
+				}
+			}
+
+			if len(patterns) == 0 {
+				return parameters[0], fmt.Errorf("no select values provided")
+			}
+
+			flatMap, flatKeys, err := jsonfilter.FilterPropertyByWildcard(string(jsonB), "", patterns, false)
+			if err != nil {
+				return nil, err
+			}
+			outB, err := flatten.UnflattenOrdered(flatMap, flatKeys)
+			if err != nil {
+				return nil, err
+			}
+
+			var out any
+			if err := json.Unmarshal(outB, &out); err != nil {
+				return nil, err
+			}
+			return out, nil
+		},
+	})
 }
 
 func getIntParameter(parameters []interface{}, i int) int64 {
@@ -226,23 +294,11 @@ func getStringParameter(parameters []interface{}, i int) string {
 	return ""
 }
 
-var customJSONNetFunctions = []string{
-	`Name: function(prefix='',postfix='') std.native("Name")(prefix,postfix)`,
-	`GetURLPath: std.native("GetURLPath")`,
-	`GetURLHost: std.native("GetURLHost")`,
-	`Password: function(length=32) std.native("Password")(length)`,
-	`Now: function(offset='0s') std.native("Now")(std.toString(offset))`,
-	`NowNano: function(offset='0s') std.native("NowNano")(std.toString(offset))`,
-	`Bool: std.native("Bool")`,
-	`Float: function(max=1,min=0,precision=4) std.native("Float")(max,min,precision)`,
-	`Int: function(max=100,min=0) std.native("Int")(max,min)`,
-	`Hex: function(max=16) std.native("Hex")(max)`,
-	`Char: function(max=16) std.native("Char")(max)`,
-	`Digit: function(max=16) std.native("Digit")(max)`,
-	`AlphaNumeric: function(max=16) std.native("AlphaNumeric")(max)`,
-	`StripKeys: function(value={}) value + {lastUpdated::'','self'::'',creationTime::'',additionParents::'',assetParents::'',childAdditions::'',childAssets::'',childDevices::'',deviceParents::''}`,
-	`Get: function(key, value={}, defaultValue={}) if std.type(value) == "object" && std.objectHas(value, key) then {[key]: value[key]} else {[key]: defaultValue}`,
-	`Merge: function(key, a={}, b={}) _.Get(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b}`,
+func getParameter(parameters []interface{}, i int) any {
+	if len(parameters) > 0 && i < len(parameters) {
+		return parameters[i]
+	}
+	return nil
 }
 
 func evaluateJsonnet(imports string, snippets ...string) (string, error) {
@@ -250,7 +306,89 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	vm := jsonnet.MakeVM()
 	registerNativeFuntions(vm)
 
-	jsonnetImport := "\n" + "local _ = {" + strings.Join(customJSONNetFunctions, ",") + "};" + imports
+	// Add functions via jsonnet object
+	localFunctions := heredoc.Doc(`
+	{
+		Name(prefix='',postfix=''):: std.native("Name")(prefix,postfix),
+		GetURLPath(url):: std.native("GetURLPath")(url),
+		GetURLHost(url):: std.native("GetURLHost")(url),
+		Password(length=32):: std.native("Password")(length),
+		Now(offset='0s'):: std.native("Now")(std.toString(offset)),
+		NowNano(offset='0s'):: std.native("NowNano")(std.toString(offset)),
+		Bool():: std.native("Bool"),
+		Float(max=1,min=0,precision=4):: std.native("Float")(max,min,precision),
+		Int(max=100,min=0):: std.native("Int")(max,min),
+		Hex(max=16):: std.native("Hex")(max),
+		Char(max=16):: std.native("Char")(max),
+		Digit(max=16):: std.native("Digit")(max),
+		AlphaNumeric(max=16):: std.native("AlphaNumeric")(max),
+		StripKeys(value={}):: value + {lastUpdated::'','self'::'',creationTime::'',additionParents::'',assetParents::'',childAdditions::'',childAssets::'',childDevices::'',deviceParents::''},
+		# Deprecated: DeprecatedMerge=>SelectMerge and DeprecatedGet => Select
+		DeprecatedMerge(key, a={}, b={}):: _.DeprecatedGet(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b},
+		DeprecatedGet(key, o={}, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
+		Patch(target={}, patch)::
+			local _target = {
+				[item.key]: target[item.key]
+				for item in std.objectKeysValues(patch)
+				if std.objectHas(target, item.key)
+			};
+			std.mergePatch(_target, patch),
+		SelectMerge(a={}, b={})::
+			local _keys = std.objectFields(b);
+			if std.length(_keys) == 0 then
+				{}
+			else
+				local item = {
+					[key]: a[key]
+					for key in _keys
+					if std.objectHas(a, key)
+				};
+				item + {
+					[key]+: b[key]
+					for key in _keys
+					if std.isObject(b[key]) || std.isArray(b[key])
+				} + {
+					[key]: b[key]
+					for key in _keys
+					if !(std.isObject(b[key]) || std.isArray(b[key]))
+				},
+		Get(o, f, default=null)::
+			local get_(o, ks) =
+				if ! std.objectHas(o, ks[0]) then
+					default
+				else if std.length(ks) == 1 then
+					o[ks[0]]
+				else
+					get_(o[ks[0]], ks[1:]);
+				get_(o, std.split(f, '.')),
+		Has(o, f)::
+			local has_(o, ks) =
+				if ! std.objectHas(o, ks[0]) then
+					false
+				else if std.length(ks) == 1 then
+					true
+				else
+					has_(o[ks[0]], ks[1:]);
+			has_(o, std.split(f, '.')),
+		RecurseReplace(any, from, to)::
+			local recurseReplace_(any, from, to) = (
+				{
+				object: function(x) { [k]: recurseReplace_(x[k], from, to) for k in std.objectFields(x) },
+				array: function(x) [recurseReplace_(e, from, to) for e in x],
+				string: function(x) std.native('ReplacePattern')(x, from, to),
+				#string: function(x) std.strReplace(x, from, to),
+				number: function(x) x,
+				boolean: function(x) x,
+				'function': function(x) x,
+				'null': function(x) x,
+				}[std.type(any)](any)
+			);
+			recurseReplace_(any, from, to),
+		ReplacePattern(x, from, to):: std.native('ReplacePattern')(x, from, to),
+		Select(o, properties=['*']):: std.native('Select')(o, properties),
+	}`)
+
+	jsonnetImport := fmt.Sprintf("\nlocal _ = %s; %s", localFunctions, imports)
 
 	jsonnetImport += `
 // output

@@ -196,8 +196,10 @@ Below lists the additional functions which are available in jsonnet template fil
 |_.Digit([length=16])| Random 0 padded string with only digits | `0261177197719716` |
 |_.AlphaNumeric([length=16])| Random AlphaNumeric string of a given length | `f087oAAzjnvzkPdf` |
 |_.StripKeys([object])| Strip protected Cumulocity properties from a object. The following properties are removed from the given object: additionParents, assetParents, childAdditions, childAssets, childDevices, deviceParents, creationTime, lastUpdated, self | `{}` |
-|_.Get(key, object, defaultValue={}) | Get a property if `object` is an object type and the key exists in it, otherwise return the default value | See examples |
-|_.Merge(key, a={}, b={}}) | Merge object b into a on the given key (property name)| See examples |
+|_.Get(object, key, default=null) | Get a property value using dot notation. Use a default value if it does not exist | - |
+|_.Has(object, key) | Check if a key exists in an object. Accept dot notation as the key | - |
+|_.Select(object, keys=['*']) | Select specific keys from a given object. It behaves the same as the `--select` flag. `keys` can also be provided as a csv string | See examples |
+|_.SelectMerge(a={}, b={}) | Merge b into a, but only include the fields which are present in b | See examples |
 
 
 ### Example: Generating random data
@@ -378,11 +380,53 @@ cat input.json |
 }
 ```
 
-### Example: Merging device managed object fragments 
+### Example: Select a subset of fragments from an input object
+
+The `_.Select()` function provides the same functionality as the global `--select` flag.
+
+To demonstrate this, image you have the following managed object.
+
+```json title="managed object: id=1234"
+{
+  "id": "1234",
+  "name": "MyDevice",
+  "other": {
+    "nestedValue": 1
+  },
+  "c8y_IsDevice": {},
+  "c8y_SupportedOperations": [
+    "c8y_Restart"
+  ]
+}
+```
+
+We can select fragments from the piped input (by referencing `input.value`). Below shows that only the `id`, `name` and `other.*` fragments are selected.
+
+<CodeExample>
+
+```bash
+c8y devices get --id 1234 |
+  c8y devices update --template "_.Select(input.value, 'id,name,other.*')" --dry
+```
+
+</CodeExample>
+
+```json title="Output (body only)"
+{
+  "id": "1234",
+  "name": "MyDevice",
+  "other": {
+    "nestedValue": 1
+  }
+}
+```
+
+
+### Example: Merging device managed object fragments
 
 Update a nested fragment is normally difficult as it involves retrieving the existing values, altering the existing values, then only sending the updated fragment to Cumulocity.
 
-This is made easier if you combine the piped data and using the `_.Merge()` function.
+This is made easier if you combine the piped data and using the `_.SelectMerge()` function.
 
 This examples shows how the `c8y_SupportedOperations` fragment can be extended to support a new type.
 
@@ -404,7 +448,7 @@ The following command will add `c8y_Command` to the list of supported operations
 
 ```bash
 c8y devices get --id 1234 |
-  c8y devices update --template "_.Merge('c8y_SupportedOperations', input.value, ['c8y_Command'])"
+  c8y devices update --template "_.SelectMerge(input.value, {c8y_SupportedOperations:['c8y_Command']})"
 ```
 
 </CodeExample>
@@ -447,7 +491,7 @@ The following command will remove the `otherValue` property from the `c8y_Model`
 
 ```bash
 c8y devices get --id 1234 |
-  c8y devices update --template "_.Merge('c8y_Model', input.value, {otherValue:: null})"
+  c8y devices update --template "_.DeprecatedMerge('c8y_Model', input.value, {otherValue:: null})"
 ```
 
 </CodeExample>
