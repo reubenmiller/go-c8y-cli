@@ -4,12 +4,12 @@ Function Install-ClientBinary {
 Install the Cumulocity cli binary (c8y)
 
 .DESCRIPTION
-Install the Cumulocity cli binary (c8y) so it is accessible from everywhere in consoles (assuming /usr/local/bin is in the $PATH variable)
+Install the Cumulocity cli binary (c8y) so it is accessible from everywhere in consoles (assuming /usr/bin is in the $PATH variable)
 
 .EXAMPLE
 Install-ClientBinary
 
-On Linux/MacOS, this installs the cumulocity binary to /usr/local/bin
+On Linux/MacOS, this installs the cumulocity binary to /usr/bin
 On Windows this will throw a warning
 
 .EXAMPLE
@@ -36,7 +36,7 @@ Install the Cumulocity binary to /usr/bin
 
     if ($IsMacOS -or $IsLinux) {
         if (!$InstallPath) {
-            $InstallPath = "/usr/local/bin"
+            $InstallPath = "/usr/bin"
         }
         $TargetBinary = "c8y"
         

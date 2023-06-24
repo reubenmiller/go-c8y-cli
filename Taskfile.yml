@@ -48,8 +48,8 @@ tasks:
       - build-snapshot
     cmds:
       - |
-        if [ ! -f /usr/local/bin/c8y ]; then \
-          sudo ln -s "$(pwd)/tools/PSc8y/Dependencies/c8y.linux" /usr/local/bin/c8y; \
+        if [ ! -f /usr/bin/c8y ]; then \
+          sudo ln -s "$(pwd)/tools/PSc8y/Dependencies/c8y.linux" /usr/bin/c8y; \
         fi
         cp ./tools/shell/c8y.plugin.sh ~/
         echo "source ~/c8y.plugin.sh"  >> ~/.bashrc
