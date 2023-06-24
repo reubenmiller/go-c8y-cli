@@ -70,7 +70,7 @@ tests:
 
   It does not try to merge string values:
     command: |
-      c8y template execute --template /Users/reubenmiller/dev/opensource/go-c8y-cli/tests/manual/template/input.json |
+      c8y template execute --template ./manual/template/input.json |
       c8y template execute --template "_.SelectMerge(input.value, {name:null})" --compact=false
 
     exit-code: 0
