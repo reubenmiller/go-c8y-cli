@@ -101,7 +101,7 @@ tests:
   It provides a function to get an optional value:
     command: |
       c8y template execute --template "{nestedProp:{othervalue: 1}}" |
-        c8y devices update --id 0 --dry --dryFormat json --template "_.Get('nestedProp', input.value, {dummy: 2})" |
+        c8y devices update --id 0 --dry --dryFormat json --template "_.DeprecatedGet('nestedProp', input.value, {dummy: 2})" |
         c8y util show --select body --compact=false
     stdout:
       exactly: |
@@ -115,7 +115,7 @@ tests:
   
   It provides a function to get an optional value - test:
       command: |
-          echo '{"nestedProp":{"otherValue":1}}' | c8y devices update --id 0 --dry --template "_.Get('nestedProp', input.value, {dummy: 2})"
+          echo '{"nestedProp":{"otherValue":1}}' | c8y devices update --id 0 --dry --template "_.DeprecatedGet('nestedProp', input.value, {dummy: 2})"
       exit-code: 0
       stdout:
           line-count: 1
@@ -125,7 +125,7 @@ tests:
   It provides a function to get an optional value and returns a default value if not present:
     command: |
       c8y template execute --template "{nestedProp:{othervalue: 1}}" |
-        c8y devices update --id 0 --dry --dryFormat json --template "_.Get('nestedProp2', input.value, {dummy: 2})" |
+        c8y devices update --id 0 --dry --dryFormat json --template "_.DeprecatedGet('nestedProp2', input.value, {dummy: 2})" |
         c8y util show --select body --compact=false
     stdout:
       exactly: |

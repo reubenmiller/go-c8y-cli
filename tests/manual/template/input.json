@@ -1,0 +1,11 @@
+{
+    "id": "1234",
+    "name": "testname",
+    "c8y_Firmware": {
+        "name": "linux",
+        "version": "1.0.0",
+        "url":"https://linux.com/linux.bin"
+    },
+    "c8y_IsDevice": {},
+    "c8y_SupportedOperations": ["c8y_Firmware"]
+}

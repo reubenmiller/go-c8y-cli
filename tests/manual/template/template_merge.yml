@@ -5,7 +5,7 @@ tests:
   It merges values array values:
     command: |
       c8y template execute --template "{nestedProp: {inputList:['existingValue'], othervalue: 'somevalue'}}" |
-      c8y template execute --template "_.Merge('nestedProp', input.value, {inputList+: ['newValue']})" --compact=false
+      c8y template execute --template "_.DeprecatedMerge('nestedProp', input.value, {inputList+: ['newValue']})" --compact=false
 
     exit-code: 0
     stdout:
@@ -20,7 +20,7 @@ tests:
   It merges values array values with any empty initial value:
     command: |
       c8y template execute --template "{}" |
-      c8y template execute --template "_.Merge('nestedProp', input.value, {inputList+: ['newValue']})" --compact=false
+      c8y template execute --template "_.DeprecatedMerge('nestedProp', input.value, {inputList+: ['newValue']})" --compact=false
 
     exit-code: 0
     stdout:
@@ -34,7 +34,7 @@ tests:
   It merges arrays when array is immediate key:
     command: |
       c8y template execute --template "{c8y_SupportedOperations:[]}" |
-      c8y template execute --template "_.Merge('c8y_SupportedOperations', input.value, ['newValue'])" --compact=false
+      c8y template execute --template "_.DeprecatedMerge('c8y_SupportedOperations', input.value, ['newValue'])" --compact=false
 
     exit-code: 0
     stdout:
@@ -46,7 +46,7 @@ tests:
   It merges an array when existing value does not exist:
     command: |
       c8y template execute --template "{}" |
-      c8y template execute --template "_.Merge('c8y_SupportedOperations', input.value, ['newValue'])" --compact=false
+      c8y template execute --template "_.DeprecatedMerge('c8y_SupportedOperations', input.value, ['newValue'])" --compact=false
 
     exit-code: 0
     stdout:
@@ -58,7 +58,7 @@ tests:
   It removes a nested fragment:
     command: |
       c8y template execute --template "{c8y_Model:{serialNumber:'123456789', otherValue: 'example'}}" |
-      c8y template execute --template "_.Merge('c8y_Model', input.value, {otherValue:: null})" --compact=false
+      c8y template execute --template "_.DeprecatedMerge('c8y_Model', input.value, {otherValue:: null})" --compact=false
 
     exit-code: 0
     stdout:

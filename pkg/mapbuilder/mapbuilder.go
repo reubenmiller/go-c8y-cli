@@ -323,9 +323,16 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		Digit(max=16):: std.native("Digit")(max),
 		AlphaNumeric(max=16):: std.native("AlphaNumeric")(max),
 		StripKeys(value={}):: value + {lastUpdated::'','self'::'',creationTime::'',additionParents::'',assetParents::'',childAdditions::'',childAssets::'',childDevices::'',deviceParents::''},
-		# TODO: Deprecate Merge=>SelectMerge and Get => Select
-		Merge(key, a={}, b={}):: _.Get(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b},
-		Get(key, o={}, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
+		# Deprecated: DeprecatedMerge=>SelectMerge and DeprecatedGet => Select
+		DeprecatedMerge(key, a={}, b={}):: _.DeprecatedGet(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b},
+		DeprecatedGet(key, o={}, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
+		Patch(target={}, patch)::
+			local _target = {
+				[item.key]: target[item.key]
+				for item in std.objectKeysValues(patch)
+				if std.objectHas(target, item.key)
+			};
+			std.mergePatch(_target, patch),
 		SelectMerge(a={}, b={})::
 			local _keys = std.objectFields(b);
 			if std.length(_keys) == 0 then
@@ -339,9 +346,13 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 				item + {
 					[key]+: b[key]
 					for key in _keys
+					if std.isObject(b[key]) || std.isArray(b[key])
+				} + {
+					[key]: b[key]
+					for key in _keys
+					if !(std.isObject(b[key]) || std.isArray(b[key]))
 				},
-
-		Get2(o, f, default=null)::
+		Get(o, f, default=null)::
 			local get_(o, ks) =
 				if ! std.objectHas(o, ks[0]) then
 					default

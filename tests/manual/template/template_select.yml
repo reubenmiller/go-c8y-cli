@@ -1,6 +1,19 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
 # Merge function
 tests:
+  It selects only top level fragments:
+    command: |
+      c8y template execute --template "{id: '1234', name:'peter',nestedProp: {inputList:['existingValue'], othervalue: 'somevalue'}}" |
+      c8y template execute --template "_.Select(input.value, '*')" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "id": "1234",
+          "name": "peter"
+        }
+
   It selects using a single level glob star:
     command: |
       c8y template execute --template "{name:'peter',nestedProp: {inputList:['existingValue'], othervalue: 'somevalue'}}" |
