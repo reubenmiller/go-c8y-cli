@@ -739,9 +739,6 @@ func (m *Manager) installDir() string {
 //go:embed ext_tmpls/script.sh
 var scriptTmpl string
 
-//go:embed ext_tmpls/script-inventory-example.sh
-var scriptInventoryTmpl string
-
 //go:embed ext_tmpls/README.md
 var readmeTmpl string
 
@@ -821,7 +818,9 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 	if err := writeFile(filepath.Join(subCommandsDir, "list"), []byte(script), 0755); err != nil {
 		return err
 	}
-	m.newCommand(exe, "-C", name, "add", filepath.Join(commandsName, "services", "list"), "--chmod=+x").Run()
+	if err := m.newCommand(exe, "-C", name, "add", filepath.Join(commandsName, "services", "list"), "--chmod=+x").Run(); err != nil {
+		return err
+	}
 
 	// stage remaining files
 	return m.newCommand(exe, "-C", name, "add", "**").Run()
