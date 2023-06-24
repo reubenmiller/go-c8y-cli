@@ -317,7 +317,7 @@ func formatJsonAssertion(jsonAssertion map[string]string, propType string, prop 
 				switch tv := v.(type) {
 				case map[string]interface{}:
 					if vjson, err := json.Marshal(tv); err == nil {
-						jsonAssertion[k] = fmt.Sprintf("%s", vjson)
+						jsonAssertion[k] = string(vjson)
 					}
 					// if len(tv) == 0 {
 					// 	jsonAssertion[k] = "{}"

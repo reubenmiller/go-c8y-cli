@@ -182,7 +182,7 @@ type RequestDetails struct {
 
 func (r *RequestHandler) DumpRequest(w io.Writer, req *http.Request) {
 	if out, err := httputil.DumpRequest(req, true); err == nil {
-		fmt.Fprint(w, r.HideSensitive(r.Client, fmt.Sprintf("%s", out)))
+		fmt.Fprint(w, r.HideSensitive(r.Client, string(out)))
 	}
 }
 
@@ -698,7 +698,9 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 		return nil, err
 	}
 
-	outputBuilder.AddLocalTemplateVariable("output", string(responseText))
+	if err := outputBuilder.AddLocalTemplateVariable("output", string(responseText)); err != nil {
+		return nil, err
+	}
 
 	outputBuilder.AppendTemplate(commonOptions.OutputTemplate)
 	out, outErr := outputBuilder.MarshalJSONWithInput(input)

@@ -88,7 +88,9 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						return cmderrors.NewUserError("Settings error. ", err)
 					}
 
-					f.WriteJSONToConsole(cfg, cmd, "", rowText)
+					if err := f.WriteJSONToConsole(cfg, cmd, "", rowText); err != nil {
+						return cmderrors.NewSystemError("Failed to write to console. ", err)
+					}
 				}
 				return nil
 			},
@@ -392,7 +394,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				RunE: func(cmd *cobra.Command, args []string) error {
 					if cmd.Flags().Changed("precompiled") {
 						if flagType != "go" && flagType != "other" {
-							return cmderrors.NewUserError("value for --precompiled must be 'go' or 'other'. Got '%s'", flagType)
+							return cmderrors.NewUserError(fmt.Sprintf("value for --precompiled must be 'go' or 'other'. Got '%s'", flagType))
 						}
 					}
 					var extName string

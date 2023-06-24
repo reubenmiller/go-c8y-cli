@@ -328,7 +328,9 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 	}
 
 	if p.IsHidden() && !p.AcceptsPipeline() {
-		cmd.Command.Flags().MarkHidden(p.Name)
+		if err := cmd.Command.Flags().MarkHidden(p.Name); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -676,7 +678,7 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 
 	// Add flags/completions for preset extensions
 	for _, p := range template.Extensions {
-		AddFlag(cmd, &p, factory)
+		_ = AddFlag(cmd, &p, factory)
 		cmd.Completion = AppendCompletionOptions(cmd.Completion, cmd, &p, factory)
 	}
 
