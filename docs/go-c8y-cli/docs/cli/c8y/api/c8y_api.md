@@ -21,6 +21,13 @@ Get a list of alarms
 $ c8y api GET "/alarm/alarms&status=ACTIVE" --pageSize 10
 Get a list of alarms with custom query parameters
 
+$ c8y api GET "/dosomething" --host localhost:8080
+Send a GET request to a custom hosted service running on localhost port 8080. You can force https or http by adding them as a prefix to the host.
+
+$ c8y api GET "/dosomething" --host $C8Y_HOST/service/mymicroservice --dry
+Send a request to a microservice hosted in the cloud. The /dosomething will be appended to the /service/mymicroservice path provided by the host flag.
+Results in the following request: GET /service/mymicroservice/dosomething sent to the  current session URL.
+
 $ c8y api GET "/alarm/alarms&status=ACTIVE" --pageSize 1 --withTotalPages
 Get a total ACTIVE alarms
 
