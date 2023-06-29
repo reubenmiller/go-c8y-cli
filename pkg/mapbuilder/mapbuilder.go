@@ -206,6 +206,50 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 	})
 
 	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Duration",
+		Params: ast.Identifiers{"dateA", "dateB", "unit"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			// duration = DateA - DateB
+			dateA := getStringParameter(parameters, 0)
+			dateB := getStringParameter(parameters, 1)
+
+			tsA, err := timestamp.ParseTimestamp(dateA)
+			if err != nil {
+				return nil, err
+			}
+
+			tsB, err := timestamp.ParseTimestamp(dateB)
+			if err != nil {
+				return nil, err
+			}
+
+			diff := tsA.Sub(tsB)
+
+			// Round date to nearest milliseconds
+			diff = diff.Round(time.Millisecond)
+
+			unit := getStringParameter(parameters, 2)
+
+			switch unit {
+			case "string", "str", "duration":
+				return diff.String(), nil
+			case "milliseconds", "ms":
+				return float64(diff.Milliseconds()), nil
+			case "days", "d":
+				return diff.Hours() / 24, nil
+			case "hours", "h", "hrs", "hr":
+				return diff.Hours(), nil
+			case "minutes", "mins", "m":
+				return diff.Minutes(), nil
+			case "seconds", "s", "sec":
+				return diff.Seconds(), nil
+			default:
+				return diff.String(), nil
+			}
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
 		Name:   "GetURLPath",
 		Params: ast.Identifiers{"url"},
 		Func: func(parameters []interface{}) (interface{}, error) {
@@ -388,6 +432,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		DeprecatedMerge(key, a={}, b={}):: _.DeprecatedGet(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b},
 		DeprecatedGet(key, o={}, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
 		Date(now="0s", offset="0s", format="", utc=false):: std.native("Date")(now=now, offset=offset, format=format, utc=utc),
+		Duration(dateA="", dateB="", unit=''):: std.native("Duration")(dateA=dateA, dateB=dateB, unit=unit),
 		Patch(target={}, patch)::
 			local _target = {
 				[item.key]: target[item.key]

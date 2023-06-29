@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# Duration Function
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+    C8Y_SETTINGS_DEFAULTS_COMPACT: false
+tests:
+  It calculates the duration between two dates (dateA - dateB):
+    command: |
+      c8y template execute --template "_.Duration('Thu Jun 29 09:05:14 CEST 2023', 'Thu Jun 29 09:00:10 CEST 2023')"
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        5m4s
+
+  It calculates the duration between now and a date:
+    # Don't check the output as the output varies over time
+    command: |
+      c8y template execute --template "_.Duration('Thu Jun 29 09:05:14 CEST 2023')"
+    exit-code: 0
+  
+  It can convert time units:
+    command: |
+      c8y template execute --template "_.Duration('1h12min', unit='seconds')"
+    exit-code: 0
+    stdout:
+      exactly: |
+        4320
+
+  It supports adding a random offset in seconds (negative):
+    command: |
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='hrs')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='hours')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='h')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='mins')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='m')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='minutes')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='seconds')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='sec')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='s')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='ms')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='milliseconds')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='days')"
+      c8y template execute --template "_.Duration('2023-06-30T09:05:14', 'Thu Jun 29 09:00:10 CEST 2023', unit='d')"
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        26.084444444444443
+        26.084444444444443
+        26.084444444444443
+        1565.0666666666666
+        1565.0666666666666
+        1565.0666666666666
+        93904
+        93904
+        93904
+        26h5m4s
+        26h5m4s
+        93904000
+        93904000
+        1.0868518518518517
+        1.0868518518518517
