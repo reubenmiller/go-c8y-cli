@@ -387,7 +387,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		# Deprecated: DeprecatedMerge=>SelectMerge and DeprecatedGet => Select
 		DeprecatedMerge(key, a={}, b={}):: _.DeprecatedGet(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b},
 		DeprecatedGet(key, o={}, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
-		Date(now, offset="0s", format="", utc=false):: std.native("Date")(now=now, offset=offset, format=format, utc=utc),
+		Date(now="0s", offset="0s", format="", utc=false):: std.native("Date")(now=now, offset=offset, format=format, utc=utc),
 		Patch(target={}, patch)::
 			local _target = {
 				[item.key]: target[item.key]
