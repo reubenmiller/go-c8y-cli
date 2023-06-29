@@ -168,7 +168,25 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 			default:
 				offset = fmt.Sprintf("%vs", value)
 			}
-			d, err := timestamp.AddDateTime(getStringParameter(parameters, 0), offset)
+
+			var d time.Time
+			var err error
+
+			nowRaw := getParameter(parameters, 0)
+			if nowRaw == nil {
+				return nil, fmt.Errorf("missing date")
+			}
+
+			switch now := nowRaw.(type) {
+			case float64:
+				d, err = timestamp.AddDateTime(fmt.Sprintf("%v", int(now)), offset)
+			case float32:
+				d, err = timestamp.AddDateTime(fmt.Sprintf("%v", int(now)), offset)
+			case string:
+				d, err = timestamp.AddDateTime(now, offset)
+			default:
+				return nil, fmt.Errorf("invalid date format")
+			}
 			if err != nil {
 				return nil, err
 			}

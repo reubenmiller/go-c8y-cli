@@ -70,3 +70,12 @@ tests:
         {
           "time": "2023-06-29T07:05:14.000Z"
         }
+
+  It supports linux timestamp in milliseconds and seconds:
+    command: |
+      c8y template execute --template "_.Date(1688064371234, '10s', utc=true)"
+      c8y template execute --template "_.Date(1688064371, '11s', utc=true)"
+    stdout:
+      exactly: |
+        2023-06-29T18:46:21.234Z
+        2023-06-29T18:46:22.000Z
