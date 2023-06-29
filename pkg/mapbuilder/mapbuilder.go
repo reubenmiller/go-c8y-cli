@@ -157,17 +157,33 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 	})
 
 	vm.NativeFunction(&jsonnet.NativeFunction{
-		Name:   "AddDateTime",
-		Params: ast.Identifiers{"now", "offset"},
+		Name:   "AddDate",
+		Params: ast.Identifiers{"now", "offset", "format", "utc"},
 		Func: func(parameters []interface{}) (interface{}, error) {
-			d, err := timestamp.AddDateTime(getStringParameter(parameters, 0), getStringParameter(parameters, 1))
+			offsetRaw := getParameter(parameters, 1)
+			offset := ""
+			switch value := offsetRaw.(type) {
+			case string:
+				offset = value
+			default:
+				offset = fmt.Sprintf("%vs", value)
+			}
+			d, err := timestamp.AddDateTime(getStringParameter(parameters, 0), offset)
 			if err != nil {
 				return nil, err
 			}
 
-			// TODO: Make format optional, default to milliseconds (not nano seconds)
-			RFC3339Milli := "2006-01-02T15:04:05.000Z07:00"
-			return d.Format(RFC3339Milli), nil
+			format := "2006-01-02T15:04:05.000Z07:00"
+			if timeFormat := strings.TrimSpace(getStringParameter(parameters, 2)); timeFormat != "" {
+				format = timeFormat
+			}
+
+			useUTC := getBooleanParameter(parameters, 3, false)
+			if useUTC {
+				return d.UTC().Format(format), nil
+			}
+
+			return d.Format(format), nil
 		},
 	})
 
@@ -297,6 +313,18 @@ func getFloatParameter(parameters []interface{}, i int) float64 {
 	return 0
 }
 
+func getBooleanParameter(parameters []interface{}, i int, defaultValue bool) bool {
+	if len(parameters) > 0 && i < len(parameters) {
+		value, err := strconv.ParseBool(fmt.Sprintf("%v", parameters[i]))
+
+		if err != nil {
+			return defaultValue
+		}
+		return value
+	}
+	return defaultValue
+}
+
 func getStringParameter(parameters []interface{}, i int) string {
 	if len(parameters) > 0 && i < len(parameters) {
 		switch v := parameters[i].(type) {
@@ -341,7 +369,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		# Deprecated: DeprecatedMerge=>SelectMerge and DeprecatedGet => Select
 		DeprecatedMerge(key, a={}, b={}):: _.DeprecatedGet(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b},
 		DeprecatedGet(key, o={}, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
-		AddDateTime(now, offset="0s"):: std.native("AddDateTime")(now, offset),
+		AddDate(now, offset="0s", format="", utc=false):: std.native("AddDate")(now=now, offset=offset, format=format, utc=utc),
 		Patch(target={}, patch)::
 			local _target = {
 				[item.key]: target[item.key]
