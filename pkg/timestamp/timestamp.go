@@ -138,7 +138,7 @@ func AddDateTime(now any, offset string) (ts time.Time, err error) {
 	case *time.Time:
 		tsNow = *v
 	default:
-		err = fmt.Errorf("unsupported datetime type")	
+		err = fmt.Errorf("unsupported datetime type")
 		return
 	}
 
