@@ -14,6 +14,9 @@ import (
 // ParseDurationRelativeToNow("-1m")
 func ParseDurationRelativeToNow(offsetDuration string) (*time.Time, error) {
 	now := time.Now()
+	if offsetDuration == "now" {
+		return GetTimestampUsingOffset(now, "")
+	}
 	return GetTimestampUsingOffset(now, offsetDuration)
 }
 
