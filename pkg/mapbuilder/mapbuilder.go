@@ -243,6 +243,15 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 				return diff.Minutes(), nil
 			case "seconds", "s", "sec":
 				return diff.Seconds(), nil
+			case "object":
+				duration := map[string]any{}
+				duration["milliseconds"] = float64(diff.Milliseconds())
+				duration["seconds"] = diff.Seconds()
+				duration["minutes"] = diff.Minutes()
+				duration["hours"] = diff.Hours()
+				duration["days"] = diff.Hours() / 24
+				duration["duration"] = diff.String()
+				return duration, nil
 			default:
 				return diff.String(), nil
 			}
@@ -432,7 +441,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		DeprecatedMerge(key, a={}, b={}):: _.DeprecatedGet(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b},
 		DeprecatedGet(key, o={}, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
 		Date(now="0s", offset="0s", format="", utc=false):: std.native("Date")(now=now, offset=offset, format=format, utc=utc),
-		Duration(dateA="", dateB="", unit=''):: std.native("Duration")(dateA=dateA, dateB=dateB, unit=unit),
+		Duration(dateA="", dateB="", unit='object'):: std.native("Duration")(dateA=dateA, dateB=dateB, unit=unit),
 		Patch(target={}, patch)::
 			local _target = {
 				[item.key]: target[item.key]
