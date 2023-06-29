@@ -35,7 +35,7 @@ tests:
     stdout:
       exactly: |
         {
-          "time": "2023-06-29T09:04:54.000+02:00"
+          "time": "2023-06-29T07:04:54.000Z"
         }
 
   It supports subtracting a relative offset:
