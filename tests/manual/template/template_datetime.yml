@@ -7,7 +7,7 @@ config:
 tests:
   It adds a relative time to an existing time:
     command: |
-      c8y template execute --template "{time: _.AddDate('Thu Jun 29 09:05:14 CEST 2023', '10s')}" -c=false
+      c8y template execute --template "{time: _.Date('Thu Jun 29 09:05:14 CEST 2023', '10s')}" -c=false
 
     exit-code: 0
     stdout:
@@ -18,7 +18,7 @@ tests:
 
   It supports adding a random offset in seconds (positive):
     command: |
-      c8y template execute --template "{time: _.AddDate('Thu Jun 29 09:05:14 CEST 2023', 10)}" -c=false
+      c8y template execute --template "{time: _.Date('Thu Jun 29 09:05:14 CEST 2023', 10)}" -c=false
 
     exit-code: 0
     stdout:
@@ -29,7 +29,7 @@ tests:
 
   It supports adding a random offset in seconds (negative):
     command: |
-      c8y template execute --template "{time: _.AddDate('Thu Jun 29 09:05:14 CEST 2023', -20)}" -c=false
+      c8y template execute --template "{time: _.Date('Thu Jun 29 09:05:14 CEST 2023', -20)}" -c=false
 
     exit-code: 0
     stdout:
@@ -40,7 +40,7 @@ tests:
 
   It supports subtracting a relative offset:
     command: |
-      c8y template execute --template "{time: _.AddDate('Thu Jun 29 09:05:14 CEST 2023', '-10s')}" -c=false
+      c8y template execute --template "{time: _.Date('Thu Jun 29 09:05:14 CEST 2023', '-10s')}" -c=false
 
     exit-code: 0
     stdout:
@@ -51,7 +51,7 @@ tests:
   
   It supports custom time format string (go style):
     command: |
-      c8y template execute --template "{time: _.AddDate('Thu Jun 29 09:05:14 CEST 2023', '-30d', '2006-01-02')}" -c=false
+      c8y template execute --template "{time: _.Date('Thu Jun 29 09:05:14 CEST 2023', '-30d', '2006-01-02')}" -c=false
 
     exit-code: 0
     stdout:
@@ -62,7 +62,7 @@ tests:
 
   It supports formatting as utc:
     command: |
-      c8y template execute --template "{time: _.AddDate('Thu Jun 29 09:05:14 CEST 2023', utc=true)}" -c=false
+      c8y template execute --template "{time: _.Date('Thu Jun 29 09:05:14 CEST 2023', utc=true)}" -c=false
 
     exit-code: 0
     stdout:

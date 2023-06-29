@@ -157,7 +157,7 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 	})
 
 	vm.NativeFunction(&jsonnet.NativeFunction{
-		Name:   "AddDate",
+		Name:   "Date",
 		Params: ast.Identifiers{"now", "offset", "format", "utc"},
 		Func: func(parameters []interface{}) (interface{}, error) {
 			offsetRaw := getParameter(parameters, 1)
@@ -369,7 +369,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		# Deprecated: DeprecatedMerge=>SelectMerge and DeprecatedGet => Select
 		DeprecatedMerge(key, a={}, b={}):: _.DeprecatedGet(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b},
 		DeprecatedGet(key, o={}, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
-		AddDate(now, offset="0s", format="", utc=false):: std.native("AddDate")(now=now, offset=offset, format=format, utc=utc),
+		Date(now, offset="0s", format="", utc=false):: std.native("Date")(now=now, offset=offset, format=format, utc=utc),
 		Patch(target={}, patch)::
 			local _target = {
 				[item.key]: target[item.key]
