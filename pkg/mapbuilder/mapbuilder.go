@@ -157,6 +157,21 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 	})
 
 	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "AddDateTime",
+		Params: ast.Identifiers{"now", "offset"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			d, err := timestamp.AddDateTime(getStringParameter(parameters, 0), getStringParameter(parameters, 1))
+			if err != nil {
+				return nil, err
+			}
+
+			// TODO: Make format optional, default to milliseconds (not nano seconds)
+			RFC3339Milli := "2006-01-02T15:04:05.000Z07:00"
+			return d.Format(RFC3339Milli), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
 		Name:   "GetURLPath",
 		Params: ast.Identifiers{"url"},
 		Func: func(parameters []interface{}) (interface{}, error) {
@@ -326,6 +341,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		# Deprecated: DeprecatedMerge=>SelectMerge and DeprecatedGet => Select
 		DeprecatedMerge(key, a={}, b={}):: _.DeprecatedGet(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b},
 		DeprecatedGet(key, o={}, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
+		AddDateTime(now, offset="0s"):: std.native("AddDateTime")(now, offset),
 		Patch(target={}, patch)::
 			local _target = {
 				[item.key]: target[item.key]

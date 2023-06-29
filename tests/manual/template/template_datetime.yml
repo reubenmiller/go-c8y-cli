@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# AddDateTime Function
+tests:
+  It adds a relative time to an existing time:
+    command: |
+      c8y template execute --template "{time: _.AddDateTime('Thu Jun 29 09:05:14 CEST 2023', '10s')}"
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "time": "2023-06-29T09:05:24.000+02:00"
+        }
+
+  It supports adding a random offset in seconds:
+    command: |
+      c8y template execute --template "{time: _.AddDateTime('Thu Jun 29 09:05:14 CEST 2023', 10)}"
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "time": "2023-06-29T09:05:24.000+02:00"
+        }
+
+  It supports subtracting a relative offset:
+    command: |
+      c8y template execute --template "{time: _.AddDateTime('Thu Jun 29 09:05:14 CEST 2023', '-10s')}"
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "time": "2023-06-29T09:05:04.000+02:00"
+        }
