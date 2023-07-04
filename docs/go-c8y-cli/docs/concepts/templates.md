@@ -200,6 +200,8 @@ Below lists the additional functions which are available in jsonnet template fil
 |_.Has(object, key) | Check if a key exists in an object. Accept dot notation as the key | - |
 |_.Select(object, keys=['*']) | Select specific keys from a given object. It behaves the same as the `--select` flag. `keys` can also be provided as a csv string | See examples |
 |_.SelectMerge(a={}, b={}) | Merge b into a, but only include the fields which are present in b | See examples |
+|_.Date(now="now", offset="0s", format="", utc=false)| Generic date function to either format or add a relative duration to a timestamp. | See examples |
+|_.Duration(dateA='now', dateB='now', unit='object')|Get the duration (difference) between two timestamps. The duration is calculated by `duration = dateA - dateB`| See examples |
 
 
 ### Example: Generating random data
@@ -555,6 +557,135 @@ c8y devices list --pageSize 1 --select '**,copiedFrom:id,!id,!lastUpdated' |
   "self": "https://t12345.example.c8y.com/inventory/managedObjects/519792",
   "type": "altest"
 }
+```
+
+### Example: add durations to a fixed timestamp
+
+This example uses a fixed timestamp, however you can specify the datetime in a lot of different formats, below are some of the more common formats:
+
+```
+2013-06-29T09:05:14.00+0200
+2013-06-29T09:05:14.00Z
+2013-06-29
+1688064371  (linux timestamp in seconds)
+1688064371  (linux timestamp in milliseconds)
+```
+
+Some example of date manipulation are show below:
+
+```sh
+# Add seconds
+c8y template execute --template "_.Date('2023-06-29T09:05:14.000+0200', '10s')"
+# => 2023-06-29T09:05:24.000+02:00
+
+# Add days
+c8y template execute --template "_.Date('2023-06-29T09:05:14.000+0200', '10d')"
+# => 2023-07-09T09:05:14.000+02:00
+
+# Subtract seconds (as integer)
+c8y template execute --template "_.Date('2023-06-29T09:05:14.000+0200', -20.2)"
+# => 2023-06-29T09:04:53.800+02:00
+
+# Add randomized delay in seconds between 60 and 120 seconds
+c8y template execute --template "_.Date('2023-06-29T09:05:14.000+0200', _.Int(60, 120))"
+# => 2023-06-29T09:06:25.000+02:00
+
+# Get date in utc
+c8y template execute --template "_.Date('2023-06-29T09:05:14.000+0200', utc=true)"
+# => 2023-06-29T07:05:14.000Z
+
+# Get date in utc
+c8y template execute --template "_.Date('2023-06-29T09:05:14.000+0200', utc=true)"
+# => 2023-06-29T07:05:14.000Z
+
+# Just return the date (not the time). This uses custom format string using go's slightly weird formatting syntax, see golang https://pkg.go.dev/time#pkg-constants for details
+c8y template execute --template "_.Date('2023-06-29T09:05:14.000+0200', format='2006-02-01', utc=true)"
+# => 2023-29-06
+```
+
+### Example: Generate new events from existing ones but add an offset to the timestamp
+
+```sh
+c8y events list -p 1 --select '**,!id,!lastUpdated,!creationTime,!self' \
+| c8y events create --template "input.value + {time: _.Date(input.value.time, '2months')}" --dry
+```
+
+The same example can be randomized by using the `_.Int()` function to returned a value between 1 and 5, and using a jsonnet format string to build offset in months, e.g. `4months`.
+
+```sh
+c8y events list -p 1 --select '**,!id,!lastUpdated,!creationTime,!self' \
+| c8y events create --template "input.value + {time: _.Date(input.value.time, '%smonths' % _.Int(1,5))}" --dry
+```
+
+### Example: Calculate a duration between two dates
+
+By default the `_.Duration()` function returns an object with properties containing the same duration in various formats. You can then access them using normal dot notation, e.g. `_.Duration('2023-01-01', '2020-01-01').minutes`.
+
+```json
+{
+    "days": 0.0035185185185185185,
+    "duration": "5m4s",
+    "hours": 0.08444444444444445,
+    "milliseconds": 304000,
+    "minutes": 5.066666666666666,
+    "seconds": 304
+}
+```
+
+Alternatively you can specify which units you want returned by providing the `unit="<type>"` named argument.
+Supported `unit` values:
+
+|Unit|Example|
+|---|---|
+|`object` (default)| `{"days":0.0035185185185185185,"duration":"5m4s","hours":0.08444444444444445,"milliseconds":304000,"minutes":5.066666666666666,"seconds":304}`|
+|`duration`| `"32h9m12.6s"`|
+|`days`, `d`| `1.02`|
+|`hours`, `h`| `32.5`|
+|`minutes`, `m`| `16.1`|
+|`seconds`, `s`| `12.1`|
+|`milliseconds`, `ms`| `12100`|
+
+### Example: Check out long ago an event was created
+
+You can get the relative timestamp (to now) as a human friendly string (e.g. -5.6seconds, -32h30min2s etc.)
+
+```sh
+c8y events list -p 5 | c8y template execute --template "{id: input.value.id, relativeTime: _.Duration(input.value.time).duration}"
+| id           | relativeTime |
+|--------------|--------------|
+| 2776297      | -5.605s      |
+| 2776296      | -7.763s      |
+| 2775121      | -8.206s      |
+| 2776295      | -8.208s      |
+| 2658776      | -32h9m12.6s  |
+```
+
+You can also control the units to return the value in seconds.
+
+```sh
+c8y events list -p 5 | c8y template execute --template "{id: input.value.id, time: input.value.time, relativeTime: _.Duration(input.value.time, unit='seconds')}"
+| id           | relativeTime     | time                          |
+|--------------|------------------|-------------------------------|
+| 2658776      | -116010.555      | 2023-06-28T12:04:56.671Z      |
+| 2658770      | -116012.645      | 2023-06-28T12:04:54.591Z      |
+| 2658693      | -117088.392      | 2023-06-28T11:46:58.845Z      |
+| 2658687      | -117090.536      | 2023-06-28T11:46:56.702Z      |
+| 2673447      | -122514.6        | 2023-06-28T10:16:32.641Z      |
+```
+
+### Example: Convert units of time
+
+You can also use it to convert between different units of time, e.g. hours => seconds, seconds to days etc.
+
+```sh
+c8y template execute --template "_.Duration('1h12min', unit='seconds')"
+# => 4320
+
+c8y template execute --template "_.Duration('1h', unit='seconds')"
+# => 3600
+
+c8y template execute --template "_.Duration('10s', unit='days')"
+# => 0.00011574074074074075
 ```
 
 ## Template settings
