@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
-# AddDateTime Function
+# Date Function
 config:
   env:
     C8Y_SETTINGS_DEFAULTS_OUTPUT: json
