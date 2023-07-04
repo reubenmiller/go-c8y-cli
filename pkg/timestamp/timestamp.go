@@ -1,6 +1,7 @@
 package timestamp
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -13,6 +14,9 @@ import (
 // ParseDurationRelativeToNow("-1m")
 func ParseDurationRelativeToNow(offsetDuration string) (*time.Time, error) {
 	now := time.Now()
+	if offsetDuration == "now" {
+		return GetTimestampUsingOffset(now, "")
+	}
 	return GetTimestampUsingOffset(now, offsetDuration)
 }
 
@@ -115,5 +119,34 @@ func ParseTimestamp(value string) (ts time.Time, err error) {
 		return
 	}
 
+	return
+}
+
+// AddDateTime adds an offset to a given timestamp (either as string or time.Time)
+func AddDateTime(now any, offset string) (ts time.Time, err error) {
+	// Try parsing relative timestamp
+
+	var tsNow time.Time
+	switch v := now.(type) {
+	case string:
+		tsNow, err = ParseTimestamp(v)
+		if err != nil {
+			return
+		}
+	case time.Time:
+		tsNow = v
+	case *time.Time:
+		tsNow = *v
+	default:
+		err = fmt.Errorf("unsupported datetime type")
+		return
+	}
+
+	ts1, offsetErr := GetTimestampUsingOffset(tsNow, offset)
+	if offsetErr != nil {
+		err = offsetErr
+		return
+	}
+	ts = *ts1
 	return
 }

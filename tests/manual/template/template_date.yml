@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# Date Function
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+    C8Y_SETTINGS_DEFAULTS_COMPACT: false
+tests:
+  It adds a relative time to an existing time:
+    command: |
+      c8y template execute --template "{time: _.Date('2023-06-29T09:05:14.000+0200', '10s', utc=true)}" -c=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "time": "2023-06-29T07:05:24.000Z"
+        }
+
+  It supports adding a random offset in seconds (positive):
+    command: |
+      c8y template execute --template "{time: _.Date('2023-06-29T09:05:14.000+0200', 10, utc=true)}" -c=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "time": "2023-06-29T07:05:24.000Z"
+        }
+
+  It supports adding a random offset in seconds (negative):
+    command: |
+      c8y template execute --template "{time: _.Date('2023-06-29T09:05:14.000+0200', -20, utc=true)}" -c=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "time": "2023-06-29T07:04:54.000Z"
+        }
+
+  It supports subtracting a relative offset:
+    command: |
+      c8y template execute --template "{time: _.Date('2023-06-29T09:05:14.000+0200', '-10s', utc=true)}" -c=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "time": "2023-06-29T07:05:04.000Z"
+        }
+  
+  It supports custom time format string (go style):
+    command: |
+      c8y template execute --template "{time: _.Date('2023-06-29T09:05:14.000+0200', '-30d', '2006-01-02')}" -c=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "time": "2023-05-30"
+        }
+
+  It supports formatting as utc:
+    command: |
+      c8y template execute --template "{time: _.Date('2023-06-29T09:05:14.000+0200', utc=true)}" -c=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "time": "2023-06-29T07:05:14.000Z"
+        }
+
+  It supports linux timestamp in milliseconds and seconds:
+    command: |
+      c8y template execute --template "_.Date(1688064371234, '10s', utc=true)"
+      c8y template execute --template "_.Date(1688064371, '11s', utc=true)"
+    stdout:
+      exactly: |
+        2023-06-29T18:46:21.234Z
+        2023-06-29T18:46:22.000Z

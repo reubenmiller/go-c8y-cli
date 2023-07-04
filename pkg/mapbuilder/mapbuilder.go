@@ -157,6 +157,108 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 	})
 
 	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Date",
+		Params: ast.Identifiers{"now", "offset", "format", "utc"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			offsetRaw := getParameter(parameters, 1)
+			offset := ""
+			switch value := offsetRaw.(type) {
+			case string:
+				offset = value
+			default:
+				offset = fmt.Sprintf("%vs", value)
+			}
+
+			var d time.Time
+			var err error
+
+			nowRaw := getParameter(parameters, 0)
+			if nowRaw == nil {
+				return nil, fmt.Errorf("missing date")
+			}
+
+			switch now := nowRaw.(type) {
+			case float64:
+				d, err = timestamp.AddDateTime(fmt.Sprintf("%v", int(now)), offset)
+			case float32:
+				d, err = timestamp.AddDateTime(fmt.Sprintf("%v", int(now)), offset)
+			case string:
+				d, err = timestamp.AddDateTime(now, offset)
+			default:
+				return nil, fmt.Errorf("invalid date format")
+			}
+			if err != nil {
+				return nil, err
+			}
+
+			format := "2006-01-02T15:04:05.000Z07:00"
+			if timeFormat := strings.TrimSpace(getStringParameter(parameters, 2)); timeFormat != "" {
+				format = timeFormat
+			}
+
+			useUTC := getBooleanParameter(parameters, 3, false)
+			if useUTC {
+				return d.UTC().Format(format), nil
+			}
+
+			return d.Format(format), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Duration",
+		Params: ast.Identifiers{"dateA", "dateB", "unit"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			// duration = DateA - DateB
+			dateA := getStringParameter(parameters, 0)
+			dateB := getStringParameter(parameters, 1)
+
+			tsA, err := timestamp.ParseTimestamp(dateA)
+			if err != nil {
+				return nil, err
+			}
+
+			tsB, err := timestamp.ParseTimestamp(dateB)
+			if err != nil {
+				return nil, err
+			}
+
+			diff := tsA.Sub(tsB)
+
+			// Round date to nearest milliseconds
+			diff = diff.Round(time.Millisecond)
+
+			unit := getStringParameter(parameters, 2)
+
+			switch unit {
+			case "string", "str", "duration":
+				return diff.String(), nil
+			case "milliseconds", "ms":
+				return float64(diff.Milliseconds()), nil
+			case "days", "d":
+				return diff.Hours() / 24, nil
+			case "hours", "h", "hrs", "hr":
+				return diff.Hours(), nil
+			case "minutes", "mins", "m":
+				return diff.Minutes(), nil
+			case "seconds", "s", "sec":
+				return diff.Seconds(), nil
+			case "object":
+				duration := map[string]any{}
+				duration["milliseconds"] = float64(diff.Milliseconds())
+				duration["seconds"] = diff.Seconds()
+				duration["minutes"] = diff.Minutes()
+				duration["hours"] = diff.Hours()
+				duration["days"] = diff.Hours() / 24
+				duration["duration"] = diff.String()
+				return duration, nil
+			default:
+				return diff.String(), nil
+			}
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
 		Name:   "GetURLPath",
 		Params: ast.Identifiers{"url"},
 		Func: func(parameters []interface{}) (interface{}, error) {
@@ -282,6 +384,18 @@ func getFloatParameter(parameters []interface{}, i int) float64 {
 	return 0
 }
 
+func getBooleanParameter(parameters []interface{}, i int, defaultValue bool) bool {
+	if len(parameters) > 0 && i < len(parameters) {
+		value, err := strconv.ParseBool(fmt.Sprintf("%v", parameters[i]))
+
+		if err != nil {
+			return defaultValue
+		}
+		return value
+	}
+	return defaultValue
+}
+
 func getStringParameter(parameters []interface{}, i int) string {
 	if len(parameters) > 0 && i < len(parameters) {
 		switch v := parameters[i].(type) {
@@ -326,6 +440,8 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		# Deprecated: DeprecatedMerge=>SelectMerge and DeprecatedGet => Select
 		DeprecatedMerge(key, a={}, b={}):: _.DeprecatedGet(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b},
 		DeprecatedGet(key, o={}, defaultValue={}):: if std.type(o) == "object" && std.objectHas(o, key) then {[key]: o[key]} else {[key]: defaultValue},
+		Date(now="0s", offset="0s", format="", utc=false):: std.native("Date")(now=now, offset=offset, format=format, utc=utc),
+		Duration(dateA="", dateB="", unit='object'):: std.native("Duration")(dateA=dateA, dateB=dateB, unit=unit),
 		Patch(target={}, patch)::
 			local _target = {
 				[item.key]: target[item.key]
