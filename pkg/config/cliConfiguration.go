@@ -274,6 +274,9 @@ const (
 	// SettingsLoginType preferred login type, i.e. BASIC, OAUTH_INTERNAL etc.
 	SettingsLoginType = "settings.login.type"
 
+	// SettingsSessionAlwaysIncludePassword should the password always be included in the session variables or not
+	SettingsSessionAlwaysIncludePassword = "settings.session.alwaysIncludePassword"
+
 	// Cache settings
 	// SettingsDefaultsCacheEnabled enable caching
 	SettingsDefaultsCacheEnabled = "settings.defaults.cache"
@@ -469,6 +472,9 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsCacheBodyPaths, ""),
 		WithBindEnv(SettingsCacheMode, nil),
 		WithBindEnv(SettingsCacheDir, filepath.Join(os.TempDir(), "go-c8y-cli-cache")),
+
+		// Session options
+		WithBindEnv(SettingsSessionAlwaysIncludePassword, false),
 
 		WithBindEnv(SettingsBrowser, ""),
 
@@ -942,6 +948,11 @@ func (c *Config) GetStringSlice(key string) []string {
 // GetDefaultUsername returns the default username
 func (c *Config) GetDefaultUsername() string {
 	return c.viper.GetString("settings.session.defaultUsername")
+}
+
+// AlwaysIncludePassword password when setting a session
+func (c *Config) AlwaysIncludePassword() bool {
+	return c.viper.GetBool(SettingsSessionAlwaysIncludePassword)
 }
 
 // CachePassphraseVariables return true if the passphrase variables should be persisted or not

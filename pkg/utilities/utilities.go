@@ -63,7 +63,7 @@ const (
 )
 
 func ShowClientEnvironmentVariables(cfg *config.Config, c8yclient *c8y.Client, shell ShellType) {
-	output := cfg.GetEnvironmentVariables(c8yclient, false)
+	output := cfg.GetEnvironmentVariables(c8yclient, cfg.AlwaysIncludePassword())
 	ShowEnvironmentVariables(output, shell)
 }
 
