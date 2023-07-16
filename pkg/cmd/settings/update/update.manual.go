@@ -299,6 +299,10 @@ var updateSettingsOptions = map[string]argumentHandler{
 
 	// session
 	"session.defaultUsername": {"session.defaultUsername", "string", "settings.session.defaultUsername", []string{}, nil, cobra.ShellCompDirectiveDefault},
+	"session.alwaysIncludePassword": {"session.alwaysIncludePassword", "bool", config.SettingsSessionAlwaysIncludePassword, []string{
+		"true",
+		"false",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// cache
 	"defaults.cache": {"defaults.cache", "bool", config.SettingsDefaultsCacheEnabled, []string{
