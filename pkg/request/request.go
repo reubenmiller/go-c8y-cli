@@ -718,28 +718,34 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 	}
 
 	// Display log output in special scenarios (i.e. Delete and no Accept header), so the user gets some feedback that it did something
-	if resp != nil && (resp.Response.Request.Method == http.MethodDelete && resp.StatusCode() == 204 || resp.Response.Request.Header.Get("Accept") == "" && resp.Response.Request.Method != http.MethodDelete && (resp.StatusCode() == 201 || resp.StatusCode() == 200)) {
-		if r.IsTerminal && !r.Config.ShowProgress() {
-			cs := r.IO.ColorScheme()
+	if resp != nil {
+		showMessage := resp.StatusCode() == 204 ||
+			(resp.Response.Header.Get("Content-Type") == "" ||
+				resp.Response.Request.Header.Get("Accept") == "") && resp.StatusCode() >= 200 && resp.StatusCode() < 400
 
-			actionText := ""
-			actionColor := cs.Green
-			switch resp.Response.Request.Method {
-			case http.MethodDelete:
-				actionText = "Deleted"
-				actionColor = cs.Red
-			case http.MethodPut:
-				actionText = "Updated"
+		if showMessage {
+			if r.IsTerminal && !r.Config.ShowProgress() {
+				cs := r.IO.ColorScheme()
 
-			case http.MethodPost:
-				actionText = "Created"
+				actionText := ""
+				actionColor := cs.Green
+				switch resp.Response.Request.Method {
+				case http.MethodDelete:
+					actionText = "Deleted"
+					actionColor = cs.Red
+				case http.MethodPut:
+					actionText = "Updated"
 
-			case http.MethodPatch:
-				actionText = "Patched"
-			default:
-				actionText = resp.Response.Request.Method
+				case http.MethodPost:
+					actionText = "Created"
+
+				case http.MethodPatch:
+					actionText = "Patched"
+				default:
+					actionText = resp.Response.Request.Method
+				}
+				fmt.Fprintf(r.IO.ErrOut, "%s %s %s => %s\n", cs.SuccessIconWithColor(actionColor), actionText, resp.Response.Request.URL.Path, resp.Status())
 			}
-			fmt.Fprintf(r.IO.ErrOut, "%s %s %s => %s\n", cs.SuccessIconWithColor(actionColor), actionText, resp.Response.Request.URL.Path, resp.Status())
 		}
 	}
 
