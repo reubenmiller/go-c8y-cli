@@ -160,7 +160,7 @@ brews:
     goarm: "6"
 
     # GitHub/GitLab repository to push the formula to
-    tap:
+    repository:
       owner: reubenmiller
       name: homebrew-go-c8y-cli
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
