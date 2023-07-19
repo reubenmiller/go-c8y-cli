@@ -83,13 +83,7 @@ func (s *AlarmCount) Check(m interface{}) (done bool, err error) {
 			}
 		}
 
-		if s.Minimum > -1 {
-			done = count >= int(s.Minimum)
-		}
-
-		if s.Maximum > -1 {
-			done = count <= int(s.Maximum)
-		}
+		done = CompareCount(int64(count), s.Minimum, s.Maximum)
 
 		if !done {
 			err = cmderrors.NewAssertionError(&cmderrors.AssertionError{
