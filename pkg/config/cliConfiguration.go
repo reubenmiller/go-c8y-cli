@@ -124,6 +124,8 @@ const (
 	// SettingsShowProgress show progress bar
 	SettingsShowProgress = "settings.defaults.progress"
 
+	SettingsForceTTY = "settings.defaults.forceTTY"
+
 	// SettingsDisableColor don't print progress bar
 	SettingsDisableProgress = "settings.defaults.noProgress"
 
@@ -472,6 +474,9 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsCacheBodyPaths, ""),
 		WithBindEnv(SettingsCacheMode, nil),
 		WithBindEnv(SettingsCacheDir, filepath.Join(os.TempDir(), "go-c8y-cli-cache")),
+
+		// Console options
+		WithBindEnv(SettingsForceTTY, false),
 
 		// Session options
 		WithBindEnv(SettingsSessionAlwaysIncludePassword, false),
@@ -1135,6 +1140,10 @@ func (c *Config) CompactJSON() bool {
 // ShowProgress show progress bar
 func (c *Config) ShowProgress() bool {
 	return c.viper.GetBool(SettingsShowProgress) && !c.DisableProgress()
+}
+
+func (c *Config) ForceTTY() bool {
+	return c.viper.GetBool(SettingsForceTTY)
 }
 
 func (c *Config) GetProgressBar(w io.Writer, enable bool) (progress *mpb.Progress) {
