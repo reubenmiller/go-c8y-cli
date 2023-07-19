@@ -717,13 +717,17 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 		r.Logger.Debugf("Response Headers: %v", resp.Header())
 	}
 
+	// Note: An output template will affect the handling of the response
+	// for example responses with no responses will generate output due to the output template
+	hasOutputTemplate := commonOptions.OutputTemplate != ""
+
 	// Display log output in special scenarios (i.e. Delete and no Accept header), so the user gets some feedback that it did something
 	if resp != nil {
 		showMessage := resp.StatusCode() == 204 ||
 			(resp.Response.Header.Get("Content-Type") == "" ||
 				resp.Response.Request.Header.Get("Accept") == "") && resp.StatusCode() >= 200 && resp.StatusCode() < 400
 
-		if showMessage {
+		if showMessage && !hasOutputTemplate {
 			if r.Config.ForceTTY() || (r.IsTerminal && !r.Config.ShowProgress()) {
 				cs := r.IO.ColorScheme()
 
@@ -800,7 +804,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 
 	unfilteredSize := 0
 
-	if resp != nil && len(resp.Body()) > 0 {
+	if resp != nil && (len(resp.Body()) > 0 || hasOutputTemplate) {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
 		if resp.Response.ContentLength > -1 {
 			r.Logger.Infof("Response Length: %0.1fKB", float64(resp.Response.ContentLength)/1024)
@@ -827,7 +831,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 		}
 
 		// Apply output template (before the data is processed as the template can transform text to json or other way around)
-		if commonOptions.OutputTemplate != "" {
+		if hasOutputTemplate {
 			var tempBody []byte
 			if showRaw || dataProperty == "" {
 				tempBody = resp.Body()
