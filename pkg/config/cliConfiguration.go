@@ -1211,6 +1211,13 @@ func (c *Config) ViewOption() string {
 	if c.RawOutput() {
 		return ViewsOff
 	}
+
+	// If view is not set by the user, and an output template is being
+	// used, then turn off the views as the output template will most
+	// likely change the structure significantly
+	if !c.viper.IsSet(SettingsViewOption) && c.GetOutputTemplate() != "" {
+		return ViewsOff
+	}
 	return c.viper.GetString(SettingsViewOption)
 }
 
