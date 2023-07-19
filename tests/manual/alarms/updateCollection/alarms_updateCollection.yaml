@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+    C8Y_SETTINGS_DEFAULTS_FORCETTY: true
+
+tests:
+  It prints a confirmation on the console showing the update collection command was sent:
+    command: |
+      c8y alarms updateCollection -n --createdFrom -1d --severity CRITICAL --newStatus ACTIVE -f
+    exit-code: 0
+    stderr:
+      lines:
+        1: ✓ Updated /alarm/alarms => 200 OK

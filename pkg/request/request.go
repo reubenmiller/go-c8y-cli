@@ -724,7 +724,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 				resp.Response.Request.Header.Get("Accept") == "") && resp.StatusCode() >= 200 && resp.StatusCode() < 400
 
 		if showMessage {
-			if r.IsTerminal && !r.Config.ShowProgress() {
+			if r.Config.ForceTTY() || (r.IsTerminal && !r.Config.ShowProgress()) {
 				cs := r.IO.ColorScheme()
 
 				actionText := ""
