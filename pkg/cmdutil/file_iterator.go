@@ -9,12 +9,18 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/randdata"
 )
+
+type RandomRange struct {
+	Min *int64
+	Max *int64
+}
 
 type FileIteratorOptions struct {
 	Infinite        bool
 	FirstNRows      int64
-	Times           int64
+	Times           RandomRange
 	TotalRows       int64
 	RandomSkip      float32
 	DelayBefore     time.Duration
@@ -41,10 +47,29 @@ func ExecuteFileIterator(w io.Writer, log *logger.Logger, files []string, iterFa
 		outputFormatter = opt.Format
 	}
 
+	var times int64
+
+	// randomized times
+	if opt.Times.Min != nil || opt.Times.Max != nil {
+		// If only min is provided, then adjust max values to equal to min
+		// This will behaviour exactly the same as using --times x.
+		// However, just providing a max value will result in range from 1 to max
+		if opt.Times.Max == nil {
+			opt.Times.Max = opt.Times.Min
+		}
+		// Allow users to set --max 0 to disable all output
+		// as it gives the user full control to also turn off the output if desired
+		if *opt.Times.Max == 0 {
+			times = 0
+		} else {
+			times = randdata.Integer(*opt.Times.Max, *opt.Times.Min)
+		}
+	}
+
 	for {
 		row++
 
-		if row > opt.Times && !opt.Infinite {
+		if row > times && !opt.Infinite {
 			break
 		}
 

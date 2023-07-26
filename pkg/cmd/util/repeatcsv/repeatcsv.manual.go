@@ -21,6 +21,8 @@ type CmdRepeatCsvFile struct {
 	columns    []string
 	infinite   bool
 	times      int64
+	times_min  int64
+	times_max  int64
 	first      int64
 	randomSkip float32
 	factory    *cmdutil.Factory
@@ -67,6 +69,8 @@ func NewCmdFromCsv(f *cmdutil.Factory) *CmdRepeatCsvFile {
 	cmd.Flags().String("randomDelayMax", "0ms", "random maximum delay after each request, i.e. 5ms, 1.2s. It must be larger than randomDelayMin. 0 = disabled.")
 	cmd.Flags().Float32Var(&ccmd.randomSkip, "randomSkip", -1, "randomly skip line based on a percentage, probability as a float: 0 to 1, 1 = always skip, 0 = never skip, -1 = disabled")
 	cmd.Flags().Int64Var(&ccmd.times, "times", 1, "number of times to repeat the input")
+	cmd.Flags().Int64Var(&ccmd.times_min, "min", 1, "min number of (randomized) times to repeat the input (inclusive)")
+	cmd.Flags().Int64Var(&ccmd.times_max, "max", 1, "max number of (randomized) times to repeat the input (inclusive). 0 = no output")
 	cmd.Flags().BoolVar(&ccmd.infinite, "infinite", false, "Repeat forever. You will need to ctrl-c it to stop it")
 
 	cmdutil.DisableEncryptionCheck(cmd)
@@ -121,9 +125,19 @@ func (n *CmdRepeatCsvFile) newTemplate(cmd *cobra.Command, args []string) error 
 		return nil
 	}
 
+	repeatRange := cmdutil.RandomRange{
+		Min: &n.times,
+	}
+	if cmd.Flags().Changed("min") {
+		repeatRange.Min = &n.times_min
+	}
+	if cmd.Flags().Changed("max") {
+		repeatRange.Max = &n.times_max
+	}
+
 	return cmdutil.ExecuteFileIterator(n.GetCommand().OutOrStdout(), cfg.Logger, files, iterFactory, cmdutil.FileIteratorOptions{
 		Infinite:        n.infinite,
-		Times:           n.times,
+		Times:           repeatRange,
 		FirstNRows:      n.first,
 		RandomSkip:      n.randomSkip,
 		RandomDelayFunc: randomDelayFunc,

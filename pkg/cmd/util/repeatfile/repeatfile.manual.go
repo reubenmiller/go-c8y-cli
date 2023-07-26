@@ -15,6 +15,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/randdata"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +25,8 @@ type CmdRepeatFile struct {
 	infinite   bool
 	format     string
 	times      int64
+	times_min  int64
+	times_max  int64
 	first      int64
 	randomSkip float32
 	factory    *cmdutil.Factory
@@ -77,6 +80,8 @@ func NewCmdRepeatFile(f *cmdutil.Factory) *CmdRepeatFile {
 	cmd.Flags().String("randomDelayMax", "0ms", "random maximum delay after each request, i.e. 5ms, 1.2s. It must be larger than randomDelayMin. 0 = disabled.")
 	cmd.Flags().Float32Var(&ccmd.randomSkip, "randomSkip", -1, "randomly skip line based on a percentage, probability as a float: 0 to 1, 1 = always skip, 0 = never skip, -1 = disabled")
 	cmd.Flags().Int64Var(&ccmd.times, "times", 1, "number of times to repeat the input")
+	cmd.Flags().Int64Var(&ccmd.times_min, "min", 1, "min number of (randomized) times to repeat the input (inclusive)")
+	cmd.Flags().Int64Var(&ccmd.times_max, "max", 1, "max number of (randomized) times to repeat the input (inclusive). 0 = no output")
 	cmd.Flags().BoolVar(&ccmd.infinite, "infinite", false, "Repeat forever. You will need to ctrl-c it to stop it")
 
 	cmdutil.DisableEncryptionCheck(cmd)
@@ -103,6 +108,23 @@ func (n *CmdRepeatFile) newTemplate(cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
 		if v, err := strconv.ParseInt(args[0], 10, 64); err == nil {
 			times = v
+		}
+	}
+
+	// randomized times
+	if cmd.Flags().Changed("min") || cmd.Flags().Changed("max") {
+		// If only min is provided, then adjust max values to equal to min
+		// This will behaviour exactly the same as using --times x.
+		// However, just providing a max value will result in range from 1 to max
+		if !cmd.Flags().Changed("max") {
+			n.times_max = n.times_min
+		}
+		// Allow users to set --max 0 to disable all output
+		// as it gives the user full control to also turn off the output if desired
+		if n.times_max == 0 {
+			times = 0
+		} else {
+			times = randdata.Integer(n.times_max, n.times_min)
 		}
 	}
 
