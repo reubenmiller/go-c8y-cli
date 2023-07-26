@@ -171,3 +171,30 @@ tests:
         device-001
         device-001
         device-001
+
+  It repeats a variable amount of times using min and max:
+    command: |
+      echo "device" |
+        c8y util repeat --format "%s" --min 2 --max 3
+    exit-code: 0
+    stdout:
+      line-count-min: 2
+      line-count-max: 3
+
+  It repeats a variable amount of times only using min:
+    command: |
+      echo "device" |
+        c8y util repeat --format "%s" --min 2
+    exit-code: 0
+    stdout:
+      line-count-min: 2
+      line-count-max: 2
+
+  It repeats a variable amount of times only using max:
+    command: |
+      echo "device" |
+        c8y util repeat --format "%s" --max 2
+    exit-code: 0
+    stdout:
+      line-count-min: 1
+      line-count-max: 2

@@ -81,3 +81,30 @@ tests:
                 {"body":{"source":{"id":"12345"},"text":"Alarm Reset drücken INAKTIV<br>Alarm Rücktür AAA offen INAKTIV","type":"machine_CustomEvent"}}
                 {"body":{"source":{"id":"12345"},"text":"Alarm Reset drücken GELÖSCHT<br>Alarm Rücktür AAA offen GELÖSCHT","type":"machine_CustomEvent"}}
                 {"body":{"source":{"id":"12345"},"text":"Alarm Sattelheizung1: Stoppen aktiv AKTIV","type":"machine_CustomEvent"}}
+
+    It repeats a variable amount of times using min and max:
+        command: |
+            echo "device01" > /tmp/util_repeatfile07.csv
+            c8y util repeatcsv /tmp/util_repeatfile07.csv --noHeader --min 2 --max 3
+        exit-code: 0
+        stdout:
+            line-count-min: 2
+            line-count-max: 3
+
+    It repeats a variable amount of times only using min:
+        command: |
+            echo "device01" > /tmp/util_repeatfile08.csv
+            c8y util repeatcsv /tmp/util_repeatfile08.csv --noHeader --min 2
+        exit-code: 0
+        stdout:
+            line-count-min: 2
+            line-count-max: 2
+
+    It repeats a variable amount of times only using max:
+        command: |
+            echo "device01" > /tmp/util_repeatfile09.csv
+            c8y util repeatcsv /tmp/util_repeatfile09.csv --noHeader --max 2
+        exit-code: 0
+        stdout:
+            line-count-min: 1
+            line-count-max: 2
