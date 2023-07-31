@@ -711,6 +711,18 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 	return out, nil
 }
 
+func printResponseSize(l *logger.Logger, resp *c8y.Response) {
+	if resp.Response.ContentLength > -1 {
+		l.Infof("Response Length: %0.1fKB", float64(resp.Response.ContentLength)/1024)
+	} else {
+		if resp.Response.Uncompressed {
+			l.Infof("Response Length: %0.1fKB (uncompressed)", float64(len(resp.Body()))/1024)
+		} else {
+			l.Infof("Response Length: %0.1fKB", float64(len(resp.Body()))/1024)
+		}
+	}
+}
+
 func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, input any, commonOptions config.CommonCommandOptions) (int, error) {
 	if resp != nil && resp.StatusCode() != 0 {
 		r.Logger.Infof("Response Content-Type: %s", resp.Response.Header.Get("Content-Type"))
@@ -723,6 +735,11 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 
 	// Display log output in special scenarios (i.e. Delete and no Accept header), so the user gets some feedback that it did something
 	if resp != nil {
+		if resp.Response.Uncompressed {
+			// Add Accept Encoding back in if the response was uncompressed
+			// But the original Content-Length setting is still lost
+			resp.Header().Set("Accept-Encoding", "gzip")
+		}
 		showMessage := resp.StatusCode() == 204 ||
 			(resp.Response.Header.Get("Content-Type") == "" ||
 				resp.Response.Request.Header.Get("Accept") == "") && resp.StatusCode() >= 200 && resp.StatusCode() < 400
@@ -772,11 +789,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 		// estimate size based on utf8 encoding. 1 char is 1 byte
 		r.Logger.Debugf("Writing https response output")
 
-		if resp.Response.ContentLength > -1 {
-			r.Logger.Infof("Response Length: %0.1fKB", float64(resp.Response.ContentLength)/1024)
-		} else {
-			r.Logger.Infof("Response Length: %0.1fKB", float64(len(resp.Body()))/1024)
-		}
+		printResponseSize(r.Logger, resp)
 
 		outputEOL := ""
 		if r.IsTerminal {
@@ -806,11 +819,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 
 	if resp != nil && (len(resp.Body()) > 0 || hasOutputTemplate) {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
-		if resp.Response.ContentLength > -1 {
-			r.Logger.Infof("Response Length: %0.1fKB", float64(resp.Response.ContentLength)/1024)
-		} else {
-			r.Logger.Infof("Response Length: %0.1fKB", float64(len(resp.Body()))/1024)
-		}
+		printResponseSize(r.Logger, resp)
 
 		var responseText []byte
 		isJSONResponse := jsonUtilities.IsValidJSON(resp.Body())

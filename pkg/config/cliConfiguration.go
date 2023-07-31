@@ -109,6 +109,9 @@ const (
 	// SettingsDryRunPattern list of methods which should be conditionally dry, i.e. "PUT POST DELETE"
 	SettingsDryRunPattern = "settings.defaults.dryPattern"
 
+	// SettingsUseCompression use compression for HTTP client
+	SettingsUseCompression = "settings.http.compression"
+
 	// SettingsDryRunFormat dry run output format. Controls how the dry run information is displayed
 	SettingsDryRunFormat = "settings.defaults.dryFormat"
 
@@ -441,6 +444,9 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsActivityLogEnabled, true),
 		WithBindEnv(SettingsActivityLogPath, path.Join(c.GetSessionHomeDir(), ActivityLogDirName)),
 		WithBindEnv(SettingsActivityLogMethodFilter, "GET PUT POST DELETE"),
+
+		// HTTP settings
+		WithBindEnv(SettingsUseCompression, true),
 
 		// Dry run options
 		WithBindEnv(SettingsDryRunPattern, ""),
@@ -1091,6 +1097,10 @@ func (c *Config) DryRunFormat() string {
 // GetDryRunPattern pattern used to check if a command should be run using dry run or not if dry run is activated
 func (c *Config) GetDryRunPattern() string {
 	return c.viper.GetString(SettingsDryRunPattern)
+}
+
+func (c *Config) ShouldUseCompression() bool {
+	return c.viper.GetBool(SettingsUseCompression)
 }
 
 // ShouldUseDryRun returns true of dry run should be applied to the command based on the type of method

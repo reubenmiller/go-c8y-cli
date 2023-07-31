@@ -71,7 +71,7 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		httpClient := c8y.NewHTTPClient(
 			WithProxyDisabled(cfg.IgnoreProxy()),
 			c8y.WithInsecureSkipVerify(cfg.SkipSSLVerify()),
-			WithCompression(false),
+			WithCompression(cfg.ShouldUseCompression()),
 		)
 
 		cacheBodyPaths := cfg.CacheBodyKeys()
