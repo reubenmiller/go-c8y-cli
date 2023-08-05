@@ -72,7 +72,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 	req := requests[0]
 
 	// Modify request if special mode is being used
-	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
+	if commonOptions.IncludeAll || commonOptions.TotalPages > 1 {
 		if isInventoryQuery(&req) {
 			tempURL, _ := url.Parse("https://dummy.com?" + req.Query.(string))
 			tempURL = optimizeManagedObjectsURL(tempURL, "0")
@@ -130,7 +130,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 		r.Logger.Errorf("request timed out after %s", r.Config.RequestTimeout())
 	}
 
-	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
+	if commonOptions.IncludeAll || commonOptions.TotalPages > 1 {
 		if isInventoryQuery(&req) {
 			// TODO: Optimize implementation for inventory managed object queries to use the following
 			r.Logger.Info("Using inventory optimized query")
