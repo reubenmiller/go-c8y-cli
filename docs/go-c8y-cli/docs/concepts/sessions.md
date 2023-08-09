@@ -4,6 +4,8 @@ category: Concepts
 title: Sessions
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 import CodeExample from '@site/src/components/CodeExample';
 
 A session holds the current Cumulocity settings and authentication to use for each command. For example, as session will contain the Cumulocity platform address, tenant, username and password. All of these settings are required in order to send REST requests to the platform.
