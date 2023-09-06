@@ -9,6 +9,16 @@ import CodeExample from '@site/src/components/CodeExample';
 
 Before you can send any requests to Cumulocity you need to configure the Cumulocity session which has the details which Cumulocity platform and authentication should be used for each of the commands/requests. This process only needs to be done once.
 
+:::caution
+SSO (Single Sign On) is not currently supported due to a security mechanism on the platform side which makes any cli implementation impossible.
+
+If you are an SSO user, then you will have to do one of the following before you can use go-c8y-cli:
+
+* Create a dedicated local user in Cumulocity IoT (via the Administration -> Users page)
+* Create a service user via the Application User interface (though only for advanced users whom already have a username/password, see the [example](../cli/c8y/microservices/serviceusers/c8y_microservices_serviceusers_create/#examples))
+
+If you are using a local Cumulocity IoT user, it recommended that you use TFA (Two-Factor Authentication) and use the "OAI-Secure" preferred login mode, which enables the usage of tokens (e.g. Bearer Authorization header), all of which is supported out of the box by go-c8y-cli.
+:::
 
 ## Basics
 
