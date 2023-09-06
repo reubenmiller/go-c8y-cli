@@ -81,6 +81,11 @@ commands:
             description: ""
             value: "not(has(c8y_Patch))"
 
+          - name: onlyIncludeVersions
+            type: stringStatic
+            description: "Only include firmware like items otherwise if the user does not specify the firmware, then other items are returned"
+            value: "type eq 'c8y_FirmwareBinary'"
+
           - name: version
             type: string
             description: Filter by version
