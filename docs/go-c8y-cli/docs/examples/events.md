@@ -4,6 +4,51 @@ title: Events
 
 import CodeExample from '@site/src/components/CodeExample';
 
+## Download events binaries
+
+You can download binaries (attachments) from a list of events by first listing the events, then piping the results to the download event binary commands. The binaries are downloaded to a file using the `outputFileRaw` flag which makes use of some variables to ensure each binary has a different name (based on the information stored in the event).
+
+The following example assumes that all events with the type `c8y-configuration-plugin` have an attachment (otherwise an error will be printed on the console).
+
+<CodeExample>
+
+```bash
+c8y events list --dateFrom -1d --type c8y-configuration-plugin \
+| c8y events downloadBinary --noProgress --outputFileRaw "{filename}.txt"
+```
+
+</CodeExample>
+
+After the command has finished you can view the saved files in the current directory.
+
+```bash title="List files"
+$ ls
+3416200.txt	3425288.txt	3425295.txt	3426750.txt	3426768.txt	3427498.txt
+```
+
+If you don't know which events have binaries attached to them (and you don't care), then you can tell the command to silently ignore the "Not Found" (e.g. HTTP status code 404) errors.
+
+It is still advised to use some sort of filter in the event list so that you don't return too many events as the command will still attempt to download an attachment regardless if it exists or not.
+
+<CodeExample>
+
+```bash
+c8y events list --dateFrom -1d \
+| c8y events downloadBinary --noProgress --outputFileRaw "{filename}.txt" --silentStatusCodes 404
+```
+
+</CodeExample>
+
+:::info
+The download binary command will still output the event binary's content to standard output (e.g. the console). If you are downloading binaries, then this can be very disruptive, therefore you can redirect the standard output to `/dev/null` using the following shell convention.
+
+```sh
+c8y events list --dateFrom -1d --type c8y-configuration-plugin \
+| c8y events downloadBinary --noProgress --outputFileRaw "{filename}.txt" >/dev/null
+```
+
+:::
+
 ## Get counts of events in one hour intervals for the last 12 hours
 
 :::caution
