@@ -95,6 +95,12 @@
               "value": "not(has(c8y_Patch))"
             },
             {
+              "name": "onlyIncludeVersions",
+              "type": "stringStatic",
+              "description": "Only include software like items otherwise if the user does not specify the software, then other items are returned",
+              "value": "type eq 'c8y_SoftwareBinary'"
+            },
+            {
               "name": "version",
               "type": "string",
               "description": "Filter by version",

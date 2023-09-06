@@ -122,6 +122,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 				flags.WithStringValue("query", "query", "%s"),
 				c8yfetcher.WithFirmwareByNameFirstMatch(n.factory, args, "firmware", "firmware", "bygroupid(%s)"),
 				flags.WithStaticStringValue("ignorePatches", "not(has(c8y_Patch))"),
+				flags.WithStaticStringValue("onlyIncludeVersions", "type eq 'c8y_FirmwareBinary'"),
 				flags.WithStringValue("version", "version", "(c8y_Firmware.version eq '%s')"),
 				flags.WithStringValue("url", "url", "(c8y_Firmware.url eq '%s')"),
 			},
