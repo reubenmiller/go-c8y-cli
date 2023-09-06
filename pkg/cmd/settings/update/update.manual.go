@@ -340,6 +340,12 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
+	// Use HTTP compression
+	"http.compression": {"http.compression", "bool", config.SettingsUseCompression, []string{
+		"true",
+		"false",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
 	// proxy
 	"defaults.proxy": {"defaults.proxy", "string", "settings.defaults.proxy", []string{}, nil, cobra.ShellCompDirectiveNoFileComp},
 
