@@ -21,7 +21,7 @@ USER root
 # add binary to path
 ENV PATH=${PATH}:/home/$USERNAME/bin
 ENV C8Y_SESSION_HOME=/sessions
-COPY c8y /home/$USERNAME/bin/c8y
+COPY bin/c8y /home/$USERNAME/bin/c8y
 
 
 # install plugins
