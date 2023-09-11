@@ -31,6 +31,9 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
   organizationName: 'reubenmiller',
   projectName: 'go-c8y-cli',
   trailingSlash: true,
+  markdown: {
+    mermaid: true,
+  },
   i18n: {
     defaultLocale: 'en',
     locales: isDeployPreview
@@ -42,7 +45,10 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
       : // Production locales
         ['en'],
   },
-  themes: ['@docusaurus/theme-live-codeblock'],
+  themes: [
+    '@docusaurus/theme-live-codeblock',
+    '@docusaurus/theme-mermaid',
+  ],
   plugins: [
     // [
     //   '@docusaurus/plugin-client-redirects',
@@ -63,6 +69,24 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
     //     ],
     //   },
     // ],
+    [
+      '@docusaurus/plugin-content-blog',
+      {
+        /**
+         * Required for any multi-instance plugin
+         */
+        id: 'demos-blog',
+        /**
+         * URL route for the blog section of your site.
+         * *DO NOT* include a trailing slash.
+         */
+        routeBasePath: 'demos',
+        /**
+         * Path to data on filesystem relative to site dir.
+         */
+        path: './demos',
+      },
+    ],
     [
       '@docusaurus/plugin-ideal-image',
       {
@@ -185,9 +209,11 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
           position: 'left',
         },
         {to: 'blog', label: 'Blog', position: 'left'},
+        {to: 'demos', label: 'Demos', position: 'left'},
         {
           href: 'https://github.com/reubenmiller/go-c8y-cli',
-          label: 'GitHub',
+          className: "header-github-link",
+          'aria-label': "GitHub repository",
           position: 'right',
         },
       ],
@@ -225,8 +251,10 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
         debug: true,
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl:
-            'https://github.com/reubenmiller/go-c8y-cli/edit/v2/docs/go-c8y-cli/',
+          editUrl: 'https://github.com/reubenmiller/go-c8y-cli/edit/v2/docs/go-c8y-cli/',
+        },
+        theme: {
+          customCss: require.resolve('./src/css/custom.css'),
         },
         googleAnalytics: {
           trackingID: 'UA-155263011-1',

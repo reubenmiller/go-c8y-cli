@@ -14,6 +14,17 @@ The active session is controlled via an environment variable `C8Y_SESSION`. The 
 
 A user can add any number of session that that want. They are then free to switch sessions at any time they want. For users with only one session, you could set the `C8Y_SESSION` environment variable to a file, however for users with multiple sessions, it is recommended to always to set the session when starting out.
 
+:::caution
+SSO (Single Sign On) is not currently supported due to a security mechanism on the platform side which makes any cli implementation impossible.
+
+If you are an SSO user, then you will have to do one of the following before you can use go-c8y-cli:
+
+* Create a dedicated local user in Cumulocity IoT (via the Administration -> Users page)
+* Create a service user via the Application User interface (though only for advanced users whom already have a username/password, see the [example](../../cli/c8y/microservices/serviceusers/c8y_microservices_serviceusers_create/#examples))
+
+If you are using a local Cumulocity IoT user, it recommended that you use TFA (Two-Factor Authentication) and use the "OAI-Secure" preferred login mode, which enables the usage of tokens (e.g. Bearer Authorization header), all of which is supported out of the box by go-c8y-cli.
+:::
+
 ## Create a new session
 
 <CodeExample>

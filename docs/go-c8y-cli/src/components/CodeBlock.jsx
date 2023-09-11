@@ -23,6 +23,7 @@ const c8yCommands = {
     'c8y events delete': 'Remove-Event',
     'c8y events subscribe': 'Watch-Event',
     'c8y events list': 'Get-EventCollection',
+    'c8y events downloadBinary': 'Get-EventBinary',
 
     // measurements
     'c8y measurements create': 'New-Measurement',
