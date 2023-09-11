@@ -48,6 +48,8 @@ skip lines at a probability of 50 percent.
       --format string           format string to be applied to each input line (default "%s")
   -h, --help                    help for repeatfile
       --infinite                Repeat forever. You will need to ctrl-c it to stop it
+      --max int                 max number of (randomized) times to repeat the input (inclusive). 0 = no output (default 1)
+      --min int                 min number of (randomized) times to repeat the input (inclusive) (default 1)
       --randomDelayMax string   random maximum delay after each request, i.e. 5ms, 1.2s. It must be larger than randomDelayMin. 0 = disabled. (default "0ms")
       --randomDelayMin string   random minimum delay after each request, i.e. 5ms, 1.2s. It must be less than randomDelayMax. 0 = disabled (default "0ms")
       --randomSkip float32      randomly skip line based on a percentage, probability as a float: 0 to 1, 1 = always skip, 0 = never skip, -1 = disabled (default -1)

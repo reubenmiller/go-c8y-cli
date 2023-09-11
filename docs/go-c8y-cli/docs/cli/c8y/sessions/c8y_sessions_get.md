@@ -6,7 +6,10 @@ Get session
 
 ### Synopsis
 
-Get session infomration and settings
+Get session information and settings
+
+The session is either loaded by the session file or from environment variables.
+
 
 ```
 c8y sessions get [flags]

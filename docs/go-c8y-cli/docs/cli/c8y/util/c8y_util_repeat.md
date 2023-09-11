@@ -52,6 +52,9 @@ Print "test" 5 times waiting between 0s and 10s after each line
 $ echo "test" | c8y util repeat 5 --randomDelayMin 5s -v
 Print "test" 5 times waiting exactly 5 seconds after each line
 
+$ echo "test" | c8y util repeat --min 1 --max 10
+Print "test" a random number of times, between 1 to 10 times (inclusive)
+
 ```
 
 ### Options
@@ -62,6 +65,8 @@ Print "test" 5 times waiting exactly 5 seconds after each line
   -h, --help                    help for repeat
       --infinite                Repeat infinitely. You will need to ctrl-c it to stop it
       --input string            input value to be repeated (required) (accepts pipeline)
+      --max int                 max number of (randomized) times to repeat the input (inclusive). 0 = no output (default 1)
+      --min int                 min number of (randomized) times to repeat the input (inclusive) (default 1)
       --offset int              offset the output index counter. default = 0.
       --randomDelayMax string   random maximum delay after each request, i.e. 5ms, 1.2s. It must be >= randomDelayMin. 0 = disabled. (default "0ms")
       --randomDelayMin string   random minimum delay after each request, i.e. 5ms, 1.2s. It must be less than randomDelayMax. 0 = disabled (default "0ms")

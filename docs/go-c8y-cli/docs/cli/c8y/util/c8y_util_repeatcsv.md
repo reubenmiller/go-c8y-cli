@@ -36,6 +36,8 @@ Convert csv file which does not have a header row. Manually define the names of 
       --first int               only include first x lines. 0 = all lines
   -h, --help                    help for repeatcsv
       --infinite                Repeat forever. You will need to ctrl-c it to stop it
+      --max int                 max number of (randomized) times to repeat the input (inclusive). 0 = no output (default 1)
+      --min int                 min number of (randomized) times to repeat the input (inclusive) (default 1)
       --noHeader                Input data does not have a header row. Treat the first row as a data row
       --randomDelayMax string   random maximum delay after each request, i.e. 5ms, 1.2s. It must be larger than randomDelayMin. 0 = disabled. (default "0ms")
       --randomDelayMin string   random minimum delay after each request, i.e. 5ms, 1.2s. It must be less than randomDelayMax. 0 = disabled (default "0ms")
