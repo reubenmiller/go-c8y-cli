@@ -250,7 +250,7 @@ commands:
     bodyTemplates:
       - type: jsonnet
         applyLast: false
-        template: "{time: _.Now('0s')}"
+        template: "{time: _.Date('0s')}"
     bodyRequiredKeys:
       - "type"
       - "text"
