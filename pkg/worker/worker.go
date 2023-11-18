@@ -198,8 +198,14 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 	if batchOptions.TotalWorkers < 1 {
 		batchOptions.TotalWorkers = 1
 	}
-	jobs := make(chan batchArgument, batchOptions.TotalWorkers-1)
-	results := make(chan error, batchOptions.TotalWorkers-1)
+
+	chanSize := 1
+	if batchOptions.TotalWorkers > 1 {
+		chanSize = batchOptions.TotalWorkers
+	}
+	w.logger.Warningf("Using chan size of: %d", chanSize)
+	jobs := make(chan batchArgument, chanSize)
+	results := make(chan error, chanSize)
 	workers := sync.WaitGroup{}
 
 	// don't start the progress bar until all confirmations are done

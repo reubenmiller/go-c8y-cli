@@ -540,6 +540,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		}
 		err = fmt.Errorf("Could not create json from template. Error: %s%s", err, helpMsg)
 	}
+	log.Printf("Executing output. %s", out)
 	return out, err
 }
 
@@ -1004,6 +1005,33 @@ func (b *MapBuilder) MarshalJSONWithInput(input interface{}) (body []byte, err e
 		b.externalInput = []byte(v)
 	}
 	return b.MarshalJSON()
+}
+
+type DelayedReader struct {
+	Map       *MapBuilder
+	Input     any
+	readIndex int64
+}
+
+func (d *DelayedReader) Read(p []byte) (n int, err error) {
+	if d.readIndex > 0 {
+		err = io.EOF
+		return
+	}
+	var body []byte
+	body, err = d.Map.MarshalJSONWithInput(d.Input)
+	n = copy(p, body)
+	d.readIndex += int64(n)
+	return
+}
+
+func (b *MapBuilder) GetDelayedReader(input interface{}) func() io.Reader {
+	return func() io.Reader {
+		return &DelayedReader{
+			Map:   b,
+			Input: input,
+		}
+	}
 }
 
 func (b *MapBuilder) MarshalJSON() (body []byte, err error) {

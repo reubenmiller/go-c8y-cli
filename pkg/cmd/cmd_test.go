@@ -458,11 +458,11 @@ func Test_DebugStdinCommand(t *testing.T) {
 	cmd := setupTest()
 	stdin := fakestdin.NewStdIn()
 	defer stdin.Restore()
-	stdin.Write(`` + "\n")
+	stdin.Write(`1` + "\n" + `2` + "\n")
 	// stdin.Write(`{"source":{"id":"1111"}}` + "\n")
 
 	cmdtext := `
-	extension install reubenmiller/c8y-devmgmt
+	events create --device 12345 --type "myType" --template "{c8y_Winding:{temperature:{value: 25.0,unit:'°C'}}}" --dry --delay 5s --text testme
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 
