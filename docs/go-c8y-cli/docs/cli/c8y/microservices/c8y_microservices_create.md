@@ -8,6 +8,9 @@ Create microservice
 
 Create a new microservice or update the application binary of an existing microservice
 
+Note: Named lookups of microservices will only include microservices which 
+
+
 ```
 c8y microservices create [flags]
 ```
