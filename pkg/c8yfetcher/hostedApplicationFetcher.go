@@ -45,13 +45,20 @@ func (f *HostedApplicationFetcher) getByID(id string) ([]fetcherResultSet, error
 
 // getByName returns applications matching a given using regular expression
 func (f *HostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, error) {
+	serverOptions := &c8y.ApplicationOptions{
+		PaginationOptions: *c8y.NewPaginationOptions(2000),
+		Type:              c8y.ApplicationTypeHosted,
+	}
+	if f.Client().TenantName != "" {
+		// Ignore applications which don't match the owner
+		// so that it can overwrite existing applications such as cockpit and devicemanagement.
+		// Otherwise it will always match the in-built apps
+		serverOptions.Owner = f.Client().TenantName
+	}
+
 	col, _, err := f.Client().Application.GetApplications(
 		c8y.WithDisabledDryRunContext(context.Background()),
-		&c8y.ApplicationOptions{
-			PaginationOptions: *c8y.NewPaginationOptions(2000),
-
-			Type: c8y.ApplicationTypeHosted,
-		},
+		serverOptions,
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not fetch applications")
@@ -71,19 +78,7 @@ func (f *HostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, e
 
 	// First check for hosted applications owned by the current tenant
 	for i, app := range col.Applications {
-		if app.Type == "HOSTED" && pattern.MatchString(app.Name) {
-
-			// Ignore applications which don't match the owner
-			// so that it can overwrite existing applications such as cockpit and devicemanagement.
-			// Otherwise it will always match the in-built apps
-			if f.Client().TenantName != "" {
-				if app.Owner != nil && app.Owner.Tenant != nil && app.Owner.Tenant.ID != "" {
-					if app.Owner.Tenant.ID != f.Client().TenantName {
-						continue
-					}
-				}
-			}
-
+		if pattern.MatchString(app.Name) {
 			results = append(results, fetcherResultSet{
 				ID:    app.ID,
 				Name:  app.Name,
@@ -94,8 +89,19 @@ func (f *HostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, e
 
 	// If not results are found, then also include any matches (not just in the current tenant)
 	if len(results) == 0 && !f.excludeParentTenant {
+
+		// Run request against, but without the tenant filter
+		serverOptions.Owner = ""
+		col, _, err := f.Client().Application.GetApplications(
+			c8y.WithDisabledDryRunContext(context.Background()),
+			serverOptions,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not fetch applications")
+		}
+
 		for i, app := range col.Applications {
-			if app.Type == "HOSTED" && pattern.MatchString(app.Name) {
+			if pattern.MatchString(app.Name) {
 				results = append(results, fetcherResultSet{
 					ID:    app.ID,
 					Name:  app.Name,
