@@ -61,7 +61,10 @@ func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create microservice",
-		Long:  `Create a new microservice or update the application binary of an existing microservice`,
+		Long: heredoc.Doc(`Create a new microservice or update the application binary of an existing microservice
+
+			Note: Named lookups of microservices will only include microservices which 
+		`),
 		Example: heredoc.Doc(`
 $ c8y microservices create --file ./myapp.zip
 Create new microservice
@@ -207,7 +210,10 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 
 	if applicationName != "" {
 
-		refs, err := c8yfetcher.FindMicroservices(n.factory, []string{applicationName}, true, "")
+		// Only lookup microservices in the current tenant, as managing microservices of subtenants is not allowed
+		// e.g. upload binary etc. Restricting the search means name conflicts will be avoided if
+		// subtenants also have the same application name deployed multiple times.
+		refs, err := c8yfetcher.FindMicroservices(n.factory, []string{applicationName}, true, "", true)
 
 		if err != nil {
 			return cmderrors.NewUserError(err)

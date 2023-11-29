@@ -12,6 +12,11 @@ import (
 
 type MicroserviceFetcher struct {
 	*CumulocityFetcher
+
+	// Enable the owner check which will only return microservices owned by the current tenant
+	// This option was added to ensure that it will not break the existing behaviour,
+	// though this option could be enabled by default in the future if it proves to be more useful
+	EnableOwnerCheck bool
 }
 
 func NewMicroserviceFetcher(factory *cmdutil.Factory) *MicroserviceFetcher {
@@ -43,14 +48,21 @@ func (f *MicroserviceFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 // getByName returns applications matching a given using regular expression
 func (f *MicroserviceFetcher) getByName(name string) ([]fetcherResultSet, error) {
+	serverOptions := &c8y.ApplicationOptions{
+		PaginationOptions: *c8y.NewPaginationOptions(2000),
+		Type:              c8y.ApplicationTypeMicroservice,
+	}
+	if f.EnableOwnerCheck && f.Client().TenantName != "" {
+		// Ignore microservices which don't match the owner
+		// so that microservices of sub tenants don't get returned.
+		serverOptions.Owner = f.Client().TenantName
+	}
+
 	col, _, err := f.Client().Application.GetApplications(
 		c8y.WithDisabledDryRunContext(context.Background()),
-		&c8y.ApplicationOptions{
-			PaginationOptions: *c8y.NewPaginationOptions(2000),
-
-			Type: c8y.ApplicationTypeMicroservice,
-		},
+		serverOptions,
 	)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "could not fetch microservices")
 	}
@@ -68,7 +80,7 @@ func (f *MicroserviceFetcher) getByName(name string) ([]fetcherResultSet, error)
 	results := make([]fetcherResultSet, 0)
 
 	for i, app := range col.Applications {
-		if app.Type == "MICROSERVICE" && pattern.MatchString(app.Name) {
+		if pattern.MatchString(app.Name) {
 			results = append(results, fetcherResultSet{
 				ID:    app.ID,
 				Name:  app.Name,
@@ -84,8 +96,9 @@ func (f *MicroserviceFetcher) getByName(name string) ([]fetcherResultSet, error)
 // findMicroservices returns microservices given either an id or search text
 // @values: An array of ids, or names (with wildcards)
 // @lookupID: Lookup the data if an id is given. If a non-id text is given, the result will always be looked up.
-func FindMicroservices(factory *cmdutil.Factory, values []string, lookupID bool, format string) ([]entityReference, error) {
+func FindMicroservices(factory *cmdutil.Factory, values []string, lookupID bool, format string, enableOwnerCheck bool) ([]entityReference, error) {
 	f := NewMicroserviceFetcher(factory)
+	f.EnableOwnerCheck = enableOwnerCheck
 
 	formattedValues, err := lookupEntity(f, values, lookupID, format)
 
