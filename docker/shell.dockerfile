@@ -1,7 +1,6 @@
-FROM alpine:3.11
+FROM alpine:3.18
 
 ARG USERNAME=c8yuser
-ARG C8Y_VERSION=1.3.0
 
 RUN apk update \
     && apk add curl unzip bash bash-completion zsh fish git vim jq sudo coreutils \
@@ -15,7 +14,7 @@ RUN apk update \
 WORKDIR /home/$USERNAME
 
 USER $USERNAME
-RUN sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)" -s --batch
+RUN sh -c "$(wget -qO- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" -s --batch
 USER root
 
 # add binary to path

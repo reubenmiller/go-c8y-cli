@@ -244,6 +244,7 @@ brews:
 dockers:
   - dockerfile: docker/shell.dockerfile
     use: buildx
+    goarch: amd64
 
     # Templates of the Docker image names.
     image_templates:
@@ -261,11 +262,12 @@ dockers:
 
   - dockerfile: docker/shell.dockerfile
     use: buildx
+    goarch: arm64
 
     # Templates of the Docker image names.
     image_templates:
-    - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:latest-arm64"
-    - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}-arm64"
+    - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:latest-arm64v8"
+    - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}-arm64v8"
 
     # Template of the docker build flags.
     build_flag_templates:
@@ -274,13 +276,14 @@ dockers:
     - "--label=org.opencontainers.image.title={{.ProjectName}}"
     - "--label=org.opencontainers.image.revision={{.FullCommit}}"
     - "--label=org.opencontainers.image.version={{.Version}}"
-    - "--platform=linux/arm64"
+    - "--platform=linux/arm64/v8"
 
   #
   # pwsh image
   #
-  - dockerfile: docker/pwsh2.dockerfile
+  - dockerfile: docker/pwsh.dockerfile
     use: buildx
+    goarch: amd64
 
     # Templates of the Docker image names.
     image_templates:
@@ -300,13 +303,14 @@ dockers:
     - docker/profile.ps1
     - output_pwsh/PSc8y
 
-  - dockerfile: docker/pwsh2.dockerfile
+  - dockerfile: docker/pwsh.dockerfile
     use: buildx
+    goarch: arm64
 
     # Templates of the Docker image names.
     image_templates:
-    - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:latest-arm64"
-    - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:{{ .Tag }}-arm64"
+    - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:latest-arm64v8"
+    - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:{{ .Tag }}-arm64v8"
 
     # Template of the docker build flags.
     build_flag_templates:
@@ -315,7 +319,7 @@ dockers:
     - "--label=org.opencontainers.image.title={{.ProjectName}}"
     - "--label=org.opencontainers.image.revision={{.FullCommit}}"
     - "--label=org.opencontainers.image.version={{.Version}}"
-    - "--platform=linux/arm64"
+    - "--platform=linux/arm64/v8"
 
     extra_files:
     - docker/profile.ps1
@@ -325,19 +329,19 @@ docker_manifests:
 - name_template: "ghcr.io/reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}"
   image_templates:
   - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}-amd64"
-  - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}-arm64"
+  - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}-arm64v8"
 
 - name_template: "ghcr.io/reubenmiller/{{.ProjectName}}-shell:latest"
   image_templates:
   - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:latest-amd64"
-  - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:latest-arm64"
+  - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:latest-arm64v8"
 
 - name_template: "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:{{ .Tag }}"
   image_templates:
   - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:{{ .Tag }}-amd64"
-  - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:{{ .Tag }}-arm64"
+  - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:{{ .Tag }}-arm64v8"
 
 - name_template: "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:latest"
   image_templates:
   - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:latest-amd64"
-  - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:latest-arm64"
+  - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:latest-arm64v8"
