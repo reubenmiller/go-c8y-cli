@@ -281,7 +281,7 @@ dockers:
   #
   # pwsh image
   #
-  - dockerfile: docker/pwsh2.dockerfile
+  - dockerfile: docker/pwsh.dockerfile
     use: buildx
     goarch: amd64
 
@@ -303,7 +303,7 @@ dockers:
     - docker/profile.ps1
     - output_pwsh/PSc8y
 
-  - dockerfile: docker/pwsh2.dockerfile
+  - dockerfile: docker/pwsh.dockerfile
     use: buildx
     goarch: arm64
 
