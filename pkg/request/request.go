@@ -246,11 +246,25 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 			return
 		}
 
+		// FIXME: This seems overly complicated. The json parsing should be able to handle any kind of json object
+		// regardless whether it is an array, object, string, number etc.
 		// try converting it to json
-		err = jsonUtilities.ParseJSON(string(body), bodyMap)
-
-		if err == nil && (jsonUtilities.IsJSONObject(body) || jsonUtilities.IsJSONArray(body)) {
-			requestBody = bodyMap
+		if jsonUtilities.IsJSONArray(body) {
+			var bodyArray []any
+			if err := json.Unmarshal(body, &bodyArray); err == nil {
+				requestBody = bodyArray
+			} else {
+				requestBody = string(body)
+				isJSON = false
+			}
+		} else if jsonUtilities.IsJSONObject(body) {
+			if err := jsonUtilities.ParseJSON(string(body), bodyMap); err == nil {
+				requestBody = bodyMap
+			} else {
+				r.Logger.Debugf("Error parsing json object in dry run. %s", err)
+				requestBody = string(body)
+				isJSON = false
+			}
 		} else {
 			r.Logger.Debugf("Using non-json body. %s", err)
 			requestBody = string(body)
