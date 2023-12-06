@@ -209,3 +209,37 @@ commands:
       - name: mydata
         type: json_custom
         description: json
+
+  - name: jsonarray
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    bodyContent:
+      type: jsonarray
+    body:
+      - name: name
+        type: string
+        property: 0.name
+        description: property of an array
+
+      - name: version
+        type: string
+        property: 0.version
+        description: property of an array
+
+  - name: jsonobject
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    bodyContent:
+      type: jsonobject
+    body:
+      - name: name
+        type: string
+        property: 0.name
+        description: property of an array
+
+      - name: version
+        type: string
+        property: 0.version
+        description: property of an array
