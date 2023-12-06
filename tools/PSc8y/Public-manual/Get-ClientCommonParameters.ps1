@@ -6,7 +6,12 @@ Get the common parameters which can be added to a function which extends PSc8y f
 .DESCRIPTION
 * PageSize
 
-.EXAMPLE
+.NOTES
+
+The cmdlet can be used within custom cmdlet's if you want to inherit the same common parameters
+used by other cmdlets in the PSc8y module (for a consistent experience).
+
+```
 Function Get-MyObject {
     [cmdletbinding()]
     Param()
@@ -19,7 +24,13 @@ Function Get-MyObject {
         Find-ManagedObjects @PSBoundParameters
     }
 }
+```
 Inherit common parameters to a custom function. This will add parameters such as "PageSize", "TotalPages", "Template" to your function
+
+.EXAMPLE
+Get-ClientCommonParameters
+
+Get the common client parameters that can be added to an existing function
 #>
     [cmdletbinding()]
     Param(

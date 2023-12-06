@@ -23,7 +23,7 @@ Set-c8yMode
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Set cli mode temporarily
 
 ## EXAMPLES
 

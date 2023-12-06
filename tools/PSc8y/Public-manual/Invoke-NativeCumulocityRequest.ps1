@@ -1,9 +1,18 @@
 Function Invoke-NativeCumulocityRequest {
+<#
+.SYNOPSIS
+Invoke a Cumulocity IoT request using PowerShell
+
+.DESCRIPTION
+Invoke a Cumulocity IoT request using PowerShell
+
+#>
     [cmdletbinding(
         SupportsShouldProcess = $true,
         ConfirmImpact = "High"
     )]
     Param(
+        # Uri to send request to
         [Alias("Url")]
         [Parameter(
             Mandatory = $true,
@@ -11,10 +20,13 @@ Function Invoke-NativeCumulocityRequest {
         )]
         [string] $Uri,
 
+        # HTTP Method, e.g. POST, PUT, GET
         [string] $Method,
 
+        # Request body
         [object] $Body,
 
+        # HTTP Headers to include in the request
         [object] $Headers
     )
 

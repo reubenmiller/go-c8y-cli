@@ -13,7 +13,6 @@ title: Group-ClientRequests
 
 ## SYNOPSIS
 Groups the input into array of a given maximum size.
-It will pass the piped input as array rather than individual items
 
 ## SYNTAX
 
@@ -26,16 +25,18 @@ Group-ClientRequests
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Groups the input into array of a given maximum size.
+It will pass the piped input as array rather than individual items
+This cmdlet is mainly used internally by the module.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+$Id | Group-ClientRequests | c8y devices delete $c8yargs
 ```
 
-{{ Add example description here }}
+Group and normalize the input objects to be compatible with piping to the native c8y binary
 
 ## PARAMETERS
 
@@ -55,7 +56,7 @@ Accept wildcard characters: False
 ```
 
 ### -Size
-{{ Fill Size Description }}
+Grouping size
 
 ```yaml
 Type: Int32
@@ -70,7 +71,7 @@ Accept wildcard characters: False
 ```
 
 ### -AsPSObject
-{{ Fill AsPSObject Description }}
+Output objects as PSObjects rather than json text
 
 ```yaml
 Type: SwitchParameter

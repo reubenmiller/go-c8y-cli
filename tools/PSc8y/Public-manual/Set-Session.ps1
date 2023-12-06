@@ -43,6 +43,7 @@ String
 #>
     [cmdletbinding()]
     Param(
+        # Session filter. Only include sessions which match the given filter
         [Parameter(
             Position = 0
         )]

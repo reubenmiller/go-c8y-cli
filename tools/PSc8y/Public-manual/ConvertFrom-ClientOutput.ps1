@@ -1,6 +1,20 @@
 Function ConvertFrom-ClientOutput {
+    <# 
+.SYNOPSIS
+Convert the text output to PowerShell objects.
+
+.DESCRIPTION
+The cmdlet is used internally to interface between the c8y binary and PowerShell.
+
+.EXAMPLE
+c8y devices list | ConvertFrom-ClientOutput -Type mycustomtype
+
+Convert the json output from the c8y devices list command into powershell objects
+
+#>
     [CmdletBinding()]
     param (
+        # Input object
         [Parameter(
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true,
@@ -10,9 +24,11 @@ Function ConvertFrom-ClientOutput {
         [object[]]
         $InputObject,
 
+        # Type
         [string]
         $Type = "application/json",
 
+        # Item type
         [string]
         $ItemType = "application/json",
 

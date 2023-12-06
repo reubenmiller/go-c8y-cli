@@ -41,7 +41,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 
 			An extension cannot override any of the core c8y commands.
 
-			See the list of available extensions at <https://github.com/topics/c8y-extension>.
+			See the list of available extensions at https://github.com/topics/c8y-extension.
 		`, "`"),
 		Aliases: []string{"extension"},
 	}
@@ -110,7 +110,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					To install an extension in development from the current directory, use "." as the
 					value of the repository argument.
 
-					See the list of available extensions at <https://github.com/topics/c8y-extension>.
+					See the list of available extensions at https://github.com/topics/c8y-extension.
 				`),
 				Example: heredoc.Doc(`
 					$ c8y extensions install owner/c8y-extension

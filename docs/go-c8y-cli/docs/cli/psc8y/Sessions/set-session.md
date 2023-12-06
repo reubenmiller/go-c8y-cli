@@ -108,7 +108,8 @@ Set a session interactively but only includes session where the details includes
 ## PARAMETERS
 
 ### -SessionFilter
-{{ Fill SessionFilter Description }}
+Session filter.
+Only include sessions which match the given filter
 
 ```yaml
 Type: String[]

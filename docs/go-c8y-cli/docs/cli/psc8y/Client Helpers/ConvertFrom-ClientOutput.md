@@ -12,7 +12,7 @@ title: ConvertFrom-ClientOutput
 
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Convert the text output to PowerShell objects.
 
 ## SYNTAX
 
@@ -26,36 +26,21 @@ ConvertFrom-ClientOutput
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+The cmdlet is used internally to interface between the c8y binary and PowerShell.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+c8y devices list | ConvertFrom-ClientOutput -Type mycustomtype
 ```
 
-{{ Add example description here }}
+Convert the json output from the c8y devices list command into powershell objects
 
 ## PARAMETERS
 
-### -BoundParameters
-{{ Fill BoundParameters Description }}
-
-```yaml
-Type: Hashtable
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -InputObject
-{{ Fill InputObject Description }}
+Input object
 
 ```yaml
 Type: Object[]
@@ -63,14 +48,14 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 0
+Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -ItemType
-{{ Fill ItemType Description }}
+### -Type
+Type
 
 ```yaml
 Type: String
@@ -79,16 +64,32 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: Application/json
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Type
-{{ Fill Type Description }}
+### -ItemType
+Item type
 
 ```yaml
 Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: Application/json
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -BoundParameters
+Existing bound parameters from the cmdlet.
+Common parameters will be retrieved from it
+
+```yaml
+Type: Hashtable
 Parameter Sets: (All)
 Aliases:
 
@@ -104,10 +105,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.Object[]
 ## OUTPUTS
 
-### System.Object
 ## NOTES
 
 ## RELATED LINKS

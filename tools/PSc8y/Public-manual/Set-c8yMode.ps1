@@ -3,6 +3,9 @@ Function Set-c8yMode {
     .SYNOPSIS
     Set cli mode temporarily
 
+    .DESCRIPTION
+    Set cli mode temporarily
+
     .EXAMPLE
     Set-c8yMode -Mode dev
 

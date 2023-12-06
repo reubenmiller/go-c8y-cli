@@ -1,7 +1,16 @@
 function Group-ClientRequests {
 <# 
 .SYNOPSIS
+Groups the input into array of a given maximum size.
+
+.DESCRIPTION
 Groups the input into array of a given maximum size. It will pass the piped input as array rather than individual items
+This cmdlet is mainly used internally by the module.
+
+.EXAMPLE
+PS> $Id | Group-ClientRequests | c8y devices delete $c8yargs
+
+Group and normalize the input objects to be compatible with piping to the native c8y binary
 #>
     [CmdletBinding()]
     param (
@@ -18,9 +27,11 @@ Groups the input into array of a given maximum size. It will pass the piped inpu
         [object[]]
         $InputObject,
 
+        # Grouping size
         [int]
         $Size = 2000,
 
+        # Output objects as PSObjects rather than json text
         [switch]
         $AsPSObject
     )

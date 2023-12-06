@@ -33,7 +33,7 @@ The instructions have been updated to reflect the new url. Please remove any exi
 
 2. Configure the repository
 
-    **Debian >=9 and Ubuntu >= 16.04**
+    **Debian &gt;=9 and Ubuntu &gt;= 16.04**
 
     ```bash
     curl https://reubenmiller.github.io/go-c8y-cli-repo/debian/PUBLIC.KEY | gpg --dearmor | sudo tee /usr/share/keyrings/go-c8y-cli-archive-keyring.gpg >/dev/null
@@ -44,7 +44,7 @@ The instructions have been updated to reflect the new url. Please remove any exi
     This step does not make use of `apt-key` as it has been deprecated. The gpg key is stored in an individual store only related to the go-c8y-cli repository, and it is linked via the apt.source settings using the `signed-by` property.
     :::
 
-    **Debian <=8 and Ubuntu <= 14.04**
+    **Debian &lt;=8 and Ubuntu &lt;= 14.04**
 
     ```bash
     curl https://reubenmiller.github.io/go-c8y-cli-repo/debian/PUBLIC.KEY | sudo apt-key add -

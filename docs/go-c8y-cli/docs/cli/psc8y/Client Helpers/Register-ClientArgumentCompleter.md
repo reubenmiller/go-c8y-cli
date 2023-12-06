@@ -60,7 +60,7 @@ Accept wildcard characters: False
 ```
 
 ### -BoundParameters
-{{ Fill BoundParameters Description }}
+Bound parameters were completion is to be activated for
 
 ```yaml
 Type: Hashtable

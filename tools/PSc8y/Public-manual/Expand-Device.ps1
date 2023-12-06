@@ -27,18 +27,21 @@ Cases when the managed object IS NOT fetched from the server
 * AND user does not use -Fetch when calling Expand-Device
 
 
-.OUTPUTS
 # Without fetch
+```
 [pscustomobject]@{
     id = "1234"
     name = "[id=1234]"
 }
+```
 
 # With fetch
+```
 [pscustomobject]@{
     id = "1234"
     name = "mydevice"
 }
+```
 
 .PARAMETER InputObject
 List of ids, names or device objects

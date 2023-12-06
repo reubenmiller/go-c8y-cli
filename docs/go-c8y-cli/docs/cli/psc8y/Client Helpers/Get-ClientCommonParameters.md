@@ -30,21 +30,10 @@ Get-ClientCommonParameters
 
 ### EXAMPLE 1
 ```
-Function Get-MyObject {
-    [cmdletbinding()]
-    Param()
+Get-ClientCommonParameters
 ```
 
-DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template"
-    }
-
-    Process {
-        Find-ManagedObjects @PSBoundParameters
-    }
-}
-Inherit common parameters to a custom function.
-This will add parameters such as "PageSize", "TotalPages", "Template" to your function
+Get the common client parameters that can be added to an existing function
 
 ## PARAMETERS
 
@@ -87,5 +76,24 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
+The cmdlet can be used within custom cmdlet's if you want to inherit the same common parameters
+used by other cmdlets in the PSc8y module (for a consistent experience).
+
+```
+Function Get-MyObject {
+    [cmdletbinding()]
+    Param()
+
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create", "Template"
+    }
+
+    Process {
+        Find-ManagedObjects @PSBoundParameters
+    }
+}
+```
+Inherit common parameters to a custom function.
+This will add parameters such as "PageSize", "TotalPages", "Template" to your function
 
 ## RELATED LINKS
