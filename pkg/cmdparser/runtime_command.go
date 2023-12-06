@@ -167,6 +167,12 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 	case "formdata":
 		supportsFormData = true
 		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDataFlagValue())
+	case "jsonarray":
+		subcmd.Body.DefaultValue = []byte("[]")
+		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDataFlagValue())
+	case "jsonobject":
+		subcmd.Body.DefaultValue = []byte("{}")
+		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDataFlagValue())
 	default:
 		subcmd.Body.Options = append(subcmd.Body.Options, flags.WithDataFlagValue())
 	}
@@ -276,7 +282,12 @@ func (n *RuntimeCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(n.options.Body.Initialize)
+	var body *mapbuilder.MapBuilder
+	if len(n.options.Body.DefaultValue) > 0 {
+		body = mapbuilder.NewMapBuilderWithInit(n.options.Body.DefaultValue)
+	} else {
+		body = mapbuilder.NewInitializedMapBuilder(n.options.Body.Initialize)
+	}
 	err = flags.WithBody(
 		cmd,
 		body,
