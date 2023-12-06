@@ -253,4 +253,7 @@ create_devicecert () {
         c8y devicemanagement certificates create -n --name "$name" --file tests/testdata/trustedcert.pem
 }
 
+# Remove cache to avoid stale/invalid cache which makes debugging tests very difficult
+c8y cache delete
+
 setup
