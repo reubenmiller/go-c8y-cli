@@ -286,3 +286,19 @@ tests:
     stdout:
       json:
         body.mydata.foo.bar: "true"
+
+  jsonarray:
+    command: |
+      c8y kitchensink body jsonarray --name foo --version 1.0.0 |
+        c8y util show --select body -o json -c
+    stdout:
+      exactly: |
+        {"body":[{"name":"foo","version":"1.0.0"}]}
+
+  jsonobject:
+    command: |
+      c8y kitchensink body jsonobject --name foo --version 1.0.0 |
+        c8y util show --select body -o json -c
+    stdout:
+      exactly: |
+        {"body":{"0":{"name":"foo","version":"1.0.0"}}}

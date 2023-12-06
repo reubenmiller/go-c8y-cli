@@ -724,6 +724,7 @@ type BodyOptions struct {
 	Options              []flags.GetOption
 	IsBinary             bool
 	Initialize           bool
+	DefaultValue         []byte
 	UploadProgressSource string
 }
 
