@@ -82,6 +82,8 @@ jobs:
       C8Y_USER: ${{ secrets.C8Y_USER }}
       C8Y_USERNAME: ${{ secrets.C8Y_USER }}
       C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
+      DEVICE_BOOTSTRAP_USER: ${{ secrets.DEVICE_BOOTSTRAP_USER }}
+      DEVICE_BOOTSTRAP_PASSWORD: ${{ secrets.DEVICE_BOOTSTRAP_PASSWORD }}
 
       # Max timeout for each request (in milliseconds)
       C8Y_SETTINGS_DEFAULTS_TIMEOUT: 30000
@@ -131,6 +133,8 @@ jobs:
       C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
       C8Y_USER: ${{ secrets.C8Y_USER }}
       C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
+      DEVICE_BOOTSTRAP_USER: ${{ secrets.DEVICE_BOOTSTRAP_USER }}
+      DEVICE_BOOTSTRAP_PASSWORD: ${{ secrets.DEVICE_BOOTSTRAP_PASSWORD }}
 
       # Max timeout for each request (in milliseconds)
       C8Y_SETTINGS_DEFAULTS_TIMEOUT: 30000
