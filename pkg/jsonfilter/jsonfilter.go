@@ -452,7 +452,7 @@ func (f JSONFilters) GetJQQuery(property string) string {
 			case pluck == "**":
 				// Do nothing (select everything)
 			case pluck != "":
-				if f.AsCSV {
+				if f.AsCSV || f.AsTSV {
 					selectStatement = append(selectStatement, fmt.Sprintf(".%s", pluck))
 				} else {
 					if strings.Contains(pluck, ".") {
@@ -469,7 +469,7 @@ func (f JSONFilters) GetJQQuery(property string) string {
 			}
 		}
 		if len(selectStatement) > 0 {
-			if f.AsCSV {
+			if f.AsCSV || f.AsTSV {
 				queryParts = append(queryParts, fmt.Sprintf("[%s]", strings.Join(selectStatement, ",")))
 			} else {
 				queryParts = append(queryParts, fmt.Sprintf("{%s}", strings.Join(selectStatement, ",")))
@@ -482,9 +482,13 @@ func (f JSONFilters) GetJQQuery(property string) string {
 		queryParts = append(queryParts, f.PostJQ)
 	}
 
-	// if f.AsCSV {
-	// 	queryParts = append(queryParts, "@csv")
-	// }
+	if f.AsCSV {
+		queryParts = append(queryParts, "@csv")
+	}
+
+	if f.AsTSV {
+		queryParts = append(queryParts, "@tsv")
+	}
 
 	return strings.Join(queryParts, "|")
 }
