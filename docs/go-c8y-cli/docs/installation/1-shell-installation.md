@@ -13,12 +13,6 @@ It is recommended to install `go-c8y-cli` using a package manager as it makes it
 
 After the installation, follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile).
 
-:::warning WARNING 2022-01-10
-The Linux repositories (Debian/Ubuntu/CentOs/RHEL/Fedora/Alpine) have been moved due to an issue with the previous hosting service.
-
-The instructions have been updated to reflect the new url. Please remove any existing settings containing the string `https://reubenmiller.jfrog.io/artifactory` from your repository configuration and then repeat the installation instructions.
-:::
-
 ### Debian / Ubuntu (apt)
 
 1. Install the apt dependencies
