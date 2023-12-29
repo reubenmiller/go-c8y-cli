@@ -1,6 +1,7 @@
 package version
 
 import (
+	"encoding/json"
 	"runtime/debug"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
@@ -52,5 +53,9 @@ func (n *CmdVersion) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	return n.factory.WriteJSONToConsole(cfg, cmd, "", release)
+	releaseB, err := json.Marshal(release)
+	if err != nil {
+		return err
+	}
+	return n.factory.WriteJSONToConsole(cfg, cmd, "", releaseB)
 }

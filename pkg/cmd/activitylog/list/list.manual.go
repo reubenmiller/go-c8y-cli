@@ -9,7 +9,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/spf13/cobra"
 )
@@ -109,12 +108,7 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	cfg.Logger.Debugf("activity log filter: path=%s, host=%s, datefrom=%s, dateto=%s", activitylog.GetPath(), filter.Host, filter.DateFrom, filter.DateTo)
 
 	err = activitylog.GetLogEntries(filter, func(line []byte) error {
-		data := make(map[string]interface{})
-		err := jsonUtilities.DecodeJSON(line, &data)
-		if err != nil {
-			return err
-		}
-		return n.factory.WriteJSONToConsole(cfg, cmd, "", data)
+		return n.factory.WriteJSONToConsole(cfg, cmd, "", line)
 	})
 
 	return err

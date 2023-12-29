@@ -47,6 +47,7 @@ require github.com/hashicorp/go-version v1.6.0
 
 require (
 	github.com/cli/browser v1.3.0
+	github.com/itchyny/gojq v0.12.12
 	github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3
 )
 
@@ -68,6 +69,7 @@ require (
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/itchyny/timefmt-go v0.1.5 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect

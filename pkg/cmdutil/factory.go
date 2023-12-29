@@ -18,6 +18,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonformatter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mode"
@@ -26,7 +27,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/gjson"
 )
 
 type Browser interface {
@@ -194,7 +194,7 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 }
 
 // GetViewProperties Look up the view properties to display
-func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, output []byte) ([]string, error) {
+func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, data map[string]interface{}) ([]string, error) {
 	dataView, err := f.DataView()
 	if err != nil {
 		return nil, err
@@ -216,10 +216,12 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 		// dont apply a view
 		return []string{"**"}, nil
 	case config.ViewsAuto:
-		jsonResponse := gjson.ParseBytes(output)
-		props, err := dataView.GetView(&dataview.ViewData{
-			ResponseBody: &jsonResponse,
-		})
+		viewData := &dataview.ViewData{
+			ResponseBody: &data,
+			// ContentType:  resp.Response.Header.Get("Content-Type"),
+			// Request:      resp.Response.Request,
+		}
+		props, err := dataView.GetView(viewData)
 
 		if err != nil || len(props) == 0 {
 			if err != nil {
@@ -251,7 +253,7 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 }
 
 // WriteJSONToConsole writes given json output to the console supporting the common options of select, output etc.
-func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, property string, output []byte) error {
+func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, property string, input any) error {
 	consol, err := f.Console()
 	if err != nil {
 		return err
@@ -261,14 +263,40 @@ func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, pro
 		return err
 	}
 
+	var data map[string]interface{}
+	switch d := input.(type) {
+	case string:
+		data = make(map[string]interface{})
+		err := jsonUtilities.DecodeJSON([]byte(d), &data)
+		if err != nil {
+			return err
+		}
+	case []byte:
+		data = make(map[string]interface{})
+		err := jsonUtilities.DecodeJSON(d, &data)
+		if err != nil {
+			return err
+		}
+	case map[string]interface{}:
+		data = d
+	default:
+		return fmt.Errorf("unsupported input data type. Oops we made a type error when calling WriteJSONToConsole")
+	}
+
 	if len(commonOptions.Filters.Pluck) == 0 {
 		// don't fail if view properties fail
-		props, _ := f.GetViewProperties(cfg, cmd, output)
+		props, _ := f.GetViewProperties(cfg, cmd, data)
 		if len(props) > 0 {
 			commonOptions.Filters.Pluck = props
 		}
 	}
-	output, filterErr := commonOptions.Filters.Apply(string(output), property, false, consol.SetHeaderFromInput)
+
+	if len(commonOptions.Filters.Pluck) == 0 || (len(commonOptions.Filters.Pluck) == 1 && commonOptions.Filters.Pluck[0] == "**") {
+		unpack := request.NewUnpacker(data)
+		consol.SetHeaderFromInput(strings.Join(unpack.Keys(), ","))
+	}
+
+	output, filterErr := commonOptions.Filters.ApplyToData(data, property, false, consol.SetHeaderFromInput)
 	if filterErr != nil {
 		return filterErr
 	}
@@ -277,13 +305,17 @@ func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, pro
 	output = bytes.ReplaceAll(output, []byte("\\u003e"), []byte(">"))
 	output = bytes.ReplaceAll(output, []byte("\\u0026"), []byte("&"))
 
+	isJSONResponse := jsonUtilities.IsJSONObject(output) || jsonUtilities.IsValidJSON(output)
+
+	// consol.Output <- data
+
 	jsonformatter.WithOutputFormatters(
 		consol,
 		output,
-		false,
+		!isJSONResponse,
 		jsonformatter.WithFileOutput(commonOptions.OutputFile != "", commonOptions.OutputFile, false),
 		jsonformatter.WithTrimSpace(true),
-		jsonformatter.WithJSONStreamOutput(true, consol.IsJSONStream(), consol.IsTextOutput()),
+		jsonformatter.WithJSONStreamOutput(isJSONResponse, consol.IsJSONStream(), consol.IsCSV()),
 		jsonformatter.WithSuffix(len(output) > 0, "\n"),
 	)
 	return nil
@@ -304,15 +336,9 @@ func (f *Factory) CheckPostCommandError(err error) error {
 		return err
 	}
 
-	// cfg must be
 	if cfg != nil && cfg.WithError() {
 		w = f.IOStreams.Out
 	}
-
-	// consol, consolErr := f.Console()
-	// if consolErr != nil {
-	// 	log.Fatalf("Could not configure console. %s", consolErr)
-	// }
 
 	if errors.Is(err, cmderrors.ErrNoMatchesFound) {
 		// Simulate a 404 error

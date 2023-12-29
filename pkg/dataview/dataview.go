@@ -222,19 +222,30 @@ func (v *DataView) ClearActiveView() {
 }
 
 type ViewData struct {
-	ResponseBody *gjson.Result
+	ResponseBody any
 	ContentType  string
 	Response     *http.Response
 	Request      *http.Request
 }
 
 func (v *DataView) GetView(r *ViewData) ([]string, error) {
+	switch d := r.ResponseBody.(type) {
+	case *gjson.Result:
+		urlPath := r.Request.URL.Path
+		method := r.Request.Method
+		return v.GetViewFromGJSON(d, method, urlPath, r.ContentType)
+	case map[string]interface{}:
+		return v.GetViewFromMap(d, r.ContentType)
+	}
+	return []string{}, nil
+}
+
+func (v *DataView) GetViewFromGJSON(data *gjson.Result, method string, urlPath string, contentType string) ([]string, error) {
 	if view := v.GetActiveView(); view != nil {
 		v.Logger.Debugf("Using already active view")
 		return view.Columns, nil
 	}
 
-	data := r.ResponseBody
 	err := v.LoadDefinitions()
 	if err != nil {
 		return nil, err
@@ -271,7 +282,7 @@ func (v *DataView) GetView(r *ViewData) ([]string, error) {
 		}
 
 		if definition.ContentType != "" {
-			if match, err := regexp.MatchString("(?i)"+definition.ContentType, r.ContentType); err == nil && !match {
+			if match, err := regexp.MatchString("(?i)"+definition.ContentType, contentType); err == nil && !match {
 				isMatch = false
 			}
 		}
@@ -287,21 +298,82 @@ func (v *DataView) GetView(r *ViewData) ([]string, error) {
 		}
 
 		if definition.RequestPath != "" {
-			if r.Request == nil {
+			if match, err := regexp.MatchString("(?i)"+definition.RequestPath, urlPath); err == nil && !match {
 				isMatch = false
-			} else {
-				if match, err := regexp.MatchString("(?i)"+definition.RequestPath, r.Request.URL.Path); err == nil && !match {
-					isMatch = false
-				}
 			}
 		}
 		if definition.RequestMethod != "" {
-			if r.Request == nil {
+			if match, err := regexp.MatchString("(?i)"+definition.RequestMethod, method); err == nil && !match {
 				isMatch = false
-			} else {
-				if match, err := regexp.MatchString("(?i)"+definition.RequestMethod, r.Request.Method); err == nil && !match {
-					isMatch = false
+			}
+		}
+
+		if isMatch {
+			matchingDefinition = &definition
+			break
+		}
+	}
+	if matchingDefinition != nil {
+		v.Logger.Debugf("Found matching view: name=%s", matchingDefinition.Name)
+		v.ActiveView = matchingDefinition
+		return matchingDefinition.Columns, nil
+	}
+	v.Logger.Debug("No matching view found")
+	return nil, nil
+}
+
+func (v *DataView) GetViewFromMap(data map[string]interface{}, contentType ...string) ([]string, error) {
+	if view := v.GetActiveView(); view != nil {
+		v.Logger.Debugf("Using already active view")
+		return view.Columns, nil
+	}
+
+	err := v.LoadDefinitions()
+	if err != nil {
+		return nil, err
+	}
+
+	definitions := v.GetDefinitions()
+	v.mu.Lock()
+	defer v.mu.Unlock()
+
+	var matchingDefinition *Definition
+	for _, definition := range definitions {
+		isMatch := true
+
+		for _, fragment := range definition.Fragments {
+			if _, exists := data[fragment]; !exists {
+				isMatch = false
+				break
+			}
+		}
+		if definition.Type != "" {
+			if v, exists := data["type"]; exists {
+				if typeName, ok := v.(string); ok {
+					if match, err := regexp.MatchString("(?i)"+definition.Type, typeName); err == nil && !match {
+						isMatch = false
+					}
 				}
+			} else {
+				isMatch = false
+			}
+		}
+
+		if len(contentType) > 0 {
+			if match, err := regexp.MatchString("(?i)"+definition.ContentType, contentType[0]); err == nil && !match {
+				isMatch = false
+			}
+		}
+
+		if definition.Self != "" {
+			if v, exists := data["self"]; exists {
+				if self, ok := v.(string); ok {
+					if match, err := regexp.MatchString("(?i)"+definition.Self, self); err == nil && !match {
+						isMatch = false
+					}
+				}
+			} else {
+				isMatch = false
 			}
 		}
 

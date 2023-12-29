@@ -14,6 +14,7 @@ type CommonCommandOptions struct {
 	OutputTemplate    string
 	CommandFlags      map[string]string
 	Filters           *jsonfilter.JSONFilters
+	JQSelect          string
 	ResultProperty    string
 	IncludeAll        bool
 	WithTotalPages    bool

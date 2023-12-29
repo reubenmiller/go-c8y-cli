@@ -107,10 +107,6 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 		})
 	defer cancel()
 
-	// Support both JSON objects or arrays, but default to an object
-	if req.ResponseData == nil {
-		req.ResponseData = make(map[string]interface{})
-	}
 	resp, err := r.Client.SendRequest(
 		ctx,
 		req,
@@ -738,9 +734,17 @@ func printResponseSize(l *logger.Logger, resp *c8y.Response) {
 }
 
 func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, input any, commonOptions config.CommonCommandOptions) (int, error) {
-	if resp != nil && resp.StatusCode() != 0 {
-		r.Logger.Infof("Response Content-Type: %s", resp.Response.Header.Get("Content-Type"))
-		r.Logger.Debugf("Response Headers: %v", resp.Header())
+
+	contentType := ""
+	isJSONResponse := false
+	if resp != nil && resp.Response != nil {
+		contentType = resp.Response.Header.Get("Content-Type")
+		isJSONResponse = HasJSONHeader(&resp.Response.Header)
+
+		if resp.StatusCode() != 0 {
+			r.Logger.Infof("Response Content-Type: %s", contentType)
+			r.Logger.Debugf("Response Headers: %v", resp.Header())
+		}
 	}
 
 	// Note: An output template will affect the handling of the response
@@ -788,8 +792,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 	if resp != nil && respError == nil && commonOptions.OutputFileRaw != "" {
 		if resp.StatusCode() != 0 {
 			// check if it is a dummy response (i.e. no status code)
-			newline := strings.Contains(strings.ToLower(resp.Response.Header.Get("Content-Type")), "json")
-			fullFilePath, err := r.saveResponseToFile(resp, commonOptions.OutputFileRaw, false, newline)
+			fullFilePath, err := r.saveResponseToFile(resp, commonOptions.OutputFileRaw, false, isJSONResponse)
 
 			if err != nil {
 				return 0, cmderrors.NewSystemError("write to file failed", err)
@@ -799,7 +802,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 		}
 	}
 
-	if resp != nil && respError == nil && (r.Config.IsResponseOutput() || resp.Response.Header.Get("Content-Type") == "application/octet-stream") && len(resp.Body()) > 0 {
+	if resp != nil && respError == nil && (r.Config.IsResponseOutput() || contentType == "application/octet-stream") && len(resp.Body()) > 0 {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
 		r.Logger.Debugf("Writing https response output")
 
@@ -835,9 +838,13 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 		// estimate size based on utf8 encoding. 1 char is 1 byte
 		printResponseSize(r.Logger, resp)
 
-		var responseText []byte
-		isJSONResponse := jsonUtilities.IsValidJSON(resp.Body())
+		// Decode response, and get properties
+		body := Unpacker{}
+		if err := resp.DecodeJSON(&body); err != nil {
+			return 0, err
+		}
 
+		var responseText []byte
 		dataProperty := ""
 		showRaw := r.Config.RawOutput() || r.Config.WithTotalPages() || r.Config.WithTotalElements()
 
@@ -848,8 +855,14 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 			dataProperty = ""
 		}
 
-		if v := resp.JSON(dataProperty); v.Exists() && v.IsArray() {
-			unfilteredSize = len(v.Array())
+		if dataProperty != "" {
+			if v, err := commonOptions.Filters.ApplyQuery(body.Data, dataProperty); err == nil {
+				body.SetData(v)
+			}
+		}
+
+		if dataArray, ok := body.Data.([]interface{}); ok {
+			unfilteredSize = len(dataArray)
 			r.Logger.Infof("Unfiltered array size. len=%d", unfilteredSize)
 		}
 
@@ -895,27 +908,26 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 			// Detect view (if no filters are given)
 			if len(commonOptions.Filters.Pluck) == 0 {
 				if len(resp.Body()) > 0 && r.DataView != nil {
-					inputData := resp.JSON()
-					if dataProperty != "" {
-						inputData = resp.JSON(dataProperty)
-					}
 
 					switch strings.ToLower(view) {
 					case config.ViewsOff:
-						// dont apply a view
+						// don't apply a view
 						if !showRaw {
 							commonOptions.Filters.Pluck = []string{"**"}
 						}
 					case config.ViewsAuto:
+
 						viewData := &dataview.ViewData{
-							ResponseBody: &inputData,
+							ResponseBody: &body,
 							ContentType:  resp.Response.Header.Get("Content-Type"),
 							Request:      resp.Response.Request,
 						}
 						if resp.Response != nil {
 							viewData.Request = resp.Response.Request
 						}
+						// TODO: Check if a contentType override is required
 						props, err := r.DataView.GetView(viewData)
+						// props, err := r.DataView.GetView(body.Flat(), contentType)
 
 						if err != nil || len(props) == 0 {
 							if err != nil {
@@ -947,7 +959,11 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 				r.Logger.Debugf("using existing pluck values. %v", commonOptions.Filters.Pluck)
 			}
 
-			if filterOutput, filterErr := commonOptions.Filters.Apply(string(resp.Body()), dataProperty, false, r.Console.SetHeaderFromInput); filterErr != nil {
+			// Set keys before filtering?
+			if len(commonOptions.Filters.Pluck) == 0 || (len(commonOptions.Filters.Pluck) == 1 && commonOptions.Filters.Pluck[0] == "**") {
+				r.Console.SetHeaderFromInput(strings.Join(body.Keys(), ","))
+			}
+			if filterOutput, filterErr := commonOptions.Filters.ApplyToData(body.Data, ".[]", false, r.Console.SetHeaderFromInput); filterErr != nil {
 				r.Logger.Warnf("filter error. %s", filterErr)
 				responseText = filterOutput
 			} else {
