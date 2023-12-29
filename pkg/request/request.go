@@ -963,7 +963,12 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 			if len(commonOptions.Filters.Pluck) == 0 || (len(commonOptions.Filters.Pluck) == 1 && commonOptions.Filters.Pluck[0] == "**") {
 				r.Console.SetHeaderFromInput(strings.Join(body.Keys(), ","))
 			}
-			if filterOutput, filterErr := commonOptions.Filters.ApplyToData(body.Data, ".[]", false, r.Console.SetHeaderFromInput); filterErr != nil {
+
+			jqSelect := "."
+			if body.IsArray() {
+				jqSelect = ".[]"
+			}
+			if filterOutput, filterErr := commonOptions.Filters.ApplyToData(body.Data, jqSelect, false, r.Console.SetHeaderFromInput); filterErr != nil {
 				r.Logger.Warnf("filter error. %s", filterErr)
 				responseText = filterOutput
 			} else {
