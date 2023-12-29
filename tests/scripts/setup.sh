@@ -57,7 +57,7 @@ setup () {
 create_user () {
     local username="$1"
     
-    c8y users get --id $username --silentStatusCodes 404 || c8y users create \
+    c8y users get -n --id $username --silentStatusCodes 404 || c8y users create -n \
         --email $username \
         --userName $username \
         --template "{password: _.Password()}"
@@ -66,13 +66,13 @@ create_user () {
 create_usergroup () {
     local name="$1"
     
-    c8y usergroups get --id $name --silentStatusCodes 404 || c8y usergroups create \
+    c8y usergroups get -n --id $name --silentStatusCodes 404 || c8y usergroups create -n \
         --name "$name"
 }
 
 create_app () {
     local name="$1"
-    c8y applications get --id "$name" --silentStatusCodes 404 ||
+    c8y applications get -n --id "$name" --silentStatusCodes 404 ||
         c8y applications create \
             --name "$name" \
             --type HOSTED \
@@ -83,8 +83,8 @@ create_app () {
 create_service_user () {
     local appname="$1"
 
-    local tenant=$(c8y currenttenant get --select name -o csv)
-    c8y microservices get --id "$appname" --silentStatusCodes 404 ||
+    local tenant=$(c8y currenttenant get -n --select name -o csv)
+    c8y microservices get -n --id "$appname" --silentStatusCodes 404 ||
         c8y microservices serviceusers create \
             --name "$appname" \
             --tenants "$tenant"
@@ -92,16 +92,16 @@ create_service_user () {
 
 create_smartgroup () {
     local name="$1"
-    c8y smartgroups get --id "$name" --silentStatusCodes 404 ||
-        c8y smartgroups create \
+    c8y smartgroups get -n --id "$name" --silentStatusCodes 404 ||
+        c8y smartgroups create -n \
             --name "$name" \
             --query "name eq '*'"
 }
 
 create_devicegroup () {
     local name="$1"
-    c8y devicegroups get --id "$name" --silentStatusCodes 404 ||
-        c8y devicegroups create \
+    c8y devicegroups get -n --id "$name" --silentStatusCodes 404 ||
+        c8y devicegroups create -n \
             --name "$name"
 }
 
@@ -162,22 +162,22 @@ create_device_with_service () {
     local serviceStatus="$4"
 
     parent=$(create_agent "$parentName" | c8y util show --select id --output csv )
-    c8y devices services get --device "$parent" --id "$serviceName" --silentStatusCodes 404 ||
-        c8y devices services create --device "$parent" --name "$serviceName" --serviceType "$serviceType" --status "$serviceStatus"
+    c8y devices services get -n --device "$parent" --id "$serviceName" --silentStatusCodes 404 ||
+        c8y devices services create -n --device "$parent" --name "$serviceName" --serviceType "$serviceType" --status "$serviceStatus"
 }
 
 create_firmware () {
     local name="$1"
-    c8y firmware get --id "$name" --silentStatusCodes 404 ||
-        c8y firmware create --name "$name"
+    c8y firmware get -n --id "$name" --silentStatusCodes 404 ||
+        c8y firmware create -n --name "$name"
 }
 
 create_firmware_version () {
     local name="$1"
     local version="$2"
     local url="$3"
-    c8y firmware versions get --firmware "$name" --id "$version" --silentStatusCodes 404 ||
-        c8y firmware versions create --firmware "$name" --version "$version" --url "$url"
+    c8y firmware versions get -n --firmware "$name" --id "$version" --silentStatusCodes 404 ||
+        c8y firmware versions create -n --firmware "$name" --version "$version" --url "$url"
 }
 
 create_firmware_patch_version () {
@@ -185,16 +185,16 @@ create_firmware_patch_version () {
     local version="$2"
     local dep_version="$3"
     local url="$4"
-    c8y firmware patches get --firmware "$name" --id "$version" --silentStatusCodes 404 ||
-        c8y firmware patches create --firmware "$name" --version "$version" --dependencyVersion "$dep_version" --url "$url"
+    c8y firmware patches get -n --firmware "$name" --id "$version" --silentStatusCodes 404 ||
+        c8y firmware patches create -n --firmware "$name" --version "$version" --dependencyVersion "$dep_version" --url "$url"
 }
 
 create_configuration () {
     local name="$1"
     local configurationType="$2"
     local url="$3"
-    c8y configuration get --id "$name" --silentStatusCodes 404 ||
-        c8y configuration create \
+    c8y configuration get -n --id "$name" --silentStatusCodes 404 ||
+        c8y configuration create -n \
             --name "$name" \
             --description "Example config" \
             --configurationType "$configurationType" \
@@ -203,22 +203,22 @@ create_configuration () {
 
 create_software () {
     local name="$1"
-    c8y software get --id "$name" --silentStatusCodes 404 ||
-        c8y software create --name "$name"
+    c8y software get -n --id "$name" --silentStatusCodes 404 ||
+        c8y software create -n --name "$name"
 }
 
 create_software_version () {
     local name="$1"
     local version="$2"
     local url="$3"
-    c8y software versions get --software "$name" --id "$version" --silentStatusCodes 404 ||
-        c8y software versions create --software "$name" --version "$version" --url "$url"
+    c8y software versions get -n --software "$name" --id "$version" --silentStatusCodes 404 ||
+        c8y software versions create -n --software "$name" --version "$version" --url "$url"
 }
 
 create_device_profile () {
     local name="$1"
-    c8y deviceprofiles get --id "$name" --silentStatusCodes 404 ||
-        c8y deviceprofiles create --name "$name"
+    c8y deviceprofiles get -n --id "$name" --silentStatusCodes 404 ||
+        c8y deviceprofiles create -n --name "$name"
 }
 
 create_device_and_user () {
@@ -230,7 +230,7 @@ create_device_and_user () {
     c8y deviceregistration approve --id "$name"
     
     creds=$(
-        c8y deviceregistration getCredentials \
+        c8y deviceregistration getCredentials -n \
             --id "$name" \
             --sessionUsername "$DEVICE_BOOTSTRAP_USER" \
             --sessionPassword "$DEVICE_BOOTSTRAP_PASSWORD" \
@@ -240,15 +240,15 @@ create_device_and_user () {
     device_user=$( echo "$creds" | cut -d, -f1 )
     device_password=$( echo "$creds" | cut -d, -f2 )
 
-    if ! c8y identity get --name "$name" --type "$extType" --silentStatusCodes 404; then
-        c8y devices create \
+    if ! c8y identity get -n --name "$name" --type "$extType" --silentStatusCodes 404; then
+        c8y devices create -n \
             --name "$name" \
             --sessionUsername "$device_user" \
             --sessionPassword "$device_password" \
         | c8y identity create --type "$extType" --name "$name"
     fi
 
-    c8y devices availability set --id "$name" --interval 15
+    c8y devices availability set -n --id "$name" --interval 15
 }
 
 create_devicecert () {
