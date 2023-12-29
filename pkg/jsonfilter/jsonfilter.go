@@ -371,6 +371,33 @@ func (f JSONFilters) HasPostJQFilter() bool {
 	return f.PostJQ != ""
 }
 
+func toPathCheckJQ(property string, value string, negate bool) string {
+	parts := strings.Split(property, ".")
+	paths := make([]string, 0)
+	paths = append(paths, parts...)
+	paths = append(paths, value)
+
+	sb := strings.Builder{}
+	lines := 0
+	for _, v := range paths {
+		if v != "" {
+			if lines > 0 {
+				sb.WriteString(`,`)
+			}
+			sb.WriteString(`"`)
+			sb.WriteString(v)
+			sb.WriteString(`"`)
+			lines = 1
+		}
+	}
+
+	if negate {
+		return fmt.Sprintf("select(IN(paths; [%v]) | not)", sb.String())
+	} else {
+		return fmt.Sprintf("select(IN(paths; [%v]))", sb.String())
+	}
+}
+
 func (f JSONFilters) GetJQQuery(property string) string {
 	queryParts := []string{}
 
@@ -383,14 +410,14 @@ func (f JSONFilters) GetJQQuery(property string) string {
 	for _, ff := range f.Filters {
 		switch ff.Operation {
 		case "like", "-like":
-			queryParts = append(queryParts, fmt.Sprintf("select(.%s | match(\"%s\"))", ff.Property, strings.ReplaceAll(fmt.Sprintf("%v", ff.Value), "*", ".*")))
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | test(\"%s\"))", ff.Property, strings.ReplaceAll(fmt.Sprintf("%v", ff.Value), "*", ".*")))
 		case "notlike", "-notlike":
-			queryParts = append(queryParts, fmt.Sprintf("select(.%s | match(\"%s\") | not)", ff.Property, strings.ReplaceAll(fmt.Sprintf("%v", ff.Value), "*", ".*")))
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | test(\"%s\") | not)", ff.Property, strings.ReplaceAll(fmt.Sprintf("%v", ff.Value), "*", ".*")))
 		case "match", "-match":
-			queryParts = append(queryParts, fmt.Sprintf("select(.%s | match(\"%v\"))", ff.Property, ff.Value))
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | test(\"%v\"))", ff.Property, ff.Value))
 		case "notmatch", "-notmatch":
-			queryParts = append(queryParts, fmt.Sprintf("select(.%s | match(\"%v\") | not)", ff.Property, ff.Value))
-		case "eq", "-eq", "==":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | test(\"%v\") | not)", ff.Property, ff.Value))
+		case "eq", "-eq", "==", "=":
 			switch v := ff.Value.(type) {
 			case string:
 				queryParts = append(queryParts, fmt.Sprintf("select(.%s == \"%v\")", ff.Property, v))
@@ -410,9 +437,10 @@ func (f JSONFilters) GetJQQuery(property string) string {
 		case "lenlte", "-lenlte":
 			queryParts = append(queryParts, fmt.Sprintf("select((.%s | length) <= %v)", ff.Property, ff.Value))
 		case "has", "-has", "keyIn":
-			queryParts = append(queryParts, fmt.Sprintf("select(has(\"%v\"))", ff.Value))
+			queryParts = append(queryParts, toPathCheckJQ(ff.Property, fmt.Sprintf("%v", ff.Value), false))
 		case "hasnot", "-hasnot", "keyNotIn":
-			queryParts = append(queryParts, fmt.Sprintf("select(has(\"%v\") | not)", ff.Value))
+			queryParts = append(queryParts, toPathCheckJQ(ff.Property, fmt.Sprintf("%v", ff.Value), true))
+			// queryParts = append(queryParts, fmt.Sprintf("select(has(\"%v\") | not)", ff.Value))
 		case "gt", "-gt", ">":
 			queryParts = append(queryParts, fmt.Sprintf("select(.%s > %v)", ff.Property, ff.Value))
 		case "gte", "-gte", ">=":
@@ -425,13 +453,13 @@ func (f JSONFilters) GetJQQuery(property string) string {
 			queryParts = append(queryParts, fmt.Sprintf("select(.%s | startswith(\"%v\"))", ff.Property, ff.Value))
 		case "endsWith", "-endsWith":
 			queryParts = append(queryParts, fmt.Sprintf("select(.%s | endswith(\"%v\"))", ff.Property, ff.Value))
-		case "datelt", "-datelt", "olderthan", "-olderthan":
+		case "datelt", "-datelt":
 			queryParts = append(queryParts, fmt.Sprintf("select(.%s | datelt(\"%v\"))", ff.Property, ff.Value))
-		case "datelte", "-datelte":
+		case "datelte", "-datelte", "olderthan", "-olderthan":
 			queryParts = append(queryParts, fmt.Sprintf("select(.%s | datelte(\"%v\"))", ff.Property, ff.Value))
-		case "dategt", "-dategt", "newerthan", "-newerthan":
+		case "dategt", "-dategt":
 			queryParts = append(queryParts, fmt.Sprintf("select(.%s | dategt(\"%v\"))", ff.Property, ff.Value))
-		case "dategte", "-dategte":
+		case "dategte", "-dategte", "newerthan", "-newerthan":
 			queryParts = append(queryParts, fmt.Sprintf("select(.%s | dategte(\"%v\"))", ff.Property, ff.Value))
 		case "version", "-version":
 			queryParts = append(queryParts, fmt.Sprintf("select(.%s | version(\"%v\"))", ff.Property, ff.Value))
@@ -483,7 +511,8 @@ func (f JSONFilters) GetJQQuery(property string) string {
 	}
 
 	if f.AsCSV {
-		queryParts = append(queryParts, "@csv")
+		// FIXME: Use quotes on csv output, e.g. ignore the sub command
+		queryParts = append(queryParts, `@csv|sub("\"";"";"g")`)
 	}
 
 	if f.AsTSV {
