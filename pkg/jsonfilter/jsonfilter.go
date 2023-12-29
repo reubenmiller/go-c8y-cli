@@ -455,15 +455,15 @@ func (f JSONFilters) GetJQQuery(property string) string {
 				if f.AsCSV || f.AsTSV {
 					selectStatement = append(selectStatement, fmt.Sprintf(".%s", pluck))
 				} else {
-					if strings.Contains(pluck, ".") {
+					if strings.Contains(pluck, ".") && !f.Flatten {
 						parts := strings.Split(pluck, ".")
 
-						// Fixme, this only works for max of two nested items
+						// FIXME: this only works for max of two nested items
 						// {foo:{bar: .foo.bar}}
 						selectStatement = append(selectStatement, fmt.Sprintf("%s:{%s:.%s}", parts[0], parts[1], strings.Join(parts[0:2], ".")))
 					} else {
 						// selectStatement = append(selectStatement, pluck)
-						selectStatement = append(selectStatement, fmt.Sprintf("%s:.%s", pluck, pluck))
+						selectStatement = append(selectStatement, fmt.Sprintf(`"%s":.%s`, pluck, pluck))
 					}
 				}
 			}
