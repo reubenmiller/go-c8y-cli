@@ -2,10 +2,15 @@
 
 set -e
 
+if [ -n "$CI" ]; then
+    set -x
+fi
+
 BIN_DIR="./output"
 
 export C8Y_SETTINGS_DEFAULTS_FORCE=true
 export C8Y_SETTINGS_DEFAULTS_VERBOSE=false
+export C8Y_SETTINGS_DEFAULTS_CACHE=false
 
 if ! command -v c8y; then
     echo "could not find c8y in path. PATH=$PATH"
