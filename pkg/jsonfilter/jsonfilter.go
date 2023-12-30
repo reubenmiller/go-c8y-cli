@@ -469,6 +469,7 @@ func (f JSONFilters) GetJQQuery(property string) string {
 	// Select
 	if !f.HasPostJQFilter() {
 		selectStatement := []string{}
+		deleteStatements := []string{}
 
 		properties := []string{}
 		for _, pluck := range f.Pluck {
@@ -476,26 +477,38 @@ func (f JSONFilters) GetJQQuery(property string) string {
 		}
 
 		for _, pluck := range properties {
+			// Support property renaming
+			alias, property, found := strings.Cut(pluck, ":")
+			if !found {
+				property = alias
+			}
 			switch {
-			case pluck == "**":
+			case property == "**":
 				// Do nothing (select everything)
-			case pluck != "":
+			case strings.HasPrefix(property, "!"):
+				// Remove specific properties
+				deleteStatements = append(deleteStatements, fmt.Sprintf("del(.%s)", property[1:]))
+			case property != "":
 				if f.AsCSV || f.AsTSV {
-					selectStatement = append(selectStatement, fmt.Sprintf(".%s", pluck))
+					selectStatement = append(selectStatement, fmt.Sprintf(".%s", property))
 				} else {
-					if strings.Contains(pluck, ".") && !f.Flatten {
-						parts := strings.Split(pluck, ".")
+					if strings.Contains(property, ".") && !f.Flatten {
+						parts := strings.Split(property, ".")
 
 						// FIXME: this only works for max of two nested items
 						// {foo:{bar: .foo.bar}}
 						selectStatement = append(selectStatement, fmt.Sprintf("%s:{%s:.%s}", parts[0], parts[1], strings.Join(parts[0:2], ".")))
 					} else {
 						// selectStatement = append(selectStatement, pluck)
-						selectStatement = append(selectStatement, fmt.Sprintf(`"%s":.%s`, pluck, pluck))
+						selectStatement = append(selectStatement, fmt.Sprintf(`"%s":.%s`, alias, property))
 					}
 				}
 			}
 		}
+
+		// Apply delete statements before queries
+		queryParts = append(queryParts, deleteStatements...)
+
 		if len(selectStatement) > 0 {
 			if f.AsCSV || f.AsTSV {
 				queryParts = append(queryParts, fmt.Sprintf("[%s]", strings.Join(selectStatement, ",")))
