@@ -189,7 +189,7 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 			"dev\tDevelopment mode (no restrictions)",
 			"qual\tQA mode (delete disabled)",
 			"prod\tProduction mode (read only)",
-		}, "dev")
+		}, "dev\tDevelopment mode (no restrictions)")
 		if err != nil {
 			return err
 		}
