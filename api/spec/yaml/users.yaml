@@ -16,7 +16,7 @@ commands:
     path: /user/inventoryroles
     accept: 'application/vnd.com.nsn.cumulocity.inventoryrolecollection+json'
     collectionType: 'application/vnd.com.nsn.cumulocity.inventoryrole+json'
-    collectionProperty: 'roles'
+    collectionProperty: .roles[]
     alias:
         go: listInventoryRoles
         powershell: Get-InventoryRoleCollection
@@ -59,7 +59,7 @@ commands:
     path: /user/{tenant}/users
     accept: 'application/vnd.com.nsn.cumulocity.userCollection+json'
     collectionType: application/vnd.com.nsn.cumulocity.user+json
-    collectionProperty: users
+    collectionProperty: .users[]
     alias:
         go: list
         powershell: Get-UserCollection
@@ -472,7 +472,7 @@ commands:
     path: /user/{tenant}/users/{id}/groups
     accept: 'application/vnd.com.nsn.cumulocity.groupReferenceCollection+json'
     collectionType: application/vnd.com.nsn.cumulocity.groupReference+json
-    collectionProperty: references.#.group
+    collectionProperty: .references[].group
     alias:
         go: listUserMembership
         powershell: Get-UserMembershipCollection

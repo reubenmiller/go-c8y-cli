@@ -72,7 +72,7 @@ Find any ntp services which are currently down
 
 		flags.WithExtendedPipelineSupport("", "", false),
 
-		flags.WithCollectionProperty("managedObjects"),
+		flags.WithCollectionProperty(".managedObjects[]"),
 	)
 
 	// Required flags

@@ -9,6 +9,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 var (
@@ -18,6 +20,10 @@ var (
 	arrayPrefix = []byte("[")
 	arraySuffix = []byte("]")
 )
+
+func DecodeJSON(v []byte, d any) error {
+	return c8y.DecodeJSONBytes(v, d)
+}
 
 // IsValidJSON returns true if the given byte array is a JSON array of JSON object
 func IsValidJSON(v []byte) bool {

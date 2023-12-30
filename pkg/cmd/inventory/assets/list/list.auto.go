@@ -65,7 +65,7 @@ Get a list of the child devices using pipeline
 
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
 
-		flags.WithCollectionProperty("references.#.managedObject"),
+		flags.WithCollectionProperty(".references[].managedObject"),
 	)
 
 	// Required flags

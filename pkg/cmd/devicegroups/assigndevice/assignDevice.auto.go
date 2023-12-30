@@ -67,7 +67,7 @@ Add multiple devices to a group
 		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("newChildDevice", "deviceId", "source.id", "managedObject.id", "id"),
 
-		flags.WithCollectionProperty("managedObject"),
+		flags.WithCollectionProperty(".managedObject"),
 		flags.WithDeprecationNotice("please use 'c8y devicegroups children assign --childType asset' instead"),
 	)
 

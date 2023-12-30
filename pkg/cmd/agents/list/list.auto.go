@@ -93,7 +93,7 @@ Find an agent by name, then find other agents which the same type
 		flags.WithPipelineAliases("creationTimeDateFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
 
-		flags.WithCollectionProperty("managedObjects"),
+		flags.WithCollectionProperty(".managedObjects[]"),
 	)
 
 	// Required flags

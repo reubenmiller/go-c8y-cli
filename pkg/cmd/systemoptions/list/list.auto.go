@@ -54,7 +54,7 @@ Get a list of system options
 
 		flags.WithExtendedPipelineSupport("", "", false),
 
-		flags.WithCollectionProperty("options"),
+		flags.WithCollectionProperty(".options[]"),
 	)
 
 	// Required flags

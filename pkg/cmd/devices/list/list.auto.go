@@ -94,7 +94,7 @@ Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipe
 		flags.WithPipelineAliases("creationTimeDateFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
 
-		flags.WithCollectionProperty("managedObjects"),
+		flags.WithCollectionProperty(".managedObjects[]"),
 	)
 
 	// Required flags

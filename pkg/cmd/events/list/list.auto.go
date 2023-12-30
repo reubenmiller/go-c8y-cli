@@ -80,7 +80,7 @@ Get events from a device
 		flags.WithPipelineAliases("lastUpdatedFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("lastUpdatedTo", "time", "creationTime", "lastUpdated"),
 
-		flags.WithCollectionProperty("events"),
+		flags.WithCollectionProperty(".events[]"),
 	)
 
 	// Required flags

@@ -54,7 +54,7 @@ Get list of inventory roles
 
 		flags.WithExtendedPipelineSupport("", "", false),
 
-		flags.WithCollectionProperty("roles"),
+		flags.WithCollectionProperty(".roles[]"),
 	)
 
 	// Required flags

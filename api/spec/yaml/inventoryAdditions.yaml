@@ -17,7 +17,7 @@ commands:
     path: inventory/managedObjects/{id}/childAdditions
     accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
-    collectionProperty: 'references.#.managedObject'
+    collectionProperty: .references[].managedObject
     alias:
         go: list
         powershell: Get-ChildAdditionCollection
@@ -94,7 +94,7 @@ commands:
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
     description: Assign child addition
     descriptionLong: Add an existing managed object as a child addition to another existing managed object
-    collectionProperty: managedObject
+    collectionProperty: .managedObject
     alias:
         go: assign
         powershell: Add-ChildAddition

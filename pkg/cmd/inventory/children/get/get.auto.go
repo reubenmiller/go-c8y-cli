@@ -60,7 +60,7 @@ Get an existing child addition reference
 
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
 
-		flags.WithCollectionProperty("managedObject"),
+		flags.WithCollectionProperty(".managedObject"),
 	)
 
 	// Required flags

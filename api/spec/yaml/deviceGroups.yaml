@@ -15,7 +15,7 @@ commands:
     path: inventory/managedObjects
     accept: application/vnd.com.nsn.cumulocity.managedobjectcollection+json
     collectionType: application/vnd.com.nsn.cumulocity.customDeviceGroup+json
-    collectionProperty: managedObjects
+    collectionProperty: .managedObjects[]
     alias:
         go: list
         powershell: Get-DeviceGroupCollection
@@ -331,7 +331,7 @@ commands:
     hidden: true
     deprecated: "please use 'c8y devicegroups children assign --childType asset' instead"
     deprecatedAt: "2022-08-13"
-    collectionProperty: managedObject
+    collectionProperty: .managedObject
     alias:
         go: assignDevice
         powershell: Add-ChildDeviceToGroup
@@ -379,7 +379,7 @@ commands:
     hidden: true
     deprecated: "please use 'c8y devicegroups children unassign --childType asset' instead"
     deprecatedAt: "2022-08-13"
-    collectionProperty: managedObject
+    collectionProperty: .managedObject
     alias:
         go: assignGroup
         powershell: Add-ChildGroupToGroup
@@ -526,7 +526,7 @@ commands:
     path: inventory/managedObjects/{id}/childAssets
     accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
-    collectionProperty: 'references.#.managedObject'
+    collectionProperty: .references[].managedObject
     alias:
         go: listAssets
         powershell: Get-DeviceGroupChildAssetCollection

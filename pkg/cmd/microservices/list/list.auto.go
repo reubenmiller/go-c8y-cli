@@ -82,7 +82,7 @@ List all microservices owned by specific tenant
 		flags.WithPipelineAliases("providedFor", "tenant", "owner.tenant.id"),
 		flags.WithPipelineAliases("subscriber", "tenant", "owner.tenant.id"),
 
-		flags.WithCollectionProperty("applications"),
+		flags.WithCollectionProperty(".applications[]"),
 	)
 
 	// Required flags

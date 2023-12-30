@@ -37,7 +37,7 @@
       "path": "notification2/subscriptions",
       "accept": "application/vnd.com.nsn.cumulocity.subscriptioncollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.subscription+json",
-      "collectionProperty": "subscriptions",
+      "collectionProperty": ".subscriptions[]",
       "alias": {
         "go": "list",
         "powershell": "Get-Notification2SubscriptionCollection"

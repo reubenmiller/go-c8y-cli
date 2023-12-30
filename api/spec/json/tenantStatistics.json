@@ -14,7 +14,7 @@
       "path": "/tenant/statistics",
       "accept": "application/vnd.com.nsn.cumulocity.tenantUsageStatisticsCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.tenantUsageStatisticsSummary+json",
-      "collectionProperty": "usageStatistics",
+      "collectionProperty": ".usageStatistics[]",
       "alias": {
         "go": "list",
         "powershell": "Get-TenantStatisticsCollection"
@@ -71,7 +71,6 @@
       "path": "/tenant/statistics/allTenantsSummary",
       "accept": "application/json",
       "collectionProperty": "-",
-      "responseType": "array",
       "permissions": [
         "managementTenant"
       ],

@@ -60,7 +60,7 @@ List log levels of microservice
 		flags.WithExtendedPipelineSupport("", "", false),
 		flags.WithPipelineAliases("name", "name"),
 
-		flags.WithCollectionProperty("loggers"),
+		flags.WithCollectionProperty(".loggers"),
 	)
 
 	// Required flags

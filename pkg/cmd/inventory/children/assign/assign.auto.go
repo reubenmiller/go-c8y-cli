@@ -60,7 +60,7 @@ Add a related managed object as a child to an existing managed object
 
 		flags.WithExtendedPipelineSupport("child", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
 
-		flags.WithCollectionProperty("managedObject"),
+		flags.WithCollectionProperty(".managedObject"),
 	)
 
 	// Required flags

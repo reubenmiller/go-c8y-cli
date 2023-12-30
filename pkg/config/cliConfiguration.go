@@ -236,6 +236,7 @@ const (
 
 	// SettingsSelect json properties to be selected from the output. Only the given properties will be returned
 	SettingsSelect = "settings.defaults.select"
+	SettingsJq     = "settings.defaults.jq"
 
 	// SettingsSilentStatusCodes Status codes which will not print out an error message
 	SettingsSilentStatusCodes = "settings.defaults.silentStatusCodes"
@@ -1522,6 +1523,10 @@ func (c *Config) ExtensionDefaultUsername() string {
 	return c.viper.GetString(SettingsExtensionDefaultUsername)
 }
 
+func (c *Config) GetJQStatement() string {
+	return strings.TrimSpace(c.viper.GetString(SettingsJq))
+}
+
 // GetJSONSelect get json properties to be selected from the output. Only the given properties will be returned
 func (c *Config) GetJSONSelect() []string {
 	// Note: select is stored as an cobra Array String, which add special formating of values.
@@ -1569,6 +1574,7 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 	filters.AsCompletionFormat = c.IsCompletionOutput()
 	filters.Flatten = c.FlattenJSON()
 	filters.Pluck = c.GetJSONSelect()
+	filters.PostJQ = c.GetJQStatement()
 	if err := filters.AddRawFilters(c.GetJSONFilter()); err != nil {
 		return options, err
 	}

@@ -54,7 +54,7 @@ Get a list of data broker connectors
 
 		flags.WithExtendedPipelineSupport("", "", false),
 
-		flags.WithCollectionProperty("connectors"),
+		flags.WithCollectionProperty(".connectors[]"),
 	)
 
 	// Required flags

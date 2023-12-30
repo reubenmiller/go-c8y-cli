@@ -14,10 +14,7 @@ commands:
     accept: application/json
     description: List scheduler items
     descriptionLong: List scheduler items
-    # TODO: Data is stored as an object instead of an array, so the collectionProperty logic needs to change to support selecting the keys
-    # e.g. data.jobExecutions.<key>.*
-    # jq query: '.data.jobExecutions|to_entries | .[].value'
-    collectionProperty: "-"
+    collectionProperty: .data.jobExecutions|to_entries|.[].value
     alias:
         go: list
         powershell: Get-DataHubSchedulerCollection

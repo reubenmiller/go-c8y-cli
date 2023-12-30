@@ -65,7 +65,7 @@ Get tenant statistics collection for the day before yesterday
 		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
 
-		flags.WithCollectionProperty("usageStatistics"),
+		flags.WithCollectionProperty(".usageStatistics[]"),
 	)
 
 	// Required flags

@@ -91,5 +91,5 @@ func (n *CmdList) listSettings(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewUserError("Settings error. ", err)
 	}
 
-	return n.factory.WriteJSONToConsole(cfg, cmd, settingsPrefix, responseText)
+	return n.factory.WriteJSONToConsole(cfg, cmd, "."+settingsPrefix, responseText)
 }

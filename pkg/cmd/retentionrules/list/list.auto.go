@@ -55,7 +55,7 @@ Get a list of retention rules
 
 		flags.WithExtendedPipelineSupport("", "", false),
 
-		flags.WithCollectionProperty("retentionRules"),
+		flags.WithCollectionProperty(".retentionRules[]"),
 	)
 
 	// Required flags

@@ -60,7 +60,7 @@ Retrieve results from a datahub job with custom datahub pagination
 
 		flags.WithExtendedPipelineSupport("id", "id", true, "id"),
 
-		flags.WithCollectionProperty("rows"),
+		flags.WithCollectionProperty(".rows[]"),
 	)
 
 	// Required flags

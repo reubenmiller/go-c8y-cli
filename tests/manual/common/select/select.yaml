@@ -71,7 +71,7 @@ tests:
   
   It returns json lines:
     command: |
-      c8y applications get --id cockpit --select "id*"
+      c8y applications get --id cockpit --select "id"
     stdout:
       match-pattern: ^{"id":"\d+"}$
   

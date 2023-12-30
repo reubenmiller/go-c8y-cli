@@ -14,7 +14,7 @@
       "accept": "application/json",
       "description": "Execute a SQL query and retrieve the results",
       "descriptionLong": "Execute a SQL query and retrieve the results",
-      "collectionProperty": "rows",
+      "collectionProperty": ".rows[]",
       "alias": {
         "go": "query",
         "powershell": "Get-DataHubQueryResult"

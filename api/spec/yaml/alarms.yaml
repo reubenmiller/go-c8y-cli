@@ -44,7 +44,7 @@ commands:
     path: alarm/alarms
     accept: application/vnd.com.nsn.cumulocity.alarmCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.alarm+json
-    collectionProperty: alarms
+    collectionProperty: .alarms[]
     alias:
         go: list
         powershell: Get-AlarmCollection

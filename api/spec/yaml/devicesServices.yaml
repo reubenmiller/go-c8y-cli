@@ -14,7 +14,7 @@ commands:
     path: inventory/managedObjects
     accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
-    collectionProperty: 'managedObjects'
+    collectionProperty: .managedObjects[]
     alias:
         go: find
         powershell: Find-DeviceServiceCollection
@@ -106,7 +106,7 @@ commands:
     path: inventory/managedObjects/{device}/childAdditions
     accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
-    collectionProperty: 'references.#.managedObject'
+    collectionProperty: .references[].managedObject
     alias:
         go: list
         powershell: Get-DeviceServiceCollection

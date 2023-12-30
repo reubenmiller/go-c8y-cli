@@ -54,7 +54,7 @@ Get a list of roles
 
 		flags.WithExtendedPipelineSupport("", "", false),
 
-		flags.WithCollectionProperty("roles"),
+		flags.WithCollectionProperty(".roles[]"),
 	)
 
 	// Required flags

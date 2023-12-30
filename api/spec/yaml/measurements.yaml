@@ -14,7 +14,7 @@ commands:
     path: measurement/measurements
     accept: application/vnd.com.nsn.cumulocity.measurementCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.measurement+json
-    collectionProperty: measurements
+    collectionProperty: .measurements[]
     alias:
         go: list
         powershell: Get-MeasurementCollection
@@ -105,7 +105,7 @@ commands:
     path: measurement/measurements/one
     accept: application/vnd.com.nsn.cumulocity.measurementCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.measurement+json
-    collectionProperty: measurements
+    collectionProperty: .measurements[]
     skip: true  # This might be a new feature. Need to find out which version it is included in
     alias:
         go: listLatest

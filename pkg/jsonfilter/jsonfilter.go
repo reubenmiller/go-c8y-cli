@@ -2,13 +2,16 @@ package jsonfilter
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/hashicorp/go-version"
+	"github.com/itchyny/gojq"
 	glob "github.com/obeattie/ohmyglob"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flatten"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
@@ -32,22 +35,41 @@ func init() {
 }
 
 type JSONFilters struct {
-	Logger             *logger.Logger
-	Filters            []JSONFilter
-	Selectors          []string
-	Pluck              []string
-	Flatten            bool
-	AsCSV              bool
-	AsTSV              bool
-	AsCompletionFormat bool
+	Logger               *logger.Logger
+	Filters              []JSONFilter
+	Pluck                []string
+	PostJQ               string
+	Flatten              bool
+	AsCSV                bool
+	AsTSV                bool
+	AsCompletionFormat   bool
+	UseOldImplementation bool
 }
 
 func (f JSONFilters) Apply(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) ([]byte, error) {
-	return f.filterJSON(jsonValue, property, showHeaders, setHeaderFunc)
+	if f.UseOldImplementation {
+		return f.filterJSON(jsonValue, property, showHeaders, setHeaderFunc)
+	}
+	return f.ApplyToData(jsonValue, property, showHeaders, setHeaderFunc)
 }
 
-func (f *JSONFilters) AddSelectors(props ...string) {
-	f.Selectors = append(f.Selectors, props...)
+func (f JSONFilters) ApplyToData(data any, property string, showHeaders bool, setHeaderFunc func(string)) ([]byte, error) {
+	switch v := data.(type) {
+	case []byte:
+		var d any
+		if err := c8y.DecodeJSONBytes(v, &d); err != nil {
+			return nil, err
+		}
+		return f.filterJSONUsingJQ(d, property, showHeaders, setHeaderFunc)
+	case string:
+		var d any
+		if err := c8y.DecodeJSONBytes([]byte(v), &d); err != nil {
+			return nil, err
+		}
+		return f.filterJSONUsingJQ(d, property, showHeaders, setHeaderFunc)
+
+	}
+	return f.filterJSONUsingJQ(data, property, showHeaders, setHeaderFunc)
 }
 
 func splitFilter(s string, sep rune, maxSplit int) []string {
@@ -303,9 +325,8 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 // NewJSONFilters create a json filter
 func NewJSONFilters(l *logger.Logger) *JSONFilters {
 	return &JSONFilters{
-		Logger:    l,
-		Filters:   make([]JSONFilter, 0),
-		Selectors: make([]string, 0),
+		Logger:  l,
+		Filters: make([]JSONFilter, 0),
 	}
 }
 
@@ -344,6 +365,272 @@ func formatErrors(errs []error) error {
 	}
 
 	return nil
+}
+
+func (f JSONFilters) HasPostJQFilter() bool {
+	return f.PostJQ != ""
+}
+
+func toPathCheckJQ(property string, value string, negate bool) string {
+	parts := strings.Split(property, ".")
+	paths := make([]string, 0)
+	paths = append(paths, parts...)
+	paths = append(paths, value)
+
+	sb := strings.Builder{}
+	lines := 0
+	for _, v := range paths {
+		if v != "" {
+			if lines > 0 {
+				sb.WriteString(`,`)
+			}
+			sb.WriteString(`"`)
+			sb.WriteString(v)
+			sb.WriteString(`"`)
+			lines = 1
+		}
+	}
+
+	if negate {
+		return fmt.Sprintf("select(IN(paths; [%v]) | not)", sb.String())
+	} else {
+		return fmt.Sprintf("select(IN(paths; [%v]))", sb.String())
+	}
+}
+
+func (f JSONFilters) GetJQQuery(property string) string {
+	queryParts := []string{}
+
+	// Pre-process
+	if property != "" {
+		queryParts = append(queryParts, property)
+	}
+
+	// Filter
+	for _, ff := range f.Filters {
+		switch ff.Operation {
+		case "like", "-like":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | test(\"%s\"))", ff.Property, strings.ReplaceAll(fmt.Sprintf("%v", ff.Value), "*", ".*")))
+		case "notlike", "-notlike":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | test(\"%s\") | not)", ff.Property, strings.ReplaceAll(fmt.Sprintf("%v", ff.Value), "*", ".*")))
+		case "match", "-match":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | test(\"%v\"))", ff.Property, ff.Value))
+		case "notmatch", "-notmatch":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | test(\"%v\") | not)", ff.Property, ff.Value))
+		case "eq", "-eq", "==", "=":
+			switch v := ff.Value.(type) {
+			case string:
+				queryParts = append(queryParts, fmt.Sprintf("select(.%s == \"%v\")", ff.Property, v))
+			default:
+				queryParts = append(queryParts, fmt.Sprintf("select(.%s == %v)", ff.Property, v))
+			}
+		case "neq", "-neq", "!=", "<>":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s != \"%v\")", ff.Property, ff.Value))
+		case "leneq", "-leneq":
+			queryParts = append(queryParts, fmt.Sprintf("select((.%s | length) == %v)", ff.Property, ff.Value))
+		case "lengt", "-lengt":
+			queryParts = append(queryParts, fmt.Sprintf("select((.%s | length) > %v)", ff.Property, ff.Value))
+		case "lengte", "-lengte":
+			queryParts = append(queryParts, fmt.Sprintf("select((.%s | length) >= %v)", ff.Property, ff.Value))
+		case "lenlt", "-lenlt":
+			queryParts = append(queryParts, fmt.Sprintf("select((.%s | length) < %v)", ff.Property, ff.Value))
+		case "lenlte", "-lenlte":
+			queryParts = append(queryParts, fmt.Sprintf("select((.%s | length) <= %v)", ff.Property, ff.Value))
+		case "has", "-has", "keyIn":
+			queryParts = append(queryParts, toPathCheckJQ(ff.Property, fmt.Sprintf("%v", ff.Value), false))
+		case "hasnot", "-hasnot", "keyNotIn":
+			queryParts = append(queryParts, toPathCheckJQ(ff.Property, fmt.Sprintf("%v", ff.Value), true))
+			// queryParts = append(queryParts, fmt.Sprintf("select(has(\"%v\") | not)", ff.Value))
+		case "gt", "-gt", ">":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s > %v)", ff.Property, ff.Value))
+		case "gte", "-gte", ">=":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s >= %v)", ff.Property, ff.Value))
+		case "lt", "-lt", "<":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s < %v)", ff.Property, ff.Value))
+		case "lte", "-lte", "<=":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s <= %v)", ff.Property, ff.Value))
+		case "startsWith", "-startsWith":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | startswith(\"%v\"))", ff.Property, ff.Value))
+		case "endsWith", "-endsWith":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | endswith(\"%v\"))", ff.Property, ff.Value))
+		case "datelt", "-datelt":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | datelt(\"%v\"))", ff.Property, ff.Value))
+		case "datelte", "-datelte", "olderthan", "-olderthan":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | datelte(\"%v\"))", ff.Property, ff.Value))
+		case "dategt", "-dategt":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | dategt(\"%v\"))", ff.Property, ff.Value))
+		case "dategte", "-dategte", "newerthan", "-newerthan":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | dategte(\"%v\"))", ff.Property, ff.Value))
+		case "version", "-version":
+			queryParts = append(queryParts, fmt.Sprintf("select(.%s | version(\"%v\"))", ff.Property, ff.Value))
+		}
+	}
+
+	// Select
+	if !f.HasPostJQFilter() {
+		selectStatement := []string{}
+		deleteStatements := []string{}
+
+		properties := []string{}
+		for _, pluck := range f.Pluck {
+			properties = append(properties, strings.Split(pluck, ",")...)
+		}
+
+		for _, pluck := range properties {
+			// Support property renaming
+			alias, property, found := strings.Cut(pluck, ":")
+			if !found {
+				property = alias
+			}
+			switch {
+			case property == "**":
+				// Do nothing (select everything)
+			case strings.HasPrefix(property, "!"):
+				// Remove specific properties
+				deleteStatements = append(deleteStatements, fmt.Sprintf("del(.%s)", property[1:]))
+			case property != "":
+				if f.AsCSV || f.AsTSV {
+					selectStatement = append(selectStatement, fmt.Sprintf(".%s", property))
+				} else {
+					if strings.Contains(property, ".") && !f.Flatten {
+						parts := strings.Split(property, ".")
+
+						// FIXME: this only works for max of two nested items
+						// {foo:{bar: .foo.bar}}
+						selectStatement = append(selectStatement, fmt.Sprintf("%s:{%s:.%s}", parts[0], parts[1], strings.Join(parts[0:2], ".")))
+					} else {
+						// selectStatement = append(selectStatement, pluck)
+						selectStatement = append(selectStatement, fmt.Sprintf(`"%s":.%s`, alias, property))
+					}
+				}
+			}
+		}
+
+		// Apply delete statements before queries
+		queryParts = append(queryParts, deleteStatements...)
+
+		if len(selectStatement) > 0 {
+			if f.AsCSV || f.AsTSV {
+				queryParts = append(queryParts, fmt.Sprintf("[%s]", strings.Join(selectStatement, ",")))
+			} else {
+				queryParts = append(queryParts, fmt.Sprintf("{%s}", strings.Join(selectStatement, ",")))
+			}
+		}
+	}
+
+	// Post processing
+	if f.PostJQ != "" {
+		queryParts = append(queryParts, f.PostJQ)
+	}
+
+	if f.AsCSV {
+		// FIXME: Use quotes on csv output, e.g. ignore the sub command
+		queryParts = append(queryParts, `@csv|sub("\"";"";"g")`)
+	}
+
+	if f.AsTSV {
+		queryParts = append(queryParts, "@tsv")
+	}
+
+	return strings.Join(queryParts, "|")
+}
+
+func GetKeys(v any) ([]string, error) {
+	q, err := gojq.Parse(".|paths|join(\".\")")
+	if err != nil {
+		return nil, err
+	}
+	iter := q.RunWithContext(context.Background(), v)
+
+	keys := []string{}
+	for {
+		v, ok := iter.Next()
+		if !ok {
+			break
+		}
+		if err, ok := v.(error); ok {
+			log.Fatalln(err)
+		}
+		switch val := v.(type) {
+		case string:
+			keys = append(keys, val)
+		}
+	}
+	return keys, nil
+}
+
+func (f JSONFilters) ApplyQuery(data any, query string) ([]interface{}, error) {
+	if !strings.HasPrefix(query, ".") {
+		query = "." + query + "[]"
+	}
+	q, err := gojq.Parse(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	iter := q.RunWithContext(context.Background(), data)
+	output := make([]interface{}, 0)
+	for {
+		v, ok := iter.Next()
+		if !ok {
+			break
+		}
+		if err, ok := v.(error); ok {
+			log.Fatalln(err)
+		}
+		output = append(output, v)
+	}
+
+	return output, nil
+}
+
+func (f JSONFilters) filterJSONUsingJQ(data any, property string, showHeaders bool, setHeaderFunc func(string)) ([]byte, error) {
+
+	rawJQQuery := f.GetJQQuery(property)
+	f.Logger.Infof("jq query: %s", rawJQQuery)
+
+	query, err := gojq.Parse(rawJQQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	code, err := gojq.Compile(
+		query,
+		gojq.WithFunction("version", 1, 1, extStringFunc(matchVersionConstraint)),
+		gojq.WithFunction("datelt", 1, 1, extStringFunc(dateOlderThan)),
+		gojq.WithFunction("datelte", 1, 1, extStringFunc(dateOlderThanEqual)),
+		gojq.WithFunction("dategt", 1, 1, extStringFunc(dateNewerThan)),
+		gojq.WithFunction("dategte", 1, 1, extStringFunc(dateNewerThanEqual)),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	iter := code.RunWithContext(context.Background(), data)
+	var output bytes.Buffer
+	for {
+		v, ok := iter.Next()
+		if !ok {
+			break
+		}
+		if err, ok := v.(error); ok {
+			log.Fatalln(err)
+		}
+
+		if vstr, ok := v.(string); ok {
+			output.Write([]byte(vstr))
+			output.WriteByte('\n')
+		} else {
+			if out, err := json.Marshal(v); err == nil {
+				output.Write(out)
+				output.WriteByte('\n')
+			}
+		}
+	}
+
+	setHeaderFunc(strings.Join(f.Pluck, ","))
+	return output.Bytes(), nil
 }
 
 func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) ([]byte, error) {
@@ -400,9 +687,6 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 		Logger.Warnf("filter errors. %v", errs)
 	}
 
-	if len(f.Selectors) > 0 {
-		jq.Select(f.Selectors...)
-	}
 	Logger.Debugf("Pluck values: %v", f.Pluck)
 	// format values (using gjson)
 	// skip flatten and select if a only a globstar is provided
@@ -746,6 +1030,27 @@ func matchWithRegexNegated(x, y interface{}) (bool, error) {
 	return !match, err
 }
 
+func toString(v any) string {
+	switch v := v.(type) {
+	case string:
+		return v
+	}
+	return ""
+}
+
+func extStringFunc(f func(x, y interface{}) (bool, error)) func(x any, xs []any) any {
+	return func(x any, xs []any) any {
+		match, err := f(toString(x), toString(xs[0]))
+		if err != nil {
+			return err
+		}
+		if match {
+			return x
+		}
+		return nil
+	}
+}
+
 func matchVersionConstraint(x, y interface{}) (bool, error) {
 	xs, okx := x.(string)
 	ys, oky := y.(string)
@@ -761,7 +1066,7 @@ func matchVersionConstraint(x, y interface{}) (bool, error) {
 
 	constraint, err := version.NewConstraint(strings.ReplaceAll(ys, ",", ", "))
 	if err != nil {
-		return false, fmt.Errorf("Invalid version constraint. %w", err)
+		return false, fmt.Errorf("invalid version constraint. %w", err)
 	}
 
 	return constraint.Check(currentVersion), nil

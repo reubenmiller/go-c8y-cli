@@ -72,7 +72,7 @@ Get a list of firmware patches where the dependency version starts with '1.'
 
 		flags.WithExtendedPipelineSupport("firmware", "firmware", true, "additionParents.references.0.managedObject.id", "id"),
 
-		flags.WithCollectionProperty("managedObjects"),
+		flags.WithCollectionProperty(".managedObjects[]"),
 	)
 
 	// Required flags

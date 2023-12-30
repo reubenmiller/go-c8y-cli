@@ -14,7 +14,7 @@ commands:
     path: devicecontrol/operations
     accept: application/vnd.com.nsn.cumulocity.operationCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.operation+json
-    collectionProperty: operations
+    collectionProperty: .operations[]
     alias:
         go: list
         powershell: Get-OperationCollection

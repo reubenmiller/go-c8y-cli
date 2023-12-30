@@ -174,8 +174,6 @@ func (n *ListSummaryAllTenantsCmd) RunE(cmd *cobra.Command, args []string) error
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-
-		ResponseData: make([]map[string]interface{}, 0),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

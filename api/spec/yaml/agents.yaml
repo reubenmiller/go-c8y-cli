@@ -15,7 +15,7 @@ commands:
     path: inventory/managedObjects
     accept: application/vnd.com.nsn.cumulocity.managedobjectcollection+json
     collectionType: application/vnd.com.nsn.cumulocity.customAgent+json
-    collectionProperty: managedObjects
+    collectionProperty: .managedObjects[]
     alias:
         go: list
         powershell: Get-AgentCollection

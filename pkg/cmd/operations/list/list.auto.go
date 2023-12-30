@@ -77,7 +77,7 @@ Get a list of pending operations for a device
 		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
 
-		flags.WithCollectionProperty("operations"),
+		flags.WithCollectionProperty(".operations[]"),
 	)
 
 	// Required flags

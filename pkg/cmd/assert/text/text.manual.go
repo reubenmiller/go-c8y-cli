@@ -134,7 +134,9 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 
 	writeOutput := func(isJSON bool, output []byte) {
 		if isJSON {
-			_ = n.factory.WriteJSONToConsole(cfg, cmd, "", output)
+			if err == nil {
+				_ = n.factory.WriteJSONToConsole(cfg, cmd, "", output)
+			}
 		} else {
 			fmt.Fprintf(consol, "%s\n", output)
 		}

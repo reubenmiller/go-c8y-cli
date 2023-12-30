@@ -164,7 +164,7 @@
       "accept": "application/json",
       "description": "Retrieve the query results given the ID of the Dremio job that has executed the query",
       "descriptionLong": "Retrieve the query results given the ID of the Dremio job that has executed the query",
-      "collectionProperty": "rows",
+      "collectionProperty": ".rows[]",
       "alias": {
         "go": "listResults",
         "powershell": "Get-DataHubJobResult"

@@ -121,7 +121,7 @@ commands:
     path: /user/{tenant}/groups/{id}/users
     accept: application/vnd.com.nsn.cumulocity.userReferenceCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.user+json
-    collectionProperty: references.#.user
+    collectionProperty: .references[].user
     alias:
         go: listGroupMembership
         powershell: Get-UserGroupMembershipCollection
