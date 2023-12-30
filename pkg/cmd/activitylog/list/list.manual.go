@@ -33,7 +33,7 @@ func NewCmdList(f *cmdutil.Factory) *CmdList {
 		Short: "Get activity log entries",
 		Long:  `View activity log entries and filter for specific information`,
 		Example: heredoc.Doc(`
-		$ c8y activitylog list --datFrom -1h
+		$ c8y activitylog list --dateFrom -1h
 		Show entries from the last hour
 
 		$ c8y activitylog list --dateFrom -8h --filter "method match PUT|POST"
