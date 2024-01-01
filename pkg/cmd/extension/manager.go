@@ -28,15 +28,16 @@ import (
 )
 
 type Manager struct {
-	dataDir    func() string
-	lookPath   func(string) (string, error)
-	findSh     func() (string, error)
-	newCommand func(string, ...string) *exec.Cmd
-	platform   func() (string, string)
-	client     *http.Client
-	config     config.Config
-	io         *iostreams.IOStreams
-	dryRunMode bool
+	dataDir     func() string
+	lookPath    func(string) (string, error)
+	findSh      func() (string, error)
+	newCommand  func(string, ...string) *exec.Cmd
+	platform    func() (string, string)
+	client      *http.Client
+	config      config.Config
+	io          *iostreams.IOStreams
+	dryRunMode  bool
+	allowBinary bool
 }
 
 func NewManager(ios *iostreams.IOStreams, cfg *config.Config) *Manager {
@@ -407,7 +408,8 @@ type binManifest struct {
 
 // Install installs an extension from repo, and pins to commitish if provided
 func (m *Manager) Install(repo ghrepo.Interface, name string, target string) error {
-	if strings.Contains(repo.RepoHost(), "github") {
+	// FUTURE: Disable binary extensions for now
+	if m.allowBinary && strings.Contains(repo.RepoHost(), "github") {
 		isBin, err := isBinExtension(m.client, repo)
 		if err != nil {
 			if errors.Is(err, ErrReleaseNotFound) {
