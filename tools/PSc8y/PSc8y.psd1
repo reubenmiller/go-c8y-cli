@@ -219,6 +219,7 @@ FunctionsToExport = @(
 	'Get-UserMembershipCollection',
 	'Install-FirmwareVersion',
 	'Install-SoftwareVersion',
+	'Invoke-CancelOperation',
 	'Invoke-UserLogout',
 	'New-Agent',
 	'New-Alarm',
