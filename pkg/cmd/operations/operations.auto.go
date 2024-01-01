@@ -1,6 +1,7 @@
 package operations
 
 import (
+	cmdCancel "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/cancel"
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/create"
 	cmdDeleteCollection "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/deletecollection"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/get"
@@ -29,6 +30,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdOperations {
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
 	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
+	cmd.AddCommand(cmdCancel.NewCancelCmd(f).GetCommand())
 	cmd.AddCommand(cmdDeleteCollection.NewDeleteCollectionCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)

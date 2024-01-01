@@ -1,0 +1,10 @@
+tests:
+    operations_cancel_Cancel an operation:
+        command: c8y operations cancel --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                body.failureReason: User cancelled operation
+                body.status: FAILED
+                method: PUT
+                path: /devicecontrol/operations/12345
