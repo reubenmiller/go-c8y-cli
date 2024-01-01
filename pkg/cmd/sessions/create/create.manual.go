@@ -73,6 +73,7 @@ type CmdCreate struct {
 	noStorage      bool
 	encrypt        bool
 	allowInsecure  bool
+	prompt         bool
 
 	*subcommand.SubCommand
 
@@ -127,6 +128,7 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 	cmd.Flags().BoolVar(&ccmd.noStorage, "noStorage", false, "Don't store any passwords or tokens in the session file")
 	cmd.Flags().BoolVar(&ccmd.encrypt, "encrypt", false, "Encrypt passwords and tokens (occurs when logging in)")
 	cmd.Flags().BoolVar(&ccmd.allowInsecure, "allowInsecure", false, "Allow insecure connection (e.g. when using self-signed certificates)")
+	cmd.Flags().BoolVar(&ccmd.prompt, "prompt", false, "Force prompting of missing information")
 
 	// Required flags
 	completion.WithOptions(cmd,
@@ -145,6 +147,10 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 }
 
 func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
+	if n.prompt {
+		n.factory.IOStreams.SetStdoutTTY(true)
+		n.factory.IOStreams.SetStdinTTY(true)
+	}
 	if !n.factory.IOStreams.CanPrompt() {
 		return nil
 	}
