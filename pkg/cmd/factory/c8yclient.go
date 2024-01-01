@@ -94,7 +94,9 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		retryClient.ErrorHandler = func(resp *http.Response, err error, numTries int) (*http.Response, error) {
 			// Pass error back so that the activity log is processed
 			log.Warnf("Giving up after %d attempt/s. err=%s", numTries, err)
-			defer resp.Body.Close()
+			if resp != nil && resp.Body != nil {
+				defer resp.Body.Close()
+			}
 			return resp, err
 		}
 		retryClient.HTTPClient = internalHttpClient
