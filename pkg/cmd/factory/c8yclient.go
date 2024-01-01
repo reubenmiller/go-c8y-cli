@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
@@ -46,6 +47,16 @@ func WithCompression(enable bool) c8y.ClientOption {
 	}
 }
 
+// RetryLogger to customize the log messages produced by the http retry client
+type RetryLogger struct {
+	l *logger.Logger
+}
+
+func (l RetryLogger) Printf(format string, args ...interface{}) {
+	format = strings.TrimPrefix(format, "[DEBUG] ")
+	l.l.Infof(format, args...)
+}
+
 func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password string, disableEncryptionCheck bool) func() (*c8y.Client, error) {
 	return func() (*c8y.Client, error) {
 		cfg, err := f.Config()
@@ -68,11 +79,28 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		log.Debug("Creating c8y client")
 		configureProxySettings(cfg, log)
 
-		httpClient := c8y.NewHTTPClient(
+		internalHttpClient := c8y.NewHTTPClient(
 			WithProxyDisabled(cfg.IgnoreProxy()),
 			c8y.WithInsecureSkipVerify(cfg.SkipSSLVerify()),
 			WithCompression(cfg.ShouldUseCompression()),
 		)
+
+		// Use retry client
+		retryClient := retryablehttp.NewClient()
+		retryClient.RetryMax = cfg.HTTPRetryMax()
+		retryClient.RetryWaitMin = cfg.HTTPRetryWaitMin()
+		retryClient.RetryWaitMax = cfg.HTTPRetryWaitMax()
+		retryClient.Logger = RetryLogger{l: log}
+		retryClient.ErrorHandler = func(resp *http.Response, err error, numTries int) (*http.Response, error) {
+			// Pass error back so that the activity log is processed
+			log.Warnf("Giving up after %d attempt/s. err=%s", numTries, err)
+			if resp != nil && resp.Body != nil {
+				defer resp.Body.Close()
+			}
+			return resp, err
+		}
+		retryClient.HTTPClient = internalHttpClient
+		httpClient := retryClient.StandardClient()
 
 		cacheBodyPaths := cfg.CacheBodyKeys()
 		if len(cacheBodyPaths) > 0 {

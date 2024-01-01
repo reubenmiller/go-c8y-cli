@@ -270,6 +270,9 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// ssl settings
 	cmd.PersistentFlags().BoolP("insecure", "k", false, "Allow insecure server connections when using SSL")
 
+	// retries
+	cmd.PersistentFlags().Int("retries", 3, "Max number of attempts when a failed http call is encountered")
+
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),

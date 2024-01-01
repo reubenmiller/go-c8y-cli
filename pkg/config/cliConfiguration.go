@@ -112,6 +112,15 @@ const (
 	// SettingsUseCompression use compression for HTTP client
 	SettingsUseCompression = "settings.http.compression"
 
+	// SettingsHTTPMaxRetries maximum number of retries by the HTTP client
+	SettingsHTTPMaxRetries = "settings.defaults.retries"
+
+	// SettingsHTTPRetryWaitMin minimum duration to wait before retrying a failed HTTP request
+	SettingsHTTPRetryWaitMin = "settings.http.retryWaitMin"
+
+	// SettingsHTTPRetryWaitMax maximum duration to wait before retrying a failed HTTP request
+	SettingsHTTPRetryWaitMax = "settings.http.retryWaitMax"
+
 	// SettingsDryRunFormat dry run output format. Controls how the dry run information is displayed
 	SettingsDryRunFormat = "settings.defaults.dryFormat"
 
@@ -447,6 +456,9 @@ func (c *Config) bindSettings() {
 
 		// HTTP settings
 		WithBindEnv(SettingsUseCompression, true),
+		WithBindEnv(SettingsHTTPMaxRetries, 3),
+		WithBindEnv(SettingsHTTPRetryWaitMax, "50s"),
+		WithBindEnv(SettingsHTTPRetryWaitMin, "5s"),
 
 		// Dry run options
 		WithBindEnv(SettingsDryRunPattern, ""),
@@ -1101,6 +1113,33 @@ func (c *Config) GetDryRunPattern() string {
 
 func (c *Config) ShouldUseCompression() bool {
 	return c.viper.GetBool(SettingsUseCompression)
+}
+
+// HTTPRetryMax get the maximum number of retries on failed http requests
+func (c *Config) HTTPRetryMax() int {
+	return c.viper.GetInt(SettingsHTTPMaxRetries)
+}
+
+// HTTPRetryWaitMax get the maximum wait time between failed http requests
+func (c *Config) HTTPRetryWaitMax() time.Duration {
+	value := c.viper.GetString(SettingsHTTPRetryWaitMax)
+	duration, err := flags.GetDuration(value, true, time.Second)
+	if err != nil {
+		c.Logger.Warnf("Invalid duration. value=%s, err=%s", duration, err)
+		return 0
+	}
+	return duration
+}
+
+// HTTPRetryWaitMin get the minimum wait time between failed http requests
+func (c *Config) HTTPRetryWaitMin() time.Duration {
+	value := c.viper.GetString(SettingsHTTPRetryWaitMin)
+	duration, err := flags.GetDuration(value, true, time.Second)
+	if err != nil {
+		c.Logger.Warnf("Invalid duration. value=%s, err=%s", duration, err)
+		return 0
+	}
+	return duration
 }
 
 // ShouldUseDryRun returns true of dry run should be applied to the command based on the type of method
