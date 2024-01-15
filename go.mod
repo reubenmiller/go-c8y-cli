@@ -24,7 +24,7 @@ require (
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.4.0
-	github.com/reubenmiller/go-c8y v0.14.12
+	github.com/reubenmiller/go-c8y v0.14.13
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/sethvargo/go-password v0.2.0
@@ -37,8 +37,8 @@ require (
 	github.com/tidwall/sjson v1.2.5
 	github.com/vbauerster/mpb/v6 v6.0.4
 	go.uber.org/zap v1.26.0
-	golang.org/x/crypto v0.17.0
-	golang.org/x/term v0.15.0
+	golang.org/x/crypto v0.18.0
+	golang.org/x/term v0.16.0
 	gopkg.in/yaml.v3 v3.0.1
 	moul.io/http2curl/v2 v2.3.0
 )
@@ -94,8 +94,8 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b // indirect
-	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637 // indirect
