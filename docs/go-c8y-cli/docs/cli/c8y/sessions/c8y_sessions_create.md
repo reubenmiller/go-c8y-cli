@@ -48,6 +48,7 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
       --noStorage            Don't store any passwords or tokens in the session file
       --noTenantPrefix       Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false
       --password string      Password. If left blank then you will be prompted for the password
+      --prompt               Force prompting of missing information
       --tenant string        Tenant ID
       --token string         Token
       --type string          Session type. List of predefined session types
@@ -96,6 +97,7 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
       --progress                   Show progress bar. This will also disable any other verbose output
       --proxy string               Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw                        Show raw response. This mode will force output=json and view=off
+      --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
   -P, --sessionPassword string     Override session password
