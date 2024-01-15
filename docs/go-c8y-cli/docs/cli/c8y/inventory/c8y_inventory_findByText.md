@@ -82,6 +82,7 @@ Find managed objects which contain the text 'myText' and is a device (using pipe
       --progress                   Show progress bar. This will also disable any other verbose output
       --proxy string               Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw                        Show raw response. This mode will force output=json and view=off
+      --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
   -P, --sessionPassword string     Override session password
