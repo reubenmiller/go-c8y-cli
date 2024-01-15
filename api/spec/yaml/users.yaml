@@ -377,7 +377,10 @@ commands:
 
   - name: resetUserPassword
     description: Reset user password
-    descriptionLong: The password can be reset either by issuing a password reset email (default), or be specifying a new password.
+    descriptionLong: |
+      The password can be reset either by issuing a password reset email (default), or be specifying a new password.
+
+      Note: In more recent Cumulocity IoT versions,  you can't set a fixed password for another user.
     method: PUT
     path: user/{tenant}/users/{id}
     accept: 'application/vnd.com.nsn.cumulocity.user+json'
@@ -389,16 +392,14 @@ commands:
         - description: Resets a user's password by sending a reset email to the user
           beforeEach:
             - $User = PSc8y\New-TestUser
+          skipTest: false
           command: Reset-UserPassword -Id $User.id -Dry
           afterEach:
             - PSc8y\Remove-User -Id $User.id
 
         - description: Resets a user's password by generating a new password
-          beforeEach:
-            - $User = PSc8y\New-TestUser
+          skipTest: true
           command: Reset-UserPassword -Id $User.id -NewPassword (New-RandomPassword)
-          afterEach:
-            - PSc8y\Remove-User -Id $User.id
       go:
         - description: Update a user
           command: c8y users resetUserPassword --id "myuser"
