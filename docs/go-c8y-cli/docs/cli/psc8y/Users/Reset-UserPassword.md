@@ -76,6 +76,8 @@ Reset-UserPassword
 ## DESCRIPTION
 The password can be reset either by issuing a password reset email (default), or be specifying a new password.
 
+Note: In more recent Cumulocity IoT versions,  you can't set a fixed password for another user.
+
 ## EXAMPLES
 
 ### EXAMPLE 1
