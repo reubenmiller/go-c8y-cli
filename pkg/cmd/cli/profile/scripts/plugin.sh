@@ -1,68 +1,106 @@
 #!/bin/bash
-
 # Force encoding
 export LANG=C.UTF-8
 export LC_ALL=C.UTF-8
 
+__setup_bash() {
+    #
+    # Install bash dependencies
+    #
+    if [ ! -d "$HOME/.bash_completion.d" ]; then
+        mkdir -p "$HOME/.bash_completion.d"
+    fi
+
+    if [ ! -f "$HOME/.bash_completion.d/complete_alias" ]; then
+        if command -V curl >/dev/null 2>&1; then
+            echo "Installing bash completion for aliases"
+            curl -sfL https://raw.githubusercontent.com/cykerway/complete-alias/master/complete_alias > "$HOME/.bash_completion.d/complete_alias"
+        elif command -V curl >/dev/null 2>&1; then
+            echo "Installing bash completion for aliases"
+            wget -O - https://raw.githubusercontent.com/cykerway/complete-alias/master/complete_alias > "$HOME/.bash_completion.d/complete_alias"
+        fi
+    fi
+
+    # Enable completion for aliases
+    # shellcheck disable=SC1091
+    [ -f /usr/share/bash-completion/bash_completion ] && source /usr/share/bash-completion/bash_completion
+    # shellcheck disable=SC1091
+    [ -f "$HOME/.bash_completion.d/complete_alias" ] && source "$HOME/.bash_completion.d/complete_alias"
+
+    if [ -f /etc/bash_completion ]; then
+        # shellcheck disable=SC1091
+        . "/etc/bash_completion"
+    elif command -v brew >/dev/null 2>&1; then
+        if [ -f "$(brew --prefix)/etc/bash_completion" ]; then
+            # shellcheck disable=SC1091
+            . "$(brew --prefix)/etc/bash_completion"
+        fi
+    fi
+
+    # shellcheck disable=SC1090
+    source <(c8y completion bash)
+}
+
+__setup_zsh() {
+    # homebrew only: Add completions folder to the fpath so zsh can find it
+    if command -v brew >/dev/null 2>&1; then
+        FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
+        # TODO: Check if this line is really required
+        # chmod -R go-w "$(brew --prefix)/share"
+    fi
+
+    # init completions
+    autoload -U compinit; compinit
+
+    IMPORT_LOCAL=1
+
+    if [ -n "$ZSH_CUSTOM" ]; then
+        # oh-my-zsh
+        mkdir -p "$ZSH_CUSTOM/plugins/c8y"
+        if [ ! -f "$ZSH_CUSTOM/plugins/c8y/_c8y" ]; then
+            echo "Updating c8y completions: $ZSH_CUSTOM/plugins/c8y/_c8y"
+            c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
+            IMPORT_LOCAL=0
+        fi
+    else
+        # zsh (vanilla)
+        if [ ! -f "/usr/share/zsh/site-functions/_c8y" ]; then
+            if [ "$EUID" = "0" ]; then
+                if [ -d /usr/share/zsh/site-functions ]; then
+                    echo "Updating c8y completions: /usr/share/zsh/site-functions/_c8y"
+                    c8y completion zsh > "/usr/share/zsh/site-functions/_c8y"
+                    IMPORT_LOCAL=0
+                fi
+            fi
+        fi
+    fi
+
+    if [ "$IMPORT_LOCAL" = 1 ]; then
+        # shellcheck disable=SC1090
+        source <(c8y completion zsh)
+    fi
+}
+
+
+#
+# init
+#
 C8Y_SHELL=bash
 if [ -n "$BASH_VERSION" ]; then
     C8Y_SHELL=bash
 elif [ -n "$ZSH_VERSION" ]; then
     C8Y_SHELL=zsh
 fi
-
-install_bash_dependencies() {
-    if [ ! -d "$HOME/.bash_completion.d" ]; then
-        mkdir -p "$HOME/.bash_completion.d"
-    fi
-
-    if [ ! -f "$HOME/.bash_completion.d/complete_alias" ]; then
-        echo "Installing bash completion for aliases"
-        curl -sfL https://raw.githubusercontent.com/cykerway/complete-alias/master/complete_alias \
-                > "$HOME/.bash_completion.d/complete_alias"
-    fi
-
-    # Enable completion for aliases
-    [ -f /usr/share/bash-completion/bash_completion ] && source /usr/share/bash-completion/bash_completion
-    [ -f "$HOME/.bash_completion.d/complete_alias" ] && source "$HOME/.bash_completion.d/complete_alias"
-
-    if [ -f "$(brew --prefix)/etc/bash_completion" ]; then
-        . "$(brew --prefix)/etc/bash_completion"
-    fi
-}
-
-init-c8y() {
-    if command -v c8y >/dev/null 2>&1; then
-        if [ "$C8Y_SHELL" = "zsh" ]; then
-
-            # homebrew only: Add completions folder to the fpath so zsh can find it
-            if command -v brew >/dev/null 2>&1; then
-                FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
-                chmod -R go-w "$(brew --prefix)/share"
-            fi
-
-            # init completions
-            autoload -U compinit; compinit
-
-            if [ -n "$ZSH_CUSTOM" ]; then
-                mkdir -p "$ZSH_CUSTOM/plugins/c8y"
-
-                if [ ! -f "$ZSH_CUSTOM/plugins/c8y/_c8y" ]; then
-                    c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
-                    echo "Updated c8y completions"
-                    source "$HOME/.zshrc"
-                fi
-            fi
-        fi
-
-        if [ "$C8Y_SHELL" = "bash" ]; then
-            install_bash_dependencies
-            source <(c8y completion bash)
-        fi
-    fi
-}
-
-init-c8y
+if command -v c8y >/dev/null 2>&1; then
+    case "$C8Y_SHELL" in
+        bash)
+            __setup_bash
+            ;;
+        zsh)
+            __setup_zsh
+            ;;
+    esac
+fi
 
 ########################################################################
 # c8y helpers
