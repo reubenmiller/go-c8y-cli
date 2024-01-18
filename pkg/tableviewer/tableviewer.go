@@ -9,6 +9,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/olekukonko/ts"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/gjsonpath"
 	"github.com/tidwall/gjson"
 )
 
@@ -44,7 +45,7 @@ type TableView struct {
 func (v *TableView) getValue(value gjson.Result) []string {
 	row := []string{}
 	for i, col := range v.Columns {
-		columnValue := strings.Trim(value.Get(col).Raw, "\"")
+		columnValue := strings.Trim(value.Get(gjsonpath.EscapePath(col)).Raw, "\"")
 
 		columnWidth := v.MaxColumnWidth
 		if i < len(v.ColumnWidths) {

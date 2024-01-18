@@ -3,6 +3,7 @@ package flatten
 import (
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/gjsonpath"
 	"github.com/tidwall/sjson"
 )
 
@@ -34,8 +35,7 @@ func UnflattenOrdered(data map[string]interface{}, keys []string) (output []byte
 	for _, k := range keys {
 		if v, ok := data[k]; ok {
 			k = strings.ReplaceAll(k, KeyPrefix, ":")
-
-			output, err = sjson.SetBytes(output, k, v)
+			output, err = sjson.SetBytes(output, gjsonpath.EscapePath(k), v)
 			if err != nil {
 				return nil, err
 			}
