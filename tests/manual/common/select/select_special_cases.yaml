@@ -25,3 +25,18 @@ tests:
     stdout:
       json:
         c8y_Dashboard.15426326034650895.name: test
+
+  It selects paths with special characters in their property names \#340:
+    command: |
+      echo '{"with@at":"one","with#hash":"two","with|pipe":"three","with*star":"four","with?questionmark":"five"}' |
+        c8y util show --select "with@at,with#hash,with|pipe,with\*star,with?questionmark" --compact=false -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "with#hash": "two",
+          "with*star": "four",
+          "with?questionmark": "five",
+          "with@at": "one",
+          "with|pipe": "three"
+        }
