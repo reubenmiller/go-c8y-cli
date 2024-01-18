@@ -24,3 +24,20 @@ tests:
         |------------|----------------------|
         | ms03       |                      |
         |------------|----------------------|
+
+  It can display paths with special characters in a table \#340:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+    command: |
+      echo '{"with@at":"one","with#hash":"two","with|pipe":"three","with*star":"four","with?questionmark":"five"}' |
+        c8y util show --select "with@at,with#hash,with|pipe,with\*star,with?questionmark" -o table --noColor
+    exit-code: 0
+    stdout:
+      exactly: |
+        | with@at    | with#hash  | with|pipe  | with*star  | with?questionmark |
+        |------------|------------|------------|------------|-------------------|
+        | one        | two        | three      | four       | five              |
