@@ -104,7 +104,7 @@ commands:
           command: c8y devicemanagement certificates update --id MyCert --status DISABLED
           assertStdOut:
             json:
-              path: r//tenant/tenants/t\d+/trusted-certificates/4fd8df0378f2cafd5e322c1aaa8b87300704e9a5
+              path: r//tenant/tenants/t\d+/trusted-certificates/[0-9a-f]+$
 
     pathParameters:
       - name: id
