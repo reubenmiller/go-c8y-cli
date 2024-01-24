@@ -73,7 +73,7 @@ create_usergroup () {
 create_app () {
     local name="$1"
     c8y applications get -n --id "$name" --silentStatusCodes 404 ||
-        c8y applications create \
+        c8y applications create -n \
             --name "$name" \
             --type HOSTED \
             --key "$name-key" \
@@ -85,7 +85,7 @@ create_service_user () {
 
     local tenant=$(c8y currenttenant get -n --select name -o csv)
     c8y microservices get -n --id "$appname" --silentStatusCodes 404 ||
-        c8y microservices serviceusers create \
+        c8y microservices serviceusers create -n \
             --name "$appname" \
             --tenants "$tenant"
 }
