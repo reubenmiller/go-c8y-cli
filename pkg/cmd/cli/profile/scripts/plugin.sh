@@ -117,7 +117,7 @@ set-session() {
     code=$?
     if [ $code -ne 0 ]; then
         echo "Set session failed"
-        exit $code
+        return 1
     fi
     eval "$c8yenv"
 }
