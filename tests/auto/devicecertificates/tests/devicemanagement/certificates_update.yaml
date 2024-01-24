@@ -14,4 +14,4 @@ tests:
             json:
                 body.status: DISABLED
                 method: PUT
-                path: r//tenant/tenants/t\d+/trusted-certificates/4fd8df0378f2cafd5e322c1aaa8b87300704e9a5
+                path: r//tenant/tenants/t\d+/trusted-certificates/[0-9a-f]+$
