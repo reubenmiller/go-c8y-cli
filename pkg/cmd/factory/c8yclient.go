@@ -85,22 +85,29 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 			WithCompression(cfg.ShouldUseCompression()),
 		)
 
-		// Use retry client
-		retryClient := retryablehttp.NewClient()
-		retryClient.RetryMax = cfg.HTTPRetryMax()
-		retryClient.RetryWaitMin = cfg.HTTPRetryWaitMin()
-		retryClient.RetryWaitMax = cfg.HTTPRetryWaitMax()
-		retryClient.Logger = RetryLogger{l: log}
-		retryClient.ErrorHandler = func(resp *http.Response, err error, numTries int) (*http.Response, error) {
-			// Pass error back so that the activity log is processed
-			log.Warnf("Giving up after %d attempt/s. err=%s", numTries, err)
-			if resp != nil && resp.Body != nil {
-				defer resp.Body.Close()
+		var httpClient *http.Client
+		if cfg.HTTPRetryMax() > 0 {
+			// Use retry client
+			// Note: Don't use the retry client unless we have to as it will the body (if set)
+			// of outgoing HTTP requests into memory (and it affects the loading as well)
+			retryClient := retryablehttp.NewClient()
+			retryClient.RetryMax = cfg.HTTPRetryMax()
+			retryClient.RetryWaitMin = cfg.HTTPRetryWaitMin()
+			retryClient.RetryWaitMax = cfg.HTTPRetryWaitMax()
+			retryClient.Logger = RetryLogger{l: log}
+			retryClient.ErrorHandler = func(resp *http.Response, err error, numTries int) (*http.Response, error) {
+				// Pass error back so that the activity log is processed
+				log.Warnf("Giving up after %d attempt/s. err=%s", numTries, err)
+				if resp != nil && resp.Body != nil {
+					defer resp.Body.Close()
+				}
+				return resp, err
 			}
-			return resp, err
+			retryClient.HTTPClient = internalHttpClient
+			httpClient = retryClient.StandardClient()
+		} else {
+			httpClient = internalHttpClient
 		}
-		retryClient.HTTPClient = internalHttpClient
-		httpClient := retryClient.StandardClient()
 
 		cacheBodyPaths := cfg.CacheBodyKeys()
 		if len(cacheBodyPaths) > 0 {
