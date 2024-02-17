@@ -456,7 +456,7 @@ func (c *Config) bindSettings() {
 
 		// HTTP settings
 		WithBindEnv(SettingsUseCompression, true),
-		WithBindEnv(SettingsHTTPMaxRetries, 3),
+		WithBindEnv(SettingsHTTPMaxRetries, 0),
 		WithBindEnv(SettingsHTTPRetryWaitMax, "50s"),
 		WithBindEnv(SettingsHTTPRetryWaitMin, "5s"),
 
