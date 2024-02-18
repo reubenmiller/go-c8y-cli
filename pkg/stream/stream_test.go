@@ -45,7 +45,7 @@ func Test_Read_Simple(t *testing.T) {
 	input := strings.TrimSpace(`
 1
 
-2
+"2"
 3
 `)
 	s := newTestStreamer(input, false)

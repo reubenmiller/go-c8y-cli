@@ -134,10 +134,21 @@ func (r *InputStreamer) Read() (output []byte, err error) {
 		output, err = r.ReadJSONObject()
 	} else {
 		output, err = r.ReadLine()
-		output = bytes.TrimSpace(output)
 		if err != nil {
 			return output, err
 		}
+		output = r.formatLine(output)
 	}
 	return output, err
+}
+
+func (r *InputStreamer) formatLine(b []byte) []byte {
+	b = bytes.TrimSpace(b)
+
+	// If has surrounding quotes then strip them
+	// as it improves compatibility with jq output when not using the -r option, e.g. `echo '{"key":"1234"}' | jq '.key' | c8y util show`
+	if bytes.HasPrefix(b, []byte("\"")) && bytes.HasSuffix(b, []byte("\"")) {
+		b = bytes.Trim(b, "\"")
+	}
+	return b
 }
