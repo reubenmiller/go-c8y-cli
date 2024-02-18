@@ -9,7 +9,8 @@ import (
 
 // InputStreamer an input streamer which breaks down a buffer into input values
 type InputStreamer struct {
-	Buffer *bufio.Reader
+	IgnoreEmptyLines bool
+	Buffer           *bufio.Reader
 }
 
 func (r *InputStreamer) isJSONObject() (bool, error) {
@@ -28,6 +29,19 @@ func (r *InputStreamer) consumeWhitespace() error {
 			return err
 		}
 		if !unicode.IsSpace(c) {
+			r.Buffer.UnreadRune()
+			break
+		}
+	}
+	return nil
+}
+func (r *InputStreamer) consumeWhitespaceOnLine() error {
+	for {
+		c, _, err := r.Buffer.ReadRune()
+		if err == io.EOF {
+			return err
+		}
+		if !(c == ' ' || c == '\t') {
 			r.Buffer.UnreadRune()
 			break
 		}
@@ -74,7 +88,22 @@ func (r *InputStreamer) ReadJSONObject() ([]byte, error) {
 		}
 		prev = c
 	}
+
+	// Consume a trailing newline if present
+	r.consumeIf('\n')
 	return out.Bytes(), err
+}
+
+// ReadLine reads the next chunk of text until the next newline char
+// if not put it back on the buffer
+func (r *InputStreamer) consumeIf(c rune) error {
+	v, _, err := r.Buffer.ReadRune()
+	if err == nil {
+		if v != c {
+			return r.Buffer.UnreadRune()
+		}
+	}
+	return nil
 }
 
 // ReadLine reads the next chunk of text until the next newline char
@@ -84,8 +113,15 @@ func (r *InputStreamer) ReadLine() ([]byte, error) {
 
 // Read reads the next delimited value (either text or JSON object)
 func (r *InputStreamer) Read() (output []byte, err error) {
-	if err := r.consumeWhitespace(); err != nil {
-		return output, err
+	if r.IgnoreEmptyLines {
+		if err := r.consumeWhitespace(); err != nil {
+			return output, err
+		}
+
+	} else {
+		if err := r.consumeWhitespaceOnLine(); err != nil {
+			return output, err
+		}
 	}
 
 	var isJSON bool

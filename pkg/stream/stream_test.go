@@ -9,66 +9,137 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createBuffer(v string) *bufio.Reader {
-	return bufio.NewReader(strings.NewReader(v))
+func newTestStreamer(v string, ignoreEmptyLines bool) *InputStreamer {
+	return &InputStreamer{
+		Buffer:           bufio.NewReader(strings.NewReader(v)),
+		IgnoreEmptyLines: ignoreEmptyLines,
+	}
 }
 
-func Test_ScanJSONObject_Consuming(t *testing.T) {
-	data := []struct {
-		Input  string
-		Output []string
-		Error  error
-	}{
-		{
-			Input: `
-	{"name":"1 {literal \" value}"}
-		`,
-			Output: []string{
-				`{"name":"1 {literal \" value}"}`,
-			},
-			Error: nil,
-		},
-		{
-			Input: `
-	{"name":"1"}{"name":"2"}
-one
-two
+func Test_ReadSimpleWithoutEmptyLines(t *testing.T) {
+	input := strings.TrimSpace(`
+1
 
-		`,
-			Output: []string{
-				`{"name":"1"}`,
-				`{"name":"2"}`,
-				`one`,
-				`two`,
-			},
-			Error: nil,
-		},
-		{
-			Input: `{"name":{"1":{"2":{"3":{"4":{"5":"value"}}}}}}{"name":"2"}
+2
+3
+`)
+	s := newTestStreamer(input, true)
 
-		`,
-			Output: []string{
-				`{"name":{"1":{"2":{"3":{"4":{"5":"value"}}}}}}`,
-				`{"name":"2"}`,
-			},
-			Error: nil,
-		},
-		{
-			Input: `{"name":"1"`,
-			Output: []string{
-				`{"name":"1"`,
-			},
-			Error: io.EOF,
-		},
-	}
-	for _, testcase := range data {
-		s := InputStreamer{
-			Buffer: createBuffer(testcase.Input),
-		}
+	var obj []byte
+	var err error
 
-		for _, iOutput := range testcase.Output {
-			out, _ := s.Read()
-			assert.Equal(t, iOutput, string(out))
-		}
-	}
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, "1", string(obj))
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, "2", string(obj))
+
+	obj, err = s.Read()
+	assert.ErrorIs(t, err, io.EOF)
+	assert.Equal(t, "3", string(obj))
+}
+
+func Test_Read_Simple(t *testing.T) {
+	input := strings.TrimSpace(`
+1
+
+2
+3
+`)
+	s := newTestStreamer(input, false)
+
+	var obj []byte
+	var err error
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, "1", string(obj))
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, "", string(obj))
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, "2", string(obj))
+
+	obj, err = s.Read()
+	assert.ErrorIs(t, err, io.EOF)
+	assert.Equal(t, "3", string(obj))
+}
+
+func Test_Read_Complex_JSON(t *testing.T) {
+	input := strings.TrimSpace(`
+{"name":"1 {literal \" value}"}
+{"name":{"1":{"2":{"3":{"4":{"5":"value"}}}}}}{"name":"3"}
+`)
+	s := newTestStreamer(input, false)
+
+	var obj []byte
+	var err error
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, `{"name":"1 {literal \" value}"}`, string(obj))
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, `{"name":{"1":{"2":{"3":{"4":{"5":"value"}}}}}}`, string(obj))
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, `{"name":"3"}`, string(obj))
+}
+
+func Test_ReadPartialJSON(t *testing.T) {
+	input := strings.TrimSpace(`
+{"name":"1"
+`)
+	s := newTestStreamer(input, false)
+
+	var obj []byte
+	var err error
+
+	obj, err = s.Read()
+	assert.ErrorIs(t, err, io.EOF)
+	assert.Equal(t, `{"name":"1"`, string(obj))
+}
+
+func Test_Read_Mixed(t *testing.T) {
+	input := strings.TrimLeft(`
+{"name":"1"}{"name":"2"}
+
+3
+4
+`, "\n\t ")
+	s := newTestStreamer(input, false)
+
+	var obj []byte
+	var err error
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, `{"name":"1"}`, string(obj))
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, `{"name":"2"}`, string(obj))
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, "", string(obj))
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, "3", string(obj))
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, "4", string(obj))
+
+	obj, err = s.Read()
+	assert.ErrorIs(t, err, io.EOF)
+	assert.Equal(t, "", string(obj))
 }
