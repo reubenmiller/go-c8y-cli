@@ -21,10 +21,10 @@ func Test_ScanJSONObject_Consuming(t *testing.T) {
 	}{
 		{
 			Input: `
-	{"name":"1"}
+	{"name":"1 {literal \" value}"}
 		`,
 			Output: []string{
-				`{"name":"1"}`,
+				`{"name":"1 {literal \" value}"}`,
 			},
 			Error: nil,
 		},

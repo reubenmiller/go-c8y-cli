@@ -45,6 +45,9 @@ func (r *InputStreamer) ReadJSONObject() ([]byte, error) {
 		return nil, err
 	}
 
+	// Simple json object parser
+	var prev rune
+	quote := 0
 	for {
 		c, _, rErr := r.Buffer.ReadRune()
 		if rErr == io.EOF {
@@ -52,15 +55,24 @@ func (r *InputStreamer) ReadJSONObject() ([]byte, error) {
 			break
 		}
 		switch c {
+		case '"':
+			if prev != '\\' {
+				quote = (quote + 1) % 2
+			}
 		case '{':
-			brackets++
+			if quote == 0 {
+				brackets++
+			}
 		case '}':
-			brackets--
+			if quote == 0 {
+				brackets--
+			}
 		}
 		out.WriteRune(c)
 		if brackets == 0 {
 			break
 		}
+		prev = c
 	}
 	return out.Bytes(), err
 }
