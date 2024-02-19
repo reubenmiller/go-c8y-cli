@@ -1,6 +1,7 @@
 {"name": "device01"}{"name": "device02"}
     {"name": "device03"}
     device04
+"device05"
 {
-    "name": "device05"
+    "name": "device06"
 }
