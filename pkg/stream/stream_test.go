@@ -46,6 +46,7 @@ func Test_Read_Simple(t *testing.T) {
 1
 
 "2"
+ 1.23
 3
 `)
 	s := newTestStreamer(input, false)
@@ -64,6 +65,10 @@ func Test_Read_Simple(t *testing.T) {
 	obj, err = s.Read()
 	assert.Nil(t, err)
 	assert.Equal(t, "2", string(obj))
+
+	obj, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, "1.23", string(obj))
 
 	obj, err = s.Read()
 	assert.ErrorIs(t, err, io.EOF)

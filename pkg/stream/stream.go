@@ -3,6 +3,7 @@ package stream
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"io"
 	"unicode"
 )
@@ -143,12 +144,14 @@ func (r *InputStreamer) Read() (output []byte, err error) {
 }
 
 func (r *InputStreamer) formatLine(b []byte) []byte {
-	b = bytes.TrimSpace(b)
-
-	// If has surrounding quotes then strip them
-	// as it improves compatibility with jq output when not using the -r option, e.g. `echo '{"key":"1234"}' | jq '.key' | c8y util show`
-	if bytes.HasPrefix(b, []byte("\"")) && bytes.HasSuffix(b, []byte("\"")) {
-		b = bytes.Trim(b, "\"")
+	// Prase json strings (e.g. quoted strings)
+	// as it improves compatibility with jq output when not using the -r option,
+	// e.g. `echo '{"key":"1234"}' | jq '.key' | c8y util show`
+	var strValue string
+	if err := json.Unmarshal(b, &strValue); err == nil {
+		return []byte(strValue)
 	}
+
+	b = bytes.TrimSpace(b)
 	return b
 }
