@@ -12,6 +12,7 @@ import (
 	"errors"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/stream"
 	"github.com/tidwall/gjson"
 )
 
@@ -69,6 +70,7 @@ type PipeIterator struct {
 	filter Filter
 	opts   *PipeOptions
 	reader *bufio.Reader
+	stream *stream.InputStreamer
 }
 
 // IsBound return true if the iterator is bound
@@ -80,11 +82,14 @@ func (i *PipeIterator) IsBound() bool {
 func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 	i.mu.Lock()
 	defer i.mu.Unlock()
-	line, err = i.reader.ReadBytes('\n')
-	line = bytes.TrimSpace(line)
 
-	if err != nil {
-		return line, line, err
+	line, err = i.stream.Read()
+	if len(line) > 0 && errors.Is(err, io.EOF) {
+		// Don't return io.EOF if the line includes a value
+		// TODO: Ideally this should be changed so the reader of the
+		// iterator handles io.EOF correctly (e.g. if there is still a value process it, then
+		// react to the io.EOF)
+		err = nil
 	}
 
 	if i.filter != nil {
@@ -175,6 +180,9 @@ func NewPipeIterator(in io.Reader, filter ...Filter) (Iterator, error) {
 
 	return &PipeIterator{
 		reader: reader,
+		stream: &stream.InputStreamer{
+			Buffer: reader,
+		},
 		filter: pipelineFilter,
 	}, nil
 }
@@ -210,6 +218,9 @@ func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) 
 
 	return &PipeIterator{
 		reader: reader,
+		stream: &stream.InputStreamer{
+			Buffer: reader,
+		},
 		filter: pipelineFilter,
 		opts:   pipeOpts,
 	}, nil
