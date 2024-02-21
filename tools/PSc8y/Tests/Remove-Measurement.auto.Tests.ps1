@@ -6,7 +6,7 @@ Describe -Name "Remove-Measurement" {
 
     }
 
-    It "Delete measurement" {
+    It -Skip "Delete measurement" {
         $Response = PSc8y\Remove-Measurement -id $Measurement.id
         $LASTEXITCODE | Should -Be 0
     }

@@ -6,7 +6,7 @@ Describe -Name "Get-Measurement" {
 
     }
 
-    It "Get measurement" {
+    It -Skip "Get measurement" {
         $Response = PSc8y\Get-Measurement -Id $Measurement.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

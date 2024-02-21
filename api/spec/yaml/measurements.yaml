@@ -228,6 +228,8 @@ commands:
           beforeEach:
             - $Measurement = New-TestDevice | New-Measurement -Template "test.measurement.jsonnet"
           command: Get-Measurement -Id $Measurement.id
+          # Retrieving single measurements is deprecated when using time series feature is enabled
+          skipTest: true
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $Measurement.source.id
 
@@ -324,6 +326,8 @@ commands:
     examples:
       powershell:
         - description: Delete measurement
+          # Deleting a single measurement is deprecated when using time series feature
+          skipTest: true
           beforeEach:
             - $Measurement = New-TestDevice | New-Measurement -Template "test.measurement.jsonnet"
           command: Remove-Measurement -id $Measurement.id
