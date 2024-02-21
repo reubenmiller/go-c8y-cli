@@ -22,7 +22,11 @@ commands:
     examples:
       powershell:
         - description: Get a collection of device groups with names that start with 'parent'
+          beforeEach:
+            - $group = PSc8y\New-TestDeviceGroup -Name "parent"
           command: Get-DeviceGroupCollection -Name "parent*"
+          afterEach:
+            - Remove-ManagedObject -Id $group.id
       go:
         - description: Get a collection of device groups with names that start with 'parent'
           command: c8y devicegroups list --name "parent*"
