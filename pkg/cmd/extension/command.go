@@ -452,7 +452,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						- fill in script/build.sh with your compilation script for automated builds
 						- compile a %[1]s binary locally and run 'c8y %[2]s' to see changes`, fullName, extName)
 					}
-					link := "https://docs.github.com/github-cli/github-cli/creating-github-cli-extensions"
+					link := "https://goc8ycli.netlify.app/docs/tutorials/extensions/"
 					out := heredoc.Docf(`
 						%[1]s Created directory %[2]s
 						%[1]s Initialized git repository
@@ -463,10 +463,9 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						%[4]s
 						%[5]s
 						- commit and push your code to a git repository to share your extension with others.
-						  To share on github you can use the 'gh' command: 'gh repo create'
 
 						For more information on writing extensions:
-						%[3]s
+						  %[3]s
 					`, cs.SuccessIcon(), fullName, link, cs.Bold("Next Steps"), steps, goBinChecks)
 					fmt.Fprint(io.Out, out)
 					return nil
