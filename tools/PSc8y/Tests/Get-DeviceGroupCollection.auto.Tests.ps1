@@ -2,6 +2,7 @@
 
 Describe -Name "Get-DeviceGroupCollection" {
     BeforeEach {
+        $group = PSc8y\New-TestDeviceGroup -Name "parent"
 
     }
 
@@ -13,6 +14,7 @@ Describe -Name "Get-DeviceGroupCollection" {
 
 
     AfterEach {
+        Remove-ManagedObject -Id $group.id
 
     }
 }

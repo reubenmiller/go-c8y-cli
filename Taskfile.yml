@@ -69,7 +69,7 @@ tasks:
   docs-powershell:
     desc: Update the powershell docs
     cmds:
-      - env C8Y_BINARY=$(which c8y) pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate -OutputFolder "docs/go-c8y-cli/docs/cli/psc8y"
+      - env C8Y_BINARY='{{joinPath .ROOT_DIR ".bin" "c8y"}}' pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate -OutputFolder "docs/go-c8y-cli/docs/cli/psc8y"
   
   docs-c8y:
     desc: create c8y documentation
@@ -256,7 +256,7 @@ tasks:
   test-powershell:
     desc: Run powershell tests
     cmds:
-      - env C8Y_BINARY=$(which c8y) pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.ps1
+      - env C8Y_BINARY='{{joinPath .ROOT_DIR ".bin" "c8y"}}' pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.ps1
 
   install-test-dependencies:
     desc: Install test dependencies

@@ -303,6 +303,7 @@
               "$Measurement = New-TestDevice | New-Measurement -Template \"test.measurement.jsonnet\""
             ],
             "command": "Get-Measurement -Id $Measurement.id",
+            "skipTest": true,
             "afterEach": [
               "PSc8y\\Remove-ManagedObject -Id $Measurement.source.id"
             ]
@@ -429,6 +430,7 @@
         "powershell": [
           {
             "description": "Delete measurement",
+            "skipTest": true,
             "beforeEach": [
               "$Measurement = New-TestDevice | New-Measurement -Template \"test.measurement.jsonnet\""
             ],

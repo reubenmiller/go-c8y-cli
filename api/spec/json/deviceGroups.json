@@ -23,7 +23,13 @@
         "powershell": [
           {
             "description": "Get a collection of device groups with names that start with 'parent'",
-            "command": "Get-DeviceGroupCollection -Name \"parent*\""
+            "beforeEach": [
+              "$group = PSc8y\\New-TestDeviceGroup -Name \"parent\""
+            ],
+            "command": "Get-DeviceGroupCollection -Name \"parent*\"",
+            "afterEach": [
+              "Remove-ManagedObject -Id $group.id"
+            ]
           }
         ],
         "go": [
