@@ -151,7 +151,13 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: "1.21"
-    
+
+    - name: Install GoReleaser
+      uses: goreleaser/goreleaser-action@v5
+      with:
+        version: latest
+        install-only: true
+
     - name: Install Task
       uses: arduino/setup-task@v2
       with:
