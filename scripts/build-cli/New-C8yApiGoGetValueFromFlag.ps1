@@ -31,13 +31,16 @@
 
     $Definitions = @{
         # file (used in multipart/form-data uploads). It writes to the formData object instead of the body
-        "file" = "flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(n.factory), `"${prop}`", `"data`")...,"
+        "file" = "flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(n.factory), `"${prop}`", `"data`"),"
 
         # fileContents. File contents will be added to body
         "fileContents" = "flags.WithFilePath(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
         # attachment (used in multipart/form-data uploads), without extra details
         "attachment" = "flags.WithFormDataFile(`"${prop}`", `"data`")...,"
+
+        # multi-part file without extra details and control the form-data field name
+        "formDataFile" = "flags.WithFileReader(`"${prop}`", `"${queryParam}`"),"
 
         # Boolean
         "boolean" = "flags.WithBoolValue(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"

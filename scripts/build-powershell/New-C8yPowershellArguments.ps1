@@ -87,6 +87,7 @@
         "dateto" { "string"; break }
         "directory" { "string"; break }
         "file" { "string"; break }
+        "formDataFile" { "string"; break }
         "fileContents" { "string"; break }
         "firmwareName" { "object[]"; break }
         "firmwarepatchName" { "object[]"; break }
