@@ -4,7 +4,7 @@ tests:
         exit-code: 0
         stdout:
             json:
-                ..#(body.tags="latest").body.tags: latest
-                ..#(body.tags="tag1").body.tags: tag1
+                body.tags.0: tag1
+                body.tags.1: latest
                 method: PUT
                 path: /application/applications/1234/versions/1.0

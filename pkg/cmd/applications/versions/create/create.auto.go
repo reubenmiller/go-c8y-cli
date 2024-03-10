@@ -34,7 +34,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create application version",
 		Long:  `Uploaded version and tags can only contain upper and lower case letters, integers and ., +, -. Other characters are prohibited.`,
 		Example: heredoc.Doc(`
-$ c8y applications versions create --id 1234 --file ./myapp.zip --version ""
+$ c8y applications versions create --application 1234 --file "./testdata/myapp.zip" --version "2.0.0"
 Create a new application version
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

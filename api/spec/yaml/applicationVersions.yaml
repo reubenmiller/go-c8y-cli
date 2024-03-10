@@ -29,7 +29,10 @@ commands:
           command: c8y applications versions list --id 1234 --pageSize 100
 
         - description: Get an application versions by name
-          command: c8y applications versions list --id cockpit
+          command: c8y applications versions list --application cockpit
+          assertStdOut:
+            json:
+              path: r//application/applications/\d+/versions$
 
     pathParameters:
       - name: id
@@ -91,7 +94,8 @@ commands:
           skipTest: true
       go:
         - description: Create a new application version
-          command: c8y applications versions create --id 1234 --file ./myapp.zip --version ""
+          command: c8y applications versions create --application 1234 --file "./testdata/myapp.zip" --version "2.0.0"
+          skipTest: true
     pathParameters:
       - name: id
         type: hostedapplication
@@ -184,7 +188,12 @@ commands:
 
       go:
         - description: Replace application version's tags
-          command: c8y applications versions update --id 1234 --version 1.0 --tag tag1,latest
+          command: c8y applications versions update --application 1234 --version 1.0 --tag tag1,latest
+          assertStdOut:
+            json:
+              path: /application/applications/1234/versions/1.0
+              body.tags.0: tag1
+              body.tags.1: latest
 
     pathParameters:
       - name: id

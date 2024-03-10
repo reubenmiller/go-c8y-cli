@@ -5,7 +5,7 @@ tests:
         stdout:
             json:
                 method: GET
-                path: /application/applications/cockpit/versions
+                path: r//application/applications/\d+/versions$
     applications/versions_list_Get application versions:
         command: c8y applications versions list --id 1234 --pageSize 100
         exit-code: 0
