@@ -172,6 +172,10 @@
       "description": "Parameter name. It should start with a lower case character, and only include characters [a-zA-Z]",
       "pattern": "^[a-z][a-zA-Z]+$"
     },
+    "parameterOptions": {
+      "type": "object",
+      "description": "Parameter options"
+    },
     "dependsOn": {
       "type": "array",
       "title": "Parameter is depend on the list of parameters for completions or other lookups",
@@ -742,6 +746,9 @@
                 },
                 "skip": {
                   "$ref": "#/definitions/skipParameter"
+                },
+                "options": {
+                  "$ref": "#/definitions/parameterOptions"
                 }
               },
               "required": [
