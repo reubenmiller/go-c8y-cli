@@ -1,0 +1,10 @@
+tests:
+    applications/versions_update_Replace application version's tags:
+        command: c8y applications versions update --id 1234 --version 1.0 --tag tag1,latest
+        exit-code: 0
+        stdout:
+            json:
+                ..#(body.tags="latest").body.tags: latest
+                ..#(body.tags="tag1").body.tags: tag1
+                method: PUT
+                path: /application/applications/1234/versions/1.0
