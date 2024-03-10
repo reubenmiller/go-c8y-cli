@@ -1,0 +1,206 @@
+# yaml-language-server: $schema=../schema.json
+---
+
+group:
+  name: applications/versions
+  description: Cumulocity application versions
+  descriptionLong: API methods to retrieve, create, update and delete application versions
+  link: https://cumulocity.com/api/core/#tag/Application-versions
+
+commands:
+  - name: getApplicationVersionCollection
+    description: Get application version collection
+    descriptionLong: Get a collection of application versions by a given filter
+    method: GET
+    path: /application/applications/{id}/versions
+    accept: application/vnd.com.nsn.cumulocity.applicationVersionCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.applicationVersion+json
+    collectionProperty: applicationVersions
+    alias:
+        go: list
+        powershell: Get-ApplicationVersionCollection
+    examples:
+      powershell:
+        - description: Get application versions
+          command: Get-ApplicationVersionCollection -Id 1234
+
+      go:
+        - description: Get application versions
+          command: c8y applications versions list --id 1234 --pageSize 100
+
+        - description: Get an application versions by name
+          command: c8y applications versions list --id cockpit
+
+    pathParameters:
+      - name: id
+        type: hostedapplication
+        description: Application
+
+  - name: getApplicationVersion
+    description: Get a specific version of an application
+    descriptionLong: Retrieve the selected version of an application in your tenant. To select the version, use only the version or only the tag query parameter
+    method: GET
+    path: /application/applications/{id}/versions
+    accept: application/vnd.com.nsn.cumulocity.applicationVersion+json
+    addAccept: true
+    collectionProperty: '-'
+    alias:
+        go: find
+        powershell: Get-ApplicationVersion
+    examples:
+      powershell:
+        - description: Get application version by tag
+          command: Get-ApplicationVersion -Id 1234 -Tag tag1
+        - description: Get application version by version name
+          command: Get-ApplicationVersion -Id 1234 -Version 1.0
+
+      go:
+        - description: Get application version by tag
+          command: c8y applications versions find --id 1234 --tag tag1
+        - description: Get application version by version name
+          command: c8y applications versions find --id 1234 --version 1.0
+
+    pathParameters:
+      - name: id
+        type: hostedapplication
+        description: Application
+
+    queryParameters:
+      - name: version
+        type: string
+        description: The version field of the application version
+
+      - name: tag
+        type: string
+        description: The tag of the application version
+
+  - name: newApplicationVersion
+    description: Create application version
+    descriptionLong: Uploaded version and tags can only contain upper and lower case letters, integers and ., +, -. Other characters are prohibited.
+    method: POST
+    path: /application/applications/{id}/versions
+    accept: application/json
+    collectionProperty: "-"
+    alias:
+        go: create
+        powershell: New-ApplicationVersion
+    examples:
+      powershell:
+        - description: Create a new application version
+          command: New-ApplicationVersion -Name $AppName -Key "${AppName}-key" -ContextPath $AppName -Type HOSTED
+          skipTest: true
+      go:
+        - description: Create a new application version
+          command: c8y applications versions create --id 1234 --file ./myapp.zip --version ""
+    pathParameters:
+      - name: id
+        type: hostedapplication
+        description: Application
+
+    bodyContent:
+      type: formdata
+
+    bodyTemplateOptions:
+      enabled: true
+
+    body:
+      - name: file
+        type: formDataFile
+        property: applicationBinary
+        description: The ZIP file to be uploaded
+
+      - name: version
+        property: version
+        type: string
+        options:
+          formData: applicationVersion
+        required: true
+        description: The JSON file with version information.
+
+      - name: tags
+        property: tags
+        type: string[]
+        options:
+          formData: applicationVersion
+        required: true
+        description: The JSON file with version information. todo
+
+      - name: data
+        type: json_custom
+        description: data
+
+  - name: deleteApplicationVersion
+    description: Delete a specific version of an application
+    descriptionLong: Delete a specific version of an application in your tenant, by a given tag or version
+    method: DELETE
+    path: /application/applications/{id}/versions
+    alias:
+        go: delete
+        powershell: Remove-ApplicationVersion
+    examples:
+      powershell:
+        - description: Delete application version by tag
+          command: Remove-ApplicationVersion -Id 1234 -Tag tag1
+        - description: Delete application version by version name
+          command: Remove-ApplicationVersion -Id 1234 -Version 1.0
+
+      go:
+        - description: Delete application version by tag
+          command: c8y applications versions delete --id 1234 --tag tag1
+        - description: Delete application version by version name
+          command: c8y applications versions delete --id 1234 --version 1.0
+
+    pathParameters:
+      - name: id
+        type: hostedapplication
+        description: Application
+
+    queryParameters:
+      - name: version
+        type: string
+        description: The version field of the application version
+
+      - name: tag
+        type: string
+        description: The tag of the application version
+
+  - name: updateApplicationVersionTags
+    description: Replace an application version's tags
+    descriptionLong: Replaces the tags of a given application version in your tenant
+    method: PUT
+    path: /application/applications/{id}/versions/{version}
+    accept: application/vnd.com.nsn.cumulocity.applicationVersion+json
+    collectionProperty: '-'
+    addAccept: true
+    alias:
+        go: update
+        powershell: Update-ApplicationVersionTag
+    examples:
+      powershell:
+        - description: Get application version by tag
+          command: Update-ApplicationVersionTag -Id 1234 -Tag tag1
+        - description: Get application version by version name
+          command: Update-ApplicationVersionTag -Id 1234 -Version 1.0
+
+      go:
+        - description: Replace application version's tags
+          command: c8y applications versions update --id 1234 --version 1.0 --tag tag1,latest
+
+    pathParameters:
+      - name: id
+        type: hostedapplication
+        description: Application
+
+      - name: version
+        type: string
+        description: Application version
+
+    body:
+      - name: tag
+        property: tags
+        type: string[]
+        description: Tag assigned to the version. Version tags must be unique across all versions and version fields of application versions
+
+      - name: data
+        type: json
+        description: Custom data
