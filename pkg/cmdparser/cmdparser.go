@@ -355,6 +355,8 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	switch p.Type {
 	case "file":
 		opts = append(opts, flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(factory), p.Name, flags.FlagDataName)...)
+	case "formDataFile":
+		opts = append(opts, flags.WithFileReader(p.Name, targetProp))
 	case "attachment":
 		opts = append(opts, flags.WithFormDataFile(p.Name, flags.FlagDataName)...)
 
