@@ -267,6 +267,7 @@
     # Body
     #
     $GetBodyContents = "body"
+    $IsFormData = $false
     
     if ($Specification.body) {
         switch ($Specification.bodyContent.type) {
@@ -276,7 +277,7 @@
             }
             "formdata" {
                 $GetBodyContents = "body"
-                break
+                $IsFormData = $true
             }
             default {
                 $GetBodyContents = "body"
@@ -294,16 +295,25 @@
                 }
             }
 
+            if ($iArg.options -and $iArg.options.formData) {
+                $null = $RESTFormDataBuilderOptions.AppendLine("Append(flags.WithFormDataProperty(`"{0}`"))." -f $iArg.options.formData)
+            }
+
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
             if ($code) {
                 switch -Regex ($code) {
                     "^flags\.WithFormData" {
-                        $null = $RESTFormDataBuilderOptions.AppendLine($code)
+                        # $null = $RESTFormDataBuilderOptions.AppendLine($code)
+                        $null = $RESTFormDataBuilderOptions.AppendLine("Append({0}...)." -f $code.TrimEnd(',').TrimEnd('.'))
                         break
                     }
 
                     "^(flags\.|c8yfetcher\.|With|c8ybinary\.)" {
-                        $null = $RESTBodyBuilderOptions.AppendLine($code)
+                        if ($IsFormData) {
+                            $null = $RESTFormDataBuilderOptions.AppendLine("Append({0})." -f $code.TrimEnd(','))
+                        } else {
+                            $null = $RESTBodyBuilderOptions.AppendLine($code)
+                        }
                         break
                     }
 
@@ -362,8 +372,13 @@
         # Add support for user defined templates to control body
         #
         if ($Specification.bodyTemplates.type -ne "none") {
-            $null = $RESTBodyBuilderOptions.AppendLine("cmdutil.WithTemplateValue(n.factory),")
-            $null = $RESTBodyBuilderOptions.AppendLine("flags.WithTemplateVariablesValue(),")
+            if ($IsFormData) {
+                $null = $RESTFormDataBuilderOptions.AppendLine("Append({0})." -f "cmdutil.WithTemplateValue(n.factory)")
+                $null = $RESTFormDataBuilderOptions.AppendLine("Append({0})." -f "flags.WithTemplateVariablesValue()")
+            } else {
+                $null = $RESTBodyBuilderOptions.AppendLine("cmdutil.WithTemplateValue(n.factory),")
+                $null = $RESTBodyBuilderOptions.AppendLine("flags.WithTemplateVariablesValue(),")
+            }
         }
 
         if ($Specification.bodyRequiredKeys) {
@@ -707,8 +722,15 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     err = flags.WithFormDataOptions(
 		cmd,
         formData,
-        inputIterators,
-		$RESTFormDataBuilderOptions
+        inputIterators,$(
+            if ($RESTFormDataBuilderOptions.Length -gt 0) {
+                @"
+                flags.WithOptionBuilder().
+                    $RESTFormDataBuilderOptions
+                Build()...
+"@
+            }
+        )
     )
     if err != nil {
 		return cmderrors.NewUserError(err)
@@ -1219,6 +1241,18 @@ Function Get-C8yGoArgs {
         }
 
         "file" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "formDataFile" {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {

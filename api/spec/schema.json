@@ -200,6 +200,7 @@
         "float",
         "fileContents",
         "attachment",
+        "formDataFile",
         "binaryUploadURL",
         "date",
         "datetime",
