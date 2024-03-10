@@ -131,8 +131,13 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
-		inputIterators,
-		flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(n.factory), "file", "data")...,
+		inputIterators, flags.WithOptionBuilder().
+			Append(flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(n.factory), "file", "data")...).
+			Append(flags.WithStringValue("name", "name")).
+			Append(flags.WithStringValue("type", "type")).
+			Append(cmdutil.WithTemplateValue(n.factory)).
+			Append(flags.WithTemplateVariablesValue()).
+			Build()...,
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -144,10 +149,6 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("type", "type"),
-		cmdutil.WithTemplateValue(n.factory),
-		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
