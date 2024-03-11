@@ -61,7 +61,7 @@ Get a binary and save it to a file
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("id", "id", true, "id", "binaryId"),
 	)
 
 	// Required flags

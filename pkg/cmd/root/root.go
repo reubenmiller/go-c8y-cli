@@ -21,6 +21,7 @@ import (
 	applicationsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications"
 	applicationsCreateHostedCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/createhostedapplication"
 	applicationsOpenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/open"
+	applicationVersionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/versions"
 	assertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/assert"
 	auditrecordsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/auditrecords"
 	binariesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/binaries"
@@ -440,6 +441,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	applications := applicationsCmd.NewSubCommand(f).GetCommand()
 	applications.AddCommand(applicationsCreateHostedCmd.NewCmdCreateHostedApplication(f).GetCommand())
 	applications.AddCommand(applicationsOpenCmd.NewOpenCmd(f).GetCommand())
+	applications.AddCommand(applicationVersionsCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(applications)
 
 	// smart groups

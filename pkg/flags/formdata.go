@@ -19,6 +19,8 @@ var ErrReadFile = errors.New("failed to read file")
 var ErrInvalidJSON = errors.New("invalid json")
 var ErrUnsupportedType = errors.New("unsupported type")
 
+type FormDataProperty string
+
 // WithFormDataOptions returns a body from given command line arguments
 func WithFormDataOptions(cmd *cobra.Command, form map[string]io.Reader, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
 
@@ -29,6 +31,7 @@ func WithFormDataOptions(cmd *cobra.Command, form map[string]io.Reader, inputIte
 	hasInfo := false
 	objectInfo := mapbuilder.NewMapBuilder()
 	objectInfo.SetEmptyMap()
+	property := "object"
 
 	for _, opt := range opts {
 		name, value, err := opt(cmd, inputIterators)
@@ -71,6 +74,9 @@ func WithFormDataOptions(cmd *cobra.Command, form map[string]io.Reader, inputIte
 		case RequiredKeys:
 			objectInfo.SetRequiredKeys(v...)
 
+		case FormDataProperty:
+			property = string(v)
+
 		default:
 			if name != "" {
 				err = objectInfo.Set(name, v)
@@ -88,7 +94,7 @@ func WithFormDataOptions(cmd *cobra.Command, form map[string]io.Reader, inputIte
 		if err != nil {
 			return err
 		}
-		form["object"] = bytes.NewReader(b)
+		form[property] = bytes.NewReader(b)
 	}
 
 	return nil
@@ -198,6 +204,12 @@ func WithFormDataFile(srcFile string, srcData string) []GetOption {
 	return []GetOption{
 		WithFileReader(srcFile, "file"),
 		WithStringFormValue("name", "filename"),
+	}
+}
+
+func WithFormDataProperty(name string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		return name, FormDataProperty(name), nil
 	}
 }
 

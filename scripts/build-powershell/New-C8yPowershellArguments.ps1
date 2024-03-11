@@ -75,6 +75,7 @@
         "usergroup[]" { "object[]"; break }
         "userself[]" { "object[]"; break }
         "application" { "object[]"; break }
+        "application_with_versions" { "object[]"; break }
         "applicationname" { "string"; break }
         "attachment" { "string"; break }
         "binaryUploadURL" { "string"; break }
@@ -87,6 +88,7 @@
         "dateto" { "string"; break }
         "directory" { "string"; break }
         "file" { "string"; break }
+        "formDataFile" { "string"; break }
         "fileContents" { "string"; break }
         "firmwareName" { "object[]"; break }
         "firmwarepatchName" { "object[]"; break }

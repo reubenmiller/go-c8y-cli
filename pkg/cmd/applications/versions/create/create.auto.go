@@ -1,12 +1,11 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package createbinary
+package create
 
 import (
 	"io"
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
@@ -18,28 +17,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CreateBinaryCmd command
-type CreateBinaryCmd struct {
+// CreateCmd command
+type CreateCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreateBinaryCmd creates a command to Create event binary
-func NewCreateBinaryCmd(f *cmdutil.Factory) *CreateBinaryCmd {
-	ccmd := &CreateBinaryCmd{
+// NewCreateCmd creates a command to Create application version
+func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
+	ccmd := &CreateCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "createBinary",
-		Short: "Create event binary",
-		Long:  `Upload a new binary file to an event`,
+		Use:   "create",
+		Short: "Create application version",
+		Long:  `Uploaded version and tags can only contain upper and lower case letters, integers and ., +, -. Other characters are prohibited.`,
 		Example: heredoc.Doc(`
-$ c8y events createBinary --id 12345 --file ./myfile.log
-Add a binary to an event
-
-$ c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-31.log"
-Add a binary to an event using a custom name
+$ c8y applications versions create --application 1234 --file ./myapp.zip --version "2.0.0"
+Create a new application version
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -49,23 +45,30 @@ Add a binary to an event using a custom name
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Event id (required) (accepts pipeline)")
-	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
-	cmd.Flags().String("name", "", "Set the name of the binary file. This will be the name of the file when it is downloaded in the UI")
+	cmd.Flags().String("application", "", "Application (accepts pipeline)")
+	cmd.Flags().String("file", "", "The ZIP file to be uploaded")
+	cmd.Flags().String("version", "", "The JSON file with version information. (required)")
+	cmd.Flags().StringSlice("tags", []string{""}, "The JSON file with version information. todo (required)")
+	cmd.Flags().String("data", "", "data")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithApplicationWithVersions("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
+		f.WithTemplateFlag(cmd),
+		flags.WithExtendedPipelineSupport("application", "application", false, "id", "name"),
+		flags.WithPipelineAliases("application", "id"),
 
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithCollectionProperty("-"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("file")
+	_ = cmd.MarkFlagRequired("version")
+	_ = cmd.MarkFlagRequired("tags")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -73,7 +76,7 @@ Add a binary to an event using a custom name
 }
 
 // RunE executes the command
-func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -129,7 +132,14 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		formData,
 		inputIterators, flags.WithOptionBuilder().
-			Append(flags.WithFormDataFile("file", "data")...).
+			Append(flags.WithFileReader("file", "applicationBinary")).
+			Append(flags.WithFormDataProperty("applicationVersion")).
+			Append(flags.WithStringValue("version", "version")).
+			Append(flags.WithFormDataProperty("applicationVersion")).
+			Append(flags.WithStringSliceValues("tags", "tags", "")).
+			Append(flags.WithDataValue("data", "data")).
+			Append(cmdutil.WithTemplateValue(n.factory)).
+			Append(flags.WithTemplateVariablesValue()).
 			Build()...,
 	)
 	if err != nil {
@@ -142,37 +152,32 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithDataFlagValue(),
-		flags.WithStringValue("name", "name"),
-		cmdutil.WithTemplateValue(n.factory),
-		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("event/events/{id}/binaries")
+	path := flags.NewStringTemplate("/application/applications/{application}/versions")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithIDSlice(args, "id", "id"),
+		c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, "application", "application"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:         "POST",
-		Path:           path.GetTemplate(),
-		Query:          queryValue,
-		Body:           body,
-		FormData:       formData,
-		Header:         headers,
-		IgnoreAccept:   cfg.IgnoreAcceptHeader(),
-		DryRun:         cfg.ShouldUseDryRun(cmd.CommandPath()),
-		PrepareRequest: c8ybinary.AddProgress(cmd, "file", cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY())),
+		Method:       "POST",
+		Path:         path.GetTemplate(),
+		Query:        queryValue,
+		Body:         body,
+		FormData:     formData,
+		Header:       headers,
+		IgnoreAccept: cfg.IgnoreAcceptHeader(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

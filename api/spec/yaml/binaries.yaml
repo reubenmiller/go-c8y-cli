@@ -115,6 +115,9 @@ commands:
         type: id[]
         required: true
         pipeline: true
+        pipelineAliases:
+          - id
+          - binaryId
         description: Inventory binary id
 
   - name: newBinary
@@ -211,6 +214,9 @@ commands:
         type: id[]
         required: true
         pipeline: true
+        pipelineAliases:
+          - id
+          - binaryId
         description: Inventory binary id
     bodyTemplates:
         - type: none
@@ -248,4 +254,7 @@ commands:
         type: id[]
         required: true
         pipeline: true
+        pipelineAliases:
+          - id
+          - binaryId
         description: Inventory binary id

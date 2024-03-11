@@ -1,0 +1,19 @@
+tests:
+    applications/versions_get_Get application version by tag:
+        command: c8y applications versions get --application 1234 --tag tag1
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications/1234/versions
+            contains:
+                - tag=tag1
+    applications/versions_get_Get application version by version name:
+        command: c8y applications versions get --application 1234 --version 1.0
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications/1234/versions
+            contains:
+                - version=1.0
