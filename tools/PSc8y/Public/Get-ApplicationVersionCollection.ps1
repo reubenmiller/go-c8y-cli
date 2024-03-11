@@ -11,7 +11,7 @@ Get a collection of application versions by a given filter
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_versions_list
 
 .EXAMPLE
-PS> Get-ApplicationVersionCollection -Id 1234
+PS> Get-ApplicationVersionCollection -Application 1234
 
 Get application versions
 
@@ -26,7 +26,7 @@ Get application versions
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id
+        $Application
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
@@ -51,13 +51,13 @@ Get application versions
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            $Application `
             | Group-ClientRequests `
             | c8y applications versions list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Id `
+            $Application `
             | Group-ClientRequests `
             | c8y applications versions list $c8yargs
         }

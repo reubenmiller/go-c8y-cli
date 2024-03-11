@@ -1,7 +1,8 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package delete
+package get
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -17,31 +18,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// DeleteCmd command
-type DeleteCmd struct {
+// GetCmd command
+type GetCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewDeleteCmd creates a command to Delete a specific version of an application
-func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
-	ccmd := &DeleteCmd{
+// NewGetCmd creates a command to Get a specific version of an application
+func NewGetCmd(f *cmdutil.Factory) *GetCmd {
+	ccmd := &GetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "delete",
-		Short: "Delete a specific version of an application",
-		Long:  `Delete a specific version of an application in your tenant, by a given tag or version`,
+		Use:   "get",
+		Short: "Get a specific version of an application",
+		Long:  `Retrieve the selected version of an application in your tenant. To select the version, use only the version or only the tag query parameter`,
 		Example: heredoc.Doc(`
-$ c8y applications versions delete --application 1234 --tag tag1
-Delete application version by tag
+$ c8y applications versions get --application 1234 --tag tag1
+Get application version by tag
 
-$ c8y applications versions delete --application 1234 --version 1.0
-Delete application version by version name
+$ c8y applications versions get --application 1234 --version 1.0
+Get application version by version name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return nil
 		},
 		RunE: ccmd.RunE,
 	}
@@ -59,10 +60,11 @@ Delete application version by version name
 
 	flags.WithOptions(
 		cmd,
-		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("application", "application", false, "id", "name"),
 		flags.WithPipelineAliases("application", "id"),
+
+		flags.WithCollectionProperty("-"),
 	)
 
 	// Required flags
@@ -73,7 +75,7 @@ Delete application version by version name
 }
 
 // RunE executes the command
-func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -105,6 +107,11 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -119,7 +126,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
+		flags.WithStaticStringValue("Accept", "application/vnd.com.nsn.cumulocity.applicationVersion+json"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -160,7 +167,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "DELETE",
+		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

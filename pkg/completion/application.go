@@ -134,6 +134,61 @@ func WithHostedApplication(flagName string, clientFunc func() (*c8y.Client, erro
 	}
 }
 
+var BooleanTrue bool = true
+var BooleanFalse bool = false
+
+// WithApplicationWithVersions applications with versions completion
+func WithApplicationWithVersions(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			client, err := clientFunc()
+			if err != nil {
+				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
+			}
+			items, _, err := client.Application.GetApplications(
+				c8y.WithDisabledDryRunContext(context.Background()),
+				&c8y.ApplicationOptions{
+					PaginationOptions: *c8y.NewPaginationOptions(2000),
+					HasVersions:       &BooleanTrue,
+				},
+			)
+
+			if err != nil {
+				values := []string{fmt.Sprintf("error. %s", err)}
+				return values, cobra.ShellCompDirectiveError
+			}
+			values := []string{}
+			pattern := "*" + toComplete + "*"
+			for _, item := range items.Applications {
+				// Ignore if not hosted in the current application
+				if client.TenantName != "" {
+					if item.Owner != nil && item.Owner.Tenant != nil && item.Owner.Tenant.ID != "" {
+						if item.Owner.Tenant.ID != client.TenantName {
+							continue
+						}
+					}
+				}
+
+				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
+					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+				}
+			}
+
+			// If no results, then included applications that are not owned by the current tenant
+			if len(values) == 0 {
+				for _, item := range items.Applications {
+					if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
+						values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+					}
+				}
+			}
+
+			return values, cobra.ShellCompDirectiveNoFileComp
+		})
+		return cmd
+	}
+}
+
 // WithMicroservice microservice completion
 func WithMicroservice(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {

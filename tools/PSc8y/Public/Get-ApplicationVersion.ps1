@@ -8,15 +8,15 @@ Get a specific version of an application
 Retrieve the selected version of an application in your tenant. To select the version, use only the version or only the tag query parameter
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_versions_find
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_versions_get
 
 .EXAMPLE
-PS> Get-ApplicationVersion -Id 1234 -Tag tag1
+PS> Get-ApplicationVersion -Application 1234 -Tag tag1
 
 Get application version by tag
 
 .EXAMPLE
-PS> Get-ApplicationVersion -Id 1234 -Version 1.0
+PS> Get-ApplicationVersion -Application 1234 -Version 1.0
 
 Get application version by version name
 
@@ -31,7 +31,7 @@ Get application version by version name
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id,
+        $Application,
 
         # The version field of the application version
         [Parameter()]
@@ -54,7 +54,7 @@ Get application version by version name
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "applications versions find"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "applications versions get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.applicationVersion+json"
@@ -66,15 +66,15 @@ Get application version by version name
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            $Application `
             | Group-ClientRequests `
-            | c8y applications versions find $c8yargs `
+            | c8y applications versions get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Id `
+            $Application `
             | Group-ClientRequests `
-            | c8y applications versions find $c8yargs
+            | c8y applications versions get $c8yargs
         }
         
     }

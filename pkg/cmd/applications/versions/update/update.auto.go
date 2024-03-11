@@ -34,7 +34,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Short: "Replace an application version's tags",
 		Long:  `Replaces the tags of a given application version in your tenant`,
 		Example: heredoc.Doc(`
-$ c8y applications versions update --id 1234 --version 1.0 --tag tag1,latest
+$ c8y applications versions update --application 1234 --version 1.0 --tag tag1,latest
 Replace application version's tags
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -45,13 +45,13 @@ Replace application version's tags
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application")
+	cmd.Flags().String("application", "", "Application (accepts pipeline)")
 	cmd.Flags().String("version", "", "Application version")
 	cmd.Flags().StringSlice("tag", []string{""}, "Tag assigned to the version. Version tags must be unique across all versions and version fields of application versions")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithHostedApplication("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithApplicationWithVersions("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -59,8 +59,8 @@ Replace application version's tags
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("", "", false),
-		flags.WithPipelineAliases("id", "id"),
+		flags.WithExtendedPipelineSupport("application", "application", false, "id", "name"),
+		flags.WithPipelineAliases("application", "id"),
 
 		flags.WithCollectionProperty("-"),
 	)
@@ -151,12 +151,12 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/application/applications/{id}/versions/{version}")
+	path := flags.NewStringTemplate("/application/applications/{application}/versions/{version}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithHostedApplicationByNameFirstMatch(n.factory, args, "id", "id"),
+		c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, "application", "application"),
 		flags.WithStringValue("version", "version"),
 	)
 	if err != nil {

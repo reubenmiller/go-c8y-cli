@@ -6,7 +6,7 @@ Describe -Name "Get-ApplicationVersionCollection" {
     }
 
     It "Get application versions" {
-        $Response = PSc8y\Get-ApplicationVersionCollection -Id 1234
+        $Response = PSc8y\Get-ApplicationVersionCollection -Application 1234
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

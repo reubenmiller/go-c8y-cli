@@ -34,7 +34,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create application version",
 		Long:  `Uploaded version and tags can only contain upper and lower case letters, integers and ., +, -. Other characters are prohibited.`,
 		Example: heredoc.Doc(`
-$ c8y applications versions create --id 1234 --file ./myapp.zip --version ""
+$ c8y applications versions create --application 1234 --file ./myapp.zip --version "2.0.0"
 Create a new application version
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -45,7 +45,7 @@ Create a new application version
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application")
+	cmd.Flags().String("application", "", "Application (accepts pipeline)")
 	cmd.Flags().String("file", "", "The ZIP file to be uploaded")
 	cmd.Flags().String("version", "", "The JSON file with version information. (required)")
 	cmd.Flags().StringSlice("tags", []string{""}, "The JSON file with version information. todo (required)")
@@ -53,15 +53,15 @@ Create a new application version
 
 	completion.WithOptions(
 		cmd,
-		completion.WithHostedApplication("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithApplicationWithVersions("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("", "", false),
-		flags.WithPipelineAliases("id", "id"),
+		flags.WithExtendedPipelineSupport("application", "application", false, "id", "name"),
+		flags.WithPipelineAliases("application", "id"),
 
 		flags.WithCollectionProperty("-"),
 	)
@@ -158,12 +158,12 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/application/applications/{id}/versions")
+	path := flags.NewStringTemplate("/application/applications/{application}/versions")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithHostedApplicationByNameFirstMatch(n.factory, args, "id", "id"),
+		c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, "application", "application"),
 	)
 	if err != nil {
 		return err
