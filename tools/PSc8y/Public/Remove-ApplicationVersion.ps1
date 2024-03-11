@@ -11,12 +11,12 @@ Delete a specific version of an application in your tenant, by a given tag or ve
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_versions_delete
 
 .EXAMPLE
-PS> Remove-ApplicationVersion -Id 1234 -Tag tag1
+PS> Remove-ApplicationVersion -Application 1234 -Tag tag1
 
 Delete application version by tag
 
 .EXAMPLE
-PS> Remove-ApplicationVersion -Id 1234 -Version 1.0
+PS> Remove-ApplicationVersion -Application 1234 -Version 1.0
 
 Delete application version by version name
 
@@ -31,7 +31,7 @@ Delete application version by version name
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id,
+        $Application,
 
         # The version field of the application version
         [Parameter()]
@@ -66,13 +66,13 @@ Delete application version by version name
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            $Application `
             | Group-ClientRequests `
             | c8y applications versions delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Id `
+            $Application `
             | Group-ClientRequests `
             | c8y applications versions delete $c8yargs
         }

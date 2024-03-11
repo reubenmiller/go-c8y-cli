@@ -1,7 +1,8 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package create
+package get
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -17,28 +18,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CreateCmd command
-type CreateCmd struct {
+// GetCmd command
+type GetCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreateCmd creates a command to Create application version
-func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
-	ccmd := &CreateCmd{
+// NewGetCmd creates a command to Get a specific version of an application
+func NewGetCmd(f *cmdutil.Factory) *GetCmd {
+	ccmd := &GetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create application version",
-		Long:  `Uploaded version and tags can only contain upper and lower case letters, integers and ., +, -. Other characters are prohibited.`,
+		Use:   "get",
+		Short: "Get a specific version of an application",
+		Long:  `Retrieve the selected version of an application in your tenant. To select the version, use only the version or only the tag query parameter`,
 		Example: heredoc.Doc(`
-$ c8y applications versions create --application 1234 --file "./testdata/myapp.zip" --version "2.0.0"
-Create a new application version
+$ c8y applications versions get --application 1234 --tag tag1
+Get application version by tag
+
+$ c8y applications versions get --application 1234 --version 1.0
+Get application version by version name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return nil
 		},
 		RunE: ccmd.RunE,
 	}
@@ -46,10 +50,8 @@ Create a new application version
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("application", "", "Application (accepts pipeline)")
-	cmd.Flags().String("file", "", "The ZIP file to be uploaded")
-	cmd.Flags().String("version", "", "The JSON file with version information. (required)")
-	cmd.Flags().StringSlice("tags", []string{""}, "The JSON file with version information. todo (required)")
-	cmd.Flags().String("data", "", "data")
+	cmd.Flags().String("version", "", "The version field of the application version")
+	cmd.Flags().String("tag", "", "The tag of the application version")
 
 	completion.WithOptions(
 		cmd,
@@ -58,8 +60,7 @@ Create a new application version
 
 	flags.WithOptions(
 		cmd,
-		flags.WithProcessingMode(),
-		f.WithTemplateFlag(cmd),
+
 		flags.WithExtendedPipelineSupport("application", "application", false, "id", "name"),
 		flags.WithPipelineAliases("application", "id"),
 
@@ -67,8 +68,6 @@ Create a new application version
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("version")
-	_ = cmd.MarkFlagRequired("tags")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -76,7 +75,7 @@ Create a new application version
 }
 
 // RunE executes the command
-func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -102,10 +101,17 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithStringValue("version", "version"),
+		flags.WithStringValue("tag", "tag"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -120,7 +126,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
+		flags.WithStaticStringValue("Accept", "application/vnd.com.nsn.cumulocity.applicationVersion+json"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -131,23 +137,14 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
-		inputIterators, flags.WithOptionBuilder().
-			Append(flags.WithFileReader("file", "applicationBinary")).
-			Append(flags.WithFormDataProperty("applicationVersion")).
-			Append(flags.WithStringValue("version", "version")).
-			Append(flags.WithFormDataProperty("applicationVersion")).
-			Append(flags.WithStringSliceValues("tags", "tags", "")).
-			Append(flags.WithDataValue("data", "data")).
-			Append(cmdutil.WithTemplateValue(n.factory)).
-			Append(flags.WithTemplateVariablesValue()).
-			Build()...,
+		inputIterators,
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,
@@ -170,7 +167,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "POST",
+		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

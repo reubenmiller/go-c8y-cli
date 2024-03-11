@@ -190,6 +190,7 @@
       "enum": [
         "application",
         "applicationname",
+        "application_with_versions",
         "hostedapplication",
         "boolean",
         "booleanDefault",

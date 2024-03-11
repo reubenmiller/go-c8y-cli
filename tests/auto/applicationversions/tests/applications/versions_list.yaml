@@ -1,13 +1,13 @@
 tests:
     applications/versions_list_Get an application versions by name:
-        command: c8y applications versions list --id cockpit
+        command: c8y applications versions list --application cockpit
         exit-code: 0
         stdout:
             json:
                 method: GET
                 path: r//application/applications/\d+/versions$
     applications/versions_list_Get application versions:
-        command: c8y applications versions list --id 1234 --pageSize 100
+        command: c8y applications versions list --application 1234 --pageSize 100
         exit-code: 0
         stdout:
             json:

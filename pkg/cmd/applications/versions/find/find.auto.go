@@ -55,7 +55,7 @@ Get application version by version name
 
 	completion.WithOptions(
 		cmd,
-		completion.WithHostedApplication("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithApplicationWithVersions("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -160,7 +160,7 @@ func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithHostedApplicationByNameFirstMatch(n.factory, args, "id", "id"),
+		c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

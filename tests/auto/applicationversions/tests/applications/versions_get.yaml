@@ -1,6 +1,6 @@
 tests:
-    applications/versions_find_Get application version by tag:
-        command: c8y applications versions find --id 1234 --tag tag1
+    applications/versions_get_Get application version by tag:
+        command: c8y applications versions get --application 1234 --tag tag1
         exit-code: 0
         stdout:
             json:
@@ -8,8 +8,8 @@ tests:
                 path: /application/applications/1234/versions
             contains:
                 - tag=tag1
-    applications/versions_find_Get application version by version name:
-        command: c8y applications versions find --id 1234 --version 1.0
+    applications/versions_get_Get application version by version name:
+        command: c8y applications versions get --application 1234 --version 1.0
         exit-code: 0
         stdout:
             json:

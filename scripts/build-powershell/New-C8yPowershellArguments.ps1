@@ -75,6 +75,7 @@
         "usergroup[]" { "object[]"; break }
         "userself[]" { "object[]"; break }
         "application" { "object[]"; break }
+        "application_with_versions" { "object[]"; break }
         "applicationname" { "string"; break }
         "attachment" { "string"; break }
         "binaryUploadURL" { "string"; break }

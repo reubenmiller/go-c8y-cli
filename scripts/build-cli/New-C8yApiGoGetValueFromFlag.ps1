@@ -102,6 +102,7 @@
 
         # application
         "application" = "c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
+        "application_with_versions" = "c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # hostedapplication (web app)
         "hostedapplication" = "c8yfetcher.WithHostedApplicationByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"

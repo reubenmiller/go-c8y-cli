@@ -35,10 +35,10 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get application version collection",
 		Long:  `Get a collection of application versions by a given filter`,
 		Example: heredoc.Doc(`
-$ c8y applications versions list --id 1234 --pageSize 100
+$ c8y applications versions list --application 1234 --pageSize 100
 Get application versions
 
-$ c8y applications versions list --id cockpit
+$ c8y applications versions list --application cockpit
 Get an application versions by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -49,18 +49,18 @@ Get an application versions by name
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application")
+	cmd.Flags().String("application", "", "Application (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithHostedApplication("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithApplicationWithVersions("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("", "", false),
-		flags.WithPipelineAliases("id", "id"),
+		flags.WithExtendedPipelineSupport("application", "application", false, "id", "name"),
+		flags.WithPipelineAliases("application", "id"),
 
 		flags.WithCollectionProperty("applicationVersions"),
 	)
@@ -150,12 +150,12 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/application/applications/{id}/versions")
+	path := flags.NewStringTemplate("/application/applications/{application}/versions")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithHostedApplicationByNameFirstMatch(n.factory, args, "id", "id"),
+		c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, "application", "application"),
 	)
 	if err != nil {
 		return err

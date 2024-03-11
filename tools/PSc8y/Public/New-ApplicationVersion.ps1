@@ -11,7 +11,7 @@ Uploaded version and tags can only contain upper and lower case letters, integer
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_versions_create
 
 .EXAMPLE
-PS> New-ApplicationVersion -Name $AppName -Key "${AppName}-key" -ContextPath $AppName -Type HOSTED
+PS> New-ApplicationVersion -Application 1234 -File ./myapp.zip -Version "2.0.0"
 
 Create a new application version
 
@@ -26,7 +26,7 @@ Create a new application version
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id,
+        $Application,
 
         # The ZIP file to be uploaded
         [Parameter()]
@@ -66,13 +66,13 @@ Create a new application version
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            $Application `
             | Group-ClientRequests `
             | c8y applications versions create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Id `
+            $Application `
             | Group-ClientRequests `
             | c8y applications versions create $c8yargs
         }

@@ -34,10 +34,10 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Short: "Delete a specific version of an application",
 		Long:  `Delete a specific version of an application in your tenant, by a given tag or version`,
 		Example: heredoc.Doc(`
-$ c8y applications versions delete --id 1234 --tag tag1
+$ c8y applications versions delete --application 1234 --tag tag1
 Delete application version by tag
 
-$ c8y applications versions delete --id 1234 --version 1.0
+$ c8y applications versions delete --application 1234 --version 1.0
 Delete application version by version name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -48,21 +48,21 @@ Delete application version by version name
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application")
+	cmd.Flags().String("application", "", "Application (accepts pipeline)")
 	cmd.Flags().String("version", "", "The version field of the application version")
 	cmd.Flags().String("tag", "", "The tag of the application version")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithHostedApplication("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithApplicationWithVersions("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("", "", false),
-		flags.WithPipelineAliases("id", "id"),
+		flags.WithExtendedPipelineSupport("application", "application", false, "id", "name"),
+		flags.WithPipelineAliases("application", "id"),
 	)
 
 	// Required flags
@@ -148,12 +148,12 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/application/applications/{id}/versions")
+	path := flags.NewStringTemplate("/application/applications/{application}/versions")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithHostedApplicationByNameFirstMatch(n.factory, args, "id", "id"),
+		c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, "application", "application"),
 	)
 	if err != nil {
 		return err
