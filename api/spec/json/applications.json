@@ -78,6 +78,16 @@
           "name": "user",
           "type": "user[]",
           "description": "The ID of a user that has access to the applications."
+        },
+        {
+          "name": "tenant",
+          "type": "tenantname",
+          "description": "The ID of a tenant that either owns the application or is subscribed to the applications."
+        },
+        {
+          "name": "hasVersions",
+          "type": "boolean",
+          "description": "When set to true, the returned result contains applications with an applicationVersions field that is not empty. When set to false, the result will contain applications with an empty applicationVersions field."
         }
       ]
     },

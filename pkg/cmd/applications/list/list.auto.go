@@ -58,6 +58,8 @@ Check if a user has access to the cockpit application
 	cmd.Flags().String("providedFor", "", "The ID of a tenant that is subscribed to the applications but doesn't own them.")
 	cmd.Flags().String("subscriber", "", "The ID of a tenant that is subscribed to the applications.")
 	cmd.Flags().StringSlice("user", []string{""}, "The ID of a user that has access to the applications.")
+	cmd.Flags().String("tenant", "", "The ID of a tenant that either owns the application or is subscribed to the applications.")
+	cmd.Flags().Bool("hasVersions", false, "When set to true, the returned result contains applications with an applicationVersions field that is not empty. When set to false, the result will contain applications with an empty applicationVersions field.")
 
 	completion.WithOptions(
 		cmd,
@@ -67,6 +69,7 @@ Check if a user has access to the cockpit application
 		completion.WithTenantID("providedFor", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithTenantID("subscriber", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithUser("user", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -77,6 +80,7 @@ Check if a user has access to the cockpit application
 		flags.WithPipelineAliases("owner", "tenant", "owner.tenant.id"),
 		flags.WithPipelineAliases("providedFor", "tenant", "owner.tenant.id"),
 		flags.WithPipelineAliases("subscriber", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 
 		flags.WithCollectionProperty("applications"),
 	)
@@ -121,6 +125,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("providedFor", "providedFor"),
 		flags.WithStringValue("subscriber", "subscriber"),
 		c8yfetcher.WithUserByNameFirstMatch(n.factory, args, "user", "user"),
+		flags.WithStringValue("tenant", "tenant"),
+		flags.WithBoolValue("hasVersions", "hasVersions", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
