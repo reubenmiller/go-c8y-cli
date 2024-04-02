@@ -35,7 +35,7 @@ type Manifest struct {
 	Name          string   `json:"name"`
 	Version       string   `json:"version"`
 	RequiredRoles []string `json:"requiredRoles"`
-	Roles         []string `json:"roles"`
+	Roles         []string `json:"roles,omitempty"`
 }
 
 type CmdCreate struct {
@@ -71,6 +71,9 @@ Create new microservice
 
 $ c8y microservices create --name my-application --file ./myapp.zip
 Create or update a microservice using an explicit name
+
+$ c8y microservices create --file ./manifest/cumulocity.json
+Create or update an existing microservice using it's manifest file. This will set the requiredRoles and roles defined in the given manifest file
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -292,10 +295,16 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		// will be hosted outside of the platform
 		//
 		// Read the Cumulocity.json file, and upload
-		log.Infof("updating application details [id=%s], requiredRoles=%s", application.ID, strings.Join(applicationDetails.Manifest.RequiredRoles, ","))
+		log.Infof(
+			"updating application details [id=%s], requiredRoles=%s, roles=%s",
+			application.ID,
+			strings.Join(applicationDetails.Manifest.RequiredRoles, ","),
+			strings.Join(applicationDetails.Manifest.Roles, ","),
+		)
 		if !dryRun {
 			_, response, err = client.Application.Update(context.Background(), application.ID, &c8y.Application{
 				RequiredRoles: applicationDetails.Manifest.RequiredRoles,
+				Roles:         applicationDetails.Manifest.Roles,
 			})
 			if err != nil {
 				return err
