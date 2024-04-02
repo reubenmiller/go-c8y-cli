@@ -71,6 +71,9 @@ Create new microservice
 
 $ c8y microservices create --name my-application --file ./myapp.zip
 Create or update a microservice using an explicit name
+
+$ c8y microservices create --file ./manifest/cumulocity.json
+Create or update an existing microservice using it's manifest file. This will set the requiredRoles and roles defined in the given manifest file
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
