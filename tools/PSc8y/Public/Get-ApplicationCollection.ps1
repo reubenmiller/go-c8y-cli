@@ -52,7 +52,17 @@ Get applications
         # The ID of a user that has access to the applications.
         [Parameter()]
         [object[]]
-        $User
+        $User,
+
+        # The ID of a tenant that either owns the application or is subscribed to the applications.
+        [Parameter()]
+        [string]
+        $Tenant,
+
+        # When set to true, the returned result contains applications with an applicationVersions field that is not empty. When set to false, the result will contain applications with an empty applicationVersions field.
+        [Parameter()]
+        [switch]
+        $HasVersions
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
