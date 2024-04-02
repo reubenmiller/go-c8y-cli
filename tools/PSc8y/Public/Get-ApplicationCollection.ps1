@@ -62,7 +62,13 @@ Get applications
         # When set to true, the returned result contains applications with an applicationVersions field that is not empty. When set to false, the result will contain applications with an empty applicationVersions field.
         [Parameter()]
         [switch]
-        $HasVersions
+        $HasVersions,
+
+        # Application access level for other tenants.
+        [Parameter()]
+        [ValidateSet('SHARED','PRIVATE','MARKET')]
+        [string]
+        $Availability
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

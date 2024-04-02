@@ -60,6 +60,7 @@ Check if a user has access to the cockpit application
 	cmd.Flags().StringSlice("user", []string{""}, "The ID of a user that has access to the applications.")
 	cmd.Flags().String("tenant", "", "The ID of a tenant that either owns the application or is subscribed to the applications.")
 	cmd.Flags().Bool("hasVersions", false, "When set to true, the returned result contains applications with an applicationVersions field that is not empty. When set to false, the result will contain applications with an empty applicationVersions field.")
+	cmd.Flags().String("availability", "", "Application access level for other tenants.")
 
 	completion.WithOptions(
 		cmd,
@@ -70,6 +71,7 @@ Check if a user has access to the cockpit application
 		completion.WithTenantID("subscriber", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithUser("user", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("availability", "SHARED", "PRIVATE", "MARKET"),
 	)
 
 	flags.WithOptions(
@@ -127,6 +129,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithUserByNameFirstMatch(n.factory, args, "user", "user"),
 		flags.WithStringValue("tenant", "tenant"),
 		flags.WithBoolValue("hasVersions", "hasVersions", ""),
+		flags.WithStringValue("availability", "availability"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
