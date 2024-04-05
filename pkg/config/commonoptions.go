@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 // CommonCommandOptions control the handling of the response which are available for all commands
@@ -21,6 +22,18 @@ type CommonCommandOptions struct {
 	PageSize          int
 	CurrentPage       int64
 	TotalPages        int64
+}
+
+func (options CommonCommandOptions) GetPaginationOptions() c8y.PaginationOptions {
+	opts := c8y.PaginationOptions{
+		WithTotalPages:    options.WithTotalPages,
+		WithTotalElements: options.WithTotalElements,
+		PageSize:          options.PageSize,
+	}
+	if options.CurrentPage > 0 {
+		opts.SetCurrentPage(int(options.CurrentPage))
+	}
+	return opts
 }
 
 // AddQueryParameters adds the common query parameters to the given query values

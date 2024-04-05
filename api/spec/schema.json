@@ -210,6 +210,7 @@
         "microservice",
         "microservicename",
         "microserviceinstance",
+        "uiextension",
         "queryExpression",
         "string",
         "stringStatic",

@@ -1,0 +1,10 @@
+tests:
+    ui/extensions_update_Update an extension's availability to SHARED:
+        command: c8y ui extensions update --id "my-example-app" --availability SHARED
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.availability: SHARED
+                method: PUT
+                path: r//application/applications/\d+$

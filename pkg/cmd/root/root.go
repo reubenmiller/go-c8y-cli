@@ -96,6 +96,9 @@ import (
 	tenantoptionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions"
 	tenantsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants"
 	tenantstatisticsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantstatistics"
+	uiCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui"
+	uiExtensionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/extensions"
+	uiExtensionsCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/extensions/create"
 	usergroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/usergroups"
 	userreferencesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences"
 	userrolesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles"
@@ -443,6 +446,13 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	applications.AddCommand(applicationsOpenCmd.NewOpenCmd(f).GetCommand())
 	applications.AddCommand(applicationVersionsCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(applications)
+
+	// UI Extensions
+	ui := uiCmd.NewSubCommand(f).GetCommand()
+	uiExtension := uiExtensionsCmd.NewSubCommand(f).GetCommand()
+	uiExtension.AddCommand(uiExtensionsCreateCmd.NewCmdCreate(f).GetCommand())
+	ui.AddCommand(uiExtension)
+	cmd.AddCommand(ui)
 
 	// smart groups
 	smartgroups := smartgroupsCmd.NewSubCommand(f).GetCommand()

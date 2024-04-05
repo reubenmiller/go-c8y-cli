@@ -1,7 +1,9 @@
 package fileutilities
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"runtime"
@@ -41,6 +43,37 @@ func CreateDirs(p string) error {
 		if err != nil {
 			return fmt.Errorf("error change owner of dir %s to %s: %w %s", p, owner, err, b)
 		}
+	}
+	return nil
+}
+
+var ErrInvalid = errors.New("invalid file destination")
+
+// Copy copies src to dst like the cp command.
+func CopyFile(dst, src string) error {
+	if dst == src {
+		return ErrInvalid
+	}
+
+	srcF, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcF.Close()
+
+	info, err := srcF.Stat()
+	if err != nil {
+		return err
+	}
+
+	dstF, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, info.Mode())
+	if err != nil {
+		return err
+	}
+	defer dstF.Close()
+
+	if _, err := io.Copy(dstF, srcF); err != nil {
+		return err
 	}
 	return nil
 }
