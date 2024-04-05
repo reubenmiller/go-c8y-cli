@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
@@ -76,4 +77,16 @@ func CopyFile(dst, src string) error {
 		return err
 	}
 	return nil
+}
+
+// DownloadFile download a file from a public url
+func DownloadFile(u string, out io.WriteCloser) error {
+	defer out.Close()
+	resp, err := http.Get(u)
+	if err != nil {
+		return fmt.Errorf("failed to download extension from url. %w", err)
+	}
+	defer resp.Body.Close()
+	_, err = io.Copy(out, resp.Body)
+	return err
 }

@@ -3,6 +3,7 @@ package create
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -26,6 +27,7 @@ type CmdCreate struct {
 	file         string
 	name         string
 	key          string
+	version      string
 	availability string
 	contextPath  string
 	resourceURL  string
@@ -51,11 +53,17 @@ func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 			  file upload
 		`),
 		Example: heredoc.Doc(`
-			$ c8y ui extensions create --file ./myapp.zip
-			Create new ui extension from a file
+			$ c8y ui extensions create --file ./myapp.zip --tag latest
+			Create new ui extension from a file and tag it as the latest
 
 			$ c8y ui extensions create --name my-extension --file ./myapp.zip
 			Create or update a ui extension using an explicit name
+
+			$ c8y ui extensions create --file ./myapp.zip --name my-extension --version 1.0.0 --tag latest --tag stable-v1
+			Create/update a ui extension and override the name and version
+
+			$ c8y ui extensions create --file "https://github.com/SoftwareAG/cumulocity-remote-access-cloud-http-proxy/releases/download/v2.5.0/cloud-http-proxy-ui.zip"
+			Create/update a ui extension from a URL
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -68,6 +76,7 @@ func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 	cmd.Flags().StringVar(&ccmd.file, "file", "", "UI Extension file to be uploaded file")
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of application")
 	cmd.Flags().StringVar(&ccmd.key, "key", "", "Shared secret of application")
+	cmd.Flags().StringVar(&ccmd.version, "version", "", "Extension version")
 	cmd.Flags().StringVar(&ccmd.availability, "availability", "", "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)")
 	cmd.Flags().StringVar(&ccmd.contextPath, "contextPath", "", "contextPath of the hosted application. Required when application type is HOSTED")
 	cmd.Flags().StringVar(&ccmd.resourceURL, "resourcesUrl", "", "URL to application base directory hosted on an external server. Required when application type is HOSTED")
@@ -137,11 +146,39 @@ func (n *CmdCreate) getApplicationDetails(client *c8y.Client, log *logger.Logger
 		app.ContextPath = n.contextPath
 	}
 
+	if n.version != "" {
+		app.ManifestFile.Version = n.version
+	}
+
 	return app, nil
 }
 
 func IsValidFilename(v string) bool {
 	return !strings.ContainsAny(v, " ")
+}
+
+func ShouldDownload(v string) bool {
+	return strings.HasPrefix(v, "http://") || strings.HasPrefix(v, "https://")
+}
+
+func DownloadFile(u string) (string, error) {
+	fileURL, urlErr := url.Parse(u)
+	if urlErr != nil {
+		return "", fmt.Errorf("invalid url format. %w", urlErr)
+	}
+	tmpFilename := filepath.Base(fileURL.RawPath)
+	if filepath.Ext(tmpFilename) != ".zip" {
+		tmpFilename = tmpFilename + ".zip"
+	}
+	tmpFile := filepath.Join(os.TempDir(), tmpFilename)
+	fTmpFile, fileErr := os.OpenFile(tmpFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if fileErr != nil {
+		return "", fileErr
+	}
+	if downloadErr := fileutilities.DownloadFile(u, fTmpFile); downloadErr != nil {
+		return "", fmt.Errorf("could not download extension. %w", downloadErr)
+	}
+	return tmpFile, nil
 }
 
 func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
@@ -166,6 +203,29 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	handler, err := n.factory.GetRequestHandler()
 	if err != nil {
 		return err
+	}
+
+	// TODO: Check if the user is trying to update an extension that is owned by another tenant
+
+	// Check if file is a url
+	if ShouldDownload(n.file) {
+		if cfg.DryRun() {
+			fmt.Fprintf(n.factory.IOStreams.ErrOut, "DRY: Downloading extension from url: %s\n", n.file)
+		} else {
+			localFile, downloadErr := DownloadFile(n.file)
+			if downloadErr != nil {
+				return fmt.Errorf("could not download extension. %w", downloadErr)
+			}
+			log.Infof("downloaded extension to %s", localFile)
+			n.file = localFile
+
+			defer func() {
+				if err := os.Remove(localFile); err != nil {
+					log.Warnf("could not delete downloaded file. %w", err)
+				}
+			}()
+		}
+
 	}
 
 	// dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
