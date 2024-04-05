@@ -1,4 +1,4 @@
-﻿Function New-C8yApiGoGetValueFromFlag {
+Function New-C8yApiGoGetValueFromFlag {
     [cmdletbinding()]
     Param(
         [Parameter(
@@ -118,6 +118,9 @@
 
         # microservice name
         "microservicename" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
+
+        # uiextension
+        "uiextension" = "c8yfetcher.WithUIExtensionByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # devicerequest array
         "devicerequest[]" = "c8yfetcher.WithIDSlice(args, `"${prop}`", `"${queryParam}`"$FormatValue),"

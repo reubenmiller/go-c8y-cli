@@ -77,6 +77,7 @@
         "application" { "object[]"; break }
         "application_with_versions" { "object[]"; break }
         "applicationname" { "string"; break }
+        "uiextension" { "object[]"; break }
         "attachment" { "string"; break }
         "binaryUploadURL" { "string"; break }
         "boolean" { "switch"; break }
