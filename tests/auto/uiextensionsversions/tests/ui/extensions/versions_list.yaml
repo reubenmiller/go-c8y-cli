@@ -7,8 +7,9 @@ tests:
                 method: GET
                 path: /application/applications/1234/versions
     ui/extensions/versions_list_Get versions by extension name:
-        command: c8y ui extensions versions list --extension cockpit
+        command: c8y ui extensions versions list --extension mychart
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET

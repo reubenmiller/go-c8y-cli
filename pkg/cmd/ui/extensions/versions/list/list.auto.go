@@ -38,7 +38,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 $ c8y ui extensions versions list --extension 1234 --pageSize 100
 Get versions
 
-$ c8y ui extensions versions list --extension cockpit
+$ c8y ui extensions versions list --extension mychart
 Get versions by extension name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

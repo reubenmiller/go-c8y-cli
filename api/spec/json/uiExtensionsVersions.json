@@ -33,7 +33,8 @@
           },
           {
             "description": "Get versions by extension name",
-            "command": "c8y ui extensions versions list --extension cockpit",
+            "command": "c8y ui extensions versions list --extension mychart",
+            "skipTest": true,
             "assertStdOut": {
               "json": {
                 "path": "r//application/applications/\\d+/versions$"

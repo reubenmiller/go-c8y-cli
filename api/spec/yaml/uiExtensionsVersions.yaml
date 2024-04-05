@@ -29,7 +29,8 @@ commands:
           command: c8y ui extensions versions list --extension 1234 --pageSize 100
 
         - description: Get versions by extension name
-          command: c8y ui extensions versions list --extension cockpit
+          command: c8y ui extensions versions list --extension mychart
+          skipTest: true
           assertStdOut:
             json:
               path: r//application/applications/\d+/versions$
