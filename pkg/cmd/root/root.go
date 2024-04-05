@@ -99,6 +99,7 @@ import (
 	uiCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui"
 	uiExtensionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/extensions"
 	uiExtensionsCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/extensions/create"
+	uiExtensionsVersionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/extensions/versions"
 	usergroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/usergroups"
 	userreferencesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences"
 	userrolesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles"
@@ -451,6 +452,8 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	ui := uiCmd.NewSubCommand(f).GetCommand()
 	uiExtension := uiExtensionsCmd.NewSubCommand(f).GetCommand()
 	uiExtension.AddCommand(uiExtensionsCreateCmd.NewCmdCreate(f).GetCommand())
+	// Extension version management
+	uiExtension.AddCommand(uiExtensionsVersionsCmd.NewSubCommand(f).GetCommand())
 	ui.AddCommand(uiExtension)
 	cmd.AddCommand(ui)
 

@@ -18,11 +18,11 @@ commands:
     collectionProperty: applications
     alias:
         go: list
-        powershell: Get-UiExtensionCollection
+        powershell: Get-UIExtensionCollection
     examples:
       powershell:
         - description: Get ui extensions
-          command: Get-UiExtensionCollection -PageSize 100
+          command: Get-UIExtensionCollection -PageSize 100
 
       go:
         - description: Get ui extensions
@@ -88,11 +88,11 @@ commands:
     accept: application/vnd.com.nsn.cumulocity.application+json
     alias:
         go: get
-        powershell: Get-UiExtension
+        powershell: Get-UIExtension
     examples:
       powershell:
         - description: Get ui extension
-          command: Get-UiExtension -Id 1234
+          command: Get-UIExtension -Id 1234
 
       go:
         - description: Get ui extension by id

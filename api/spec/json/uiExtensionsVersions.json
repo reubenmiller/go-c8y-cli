@@ -1,0 +1,317 @@
+{
+  "group": {
+    "name": "ui/extensions/versions",
+    "description": "Cumulocity UI extension versions",
+    "descriptionLong": "API methods to retrieve, create, update and delete application versions",
+    "link": "https://cumulocity.com/api/core/#tag/Application-versions"
+  },
+  "commands": [
+    {
+      "name": "list",
+      "description": "Get extension version collection",
+      "descriptionLong": "Get a collection of extension versions by a given filter",
+      "method": "GET",
+      "path": "/application/applications/{extension}/versions",
+      "accept": "application/vnd.com.nsn.cumulocity.applicationVersionCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.applicationVersion+json",
+      "collectionProperty": "applicationVersions",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-UIExtensionVersionCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get extension versions",
+            "command": "Get-UIExtensionVersionCollection -Extension 1234"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get versions",
+            "command": "c8y ui extensions versions list --extension 1234 --pageSize 100"
+          },
+          {
+            "description": "Get versions by extension name",
+            "command": "c8y ui extensions versions list --extension cockpit",
+            "assertStdOut": {
+              "json": {
+                "path": "r//application/applications/\\d+/versions$"
+              }
+            }
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "extension",
+          "type": "uiextension",
+          "description": "Extension",
+          "pipeline": true,
+          "pipelineAliases": [
+            "id",
+            "name"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get",
+      "description": "Get a specific version of an extension",
+      "descriptionLong": "Retrieve the selected version of an extension in your tenant. To select the version, use only the version or only the tag query parameter",
+      "method": "GET",
+      "path": "/application/applications/{extension}/versions",
+      "accept": "application/vnd.com.nsn.cumulocity.applicationVersion+json",
+      "addAccept": true,
+      "collectionProperty": "-",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-UIExtensionVersion"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get extension version by tag",
+            "command": "Get-UIExtensionVersion -Extension 1234 -Tag tag1"
+          },
+          {
+            "description": "Get extension version by version name",
+            "command": "Get-UIExtensionVersion -Extension 1234 -Version 1.0"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get extension version by tag",
+            "command": "c8y ui extensions versions get --extension 1234 --tag tag1"
+          },
+          {
+            "description": "Get extension version by version name",
+            "command": "c8y ui extensions versions get --extension 1234 --version 1.0"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "extension",
+          "type": "uiextension",
+          "description": "Extension",
+          "pipeline": true,
+          "pipelineAliases": [
+            "id",
+            "name"
+          ]
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "version",
+          "type": "string",
+          "description": "The version field of the extension version"
+        },
+        {
+          "name": "tag",
+          "type": "string",
+          "description": "The tag of the extension version"
+        }
+      ]
+    },
+    {
+      "name": "create",
+      "description": "Create a new version of an extension",
+      "descriptionLong": "Uploaded version and tags can only contain upper and lower case letters, integers and ., +, -. Other characters are prohibited.",
+      "method": "POST",
+      "path": "/application/applications/{application}/versions",
+      "accept": "application/json",
+      "collectionProperty": "-",
+      "alias": {
+        "go": "create",
+        "powershell": "New-UIExtensionVersion"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Create a new version for an extension",
+            "command": "New-UIExtensionVersion -Extension 1234 -File ./myapp.zip -Version \"2.0.0\"",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Create a new version for an extension",
+            "command": "c8y ui extensions versions create --extension 1234 --file \"./testdata/myapp.zip\" --version \"2.0.0\"",
+            "skipTest": true
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "extension",
+          "type": "uiextension",
+          "description": "Application",
+          "pipeline": true,
+          "pipelineAliases": [
+            "id",
+            "name"
+          ]
+        }
+      ],
+      "bodyContent": {
+        "type": "formdata"
+      },
+      "bodyTemplateOptions": {
+        "enabled": true
+      },
+      "body": [
+        {
+          "name": "file",
+          "type": "formDataFile",
+          "property": "applicationBinary",
+          "description": "The ZIP file to be uploaded"
+        },
+        {
+          "name": "version",
+          "property": "version",
+          "type": "string",
+          "options": {
+            "formData": "applicationVersion"
+          },
+          "required": true,
+          "description": "The JSON file with version information."
+        },
+        {
+          "name": "tags",
+          "property": "tags",
+          "type": "string[]",
+          "options": {
+            "formData": "applicationVersion"
+          },
+          "required": true,
+          "description": "The JSON file with version information. todo"
+        },
+        {
+          "name": "data",
+          "type": "json_custom",
+          "description": "data"
+        }
+      ]
+    },
+    {
+      "name": "delete",
+      "description": "Delete a specific version of an extension",
+      "descriptionLong": "Delete a specific version of an extension in your tenant, by a given tag or version",
+      "method": "DELETE",
+      "path": "/application/applications/{extension}/versions",
+      "alias": {
+        "go": "delete",
+        "powershell": "Remove-UIExtensionVersion"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Delete extension version by tag",
+            "command": "Remove-UIExtensionVersion -Extension 1234 -Tag tag1"
+          },
+          {
+            "description": "Delete extension version by version name",
+            "command": "Remove-UIExtensionVersion -Extension 1234 -Version 1.0"
+          }
+        ],
+        "go": [
+          {
+            "description": "Delete extension version by tag",
+            "command": "c8y ui extensions versions delete --extension 1234 --tag tag1"
+          },
+          {
+            "description": "Delete extension version by version name",
+            "command": "c8y ui extensions versions delete --extension 1234 --version 1.0"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "extension",
+          "type": "uiextension",
+          "description": "Application"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "version",
+          "type": "string",
+          "pipeline": true,
+          "description": "Version, e.g. 1.0.0"
+        },
+        {
+          "name": "tag",
+          "type": "string",
+          "description": "The tag of the extension version"
+        }
+      ]
+    },
+    {
+      "name": "replaceTags",
+      "description": "Replace tags related to an extension version",
+      "descriptionLong": "Replaces the tags of a given extension version in your tenant",
+      "method": "PUT",
+      "path": "/application/applications/{extension}/versions/{version}",
+      "accept": "application/vnd.com.nsn.cumulocity.applicationVersion+json",
+      "collectionProperty": "-",
+      "addAccept": true,
+      "alias": {
+        "go": "update",
+        "powershell": "Update-UIExtensionVersion"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Replace tags assigned to a version of an extension",
+            "command": "Update-UIExtensionVersion -Extension 1234 -Version 1.0 -Tag tag1,latest"
+          }
+        ],
+        "go": [
+          {
+            "description": "Replace tags assigned to a version of an extension",
+            "command": "c8y ui extensions versions update --extension 1234 --version 1.0 --tag tag1,latest",
+            "assertStdOut": {
+              "json": {
+                "path": "/application/applications/1234/versions/1.0",
+                "body.tags.0": "tag1",
+                "body.tags.1": "latest"
+              }
+            }
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "extension",
+          "type": "uiextension",
+          "description": "Extension",
+          "pipeline": true,
+          "pipelineAliases": [
+            "id",
+            "name"
+          ]
+        },
+        {
+          "name": "version",
+          "type": "string",
+          "description": "Version"
+        }
+      ],
+      "body": [
+        {
+          "name": "tag",
+          "property": "tags",
+          "type": "string[]",
+          "description": "Tag assigned to the version. Version tags must be unique across all versions and version fields of extension versions"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Custom data"
+        }
+      ]
+    }
+  ]
+}

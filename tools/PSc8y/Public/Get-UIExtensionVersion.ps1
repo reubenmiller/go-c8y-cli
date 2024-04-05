@@ -1,19 +1,24 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Get-UiExtension {
+Function Get-UIExtensionVersion {
 <#
 .SYNOPSIS
-Get UI extension
+Get a specific version of an extension
 
 .DESCRIPTION
-Get a UI Extension
+Retrieve the selected version of an extension in your tenant. To select the version, use only the version or only the tag query parameter
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_extensions_get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_extensions_versions_get
 
 .EXAMPLE
-PS> Get-UiExtension -Id 1234
+PS> Get-UIExtensionVersion -Extension 1234 -Tag tag1
 
-Get ui extension
+Get extension version by tag
+
+.EXAMPLE
+PS> Get-UIExtensionVersion -Extension 1234 -Version 1.0
+
+Get extension version by version name
 
 
 #>
@@ -26,7 +31,17 @@ Get ui extension
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id
+        $Extension,
+
+        # The version field of the extension version
+        [Parameter()]
+        [string]
+        $Version,
+
+        # The tag of the extension version
+        [Parameter()]
+        [string]
+        $Tag
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get"
@@ -39,10 +54,10 @@ Get ui extension
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui extensions get"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui extensions versions get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = "application/vnd.com.nsn.cumulocity.application+json"
+            Type = "application/vnd.com.nsn.cumulocity.applicationVersion+json"
             ItemType = ""
             BoundParameters = $PSBoundParameters
         }
@@ -51,15 +66,15 @@ Get ui extension
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            $Extension `
             | Group-ClientRequests `
-            | c8y ui extensions get $c8yargs `
+            | c8y ui extensions versions get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Id `
+            $Extension `
             | Group-ClientRequests `
-            | c8y ui extensions get $c8yargs
+            | c8y ui extensions versions get $c8yargs
         }
         
     }

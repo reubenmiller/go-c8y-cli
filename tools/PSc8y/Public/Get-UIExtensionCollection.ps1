@@ -1,5 +1,5 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Get-UiExtensionCollection {
+Function Get-UIExtensionCollection {
 <#
 .SYNOPSIS
 Get UI extensions collection
@@ -11,7 +11,7 @@ Get a collection of UI extensions by a given filter
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_extensions_list
 
 .EXAMPLE
-PS> Get-UiExtensionCollection -PageSize 100
+PS> Get-UIExtensionCollection -PageSize 100
 
 Get ui extensions
 

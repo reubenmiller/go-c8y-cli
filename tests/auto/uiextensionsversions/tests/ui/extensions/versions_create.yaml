@@ -1,0 +1,9 @@
+tests:
+    ui/extensions/versions_create_Create a new version for an extension:
+        command: c8y ui extensions versions create --extension 1234 --file "./testdata/myapp.zip" --version "2.0.0"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: POST
+                path: /application/applications/{application}/versions

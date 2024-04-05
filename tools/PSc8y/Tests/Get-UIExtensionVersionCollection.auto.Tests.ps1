@@ -1,12 +1,12 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Get-UIExtensionCollection" {
+Describe -Name "Get-UIExtensionVersionCollection" {
     BeforeEach {
 
     }
 
-    It "Get ui extensions" {
-        $Response = PSc8y\Get-UIExtensionCollection -PageSize 100
+    It "Get extension versions" {
+        $Response = PSc8y\Get-UIExtensionVersionCollection -Extension 1234
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
