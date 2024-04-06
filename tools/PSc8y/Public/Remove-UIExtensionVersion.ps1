@@ -27,7 +27,7 @@ Delete extension version by version name
     [Alias()]
     [OutputType([object])]
     Param(
-        # Application
+        # Extension
         [Parameter()]
         [object[]]
         $Extension,

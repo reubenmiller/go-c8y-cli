@@ -1,6 +1,6 @@
 tests:
     ui/extensions/versions_update_Replace tags assigned to a version of an extension:
-        command: c8y ui extensions versions update --extension 1234 --version 1.0 --tag tag1,latest
+        command: c8y ui extensions versions update --extension 1234 --version 1.0 --tags tag1,latest
         exit-code: 0
         stdout:
             json:

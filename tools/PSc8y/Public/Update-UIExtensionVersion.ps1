@@ -11,7 +11,7 @@ Replaces the tags of a given extension version in your tenant
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_extensions_versions_update
 
 .EXAMPLE
-PS> Update-UIExtensionVersion -Extension 1234 -Version 1.0 -Tag tag1,latest
+PS> Update-UIExtensionVersion -Extension 1234 -Version 1.0 -Tags tag1,latest
 
 Replace tags assigned to a version of an extension
 
@@ -36,7 +36,7 @@ Replace tags assigned to a version of an extension
         # Tag assigned to the version. Version tags must be unique across all versions and version fields of extension versions
         [Parameter()]
         [string[]]
-        $Tag
+        $Tags
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Update", "Template"

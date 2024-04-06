@@ -161,16 +161,17 @@ func ShouldDownload(v string) bool {
 	return strings.HasPrefix(v, "http://") || strings.HasPrefix(v, "https://")
 }
 
-func DownloadFile(u string) (string, error) {
+func DownloadFile(u string, log *logger.Logger) (string, error) {
 	fileURL, urlErr := url.Parse(u)
 	if urlErr != nil {
 		return "", fmt.Errorf("invalid url format. %w", urlErr)
 	}
-	tmpFilename := filepath.Base(fileURL.RawPath)
+	tmpFilename := filepath.Base(fileURL.Path)
 	if filepath.Ext(tmpFilename) != ".zip" {
 		tmpFilename = tmpFilename + ".zip"
 	}
 	tmpFile := filepath.Join(os.TempDir(), tmpFilename)
+	log.Debugf("Downloading %s to %s", fileURL.String(), tmpFile)
 	fTmpFile, fileErr := os.OpenFile(tmpFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if fileErr != nil {
 		return "", fileErr
@@ -212,11 +213,11 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		if cfg.DryRun() {
 			fmt.Fprintf(n.factory.IOStreams.ErrOut, "DRY: Downloading extension from url: %s\n", n.file)
 		} else {
-			localFile, downloadErr := DownloadFile(n.file)
+			localFile, downloadErr := DownloadFile(n.file, log)
 			if downloadErr != nil {
 				return fmt.Errorf("could not download extension. %w", downloadErr)
 			}
-			log.Infof("downloaded extension to %s", localFile)
+			log.Infof("Downloaded extension to %s", localFile)
 			n.file = localFile
 
 			defer func() {
@@ -256,7 +257,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 			Tags:    n.tags,
 		},
 	})
-
+	commonOptions.ResultProperty = "-"
 	_, err = handler.ProcessResponse(response, err, nil, commonOptions)
 	return err
 }

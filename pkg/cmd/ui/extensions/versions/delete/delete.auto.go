@@ -48,7 +48,7 @@ Delete extension version by version name
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("extension", "", "Application")
+	cmd.Flags().String("extension", "", "Extension")
 	cmd.Flags().String("version", "", "Version, e.g. 1.0.0 (accepts pipeline)")
 	cmd.Flags().String("tag", "", "The tag of the extension version")
 

@@ -34,7 +34,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Short: "Replace tags related to an extension version",
 		Long:  `Replaces the tags of a given extension version in your tenant`,
 		Example: heredoc.Doc(`
-$ c8y ui extensions versions update --extension 1234 --version 1.0 --tag tag1,latest
+$ c8y ui extensions versions update --extension 1234 --version 1.0 --tags tag1,latest
 Replace tags assigned to a version of an extension
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -47,7 +47,7 @@ Replace tags assigned to a version of an extension
 
 	cmd.Flags().String("extension", "", "Extension (accepts pipeline)")
 	cmd.Flags().String("version", "", "Version")
-	cmd.Flags().StringSlice("tag", []string{""}, "Tag assigned to the version. Version tags must be unique across all versions and version fields of extension versions")
+	cmd.Flags().StringSlice("tags", []string{""}, "Tag assigned to the version. Version tags must be unique across all versions and version fields of extension versions")
 
 	completion.WithOptions(
 		cmd,
@@ -142,7 +142,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		flags.WithStringSliceValues("tag", "tags", ""),
+		flags.WithStringSliceValues("tags", "tags", ""),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)

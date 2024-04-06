@@ -45,7 +45,7 @@ Create a new version for an extension
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("extension", "", "Application (accepts pipeline)")
+	cmd.Flags().String("extension", "", "Extension (accepts pipeline)")
 	cmd.Flags().String("file", "", "The ZIP file to be uploaded")
 	cmd.Flags().String("version", "", "The JSON file with version information. (required)")
 	cmd.Flags().StringSlice("tags", []string{""}, "The JSON file with version information. todo (required)")

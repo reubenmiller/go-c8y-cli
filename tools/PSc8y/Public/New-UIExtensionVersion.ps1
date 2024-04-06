@@ -22,7 +22,7 @@ Create a new version for an extension
     [Alias()]
     [OutputType([object])]
     Param(
-        # Application
+        # Extension
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]

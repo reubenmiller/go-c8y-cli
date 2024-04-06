@@ -148,7 +148,7 @@
         {
           "name": "extension",
           "type": "uiextension",
-          "description": "Application",
+          "description": "Extension",
           "pipeline": true,
           "pipelineAliases": [
             "id",
@@ -232,7 +232,7 @@
         {
           "name": "extension",
           "type": "uiextension",
-          "description": "Application"
+          "description": "Extension"
         }
       ],
       "queryParameters": [
@@ -266,13 +266,13 @@
         "powershell": [
           {
             "description": "Replace tags assigned to a version of an extension",
-            "command": "Update-UIExtensionVersion -Extension 1234 -Version 1.0 -Tag tag1,latest"
+            "command": "Update-UIExtensionVersion -Extension 1234 -Version 1.0 -Tags tag1,latest"
           }
         ],
         "go": [
           {
             "description": "Replace tags assigned to a version of an extension",
-            "command": "c8y ui extensions versions update --extension 1234 --version 1.0 --tag tag1,latest",
+            "command": "c8y ui extensions versions update --extension 1234 --version 1.0 --tags tag1,latest",
             "assertStdOut": {
               "json": {
                 "path": "/application/applications/1234/versions/1.0",
@@ -302,7 +302,7 @@
       ],
       "body": [
         {
-          "name": "tag",
+          "name": "tags",
           "property": "tags",
           "type": "string[]",
           "description": "Tag assigned to the version. Version tags must be unique across all versions and version fields of extension versions"
