@@ -661,6 +661,46 @@ $($Examples -join "`n`n")
     $($CommandArgs.Required -join "`n	")
     $($CommandArgs.Hidden -join "`n	")
 
+    $(
+        # Flag groups
+        if ($null -ne $Specification.groups) {
+            foreach ($flagGroup in $Specification.groups)
+            {
+                # one required
+                if ($null -ne $flagGroup.oneRequired)
+                {
+                    $_prefix = ""
+                    $rawValue = foreach ($item in $flagGroup.oneRequired) {
+                        "$_prefix`"$item`""
+                        $_prefix = ", "
+                    }
+                    "cmd.MarkFlagsOneRequired($rawValue)`n"
+                }
+
+                # mutually exclusive
+                if ($null -ne $flagGroup.mutuallyExclusive)
+                {
+                    $_prefix = ""
+                    $rawValue = foreach ($item in $flagGroup.mutuallyExclusive) {
+                        "$_prefix`"$item`""
+                        $_prefix = ", "
+                    }
+                    "cmd.MarkFlagsMutuallyExclusive($rawValue)`n"
+                }
+
+                # required Together
+                if ($null -ne $flagGroup.requiredTogether)
+                {
+                    $_prefix = ""
+                    $rawValue = foreach ($item in $flagGroup.requiredTogether) {
+                        "$_prefix`"$item`""
+                        $_prefix = ", "
+                    }
+                    "cmd.MarkFlagsRequiredTogether($rawValue)`n"
+                }
+            }
+        }    
+    )
     ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd

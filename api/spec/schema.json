@@ -662,6 +662,35 @@
               ]
             }
           },
+          "groups": {
+            "type": "array",
+            "title": "Flag groups",
+            "description": "Additional constraints for a combination of flags",
+            "minItems": 0,
+            "items": {
+              "type": "object",
+              "properties": {
+                "oneRequired":{
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "mutuallyExclusive":{
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "requiredTogether":{
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
           "bodyContent": {
             "type": "object",
             "description": "Description of body content",
