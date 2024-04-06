@@ -1,0 +1,4 @@
+tests:
+  It can create/update/delete a UI extension related versions:
+    command: ./manual/ui/extensions/crud.sh
+    exit-code: 0
