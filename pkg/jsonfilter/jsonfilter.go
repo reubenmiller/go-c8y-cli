@@ -388,6 +388,9 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 	jq.Macro("dategte", dateNewerThanEqual)
 	jq.Macro("newerthan", dateNewerThanEqual)
 
+	jq.Macro("includes", includesValue)
+	jq.Macro("notincludes", notIncludesValue)
+
 	// Version filters
 	jq.Macro("version", matchVersionConstraint)
 
@@ -765,4 +768,32 @@ func matchVersionConstraint(x, y interface{}) (bool, error) {
 	}
 
 	return constraint.Check(currentVersion), nil
+}
+
+func includesValue(x, y interface{}) (bool, error) {
+	xs, okx := x.([]interface{})
+	if !okx {
+		return false, fmt.Errorf("includes only matches against arrays of strings")
+	}
+
+	pattern := fmt.Sprintf("%v", y)
+	// pattern, oky := y.(string)
+	// if !okx || !oky {
+	// 	return false, fmt.Errorf("includes only matches against arrays of strings")
+	// }
+
+	found := false
+	for _, v := range xs {
+		sv := fmt.Sprintf("%v", v)
+		if match, _ := matcher.MatchWithWildcards(sv, pattern); match {
+			found = true
+			break
+		}
+	}
+	return found, nil
+}
+
+func notIncludesValue(x, y interface{}) (bool, error) {
+	match, err := includesValue(x, y)
+	return !match, err
 }

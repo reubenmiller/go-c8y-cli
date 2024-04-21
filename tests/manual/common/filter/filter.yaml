@@ -137,6 +137,51 @@ tests:
       line-count: 0
   
   #
+  # includes
+  #
+  It filters an array which includes values (match):
+    command: |
+      cat manual/common/filter/input.jsonl |
+        c8y util show --filter "tags includes latest" --select id
+    exit-code: 0
+    stdout:
+      line-count: 1
+      lines:
+        1: '1'
+
+  It filters an array which includes values (no match):
+    command: |
+      cat manual/common/filter/input.jsonl |
+        c8y util show --filter "tags includes non-existent" --select id
+    exit-code: 0
+    stdout:
+      line-count: 0
+  #
+  # notincludes
+  #
+  It filters an array which does not include value (match):
+    command: |
+      cat manual/common/filter/input.jsonl |
+        c8y util show --filter "tags notincludes latest" --select id
+    exit-code: 0
+    stdout:
+      line-count: 1
+      lines:
+        1: '2'
+
+  It filters an array which does not includes a value (no match):
+    command: |
+      cat manual/common/filter/input.jsonl |
+        c8y util show --filter "tags notincludes non-existent" --select id
+    exit-code: 0
+    stdout:
+      line-count: 2
+      lines:
+        1: '1'
+        2: '2'
+
+
+  #
   # Greater than
   #
   It filters by int - greater than (match int):
