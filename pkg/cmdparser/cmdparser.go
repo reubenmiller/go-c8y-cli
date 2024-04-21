@@ -182,6 +182,8 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 		return completion.WithMicroserviceInstance(p.Name, p.GetDependentProperty(0, "id"), func() (*c8y.Client, error) { return factory.Client() })
 	case "uiextension":
 		return completion.WithUIExtension(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+	case "uiextensionversion":
+		return completion.WithUIExtensionVersion(p.Name, p.GetDependentProperty(0, "extension"), func() (*c8y.Client, error) { return factory.Client() })
 	case "role[]", "roleself[]":
 		return completion.WithUserRole(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "devicerequest", "devicerequest[]":
@@ -278,7 +280,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		cmd.Command.Flags().StringSliceP(p.Name, p.ShortName, []string{p.Default}, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "id")
 
-	case "application", "applicationname", "hostedapplication", "microservice", "microserviceinstance", "uiextension":
+	case "application", "applicationname", "hostedapplication", "microservice", "microserviceinstance", "uiextension", "uiextensionversion":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "id")
 
@@ -396,7 +398,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "inventoryChildType":
 		opts = append(opts, flags.WithInventoryChildType(p.Name, targetProp, p.Format))
 
-	case "string", "source", "tenantname", "devicerequest", "subscriptionName", "subscriptionId", "applicationname", "microserviceinstance", "microservicename", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName":
+	case "string", "source", "tenantname", "devicerequest", "subscriptionName", "subscriptionId", "applicationname", "microserviceinstance", "microservicename", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "uiextensionversion":
 		opts = append(opts, flags.WithStringValue(p.Name, targetProp, p.Format))
 
 	case "stringStatic":

@@ -106,7 +106,10 @@
       "queryParameters": [
         {
           "name": "version",
-          "type": "string",
+          "type": "uiextensionversion",
+          "dependsOn": [
+            "extension"
+          ],
           "description": "The version field of the extension version"
         },
         {
@@ -238,7 +241,10 @@
       "queryParameters": [
         {
           "name": "version",
-          "type": "string",
+          "type": "uiextensionversion",
+          "dependsOn": [
+            "extension"
+          ],
           "pipeline": true,
           "description": "Version, e.g. 1.0.0"
         },
@@ -309,7 +315,10 @@
         },
         {
           "name": "version",
-          "type": "string",
+          "type": "uiextensionversion",
+          "dependsOn": [
+            "extension"
+          ],
           "description": "Version"
         }
       ],

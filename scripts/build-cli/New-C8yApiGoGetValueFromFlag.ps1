@@ -122,6 +122,9 @@ Function New-C8yApiGoGetValueFromFlag {
         # uiextension
         "uiextension" = "c8yfetcher.WithUIExtensionByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
+        # uiextensionversion
+        "uiextensionversion" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
+
         # devicerequest array
         "devicerequest[]" = "c8yfetcher.WithIDSlice(args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 

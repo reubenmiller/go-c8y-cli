@@ -211,6 +211,7 @@
         "microservicename",
         "microserviceinstance",
         "uiextension",
+        "uiextensionversion",
         "queryExpression",
         "string",
         "stringStatic",

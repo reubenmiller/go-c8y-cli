@@ -195,6 +195,7 @@
             { @("application", "applicationname") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             { @("application_with_versions") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithApplicationWithVersions(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             { @("uiextension") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithUIExtension(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("uiextensionversion") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithUIExtensionVersion(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "hostedapplication" { [void] $CompletionBuilderOptions.AppendLine("completion.WithHostedApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "microservice" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "microservicename" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
@@ -1144,7 +1145,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        {$_ -in "application", "applicationname", "hostedapplication", "application_with_versions", "uiextension"} {
+        {$_ -in "application", "applicationname", "hostedapplication", "application_with_versions", "uiextension", "uiextensionversion"} {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {

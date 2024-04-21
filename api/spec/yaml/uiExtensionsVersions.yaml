@@ -79,7 +79,9 @@ commands:
 
     queryParameters:
       - name: version
-        type: string
+        type: uiextensionversion
+        dependsOn:
+          - extension
         description: The version field of the extension version
 
       - name: tag
@@ -174,7 +176,9 @@ commands:
 
     queryParameters:
       - name: version
-        type: string
+        type: uiextensionversion
+        dependsOn:
+          - extension
         pipeline: true
         description: Version, e.g. 1.0.0
 
@@ -226,7 +230,9 @@ commands:
           - name
 
       - name: version
-        type: string
+        type: uiextensionversion
+        dependsOn:
+          - extension
         description: Version
     
     body:
