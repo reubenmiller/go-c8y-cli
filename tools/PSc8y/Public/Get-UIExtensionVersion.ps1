@@ -35,7 +35,7 @@ Get extension version by version name
 
         # The version field of the extension version
         [Parameter()]
-        [string]
+        [object[]]
         $Version,
 
         # The tag of the extension version

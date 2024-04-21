@@ -56,6 +56,7 @@ Get extension version by version name
 	completion.WithOptions(
 		cmd,
 		completion.WithUIExtension("extension", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUIExtensionVersion("version", "extension", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -63,6 +64,7 @@ Get extension version by version name
 
 		flags.WithExtendedPipelineSupport("extension", "extension", false, "id", "name"),
 		flags.WithPipelineAliases("extension", "id"),
+		flags.WithPipelineAliases("version", "id"),
 
 		flags.WithCollectionProperty("-"),
 	)

@@ -30,7 +30,7 @@ Replace tags assigned to a version of an extension
 
         # Version
         [Parameter()]
-        [string]
+        [object[]]
         $Version,
 
         # Tag assigned to the version. Version tags must be unique across all versions and version fields of extension versions

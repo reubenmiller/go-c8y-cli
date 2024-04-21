@@ -55,6 +55,7 @@ Delete extension version by version name
 	completion.WithOptions(
 		cmd,
 		completion.WithUIExtension("extension", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUIExtensionVersion("version", "extension", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -63,6 +64,7 @@ Delete extension version by version name
 
 		flags.WithExtendedPipelineSupport("version", "version", false, "id"),
 		flags.WithPipelineAliases("extension", "id"),
+		flags.WithPipelineAliases("version", "id"),
 	)
 
 	// Required flags

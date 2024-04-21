@@ -52,6 +52,7 @@ Replace tags assigned to a version of an extension
 	completion.WithOptions(
 		cmd,
 		completion.WithUIExtension("extension", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUIExtensionVersion("version", "extension", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -61,6 +62,7 @@ Replace tags assigned to a version of an extension
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("extension", "extension", false, "id", "name"),
 		flags.WithPipelineAliases("extension", "id"),
+		flags.WithPipelineAliases("version", "id"),
 
 		flags.WithCollectionProperty("-"),
 	)
