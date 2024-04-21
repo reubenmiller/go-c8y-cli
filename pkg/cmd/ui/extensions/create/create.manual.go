@@ -3,6 +3,7 @@ package create
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -264,7 +265,12 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	if barErr != nil {
 		return barErr
 	}
-	fileReader := bar.ProxyReader(file)
+
+	var fileReader io.ReadCloser
+	fileReader = file
+	if bar != nil {
+		fileReader = bar.ProxyReader(file)
+	}
 
 	_, response, err := client.UIExtension.CreateExtension(ctx, &application.Application, fileReader, c8y.UpsertOptions{
 		SkipActivation: n.skipActivate,
