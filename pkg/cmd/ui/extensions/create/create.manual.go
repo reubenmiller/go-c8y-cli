@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
@@ -229,7 +230,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 
 	}
 
-	// dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
+	dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
 	application, err := n.getApplicationDetails(client, log)
 	if err != nil {
 		return err
@@ -250,13 +251,29 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		n.file = tmpFile
 	}
 
-	_, response, err := client.UIExtension.CreateExtension(context.Background(), &application.Application, n.file, c8y.UpsertOptions{
+	ctx := c8y.WithCommonOptionsContext(context.Background(), c8y.CommonOptions{
+		DryRun: dryRun,
+	})
+
+	file, fileErr := os.Open(n.file)
+	if fileErr != nil {
+		return fileErr
+	}
+	progress := n.factory.IOStreams.ProgressIndicator()
+	bar, barErr := c8ybinary.NewProgressBar(progress, n.file)
+	if barErr != nil {
+		return barErr
+	}
+	fileReader := bar.ProxyReader(file)
+
+	_, response, err := client.UIExtension.CreateExtension(ctx, &application.Application, fileReader, c8y.UpsertOptions{
 		SkipActivation: n.skipActivate,
 		Version: &c8y.ApplicationVersion{
 			Version: application.ManifestFile.Version,
 			Tags:    n.tags,
 		},
 	})
+	n.factory.IOStreams.WaitForProgressIndicator()
 	commonOptions.ResultProperty = "-"
 	_, err = handler.ProcessResponse(response, err, nil, commonOptions)
 	return err
