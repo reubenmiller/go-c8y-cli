@@ -31,7 +31,7 @@ c8y ui extensions create --file ./my_extension.zip --name custom_name --version 
 
 </CodeExample>
 
-## List extensions
+### List extensions
 
 You can list local extensions in your tenant using:
 
@@ -52,6 +52,45 @@ c8y ui extensions list --pageSize 100 --availability SHARED
 ```
 
 </CodeExample>
+
+### Update/Replace tags
+
+You can replace the tags of an existing version using the following command:
+
+For example the `latest` and `other` tags
+
+<CodeExample transform="false">
+
+```bash
+c8y ui extensions versions update --extension myext --version "1.0.0" --tags latest,other
+```
+
+</CodeExample>
+
+### Delete a version
+
+Deleting a version can either be done by referencing the tag or version.
+
+#### Delete by tag
+
+<CodeExample transform="false">
+
+```bash
+c8y ui extensions versions delete --extension myext --version "1.0.0"
+```
+
+</CodeExample>
+
+#### Delete by version
+
+<CodeExample transform="false">
+
+```bash
+c8y ui extensions versions delete --extension myext --tag other
+```
+
+</CodeExample>
+
 
 ## Advanced
 
@@ -97,3 +136,27 @@ c8y ui extensions versions list --extension mycustom-ui-ext \
 ```
 
 </CodeExample>
+
+### List the extensions and check how many versions exist for each
+
+Getting a list of extensions and how many versions exist for each extension is useful to allow users to check if some versions need to be cleaned up or not.
+
+<CodeExample transform="false">
+
+```bash
+c8y ui extensions list \
+| c8y ui extensions versions list --pageSize 100 \
+    --outputTemplate "input.value + {totalVersions: std.length(output)}" \
+    --select id,name,totalVersions
+```
+
+</CodeExample>
+
+
+```sh title="Output"
+| id          | name                      | totalVersions |
+|-------------|---------------------------|---------------|
+| 102626      | ext1                      | 1             |
+| 69513       | lwm2m-ui-plugin           | 1             |
+| 99228       | tedge-container-plugin-ui | 2             |
+```
