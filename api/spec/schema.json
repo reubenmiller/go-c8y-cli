@@ -662,14 +662,21 @@
               ]
             }
           },
-          "groups": {
+          "constraints": {
             "type": "array",
-            "title": "Flag groups",
+            "title": "Flag constraints",
             "description": "Additional constraints for a combination of flags",
             "minItems": 0,
             "items": {
               "type": "object",
               "properties": {
+                "type": {
+                  "type": "string",
+                  "title": "Type of group",
+                  "enum": [
+                    "queryParameters"
+                  ]
+                },
                 "oneRequired":{
                   "type": "array",
                   "items": {

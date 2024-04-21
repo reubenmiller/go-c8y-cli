@@ -661,46 +661,6 @@ $($Examples -join "`n`n")
     $($CommandArgs.Required -join "`n	")
     $($CommandArgs.Hidden -join "`n	")
 
-    $(
-        # Flag groups
-        if ($null -ne $Specification.groups) {
-            foreach ($flagGroup in $Specification.groups)
-            {
-                # one required
-                if ($null -ne $flagGroup.oneRequired)
-                {
-                    $_prefix = ""
-                    $rawValue = foreach ($item in $flagGroup.oneRequired) {
-                        "$_prefix`"$item`""
-                        $_prefix = ", "
-                    }
-                    "cmd.MarkFlagsOneRequired($rawValue)`n"
-                }
-
-                # mutually exclusive
-                if ($null -ne $flagGroup.mutuallyExclusive)
-                {
-                    $_prefix = ""
-                    $rawValue = foreach ($item in $flagGroup.mutuallyExclusive) {
-                        "$_prefix`"$item`""
-                        $_prefix = ", "
-                    }
-                    "cmd.MarkFlagsMutuallyExclusive($rawValue)`n"
-                }
-
-                # required Together
-                if ($null -ne $flagGroup.requiredTogether)
-                {
-                    $_prefix = ""
-                    $rawValue = foreach ($item in $flagGroup.requiredTogether) {
-                        "$_prefix`"$item`""
-                        $_prefix = ", "
-                    }
-                    "cmd.MarkFlagsRequiredTogether($rawValue)`n"
-                }
-            }
-        }    
-    )
     ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
@@ -816,6 +776,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         $RequestOptionsBuilder
     }
     $PostActionOptions
+    $(Get-FlagConstraints $Specification)
 
     return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
 }
@@ -828,6 +789,64 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 
 	# Auto format code (using goimports as it removes unused imports)
 	& goimports -w $File
+}
+
+Function Get-FlagConstraints {
+    [cmdletbinding()]
+    Param(
+        $spec
+    )
+
+    if ($null -ne $spec.constraints)
+    {
+        $lines = foreach ($flagGroup in $spec.constraints)
+        {
+            if ($flagGroup.type -eq "queryParameters")
+            {
+                # one required
+                if ($null -ne $flagGroup.oneRequired)
+                {
+                    $_prefix = ""
+                    $rawValue = foreach ($item in $flagGroup.oneRequired) {
+                        "$_prefix`"$item`""
+                        $_prefix = ", "
+                    }
+                    "flags.WithQueryParameterOneRequired($rawValue),`n"
+                    # "cmd.MarkFlagsOneRequired($rawValue)`n"
+                }
+
+                # mutually exclusive
+                if ($null -ne $flagGroup.mutuallyExclusive)
+                {
+                    $_prefix = ""
+                    $rawValue = foreach ($item in $flagGroup.mutuallyExclusive) {
+                        "$_prefix`"$item`""
+                        $_prefix = ", "
+                    }
+                    "flags.WithQueryParameterMutuallyExclusive($rawValue),`n"
+                    # "cmd.MarkFlagsMutuallyExclusive($rawValue)`n"
+                }
+
+                # required Together
+                if ($null -ne $flagGroup.requiredTogether)
+                {
+                    $_prefix = ""
+                    $rawValue = foreach ($item in $flagGroup.requiredTogether) {
+                        "$_prefix`"$item`""
+                        $_prefix = ", "
+                    }
+                    "flags.WithQueryParameterRequiredTogether($rawValue),`n"
+                    # "cmd.MarkFlagsRequiredTogether($rawValue)`n"
+                }
+            }
+        }
+        if ($lines)
+        {
+            "req.WithValidateFunc(`n"
+                $lines
+            ")`n"
+        }
+    }
 }
 
 Function Remove-SkippedParameters {

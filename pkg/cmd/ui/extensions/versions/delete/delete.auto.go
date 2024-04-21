@@ -170,5 +170,10 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
+	req.WithValidateFunc(
+		flags.WithQueryParameterOneRequired("version", "tag"),
+		flags.WithQueryParameterMutuallyExclusive("version", "tag"),
+	)
+
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
 }

@@ -247,6 +247,19 @@
           "type": "string",
           "description": "The tag of the extension version"
         }
+      ],
+      "constraints": [
+        {
+          "type": "queryParameters",
+          "oneRequired": [
+            "version",
+            "tag"
+          ],
+          "mutuallyExclusive": [
+            "version",
+            "tag"
+          ]
+        }
       ]
     },
     {

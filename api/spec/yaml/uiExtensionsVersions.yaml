@@ -182,6 +182,15 @@ commands:
         type: string
         description: The tag of the extension version
 
+    constraints:
+      - type: queryParameters
+        oneRequired:
+          - version
+          - tag
+        mutuallyExclusive:
+          - version
+          - tag
+
   - name: replaceTags
     description: Replace tags related to an extension version
     descriptionLong: Replaces the tags of a given extension version in your tenant
@@ -219,7 +228,7 @@ commands:
       - name: version
         type: string
         description: Version
-
+    
     body:
       - name: tags
         property: tags
