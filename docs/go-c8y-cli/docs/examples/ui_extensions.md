@@ -19,6 +19,16 @@ c8y ui extensions create --file ./my_extension.zip --tags latest
 
 </CodeExample>
 
+Alternatively, you can install an extension directly from a URL (provided the URL does not require any authentication):
+
+<CodeExample transform="false">
+
+```bash
+c8y ui extensions create --file "https://github.com/thin-edge/tedge-container-plugin/releases/download/1.2.3/tedge-container-plugin-ui_1.0.2.zip" --tags latest
+```
+
+</CodeExample>
+
 But default the `cumulocity.json` manifest inside the zip file will be read to extract the default information, however you can manually override this information by providing the information on the command line.
 
 For example, you can provide a manual extension name and version using:
