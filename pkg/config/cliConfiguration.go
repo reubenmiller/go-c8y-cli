@@ -484,7 +484,7 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsViewColumnPadding, 15),
 		WithBindEnv(SettingsViewRowMode, "truncate"),
 
-		WithBindEnv(SettingsLoggerHideSensitive, false),
+		WithBindEnv(SettingsLoggerHideSensitive, true),
 
 		WithBindEnv(SettingsCacheMethods, "GET PUT POST DELETE"),
 		WithBindEnv(SettingsCacheKeyHost, true),
