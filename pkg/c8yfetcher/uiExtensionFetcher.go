@@ -13,10 +13,8 @@ import (
 type UIExtensionFetcher struct {
 	*CumulocityFetcher
 
-	// Enable the owner check which will only return microservices owned by the current tenant
-	// This option was added to ensure that it will not break the existing behaviour,
-	// though this option could be enabled by default in the future if it proves to be more useful
-	EnableOwnerCheck bool
+	// Look for shared extensions if no local ones are found
+	EnableSharedExtensions bool
 }
 
 func NewUIExtensionFetcher(factory *cmdutil.Factory) *UIExtensionFetcher {
@@ -53,7 +51,7 @@ func (f *UIExtensionFetcher) getByName(name string) ([]fetcherResultSet, error) 
 		Type:              c8y.ApplicationTypeHosted,
 	}
 	serverOptions.WithHasVersions(true)
-	if f.EnableOwnerCheck && f.Client().TenantName != "" {
+	if f.EnableSharedExtensions && f.Client().TenantName != "" {
 		// Ignore microservices which don't match the owner
 		// so that microservices of sub tenants don't get returned.
 		serverOptions.Owner = f.Client().TenantName
@@ -74,21 +72,43 @@ func (f *UIExtensionFetcher) getByName(name string) ([]fetcherResultSet, error) 
 		return nil, errors.Wrap(err, "invalid regex")
 	}
 
-	if err != nil {
-		return nil, errors.Wrap(err, "Could not fetch by id")
-	}
-
 	results := make([]fetcherResultSet, 0)
 
+	// Note: Match against both name and contextPath
+	// as the contextPath is used by UI extensions as a reference
 	for i, app := range col.Applications {
-		if pattern.MatchString(app.Name) {
+		if pattern.MatchString(app.Name) || pattern.MatchString(app.ContextPath) {
 			results = append(results, fetcherResultSet{
 				ID:    app.ID,
 				Name:  app.Name,
 				Value: col.Items[i],
 			})
 		}
+	}
 
+	// If not results are found, then also include any matches (not just in the current tenant)
+	if len(results) == 0 && f.EnableSharedExtensions {
+
+		// Run request against, but without the tenant filter
+		serverOptions.Availability = c8y.ApplicationAvailabilityShared
+		serverOptions.Owner = ""
+		col, _, err := f.Client().Application.GetApplications(
+			c8y.WithDisabledDryRunContext(context.Background()),
+			serverOptions,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not fetch applications")
+		}
+
+		for i, app := range col.Applications {
+			if pattern.MatchString(app.Name) || pattern.MatchString(app.ContextPath) {
+				results = append(results, fetcherResultSet{
+					ID:    app.ID,
+					Name:  app.Name,
+					Value: col.Items[i],
+				})
+			}
+		}
 	}
 
 	return results, nil
@@ -97,9 +117,9 @@ func (f *UIExtensionFetcher) getByName(name string) ([]fetcherResultSet, error) 
 // Find UI Extensions returns extensions given either an id or search text
 // @values: An array of ids, or names (with wildcards)
 // @lookupID: Lookup the data if an id is given. If a non-id text is given, the result will always be looked up.
-func FindUIExtensions(factory *cmdutil.Factory, values []string, lookupID bool, format string, enableOwnerCheck bool) ([]entityReference, error) {
+func FindUIExtensions(factory *cmdutil.Factory, values []string, lookupID bool, format string, resolveSharedExtensions bool) ([]entityReference, error) {
 	f := NewUIExtensionFetcher(factory)
-	f.EnableOwnerCheck = enableOwnerCheck
+	f.EnableSharedExtensions = resolveSharedExtensions
 
 	formattedValues, err := lookupEntity(f, values, lookupID, format)
 

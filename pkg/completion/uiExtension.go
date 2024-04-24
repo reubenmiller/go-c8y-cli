@@ -40,6 +40,117 @@ func WithUIExtension(flagName string, clientFunc func() (*c8y.Client, error)) Op
 					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
 				}
 			}
+
+			// Lookup shared extensions
+			// Shared extensions
+			items, _, err = client.Application.GetApplications(
+				c8y.WithDisabledDryRunContext(context.Background()),
+				&c8y.ApplicationOptions{
+					Type:              c8y.ApplicationTypeHosted,
+					HasVersions:       &hasVersions,
+					Availability:      c8y.ApplicationAvailabilityShared,
+					PaginationOptions: *c8y.NewPaginationOptions(2000),
+				},
+			)
+			if err != nil {
+				values := []string{fmt.Sprintf("error. %s", err)}
+				return values, cobra.ShellCompDirectiveError
+			}
+			for _, item := range items.Applications {
+				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
+					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+				}
+			}
+
+			return values, cobra.ShellCompDirectiveNoFileComp
+		})
+		return cmd
+	}
+}
+
+func formatUIExtensionValues(items *c8y.ApplicationCollection, toComplete string) []string {
+	values := []string{}
+	pattern := "*" + toComplete + "*"
+
+	withVersions := strings.Contains(toComplete, "@")
+
+	for i, app := range items.Applications {
+
+		if withVersions {
+			// Show name@version
+			for _, appVersion := range app.ApplicationVersions {
+				value := fmt.Sprintf("%s@%s", app.Name, appVersion.Version)
+				if toComplete == "" || MatchString(pattern, value) || MatchString(pattern, app.ID) {
+					tags := strings.Join(appVersion.Tags, ",")
+					if tags == "" {
+						tags = "-"
+					}
+					values = append(values, fmt.Sprintf("%s\t%s | id: %s, version: %s, tags: [%s]", value, app.Type, app.ID, appVersion.Version, tags))
+				}
+			}
+		} else {
+			// Show just names
+			if toComplete == "" || MatchString(pattern, app.Name) || MatchString(pattern, app.ID) {
+				// tags := strings.Join(appVersion.Tags, ",")
+				// if tags == "" {
+				// 	tags = "-"
+				// }
+				description := items.Items[i].Get("manifest.description").String()
+				if description == "" {
+					description = "<no description>"
+				}
+				totalVersions := len(app.ApplicationVersions)
+				values = append(values, fmt.Sprintf("%s\t%s | id: %s, versions: %d, desc: %s", app.Name, app.Type, app.ID, totalVersions, description))
+			}
+		}
+	}
+	return values
+}
+
+// WithUIExtensionWithVersions UI extension with version completion
+// Values are returned in the format of name@version
+func WithUIExtensionWithVersions(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			client, err := clientFunc()
+			if err != nil {
+				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
+			}
+
+			values := []string{}
+
+			hasVersions := true
+
+			// Extensions in current tenant
+			items, _, err := client.Application.GetApplications(
+				c8y.WithDisabledDryRunContext(context.Background()),
+				&c8y.ApplicationOptions{
+					Type:              c8y.ApplicationTypeHosted,
+					HasVersions:       &hasVersions,
+					PaginationOptions: *c8y.NewPaginationOptions(2000),
+				},
+			)
+			if err != nil {
+				values := []string{fmt.Sprintf("error. %s", err)}
+				return values, cobra.ShellCompDirectiveError
+			}
+			values = append(values, formatUIExtensionValues(items, toComplete)...)
+
+			// Shared extensions
+			items, _, err = client.Application.GetApplications(
+				c8y.WithDisabledDryRunContext(context.Background()),
+				&c8y.ApplicationOptions{
+					Type:              c8y.ApplicationTypeHosted,
+					HasVersions:       &hasVersions,
+					Availability:      c8y.ApplicationAvailabilityShared,
+					PaginationOptions: *c8y.NewPaginationOptions(2000),
+				},
+			)
+			if err != nil {
+				values := []string{fmt.Sprintf("error. %s", err)}
+				return values, cobra.ShellCompDirectiveError
+			}
+			values = append(values, formatUIExtensionValues(items, toComplete)...)
 			return values, cobra.ShellCompDirectiveNoFileComp
 		})
 		return cmd
@@ -57,7 +168,7 @@ func WithUIExtensionVersion(flagVersion string, flagExtension string, clientFunc
 
 			values := []string{}
 
-			// Lookup firmware by name
+			// Lookup by name
 			names, err := GetFlagStringValues(cmd, flagExtension)
 			name := ""
 			if len(names) > 0 {
@@ -88,7 +199,7 @@ func WithUIExtensionVersion(flagVersion string, flagExtension string, clientFunc
 				return values, cobra.ShellCompDirectiveNoFileComp
 			}
 
-			// Get firmware versions
+			// Get versions
 			col, _, err := client.ApplicationVersions.GetVersions(context.Background(), extensionID, &c8y.ApplicationVersionsOptions{
 				PaginationOptions: *c8y.NewPaginationOptions(100),
 			})
