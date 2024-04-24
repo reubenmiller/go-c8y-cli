@@ -170,3 +170,54 @@ c8y ui extensions list \
 | 69513       | lwm2m-ui-plugin           | 1             |
 | 99228       | tedge-container-plugin-ui | 2             |
 ```
+
+## Managing Application extensions
+
+UI extensions can be installed into UI applications using the `c8y ui extensions install` command. This command can be used to install new extensions, upgrade existing extensions, and also replace a whole set of extensions installed in an application.
+
+The follow sections detail the common use-cases.
+
+### Adding an extension
+
+A new extension can be added to an application. Any existing extensions already installed in the application will not be modified.
+
+```sh
+c8y ui extensions install --application devicemanagement --extension myext
+```
+
+By default the `latest` version is chosen, but a version or tag can be provided using the `@<tag|version>` syntax:
+
+```sh
+c8y ui extensions install --application devicemanagement --extension myext@latest
+```
+
+Or install an explicit version:
+
+```sh
+c8y ui extensions install --application devicemanagement --extension myext@1.2.3
+```
+
+### Update all extensions to the latest versions
+
+The existing UI extensions installed in an application can easily be updated using a single command.
+
+```sh
+c8y ui extensions install --application devicemanagement --update-versions
+```
+
+### Replace all extensions with a new set of extensions
+
+The list of UI extensions installed in an application can also be swapped out entirely by replacing all of the existing extensions with a new set of extensions. The `--replace` flag will ensure that the existing set of UI extensions is ignored, and only the new extensions will be used.
+
+```sh
+c8y ui extensions install --application devicemanagement --replace --extension myext --extension another --extension cloud-http-proxy
+```
+
+### Remove all extensions from an application
+
+Similar to the previous example, you can also remove all extensions by also using `--replace`, but not providing any extensions to install.
+
+```sh
+c8y ui extensions install --application devicemanagement --replace
+```
+
