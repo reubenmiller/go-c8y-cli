@@ -1,4 +1,4 @@
-Function New-C8yApiGoGetValueFromFlag {
+﻿Function New-C8yApiGoGetValueFromFlag {
     [cmdletbinding()]
     Param(
         [Parameter(
@@ -21,6 +21,8 @@ Function New-C8yApiGoGetValueFromFlag {
 
     $Type = $Parameters.type
 
+    # TODO: Deprecate .value and use .default (as this is also used by the official go-c8y-cli extensions)
+    # $FixedValue = if ($null -ne $Parameters.value) { $Parameters.value } else { $Parameters.default }
     $FixedValue = $Parameters.value
 
     $FormatValue = ""
