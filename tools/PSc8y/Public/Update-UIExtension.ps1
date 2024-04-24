@@ -41,7 +41,7 @@ Update application availability to MARKET
 
         # Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
         [Parameter()]
-        [ValidateSet('MARKET','PRIVATE')]
+        [ValidateSet('SHARED','PRIVATE','MARKET')]
         [string]
         $Availability,
 

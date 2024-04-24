@@ -200,8 +200,9 @@
           "name": "availability",
           "type": "string",
           "validationSet": [
-            "MARKET",
-            "PRIVATE"
+            "SHARED",
+            "PRIVATE",
+            "MARKET"
           ],
           "required": false,
           "description": "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)"

@@ -54,7 +54,7 @@ Update an extension's availability to SHARED
 	completion.WithOptions(
 		cmd,
 		completion.WithUIExtension("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("availability", "MARKET", "PRIVATE"),
+		completion.WithValidateSet("availability", "SHARED", "PRIVATE", "MARKET"),
 	)
 
 	flags.WithOptions(
