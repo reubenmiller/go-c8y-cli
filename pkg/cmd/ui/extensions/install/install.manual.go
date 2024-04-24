@@ -130,7 +130,7 @@ func NewCmdInstall(f *cmdutil.Factory) *CmdInstall {
 			Update to the latest versions for all of the existing UI extensions that are installed in the application
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.UpdateModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
@@ -153,6 +153,7 @@ func NewCmdInstall(f *cmdutil.Factory) *CmdInstall {
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
+		flags.WithExtendedPipelineSupport("application", "application", false, "id"),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("application")
@@ -165,6 +166,12 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
+
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
