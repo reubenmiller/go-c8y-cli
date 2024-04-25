@@ -663,8 +663,8 @@ func WithMicroserviceByNameFirstMatch(factory *cmdutil.Factory, args []string, o
 // WithUIExtensionByNameFirstMatch add reference by name matching for UI extensions via cli args. Only the first match will be used
 func WithUIExtensionByNameFirstMatch(factory *cmdutil.Factory, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
-		fetch := NewUIExtensionFetcher(factory)
-		fetch.EnableSharedExtensions = true
+		fetch := NewUIPluginFetcher(factory)
+		fetch.EnableSharedPlugins = true
 		opt := WithReferenceByNameFirstMatch(factory, fetch, args, opts...)
 		return opt(cmd, inputIterators)
 	}

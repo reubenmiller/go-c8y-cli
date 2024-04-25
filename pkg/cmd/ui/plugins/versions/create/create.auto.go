@@ -53,7 +53,7 @@ Create a new version for a plugin
 
 	completion.WithOptions(
 		cmd,
-		completion.WithUIExtension("plugin", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUIPlugin("plugin", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

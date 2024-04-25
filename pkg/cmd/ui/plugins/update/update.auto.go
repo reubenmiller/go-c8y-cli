@@ -53,7 +53,7 @@ Update plugin availability to SHARED
 
 	completion.WithOptions(
 		cmd,
-		completion.WithUIExtension("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUIPlugin("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithValidateSet("availability", "SHARED", "PRIVATE", "MARKET"),
 	)
 

@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// WithUIExtension UI extension completion
-func WithUIExtension(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+// WithUIPlugin UI extension completion
+func WithUIPlugin(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -68,7 +68,7 @@ func WithUIExtension(flagName string, clientFunc func() (*c8y.Client, error)) Op
 	}
 }
 
-func formatUIExtensionValues(items *c8y.ApplicationCollection, toComplete string) []string {
+func formatUIPluginValues(items *c8y.ApplicationCollection, toComplete string) []string {
 	values := []string{}
 	pattern := "*" + toComplete + "*"
 
@@ -107,9 +107,9 @@ func formatUIExtensionValues(items *c8y.ApplicationCollection, toComplete string
 	return values
 }
 
-// WithUIExtensionWithVersions UI extension with version completion
+// WithUIPluginWithVersions UI plugin with version completion
 // Values are returned in the format of name@version
-func WithUIExtensionWithVersions(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithUIPluginWithVersions(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -134,7 +134,7 @@ func WithUIExtensionWithVersions(flagName string, clientFunc func() (*c8y.Client
 				values := []string{fmt.Sprintf("error. %s", err)}
 				return values, cobra.ShellCompDirectiveError
 			}
-			values = append(values, formatUIExtensionValues(items, toComplete)...)
+			values = append(values, formatUIPluginValues(items, toComplete)...)
 
 			// Shared extensions
 			items, _, err = client.Application.GetApplications(
@@ -150,7 +150,7 @@ func WithUIExtensionWithVersions(flagName string, clientFunc func() (*c8y.Client
 				values := []string{fmt.Sprintf("error. %s", err)}
 				return values, cobra.ShellCompDirectiveError
 			}
-			values = append(values, formatUIExtensionValues(items, toComplete)...)
+			values = append(values, formatUIPluginValues(items, toComplete)...)
 			return values, cobra.ShellCompDirectiveNoFileComp
 		})
 		return cmd
@@ -158,7 +158,7 @@ func WithUIExtensionWithVersions(flagName string, clientFunc func() (*c8y.Client
 }
 
 // Complete UI extension versions
-func WithUIExtensionVersion(flagVersion string, flagExtension string, clientFunc func() (*c8y.Client, error)) Option {
+func WithUIPluginVersion(flagVersion string, flagExtension string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagVersion, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()

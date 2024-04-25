@@ -181,7 +181,7 @@ func NewPluginRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, mana
 		// Add plugins
 		for _, nameVersion := range extensions {
 			name, versionOrTag, _ := strings.Cut(nameVersion, "@")
-			matches, err := c8yfetcher.FindUIExtensions(f, []string{name}, true, "", true)
+			matches, err := c8yfetcher.FindUIPlugins(f, []string{name}, true, "", true)
 			if err != nil {
 				return err
 			}
@@ -197,7 +197,7 @@ func NewPluginRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, mana
 		// Remove plugins
 		for _, nameVersion := range managerOptions.Remove {
 			name, _, _ := strings.Cut(nameVersion, "@")
-			matches, err := c8yfetcher.FindUIExtensions(f, []string{name}, true, "", true)
+			matches, err := c8yfetcher.FindUIPlugins(f, []string{name}, true, "", true)
 			if err != nil {
 				return err
 			}

@@ -53,7 +53,7 @@ Get ui plugin by name
 
 	completion.WithOptions(
 		cmd,
-		completion.WithUIExtension("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUIPlugin("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

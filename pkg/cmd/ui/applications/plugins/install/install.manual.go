@@ -46,7 +46,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 	completion.WithOptions(
 		cmd,
 		completion.WithHostedApplication("application", func() (*c8y.Client, error) { return ccmd.Factory.Client() }),
-		completion.WithUIExtensionWithVersions("plugin", func() (*c8y.Client, error) { return ccmd.Factory.Client() }),
+		completion.WithUIPluginWithVersions("plugin", func() (*c8y.Client, error) { return ccmd.Factory.Client() }),
 	)
 
 	flags.WithOptions(

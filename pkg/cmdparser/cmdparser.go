@@ -181,9 +181,9 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 	case "microserviceinstance":
 		return completion.WithMicroserviceInstance(p.Name, p.GetDependentProperty(0, "id"), func() (*c8y.Client, error) { return factory.Client() })
 	case "uiplugin":
-		return completion.WithUIExtension(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithUIPlugin(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "uipluginversion":
-		return completion.WithUIExtensionVersion(p.Name, p.GetDependentProperty(0, "plugin"), func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithUIPluginVersion(p.Name, p.GetDependentProperty(0, "plugin"), func() (*c8y.Client, error) { return factory.Client() })
 	case "role[]", "roleself[]":
 		return completion.WithUserRole(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "devicerequest", "devicerequest[]":

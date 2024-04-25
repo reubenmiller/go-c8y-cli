@@ -54,8 +54,8 @@ Delete plugin version by version name
 
 	completion.WithOptions(
 		cmd,
-		completion.WithUIExtension("plugin", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithUIExtensionVersion("version", "plugin", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUIPlugin("plugin", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUIPluginVersion("version", "plugin", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

@@ -10,22 +10,22 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
-type UIExtensionFetcher struct {
+type UIPluginFetcher struct {
 	*CumulocityFetcher
 
-	// Look for shared extensions if no local ones are found
-	EnableSharedExtensions bool
+	// Look for shared plugins if no local ones are found
+	EnableSharedPlugins bool
 }
 
-func NewUIExtensionFetcher(factory *cmdutil.Factory) *UIExtensionFetcher {
-	return &UIExtensionFetcher{
+func NewUIPluginFetcher(factory *cmdutil.Factory) *UIPluginFetcher {
+	return &UIPluginFetcher{
 		CumulocityFetcher: &CumulocityFetcher{
 			factory: factory,
 		},
 	}
 }
 
-func (f *UIExtensionFetcher) getByID(id string) ([]fetcherResultSet, error) {
+func (f *UIPluginFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	app, resp, err := f.Client().Application.GetApplication(
 		c8y.WithDisabledDryRunContext(context.Background()),
 		id,
@@ -45,13 +45,13 @@ func (f *UIExtensionFetcher) getByID(id string) ([]fetcherResultSet, error) {
 }
 
 // getByName returns applications matching a given using regular expression
-func (f *UIExtensionFetcher) getByName(name string) ([]fetcherResultSet, error) {
+func (f *UIPluginFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	serverOptions := &c8y.ApplicationOptions{
 		PaginationOptions: *c8y.NewPaginationOptions(2000),
 		Type:              c8y.ApplicationTypeHosted,
 	}
 	serverOptions.WithHasVersions(true)
-	if f.EnableSharedExtensions && f.Client().TenantName != "" {
+	if f.EnableSharedPlugins && f.Client().TenantName != "" {
 		// Ignore microservices which don't match the owner
 		// so that microservices of sub tenants don't get returned.
 		serverOptions.Owner = f.Client().TenantName
@@ -63,7 +63,7 @@ func (f *UIExtensionFetcher) getByName(name string) ([]fetcherResultSet, error) 
 	)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "could not fetch ui extension")
+		return nil, errors.Wrap(err, "could not fetch ui plugin")
 	}
 
 	pattern, err := regexp.Compile("^" + regexp.QuoteMeta(name) + "$")
@@ -75,7 +75,7 @@ func (f *UIExtensionFetcher) getByName(name string) ([]fetcherResultSet, error) 
 	results := make([]fetcherResultSet, 0)
 
 	// Note: Match against both name and contextPath
-	// as the contextPath is used by UI extensions as a reference
+	// as the contextPath is used by UI plugins as a reference
 	for i, app := range col.Applications {
 		if pattern.MatchString(app.Name) || pattern.MatchString(app.ContextPath) {
 			results = append(results, fetcherResultSet{
@@ -87,7 +87,7 @@ func (f *UIExtensionFetcher) getByName(name string) ([]fetcherResultSet, error) 
 	}
 
 	// If not results are found, then also include any matches (not just in the current tenant)
-	if len(results) == 0 && f.EnableSharedExtensions {
+	if len(results) == 0 && f.EnableSharedPlugins {
 
 		// Run request against, but without the tenant filter
 		serverOptions.Availability = c8y.ApplicationAvailabilityShared
@@ -114,12 +114,12 @@ func (f *UIExtensionFetcher) getByName(name string) ([]fetcherResultSet, error) 
 	return results, nil
 }
 
-// Find UI Extensions returns extensions given either an id or search text
+// Find UI Plugins returns plugins given either an id or search text
 // @values: An array of ids, or names (with wildcards)
 // @lookupID: Lookup the data if an id is given. If a non-id text is given, the result will always be looked up.
-func FindUIExtensions(factory *cmdutil.Factory, values []string, lookupID bool, format string, resolveSharedExtensions bool) ([]entityReference, error) {
-	f := NewUIExtensionFetcher(factory)
-	f.EnableSharedExtensions = resolveSharedExtensions
+func FindUIPlugins(factory *cmdutil.Factory, values []string, lookupID bool, format string, resolveSharedPlugins bool) ([]entityReference, error) {
+	f := NewUIPluginFetcher(factory)
+	f.EnableSharedPlugins = resolveSharedPlugins
 
 	formattedValues, err := lookupEntity(f, values, lookupID, format)
 
