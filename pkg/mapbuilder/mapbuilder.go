@@ -622,6 +622,7 @@ type MapBuilder struct {
 	templateVariables      map[string]interface{}
 	requiredKeys           []string
 	autoApplyTemplate      bool
+	appendTemplate         bool
 	templates              []string
 	externalInput          []byte
 	localTemplateVariables []LocalVariable
@@ -722,6 +723,13 @@ func (b *MapBuilder) PrependTemplate(template string) *MapBuilder {
 // SetApplyTemplateOnMarshalPreference sets whether the templates should be applied during marshalling or not.
 func (b *MapBuilder) SetApplyTemplateOnMarshalPreference(value bool) *MapBuilder {
 	b.autoApplyTemplate = value
+	return b
+}
+
+// SetAppendTemplatePreference sets if the templates should be appended when evaluating the entire map
+// Setting it to append means that the template can override other values provided in the map
+func (b *MapBuilder) SetAppendTemplatePreference(value bool) *MapBuilder {
+	b.appendTemplate = value
 	return b
 }
 
@@ -1095,7 +1103,7 @@ func (b *MapBuilder) MarshalJSONObject() (body []byte, err error) {
 	Logger.Debugf("Body (pre templating)\nbody:\t%s\n\texternalInput:\t%s", body, b.externalInput)
 
 	if b.autoApplyTemplate && len(b.templates) > 0 {
-		body, err = b.ApplyTemplates(body, b.externalInput, false)
+		body, err = b.ApplyTemplates(body, b.externalInput, b.appendTemplate)
 		if err != nil {
 			return
 		}
