@@ -106,6 +106,7 @@ commands:
       - name: id
         type: uiplugin
         description: Plugin
+        pipeline: true
 
   - name: update
     description: 'Update UI plugin details'

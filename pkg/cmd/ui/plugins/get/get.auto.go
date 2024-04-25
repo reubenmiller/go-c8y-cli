@@ -49,7 +49,7 @@ Get ui plugin by name
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Plugin")
+	cmd.Flags().String("id", "", "Plugin (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -59,7 +59,7 @@ Get ui plugin by name
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("id", "id", false),
 		flags.WithPipelineAliases("id", "id"),
 	)
 

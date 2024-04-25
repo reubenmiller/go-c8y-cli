@@ -133,7 +133,8 @@
         {
           "name": "id",
           "type": "uiplugin",
-          "description": "Plugin"
+          "description": "Plugin",
+          "pipeline": true
         }
       ]
     },
