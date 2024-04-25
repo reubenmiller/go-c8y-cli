@@ -128,6 +128,9 @@ func NewCmdInstall(f *cmdutil.Factory) *CmdInstall {
 
 			$ c8y ui extensions install --application devicemanagement --update-versions
 			Update to the latest versions for all of the existing UI extensions that are installed in the application
+
+			$ c8y ui extensions install --application devicemanagement --extension myext --template "{config+:{remotes+:{'other@1.0.0':[]}}}"
+			Install myext via a lookup and add manual configuration using templates (for power users only!)
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.UpdateModeEnabled()
@@ -254,6 +257,9 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 	if v := app.Get("config"); v.Exists() && v.IsObject() {
 		body = mapbuilder.NewMapBuilderWithInit([]byte(app.Get("config").Str))
 	}
+
+	// Allow the template values to override values provided by the --extension flags
+	body.SetAppendTemplatePreference(true)
 
 	body.Set("id", app.Get("id").String())
 	body.Set("config.remotes", formatApplicationRemotes(remotes))
