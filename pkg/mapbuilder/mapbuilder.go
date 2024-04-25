@@ -566,7 +566,8 @@ func NewInitializedMapBuilder(initBody bool) *MapBuilder {
 // NewMapBuilderWithInit returns a new map builder seeding the builder with json
 func NewMapBuilderWithInit(body []byte) *MapBuilder {
 	return &MapBuilder{
-		BodyRaw: body,
+		BodyRaw:           body,
+		autoApplyTemplate: true,
 	}
 }
 
