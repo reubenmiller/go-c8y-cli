@@ -121,11 +121,11 @@
         # microservice name
         "microservicename" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
-        # uiextension
-        "uiextension" = "c8yfetcher.WithUIExtensionByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
+        # uiplugin
+        "uiplugin" = "c8yfetcher.WithUIExtensionByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
-        # uiextensionversion
-        "uiextensionversion" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
+        # uipluginversion
+        "uipluginversion" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # devicerequest array
         "devicerequest[]" = "c8yfetcher.WithIDSlice(args, `"${prop}`", `"${queryParam}`"$FormatValue),"

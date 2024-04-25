@@ -1,0 +1,9 @@
+tests:
+    ui/plugins/versions_create_Create a new version for a plugin:
+        command: c8y ui plugins versions create --plugin 1234 --file "./testdata/myapp.zip" --version "2.0.0"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: POST
+                path: /application/applications/{application}/versions

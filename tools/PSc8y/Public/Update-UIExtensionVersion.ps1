@@ -8,7 +8,7 @@ Replace tags related to an extension version
 Replaces the tags of a given extension version in your tenant
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_extensions_versions_update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_versions_update
 
 .EXAMPLE
 PS> Update-UIExtensionVersion -Extension 1234 -Version 1.0 -Tags tag1,latest
@@ -49,7 +49,7 @@ Replace tags assigned to a version of an extension
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui extensions versions update"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui plugins versions update"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.applicationVersion+json"
@@ -63,13 +63,13 @@ Replace tags assigned to a version of an extension
         if ($ClientOptions.ConvertToPS) {
             $Extension `
             | Group-ClientRequests `
-            | c8y ui extensions versions update $c8yargs `
+            | c8y ui plugins versions update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Extension `
             | Group-ClientRequests `
-            | c8y ui extensions versions update $c8yargs
+            | c8y ui plugins versions update $c8yargs
         }
         
     }

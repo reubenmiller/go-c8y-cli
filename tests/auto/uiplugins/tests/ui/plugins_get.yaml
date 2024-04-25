@@ -1,0 +1,16 @@
+tests:
+    ui/plugins_get_Get ui plugin by id:
+        command: c8y ui plugins get --id 1234
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications/1234
+    ui/plugins_get_Get ui plugin by name:
+        command: c8y ui plugins get --id myplugin
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /application/applications/myplugin

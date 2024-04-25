@@ -8,7 +8,7 @@ Create a new version of an extension
 Uploaded version and tags can only contain upper and lower case letters, integers and ., +, -. Other characters are prohibited.
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_extensions_versions_create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_versions_create
 
 .EXAMPLE
 PS> New-UIExtensionVersion -Extension 1234 -File ./myapp.zip -Version "2.0.0"
@@ -54,7 +54,7 @@ Create a new version for an extension
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui extensions versions create"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui plugins versions create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/json"
@@ -68,13 +68,13 @@ Create a new version for an extension
         if ($ClientOptions.ConvertToPS) {
             $Extension `
             | Group-ClientRequests `
-            | c8y ui extensions versions create $c8yargs `
+            | c8y ui plugins versions create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Extension `
             | Group-ClientRequests `
-            | c8y ui extensions versions create $c8yargs
+            | c8y ui plugins versions create $c8yargs
         }
         
     }

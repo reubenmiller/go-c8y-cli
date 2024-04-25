@@ -8,7 +8,7 @@ Delete UI extension
 Delete an existing UI extension from the tenant
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_extensions_delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_delete
 
 .EXAMPLE
 PS> Remove-UIExtension -Id $App.name
@@ -40,7 +40,7 @@ Remove UI extension
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui extensions delete"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui plugins delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -54,13 +54,13 @@ Remove UI extension
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y ui extensions delete $c8yargs `
+            | c8y ui plugins delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y ui extensions delete $c8yargs
+            | c8y ui plugins delete $c8yargs
         }
         
     }

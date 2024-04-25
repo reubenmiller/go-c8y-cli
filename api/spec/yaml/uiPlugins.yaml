@@ -1,0 +1,192 @@
+# yaml-language-server: $schema=../schema.json
+---
+
+group:
+  name: ui/plugins
+  description: Cumulocity IoT UI Plugins
+  descriptionLong: 'Managed UI Plugins'
+  link: https://cumulocity.com/api/core/
+
+commands:
+  - name: list
+    description: Get UI plugin collection
+    descriptionLong: Get a collection of UI plugins by a given filter
+    method: GET
+    path: /application/applications
+    accept: application/vnd.com.nsn.cumulocity.applicationCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.application+json
+    collectionProperty: applications
+    alias:
+        go: list
+        powershell: Get-UIPluginCollection
+    examples:
+      powershell:
+        - description: Get UI plugins
+          command: Get-UIPluginCollection -PageSize 100
+
+      go:
+        - description: Get UI plugins
+          command: c8y ui plugins list --pageSize 100
+
+        - description: Get shared ui plugins
+          command: c8y ui plugins list --availability SHARED
+        
+        - description: Get private ui plugins
+          command: c8y ui plugins list --availability PRIVATE
+
+    queryParameters:
+      - name: type
+        type: stringStatic
+        value: HOSTED
+        hidden: true
+        description: Application type
+
+      - name: name
+        type: applicationname
+        description: The name of the plugin.
+        pipeline: true
+      
+      - name: owner
+        type: tenantname
+        description: The ID of the tenant that owns the plugin.
+      
+      - name: providedFor
+        type: tenantname
+        description: The ID of a tenant that is subscribed to the plugin but doesn't own them.
+      
+      - name: subscriber
+        type: tenantname
+        description: The ID of a tenant that is subscribed to the plugin.
+
+      - name: user
+        type: user[]
+        description: The ID of a user that has access to the plugin.
+
+      - name: tenant
+        type: tenantname
+        description: The ID of a tenant that either owns the plugin or is subscribed to the plugins.
+
+      - name: hasVersions
+        type: booleanDefault
+        default: "true"
+        hidden: true
+        description: When set to true, the returned result contains plugins with an applicationVersions field that is not empty. When set to false, the result will contain applications with an empty applicationVersions field.
+
+      - name: availability
+        type: string
+        description: Plugin access level for other tenants.
+        validationSet:
+          - SHARED
+          - PRIVATE
+          - MARKET
+
+  - name: get
+    description: Get UI plugin
+    descriptionLong: Get a UI plugin
+    method: GET
+    path: /application/applications/{id}
+    accept: application/vnd.com.nsn.cumulocity.application+json
+    alias:
+        go: get
+        powershell: Get-UIPlugin
+    examples:
+      powershell:
+        - description: Get ui plugin
+          command: Get-UIPlugin -Id 1234
+
+      go:
+        - description: Get ui plugin by id
+          command: c8y ui plugins get --id 1234
+
+        - description: Get ui plugin by name
+          command: c8y ui plugins get --id myplugin
+          skipTest: true
+
+    pathParameters:
+      - name: id
+        type: uiplugin
+        description: Plugin
+
+  - name: update
+    description: 'Update UI plugin details'
+    descriptionLong: Update details of an existing UI plugin
+    method: PUT
+    path: /application/applications/{id}
+    accept: application/vnd.com.nsn.cumulocity.application+json
+    alias:
+        go: update
+        powershell: Update-UIPlugin
+    examples:
+      powershell:
+        - description: Update plugin availability to MARKET
+          command: Update-UIPlugin -Id $App.name -Availability "MARKET"
+          skipTest: true
+      go:
+        - description: Update plugin availability to SHARED
+          command: c8y ui plugins update --id "my-example-app" --availability SHARED
+          skipTest: true
+          assertStdOut:
+            json:
+              path: r//application/applications/\d+$
+    pathParameters:
+      - name: id
+        type: uiplugin
+        pipeline: true
+        required: true
+        description: Plugin
+
+    body:
+      - name: data
+        type: json
+        description: data
+
+      - name: name
+        type: string
+        required: false
+        description: Name of the plugin
+
+      - name: key
+        type: string
+        required: false
+        description: Shared secret of the plugin
+
+      - name: availability
+        type: string
+        validationSet:
+          - SHARED
+          - PRIVATE
+          - MARKET
+        required: false
+        description: Access level for other tenants
+
+      - name: contextPath
+        type: string
+        required: false
+        description: contextPath of the plugin
+
+  - name: delete
+    description: Delete UI plugin
+    descriptionLong: Delete an existing UI plugin from the tenant
+    method: DELETE
+    path: /application/applications/{id}
+    alias:
+        go: delete
+        powershell: Remove-UIPlugin
+    examples:
+      powershell:
+        - description: Remove UI plugin
+          command: Remove-UIPlugin -Id $App.name
+          skipTest: true
+      go:
+        - description: Remove UI plugin
+          command: c8y ui plugins delete --id "my-example-app"
+          skipTest: true
+          assertStdOut:
+            json:
+              path: r//application/applications/\d+$
+    pathParameters:
+      - name: id
+        type: uiplugin
+        pipeline: true
+        required: true
+        description: Plugin

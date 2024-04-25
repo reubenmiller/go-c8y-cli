@@ -8,7 +8,7 @@ Delete a specific version of an extension
 Delete a specific version of an extension in your tenant, by a given tag or version
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_extensions_versions_delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_versions_delete
 
 .EXAMPLE
 PS> Remove-UIExtensionVersion -Extension 1234 -Tag tag1
@@ -54,7 +54,7 @@ Delete extension version by version name
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui extensions versions delete"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui plugins versions delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -68,13 +68,13 @@ Delete extension version by version name
         if ($ClientOptions.ConvertToPS) {
             $Version `
             | Group-ClientRequests `
-            | c8y ui extensions versions delete $c8yargs `
+            | c8y ui plugins versions delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Version `
             | Group-ClientRequests `
-            | c8y ui extensions versions delete $c8yargs
+            | c8y ui plugins versions delete $c8yargs
         }
         
     }

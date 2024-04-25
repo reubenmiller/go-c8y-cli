@@ -97,10 +97,10 @@ import (
 	tenantsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants"
 	tenantstatisticsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantstatistics"
 	uiCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui"
-	uiExtensionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/extensions"
-	uiExtensionsCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/extensions/create"
-	uiExtensionsInstallCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/extensions/install"
-	uiExtensionsVersionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/extensions/versions"
+	uiApplicationsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/applications"
+	uiExtensionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/plugins"
+	uiExtensionsCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/plugins/create"
+	uiExtensionsVersionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/plugins/versions"
 	usergroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/usergroups"
 	userreferencesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences"
 	userrolesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles"
@@ -453,10 +453,13 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	ui := uiCmd.NewSubCommand(f).GetCommand()
 	uiExtension := uiExtensionsCmd.NewSubCommand(f).GetCommand()
 	uiExtension.AddCommand(uiExtensionsCreateCmd.NewCmdCreate(f).GetCommand())
-	uiExtension.AddCommand(uiExtensionsInstallCmd.NewCmdInstall(f).GetCommand())
 	// Extension version management
 	uiExtension.AddCommand(uiExtensionsVersionsCmd.NewSubCommand(f).GetCommand())
 	ui.AddCommand(uiExtension)
+
+	// Application plugin management
+	ui.AddCommand(uiApplicationsCmd.NewSubCommand(f).GetCommand())
+
 	cmd.AddCommand(ui)
 
 	// smart groups

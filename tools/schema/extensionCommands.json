@@ -295,7 +295,8 @@
                 "subscriptionName",
                 "tenant",
                 "tenantname",
-                "uiextension",
+                "uiplugin",
+                "uipluginversion",
                 "user[]",
                 "usergroup[]",
                 "userself[]"

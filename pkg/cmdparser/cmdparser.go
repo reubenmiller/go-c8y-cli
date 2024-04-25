@@ -180,10 +180,10 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 		return completion.WithMicroservice(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "microserviceinstance":
 		return completion.WithMicroserviceInstance(p.Name, p.GetDependentProperty(0, "id"), func() (*c8y.Client, error) { return factory.Client() })
-	case "uiextension":
+	case "uiplugin":
 		return completion.WithUIExtension(p.Name, func() (*c8y.Client, error) { return factory.Client() })
-	case "uiextensionversion":
-		return completion.WithUIExtensionVersion(p.Name, p.GetDependentProperty(0, "extension"), func() (*c8y.Client, error) { return factory.Client() })
+	case "uipluginversion":
+		return completion.WithUIExtensionVersion(p.Name, p.GetDependentProperty(0, "plugin"), func() (*c8y.Client, error) { return factory.Client() })
 	case "role[]", "roleself[]":
 		return completion.WithUserRole(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "devicerequest", "devicerequest[]":
@@ -280,7 +280,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		cmd.Command.Flags().StringSliceP(p.Name, p.ShortName, []string{p.Default}, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "id")
 
-	case "application", "applicationname", "hostedapplication", "microservice", "microserviceinstance", "uiextension", "uiextensionversion":
+	case "application", "applicationname", "hostedapplication", "microservice", "microserviceinstance", "uiplugin", "uipluginversion":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "id")
 
@@ -398,7 +398,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "inventoryChildType":
 		opts = append(opts, flags.WithInventoryChildType(p.Name, targetProp, p.Format))
 
-	case "string", "source", "tenantname", "devicerequest", "subscriptionName", "subscriptionId", "applicationname", "microserviceinstance", "microservicename", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "uiextensionversion":
+	case "string", "source", "tenantname", "devicerequest", "subscriptionName", "subscriptionId", "applicationname", "microserviceinstance", "microservicename", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "uipluginversion":
 		opts = append(opts, flags.WithStringValue(p.Name, targetProp, p.Format))
 
 	case "stringStatic":
@@ -430,7 +430,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "microservice":
 		opts = append(opts, c8yfetcher.WithMicroserviceByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
-	case "uiextension":
+	case "uiplugin":
 		opts = append(opts, c8yfetcher.WithUIExtensionByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "software[]":

@@ -1,9 +1,0 @@
-tests:
-    ui/extensions_delete_Update an extension's availability to SHARED:
-        command: c8y ui extensions delete --id "my-example-app"
-        exit-code: 0
-        skip: true
-        stdout:
-            json:
-                method: DELETE
-                path: r//application/applications/\d+$

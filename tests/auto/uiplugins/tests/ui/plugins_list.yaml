@@ -1,0 +1,26 @@
+tests:
+    ui/plugins_list_Get UI plugins:
+        command: c8y ui plugins list --pageSize 100
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications
+    ui/plugins_list_Get private ui plugins:
+        command: c8y ui plugins list --availability PRIVATE
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications
+            contains:
+                - availability=PRIVATE
+    ui/plugins_list_Get shared ui plugins:
+        command: c8y ui plugins list --availability SHARED
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications
+            contains:
+                - availability=SHARED

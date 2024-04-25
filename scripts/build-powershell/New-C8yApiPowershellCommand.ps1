@@ -583,7 +583,7 @@ Function Get-IteratorFunction {
         "userself[]" { "(PSc8y\Expand-User $Variable)" }
         "user[]" { "(PSc8y\Expand-User $Variable)" }
         "application" { "(PSc8y\Expand-Application $Variable)" }
-        "uiextension" { "(PSc8y\Expand-Application $Variable)" }
+        "uiplugin" { "(PSc8y\Expand-Application $Variable)" }
         "hostedapplication" { "(PSc8y\Expand-Application $Variable)" }
         "microservice" { "(PSc8y\Expand-Microservice $Variable)" }
         "device" { "(PSc8y\Expand-Device $Variable)" }

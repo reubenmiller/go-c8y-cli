@@ -8,7 +8,7 @@ Update UI extension details
 Update details of an existing UI extension
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_extensions_update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_update
 
 .EXAMPLE
 PS> Update-UIExtension -Id $App.name -Availability "MARKET"
@@ -61,7 +61,7 @@ Update application availability to MARKET
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui extensions update"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "ui plugins update"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.application+json"
@@ -75,13 +75,13 @@ Update application availability to MARKET
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y ui extensions update $c8yargs `
+            | c8y ui plugins update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y ui extensions update $c8yargs
+            | c8y ui plugins update $c8yargs
         }
         
     }
