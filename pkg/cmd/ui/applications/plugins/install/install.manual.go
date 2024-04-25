@@ -23,14 +23,14 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 			Install UI plugins in an application
 		`),
 		Example: heredoc.Doc(`
-			$ c8y ui applications plugins install --application devicemanagement --plugin myext@latest --plugin someother@1.2.3
+			$ c8y ui applications plugins install --application devicemanagement --plugin myplugin@latest --plugin someother@1.2.3
 			Install multiple UI plugins to the devicemanagement application
 
-			$ c8y ui applications plugins install --application devicemanagement --plugin myext --template "{config+:{remotes+:{'other@1.0.0':[]}}}"
-			Install myext via a lookup and add manual configuration using templates (for power users only!)
+			$ c8y ui applications plugins install --application devicemanagement --plugin myplugin --template "{config+:{remotes+:{'other@1.0.0':[]}}}"
+			Install myplugin via a lookup and add manual configuration using templates (for power users only!)
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.CreateModeEnabled()
 		},
 	}
 
@@ -55,6 +55,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("application", "application", false, "id"),
+		flags.WithSemanticMethod("POST"),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("application")

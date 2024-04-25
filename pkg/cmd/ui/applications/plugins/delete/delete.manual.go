@@ -26,6 +26,9 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 			$ c8y ui applications plugins delete --application devicemanagement --plugin myext@latest --plugin someother@1.2.3
 			Delete multiple UI plugins from an application
 
+			$ c8y ui applications plugins delete --application devicemanagement --invalid
+			Delete orphaned or revoked UI plugins from an application
+
 			$ c8y ui applications plugins delete --application devicemanagement --all
 			Delete all UI plugins from an application
 		`),
@@ -43,6 +46,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 	cmd.Flags().StringVar(&ccmd.Application, "application", "", "Application")
 	cmd.Flags().StringSliceVar(&ccmd.Remove, "plugin", []string{}, "UI plugin to be removed")
 	cmd.Flags().BoolVar(&ccmd.ReplaceAll, "all", false, "Delete all UI plugins")
+	cmd.Flags().BoolVar(&ccmd.RemoveInvalid, "invalid", false, "Remove orphaned or revoked plugins")
 
 	completion.WithOptions(
 		cmd,
@@ -56,6 +60,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("application", "application", false, "id"),
+		flags.WithSemanticMethod("DELETE"),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("application")

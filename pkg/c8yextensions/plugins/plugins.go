@@ -23,17 +23,25 @@ type PluginCmd struct {
 
 	Factory *cmdutil.Factory
 
-	Application string
-	Remove      []string
-	Add         []string
-	ReplaceAll  bool
-	UpdateAll   bool
+	Application   string
+	Remove        []string
+	Add           []string
+	ReplaceAll    bool
+	UpdateAll     bool
+	RemoveInvalid bool
 }
 
 type ExtensionReference struct {
 	ContextPath string
 	Version     string
 	Modules     []string
+}
+
+func (r *ExtensionReference) Key() string {
+	if r.Version == "" {
+		return fmt.Sprintf("%s@%s", r.ContextPath, "latest")
+	}
+	return fmt.Sprintf("%s@%s", r.ContextPath, r.Version)
 }
 
 func buildUIRemotes(out map[string]ExtensionReference, ext gjson.Result, versionOrTag string) error {
@@ -110,6 +118,12 @@ func NewPluginRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, mana
 		if err != nil {
 			return err
 		}
+
+		log, err := f.Logger()
+		if err != nil {
+			return err
+		}
+
 		// Runtime flag options
 		flags.WithOptions(
 			cmd,
@@ -166,31 +180,45 @@ func NewPluginRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, mana
 							return true
 						})
 					}
-					if len(remote.Modules) > 0 {
-						remotes[remote.ContextPath] = remote
-					}
 
+					// Remove invalid plugins which have either been removed or the version no longer exists
 					if managerOptions.UpdateAll {
-						extensions = append(extensions, fmt.Sprintf("%s@latest", name))
+						extensions = append(extensions, fmt.Sprintf("%s@latest", remote.ContextPath))
+					} else if managerOptions.RemoveInvalid {
+						// Add to the extensions list as these will be validated afterwards
+						extensions = append(extensions, remote.Key())
+					} else {
+						remotes[remote.ContextPath] = remote
 					}
 					return true
 				})
 			}
 		}
 
-		// Add plugins
+		// Add plugins (only valid)
 		for _, nameVersion := range extensions {
 			name, versionOrTag, _ := strings.Cut(nameVersion, "@")
 			matches, err := c8yfetcher.FindUIPlugins(f, []string{name}, true, "", true)
 			if err != nil {
 				return err
 			}
-			for _, ref := range matches {
-				if ext, ok := ref.Data.Value.(gjson.Result); ok {
-					if err := buildUIRemotes(remotes, ext, versionOrTag); err != nil {
-						return err
+			if len(matches) > 0 {
+				for _, ref := range matches {
+					if ext, ok := ref.Data.Value.(gjson.Result); ok {
+						if err := buildUIRemotes(remotes, ext, versionOrTag); err != nil {
+							if managerOptions.RemoveInvalid {
+								// ignore error
+								log.Warnf("Removing reference to revoked plugin version: name=%s, version=%s, remote=%s", ext.Get("name").String(), versionOrTag, nameVersion)
+								continue
+							}
+							return err
+						}
 					}
 				}
+			} else if managerOptions.RemoveInvalid {
+				// ignore error
+				log.Warnf("Removing reference to orphaned plugin: remote=%s", nameVersion)
+				continue
 			}
 		}
 

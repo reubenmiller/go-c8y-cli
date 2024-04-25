@@ -56,6 +56,7 @@ func NewCmdUpdate(f *cmdutil.Factory) *plugins.PluginCmd {
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("application", "application", false, "id"),
+		flags.WithSemanticMethod("PUT"),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("application")

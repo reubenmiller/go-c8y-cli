@@ -213,6 +213,14 @@ The list of UI plugins installed in an application can also be swapped out entir
 c8y ui applications plugins replace --application devicemanagement --plugin myplugin --plugin another --plugin cloud-http-proxy
 ```
 
+### Remove orphaned or revoked plugins from an application
+
+Plugins and their versions can be removed at anytime, so sometimes an application will have references to plugins that don't exist, or a version that has been revoked/removed. These orphaned and revoked plugins can be removed using:
+
+```sh
+c8y ui applications plugins delete --application devicemanagement --invalid
+```
+
 ### Remove all plugins from an application
 
 Deleting all plugins from an existing application is done using:
