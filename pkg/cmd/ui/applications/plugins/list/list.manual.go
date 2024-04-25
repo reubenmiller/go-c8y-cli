@@ -46,7 +46,7 @@ func NewCmd(f *cmdutil.Factory) *CmdList {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringVar(&ccmd.Application, "application", "", "Application")
+	cmd.Flags().StringVar(&ccmd.Application, "application", "", "Application (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,

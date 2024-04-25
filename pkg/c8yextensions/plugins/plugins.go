@@ -1,10 +1,12 @@
 package plugins
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
@@ -119,7 +121,7 @@ func NewPluginRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, mana
 			return err
 		}
 
-		log, err := f.Logger()
+		client, err := f.Client()
 		if err != nil {
 			return err
 		}
@@ -129,125 +131,6 @@ func NewPluginRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, mana
 			cmd,
 			flags.WithRuntimePipelineProperty(),
 		)
-
-		client, err := f.Client()
-		if err != nil {
-			return err
-		}
-
-		// Lookup application where the extension will be applied to
-		// TODO: Check if the user is trying to update an extension that is owned by another tenant
-		refs, err := c8yfetcher.FindHostedApplications(f, []string{managerOptions.Application}, true, "", true)
-		if err != nil || len(refs) == 0 {
-			return fmt.Errorf("failed to find hosted application. %s", err)
-		}
-
-		var app gjson.Result
-		if v, ok := refs[0].Data.Value.(gjson.Result); ok {
-			app = v
-		} else {
-			_, resp, err := client.Application.GetApplication(context.Background(), refs[0].ID)
-			if err != nil {
-				return err
-			}
-			app = resp.JSON()
-		}
-
-		remotes := make(map[string]ExtensionReference)
-
-		extensions := make([]string, 0)
-		extensions = append(extensions, managerOptions.Add...)
-
-		if !managerOptions.ReplaceAll {
-			// Get existing remotes
-			if existingRemotes := app.Get("config.remotes"); existingRemotes.Exists() && existingRemotes.IsObject() {
-				existingRemotes.ForEach(func(key, value gjson.Result) bool {
-					name, version, valid := strings.Cut(key.String(), "@")
-
-					if !valid {
-						return true
-					}
-
-					remote := ExtensionReference{
-						ContextPath: name,
-						Version:     version,
-						Modules:     []string{},
-					}
-
-					if value.IsArray() {
-						value.ForEach(func(idx, value gjson.Result) bool {
-							remote.Modules = append(remote.Modules, value.String())
-							return true
-						})
-					}
-
-					// Remove invalid plugins which have either been removed or the version no longer exists
-					if managerOptions.UpdateAll {
-						extensions = append(extensions, fmt.Sprintf("%s@latest", remote.ContextPath))
-					} else if managerOptions.RemoveInvalid {
-						// Add to the extensions list as these will be validated afterwards
-						extensions = append(extensions, remote.Key())
-					} else {
-						remotes[remote.ContextPath] = remote
-					}
-					return true
-				})
-			}
-		}
-
-		// Add plugins (only valid)
-		for _, nameVersion := range extensions {
-			name, versionOrTag, _ := strings.Cut(nameVersion, "@")
-			matches, err := c8yfetcher.FindUIPlugins(f, []string{name}, true, "", true)
-			if err != nil {
-				return err
-			}
-			if len(matches) > 0 {
-				for _, ref := range matches {
-					if ext, ok := ref.Data.Value.(gjson.Result); ok {
-						if err := buildUIRemotes(remotes, ext, versionOrTag); err != nil {
-							if managerOptions.RemoveInvalid {
-								// ignore error
-								log.Warnf("Removing reference to revoked plugin version: name=%s, version=%s, remote=%s", ext.Get("name").String(), versionOrTag, nameVersion)
-								continue
-							}
-							return err
-						}
-					}
-				}
-			} else if managerOptions.RemoveInvalid {
-				// ignore error
-				log.Warnf("Removing reference to orphaned plugin: remote=%s", nameVersion)
-				continue
-			}
-		}
-
-		// Remove plugins
-		for _, nameVersion := range managerOptions.Remove {
-			name, _, _ := strings.Cut(nameVersion, "@")
-			matches, err := c8yfetcher.FindUIPlugins(f, []string{name}, true, "", true)
-			if err != nil {
-				return err
-			}
-			for _, ref := range matches {
-				if ext, ok := ref.Data.Value.(gjson.Result); ok {
-					delete(remotes, ext.Get("contextPath").String())
-				}
-			}
-		}
-
-		body := mapbuilder.NewInitializedMapBuilder(true)
-
-		// Get existing config
-		if v := app.Get("config"); v.Exists() && v.IsObject() {
-			body = mapbuilder.NewMapBuilderWithInit([]byte(app.Get("config").Str))
-		}
-
-		// Allow the template values to override values provided by the --extension flags
-		body.SetAppendTemplatePreference(true)
-
-		body.Set("id", app.Get("id").String())
-		body.Set("config.remotes", formatApplicationRemotes(remotes))
 
 		inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
 		if err != nil {
@@ -297,6 +180,8 @@ func NewPluginRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, mana
 		}
 
 		// body
+		body := mapbuilder.NewInitializedMapBuilder(true)
+		body.SetAppendTemplatePreference(true)
 		err = flags.WithBody(
 			cmd,
 			body,
@@ -304,34 +189,202 @@ func NewPluginRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, mana
 			flags.WithDataFlagValue(),
 			cmdutil.WithTemplateValue(f),
 			flags.WithTemplateVariablesValue(),
-			flags.WithRequiredProperties("config.remotes"),
 		)
 		if err != nil {
 			return cmderrors.NewUserError(err)
 		}
 
 		// path parameters
-		path := flags.NewStringTemplate("/application/applications/" + refs[0].ID)
+		path := flags.NewStringTemplate("/application/applications/{application}")
 		err = flags.WithPathParameters(
 			cmd,
 			path,
 			inputIterators,
+			c8yfetcher.WithHostedApplicationByNameFirstMatch(f, args, "application", "application"),
 		)
 		if err != nil {
 			return err
 		}
 
 		req := c8y.RequestOptions{
-			Method:       "PUT",
-			Path:         path.GetTemplate(),
-			Query:        queryValue,
-			Body:         body,
-			FormData:     formData,
-			Header:       headers,
-			IgnoreAccept: cfg.IgnoreAcceptHeader(),
-			DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+			Method:                 "PUT",
+			Path:                   path.GetTemplate(),
+			Query:                  queryValue,
+			Body:                   body,
+			FormData:               formData,
+			Header:                 headers,
+			PrepareRequest:         prepareBody(f, managerOptions),
+			PrepareRequestOnDryRun: true,
+			IgnoreAccept:           cfg.IgnoreAcceptHeader(),
+			DryRun:                 cfg.ShouldUseDryRun(cmd.CommandPath()),
 		}
 
 		return f.RunWithWorkers(client, cmd, &req, inputIterators)
+	}
+}
+
+func buildBody(f *cmdutil.Factory, applicationID string, managerOptions *PluginCmd, inputBody io.ReadCloser) (io.Reader, error) {
+
+	client, err := f.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	log, err := f.Logger()
+	if err != nil {
+		return nil, err
+	}
+
+	// Lookup application where the extension will be applied to
+	// TODO: Check if the user is trying to update an extension that is owned by another tenant
+	refs, err := c8yfetcher.FindHostedApplications(f, []string{applicationID}, true, "", true)
+	if err != nil || len(refs) == 0 {
+		return nil, fmt.Errorf("failed to find hosted application. %s", err)
+	}
+
+	var app gjson.Result
+	if v, ok := refs[0].Data.Value.(gjson.Result); ok {
+		app = v
+	} else {
+		_, resp, err := client.Application.GetApplication(context.Background(), refs[0].ID)
+		if err != nil {
+			return nil, err
+		}
+		app = resp.JSON()
+	}
+
+	remotes := make(map[string]ExtensionReference)
+
+	extensions := make([]string, 0)
+	extensions = append(extensions, managerOptions.Add...)
+
+	if !managerOptions.ReplaceAll {
+		// Get existing remotes
+		if existingRemotes := app.Get("config.remotes"); existingRemotes.Exists() && existingRemotes.IsObject() {
+			existingRemotes.ForEach(func(key, value gjson.Result) bool {
+				name, version, valid := strings.Cut(key.String(), "@")
+
+				if !valid {
+					return true
+				}
+
+				remote := ExtensionReference{
+					ContextPath: name,
+					Version:     version,
+					Modules:     []string{},
+				}
+
+				if value.IsArray() {
+					value.ForEach(func(idx, value gjson.Result) bool {
+						remote.Modules = append(remote.Modules, value.String())
+						return true
+					})
+				}
+
+				// Remove invalid plugins which have either been removed or the version no longer exists
+				if managerOptions.UpdateAll {
+					extensions = append(extensions, fmt.Sprintf("%s@latest", remote.ContextPath))
+				} else if managerOptions.RemoveInvalid {
+					// Add to the extensions list as these will be validated afterwards
+					extensions = append(extensions, remote.Key())
+				} else {
+					remotes[remote.ContextPath] = remote
+				}
+				return true
+			})
+		}
+	}
+
+	// Add plugins (only valid)
+	for _, nameVersion := range extensions {
+		name, versionOrTag, _ := strings.Cut(nameVersion, "@")
+		matches, err := c8yfetcher.FindUIPlugins(f, []string{name}, true, "", true)
+		if err != nil {
+			return nil, err
+		}
+		if len(matches) > 0 {
+			for _, ref := range matches {
+				if ext, ok := ref.Data.Value.(gjson.Result); ok {
+					if err := buildUIRemotes(remotes, ext, versionOrTag); err != nil {
+						if managerOptions.RemoveInvalid {
+							// ignore error
+							log.Warnf("Removing reference to revoked plugin version: name=%s, version=%s, remote=%s", ext.Get("name").String(), versionOrTag, nameVersion)
+							continue
+						}
+						return nil, err
+					}
+				}
+			}
+		} else if managerOptions.RemoveInvalid {
+			// ignore error
+			log.Warnf("Removing reference to orphaned plugin: remote=%s", nameVersion)
+			continue
+		}
+	}
+
+	// Remove plugins
+	for _, nameVersion := range managerOptions.Remove {
+		name, _, _ := strings.Cut(nameVersion, "@")
+		matches, err := c8yfetcher.FindUIPlugins(f, []string{name}, true, "", true)
+		if err != nil {
+			return nil, err
+		}
+		for _, ref := range matches {
+			if ext, ok := ref.Data.Value.(gjson.Result); ok {
+				delete(remotes, ext.Get("contextPath").String())
+			}
+		}
+	}
+
+	// Create a new body which merges the retrieved plugin info, and any given templates
+	currentBody, err := io.ReadAll(inputBody)
+	if err != nil {
+		return nil, err
+	}
+
+	body := mapbuilder.NewInitializedMapBuilder(true)
+
+	// Get existing config
+	if v := app.Get("config"); v.Exists() && v.IsObject() {
+		// body.AppendTemplate(app.Get("config").Str)
+		body = mapbuilder.NewMapBuilderWithInit([]byte(app.Get("config").Str))
+	}
+
+	// HACK: Perform a deep merge by using the jsonnet "+:" operator
+	// This is required because the original template has already be converted to json
+	// thus losing information
+	body.AppendTemplate(string(convertToJsonnetDeepMerge(currentBody)))
+	body.SetAppendTemplatePreference(true)
+
+	body.Set("id", app.Get("id").String())
+	body.Set("config.remotes", formatApplicationRemotes(remotes))
+	body.SetRequiredKeys("config.remotes")
+
+	tmpBody, err := body.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes.NewBuffer(tmpBody), nil
+}
+
+func convertToJsonnetDeepMerge(s []byte) []byte {
+	re := regexp.MustCompile(`:(\s*){`)
+	return re.ReplaceAll(s, []byte(`+:$1{`))
+}
+
+func prepareBody(f *cmdutil.Factory, managerOptions *PluginCmd) func(r *http.Request) (*http.Request, error) {
+	return func(r *http.Request) (*http.Request, error) {
+		var applicationID string
+		if i := strings.LastIndex(r.URL.Path, "/"); i > -1 {
+			applicationID = r.URL.Path[i+1:]
+		}
+
+		body, err := buildBody(f, applicationID, managerOptions, r.Body)
+		if err != nil {
+			return r, err
+		}
+		r.Body = io.NopCloser(body)
+		return r, nil
 	}
 }

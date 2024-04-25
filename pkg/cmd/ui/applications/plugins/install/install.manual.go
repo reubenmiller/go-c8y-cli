@@ -40,7 +40,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringVar(&ccmd.Application, "application", "", "Application")
+	cmd.Flags().StringVar(&ccmd.Application, "application", "", "Application (required) (accepts pipeline)")
 	cmd.Flags().StringSliceVar(&ccmd.Add, "plugin", []string{}, "UI plugin to be installed")
 
 	completion.WithOptions(
@@ -58,7 +58,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 		flags.WithSemanticMethod("POST"),
 	)
 
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("application")
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

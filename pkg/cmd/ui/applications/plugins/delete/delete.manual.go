@@ -43,7 +43,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringVar(&ccmd.Application, "application", "", "Application")
+	cmd.Flags().StringVar(&ccmd.Application, "application", "", "Application (required) (accepts pipeline)")
 	cmd.Flags().StringSliceVar(&ccmd.Remove, "plugin", []string{}, "UI plugin to be removed")
 	cmd.Flags().BoolVar(&ccmd.ReplaceAll, "all", false, "Delete all UI plugins")
 	cmd.Flags().BoolVar(&ccmd.RemoveInvalid, "invalid", false, "Remove orphaned or revoked plugins")
@@ -63,7 +63,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 		flags.WithSemanticMethod("DELETE"),
 	)
 
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("application")
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

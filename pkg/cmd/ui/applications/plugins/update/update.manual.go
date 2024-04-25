@@ -40,7 +40,7 @@ func NewCmdUpdate(f *cmdutil.Factory) *plugins.PluginCmd {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringVar(&ccmd.Application, "application", "", "Application")
+	cmd.Flags().StringVar(&ccmd.Application, "application", "", "Application (required) (accepts pipeline)")
 	cmd.Flags().StringSliceVar(&ccmd.Add, "plugin", []string{}, "UI plugins to be update in an application")
 	cmd.Flags().BoolVar(&ccmd.UpdateAll, "all", false, "Update all ui plugins to the latest version")
 
@@ -59,7 +59,7 @@ func NewCmdUpdate(f *cmdutil.Factory) *plugins.PluginCmd {
 		flags.WithSemanticMethod("PUT"),
 	)
 
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("application")
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
