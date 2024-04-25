@@ -7,27 +7,27 @@ config:
 tests:
     Create hosted (web) application overriding an existing application:
         command: |
-          c8y applications createHostedApplication --name devicemanagement --dry
+          c8y applications createHostedApplication --name cockpit --dry
         exit-code: 0
         stdout:
             json:
                 method: POST
                 path: /application/applications
-                body.name: devicemanagement
-                body.contextPath: devicemanagement
-                body.key: devicemanagement-application-key
+                body.name: cockpit
+                body.contextPath: cockpit
+                body.key: cockpit-application-key
                 body.type: HOSTED
                 body.resourcesUrl: /
 
     Create hosted (web) application from folder:
         command: |
-          c8y applications createHostedApplication --name devicemanagement --file "./manual/applications/createHostedApplication/simple-helloworld" --dry --skipUpload
+          c8y applications createHostedApplication --name cockpit --file "./manual/applications/createHostedApplication/simple-helloworld" --dry --skipUpload
         exit-code: 0
         stdout:
             json:
                 method: POST
                 path: /application/applications
-                body.name: devicemanagement
+                body.name: cockpit
                 body.contextPath: custom-app
                 body.key: custom-app-key
                 body.type: HOSTED
