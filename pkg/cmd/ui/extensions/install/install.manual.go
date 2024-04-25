@@ -177,8 +177,6 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	body := mapbuilder.NewInitializedMapBuilder(true)
-
 	// Lookup application where the extension will be applied to
 	// TODO: Check if the user is trying to update an extension that is owned by another tenant
 	refs, err := c8yfetcher.FindHostedApplications(n.factory, []string{n.application}, true, "", true)
@@ -249,6 +247,8 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 			}
 		}
 	}
+
+	body := mapbuilder.NewInitializedMapBuilder(true)
 
 	// Get existing config
 	if v := app.Get("config"); v.Exists() && v.IsObject() {
