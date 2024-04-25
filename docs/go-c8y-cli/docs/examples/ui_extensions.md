@@ -177,9 +177,9 @@ UI extensions can be installed into UI applications using the `c8y ui extensions
 
 The follow sections detail the common use-cases.
 
-### Adding an extension
+### Installing an extension
 
-A new extension can be added to an application. Any existing extensions already installed in the application will not be modified.
+A new extension can be added to an existing UI application using the following command. The command will preserve any existing extensions, and it will only add a new one (or update the version if already installed).
 
 ```sh
 c8y ui extensions install --application devicemanagement --extension myext
@@ -191,7 +191,7 @@ By default the `latest` version is chosen, but a version or tag can be provided 
 c8y ui extensions install --application devicemanagement --extension myext@latest
 ```
 
-Or install an explicit version:
+Or install an explicit extension version:
 
 ```sh
 c8y ui extensions install --application devicemanagement --extension myext@1.2.3
@@ -220,4 +220,3 @@ Similar to the previous example, you can also remove all extensions by also usin
 ```sh
 c8y ui extensions install --application devicemanagement --replace
 ```
-
