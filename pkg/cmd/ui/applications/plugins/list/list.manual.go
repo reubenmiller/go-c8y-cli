@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -14,6 +15,33 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )
+
+// Custom plugin output format
+type PluginReference struct {
+	ID          string         `json:"id,omitempty"`
+	Name        string         `json:"name,omitempty"`
+	Modules     []string       `json:"modules,omitempty"`
+	ContextPath string         `json:"contextPath,omitempty"`
+	Description string         `json:"description,omitempty"`
+	Version     string         `json:"version,omitempty"`
+	Plugin      map[string]any `json:"plugin,omitempty"`
+}
+
+func NewPluginReference(app gjson.Result, version string, modules []string) (*PluginReference, error) {
+
+	plugin := make(map[string]any)
+	jsonErr := json.Unmarshal([]byte(app.Raw), &plugin)
+
+	return &PluginReference{
+		ID:          app.Get("id").String(),
+		Name:        app.Get("name").String(),
+		Modules:     modules,
+		ContextPath: app.Get("contextPath").String(),
+		Description: app.Get("manifest.description").String(),
+		Version:     version,
+		Plugin:      plugin,
+	}, jsonErr
+}
 
 type CmdList struct {
 	*subcommand.SubCommand
@@ -89,10 +117,23 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	pluginRemotes := make([]string, 0)
+	pluginModules := make(map[string][]string)
 	if v, ok := matches[0].Data.Value.(gjson.Result); ok {
 		if remotes := v.Get("config.remotes"); remotes.Exists() {
 			remotes.ForEach(func(key, value gjson.Result) bool {
-				pluginRemotes = append(pluginRemotes, key.String())
+				pluginKey := key.String()
+				pluginRemotes = append(pluginRemotes, pluginKey)
+
+				if value.IsArray() {
+					pluginModules[pluginKey] = make([]string, 0)
+					value.ForEach(func(i, module gjson.Result) bool {
+						moduleName := module.String()
+						if moduleName != "" {
+							pluginModules[pluginKey] = append(pluginModules[pluginKey], moduleName)
+						}
+						return true
+					})
+				}
 				return true
 			})
 		}
@@ -128,21 +169,35 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
 
 	//
-	// Output plugins (if found)
+	// Output plugins (if found) as a custom data model (which reflects a similar view as presented in the UI)
+	//
 	for _, contextVersion := range pluginRemotes {
 		contextPath, version, ok := strings.Cut(contextVersion, "@")
 		if ok {
+			var reference *PluginReference
+			var referenceErr error
 			if i, found := localPluginLookup[contextPath]; found {
-				if err := n.factory.WriteJSONToConsole(cfg, cmd, "", []byte(localPlugins.Items[i].Raw)); err != nil {
-					return err
-				}
+				reference, referenceErr = NewPluginReference(localPlugins.Items[i], version, pluginModules[contextVersion])
 			} else if i, found := sharedPluginLookup[contextPath]; found {
-				if err := n.factory.WriteJSONToConsole(cfg, cmd, "", []byte(sharedPlugins.Items[i].Raw)); err != nil {
-					return err
-				}
+				reference, referenceErr = NewPluginReference(sharedPlugins.Items[i], version, pluginModules[contextVersion])
 			} else {
 				if !dryRun {
 					log.Warnf("could not find plugin. contextPath=%s, version=%s", contextPath, version)
+				}
+			}
+
+			if referenceErr != nil {
+				return referenceErr
+			}
+
+			if reference != nil {
+				referenceJSON, err := json.Marshal(reference)
+				if err != nil {
+					return err
+				}
+
+				if err := n.factory.WriteJSONToConsole(cfg, cmd, "", referenceJSON); err != nil {
+					return err
 				}
 			}
 		}
