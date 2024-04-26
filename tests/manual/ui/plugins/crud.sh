@@ -40,7 +40,7 @@ c8y ui plugins create --file "$VERSION1_URL" --name "$NAME"
 echo "Creating plugin from file"
 PLUGIN_FILE="${TEMP_DIR}/${NAME}.zip" 
 wget -O "$PLUGIN_FILE" "$VERSION2_URL"
-c8y ui plugins create --file "$PLUGIN_FILE" --tags latest
+c8y ui plugins create --file "$PLUGIN_FILE" --tags latest -v
 
 echo "List plugins"
 [ -n "$(c8y ui plugins list)" ]

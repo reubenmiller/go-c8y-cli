@@ -153,8 +153,8 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRI
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pquerna/otp v1.4.0 h1:wZvl1TIVxKRThZIBiwOOHOGP/1+nZyWBil9Y2XNEDzg=
 github.com/pquerna/otp v1.4.0/go.mod h1:dkJfzwRKNiegxyNb54X/3fLwhCynbMspSyWKnvi1AEg=
-github.com/reubenmiller/go-c8y v0.15.9 h1:IcsJq3QODhRzEq4VrFqm4H1CApRnjNtIHFDRlCtmXm0=
-github.com/reubenmiller/go-c8y v0.15.9/go.mod h1:5F2Z5V0A1dkaSva48iVxLUuDE866rvSe8zi3fAPxZ6Y=
+github.com/reubenmiller/go-c8y v0.15.10 h1:5ur5Fvt9Sab73fnIAPnE//GNax2HZvVPZ34tnncaa/0=
+github.com/reubenmiller/go-c8y v0.15.10/go.mod h1:5F2Z5V0A1dkaSva48iVxLUuDE866rvSe8zi3fAPxZ6Y=
 github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3 h1:v8Q77ObTxkm0Wj9iAjcc0VMLxqEzKIdAnaTNPzSiw8Q=
 github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3/go.mod h1:QidmUT4ebNVwyjKXAQgx9VFHxpOxBKWs32EEXaXnEfE=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=

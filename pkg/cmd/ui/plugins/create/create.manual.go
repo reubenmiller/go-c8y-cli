@@ -289,6 +289,9 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 			Tags:    n.tags,
 		},
 	})
+	if err != nil {
+		return err
+	}
 	n.factory.IOStreams.WaitForProgressIndicator()
 	commonOptions.ResultProperty = "-"
 	_, err = handler.ProcessResponse(response, err, nil, commonOptions)
