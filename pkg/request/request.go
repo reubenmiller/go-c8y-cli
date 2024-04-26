@@ -996,6 +996,10 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 	color.Unset()
 
 	if respError != nil {
+		// Don't double wrap errors
+		if userErr, ok := respError.(cmderrors.CommandError); ok {
+			return unfilteredSize, userErr
+		}
 		return unfilteredSize, cmderrors.NewServerError(resp, respError)
 	}
 	return unfilteredSize, nil

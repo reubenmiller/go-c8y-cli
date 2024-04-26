@@ -1,0 +1,9 @@
+tests:
+    applications/versions_create_Create a new application version:
+        command: c8y applications versions create --application 1234 --file "./testdata/myapp.zip" --version "2.0.0"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: POST
+                path: /application/applications/1234/versions

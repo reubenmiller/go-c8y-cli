@@ -75,7 +75,10 @@
         "usergroup[]" { "object[]"; break }
         "userself[]" { "object[]"; break }
         "application" { "object[]"; break }
+        "application_with_versions" { "object[]"; break }
         "applicationname" { "string"; break }
+        "uiplugin" { "object[]"; break }
+        "uipluginversion" { "object[]"; break }
         "attachment" { "string"; break }
         "binaryUploadURL" { "string"; break }
         "boolean" { "switch"; break }
@@ -87,6 +90,7 @@
         "dateto" { "string"; break }
         "directory" { "string"; break }
         "file" { "string"; break }
+        "formDataFile" { "string"; break }
         "fileContents" { "string"; break }
         "firmwareName" { "object[]"; break }
         "firmwarepatchName" { "object[]"; break }

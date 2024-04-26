@@ -180,6 +180,10 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 		return completion.WithMicroservice(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "microserviceinstance":
 		return completion.WithMicroserviceInstance(p.Name, p.GetDependentProperty(0, "id"), func() (*c8y.Client, error) { return factory.Client() })
+	case "uiplugin":
+		return completion.WithUIPlugin(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+	case "uipluginversion":
+		return completion.WithUIPluginVersion(p.Name, p.GetDependentProperty(0, "plugin"), func() (*c8y.Client, error) { return factory.Client() })
 	case "role[]", "roleself[]":
 		return completion.WithUserRole(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "devicerequest", "devicerequest[]":
@@ -276,7 +280,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		cmd.Command.Flags().StringSliceP(p.Name, p.ShortName, []string{p.Default}, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "id")
 
-	case "application", "applicationname", "hostedapplication", "microservice", "microserviceinstance":
+	case "application", "applicationname", "hostedapplication", "microservice", "microserviceinstance", "uiplugin", "uipluginversion":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "id")
 
@@ -355,6 +359,8 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	switch p.Type {
 	case "file":
 		opts = append(opts, flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(factory), p.Name, flags.FlagDataName)...)
+	case "formDataFile":
+		opts = append(opts, flags.WithFileReader(p.Name, targetProp))
 	case "attachment":
 		opts = append(opts, flags.WithFormDataFile(p.Name, flags.FlagDataName)...)
 
@@ -392,7 +398,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "inventoryChildType":
 		opts = append(opts, flags.WithInventoryChildType(p.Name, targetProp, p.Format))
 
-	case "string", "source", "tenantname", "devicerequest", "subscriptionName", "subscriptionId", "applicationname", "microserviceinstance", "microservicename", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName":
+	case "string", "source", "tenantname", "devicerequest", "subscriptionName", "subscriptionId", "applicationname", "microserviceinstance", "microservicename", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "uipluginversion":
 		opts = append(opts, flags.WithStringValue(p.Name, targetProp, p.Format))
 
 	case "stringStatic":
@@ -423,6 +429,9 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 
 	case "microservice":
 		opts = append(opts, c8yfetcher.WithMicroserviceByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+
+	case "uiplugin":
+		opts = append(opts, c8yfetcher.WithUIPluginByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "software[]":
 		opts = append(opts, c8yfetcher.WithSoftwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))

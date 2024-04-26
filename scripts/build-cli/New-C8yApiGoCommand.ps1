@@ -193,6 +193,9 @@
         $ArgType = $iArg.type
         switch ($ArgType) {
             { @("application", "applicationname") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("application_with_versions") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithApplicationWithVersions(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("uiplugin") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithUIPlugin(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            { @("uipluginversion") -contains $_ } { [void] $CompletionBuilderOptions.AppendLine("completion.WithUIPluginVersion(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "hostedapplication" { [void] $CompletionBuilderOptions.AppendLine("completion.WithHostedApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "microservice" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "microservicename" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
@@ -267,6 +270,7 @@
     # Body
     #
     $GetBodyContents = "body"
+    $IsFormData = $false
     
     if ($Specification.body) {
         switch ($Specification.bodyContent.type) {
@@ -276,7 +280,7 @@
             }
             "formdata" {
                 $GetBodyContents = "body"
-                break
+                $IsFormData = $true
             }
             default {
                 $GetBodyContents = "body"
@@ -294,16 +298,25 @@
                 }
             }
 
+            if ($iArg.options -and $iArg.options.formData) {
+                $null = $RESTFormDataBuilderOptions.AppendLine("Append(flags.WithFormDataProperty(`"{0}`"))." -f $iArg.options.formData)
+            }
+
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
             if ($code) {
                 switch -Regex ($code) {
                     "^flags\.WithFormData" {
-                        $null = $RESTFormDataBuilderOptions.AppendLine($code)
+                        # $null = $RESTFormDataBuilderOptions.AppendLine($code)
+                        $null = $RESTFormDataBuilderOptions.AppendLine("Append({0}...)." -f $code.TrimEnd(',').TrimEnd('.'))
                         break
                     }
 
                     "^(flags\.|c8yfetcher\.|With|c8ybinary\.)" {
-                        $null = $RESTBodyBuilderOptions.AppendLine($code)
+                        if ($IsFormData) {
+                            $null = $RESTFormDataBuilderOptions.AppendLine("Append({0})." -f $code.TrimEnd(','))
+                        } else {
+                            $null = $RESTBodyBuilderOptions.AppendLine($code)
+                        }
                         break
                     }
 
@@ -362,8 +375,13 @@
         # Add support for user defined templates to control body
         #
         if ($Specification.bodyTemplates.type -ne "none") {
-            $null = $RESTBodyBuilderOptions.AppendLine("cmdutil.WithTemplateValue(n.factory),")
-            $null = $RESTBodyBuilderOptions.AppendLine("flags.WithTemplateVariablesValue(),")
+            if ($IsFormData) {
+                $null = $RESTFormDataBuilderOptions.AppendLine("Append({0})." -f "cmdutil.WithTemplateValue(n.factory)")
+                $null = $RESTFormDataBuilderOptions.AppendLine("Append({0})." -f "flags.WithTemplateVariablesValue()")
+            } else {
+                $null = $RESTBodyBuilderOptions.AppendLine("cmdutil.WithTemplateValue(n.factory),")
+                $null = $RESTBodyBuilderOptions.AppendLine("flags.WithTemplateVariablesValue(),")
+            }
         }
 
         if ($Specification.bodyRequiredKeys) {
@@ -707,8 +725,15 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     err = flags.WithFormDataOptions(
 		cmd,
         formData,
-        inputIterators,
-		$RESTFormDataBuilderOptions
+        inputIterators,$(
+            if ($RESTFormDataBuilderOptions.Length -gt 0) {
+                @"
+                flags.WithOptionBuilder().
+                    $RESTFormDataBuilderOptions
+                Build()...
+"@
+            }
+        )
     )
     if err != nil {
 		return cmderrors.NewUserError(err)
@@ -752,6 +777,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         $RequestOptionsBuilder
     }
     $PostActionOptions
+    $(Get-FlagConstraints $Specification)
 
     return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
 }
@@ -764,6 +790,64 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 
 	# Auto format code (using goimports as it removes unused imports)
 	& goimports -w $File
+}
+
+Function Get-FlagConstraints {
+    [cmdletbinding()]
+    Param(
+        $spec
+    )
+
+    if ($null -ne $spec.constraints)
+    {
+        $lines = foreach ($flagGroup in $spec.constraints)
+        {
+            if ($flagGroup.type -eq "queryParameters")
+            {
+                # one required
+                if ($null -ne $flagGroup.oneRequired)
+                {
+                    $_prefix = ""
+                    $rawValue = foreach ($item in $flagGroup.oneRequired) {
+                        "$_prefix`"$item`""
+                        $_prefix = ", "
+                    }
+                    "flags.WithQueryParameterOneRequired($rawValue),`n"
+                    # "cmd.MarkFlagsOneRequired($rawValue)`n"
+                }
+
+                # mutually exclusive
+                if ($null -ne $flagGroup.mutuallyExclusive)
+                {
+                    $_prefix = ""
+                    $rawValue = foreach ($item in $flagGroup.mutuallyExclusive) {
+                        "$_prefix`"$item`""
+                        $_prefix = ", "
+                    }
+                    "flags.WithQueryParameterMutuallyExclusive($rawValue),`n"
+                    # "cmd.MarkFlagsMutuallyExclusive($rawValue)`n"
+                }
+
+                # required Together
+                if ($null -ne $flagGroup.requiredTogether)
+                {
+                    $_prefix = ""
+                    $rawValue = foreach ($item in $flagGroup.requiredTogether) {
+                        "$_prefix`"$item`""
+                        $_prefix = ", "
+                    }
+                    "flags.WithQueryParameterRequiredTogether($rawValue),`n"
+                    # "cmd.MarkFlagsRequiredTogether($rawValue)`n"
+                }
+            }
+        }
+        if ($lines)
+        {
+            "req.WithValidateFunc(`n"
+                $lines
+            ")`n"
+        }
+    }
 }
 
 Function Remove-SkippedParameters {
@@ -1061,7 +1145,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        {$_ -in "application", "applicationname", "hostedapplication"} {
+        {$_ -in "application", "applicationname", "hostedapplication", "application_with_versions", "uiplugin", "uipluginversion"} {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {
@@ -1219,6 +1303,18 @@ Function Get-C8yGoArgs {
         }
 
         "file" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "formDataFile" {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {

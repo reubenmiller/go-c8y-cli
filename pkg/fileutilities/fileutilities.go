@@ -1,7 +1,10 @@
 package fileutilities
 
 import (
+	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
@@ -43,4 +46,47 @@ func CreateDirs(p string) error {
 		}
 	}
 	return nil
+}
+
+var ErrInvalid = errors.New("invalid file destination")
+
+// Copy copies src to dst like the cp command.
+func CopyFile(dst, src string) error {
+	if dst == src {
+		return ErrInvalid
+	}
+
+	srcF, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcF.Close()
+
+	info, err := srcF.Stat()
+	if err != nil {
+		return err
+	}
+
+	dstF, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, info.Mode())
+	if err != nil {
+		return err
+	}
+	defer dstF.Close()
+
+	if _, err := io.Copy(dstF, srcF); err != nil {
+		return err
+	}
+	return nil
+}
+
+// DownloadFile download a file from a public url
+func DownloadFile(u string, out io.WriteCloser) error {
+	defer out.Close()
+	resp, err := http.Get(u)
+	if err != nil {
+		return fmt.Errorf("failed to download extension from url. %w", err)
+	}
+	defer resp.Body.Close()
+	_, err = io.Copy(out, resp.Body)
+	return err
 }

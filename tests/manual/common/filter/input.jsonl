@@ -1,2 +1,2 @@
-{"id": "1", "name": "device01", "type": "c8yci_Example", "c8y_Example": {}, "values": [0, 1, 2], "floatValue": 1.234, "intValue": 100}
-{"id": "2", "name": "device02", "type": "c8yci_Example", "c8y_Example": {}, "values": [0, 1, 2], "floatValue": 1.234, "intValue": 100}
+{"id": "1", "name": "device01", "type": "c8yci_Example", "c8y_Example": {}, "values": [0, 1, 2], "tags": ["latest","stable1"], "floatValue": 1.234, "intValue": 100}
+{"id": "2", "name": "device02", "type": "c8yci_Example", "c8y_Example": {}, "values": [0, 1, 2], "tags": ["stable2"], "floatValue": 1.234, "intValue": 100}

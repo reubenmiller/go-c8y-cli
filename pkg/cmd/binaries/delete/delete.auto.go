@@ -55,7 +55,7 @@ Delete a binary
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("id", "id", true, "id", "binaryId"),
 	)
 
 	// Required flags

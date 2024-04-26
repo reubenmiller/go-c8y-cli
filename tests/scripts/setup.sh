@@ -255,7 +255,7 @@ create_devicecert () {
     local name="$1"
 
     c8y devicemanagement certificates get -n --id "$name" --silentStatusCodes 404 ||
-        c8y devicemanagement certificates create -n --name "$name" --file tests/testdata/trustedcert.pem
+        c8y devicemanagement certificates create -n --name "$name" --file tests/testdata/trustedcert.pem --silentStatusCodes 409 --silentExit
 }
 
 # Remove cache to avoid stale/invalid cache which makes debugging tests very difficult

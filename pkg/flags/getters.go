@@ -994,6 +994,9 @@ func WithInventoryChildType(opts ...string) GetOption {
 
 		formatter := func(input string) string {
 			v := strings.ToLower(applyFormatter(format, input))
+			if v == "" {
+				return ""
+			}
 			output := "child" + strings.ToUpper(v[0:1]) + v[1:] + "s"
 			return output
 

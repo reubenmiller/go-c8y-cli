@@ -1,0 +1,9 @@
+tests:
+    ui/plugins_delete_Remove UI plugin:
+        command: c8y ui plugins delete --id "my-example-app"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: DELETE
+                path: r//application/applications/\d+$

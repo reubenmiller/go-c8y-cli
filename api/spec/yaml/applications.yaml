@@ -69,6 +69,14 @@ commands:
         type: boolean
         description: When set to true, the returned result contains applications with an applicationVersions field that is not empty. When set to false, the result will contain applications with an empty applicationVersions field.
 
+      - name: availability
+        type: string
+        description: Application access level for other tenants.
+        validationSet:
+          - SHARED
+          - PRIVATE
+          - MARKET
+
   - name: newApplication
     description: Create application
     descriptionLong: Create a new application using explicit settings

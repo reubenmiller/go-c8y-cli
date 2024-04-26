@@ -172,6 +172,10 @@
       "description": "Parameter name. It should start with a lower case character, and only include characters [a-zA-Z]",
       "pattern": "^[a-z][a-zA-Z]+$"
     },
+    "parameterOptions": {
+      "type": "object",
+      "description": "Parameter options"
+    },
     "dependsOn": {
       "type": "array",
       "title": "Parameter is depend on the list of parameters for completions or other lookups",
@@ -186,6 +190,7 @@
       "enum": [
         "application",
         "applicationname",
+        "application_with_versions",
         "hostedapplication",
         "boolean",
         "booleanDefault",
@@ -196,6 +201,7 @@
         "float",
         "fileContents",
         "attachment",
+        "formDataFile",
         "binaryUploadURL",
         "date",
         "datetime",
@@ -204,6 +210,8 @@
         "microservice",
         "microservicename",
         "microserviceinstance",
+        "uiplugin",
+        "uipluginversion",
         "queryExpression",
         "string",
         "stringStatic",
@@ -655,6 +663,42 @@
               ]
             }
           },
+          "constraints": {
+            "type": "array",
+            "title": "Flag constraints",
+            "description": "Additional constraints for a combination of flags",
+            "minItems": 0,
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "title": "Type of group",
+                  "enum": [
+                    "queryParameters"
+                  ]
+                },
+                "oneRequired":{
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "mutuallyExclusive":{
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "requiredTogether":{
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
           "bodyContent": {
             "type": "object",
             "description": "Description of body content",
@@ -742,6 +786,9 @@
                 },
                 "skip": {
                   "$ref": "#/definitions/skipParameter"
+                },
+                "options": {
+                  "$ref": "#/definitions/parameterOptions"
                 }
               },
               "required": [

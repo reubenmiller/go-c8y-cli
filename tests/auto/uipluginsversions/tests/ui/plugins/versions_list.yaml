@@ -1,0 +1,16 @@
+tests:
+    ui/plugins/versions_list_Get plugin versions:
+        command: c8y ui plugins versions list --plugin 1234 --pageSize 100
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications/1234/versions
+    ui/plugins/versions_list_Get versions by plugin name:
+        command: c8y ui plugins versions list --plugin mychart
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: r//application/applications/\d+/versions$

@@ -133,8 +133,9 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
-		inputIterators,
-		flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(n.factory), "file", "data")...,
+		inputIterators, flags.WithOptionBuilder().
+			Append(flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(n.factory), "file", "data")...).
+			Build()...,
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

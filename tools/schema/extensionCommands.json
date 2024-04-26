@@ -258,6 +258,7 @@
                 "devicerequest[]",
                 "deviceservice[]",
                 "file",
+                "formDataFile",
                 "fileContents",
                 "fileContentsAsString",
                 "firmware[]",
@@ -294,6 +295,8 @@
                 "subscriptionName",
                 "tenant",
                 "tenantname",
+                "uiplugin",
+                "uipluginversion",
                 "user[]",
                 "usergroup[]",
                 "userself[]"
