@@ -34,8 +34,7 @@ type CmdCreate struct {
 	availability string
 	contextPath  string
 	resourceURL  string
-	// TODO: Check if a new binary version needs to be activated or not
-	skipActivate bool
+	activate     bool
 	tags         []string
 }
 
@@ -83,8 +82,7 @@ func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 	cmd.Flags().StringVar(&ccmd.availability, "availability", "", "Access level for other tenants. Possible values are : MARKET, SHARED, PRIVATE (default)")
 	cmd.Flags().StringVar(&ccmd.contextPath, "contextPath", "", "contextPath of the hosted application. Required when application type is HOSTED")
 	cmd.Flags().StringVar(&ccmd.resourceURL, "resourcesUrl", "", "URL to application base directory hosted on an external server. Required when application type is HOSTED")
-	cmd.Flags().BoolVar(&ccmd.skipActivate, "skipActivate", false, "Skip activating the new version of the application")
-	cmd.Flags().StringSliceVar(&ccmd.tags, "tags", []string{}, "Tags")
+	cmd.Flags().StringSliceVar(&ccmd.tags, "tags", []string{}, "Tags. Include 'latest' to change the activeVersionId of the application")
 
 	completion.WithOptions(
 		cmd,
@@ -214,8 +212,6 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// TODO: Check if the user is trying to update an plugin that is owned by another tenant
-
 	// Check if file is a url
 	if ShouldDownload(n.file) {
 		if cfg.DryRun() {
@@ -278,8 +274,16 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		fileReader = bar.ProxyReader(file)
 	}
 
+	// Activate the tag if a tag includes 'latest'
+	for _, tag := range n.tags {
+		if strings.EqualFold(tag, "latest") {
+			n.activate = true
+			break
+		}
+	}
+
 	_, response, err := client.UIExtension.CreateExtension(ctx, &application.Application, fileReader, c8y.UpsertOptions{
-		SkipActivation: n.skipActivate,
+		SkipActivation: !n.activate,
 		Version: &c8y.ApplicationVersion{
 			Version: application.ManifestFile.Version,
 			Tags:    n.tags,
