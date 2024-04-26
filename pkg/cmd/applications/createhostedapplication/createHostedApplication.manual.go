@@ -9,10 +9,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/artifact"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
@@ -119,10 +119,7 @@ func (n *CmdCreateHostedApplication) getApplicationDetails(log *logger.Logger) (
 	app := Application{}
 
 	// set default name to the file name
-	baseFileName := filepath.Base(n.file)
-	baseFileName = baseFileName[0 : len(baseFileName)-len(filepath.Ext(baseFileName))]
-	versionRegex := regexp.MustCompile(`(-v?\d+\.\d+\.\d+(-SNAPSHOT)?)?$`)
-	appNameFromFile := versionRegex.ReplaceAllString(baseFileName, "")
+	appNameFromFile := artifact.ParseName(n.file)
 
 	// Set application properties
 

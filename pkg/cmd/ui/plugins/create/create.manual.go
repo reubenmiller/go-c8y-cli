@@ -7,10 +7,10 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/artifact"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -104,11 +104,8 @@ func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 func (n *CmdCreate) getApplicationDetails(client *c8y.Client, log *logger.Logger) (*c8y.UIExtension, error) {
 
 	// set default name to the file name
-	baseFileName := filepath.Base(n.file)
-	fileExt := filepath.Ext(baseFileName)
-	baseFileName = baseFileName[0 : len(baseFileName)-len(fileExt)]
-	versionRegex := regexp.MustCompile(`(-v?\d+\.\d+\.\d+(-SNAPSHOT)?)?$`)
-	appNameFromFile := versionRegex.ReplaceAllString(baseFileName, "")
+	appNameFromFile := artifact.ParseName(n.file)
+	fileExt := filepath.Ext(n.file)
 
 	// Set application properties
 	app, err := client.UIExtension.NewUIExtensionFromFile(n.file)
