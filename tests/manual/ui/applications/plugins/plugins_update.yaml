@@ -14,5 +14,5 @@ tests:
   
   It updates a single plugin:
     command: |
-      c8y ui applications plugins update --application cockpit --plugin "Advanced Map Plugin"
+      c8y ui applications plugins update --application cockpit --plugin "Cumulocity community plugins"
     exit-code: 0

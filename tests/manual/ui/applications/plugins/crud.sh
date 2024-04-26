@@ -7,6 +7,10 @@ export C8Y_SETTINGS_DEFAULTS_DRY=false
 PLUGIN_VERSION1_URL="https://github.com/thin-edge/tedge-container-plugin/releases/download/1.2.2/tedge-container-plugin-ui.zip"    # version=1.0.1
 PLUGIN_VERSION2_URL="https://github.com/thin-edge/tedge-container-plugin/releases/download/1.2.3/tedge-container-plugin-ui_1.0.2.zip"  # version=1.0.2
 
+# Note: The plugin must exist in the management tenant
+SHARED_PLUGIN_NAME="Cumulocity community plugins"
+SHARED_PLUGIN_CONTEXT_PATH="sag-pkg-community-plugins"
+
 fail() {
     echo "FAIL: $*"
     exit 1
@@ -67,17 +71,27 @@ echo "Checking installed plugins (should be empty)"
 # Install
 #
 echo "Installing plugins to UI application"
-c8y ui applications plugins install --application "$NAME" --plugin "Advanced Map Plugin@latest" --plugin "$PLUGIN_NAME"
+c8y ui applications plugins install --application "$NAME" --plugin "$SHARED_PLUGIN_NAME@latest" --plugin "$PLUGIN_NAME"
+
+echo "Installing unknown plugin version should fail"
+if c8y ui applications plugins update --application "$NAME" --plugin "$SHARED_PLUGIN_NAME@909.909.99"; then
+    fail "Installing unknown plugin versions should fail"
+fi
+
+echo "Installing unknown plugin version should fail"
+if c8y ui applications plugins update --application "$NAME" --plugin "Unknown Plugin"; then
+    fail "Installing unknown plugins should fail"
+fi
 
 echo "Checking installed plugins"
-[ "$(c8y ui applications plugins list --application "$NAME" --filter "name like 'Advanced Map Plugin'" --select name -o csv)" = "Advanced Map Plugin" ] || fail "'Advanced Map Plugin' should be included in the remotes"
+[ "$(c8y ui applications plugins list --application "$NAME" --filter "name like '$SHARED_PLUGIN_NAME'" --select name -o csv)" = "$SHARED_PLUGIN_NAME" ] || fail "'$SHARED_PLUGIN_NAME' should be included in the remotes"
 [ "$(c8y ui applications plugins list --application "$NAME" --filter "name like '$PLUGIN_NAME'" --select name -o csv)" = "$PLUGIN_NAME" ] || fail "'$PLUGIN_NAME' should be included in the remotes"
 [ "$(c8y ui applications plugins list --application "$NAME" | wc -l | xargs)" -eq 2 ] || fail "Expected 2 plugins"
 
 
 echo "Installing the same plugin should not add duplicate entries"
-c8y ui applications plugins install --application "$NAME" --plugin "Advanced Map Plugin@latest"
-[ "$(c8y ui applications plugins list --application "$NAME" --filter "name like 'Advanced Map Plugin'" | wc -l | xargs)" -eq 1 ] || fail "'Advanced Map Plugin' should only appear once"
+c8y ui applications plugins install --application "$NAME" --plugin "$SHARED_PLUGIN_NAME@latest"
+[ "$(c8y ui applications plugins list --application "$NAME" --filter "name like '$SHARED_PLUGIN_NAME'" | wc -l | xargs)" -eq 1 ] || fail "'$SHARED_PLUGIN_NAME' should only appear once"
 
 #
 # Update
@@ -111,20 +125,19 @@ assert_application_remotes_not_contains() {
 echo "Updating specific plugins"
 c8y ui applications plugins update --application "$NAME" --plugin "$PLUGIN_NAME"
 
-assert_application_remotes_contains "$NAME" "sag-ps-iot-pkg-advanced-map-widget-plugin@*" "$PLUGIN_NAME@1.0.1"
+assert_application_remotes_contains "$NAME" "$SHARED_PLUGIN_CONTEXT_PATH@*" "$PLUGIN_NAME@1.0.1"
 
 echo "Marking $PLUGIN_NAME 1.0.2 as the latest version"
 echo "$PLUGIN_NAME" | c8y ui plugins versions update --tags "latest" --version "1.0.2"
 
 echo "Updating all plugins"
 c8y ui applications plugins update --application "$NAME" --all
-assert_application_remotes_contains "$NAME" "sag-ps-iot-pkg-advanced-map-widget-plugin@*" "$PLUGIN_NAME@1.0.2"
+assert_application_remotes_contains "$NAME" "$SHARED_PLUGIN_CONTEXT_PATH@*" "$PLUGIN_NAME@1.0.2"
 
-# TODO: Should updating plugins which don't exist fail?
-# echo "Updating unknown plugins should fail"
-# if c8y ui applications plugins update --application "$NAME" --plugin "Invalid Plugin Example"; then
-#     fail "Updating unknown plugins should fail"
-# fi
+echo "Updating unknown plugins should fail"
+if c8y ui applications plugins update --application "$NAME" --plugin "Invalid Plugin Example"; then
+    fail "Updating unknown plugins should fail"
+fi
 
 #
 # Delete invalid plugins (both orphaned and revoked plugins and plugin versions)
@@ -147,8 +160,8 @@ assert_application_remotes_not_contains "$NAME" "manualplugin@1.0.0" "$PLUGIN_NA
 #
 # Delete
 #
-c8y ui applications plugins delete --application "$NAME" --plugin "Advanced Map Plugin" || fail "Failed to delete plugin"
-assert_application_remotes_not_contains "$NAME" "sag-ps-iot-pkg-advanced-map-widget-plugin"
+c8y ui applications plugins delete --application "$NAME" --plugin "$SHARED_PLUGIN_NAME" || fail "Failed to delete plugin"
+assert_application_remotes_not_contains "$NAME" "$SHARED_PLUGIN_CONTEXT_PATH"
 
 c8y ui applications plugins delete --application "$NAME" --all || fail "Failed to delete all plugins"
 [ -z "$(c8y ui applications plugins list --application "$NAME")" ] || fail "Plugin list should be empty"
@@ -163,7 +176,7 @@ c8y __complete ui applications plugins delete --application "$NAME" | grep id:
 
 c8y __complete ui applications plugins install --plugin "" | grep id:
 # Shared plugins should be included in the list
-c8y __complete ui applications plugins install --plugin "" | grep "Advanced Map Plugin"
+c8y __complete ui applications plugins install --plugin "" | grep "$SHARED_PLUGIN_NAME"
 
 
 c8y __complete ui applications plugins replace --plugin "" | grep id:

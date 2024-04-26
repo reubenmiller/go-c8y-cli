@@ -9,9 +9,9 @@ config:
 tests:
   It replaces all existing plugins:
     command: |
-      c8y ui applications plugins replace --application cockpit --plugin "Advanced Map Plugin@latest" --template "{config:{remotes:{'manualplugin@1.0.0':['Module1','Module2']}}}" --dry --dryFormat json \
+      c8y ui applications plugins replace --application cockpit --plugin "Cumulocity community plugins@latest" --template "{config:{remotes:{'manualplugin@1.0.0':['Module1','Module2']}}}" --dry --dryFormat json \
       | jq -r '.body.config.remotes | keys | @csv'
     exit-code: 0
     stdout:
       line-count: 1
-      match-pattern: '"manualplugin@1.0.0","sag-ps-iot-pkg-advanced-map-widget-plugin@\d+\.\d+\.\d+"'
+      match-pattern: '"manualplugin@1.0.0","sag-pkg-community-plugins@\d+\.\d+\.\d+(-.+)?"'
