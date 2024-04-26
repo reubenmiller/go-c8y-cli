@@ -86,7 +86,7 @@ Deleting a version can either be done by referencing the tag or version.
 <CodeExample transform="false">
 
 ```bash
-c8y ui plugins versions delete --plugin myplugin --version "1.0.0"
+c8y ui plugins versions delete --plugin myplugin --tag other
 ```
 
 </CodeExample>
@@ -96,7 +96,7 @@ c8y ui plugins versions delete --plugin myplugin --version "1.0.0"
 <CodeExample transform="false">
 
 ```bash
-c8y ui plugins versions delete --plugin myplugin --tag other
+c8y ui plugins versions delete --plugin myplugin --version "1.0.0"
 ```
 
 </CodeExample>
@@ -177,7 +177,7 @@ UI plugins can be installed into UI applications using the `c8y ui plugins insta
 
 The follow sections detail the common use-cases.
 
-### Installing a plugin
+### Install a plugin
 
 A new plugin can be added to an existing UI application using the following command. The command will preserve any existing plugins, and it will only add a new one (or update the version if already installed).
 
@@ -205,6 +205,13 @@ Existing UI plugins installed in an application can easily be updated using a si
 c8y ui applications plugins update --application devicemanagement --all
 ```
 
+You can update the plugins for all applications easily using:
+
+```sh
+c8y applications list --type HOSTED \
+| c8y ui applications plugins update --all
+```
+
 ### Replace all plugins with a new set of plugins
 
 The list of UI plugins installed in an application can also be swapped out entirely by replacing all of the existing plugins with a new set of plugins.
@@ -219,6 +226,13 @@ Plugins and their versions can be removed at anytime, so sometimes an applicatio
 
 ```sh
 c8y ui applications plugins delete --application devicemanagement --invalid
+```
+
+Or if you need to cleanup the invalid plugins for a list of applications, then you can the pipeline.
+
+```sh
+c8y applications list --type HOSTED --name "devicemanagement*" \
+| c8y ui applications plugins delete --application devicemanagement --invalid
 ```
 
 ### Remove all plugins from an application
