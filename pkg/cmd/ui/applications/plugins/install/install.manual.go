@@ -26,7 +26,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 			$ c8y ui applications plugins install --application devicemanagement --plugin myplugin@latest --plugin someother@1.2.3
 			Install multiple UI plugins to the devicemanagement application
 
-			$ c8y ui applications plugins install --application devicemanagement --plugin myplugin --template "{config+:{remotes+:{'other@1.0.0':[]}}}"
+			$ c8y ui applications plugins install --application devicemanagement --plugin myplugin --template "{config:{remotes:{'other@1.0.0':[]}}}"
 			Install myplugin via a lookup and add manual configuration using templates (for power users only!)
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

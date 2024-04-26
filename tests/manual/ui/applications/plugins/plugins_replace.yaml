@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+tests:
+  It replaces all existing plugins:
+    command: |
+      c8y ui applications plugins replace --application cockpit --plugin "Advanced Map Plugin@latest" --template "{config:{remotes:{'manualplugin@1.0.0':['Module1','Module2']}}}" --dry --dryFormat json \
+      | jq -r '.body.config.remotes | keys | @csv'
+    exit-code: 0
+    stdout:
+      line-count: 1
+      match-pattern: '"manualplugin@1.0.0","sag-ps-iot-pkg-advanced-map-widget-plugin@\d+\.\d+\.\d+"'
