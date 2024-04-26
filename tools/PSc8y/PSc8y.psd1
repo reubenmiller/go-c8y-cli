@@ -159,7 +159,6 @@ FunctionsToExport = @(
 	'Get-Event',
 	'Get-EventBinary',
 	'Get-EventCollection',
-	'Get-ExtensionVersion',
 	'Get-ExternalId',
 	'Get-ExternalIdCollection',
 	'Get-Firmware',
