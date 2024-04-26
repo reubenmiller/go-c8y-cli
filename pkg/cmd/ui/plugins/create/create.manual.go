@@ -127,8 +127,12 @@ func (n *CmdCreate) getApplicationDetails(client *c8y.Client, log *logger.Logger
 		app.Name = app.ManifestFile.Name
 	}
 
-	if !strings.EqualFold(fileExt, ".json") && strings.EqualFold(fileExt, ".zip") {
-		app.Name = appNameFromFile
+	// Don't derive plugin name when using a url, as URL's generally aren't editable, and it
+	// is usually an official plugin, so it should not depend on the url, but rather only the manifest name
+	if !strings.Contains(n.file, "://") {
+		if !strings.EqualFold(fileExt, ".json") && strings.EqualFold(fileExt, ".zip") {
+			app.Name = appNameFromFile
+		}
 	}
 
 	if n.name != "" {
@@ -179,6 +183,7 @@ func DownloadFile(u string, log *logger.Logger) (string, error) {
 	if fileErr != nil {
 		return "", fileErr
 	}
+	// Don't use the name from a file in this case. tedge-container-plugin-ui_1.0.2?
 	if downloadErr := fileutilities.DownloadFile(u, fTmpFile); downloadErr != nil {
 		return "", fmt.Errorf("could not download plugin. %w", downloadErr)
 	}
