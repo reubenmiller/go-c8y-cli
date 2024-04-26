@@ -146,7 +146,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithUIExtensionByNameFirstMatch(n.factory, args, "id", "id"),
+		c8yfetcher.WithUIPluginByNameFirstMatch(n.factory, args, "id", "id"),
 	)
 	if err != nil {
 		return err

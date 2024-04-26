@@ -660,8 +660,8 @@ func WithMicroserviceByNameFirstMatch(factory *cmdutil.Factory, args []string, o
 	}
 }
 
-// WithUIExtensionByNameFirstMatch add reference by name matching for UI extensions via cli args. Only the first match will be used
-func WithUIExtensionByNameFirstMatch(factory *cmdutil.Factory, args []string, opts ...string) flags.GetOption {
+// WithUIPluginByNameFirstMatch add reference by name matching for UI extensions via cli args. Only the first match will be used
+func WithUIPluginByNameFirstMatch(factory *cmdutil.Factory, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		fetch := NewUIPluginFetcher(factory)
 		fetch.EnableSharedPlugins = true

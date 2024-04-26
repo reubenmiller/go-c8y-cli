@@ -431,7 +431,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 		opts = append(opts, c8yfetcher.WithMicroserviceByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "uiplugin":
-		opts = append(opts, c8yfetcher.WithUIExtensionByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithUIPluginByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "software[]":
 		opts = append(opts, c8yfetcher.WithSoftwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))

@@ -122,7 +122,7 @@
         "microservicename" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # uiplugin
-        "uiplugin" = "c8yfetcher.WithUIExtensionByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
+        "uiplugin" = "c8yfetcher.WithUIPluginByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # uipluginversion
         "uipluginversion" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
