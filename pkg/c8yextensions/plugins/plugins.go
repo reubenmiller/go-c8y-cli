@@ -3,6 +3,7 @@ package plugins
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -79,7 +80,7 @@ func buildUIRemotes(out map[string]ExtensionReference, ext gjson.Result, version
 	})
 
 	if matchVersion == "" {
-		return fmt.Errorf("not match version found in extension. extension=%s, version=%s", ext.Get("name").String(), versionOrTag)
+		return cmderrors.NewUserError(fmt.Sprintf("plugin version not found. plugin=%s, version=%s", ext.Get("name").String(), versionOrTag))
 	}
 
 	remote := ExtensionReference{
@@ -258,6 +259,8 @@ func buildBody(f *cmdutil.Factory, applicationID string, managerOptions *PluginC
 	extensions := make([]string, 0)
 	extensions = append(extensions, managerOptions.Add...)
 
+	bodyErrors := make([]error, 0)
+
 	if !managerOptions.ReplaceAll {
 		// Get existing remotes
 		if existingRemotes := app.Get("config.remotes"); existingRemotes.Exists() && existingRemotes.IsObject() {
@@ -319,6 +322,8 @@ func buildBody(f *cmdutil.Factory, applicationID string, managerOptions *PluginC
 			// ignore error
 			log.Warnf("Removing reference to orphaned plugin: remote=%s", nameVersion)
 			continue
+		} else {
+			bodyErrors = append(bodyErrors, fmt.Errorf("plugin does not exist. name=%s, tag/version=%s, remote=%s", name, versionOrTag, nameVersion))
 		}
 	}
 
@@ -365,7 +370,18 @@ func buildBody(f *cmdutil.Factory, applicationID string, managerOptions *PluginC
 		return nil, err
 	}
 
-	return bytes.NewBuffer(tmpBody), nil
+	return bytes.NewBuffer(tmpBody), wrapErrors(bodyErrors)
+}
+
+func wrapErrors(errs []error) error {
+	switch len(errs) {
+	case 0:
+		return nil
+	case 1:
+		return cmderrors.NewUserError("Invalid user input. ", errs[0])
+	default:
+		return cmderrors.NewUserError("Invalid user input. ", errors.Join(errs...))
+	}
 }
 
 func convertToJsonnetDeepMerge(s []byte) []byte {
