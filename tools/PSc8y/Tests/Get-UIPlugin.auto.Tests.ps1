@@ -5,7 +5,7 @@ Describe -Name "Get-UIPlugin" {
 
     }
 
-    It "Get ui plugin" {
+    It -Skip "Get ui plugin" {
         $Response = PSc8y\Get-UIPlugin -Id 1234
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

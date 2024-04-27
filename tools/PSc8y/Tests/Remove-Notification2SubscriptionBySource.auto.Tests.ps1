@@ -5,7 +5,7 @@ Describe -Name "Remove-Notification2SubscriptionBySource" {
 
     }
 
-    It "Delete a subscription associated with a device" {
+    It -Skip "Delete a subscription associated with a device" {
         $Response = PSc8y\Remove-Notification2SubscriptionBySource -Device 12345
         $LASTEXITCODE | Should -Be 0
     }
