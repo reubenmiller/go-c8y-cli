@@ -303,6 +303,13 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"true",
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
+	"session.tokenValidFor": {"session.tokenValidFor", "string", config.SettingsSessionTokenValidFor, []string{
+		"1h",
+		"8h",
+		"24h",
+		"48h",
+		"7d",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// cache
 	"defaults.cache": {"defaults.cache", "bool", config.SettingsDefaultsCacheEnabled, []string{

@@ -417,6 +417,10 @@ Enable `UPDATE` commands. If set to `false` then all `UPDATE` related commands w
 
 Default username which is used when creating a new command via `c8y sessions create`
 
+### session.tokenValidFor: string
+
+The minimum duration (e.g. `8h`) that a token should be valid for in order to reuse it. You can control when to renew it when setting the active session, and ignore the token if it is to expire soon based on the duration.
+
 ### storage.storepassword: boolean
 
 Enable storage of your password in your session file. Disable if you do not want to store sensitive information to file. However this means you will be prompted for your password when you select a session via `set-session`.
