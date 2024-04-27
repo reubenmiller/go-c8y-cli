@@ -29,13 +29,16 @@ Check if a user has access to the cockpit application
 ### Options
 
 ```
-  -h, --help                 help for list
-      --name string          The name of the application.
-      --owner string         The ID of the tenant that owns the applications.
-      --providedFor string   The ID of a tenant that is subscribed to the applications but doesn't own them.
-      --subscriber string    The ID of a tenant that is subscribed to the applications.
-      --type string          Application type (accepts pipeline)
-      --user strings         The ID of a user that has access to the applications.
+      --availability string   Application access level for other tenants.
+      --hasVersions           When set to true, the returned result contains applications with an applicationVersions field that is not empty. When set to false, the result will contain applications with an empty applicationVersions field.
+  -h, --help                  help for list
+      --name string           The name of the application.
+      --owner string          The ID of the tenant that owns the applications.
+      --providedFor string    The ID of a tenant that is subscribed to the applications but doesn't own them.
+      --subscriber string     The ID of a tenant that is subscribed to the applications.
+      --tenant string         The ID of a tenant that either owns the application or is subscribed to the applications.
+      --type string           Application type (accepts pipeline)
+      --user strings          The ID of a user that has access to the applications.
 ```
 
 ### Options inherited from parent commands

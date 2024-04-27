@@ -1,50 +1,42 @@
 ---
-category: microservices
-title: c8y microservices create
+category: plugins
+title: c8y ui plugins list
 ---
-Create microservice
+Get UI plugin collection
 
 ### Synopsis
 
-Create a new microservice or update the application binary of an existing microservice
-
-Note: Named lookups of microservices will only include microservices which 
-
+Get a collection of UI plugins by a given filter
 
 ```
-c8y microservices create [flags]
+c8y ui plugins list [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y microservices create --file ./myapp.zip
-Create new microservice
+$ c8y ui plugins list --pageSize 100
+Get UI plugins
 
-$ c8y microservices create --name my-application --file ./myapp.zip
-Create or update a microservice using an explicit name
+$ c8y ui plugins list --availability SHARED
+Get shared ui plugins
 
-$ c8y microservices create --file ./manifest/cumulocity.json
-Create or update an existing microservice using it's manifest file. This will set the requiredRoles and roles defined in the given manifest file
-		
+$ c8y ui plugins list --availability PRIVATE
+Get private ui plugins
+        
 ```
 
 ### Options
 
 ```
-      --availability string        Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
-      --contextPath string         contextPath of the hosted application. Required when application type is HOSTED
-  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string                Microservice file to be uploaded (or Cumulocity.json) file
-  -h, --help                       help for create
-      --key string                 Shared secret of application
-      --name string                Name of application
-      --processingMode string      Cumulocity processing mode
-      --resourcesUrl string        URL to application base directory hosted on an external server. Required when application type is HOSTED
-      --skipSubscription           Skip microservice subscription when creating the new microservice
-      --skipUpload                 Skip uploading the binary to the platform
-      --template string            Body template
-      --templateVars stringArray   Body template variables
+      --availability string   Plugin access level for other tenants.
+  -h, --help                  help for list
+      --name string           The name of the plugin. (accepts pipeline)
+      --owner string          The ID of the tenant that owns the plugin.
+      --providedFor string    The ID of a tenant that is subscribed to the plugin but doesn't own them.
+      --subscriber string     The ID of a tenant that is subscribed to the plugin.
+      --tenant string         The ID of a tenant that either owns the plugin or is subscribed to the plugins.
+      --user strings          The ID of a user that has access to the plugin.
 ```
 
 ### Options inherited from parent commands
