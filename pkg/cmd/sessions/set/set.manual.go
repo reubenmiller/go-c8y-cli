@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ylogin"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/factory"
@@ -154,6 +155,19 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 
 	if n.ClearToken {
 		client.SetToken("")
+	} else {
+		// Check if token is valid for the minimum period
+		if tok := cfg.MustGetToken(); tok != "" {
+			shouldBeValidFor := cfg.TokenValidFor()
+			expiresSoon, expiresAt := ShouldRenewToken(tok, shouldBeValidFor)
+
+			if expiresSoon {
+				log.Warnf("Ignoring existing token as it will expire soon. minimumValidFor=%s, tokenExpiresAt=%s", shouldBeValidFor, expiresAt.Format(time.RFC3339))
+				client.SetToken("")
+			} else if expiresAt != nil {
+				log.Infof("Token expiresAt: %s", expiresAt.Format(time.RFC3339))
+			}
+		}
 	}
 
 	if err := utilities.CheckEncryption(n.factory.IOStreams, cfg, client); err != nil {
@@ -232,4 +246,22 @@ func hasChanged(client *c8y.Client, cfg *config.Config) bool {
 		return true
 	}
 	return false
+}
+
+func ShouldRenewToken(t string, validFor time.Duration) (bool, *time.Time) {
+	claims := jwt.RegisteredClaims{}
+	parser := jwt.NewParser()
+	_, _, err := parser.ParseUnverified(t, &claims)
+
+	if err != nil {
+		// Invalid token
+		return true, nil
+	}
+
+	if claims.ExpiresAt != nil {
+		limit := claims.ExpiresAt.Add(-1 * validFor)
+		expiresSoon := limit.Before(time.Now())
+		return expiresSoon, &claims.ExpiresAt.Time
+	}
+	return true, nil
 }

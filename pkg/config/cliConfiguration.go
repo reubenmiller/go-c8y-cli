@@ -291,6 +291,9 @@ const (
 	// SettingsSessionAlwaysIncludePassword should the password always be included in the session variables or not
 	SettingsSessionAlwaysIncludePassword = "settings.session.alwaysIncludePassword"
 
+	// SettingsSessionTokenValidFor interval which the token must be valid for in order to reuse it
+	SettingsSessionTokenValidFor = "settings.session.tokenValidFor"
+
 	// Cache settings
 	// SettingsDefaultsCacheEnabled enable caching
 	SettingsDefaultsCacheEnabled = "settings.defaults.cache"
@@ -498,6 +501,7 @@ func (c *Config) bindSettings() {
 
 		// Session options
 		WithBindEnv(SettingsSessionAlwaysIncludePassword, false),
+		WithBindEnv(SettingsSessionTokenValidFor, "8h"),
 
 		WithBindEnv(SettingsBrowser, ""),
 
@@ -976,6 +980,17 @@ func (c *Config) GetDefaultUsername() string {
 // AlwaysIncludePassword password when setting a session
 func (c *Config) AlwaysIncludePassword() bool {
 	return c.viper.GetBool(SettingsSessionAlwaysIncludePassword)
+}
+
+// TokenValidFor minimum validity of a token in order to reuse it
+func (c *Config) TokenValidFor() time.Duration {
+	value := c.viper.GetString(SettingsSessionTokenValidFor)
+	duration, err := flags.GetDuration(value, true, time.Second)
+	if err != nil {
+		c.Logger.Warnf("Invalid duration. value=%s, err=%s", duration, err)
+		return 0
+	}
+	return duration
 }
 
 // CachePassphraseVariables return true if the passphrase variables should be persisted or not
