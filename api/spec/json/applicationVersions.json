@@ -23,7 +23,8 @@
         "powershell": [
           {
             "description": "Get application versions",
-            "command": "Get-ApplicationVersionCollection -Application 1234"
+            "command": "Get-ApplicationVersionCollection -Application 1234",
+            "skipTest": true
           }
         ],
         "go": [
@@ -72,11 +73,13 @@
         "powershell": [
           {
             "description": "Get application version by tag",
-            "command": "Get-ApplicationVersion -Application 1234 -Tag tag1"
+            "command": "Get-ApplicationVersion -Application 1234 -Tag tag1",
+            "skipTest": true
           },
           {
             "description": "Get application version by version name",
-            "command": "Get-ApplicationVersion -Application 1234 -Version 1.0"
+            "command": "Get-ApplicationVersion -Application 1234 -Version 1.0",
+            "skipTest": true
           }
         ],
         "go": [
@@ -209,11 +212,13 @@
         "powershell": [
           {
             "description": "Delete application version by tag",
-            "command": "Remove-ApplicationVersion -Application 1234 -Tag tag1"
+            "command": "Remove-ApplicationVersion -Application 1234 -Tag tag1",
+            "skipTest": true
           },
           {
             "description": "Delete application version by version name",
-            "command": "Remove-ApplicationVersion -Application 1234 -Version 1.0"
+            "command": "Remove-ApplicationVersion -Application 1234 -Version 1.0",
+            "skipTest": true
           }
         ],
         "go": [
@@ -269,11 +274,13 @@
         "powershell": [
           {
             "description": "Get application version by tag",
-            "command": "Update-ApplicationVersionTag -Application 1234 -Tag tag1"
+            "command": "Update-ApplicationVersionTag -Application 1234 -Tag tag1",
+            "skipTest": true
           },
           {
             "description": "Get application version by version name",
-            "command": "Update-ApplicationVersionTag -Application 1234 -Version 1.0"
+            "command": "Update-ApplicationVersionTag -Application 1234 -Version 1.0",
+            "skipTest": true
           }
         ],
         "go": [

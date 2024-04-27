@@ -1,50 +1,36 @@
 ---
-category: microservices
-title: c8y microservices create
+category: versions
+title: c8y applications versions update
 ---
-Create microservice
+Replace an application version's tags
 
 ### Synopsis
 
-Create a new microservice or update the application binary of an existing microservice
-
-Note: Named lookups of microservices will only include microservices which 
-
+Replaces the tags of a given application version in your tenant
 
 ```
-c8y microservices create [flags]
+c8y applications versions update [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y microservices create --file ./myapp.zip
-Create new microservice
-
-$ c8y microservices create --name my-application --file ./myapp.zip
-Create or update a microservice using an explicit name
-
-$ c8y microservices create --file ./manifest/cumulocity.json
-Create or update an existing microservice using it's manifest file. This will set the requiredRoles and roles defined in the given manifest file
-		
+$ c8y applications versions update --application 1234 --version 1.0 --tag tag1,latest
+Replace application version's tags
+        
 ```
 
 ### Options
 
 ```
-      --availability string        Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
-      --contextPath string         contextPath of the hosted application. Required when application type is HOSTED
+      --application string         Application (accepts pipeline)
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string                Microservice file to be uploaded (or Cumulocity.json) file
-  -h, --help                       help for create
-      --key string                 Shared secret of application
-      --name string                Name of application
+  -h, --help                       help for update
       --processingMode string      Cumulocity processing mode
-      --resourcesUrl string        URL to application base directory hosted on an external server. Required when application type is HOSTED
-      --skipSubscription           Skip microservice subscription when creating the new microservice
-      --skipUpload                 Skip uploading the binary to the platform
+      --tag strings                Tag assigned to the version. Version tags must be unique across all versions and version fields of application versions
       --template string            Body template
       --templateVars stringArray   Body template variables
+      --version string             Application version
 ```
 
 ### Options inherited from parent commands

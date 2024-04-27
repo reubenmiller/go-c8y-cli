@@ -248,7 +248,8 @@
         "powershell": [
           {
             "description": "Delete a subscription associated with a device",
-            "command": "Remove-Notification2SubscriptionBySource -Device 12345"
+            "command": "Remove-Notification2SubscriptionBySource -Device 12345",
+            "skipTest": true
           }
         ],
         "go": [

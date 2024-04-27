@@ -1,48 +1,33 @@
 ---
-category: microservices
-title: c8y microservices create
+category: plugins
+title: c8y ui applications plugins list
 ---
-Create microservice
+List installed UI plugins
 
 ### Synopsis
 
-Create a new microservice or update the application binary of an existing microservice
-
-Note: Named lookups of microservices will only include microservices which 
+List UI plugins which are installed in an application
 
 
 ```
-c8y microservices create [flags]
+c8y ui applications plugins list [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y microservices create --file ./myapp.zip
-Create new microservice
+$ c8y ui applications plugins list --application devicemanagement
+List the ui plugins which are installed
 
-$ c8y microservices create --name my-application --file ./myapp.zip
-Create or update a microservice using an explicit name
-
-$ c8y microservices create --file ./manifest/cumulocity.json
-Create or update an existing microservice using it's manifest file. This will set the requiredRoles and roles defined in the given manifest file
-		
 ```
 
 ### Options
 
 ```
-      --availability string        Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
-      --contextPath string         contextPath of the hosted application. Required when application type is HOSTED
+      --application string         Application (required) (accepts pipeline)
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string                Microservice file to be uploaded (or Cumulocity.json) file
-  -h, --help                       help for create
-      --key string                 Shared secret of application
-      --name string                Name of application
+  -h, --help                       help for list
       --processingMode string      Cumulocity processing mode
-      --resourcesUrl string        URL to application base directory hosted on an external server. Required when application type is HOSTED
-      --skipSubscription           Skip microservice subscription when creating the new microservice
-      --skipUpload                 Skip uploading the binary to the platform
       --template string            Body template
       --templateVars stringArray   Body template variables
 ```

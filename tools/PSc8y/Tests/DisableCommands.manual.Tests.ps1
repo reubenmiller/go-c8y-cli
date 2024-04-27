@@ -3,6 +3,7 @@
 Describe -Name "Disable create/update/delete commands" {
     BeforeAll {
         $backupEnvSettings = @{
+            CI = $env:CI
             C8Y_SETTINGS_CI = $env:C8Y_SETTINGS_CI
             C8Y_SETTINGS_MODE_ENABLECREATE = $env:C8Y_SETTINGS_MODE_ENABLECREATE
             C8Y_SETTINGS_MODE_ENABLEUPDATE = $env:C8Y_SETTINGS_MODE_ENABLEUPDATE
@@ -11,6 +12,7 @@ Describe -Name "Disable create/update/delete commands" {
     }
 
     BeforeEach {
+        $env:CI = "false"
         $env:C8Y_SETTINGS_CI = "false"
         $env:C8Y_SETTINGS_MODE_ENABLECREATE = "false"
         $env:C8Y_SETTINGS_MODE_ENABLEUPDATE = "false"

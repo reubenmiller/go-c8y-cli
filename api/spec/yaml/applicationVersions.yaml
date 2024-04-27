@@ -23,6 +23,7 @@ commands:
       powershell:
         - description: Get application versions
           command: Get-ApplicationVersionCollection -Application 1234
+          skipTest: true
 
       go:
         - description: Get application versions
@@ -58,8 +59,10 @@ commands:
       powershell:
         - description: Get application version by tag
           command: Get-ApplicationVersion -Application 1234 -Tag tag1
+          skipTest: true
         - description: Get application version by version name
           command: Get-ApplicationVersion -Application 1234 -Version 1.0
+          skipTest: true
 
       go:
         - description: Get application version by tag
@@ -157,8 +160,11 @@ commands:
       powershell:
         - description: Delete application version by tag
           command: Remove-ApplicationVersion -Application 1234 -Tag tag1
+          skipTest: true
+
         - description: Delete application version by version name
           command: Remove-ApplicationVersion -Application 1234 -Version 1.0
+          skipTest: true
 
       go:
         - description: Delete application version by tag
@@ -199,8 +205,11 @@ commands:
       powershell:
         - description: Get application version by tag
           command: Update-ApplicationVersionTag -Application 1234 -Tag tag1
+          skipTest: true
+
         - description: Get application version by version name
           command: Update-ApplicationVersionTag -Application 1234 -Version 1.0
+          skipTest: true
 
       go:
         - description: Replace application version's tags

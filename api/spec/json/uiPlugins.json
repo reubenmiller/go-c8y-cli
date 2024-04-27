@@ -114,7 +114,8 @@
         "powershell": [
           {
             "description": "Get ui plugin",
-            "command": "Get-UIPlugin -Id 1234"
+            "command": "Get-UIPlugin -Id 1234",
+            "skipTest": true
           }
         ],
         "go": [

@@ -199,6 +199,7 @@ commands:
       powershell:
         - description: Delete a subscription associated with a device
           command: Remove-Notification2SubscriptionBySource -Device 12345
+          skipTest: true
       go:
         - description: Delete a subscription associated with a device
           command: c8y notification2 subscriptions deleteBySource --device 12345

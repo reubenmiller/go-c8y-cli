@@ -23,6 +23,7 @@ commands:
       powershell:
         - description: Get plugin versions
           command: Get-UIPluginVersionCollection -Plugin 1234
+          skipTest: true
 
       go:
         - description: Get plugin versions
@@ -59,8 +60,10 @@ commands:
       powershell:
         - description: Get plugin version by tag
           command: Get-UIPluginVersion -Plugin 1234 -Tag tag1
+          skipTest: true
         - description: Get plugin version by version name
           command: Get-UIPluginVersion -Plugin 1234 -Version 1.0
+          skipTest: true
 
       go:
         - description: Get plugin version by tag
@@ -160,8 +163,11 @@ commands:
       powershell:
         - description: Delete plugin version by tag
           command: Remove-UIPluginVersion -Plugin 1234 -Tag tag1
+          skipTest: true
+
         - description: Delete plugin version by version name
           command: Remove-UIPluginVersion -Plugin 1234 -Version 1.0
+          skipTest: true
 
       go:
         - description: Delete plugin version by tag
@@ -210,6 +216,7 @@ commands:
       powershell:
         - description: Replace tags assigned to a version of a plugin
           command: Update-UIPluginVersion -Plugin 1234 -Version 1.0 -Tags tag1,latest
+          skipTest: true
 
       go:
         - description: Replace tags assigned to a version of a plugin

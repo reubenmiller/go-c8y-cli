@@ -1,48 +1,42 @@
 ---
-category: microservices
-title: c8y microservices create
+category: plugins
+title: c8y ui applications plugins delete
 ---
-Create microservice
+Remove UI plugins from an application
 
 ### Synopsis
 
-Create a new microservice or update the application binary of an existing microservice
-
-Note: Named lookups of microservices will only include microservices which 
+Remove UI plugins assigned to an application
 
 
 ```
-c8y microservices create [flags]
+c8y ui applications plugins delete [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y microservices create --file ./myapp.zip
-Create new microservice
+$ c8y ui applications plugins delete --application devicemanagement --plugin myext@latest --plugin someother@1.2.3
+Delete multiple UI plugins from an application
 
-$ c8y microservices create --name my-application --file ./myapp.zip
-Create or update a microservice using an explicit name
+$ c8y ui applications plugins delete --application devicemanagement --invalid
+Delete orphaned or revoked UI plugins from an application
 
-$ c8y microservices create --file ./manifest/cumulocity.json
-Create or update an existing microservice using it's manifest file. This will set the requiredRoles and roles defined in the given manifest file
-		
+$ c8y ui applications plugins delete --application devicemanagement --all
+Delete all UI plugins from an application
+
 ```
 
 ### Options
 
 ```
-      --availability string        Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
-      --contextPath string         contextPath of the hosted application. Required when application type is HOSTED
+      --all                        Delete all UI plugins
+      --application string         Application (required) (accepts pipeline)
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string                Microservice file to be uploaded (or Cumulocity.json) file
-  -h, --help                       help for create
-      --key string                 Shared secret of application
-      --name string                Name of application
+  -h, --help                       help for delete
+      --invalid                    Remove orphaned or revoked plugins
+      --plugin strings             UI plugin to be removed
       --processingMode string      Cumulocity processing mode
-      --resourcesUrl string        URL to application base directory hosted on an external server. Required when application type is HOSTED
-      --skipSubscription           Skip microservice subscription when creating the new microservice
-      --skipUpload                 Skip uploading the binary to the platform
       --template string            Body template
       --templateVars stringArray   Body template variables
 ```

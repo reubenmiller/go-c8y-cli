@@ -33,6 +33,8 @@ Describe -Tag "Session" -Name "sessions-set" {
         }
 
         $env:C8Y_SESSION_HOME = $tmpdir
+
+        $env:C8Y_SETTINGS_LOGGER_HIDESENSITIVE = 'false'
     }
 
     BeforeEach {
@@ -169,5 +171,7 @@ Describe -Tag "Session" -Name "sessions-set" {
 
         Remove-Item $tmpdir -Force -Recurse -ErrorAction SilentlyContinue
         $input01.userName, $input02.userName | Remove-User
+
+        $env:C8Y_SETTINGS_LOGGER_HIDESENSITIVE = ''
     }
 }
