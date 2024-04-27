@@ -127,7 +127,7 @@ jobs:
   test-pwsh:
     runs-on: ${{ matrix.os }}
     needs: [build]
-    if: ${{ false }}
+    if: ${{ true }}
     env:
       C8Y_HOST: ${{ secrets.C8Y_HOST }}
       C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
@@ -151,7 +151,13 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: "1.21"
-    
+
+    - name: Install GoReleaser
+      uses: goreleaser/goreleaser-action@v5
+      with:
+        version: latest
+        install-only: true
+
     - name: Install Task
       uses: arduino/setup-task@v2
       with:
@@ -177,7 +183,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test-pwsh]
     # Disabled as pester does not support junit reports (only nunit)
-    if: always() && false
+    if: always() && true
+    permissions:
+      checks: write
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
@@ -190,10 +199,9 @@ jobs:
           path: test-results-${{ matrix.os }}
 
       - name: Publish results
-        uses: EnricoMi/publish-unit-test-result-action@v1.1
+        uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           check_name: Test Results
           github_token: ${{ secrets.GITHUB_TOKEN }}
           files: test-results-${{ matrix.os }}/*.xml
-          log_level: DEBUG
