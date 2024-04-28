@@ -78,6 +78,17 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 			log.Printf("Ignoring dir: %+v", info.Name())
 			return filepath.SkipDir
 		}
+
+		if info.IsDir() && path == cfg.ExtensionsDataDir() {
+			log.Printf("Ignoring extensions dir: %+v", info.Name())
+			return filepath.SkipDir
+		}
+		// extensions is a reserved word (in case the user has older extensions folder which is not the current setting, but left overs from a previous location)
+		if info.IsDir() && strings.EqualFold(info.Name(), "extensions") {
+			log.Printf("Ignoring reserved dir names: %+v", info.Name())
+			return filepath.SkipDir
+		}
+
 		if info.IsDir() {
 			return nil
 		}
