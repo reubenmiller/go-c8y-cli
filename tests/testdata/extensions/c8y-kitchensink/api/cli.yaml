@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=../../../../../tools/schema/extensionCommands.json
+---
+group:
+  name: cli
+  description: Run external cli commands
+
+commands:
+  - name: do
+    description: do cli builder
+    method: POST
+    command:
+      # - example.sh
+      - sh
+      - -c
+    type: command
+    exampleList:
+      - command: c8y remoteaccess connections get --device mydevice --id 1
+        description: Get existing remote access configuration
+    body:
+      - name: device
+        property: device
+        type: device[]
+        description: Device
+        pipeline: true
+        pipelineAliases:
+          - name
+          - c8y_Hardware.serialNumber
+
+      - name: fixedValue
+        property: "-"
+        default: do something
+        type: string
+        hidden: true
+        description: onlyRoots
+
+      - name: onlyRoots
+        property: onlyRoots
+        type: boolean
+        description: onlyRoots
+
+      - name: string
+        property: string
+        type: string
+        description: onlyRoots
+
+      # - name: dry-run
+      #   property: command.args.-1.--dry
+      #   type: boolean
+      #   description: dry
+
+  - name: run
+    description: dummy cli builder
+    method: POST
+    path: "c8ylp connect ssh"
+    command:
+      # - example.sh
+      - c8ylp
+      - connect
+      - ssh
+    type: command
+    exampleList:
+      - command: c8y remoteaccess connections get --device mydevice --id 1
+        description: Get existing remote access configuration
+    body:
+      - name: device
+        property: command.args.-1
+        type: device[]
+        description: Device
+        pipeline: true
+        pipelineAliases:
+          - name
+          - c8y_Hardware.serialNumber
+
+      - name: ssh-user
+        property: command.args.-1.--ssh-user
+        type: string
+        description: ssh user
+
+      - name: other
+        property: command.args.-1.--other
+        type: string
+        description: ssh user

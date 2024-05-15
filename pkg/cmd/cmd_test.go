@@ -458,11 +458,12 @@ func Test_DebugStdinCommand(t *testing.T) {
 	cmd := setupTest()
 	stdin := fakestdin.NewStdIn()
 	defer stdin.Restore()
-	stdin.Write(`` + "\n")
+	// stdin.Write(`` + "\n")
 	// stdin.Write(`{"source":{"id":"1111"}}` + "\n")
 
+	// kitchensink cli run --ssh-user root -- sh -c 'echo hello'
 	cmdtext := `
-	extension install reubenmiller/c8y-devmgmt
+	kitchensink cli do -n --device demo_device_11_01 --dry --string hello
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 

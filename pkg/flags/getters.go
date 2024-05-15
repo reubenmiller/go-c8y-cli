@@ -226,6 +226,125 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 	return nil
 }
 
+func formatFlagName(flag string) string {
+	if flag == "-" {
+		return ""
+	}
+
+	switch len(flag) {
+	case 0:
+		return ""
+	case 1:
+		return fmt.Sprintf("-%s", flag)
+	default:
+		return fmt.Sprintf("--%s", flag)
+	}
+}
+
+// WithBody returns a body from given command line arguments
+func WithCLI(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
+	totalIterators := 0
+	iteratorSources := []string{}
+
+	body.Set("command.args", []string{})
+
+	for _, opt := range opts {
+		name, value, err := opt(cmd, inputIterators)
+		if err != nil {
+			return err
+		}
+
+		target := formatFlagName(name)
+		cliProp := "command.args.-1"
+
+		switch v := value.(type) {
+		case iterator.Iterator:
+			// Use composite iterator to apply custom formatting to the result
+			err = body.Set(cliProp, iterator.NewCompositeStringIterator(v, target+"=%s"))
+			if v.IsBound() {
+				iteratorSources = append(iteratorSources, target)
+				totalIterators++
+			}
+		case bool:
+			if name != "" {
+				if v {
+					err = body.Set(cliProp, target)
+				} else {
+					err = body.Set(cliProp, fmt.Sprintf("%s=%v", target, v))
+				}
+			}
+		case RawString:
+			if v != "" {
+				body.SetRaw(string(v))
+			}
+		case string:
+			// only set non-empty values by default
+			switch name {
+			case "":
+				// do nothing
+			case "-":
+				err = body.SetTuple(cliProp, v)
+			default:
+				err = body.SetTuple(cliProp, target, v)
+			}
+		case AnyString:
+			// Allow any string even empty values
+			err = body.Set(target, v)
+
+		case Template:
+			body.AppendTemplate(string(v))
+			if body.TemplateIterator == nil {
+				body.TemplateIterator = iterator.NewRangeIterator(1, 100000000, 1)
+			}
+
+		case TemplateVariables:
+			body.SetTemplateVariables(v)
+
+		case DefaultTemplateString:
+			// the body will build on this template (it can override it)
+			body.PrependTemplate(string(v))
+
+		case RequiredTemplateString:
+			// the template will override values in the body
+			body.AppendTemplate(string(v))
+
+		case RequiredKeys:
+			body.SetRequiredKeys(v...)
+
+		case FilePath:
+			if v != "" {
+				body.SetFile(string(v))
+			}
+
+		case map[string]interface{}:
+			if v != nil {
+				if target != "" {
+					err = body.Set(target, v)
+				} else {
+					body.SetOptionalMap(v)
+				}
+			}
+		default:
+			if target != "" {
+				err = body.Set(target, value)
+			}
+		}
+		if err != nil {
+			return err
+		}
+	}
+	if totalIterators > 0 {
+		inputIterators.Total += totalIterators
+		inputIterators.Body = body
+
+		if len(iteratorSources) > 0 {
+			// TODO: Assign values to input template
+			body.TemplateIteratorNames = iteratorSources
+		}
+	}
+	return nil
+}
+
 // WithBoolValue adds a boolean value from cli arguments to a query parameter
 func WithBoolValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {

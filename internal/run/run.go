@@ -22,19 +22,36 @@ type Runnable interface {
 // PrepareCmd extends exec.Cmd with extra error reporting features and provides a
 // hook to stub command execution in tests
 var PrepareCmd = func(cmd *exec.Cmd) Runnable {
-	return &cmdWithStderr{cmd}
+	return &cmdWithStderr{
+		Cmd: cmd,
+	}
+}
+
+var PrepareCmdWithCombinedOutput = func(cmd *exec.Cmd, combineOutput bool) Runnable {
+	return &cmdWithStderr{
+		Cmd:           cmd,
+		CombineOutput: combineOutput,
+	}
 }
 
 // cmdWithStderr augments exec.Cmd by adding stderr to the error message
 type cmdWithStderr struct {
 	*exec.Cmd
+
+	CombineOutput bool
 }
 
 func (c cmdWithStderr) Output() ([]byte, error) {
 	if isVerbose, _ := utils.IsDebugEnabled(); isVerbose {
 		_ = printArgs(os.Stderr, c.Cmd.Args)
 	}
-	out, err := c.Cmd.Output()
+
+	execCommand := c.Cmd.Output
+	if c.CombineOutput {
+		execCommand = c.Cmd.CombinedOutput
+	}
+
+	out, err := execCommand()
 	if c.Cmd.Stderr != nil || err == nil {
 		return out, err
 	}

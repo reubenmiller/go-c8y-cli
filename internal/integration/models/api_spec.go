@@ -2,6 +2,11 @@ package models
 
 import "strings"
 
+type CommandType string
+
+var CommandTypeCommand = CommandType("command")
+var CommandTypeHTTP = CommandType("http")
+
 type Specification struct {
 	Version  string    `yaml:"version"`
 	Group    Group     `yaml:"group"`
@@ -40,6 +45,7 @@ func (cp *CommandPreset) GetOption(k string, defaultValue ...string) string {
 
 type Command struct {
 	Name               string            `yaml:"name"`
+	Type               string            `yaml:"type"`
 	Description        string            `yaml:"description"`
 	DescriptionLong    string            `yaml:"descriptionLong"`
 	Preset             CommandPreset     `yaml:"preset"`
@@ -51,6 +57,7 @@ type Command struct {
 	ContentType        string            `yaml:"contentType,omitempty"`
 	CollectionType     string            `yaml:"collectionType,omitempty"`
 	CollectionProperty string            `yaml:"collectionProperty,omitempty"`
+	Command            []string          `yaml:"command,omitempty"`
 	Path               string            `yaml:"path"`
 	Examples           Examples          `yaml:"examples"`
 	ExampleList        []Example         `yaml:"exampleList"`
@@ -65,6 +72,13 @@ type Command struct {
 	BodyTemplates      []BodyTemplate    `yaml:"bodyTemplates,omitempty"`
 	BodyRequiredKeys   []string          `yaml:"bodyRequiredKeys,omitempty"`
 	FlagMapping        map[string]string `yaml:"flagMapping"`
+}
+
+func (c *Command) CommandType() CommandType {
+	if c.Type == string(CommandTypeCommand) {
+		return CommandTypeCommand
+	}
+	return CommandTypeHTTP
 }
 
 func (c *Command) HasPreset() bool {

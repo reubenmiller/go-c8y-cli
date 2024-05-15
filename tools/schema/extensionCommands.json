@@ -390,6 +390,22 @@
                         "description": "This will be the command name which is typed by the users on the command line",
                         "pattern": "^[a-z][a-zA-Z0-9_-]*$"
                     },
+                    "type": {
+                        "type": "string",
+                        "title": "Command type (e.g. HTTP or command)",
+                        "description": "Type of output from this command. e.g. will it be used to send a request or execute a command",
+                        "enum": [
+                            "http",
+                            "command"
+                        ]
+                    },
+                    "command": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1
+                    },
                     "method": {
                         "type": "string",
                         "title": "HTTP request method",
