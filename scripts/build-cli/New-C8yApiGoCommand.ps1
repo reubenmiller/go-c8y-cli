@@ -15,9 +15,10 @@
     )
 
     $Name = $Specification.alias.go
-	$NameCamel = $Name[0].ToString().ToUpperInvariant() + $Name.Substring(1)
+	$NameCamel = ($Name[0].ToString().ToUpperInvariant() + $Name.Substring(1)) -replace '-(\p{L})', { $_.Groups[1].Value.ToUpper() }
+    $PackageName = $Name.ToLower() -replace "-", "_"
 
-    $FileName = $Specification.alias.go
+    $FileName = $PackageName
 	$File = Join-Path -Path $OutputDir -ChildPath ("{0}.auto.go" -f $FileName)
 
 
@@ -550,7 +551,7 @@
     #
     $Template = @"
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package $($Name.ToLower())
+package ${PackageName}
 
 import (
 	"fmt"

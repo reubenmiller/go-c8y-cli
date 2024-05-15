@@ -1,0 +1,20 @@
+tests:
+    remoteaccess/configuration_create-passthrough_Create a SSH passthrough configuration to the localhost:
+        command: |
+            c8y remoteaccess configurations create-passthrough --device mydevice
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /service/remoteaccess/devices/mydevice/configurations
+    remoteaccess/configuration_create-passthrough_Create a SSH passthrough configuration with custom details:
+        command: |
+            c8y remoteaccess configurations create-passthrough --device mydevice --hostname customhost --port 1234 --name "My custom configuration"
+        exit-code: 0
+        stdout:
+            json:
+                body.hostname: customhost
+                body.name: My custom configuration
+                body.port: "1234"
+                method: POST
+                path: /service/remoteaccess/devices/mydevice/configurations

@@ -48,7 +48,7 @@
                     Write-Verbose ("Skipping [{0}]" -f $iSpec.name)
                     continue
                 }
-                $SubCommandPackageName = $iSpec.alias.go.ToLower()
+                $SubCommandPackageName = $iSpec.alias.go.ToLower() -replace "-", "_"
                 $SubCommandOutput = Join-Path -Path $CommandOutput -ChildPath $SubCommandPackageName
 				$null = New-Item -Path $SubCommandOutput -ItemType Directory -Force
                 Write-Host ("Generating subcommand: {0}" -f $SubCommandOutput) -ForegroundColor Magenta

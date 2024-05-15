@@ -1,0 +1,523 @@
+{
+  "group": {
+    "name": "remoteaccess/configuration",
+    "description": "Manage Cloud Remote Access configuration",
+    "descriptionLong": "Cloud Remote Access configuration management",
+    "link": "https://cumulocity.com/docs/cloud-remote-access/using-cloud-remote-access/"
+  },
+  "commands": [
+    {
+      "name": "list",
+      "method": "GET",
+      "description": "List remote access configurations",
+      "descriptionLong": "List the remote access configurations already configured for the device\n",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-RemoteAccessConfigurationCollection"
+      },
+      "examples": {
+        "go": [
+          {
+            "command": "c8y remoteaccess configurations list --device mydevice",
+            "description": "List remote access configurations for a given device"
+          }
+        ],
+        "powershell": [
+          {
+            "command": "Get-RemoteAccessConfigurationCollection -Device mydevice",
+            "description": "List remote access configurations for a given device"
+          }
+        ]
+      },
+      "path": "/service/remoteaccess/devices/{device}/configurations",
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "device[]",
+          "description": "Device",
+          "pipeline": true
+        }
+      ]
+    },
+    {
+      "name": "get",
+      "description": "Get remote access configuration",
+      "descriptionLong": "Get an existing remote access configuration for a device",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-RemoteAccessConfiguration"
+      },
+      "method": "GET",
+      "path": "/service/remoteaccess/devices/{device}/configurations/{id}",
+      "examples": {
+        "go": [
+          {
+            "command": "c8y remoteaccess configurations get --device mydevice --id 1",
+            "description": "Get existing remote access configuration"
+          }
+        ],
+        "powershell": [
+          {
+            "command": "Get-RemoteAccessConfiguration -Device mydevice -Id 1",
+            "description": "Get existing remote access configuration"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "device[]",
+          "description": "Device",
+          "pipeline": false
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Connection",
+          "pipeline": true
+        }
+      ]
+    },
+    {
+      "name": "update",
+      "hidden": true,
+      "description": "Update remote access configuration",
+      "descriptionLong": "Update an existing remote access configuration",
+      "alias": {
+        "go": "update",
+        "powershell": "Update-RemoteAccessConfiguration"
+      },
+      "examples": {
+        "go": [
+          {
+            "command": "c8y remoteaccess configurations update --device mydevice --id 1",
+            "description": "Update an existing remote access configuration"
+          }
+        ],
+        "powershell": [
+          {
+            "command": "Update-RemoteAccessConfiguration -Device mydevice -Id 1",
+            "description": "Update an existing remote access configuration"
+          }
+        ]
+      },
+      "method": "PUT",
+      "path": "/service/remoteaccess/devices/{device}/configurations/{id}",
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "device[]",
+          "description": "Device",
+          "pipeline": false
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Connection",
+          "pipeline": true
+        }
+      ],
+      "body": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Profile name",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "delete",
+      "description": "Delete remote access configuration",
+      "alias": {
+        "go": "delete",
+        "powershell": "Remove-RemoteAccessConfiguration"
+      },
+      "examples": {
+        "go": [
+          {
+            "command": "c8y remoteaccess configurations delete --device mydevice --id 1",
+            "description": "Delete an existing remote access configuration"
+          }
+        ],
+        "powershell": [
+          {
+            "command": "Remove-RemoteAccessConfiguration -Device mydevice -Id 1",
+            "description": "Delete an existing remote access configuration"
+          }
+        ]
+      },
+      "method": "DELETE",
+      "path": "/service/remoteaccess/devices/{device}/configurations/{id}",
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "device[]",
+          "description": "Device",
+          "pipeline": false
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Connection",
+          "pipeline": true
+        }
+      ]
+    },
+    {
+      "name": "create-passthrough",
+      "description": "Create passthrough configuration",
+      "descriptionLong": "Create passthrough configuration\n",
+      "alias": {
+        "go": "create-passthrough",
+        "powershell": "New-RemoteAccessPassthroughConfiguration"
+      },
+      "method": "POST",
+      "path": "/service/remoteaccess/devices/{device}/configurations",
+      "examples": {
+        "go": [
+          {
+            "command": "c8y remoteaccess configurations create-passthrough --device mydevice\n",
+            "description": "Create a SSH passthrough configuration to the localhost"
+          },
+          {
+            "command": "c8y remoteaccess configurations create-passthrough --device mydevice --hostname customhost --port 1234 --name \"My custom configuration\"\n",
+            "description": "Create a SSH passthrough configuration with custom details"
+          }
+        ],
+        "powershell": [
+          {
+            "command": "New-RemoteAccessPassthroughConfiguration -Device mydevice\n",
+            "description": "Create a SSH passthrough configuration to the localhost"
+          },
+          {
+            "command": "New-RemoteAccessPassthroughConfiguration -Device mydevice -Hostname customhost -Port 1234 -Name \"My custom configuration\"\n",
+            "description": "Create a SSH passthrough configuration with custom details"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "device[]",
+          "description": "Device",
+          "pipeline": true
+        }
+      ],
+      "body": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Connection name",
+          "default": "passthrough"
+        },
+        {
+          "name": "hostname",
+          "type": "string",
+          "default": "127.0.0.1",
+          "description": "Hostname"
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "default": "22",
+          "description": "Port"
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "default": "PASSTHROUGH",
+          "validationSet": [
+            "PASSTHROUGH"
+          ],
+          "description": "Protocol"
+        }
+      ],
+      "bodyRequiredKeys": [
+        "hostname",
+        "port",
+        "protocol",
+        "name"
+      ],
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "template": "{credentialsType:'NONE'}"
+        }
+      ]
+    },
+    {
+      "name": "create-webssh",
+      "description": "Create web ssh configuration",
+      "descriptionLong": "Create web ssh configuration\n",
+      "alias": {
+        "go": "create-webssh",
+        "powershell": "New-RemoteAccessWebSSHConfiguration"
+      },
+      "method": "POST",
+      "path": "/service/remoteaccess/devices/{device}/configurations",
+      "examples": {
+        "go": [
+          {
+            "command": "c8y remoteaccess configurations create-webssh\n",
+            "description": "Create a webssh configuration"
+          },
+          {
+            "command": "c8y remoteaccess configurations create-webssh --hostname 127.0.0.1 --port 2222",
+            "description": "Create a webssh configuration with a custom hostname and port"
+          }
+        ],
+        "powershell": [
+          {
+            "command": "New-RemoteAccessWebSSHConfiguration\n",
+            "description": "Create a webssh configuration"
+          },
+          {
+            "command": "New-RemoteAccessWebSSHConfiguration -Hostname 127.0.0.1 -Port 2222",
+            "description": "Create a webssh configuration with a custom hostname and port"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "device[]",
+          "description": "Device",
+          "pipeline": true
+        }
+      ],
+      "body": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Connection name",
+          "default": "webssh"
+        },
+        {
+          "name": "hostname",
+          "type": "string",
+          "description": "Hostname"
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "description": "Port"
+        },
+        {
+          "name": "credentialsType",
+          "type": "string",
+          "description": "Credentials type",
+          "default": "USER_PASS",
+          "validationSet": [
+            "USER_PASS"
+          ]
+        },
+        {
+          "name": "privateKey",
+          "type": "string",
+          "description": "Private ssh key"
+        },
+        {
+          "name": "publicKey",
+          "type": "string",
+          "description": "Public ssh key"
+        },
+        {
+          "name": "username",
+          "type": "string",
+          "description": "Username"
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "description": "Username"
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "default": "SSH",
+          "validationSet": [
+            "PASSTHROUGH",
+            "SSH"
+          ],
+          "description": "Protocol"
+        }
+      ],
+      "bodyRequiredKeys": [
+        "hostname",
+        "port",
+        "protocol",
+        "name"
+      ]
+    },
+    {
+      "name": "create-vnc",
+      "description": "Create vnc configuration",
+      "descriptionLong": "Create vnc configuration\n",
+      "alias": {
+        "go": "create-vnc",
+        "powershell": "New-RemoteAccessVNCConfiguration"
+      },
+      "method": "POST",
+      "path": "/service/remoteaccess/devices/{device}/configurations",
+      "examples": {
+        "go": [
+          {
+            "command": "c8y remoteaccess configurations create-vnc\n",
+            "description": "Create a VNC configuration that does not require a password"
+          },
+          {
+            "command": "c8y remoteaccess configurations create-vnc --password 'asd08dcj23dsf{@#9}'",
+            "description": "Create a VNC configuration that requires a password"
+          }
+        ],
+        "powershell": [
+          {
+            "command": "New-RemoteAccessVNCConfiguration\n",
+            "description": "Create a VNC configuration that does not require a password"
+          },
+          {
+            "command": "New-RemoteAccessVNCConfiguration -Password 'asd08dcj23dsf{@#9}'",
+            "description": "Create a VNC configuration that requires a password"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "device[]",
+          "description": "Device",
+          "pipeline": true
+        }
+      ],
+      "body": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Connection name",
+          "default": "webssh"
+        },
+        {
+          "name": "hostname",
+          "type": "string",
+          "default": "127.0.0.1",
+          "description": "Hostname"
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "default": "5900",
+          "description": "Port"
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "description": "VNC Password"
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "default": "VNC",
+          "validationSet": [
+            "PASSTHROUGH",
+            "SSH",
+            "VNC"
+          ],
+          "description": "Protocol"
+        }
+      ],
+      "bodyRequiredKeys": [
+        "name",
+        "hostname",
+        "port",
+        "protocol",
+        "credentialsType"
+      ],
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "template": "{credentialsType: if std.isEmpty(std.get($, 'password', '')) then 'NONE' else 'PASS_ONLY'}"
+        }
+      ]
+    },
+    {
+      "name": "create-telnet",
+      "description": "Create telnet configuration",
+      "descriptionLong": "Create telnet configuration\n",
+      "alias": {
+        "go": "create-telnet",
+        "powershell": "New-RemoteAccessTelnetConfiguration"
+      },
+      "method": "POST",
+      "path": "/service/remoteaccess/devices/{device}/configurations",
+      "examples": {
+        "go": [
+          {
+            "command": "c8y remoteaccess configurations create-telnet\n",
+            "description": "Create a telnet configuration"
+          }
+        ],
+        "powershell": [
+          {
+            "command": "New-RemoteAccessTelnetConfiguration\n",
+            "description": "Create a telnet configuration"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "device[]",
+          "description": "Device",
+          "pipeline": true
+        }
+      ],
+      "body": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Connection name",
+          "default": "telnet"
+        },
+        {
+          "name": "hostname",
+          "type": "string",
+          "default": "127.0.0.1",
+          "description": "Hostname"
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "default": "23",
+          "description": "Port"
+        },
+        {
+          "name": "credentialsType",
+          "type": "string",
+          "default": "NONE",
+          "hidden": true,
+          "description": "Credentials type"
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "default": "TELNET",
+          "validationSet": [
+            "TELNET",
+            "PASSTHROUGH",
+            "SSH",
+            "VNC"
+          ],
+          "description": "Protocol"
+        }
+      ],
+      "bodyRequiredKeys": [
+        "name",
+        "hostname",
+        "port",
+        "protocol",
+        "credentialsType"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+tests:
+    remoteaccess/configuration_create-webssh_Create a webssh configuration:
+        command: |
+            c8y remoteaccess configurations create-webssh
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /service/remoteaccess/devices/{device}/configurations
+    remoteaccess/configuration_create-webssh_Create a webssh configuration with a custom hostname and port:
+        command: c8y remoteaccess configurations create-webssh --hostname 127.0.0.1 --port 2222
+        exit-code: 0
+        stdout:
+            json:
+                body.hostname: 127.0.0.1
+                body.port: "2222"
+                method: POST
+                path: /service/remoteaccess/devices/{device}/configurations

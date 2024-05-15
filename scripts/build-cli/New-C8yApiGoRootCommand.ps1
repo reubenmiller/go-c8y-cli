@@ -42,8 +42,8 @@
         }
         $EndpointName = $endpoint.name
         $GoCmdName = $endpoint.alias.go
-        $GoCmdNameLower = $GoCmdName.ToLower()
-        $GoCmdNameCamel = $GoCmdName[0].ToString().ToUpperInvariant() + $GoCmdName.Substring(1)
+        $GoCmdNameLower = $GoCmdName.ToLower() -replace "-", "_"
+        $GoCmdNameCamel = ($GoCmdName[0].ToString().ToUpperInvariant() + $GoCmdName.Substring(1)) -replace '-(\p{L})', { $_.Groups[1].Value.ToUpper() }
         $ImportAlias = "cmd" + $GoCmdNameCamel
 
         $null = $GoImports.AppendLine("$ImportAlias `"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/$Name/$GoCmdNameLower`"")

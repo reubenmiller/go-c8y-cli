@@ -1,0 +1,8 @@
+tests:
+    remoteaccess/configuration_update_Update an existing remote access configuration:
+        command: c8y remoteaccess configurations update --device mydevice --id 1
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /service/remoteaccess/devices/mydevice/configurations/1
