@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	"github.com/spf13/cobra"
 )
@@ -79,11 +78,6 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	consol, err := n.factory.Console()
-	if err != nil {
-		return err
-	}
-
 	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
 	if err != nil {
 		return err
@@ -132,12 +126,8 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	writeOutput := func(isJSON bool, output []byte) {
-		if isJSON {
-			_ = n.factory.WriteJSONToConsole(cfg, cmd, "", output)
-		} else {
-			fmt.Fprintf(consol, "%s\n", output)
-		}
+	writeOutput := func(output []byte) {
+		_ = n.factory.WriteOutputWithoutPropertyGuess(output, cmdutil.OutputContext{})
 	}
 
 	totalErrors := 0
@@ -155,8 +145,6 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 			return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAbortedWithErrors, msg)
 		}
 
-		isJSON := jsonUtilities.IsJSONObject(input)
-
 		// schema match
 		if schema != nil {
 			var val interface{}
@@ -164,7 +152,7 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 			err = schema.Validate(val)
 
 			if err == nil {
-				writeOutput(isJSON, input)
+				writeOutput(input)
 			} else {
 				err = fmt.Errorf("%w. input does not match json schema. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.schema)
 			}
@@ -176,7 +164,7 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 				if !pattern.Match(input) {
 					err = fmt.Errorf("%w. input does not match pattern. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.regex)
 				} else {
-					writeOutput(isJSON, input)
+					writeOutput(input)
 				}
 			}
 		}
@@ -187,7 +175,7 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 				if !bytes.Equal(input, []byte(n.exact)) {
 					err = fmt.Errorf("%w. input does not match. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.exact)
 				} else {
-					writeOutput(isJSON, input)
+					writeOutput(input)
 				}
 			}
 		}

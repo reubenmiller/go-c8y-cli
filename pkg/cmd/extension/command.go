@@ -57,11 +57,6 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				if len(cmds) == 0 {
 					return cmderrors.NewSystemError("no installed extensions found")
 				}
-				cfg, err := f.Config()
-
-				if err != nil {
-					return err
-				}
 
 				for _, c := range cmds {
 					ext := map[string]interface{}{}
@@ -88,7 +83,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						return cmderrors.NewUserError("Settings error. ", err)
 					}
 
-					if err := f.WriteJSONToConsole(cfg, cmd, "", rowText); err != nil {
+					if err := f.WriteOutputWithoutPropertyGuess(rowText, cmdutil.OutputContext{}); err != nil {
 						return cmderrors.NewSystemError("Failed to write to console. ", err)
 					}
 				}

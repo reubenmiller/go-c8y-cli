@@ -131,7 +131,7 @@ func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
 		result, err := desiredstate.WaitFor(interval, duration, state)
 
 		if v, ok := result.(*c8y.ManagedObject); ok {
-			_ = n.factory.WriteJSONToConsole(cfg, cmd, "", []byte(v.Item.Raw))
+			_ = n.factory.WriteOutputWithoutPropertyGuess([]byte(v.Item.Raw), cmdutil.OutputContext{})
 		}
 
 		if err != nil {

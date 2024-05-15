@@ -167,7 +167,7 @@ func (n *SubscribeCmd) RunE(cmd *cobra.Command, args []string) error {
 			}
 
 			if isMatch {
-				if err := n.factory.WriteJSONToConsole(cfg, cmd, "", msg.Payload); err != nil {
+				if err := n.factory.WriteOutputWithoutPropertyGuess(msg.Payload, cmdutil.OutputContext{}); err != nil {
 					cfg.Logger.Warnf("Could not process line. only json lines are accepted. %s", err)
 				}
 			}

@@ -119,7 +119,7 @@ func (n *CmdRepeatCsvFile) newTemplate(cmd *cobra.Command, args []string) error 
 	}
 
 	outputHandler := func(output []byte) error {
-		if err := n.factory.WriteJSONToConsole(cfg, cmd, "", output); err != nil {
+		if err := n.factory.WriteOutputWithoutPropertyGuess(output, cmdutil.OutputContext{}); err != nil {
 			cfg.Logger.Warnf("Could not process line. only json lines are accepted. %s", err)
 		}
 		return nil
