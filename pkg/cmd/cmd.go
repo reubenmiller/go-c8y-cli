@@ -399,6 +399,9 @@ func Initialize() (*root.CmdRoot, error) {
 
 	rootCmd := root.NewCmdRoot(cmdFactory, buildVersion, "")
 
+	// Add reference to root command
+	cmdFactory.SetCommand(rootCmd.Command)
+
 	tableOptions := &console.TableOptions{
 		MinColumnWidth:           configHandler.ViewColumnMinWidth(),
 		MaxColumnWidth:           configHandler.ViewColumnMaxWidth(),

@@ -1595,6 +1595,14 @@ func (c *Config) GetJSONSelect() []string {
 	return allitems
 }
 
+func (c *Config) MustGetOutputCommonOptions(cmd *cobra.Command) *CommonCommandOptions {
+	opts, err := c.GetOutputCommonOptions(cmd)
+	if err != nil {
+		panic(err)
+	}
+	return &opts
+}
+
 // GetOutputCommonOptions get common output options which controls how the output should be handled i.e. json filter, selects, csv etc.
 func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
 	if c.commonOptions != nil {

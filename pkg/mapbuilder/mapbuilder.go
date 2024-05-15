@@ -1159,6 +1159,23 @@ func (b *MapBuilder) Set(path string, value interface{}) error {
 	return nil
 }
 
+// Set multiple values
+func (b *MapBuilder) SetTuple(path string, values ...interface{}) error {
+	for _, value := range values {
+		// store iterators separately so we can intercept the raw value which is otherwise lost during json marshalling
+		if it, ok := value.(iterator.Iterator); ok {
+			b.bodyIterators = append(b.bodyIterators, IteratorReference{path, it})
+			Logger.Debugf("DEBUG: Found iterator. path=%s", path)
+			return nil
+		}
+
+		if err := b.SetPath(path, value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // MergeMaps merges a list of maps into the body. If the body does not already exists,
 // then it will be ignored. Only shallow merging is done.
 // Duplicate keys will be overwritten by maps later in the list

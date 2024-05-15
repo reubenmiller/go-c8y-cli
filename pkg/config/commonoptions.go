@@ -108,3 +108,12 @@ func (options CommonCommandOptions) AddQueryParametersWithMapping(query *flags.Q
 		}
 	}
 }
+
+func (options CommonCommandOptions) HasOutputTemplate() bool {
+	return options.OutputTemplate != ""
+}
+
+func (options *CommonCommandOptions) DisableResultPropertyDetection() *CommonCommandOptions {
+	options.ResultProperty = "-"
+	return options
+}
