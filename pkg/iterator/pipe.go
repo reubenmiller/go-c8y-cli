@@ -129,8 +129,9 @@ func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 				return []byte(""), line, nil
 			}
 
-			// stop iterator if not found
+			// stop iterator if not found (and clear line as some consumers will ignore the EOF if there is some remaining data)
 			err = io.EOF
+			line = []byte("")
 		}
 	}
 
