@@ -3,7 +3,6 @@ package ssh
 import (
 	"context"
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -14,7 +13,9 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/pkg/remoteaccess"
 	"github.com/spf13/cobra"
@@ -75,6 +76,11 @@ Use a non-interactive session to execute a single command and print the result
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithExtendedPipelineSupport("device", "device", false, "deviceId", "source.id", "managedObject.id", "id"),
+	)
+
 	// cmd.MarkFlagsMutuallyExclusive("device", "external-id")
 	// cmd.MarkFlagsMutuallyExclusive("device", "external-type")
 
@@ -115,80 +121,90 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	out, err := body.MarshalJSON()
+	var iter iterator.Iterator
+	if inputIterators.Total > 0 {
+		iter = mapbuilder.NewMapBuilderIterator(body)
+	} else {
+		iter = iterator.NewBoundIterator(mapbuilder.NewMapBuilderIterator(body), 1)
+	}
+
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return err
 	}
-	op := gjson.ParseBytes(out)
-	device := op.Get("device").String()
+	commonOptions.DisableResultPropertyDetection()
 
-	craConfig, err := c8yfetcher.DetectRemoteAccessConfiguration(client, device, n.configuration)
-	if err != nil {
-		return err
-	}
+	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
+		item := gjson.ParseBytes(j.Value.([]byte))
+		device := item.Get("device").String()
 
-	log.Debugf("Using remote access configuration: id=%s, name=%s", craConfig.ID, craConfig.Name)
+		craConfig, err := c8yfetcher.DetectRemoteAccessConfiguration(client, device, n.configuration)
+		if err != nil {
+			return nil, err
+		}
 
-	// Lookup configuration
-	craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
-		ManagedObjectID: device,
-		RemoteAccessID:  craConfig.ID,
-	}, log)
+		log.Debugf("Using remote access configuration: id=%s, name=%s", craConfig.ID, craConfig.Name)
 
-	if n.listen == "-" {
-		log.Debugf("Listening to request from stdin")
-		return craClient.ListenServe(n.factory.IOStreams.In, n.factory.IOStreams.Out)
-	}
+		// Lookup configuration
+		craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
+			ManagedObjectID: device,
+			RemoteAccessID:  craConfig.ID,
+		}, log)
 
-	// TCP / socket listener
-	if err := craClient.Listen(n.listen); err != nil {
-		return err
-	}
+		// TCP / socket listener
+		if err := craClient.Listen(n.listen); err != nil {
+			return nil, err
+		}
 
-	localAddress := craClient.GetListenerAddress()
-	host, port, _ := strings.Cut(localAddress, ":")
-	if host == "" {
-		host = "127.0.0.1"
-	}
+		localAddress := craClient.GetListenerAddress()
+		host, port, _ := strings.Cut(localAddress, ":")
+		if host == "" {
+			host = "127.0.0.1"
+		}
 
-	// Start in background
-	// TODO: Work out how to shut it down cleanly
-	go craClient.Serve()
+		// Start in background
+		// TODO: Work out how to shut it down cleanly
+		go craClient.Serve()
 
-	// Build ssh command
-	sshArgs := []string{
-		"-o", "ServerAliveInterval=120",
-		"-o", "StrictHostKeyChecking=no",
-		"-o", "UserKnownHostsFile=/dev/null",
-	}
+		// Build ssh command
+		sshArgs := []string{
+			"-o", "ServerAliveInterval=120",
+			"-o", "StrictHostKeyChecking=no",
+			"-o", "UserKnownHostsFile=/dev/null",
+		}
 
-	sshTarget := host
-	if n.user != "" {
-		sshTarget = fmt.Sprintf("%s@%s", n.user, host)
-	}
-	sshArgs = append(sshArgs, "-p", port, sshTarget)
+		sshTarget := host
+		if n.user != "" {
+			sshTarget = fmt.Sprintf("%s@%s", n.user, host)
+		}
+		sshArgs = append(sshArgs, "-p", port, sshTarget)
 
-	dashIdx := cmd.ArgsLenAtDash()
-	if dashIdx > -1 {
-		sshArgs = append(sshArgs, "--")
-		sshArgs = append(sshArgs, args[dashIdx:]...)
-	}
+		dashIdx := cmd.ArgsLenAtDash()
+		if dashIdx > -1 {
+			sshArgs = append(sshArgs, "--")
+			sshArgs = append(sshArgs, args[dashIdx:]...)
+		}
 
-	sshCmd := exec.CommandContext(context.Background(), "ssh", sshArgs...)
-	if n.factory.IOStreams.IsStdoutTTY() {
-		sshCmd.Stdout = os.Stdout
-		sshCmd.Stdin = os.Stdin
-		sshCmd.Stderr = os.Stderr
-	}
+		// TODO: Should output templates be considered here?
+		sshCmd := exec.CommandContext(context.Background(), "ssh", sshArgs...)
+		sshCmd.Stdout = n.factory.IOStreams.Out
+		sshCmd.Stdin = n.factory.IOStreams.In
+		sshCmd.Stderr = n.factory.IOStreams.ErrOut
 
-	log.Debugf("Executing command: ssh %s\n", strings.Join(sshArgs, " "))
+		log.Debugf("Executing command: ssh %s\n", strings.Join(sshArgs, " "))
 
-	cs := n.factory.IOStreams.ColorScheme()
-	fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting interactive ssh session with %s (%s)\n", device, strings.TrimRight(client.BaseURL.String(), "/"))))
+		cs := n.factory.IOStreams.ColorScheme()
+		fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting interactive ssh session with %s (%s)\n", device, strings.TrimRight(client.BaseURL.String(), "/"))))
 
-	start := time.Now()
-	sshErr := sshCmd.Run()
-	duration := time.Since(start).Truncate(time.Millisecond)
-	fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", duration)
-	return sshErr
+		start := time.Now()
+		sshErr := sshCmd.Run()
+		duration := time.Since(start).Truncate(time.Millisecond)
+		fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", duration)
+
+		// err := n.factory.WriteOutput(output, cmdutil.OutputContext{
+		// 	Input: j.Input,
+		// }, &commonOptions)
+		// return nil, err
+		return nil, sshErr
+	})
 }
