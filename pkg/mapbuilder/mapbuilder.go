@@ -1146,7 +1146,7 @@ func (b *MapBuilder) SetRawPath(path string, value []byte) error {
 
 // Set sets a value to a give dot notation path
 func (b *MapBuilder) Set(path string, value interface{}) error {
-	// store iterators seprately so we can itercept the raw value which is otherwise lost during json marshalling
+	// store iterators separately so we can intercept the raw value which is otherwise lost during json marshalling
 	if it, ok := value.(iterator.Iterator); ok {
 		b.bodyIterators = append(b.bodyIterators, IteratorReference{path, it})
 		Logger.Debugf("DEBUG: Found iterator. path=%s", path)
