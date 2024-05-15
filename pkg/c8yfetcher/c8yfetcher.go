@@ -570,10 +570,17 @@ func WithManagedObjectPropertyFirstMatch(factory *cmdutil.Factory, fetcher Entit
 	}
 }
 
+func ignoreArgsAfterDash(cmd *cobra.Command, args []string) []string {
+	if i := cmd.ArgsLenAtDash(); i > -1 {
+		return args[0:i]
+	}
+	return args[:]
+}
+
 // WithReferenceByNameFirstMatch add reference by name matching using a fetcher via cli args. Only the first match will be used
 func WithReferenceByNameFirstMatch(factory *cmdutil.Factory, fetcher EntityFetcher, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
-		opt := WithReferenceByName(factory, fetcher, args, opts...)
+		opt := WithReferenceByName(factory, fetcher, ignoreArgsAfterDash(cmd, args), opts...)
 		name, values, err := opt(cmd, inputIterators)
 
 		if name == "" {
@@ -602,7 +609,7 @@ func WithReferenceByNameFirstMatch(factory *cmdutil.Factory, fetcher EntityFetch
 // WithSelfReferenceByNameFirstMatch add reference by name matching using a fetcher via cli args. Only the first match will be used
 func WithSelfReferenceByNameFirstMatch(factory *cmdutil.Factory, fetcher EntityFetcher, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
-		opt := WithSelfReferenceByName(factory, fetcher, args, opts...)
+		opt := WithSelfReferenceByName(factory, fetcher, ignoreArgsAfterDash(cmd, args), opts...)
 		name, values, err := opt(cmd, inputIterators)
 
 		if name == "" {
