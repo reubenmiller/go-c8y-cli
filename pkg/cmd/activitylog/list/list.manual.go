@@ -108,7 +108,7 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	cfg.Logger.Debugf("activity log filter: path=%s, host=%s, datefrom=%s, dateto=%s", activitylog.GetPath(), filter.Host, filter.DateFrom, filter.DateTo)
 
 	err = activitylog.GetLogEntries(filter, func(line []byte) error {
-		return n.factory.WriteJSONToConsole(cfg, cmd, "", line)
+		return n.factory.WriteOutputWithoutPropertyGuess(line, cmdutil.OutputContext{})
 	})
 
 	return err

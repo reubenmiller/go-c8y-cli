@@ -86,5 +86,5 @@ func (n *CmdGetSession) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return n.factory.WriteJSONToConsole(cfg, cmd, "", b)
+	return n.factory.WriteOutputWithoutPropertyGuess(b, cmdutil.OutputContext{})
 }

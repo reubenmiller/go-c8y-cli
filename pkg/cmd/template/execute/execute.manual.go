@@ -2,8 +2,6 @@ package execute
 
 import (
 	"bytes"
-	"fmt"
-	"io"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -11,8 +9,9 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/spf13/cobra"
 )
 
@@ -118,36 +117,24 @@ func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewUserError(err)
 	}
 
-	bounded := inputIterators.Total > 0
-	for {
-		responseText, err := body.MarshalJSON()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
-		}
-
-		isJSONResponse := jsonUtilities.IsValidJSON([]byte(responseText))
-
-		outputEnding := ""
-		if len(responseText) > 0 {
-			outputEnding = "\n"
-		}
-
-		if isJSONResponse {
-			if err := n.factory.WriteJSONToConsole(cfg, cmd, "", responseText); err != nil {
-				return err
-			}
-		} else {
-			cfg.Logger.Debugf("Processing non-json output")
-			fmt.Printf("%s%s", formatOutput(responseText), outputEnding)
-		}
-
-		if !bounded {
-			break
-		}
+	var iter iterator.Iterator
+	if inputIterators.Total > 0 {
+		iter = mapbuilder.NewMapBuilderIterator(body)
+	} else {
+		iter = iterator.NewBoundIterator(mapbuilder.NewMapBuilderIterator(body), 1)
 	}
 
-	return nil
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
+	}
+	commonOptions.DisableResultPropertyDetection()
+
+	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
+		output := formatOutput(j.Value.([]byte))
+		err := n.factory.WriteOutput(output, cmdutil.OutputContext{
+			Input: j.Input,
+		}, &commonOptions)
+		return nil, err
+	})
 }

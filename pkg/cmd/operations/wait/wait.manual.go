@@ -126,7 +126,8 @@ func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
 			if v.FailureReason != "" {
 				cfg.Logger.Warnf("Failure reason: %s", v.FailureReason)
 			}
-			_ = n.factory.WriteJSONToConsole(cfg, cmd, "", []byte(v.Item.Raw))
+
+			_ = n.factory.WriteOutputWithoutPropertyGuess([]byte(v.Item.Raw), cmdutil.OutputContext{})
 		}
 
 		if err != nil {

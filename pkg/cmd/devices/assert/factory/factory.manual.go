@@ -13,7 +13,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/desiredstate"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -45,10 +44,6 @@ func NewAssertCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker)
 			return err
 		}
 		client, err := f.Client()
-		if err != nil {
-			return err
-		}
-		consol, err := f.Console()
 		if err != nil {
 			return err
 		}
@@ -111,12 +106,7 @@ func NewAssertCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker)
 
 			if err == nil {
 				outValue := h.GetValue(result, input)
-
-				if jsonUtilities.IsJSONObject(outValue) {
-					_ = f.WriteJSONToConsole(cfg, cmd, "", outValue)
-				} else {
-					fmt.Fprintf(consol, "%s\n", outValue)
-				}
+				_ = f.WriteOutputWithoutPropertyGuess(outValue, cmdutil.OutputContext{})
 			}
 
 			if err != nil {
@@ -164,10 +154,6 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 			return err
 		}
 		client, err := f.Client()
-		if err != nil {
-			return err
-		}
-		consol, err := f.Console()
 		if err != nil {
 			return err
 		}
@@ -230,12 +216,7 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 
 			if err == nil {
 				outValue := h.GetValue(result, input)
-
-				if jsonUtilities.IsJSONObject(outValue) {
-					_ = f.WriteJSONToConsole(cfg, cmd, "", outValue)
-				} else {
-					fmt.Fprintf(consol, "%s\n", outValue)
-				}
+				_ = f.WriteOutputWithoutPropertyGuess(outValue, cmdutil.OutputContext{})
 			}
 
 			if err != nil {

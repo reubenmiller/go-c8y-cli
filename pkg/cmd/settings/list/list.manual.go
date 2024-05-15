@@ -91,5 +91,10 @@ func (n *CmdList) listSettings(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewUserError("Settings error. ", err)
 	}
 
-	return n.factory.WriteJSONToConsole(cfg, cmd, settingsPrefix, responseText)
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
+	}
+	commonOptions.ResultProperty = settingsPrefix
+	return n.factory.WriteOutput(responseText, cmdutil.OutputContext{}, &commonOptions)
 }

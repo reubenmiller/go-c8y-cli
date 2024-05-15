@@ -9,6 +9,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/spf13/cobra"
 )
 
@@ -98,7 +99,12 @@ func (n *CmdShow) RunE(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		if err := n.factory.WriteJSONToConsole(cfg, cmd, "", responseText); err != nil {
+		if !jsonUtilities.IsJSONObject(responseText) {
+			cfg.Logger.Warnf("Could not process line. only json lines are accepted")
+			continue
+		}
+
+		if err := n.factory.WriteOutputWithoutPropertyGuess(responseText, cmdutil.OutputContext{}); err != nil {
 			cfg.Logger.Warnf("Could not process line. only json lines are accepted. %s", err)
 		}
 

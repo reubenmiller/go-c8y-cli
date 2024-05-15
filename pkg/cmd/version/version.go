@@ -41,10 +41,6 @@ type ReleaseInfo struct {
 
 // RunE execute command
 func (n *CmdVersion) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
 	release := &ReleaseInfo{
 		Version: n.factory.BuildVersion,
 		Branch:  n.factory.BuildBranch,
@@ -63,5 +59,5 @@ func (n *CmdVersion) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return nil
 	}
-	return n.factory.WriteJSONToConsole(cfg, cmd, "", responseText)
+	return n.factory.WriteOutputWithoutPropertyGuess(responseText, cmdutil.OutputContext{})
 }

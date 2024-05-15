@@ -280,7 +280,7 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 		PathEncoded: strings.Replace(fullURL, req.URL.Scheme+"://"+req.URL.Host, "", 1),
 		Method:      req.Method,
 		Headers:     headers,
-		Query:       tryUnescapeURL(req.URL.RawQuery),
+		Query:       TryUnescapeURL(req.URL.RawQuery),
 		Body:        requestBody,
 		Shell:       shell,
 		PowerShell:  pwsh,
@@ -315,7 +315,7 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 
 	// markdown
 	sectionLabel.Fprintf(w, "What If: Sending [%s] request to [%s]\n", req.Method, req.URL)
-	label.Fprintf(w, "\n### %s %s", details.Method, tryUnescapeURL(details.PathEncoded))
+	label.Fprintf(w, "\n### %s %s", details.Method, TryUnescapeURL(details.PathEncoded))
 
 	if len(req.Header) > 0 {
 		// sort header names
@@ -362,7 +362,7 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	}
 }
 
-func tryUnescapeURL(v string) string {
+func TryUnescapeURL(v string) string {
 	unescapedQuery, err := url.QueryUnescape(v)
 	if err != nil {
 		return v
@@ -665,7 +665,7 @@ func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
 	return u
 }
 
-func flattenArrayMap[K string, V []string](m map[K]V) map[K]any {
+func FlattenArrayMap[K string, V []string](m map[K]V) map[K]any {
 	out := make(map[K]any)
 	for key, value := range m {
 		if len(value) == 1 {
@@ -690,8 +690,8 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 	requestData["pathEncoded"] = strings.Replace(resp.Request.URL.String(), resp.Request.URL.Scheme+"://"+resp.Request.URL.Host, "", 1)
 	requestData["host"] = resp.Request.URL.Host
 	requestData["url"] = resp.Request.URL.String()
-	requestData["query"] = tryUnescapeURL(resp.Request.URL.RawQuery)
-	requestData["queryParams"] = flattenArrayMap(resp.Request.URL.Query())
+	requestData["query"] = TryUnescapeURL(resp.Request.URL.RawQuery)
+	requestData["queryParams"] = FlattenArrayMap(resp.Request.URL.Query())
 	requestData["method"] = resp.Request.Method
 	// requestData["header"] = resp.Response.Request.Header
 	if err := outputBuilder.AddLocalTemplateVariable("request", requestData); err != nil {
@@ -705,7 +705,7 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 	responseData["duration"] = duration.Milliseconds()
 	responseData["contentLength"] = resp.ContentLength
 	responseData["contentType"] = resp.Header.Get("Content-Type")
-	responseData["header"] = flattenArrayMap(resp.Header)
+	responseData["header"] = FlattenArrayMap(resp.Header)
 	responseData["proto"] = resp.Proto
 	responseData["body"] = string(responseText)
 	if err := outputBuilder.AddLocalTemplateVariable("response", responseData); err != nil {

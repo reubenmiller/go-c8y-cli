@@ -42,6 +42,16 @@ type BatchOptions struct {
 	InputData []string
 
 	inputIndex int
+
+	// Generic values
+	ConfirmationMessage func(string, any, any) (string, error)
+}
+
+func (b *BatchOptions) GetConfirmationMessage(operation string, value any, input any) (string, error) {
+	if b.ConfirmationMessage != nil {
+		return b.ConfirmationMessage(operation, value, input)
+	}
+	return operation, nil
 }
 
 func (b *BatchOptions) GetItem() (string, error) {

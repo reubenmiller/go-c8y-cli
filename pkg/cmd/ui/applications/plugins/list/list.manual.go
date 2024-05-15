@@ -196,7 +196,7 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 					return err
 				}
 
-				if err := n.factory.WriteJSONToConsole(cfg, cmd, "", referenceJSON); err != nil {
+				if err := n.factory.WriteOutputWithoutPropertyGuess(referenceJSON, cmdutil.OutputContext{}); err != nil {
 					return err
 				}
 			}
