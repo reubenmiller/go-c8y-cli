@@ -36,10 +36,10 @@ func NewCreateVncCmd(f *cmdutil.Factory) *CreateVncCmd {
 then sensible defaults will be used.
 `,
 		Example: heredoc.Doc(`
-$ c8y remoteaccess configurations create-vnc
+$ c8y remoteaccess configurations create-vnc --device device01
 Create a VNC configuration that does not require a password
 
-$ c8y remoteaccess configurations create-vnc --password 'asd08dcj23dsf{@#9}'
+$ c8y remoteaccess configurations create-vnc --device device01 --password 'asd08dcj23dsf{@#9}'
 Create a VNC configuration that requires a password
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -60,7 +60,7 @@ Create a VNC configuration that requires a password
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("protocol", "PASSTHROUGH", "SSH", "VNC"),
+		completion.WithValidateSet("protocol", "VNC"),
 	)
 
 	flags.WithOptions(

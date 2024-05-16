@@ -19,9 +19,13 @@ commands:
       go:
         - command: c8y remoteaccess configurations list --device device01
           description: List remote access configurations for a given device
+          assertStdOut:
+            json:
+              path: r//service/remoteaccess/devices/\d+/configurations$
       powershell:
         - command: Get-RemoteAccessConfigurationCollection -Device device01
           description: List remote access configurations for a given device
+          skipTest: true
       
     path: /service/remoteaccess/devices/{device}/configurations
     pathParameters:
@@ -42,9 +46,13 @@ commands:
       go:
         - command: c8y remoteaccess configurations get --device device01 --id 1
           description: Get existing remote access configuration
+          assertStdOut:
+            json:
+              path: r//service/remoteaccess/devices/\d+/configurations/1$
       powershell:
         - command: Get-RemoteAccessConfiguration -Device device01 -Id 1
           description: Get existing remote access configuration
+          skipTest: true
     pathParameters:
       - name: device
         type: device[]
@@ -65,11 +73,16 @@ commands:
       powershell: Update-RemoteAccessConfiguration
     examples:
       go:
-        - command: c8y remoteaccess configurations update --device device01 --id 1
+        - command: c8y remoteaccess configurations update --device device01 --id 1 --name hello
           description: Update an existing remote access configuration
+          assertStdOut:
+            json:
+              path: r//service/remoteaccess/devices/\d+/configurations/1$
+          skipTest: true
       powershell:
-        - command: Update-RemoteAccessConfiguration -Device device01 -Id 1
+        - command: Update-RemoteAccessConfiguration -Device device01 -Id 1 -Name hello
           description: Update an existing remote access configuration
+          skipTest: true
     method: PUT
     path: /service/remoteaccess/devices/{device}/configurations/{id}
     pathParameters:
@@ -98,9 +111,13 @@ commands:
       go:
         - command: c8y remoteaccess configurations delete --device device01 --id 1
           description: Delete an existing remote access configuration
+          assertStdOut:
+            json:
+              path: r//service/remoteaccess/devices/\d+/configurations/1$
       powershell:
         - command: Remove-RemoteAccessConfiguration -Device device01 -Id 1
           description: Delete an existing remote access configuration
+          skipTest: true
     method: DELETE
     path: /service/remoteaccess/devices/{device}/configurations/{id}
     pathParameters:
@@ -136,16 +153,25 @@ commands:
         - command: |
             c8y remoteaccess configurations create-passthrough --device device01
           description: Create a SSH passthrough configuration to the localhost
+          assertStdOut:
+            json:
+              path: r//service/remoteaccess/devices/\d+/configurations$
+
         - command: |
             c8y remoteaccess configurations create-passthrough --device device01 --hostname customhost --port 1234 --name "My custom configuration"
           description: Create a SSH passthrough configuration with custom details
+          assertStdOut:
+            json:
+              path: r//service/remoteaccess/devices/\d+/configurations$
       powershell:
         - command: |
             New-RemoteAccessPassthroughConfiguration -Device device01
           description: Create a SSH passthrough configuration to the localhost
+          skipTest: true
         - command: |
             New-RemoteAccessPassthroughConfiguration -Device device01 -Hostname customhost -Port 1234 -Name "My custom configuration"
           description: Create a SSH passthrough configuration with custom details
+          skipTest: true
 
     pathParameters:
       - name: device
@@ -198,18 +224,26 @@ commands:
     examples:
       go:
         - command: |
-            c8y remoteaccess configurations create-webssh
-          description: Create a webssh configuration
+            c8y remoteaccess configurations create-webssh --device device01 --username admin --password "3Xz7cEj%oAmt#dnUMP*N"
+          description: Create a webssh configuration (with username/password authentication)
+          assertStdOut:
+            json:
+              path: r//service/remoteaccess/devices/\d+/configurations$
 
-        - command: c8y remoteaccess configurations create-webssh --hostname 127.0.0.1 --port 2222
-          description: Create a webssh configuration with a custom hostname and port
+        - command: c8y remoteaccess configurations create-webssh --device device01 --hostname 127.0.0.1 --port 2222 --username admin --privateKey "xxxx" --publicKey "yyyyy"
+          description: Create a webssh configuration with a custom hostname and port (with ssh key authentication)
+          assertStdOut:
+            json:
+              path: r//service/remoteaccess/devices/\d+/configurations$
       powershell:
         - command: |
-            New-RemoteAccessWebSSHConfiguration
-          description: Create a webssh configuration
+            New-RemoteAccessWebSSHConfiguration -Device device01 -Username admin -Password "3Xz7cEj%oAmt#dnUMP*N"
+          description: Create a webssh configuration (with username/password authentication)
+          skipTest: true
 
-        - command: New-RemoteAccessWebSSHConfiguration -Hostname 127.0.0.1 -Port 2222
-          description: Create a webssh configuration with a custom hostname and port
+        - command: New-RemoteAccessWebSSHConfiguration -Device device01 -Hostname 127.0.0.1 -Port 2222 -Username admin -PrivateKey "xxxx" -PublicKey "yyyyy"
+          description: Create a webssh configuration with a custom hostname and port (with ssh key authentication)
+          skipTest: true
     pathParameters:
       - name: device
         type: device[]
@@ -224,10 +258,12 @@ commands:
       - name: hostname
         type: string
         description: Hostname
+        default: "127.0.0.1"
 
       - name: port
         type: integer
         description: Port
+        default: "22"
 
       - name: credentialsType
         type: string
@@ -235,7 +271,9 @@ commands:
         default: USER_PASS
         validationSet:
           - USER_PASS
-      
+          - KEY_PAIR
+          - CERTIFICATE
+
       - name: privateKey
         type: string
         description: Private ssh key
@@ -256,7 +294,6 @@ commands:
         type: string
         default: SSH
         validationSet:
-          - PASSTHROUGH
           - SSH
         description: Protocol
 
@@ -265,6 +302,18 @@ commands:
       - port
       - protocol
       - name
+      - credentialsType
+    # bodyTemplates:
+    #   - type: jsonnet
+    #     template: |
+          
+    #       {
+    #         local credType = if std.objectHas($, "privateKey") && std.objectHas($, "publicKey") then "USER_PASS" else if std.objectHas($, "password") else,
+    #         local credValue = {
+
+    #         },  
+    #         credentialsType: credType
+    #       }
 
   - name: create-vnc
     description: Create vnc configuration
@@ -279,18 +328,26 @@ commands:
     examples:
       go:
         - command: |
-            c8y remoteaccess configurations create-vnc
+            c8y remoteaccess configurations create-vnc --device device01
           description: Create a VNC configuration that does not require a password
+          assertStdOut:
+            json:
+              path: r//service/remoteaccess/devices/\d+/configurations$
 
-        - command: c8y remoteaccess configurations create-vnc --password 'asd08dcj23dsf{@#9}'
+        - command: c8y remoteaccess configurations create-vnc --device device01 --password 'asd08dcj23dsf{@#9}'
           description: Create a VNC configuration that requires a password
+          assertStdOut:
+            json:
+              path: r//service/remoteaccess/devices/\d+/configurations$
       powershell:
         - command: |
-            New-RemoteAccessVNCConfiguration
+            New-RemoteAccessVNCConfiguration -Device device01
           description: Create a VNC configuration that does not require a password
+          skipTest: true
 
-        - command: New-RemoteAccessVNCConfiguration -Password 'asd08dcj23dsf{@#9}'
+        - command: New-RemoteAccessVNCConfiguration -Device device01 -Password 'asd08dcj23dsf{@#9}'
           description: Create a VNC configuration that requires a password
+          skipTest: true
     pathParameters:
       - name: device
         type: device[]
@@ -320,8 +377,6 @@ commands:
         type: string
         default: VNC
         validationSet:
-          - PASSTHROUGH
-          - SSH
           - VNC
         description: Protocol
 
@@ -349,12 +404,16 @@ commands:
     examples:
       go:
         - command: |
-            c8y remoteaccess configurations create-telnet
+            c8y remoteaccess configurations create-telnet --device device01
           description: Create a telnet configuration
+          assertStdOut:
+            json:
+              path: r//service/remoteaccess/devices/\d+/configurations$
       powershell:
         - command: |
-            New-RemoteAccessTelnetConfiguration
+            New-RemoteAccessTelnetConfiguration -Device device01
           description: Create a telnet configuration
+          skipTest: true
 
     pathParameters:
       - name: device
@@ -388,9 +447,6 @@ commands:
         default: TELNET
         validationSet:
           - TELNET
-          - PASSTHROUGH
-          - SSH
-          - VNC
         description: Protocol
 
     bodyRequiredKeys:

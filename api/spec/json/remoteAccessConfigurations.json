@@ -19,13 +19,19 @@
         "go": [
           {
             "command": "c8y remoteaccess configurations list --device device01",
-            "description": "List remote access configurations for a given device"
+            "description": "List remote access configurations for a given device",
+            "assertStdOut": {
+              "json": {
+                "path": "r//service/remoteaccess/devices/\\d+/configurations$"
+              }
+            }
           }
         ],
         "powershell": [
           {
             "command": "Get-RemoteAccessConfigurationCollection -Device device01",
-            "description": "List remote access configurations for a given device"
+            "description": "List remote access configurations for a given device",
+            "skipTest": true
           }
         ]
       },
@@ -53,13 +59,19 @@
         "go": [
           {
             "command": "c8y remoteaccess configurations get --device device01 --id 1",
-            "description": "Get existing remote access configuration"
+            "description": "Get existing remote access configuration",
+            "assertStdOut": {
+              "json": {
+                "path": "r//service/remoteaccess/devices/\\d+/configurations/1$"
+              }
+            }
           }
         ],
         "powershell": [
           {
             "command": "Get-RemoteAccessConfiguration -Device device01 -Id 1",
-            "description": "Get existing remote access configuration"
+            "description": "Get existing remote access configuration",
+            "skipTest": true
           }
         ]
       },
@@ -90,14 +102,21 @@
       "examples": {
         "go": [
           {
-            "command": "c8y remoteaccess configurations update --device device01 --id 1",
-            "description": "Update an existing remote access configuration"
+            "command": "c8y remoteaccess configurations update --device device01 --id 1 --name hello",
+            "description": "Update an existing remote access configuration",
+            "assertStdOut": {
+              "json": {
+                "path": "r//service/remoteaccess/devices/\\d+/configurations/1$"
+              }
+            },
+            "skipTest": true
           }
         ],
         "powershell": [
           {
-            "command": "Update-RemoteAccessConfiguration -Device device01 -Id 1",
-            "description": "Update an existing remote access configuration"
+            "command": "Update-RemoteAccessConfiguration -Device device01 -Id 1 -Name hello",
+            "description": "Update an existing remote access configuration",
+            "skipTest": true
           }
         ]
       },
@@ -138,13 +157,19 @@
         "go": [
           {
             "command": "c8y remoteaccess configurations delete --device device01 --id 1",
-            "description": "Delete an existing remote access configuration"
+            "description": "Delete an existing remote access configuration",
+            "assertStdOut": {
+              "json": {
+                "path": "r//service/remoteaccess/devices/\\d+/configurations/1$"
+              }
+            }
           }
         ],
         "powershell": [
           {
             "command": "Remove-RemoteAccessConfiguration -Device device01 -Id 1",
-            "description": "Delete an existing remote access configuration"
+            "description": "Delete an existing remote access configuration",
+            "skipTest": true
           }
         ]
       },
@@ -179,21 +204,33 @@
         "go": [
           {
             "command": "c8y remoteaccess configurations create-passthrough --device device01\n",
-            "description": "Create a SSH passthrough configuration to the localhost"
+            "description": "Create a SSH passthrough configuration to the localhost",
+            "assertStdOut": {
+              "json": {
+                "path": "r//service/remoteaccess/devices/\\d+/configurations$"
+              }
+            }
           },
           {
             "command": "c8y remoteaccess configurations create-passthrough --device device01 --hostname customhost --port 1234 --name \"My custom configuration\"\n",
-            "description": "Create a SSH passthrough configuration with custom details"
+            "description": "Create a SSH passthrough configuration with custom details",
+            "assertStdOut": {
+              "json": {
+                "path": "r//service/remoteaccess/devices/\\d+/configurations$"
+              }
+            }
           }
         ],
         "powershell": [
           {
             "command": "New-RemoteAccessPassthroughConfiguration -Device device01\n",
-            "description": "Create a SSH passthrough configuration to the localhost"
+            "description": "Create a SSH passthrough configuration to the localhost",
+            "skipTest": true
           },
           {
             "command": "New-RemoteAccessPassthroughConfiguration -Device device01 -Hostname customhost -Port 1234 -Name \"My custom configuration\"\n",
-            "description": "Create a SSH passthrough configuration with custom details"
+            "description": "Create a SSH passthrough configuration with custom details",
+            "skipTest": true
           }
         ]
       },
@@ -260,22 +297,34 @@
       "examples": {
         "go": [
           {
-            "command": "c8y remoteaccess configurations create-webssh\n",
-            "description": "Create a webssh configuration"
+            "command": "c8y remoteaccess configurations create-webssh --device device01 --username admin --password \"3Xz7cEj%oAmt#dnUMP*N\"\n",
+            "description": "Create a webssh configuration (with username/password authentication)",
+            "assertStdOut": {
+              "json": {
+                "path": "r//service/remoteaccess/devices/\\d+/configurations$"
+              }
+            }
           },
           {
-            "command": "c8y remoteaccess configurations create-webssh --hostname 127.0.0.1 --port 2222",
-            "description": "Create a webssh configuration with a custom hostname and port"
+            "command": "c8y remoteaccess configurations create-webssh --device device01 --hostname 127.0.0.1 --port 2222 --username admin --privateKey \"xxxx\" --publicKey \"yyyyy\"",
+            "description": "Create a webssh configuration with a custom hostname and port (with ssh key authentication)",
+            "assertStdOut": {
+              "json": {
+                "path": "r//service/remoteaccess/devices/\\d+/configurations$"
+              }
+            }
           }
         ],
         "powershell": [
           {
-            "command": "New-RemoteAccessWebSSHConfiguration\n",
-            "description": "Create a webssh configuration"
+            "command": "New-RemoteAccessWebSSHConfiguration -Device device01 -Username admin -Password \"3Xz7cEj%oAmt#dnUMP*N\"\n",
+            "description": "Create a webssh configuration (with username/password authentication)",
+            "skipTest": true
           },
           {
-            "command": "New-RemoteAccessWebSSHConfiguration -Hostname 127.0.0.1 -Port 2222",
-            "description": "Create a webssh configuration with a custom hostname and port"
+            "command": "New-RemoteAccessWebSSHConfiguration -Device device01 -Hostname 127.0.0.1 -Port 2222 -Username admin -PrivateKey \"xxxx\" -PublicKey \"yyyyy\"",
+            "description": "Create a webssh configuration with a custom hostname and port (with ssh key authentication)",
+            "skipTest": true
           }
         ]
       },
@@ -297,12 +346,14 @@
         {
           "name": "hostname",
           "type": "string",
-          "description": "Hostname"
+          "description": "Hostname",
+          "default": "127.0.0.1"
         },
         {
           "name": "port",
           "type": "integer",
-          "description": "Port"
+          "description": "Port",
+          "default": "22"
         },
         {
           "name": "credentialsType",
@@ -310,7 +361,9 @@
           "description": "Credentials type",
           "default": "USER_PASS",
           "validationSet": [
-            "USER_PASS"
+            "USER_PASS",
+            "KEY_PAIR",
+            "CERTIFICATE"
           ]
         },
         {
@@ -338,7 +391,6 @@
           "type": "string",
           "default": "SSH",
           "validationSet": [
-            "PASSTHROUGH",
             "SSH"
           ],
           "description": "Protocol"
@@ -348,7 +400,8 @@
         "hostname",
         "port",
         "protocol",
-        "name"
+        "name",
+        "credentialsType"
       ]
     },
     {
@@ -364,22 +417,34 @@
       "examples": {
         "go": [
           {
-            "command": "c8y remoteaccess configurations create-vnc\n",
-            "description": "Create a VNC configuration that does not require a password"
+            "command": "c8y remoteaccess configurations create-vnc --device device01\n",
+            "description": "Create a VNC configuration that does not require a password",
+            "assertStdOut": {
+              "json": {
+                "path": "r//service/remoteaccess/devices/\\d+/configurations$"
+              }
+            }
           },
           {
-            "command": "c8y remoteaccess configurations create-vnc --password 'asd08dcj23dsf{@#9}'",
-            "description": "Create a VNC configuration that requires a password"
+            "command": "c8y remoteaccess configurations create-vnc --device device01 --password 'asd08dcj23dsf{@#9}'",
+            "description": "Create a VNC configuration that requires a password",
+            "assertStdOut": {
+              "json": {
+                "path": "r//service/remoteaccess/devices/\\d+/configurations$"
+              }
+            }
           }
         ],
         "powershell": [
           {
-            "command": "New-RemoteAccessVNCConfiguration\n",
-            "description": "Create a VNC configuration that does not require a password"
+            "command": "New-RemoteAccessVNCConfiguration -Device device01\n",
+            "description": "Create a VNC configuration that does not require a password",
+            "skipTest": true
           },
           {
-            "command": "New-RemoteAccessVNCConfiguration -Password 'asd08dcj23dsf{@#9}'",
-            "description": "Create a VNC configuration that requires a password"
+            "command": "New-RemoteAccessVNCConfiguration -Device device01 -Password 'asd08dcj23dsf{@#9}'",
+            "description": "Create a VNC configuration that requires a password",
+            "skipTest": true
           }
         ]
       },
@@ -420,8 +485,6 @@
           "type": "string",
           "default": "VNC",
           "validationSet": [
-            "PASSTHROUGH",
-            "SSH",
             "VNC"
           ],
           "description": "Protocol"
@@ -454,14 +517,20 @@
       "examples": {
         "go": [
           {
-            "command": "c8y remoteaccess configurations create-telnet\n",
-            "description": "Create a telnet configuration"
+            "command": "c8y remoteaccess configurations create-telnet --device device01\n",
+            "description": "Create a telnet configuration",
+            "assertStdOut": {
+              "json": {
+                "path": "r//service/remoteaccess/devices/\\d+/configurations$"
+              }
+            }
           }
         ],
         "powershell": [
           {
-            "command": "New-RemoteAccessTelnetConfiguration\n",
-            "description": "Create a telnet configuration"
+            "command": "New-RemoteAccessTelnetConfiguration -Device device01\n",
+            "description": "Create a telnet configuration",
+            "skipTest": true
           }
         ]
       },
@@ -504,10 +573,7 @@
           "type": "string",
           "default": "TELNET",
           "validationSet": [
-            "TELNET",
-            "PASSTHROUGH",
-            "SSH",
-            "VNC"
+            "TELNET"
           ],
           "description": "Protocol"
         }

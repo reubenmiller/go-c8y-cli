@@ -36,11 +36,11 @@ func NewCreateWebsshCmd(f *cmdutil.Factory) *CreateWebsshCmd {
 then sensible defaults will be used.
 `,
 		Example: heredoc.Doc(`
-$ c8y remoteaccess configurations create-webssh
-Create a webssh configuration
+$ c8y remoteaccess configurations create-webssh --device device01 --username admin --password "3Xz7cEj%oAmt#dnUMP*N"
+Create a webssh configuration (with username/password authentication)
 
-$ c8y remoteaccess configurations create-webssh --hostname 127.0.0.1 --port 2222
-Create a webssh configuration with a custom hostname and port
+$ c8y remoteaccess configurations create-webssh --device device01 --hostname 127.0.0.1 --port 2222 --username admin --privateKey "xxxx" --publicKey "yyyyy"
+Create a webssh configuration with a custom hostname and port (with ssh key authentication)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -52,8 +52,8 @@ Create a webssh configuration with a custom hostname and port
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device (accepts pipeline)")
 	cmd.Flags().String("name", "webssh", "Connection name")
-	cmd.Flags().String("hostname", "", "Hostname")
-	cmd.Flags().Int("port", 0, "Port")
+	cmd.Flags().String("hostname", "127.0.0.1", "Hostname")
+	cmd.Flags().Int("port", 22, "Port")
 	cmd.Flags().String("credentialsType", "USER_PASS", "Credentials type")
 	cmd.Flags().String("privateKey", "", "Private ssh key")
 	cmd.Flags().String("publicKey", "", "Public ssh key")
@@ -64,8 +64,8 @@ Create a webssh configuration with a custom hostname and port
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("credentialsType", "USER_PASS"),
-		completion.WithValidateSet("protocol", "PASSTHROUGH", "SSH"),
+		completion.WithValidateSet("credentialsType", "USER_PASS", "KEY_PAIR", "CERTIFICATE"),
+		completion.WithValidateSet("protocol", "SSH"),
 	)
 
 	flags.WithOptions(
@@ -163,7 +163,7 @@ func (n *CreateWebsshCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("protocol", "protocol"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("hostname", "port", "protocol", "name"),
+		flags.WithRequiredProperties("hostname", "port", "protocol", "name", "credentialsType"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

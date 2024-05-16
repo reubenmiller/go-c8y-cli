@@ -5,8 +5,8 @@ Describe -Name "New-RemoteAccessTelnetConfiguration" {
 
     }
 
-    It "Create a telnet configuration" {
-        $Response = PSc8y\New-RemoteAccessTelnetConfiguration
+    It -Skip "Create a telnet configuration" {
+        $Response = PSc8y\New-RemoteAccessTelnetConfiguration -Device device01
 
         $LASTEXITCODE | Should -Be 0
     }

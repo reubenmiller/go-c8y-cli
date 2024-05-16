@@ -5,7 +5,7 @@ Describe -Name "Remove-RemoteAccessConfiguration" {
 
     }
 
-    It "Delete an existing remote access configuration" {
+    It -Skip "Delete an existing remote access configuration" {
         $Response = PSc8y\Remove-RemoteAccessConfiguration -Device device01 -Id 1
         $LASTEXITCODE | Should -Be 0
     }

@@ -13,15 +13,15 @@ then sensible defaults will be used.
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_create-webssh
 
 .EXAMPLE
-PS> New-RemoteAccessWebSSHConfiguration
+PS> New-RemoteAccessWebSSHConfiguration -Device device01 -Username admin -Password "3Xz7cEj%oAmt#dnUMP*N"
 
 
-Create a webssh configuration
+Create a webssh configuration (with username/password authentication)
 
 .EXAMPLE
-PS> New-RemoteAccessWebSSHConfiguration -Hostname 127.0.0.1 -Port 2222
+PS> New-RemoteAccessWebSSHConfiguration -Device device01 -Hostname 127.0.0.1 -Port 2222 -Username admin -PrivateKey "xxxx" -PublicKey "yyyyy"
 
-Create a webssh configuration with a custom hostname and port
+Create a webssh configuration with a custom hostname and port (with ssh key authentication)
 
 
 #>
@@ -53,7 +53,7 @@ Create a webssh configuration with a custom hostname and port
 
         # Credentials type
         [Parameter()]
-        [ValidateSet('USER_PASS')]
+        [ValidateSet('USER_PASS','KEY_PAIR','CERTIFICATE')]
         [string]
         $CredentialsType,
 
@@ -79,7 +79,7 @@ Create a webssh configuration with a custom hostname and port
 
         # Protocol
         [Parameter()]
-        [ValidateSet('PASSTHROUGH','SSH')]
+        [ValidateSet('SSH')]
         [string]
         $Protocol
     )

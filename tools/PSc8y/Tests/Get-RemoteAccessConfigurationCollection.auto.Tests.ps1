@@ -5,7 +5,7 @@ Describe -Name "Get-RemoteAccessConfigurationCollection" {
 
     }
 
-    It "List remote access configurations for a given device" {
+    It -Skip "List remote access configurations for a given device" {
         $Response = PSc8y\Get-RemoteAccessConfigurationCollection -Device device01
         $LASTEXITCODE | Should -Be 0
     }

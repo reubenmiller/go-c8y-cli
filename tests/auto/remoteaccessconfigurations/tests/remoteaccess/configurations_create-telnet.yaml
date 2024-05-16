@@ -1,9 +1,9 @@
 tests:
     remoteaccess/configurations_create-telnet_Create a telnet configuration:
         command: |
-            c8y remoteaccess configurations create-telnet
+            c8y remoteaccess configurations create-telnet --device device01
         exit-code: 0
         stdout:
             json:
                 method: POST
-                path: /service/remoteaccess/devices/{device}/configurations
+                path: r//service/remoteaccess/devices/\d+/configurations$

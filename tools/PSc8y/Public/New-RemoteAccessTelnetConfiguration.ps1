@@ -13,7 +13,7 @@ then sensible defaults will be used.
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_create-telnet
 
 .EXAMPLE
-PS> New-RemoteAccessTelnetConfiguration
+PS> New-RemoteAccessTelnetConfiguration -Device device01
 
 
 Create a telnet configuration
@@ -53,7 +53,7 @@ Create a telnet configuration
 
         # Protocol
         [Parameter()]
-        [ValidateSet('TELNET','PASSTHROUGH','SSH','VNC')]
+        [ValidateSet('TELNET')]
         [string]
         $Protocol
     )

@@ -13,13 +13,13 @@ then sensible defaults will be used.
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_create-vnc
 
 .EXAMPLE
-PS> New-RemoteAccessVNCConfiguration
+PS> New-RemoteAccessVNCConfiguration -Device device01
 
 
 Create a VNC configuration that does not require a password
 
 .EXAMPLE
-PS> New-RemoteAccessVNCConfiguration -Password 'asd08dcj23dsf{@#9}'
+PS> New-RemoteAccessVNCConfiguration -Device device01 -Password 'asd08dcj23dsf{@#9}'
 
 Create a VNC configuration that requires a password
 
@@ -58,7 +58,7 @@ Create a VNC configuration that requires a password
 
         # Protocol
         [Parameter()]
-        [ValidateSet('PASSTHROUGH','SSH','VNC')]
+        [ValidateSet('VNC')]
         [string]
         $Protocol
     )

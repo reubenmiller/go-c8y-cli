@@ -5,4 +5,4 @@ tests:
         stdout:
             json:
                 method: DELETE
-                path: /service/remoteaccess/devices/device01/configurations/1
+                path: r//service/remoteaccess/devices/\d+/configurations/1$

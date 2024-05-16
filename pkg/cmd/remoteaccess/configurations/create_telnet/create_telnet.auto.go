@@ -36,7 +36,7 @@ func NewCreateTelnetCmd(f *cmdutil.Factory) *CreateTelnetCmd {
 then sensible defaults will be used.
 `,
 		Example: heredoc.Doc(`
-$ c8y remoteaccess configurations create-telnet
+$ c8y remoteaccess configurations create-telnet --device device01
 Create a telnet configuration
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -57,7 +57,7 @@ Create a telnet configuration
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("protocol", "TELNET", "PASSTHROUGH", "SSH", "VNC"),
+		completion.WithValidateSet("protocol", "TELNET"),
 	)
 
 	flags.WithOptions(
