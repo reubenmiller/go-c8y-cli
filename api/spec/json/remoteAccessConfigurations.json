@@ -1,6 +1,6 @@
 {
   "group": {
-    "name": "remoteaccess/configuration",
+    "name": "remoteaccess/configurations",
     "description": "Manage Cloud Remote Access configuration",
     "descriptionLong": "Cloud Remote Access configuration management",
     "link": "https://cumulocity.com/docs/cloud-remote-access/using-cloud-remote-access/"
@@ -10,7 +10,7 @@
       "name": "list",
       "method": "GET",
       "description": "List remote access configurations",
-      "descriptionLong": "List the remote access configurations already configured for the device\n",
+      "descriptionLong": "List the remote access configurations already configured for a device\n",
       "alias": {
         "go": "list",
         "powershell": "Get-RemoteAccessConfigurationCollection"
@@ -18,13 +18,13 @@
       "examples": {
         "go": [
           {
-            "command": "c8y remoteaccess configurations list --device mydevice",
+            "command": "c8y remoteaccess configurations list --device device01",
             "description": "List remote access configurations for a given device"
           }
         ],
         "powershell": [
           {
-            "command": "Get-RemoteAccessConfigurationCollection -Device mydevice",
+            "command": "Get-RemoteAccessConfigurationCollection -Device device01",
             "description": "List remote access configurations for a given device"
           }
         ]
@@ -52,13 +52,13 @@
       "examples": {
         "go": [
           {
-            "command": "c8y remoteaccess configurations get --device mydevice --id 1",
+            "command": "c8y remoteaccess configurations get --device device01 --id 1",
             "description": "Get existing remote access configuration"
           }
         ],
         "powershell": [
           {
-            "command": "Get-RemoteAccessConfiguration -Device mydevice -Id 1",
+            "command": "Get-RemoteAccessConfiguration -Device device01 -Id 1",
             "description": "Get existing remote access configuration"
           }
         ]
@@ -90,13 +90,13 @@
       "examples": {
         "go": [
           {
-            "command": "c8y remoteaccess configurations update --device mydevice --id 1",
+            "command": "c8y remoteaccess configurations update --device device01 --id 1",
             "description": "Update an existing remote access configuration"
           }
         ],
         "powershell": [
           {
-            "command": "Update-RemoteAccessConfiguration -Device mydevice -Id 1",
+            "command": "Update-RemoteAccessConfiguration -Device device01 -Id 1",
             "description": "Update an existing remote access configuration"
           }
         ]
@@ -129,6 +129,7 @@
     {
       "name": "delete",
       "description": "Delete remote access configuration",
+      "descriptionLong": "Delete an existing remote access configuration",
       "alias": {
         "go": "delete",
         "powershell": "Remove-RemoteAccessConfiguration"
@@ -136,13 +137,13 @@
       "examples": {
         "go": [
           {
-            "command": "c8y remoteaccess configurations delete --device mydevice --id 1",
+            "command": "c8y remoteaccess configurations delete --device device01 --id 1",
             "description": "Delete an existing remote access configuration"
           }
         ],
         "powershell": [
           {
-            "command": "Remove-RemoteAccessConfiguration -Device mydevice -Id 1",
+            "command": "Remove-RemoteAccessConfiguration -Device device01 -Id 1",
             "description": "Delete an existing remote access configuration"
           }
         ]
@@ -167,7 +168,7 @@
     {
       "name": "create-passthrough",
       "description": "Create passthrough configuration",
-      "descriptionLong": "Create passthrough configuration\n",
+      "descriptionLong": "Create a passthrough configuration which enables you to connect\ndirectly to the device (via Cumulocity IoT) using a native client such as ssh.\n\nAfter a passthrough connection has been added, you can open a proxy to it using\none of the following commands:\n\n  * c8y remoteaccess server\n  * c8y remoteaccess connect ssh\n",
       "alias": {
         "go": "create-passthrough",
         "powershell": "New-RemoteAccessPassthroughConfiguration"
@@ -177,21 +178,21 @@
       "examples": {
         "go": [
           {
-            "command": "c8y remoteaccess configurations create-passthrough --device mydevice\n",
+            "command": "c8y remoteaccess configurations create-passthrough --device device01\n",
             "description": "Create a SSH passthrough configuration to the localhost"
           },
           {
-            "command": "c8y remoteaccess configurations create-passthrough --device mydevice --hostname customhost --port 1234 --name \"My custom configuration\"\n",
+            "command": "c8y remoteaccess configurations create-passthrough --device device01 --hostname customhost --port 1234 --name \"My custom configuration\"\n",
             "description": "Create a SSH passthrough configuration with custom details"
           }
         ],
         "powershell": [
           {
-            "command": "New-RemoteAccessPassthroughConfiguration -Device mydevice\n",
+            "command": "New-RemoteAccessPassthroughConfiguration -Device device01\n",
             "description": "Create a SSH passthrough configuration to the localhost"
           },
           {
-            "command": "New-RemoteAccessPassthroughConfiguration -Device mydevice -Hostname customhost -Port 1234 -Name \"My custom configuration\"\n",
+            "command": "New-RemoteAccessPassthroughConfiguration -Device device01 -Hostname customhost -Port 1234 -Name \"My custom configuration\"\n",
             "description": "Create a SSH passthrough configuration with custom details"
           }
         ]
@@ -249,7 +250,7 @@
     {
       "name": "create-webssh",
       "description": "Create web ssh configuration",
-      "descriptionLong": "Create web ssh configuration\n",
+      "descriptionLong": "Create a new WebSSH configuration. If no arguments are provided\nthen sensible defaults will be used.\n",
       "alias": {
         "go": "create-webssh",
         "powershell": "New-RemoteAccessWebSSHConfiguration"
@@ -353,7 +354,7 @@
     {
       "name": "create-vnc",
       "description": "Create vnc configuration",
-      "descriptionLong": "Create vnc configuration\n",
+      "descriptionLong": "Create a new VNC configuration. If no arguments are provided\nthen sensible defaults will be used.\n",
       "alias": {
         "go": "create-vnc",
         "powershell": "New-RemoteAccessVNCConfiguration"
@@ -443,7 +444,7 @@
     {
       "name": "create-telnet",
       "description": "Create telnet configuration",
-      "descriptionLong": "Create telnet configuration\n",
+      "descriptionLong": "Create a new Telnet configuration. If no arguments are provided\nthen sensible defaults will be used.\n",
       "alias": {
         "go": "create-telnet",
         "powershell": "New-RemoteAccessTelnetConfiguration"

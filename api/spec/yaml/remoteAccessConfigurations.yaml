@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=../schema.json
 ---
 group:
-  name: remoteaccess/configuration
+  name: remoteaccess/configurations
   description: Manage Cloud Remote Access configuration
   descriptionLong: Cloud Remote Access configuration management
   link: https://cumulocity.com/docs/cloud-remote-access/using-cloud-remote-access/
@@ -11,16 +11,16 @@ commands:
     method: GET
     description: List remote access configurations
     descriptionLong: |
-      List the remote access configurations already configured for the device
+      List the remote access configurations already configured for a device
     alias:
         go: list
         powershell: Get-RemoteAccessConfigurationCollection
     examples:
       go:
-        - command: c8y remoteaccess configurations list --device mydevice
+        - command: c8y remoteaccess configurations list --device device01
           description: List remote access configurations for a given device
       powershell:
-        - command: Get-RemoteAccessConfigurationCollection -Device mydevice
+        - command: Get-RemoteAccessConfigurationCollection -Device device01
           description: List remote access configurations for a given device
       
     path: /service/remoteaccess/devices/{device}/configurations
@@ -40,10 +40,10 @@ commands:
     path: /service/remoteaccess/devices/{device}/configurations/{id}
     examples:
       go:
-        - command: c8y remoteaccess configurations get --device mydevice --id 1
+        - command: c8y remoteaccess configurations get --device device01 --id 1
           description: Get existing remote access configuration
       powershell:
-        - command: Get-RemoteAccessConfiguration -Device mydevice -Id 1
+        - command: Get-RemoteAccessConfiguration -Device device01 -Id 1
           description: Get existing remote access configuration
     pathParameters:
       - name: device
@@ -65,10 +65,10 @@ commands:
       powershell: Update-RemoteAccessConfiguration
     examples:
       go:
-        - command: c8y remoteaccess configurations update --device mydevice --id 1
+        - command: c8y remoteaccess configurations update --device device01 --id 1
           description: Update an existing remote access configuration
       powershell:
-        - command: Update-RemoteAccessConfiguration -Device mydevice -Id 1
+        - command: Update-RemoteAccessConfiguration -Device device01 -Id 1
           description: Update an existing remote access configuration
     method: PUT
     path: /service/remoteaccess/devices/{device}/configurations/{id}
@@ -90,15 +90,16 @@ commands:
 
   - name: delete
     description: Delete remote access configuration
+    descriptionLong: Delete an existing remote access configuration
     alias:
       go: delete
       powershell: Remove-RemoteAccessConfiguration
     examples:
       go:
-        - command: c8y remoteaccess configurations delete --device mydevice --id 1
+        - command: c8y remoteaccess configurations delete --device device01 --id 1
           description: Delete an existing remote access configuration
       powershell:
-        - command: Remove-RemoteAccessConfiguration -Device mydevice -Id 1
+        - command: Remove-RemoteAccessConfiguration -Device device01 -Id 1
           description: Delete an existing remote access configuration
     method: DELETE
     path: /service/remoteaccess/devices/{device}/configurations/{id}
@@ -116,7 +117,15 @@ commands:
   - name: create-passthrough
     description: Create passthrough configuration
     descriptionLong: |
-      Create passthrough configuration
+      Create a passthrough configuration which enables you to connect
+      directly to the device (via Cumulocity IoT) using a native client such as ssh.
+      
+      After a passthrough connection has been added, you can open a proxy to it using
+      one of the following commands:
+
+        * c8y remoteaccess server
+        * c8y remoteaccess connect ssh
+
     alias:
       go: create-passthrough
       powershell: New-RemoteAccessPassthroughConfiguration
@@ -125,17 +134,17 @@ commands:
     examples:
       go:
         - command: |
-            c8y remoteaccess configurations create-passthrough --device mydevice
+            c8y remoteaccess configurations create-passthrough --device device01
           description: Create a SSH passthrough configuration to the localhost
         - command: |
-            c8y remoteaccess configurations create-passthrough --device mydevice --hostname customhost --port 1234 --name "My custom configuration"
+            c8y remoteaccess configurations create-passthrough --device device01 --hostname customhost --port 1234 --name "My custom configuration"
           description: Create a SSH passthrough configuration with custom details
       powershell:
         - command: |
-            New-RemoteAccessPassthroughConfiguration -Device mydevice
+            New-RemoteAccessPassthroughConfiguration -Device device01
           description: Create a SSH passthrough configuration to the localhost
         - command: |
-            New-RemoteAccessPassthroughConfiguration -Device mydevice -Hostname customhost -Port 1234 -Name "My custom configuration"
+            New-RemoteAccessPassthroughConfiguration -Device device01 -Hostname customhost -Port 1234 -Name "My custom configuration"
           description: Create a SSH passthrough configuration with custom details
 
     pathParameters:
@@ -179,7 +188,8 @@ commands:
   - name: create-webssh
     description: Create web ssh configuration
     descriptionLong: |
-      Create web ssh configuration
+      Create a new WebSSH configuration. If no arguments are provided
+      then sensible defaults will be used.
     alias:
       go: create-webssh
       powershell: New-RemoteAccessWebSSHConfiguration
@@ -259,7 +269,8 @@ commands:
   - name: create-vnc
     description: Create vnc configuration
     descriptionLong: |
-      Create vnc configuration
+      Create a new VNC configuration. If no arguments are provided
+      then sensible defaults will be used.
     alias:
       go: create-vnc
       powershell: New-RemoteAccessVNCConfiguration
@@ -328,7 +339,8 @@ commands:
   - name: create-telnet
     description: Create telnet configuration
     descriptionLong: |
-      Create telnet configuration
+      Create a new Telnet configuration. If no arguments are provided
+      then sensible defaults will be used.
     alias:
       go: create-telnet
       powershell: New-RemoteAccessTelnetConfiguration
