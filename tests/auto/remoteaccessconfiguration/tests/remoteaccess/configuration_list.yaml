@@ -1,8 +1,0 @@
-tests:
-    remoteaccess/configuration_list_List remote access configurations for a given device:
-        command: c8y remoteaccess configurations list --device mydevice
-        exit-code: 0
-        stdout:
-            json:
-                method: GET
-                path: /service/remoteaccess/devices/mydevice/configurations

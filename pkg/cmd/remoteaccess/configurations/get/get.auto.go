@@ -35,7 +35,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Short: "Get remote access configuration",
 		Long:  `Get an existing remote access configuration for a device`,
 		Example: heredoc.Doc(`
-$ c8y remoteaccess configurations get --device mydevice --id 1
+$ c8y remoteaccess configurations get --device device01 --id 1
 Get existing remote access configuration
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

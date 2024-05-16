@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package update
+package delete
 
 import (
 	"io"
@@ -17,30 +17,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// UpdateCmd command
-type UpdateCmd struct {
+// DeleteCmd command
+type DeleteCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewUpdateCmd creates a command to Update remote access configuration
-func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
-	ccmd := &UpdateCmd{
+// NewDeleteCmd creates a command to Delete remote access configuration
+func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
+	ccmd := &DeleteCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:    "update",
-		Short:  "Update remote access configuration",
-		Long:   `Update an existing remote access configuration`,
-		Hidden: true,
-
+		Use:   "delete",
+		Short: "Delete remote access configuration",
+		Long:  `Delete an existing remote access configuration`,
 		Example: heredoc.Doc(`
-$ c8y remoteaccess configurations update --device mydevice --id 1
-Update an existing remote access configuration
+$ c8y remoteaccess configurations delete --device device01 --id 1
+Delete an existing remote access configuration
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.DeleteModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
@@ -49,7 +47,6 @@ Update an existing remote access configuration
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device")
 	cmd.Flags().String("id", "", "Connection (accepts pipeline)")
-	cmd.Flags().String("name", "", "Profile name (required)")
 
 	completion.WithOptions(
 		cmd,
@@ -65,7 +62,6 @@ Update an existing remote access configuration
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("name")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -73,7 +69,7 @@ Update an existing remote access configuration
 }
 
 // RunE executes the command
-func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -135,15 +131,11 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
-		flags.WithDataFlagValue(),
-		flags.WithStringValue("name", "name"),
-		cmdutil.WithTemplateValue(n.factory),
-		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -163,7 +155,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "PUT",
+		Method:       "DELETE",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

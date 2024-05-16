@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package create_vnc
+package create_webssh
 
 import (
 	"io"
@@ -17,29 +17,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CreateVncCmd command
-type CreateVncCmd struct {
+// CreateWebsshCmd command
+type CreateWebsshCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreateVncCmd creates a command to Create vnc configuration
-func NewCreateVncCmd(f *cmdutil.Factory) *CreateVncCmd {
-	ccmd := &CreateVncCmd{
+// NewCreateWebsshCmd creates a command to Create web ssh configuration
+func NewCreateWebsshCmd(f *cmdutil.Factory) *CreateWebsshCmd {
+	ccmd := &CreateWebsshCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "create-vnc",
-		Short: "Create vnc configuration",
-		Long: `Create vnc configuration
+		Use:   "create-webssh",
+		Short: "Create web ssh configuration",
+		Long: `Create a new WebSSH configuration. If no arguments are provided
+then sensible defaults will be used.
 `,
 		Example: heredoc.Doc(`
-$ c8y remoteaccess configurations create-vnc
-Create a VNC configuration that does not require a password
+$ c8y remoteaccess configurations create-webssh
+Create a webssh configuration
 
-$ c8y remoteaccess configurations create-vnc --password 'asd08dcj23dsf{@#9}'
-Create a VNC configuration that requires a password
+$ c8y remoteaccess configurations create-webssh --hostname 127.0.0.1 --port 2222
+Create a webssh configuration with a custom hostname and port
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -51,15 +52,20 @@ Create a VNC configuration that requires a password
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device (accepts pipeline)")
 	cmd.Flags().String("name", "webssh", "Connection name")
-	cmd.Flags().String("hostname", "127.0.0.1", "Hostname")
-	cmd.Flags().Int("port", 5900, "Port")
-	cmd.Flags().String("password", "", "VNC Password")
-	cmd.Flags().String("protocol", "VNC", "Protocol")
+	cmd.Flags().String("hostname", "", "Hostname")
+	cmd.Flags().Int("port", 0, "Port")
+	cmd.Flags().String("credentialsType", "USER_PASS", "Credentials type")
+	cmd.Flags().String("privateKey", "", "Private ssh key")
+	cmd.Flags().String("publicKey", "", "Public ssh key")
+	cmd.Flags().String("username", "", "Username")
+	cmd.Flags().String("password", "", "Username")
+	cmd.Flags().String("protocol", "SSH", "Protocol")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("protocol", "PASSTHROUGH", "SSH", "VNC"),
+		completion.WithValidateSet("credentialsType", "USER_PASS"),
+		completion.WithValidateSet("protocol", "PASSTHROUGH", "SSH"),
 	)
 
 	flags.WithOptions(
@@ -78,7 +84,7 @@ Create a VNC configuration that requires a password
 }
 
 // RunE executes the command
-func (n *CreateVncCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *CreateWebsshCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -149,13 +155,15 @@ func (n *CreateVncCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("hostname", "hostname"),
 		flags.WithIntValue("port", "port"),
+		flags.WithStringValue("credentialsType", "credentialsType"),
+		flags.WithStringValue("privateKey", "privateKey"),
+		flags.WithStringValue("publicKey", "publicKey"),
+		flags.WithStringValue("username", "username"),
 		flags.WithStringValue("password", "password"),
 		flags.WithStringValue("protocol", "protocol"),
-		flags.WithDefaultTemplateString(`
-{credentialsType: if std.isEmpty(std.get($, 'password', '')) then 'NONE' else 'PASS_ONLY'}`),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("name", "hostname", "port", "protocol", "credentialsType"),
+		flags.WithRequiredProperties("hostname", "port", "protocol", "name"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

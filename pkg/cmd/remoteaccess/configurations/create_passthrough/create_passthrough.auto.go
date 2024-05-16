@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package create_telnet
+package create_passthrough
 
 import (
 	"io"
@@ -17,26 +17,36 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CreateTelnetCmd command
-type CreateTelnetCmd struct {
+// CreatePassthroughCmd command
+type CreatePassthroughCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreateTelnetCmd creates a command to Create telnet configuration
-func NewCreateTelnetCmd(f *cmdutil.Factory) *CreateTelnetCmd {
-	ccmd := &CreateTelnetCmd{
+// NewCreatePassthroughCmd creates a command to Create passthrough configuration
+func NewCreatePassthroughCmd(f *cmdutil.Factory) *CreatePassthroughCmd {
+	ccmd := &CreatePassthroughCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "create-telnet",
-		Short: "Create telnet configuration",
-		Long: `Create telnet configuration
+		Use:   "create-passthrough",
+		Short: "Create passthrough configuration",
+		Long: `Create a passthrough configuration which enables you to connect
+directly to the device (via Cumulocity IoT) using a native client such as ssh.
+
+After a passthrough connection has been added, you can open a proxy to it using
+one of the following commands:
+
+  * c8y remoteaccess server
+  * c8y remoteaccess connect ssh
 `,
 		Example: heredoc.Doc(`
-$ c8y remoteaccess configurations create-telnet
-Create a telnet configuration
+$ c8y remoteaccess configurations create-passthrough --device device01
+Create a SSH passthrough configuration to the localhost
+
+$ c8y remoteaccess configurations create-passthrough --device device01 --hostname customhost --port 1234 --name "My custom configuration"
+Create a SSH passthrough configuration with custom details
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -47,16 +57,15 @@ Create a telnet configuration
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device (accepts pipeline)")
-	cmd.Flags().String("name", "telnet", "Connection name")
+	cmd.Flags().String("name", "passthrough", "Connection name")
 	cmd.Flags().String("hostname", "127.0.0.1", "Hostname")
-	cmd.Flags().Int("port", 23, "Port")
-	cmd.Flags().String("credentialsType", "NONE", "Credentials type")
-	cmd.Flags().String("protocol", "TELNET", "Protocol")
+	cmd.Flags().Int("port", 22, "Port")
+	cmd.Flags().String("protocol", "PASSTHROUGH", "Protocol")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("protocol", "TELNET", "PASSTHROUGH", "SSH", "VNC"),
+		completion.WithValidateSet("protocol", "PASSTHROUGH"),
 	)
 
 	flags.WithOptions(
@@ -69,15 +78,13 @@ Create a telnet configuration
 
 	// Required flags
 
-	_ = cmd.Flags().MarkHidden("credentialsType")
-
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
 
 // RunE executes the command
-func (n *CreateTelnetCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *CreatePassthroughCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -148,11 +155,12 @@ func (n *CreateTelnetCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("hostname", "hostname"),
 		flags.WithIntValue("port", "port"),
-		flags.WithStringValue("credentialsType", "credentialsType"),
 		flags.WithStringValue("protocol", "protocol"),
+		flags.WithDefaultTemplateString(`
+{credentialsType:'NONE'}`),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("name", "hostname", "port", "protocol", "credentialsType"),
+		flags.WithRequiredProperties("hostname", "port", "protocol", "name"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

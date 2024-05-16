@@ -5,11 +5,12 @@ Function New-RemoteAccessWebSSHConfiguration {
 Create web ssh configuration
 
 .DESCRIPTION
-Create web ssh configuration
+Create a new WebSSH configuration. If no arguments are provided
+then sensible defaults will be used.
 
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configuration_create-webssh
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_create-webssh
 
 .EXAMPLE
 PS> New-RemoteAccessWebSSHConfiguration
@@ -93,7 +94,7 @@ Create a webssh configuration with a custom hostname and port
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configuration create-webssh"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configurations create-webssh"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -107,13 +108,13 @@ Create a webssh configuration with a custom hostname and port
         if ($ClientOptions.ConvertToPS) {
             $Device `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration create-webssh $c8yargs `
+            | c8y remoteaccess configurations create-webssh $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration create-webssh $c8yargs
+            | c8y remoteaccess configurations create-webssh $c8yargs
         }
         
     }

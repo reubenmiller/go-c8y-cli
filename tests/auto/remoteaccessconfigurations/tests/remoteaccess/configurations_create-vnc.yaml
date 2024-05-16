@@ -1,5 +1,5 @@
 tests:
-    remoteaccess/configuration_create-vnc_Create a VNC configuration that does not require a password:
+    remoteaccess/configurations_create-vnc_Create a VNC configuration that does not require a password:
         command: |
             c8y remoteaccess configurations create-vnc
         exit-code: 0
@@ -7,7 +7,7 @@ tests:
             json:
                 method: POST
                 path: /service/remoteaccess/devices/{device}/configurations
-    remoteaccess/configuration_create-vnc_Create a VNC configuration that requires a password:
+    remoteaccess/configurations_create-vnc_Create a VNC configuration that requires a password:
         command: c8y remoteaccess configurations create-vnc --password 'asd08dcj23dsf{@#9}'
         exit-code: 0
         stdout:

@@ -5,20 +5,27 @@ Function New-RemoteAccessPassthroughConfiguration {
 Create passthrough configuration
 
 .DESCRIPTION
-Create passthrough configuration
+Create a passthrough configuration which enables you to connect
+directly to the device (via Cumulocity IoT) using a native client such as ssh.
+
+After a passthrough connection has been added, you can open a proxy to it using
+one of the following commands:
+
+  * c8y remoteaccess server
+  * c8y remoteaccess connect ssh
 
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configuration_create-passthrough
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_create-passthrough
 
 .EXAMPLE
-PS> New-RemoteAccessPassthroughConfiguration -Device mydevice
+PS> New-RemoteAccessPassthroughConfiguration -Device device01
 
 
 Create a SSH passthrough configuration to the localhost
 
 .EXAMPLE
-PS> New-RemoteAccessPassthroughConfiguration -Device mydevice -Hostname customhost -Port 1234 -Name "My custom configuration"
+PS> New-RemoteAccessPassthroughConfiguration -Device device01 -Hostname customhost -Port 1234 -Name "My custom configuration"
 
 
 Create a SSH passthrough configuration with custom details
@@ -68,7 +75,7 @@ Create a SSH passthrough configuration with custom details
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configuration create-passthrough"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configurations create-passthrough"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -82,13 +89,13 @@ Create a SSH passthrough configuration with custom details
         if ($ClientOptions.ConvertToPS) {
             $Device `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration create-passthrough $c8yargs `
+            | c8y remoteaccess configurations create-passthrough $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration create-passthrough $c8yargs
+            | c8y remoteaccess configurations create-passthrough $c8yargs
         }
         
     }

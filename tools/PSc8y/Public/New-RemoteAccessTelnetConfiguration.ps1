@@ -5,11 +5,12 @@ Function New-RemoteAccessTelnetConfiguration {
 Create telnet configuration
 
 .DESCRIPTION
-Create telnet configuration
+Create a new Telnet configuration. If no arguments are provided
+then sensible defaults will be used.
 
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configuration_create-telnet
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_create-telnet
 
 .EXAMPLE
 PS> New-RemoteAccessTelnetConfiguration
@@ -67,7 +68,7 @@ Create a telnet configuration
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configuration create-telnet"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configurations create-telnet"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -81,13 +82,13 @@ Create a telnet configuration
         if ($ClientOptions.ConvertToPS) {
             $Device `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration create-telnet $c8yargs `
+            | c8y remoteaccess configurations create-telnet $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration create-telnet $c8yargs
+            | c8y remoteaccess configurations create-telnet $c8yargs
         }
         
     }

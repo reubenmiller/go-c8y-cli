@@ -5,14 +5,14 @@ Function Get-RemoteAccessConfigurationCollection {
 List remote access configurations
 
 .DESCRIPTION
-List the remote access configurations already configured for the device
+List the remote access configurations already configured for a device
 
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configuration_list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_list
 
 .EXAMPLE
-PS> Get-RemoteAccessConfigurationCollection -Device mydevice
+PS> Get-RemoteAccessConfigurationCollection -Device device01
 
 List remote access configurations for a given device
 
@@ -40,7 +40,7 @@ List remote access configurations for a given device
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configuration list"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configurations list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -54,13 +54,13 @@ List remote access configurations for a given device
         if ($ClientOptions.ConvertToPS) {
             $Device `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration list $c8yargs `
+            | c8y remoteaccess configurations list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration list $c8yargs
+            | c8y remoteaccess configurations list $c8yargs
         }
         
     }

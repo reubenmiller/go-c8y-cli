@@ -1,8 +1,7 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package list
+package create_telnet
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -18,29 +17,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// ListCmd command
-type ListCmd struct {
+// CreateTelnetCmd command
+type CreateTelnetCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewListCmd creates a command to List remote access configurations
-func NewListCmd(f *cmdutil.Factory) *ListCmd {
-	ccmd := &ListCmd{
+// NewCreateTelnetCmd creates a command to Create telnet configuration
+func NewCreateTelnetCmd(f *cmdutil.Factory) *CreateTelnetCmd {
+	ccmd := &CreateTelnetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List remote access configurations",
-		Long: `List the remote access configurations already configured for the device
+		Use:   "create-telnet",
+		Short: "Create telnet configuration",
+		Long: `Create a new Telnet configuration. If no arguments are provided
+then sensible defaults will be used.
 `,
 		Example: heredoc.Doc(`
-$ c8y remoteaccess configurations list --device mydevice
-List remote access configurations for a given device
+$ c8y remoteaccess configurations create-telnet
+Create a telnet configuration
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			return f.CreateModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
@@ -48,14 +48,21 @@ List remote access configurations for a given device
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device (accepts pipeline)")
+	cmd.Flags().String("name", "telnet", "Connection name")
+	cmd.Flags().String("hostname", "127.0.0.1", "Hostname")
+	cmd.Flags().Int("port", 23, "Port")
+	cmd.Flags().String("credentialsType", "NONE", "Credentials type")
+	cmd.Flags().String("protocol", "TELNET", "Protocol")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("protocol", "TELNET", "PASSTHROUGH", "SSH", "VNC"),
 	)
 
 	flags.WithOptions(
 		cmd,
+		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("device", "device", false, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
@@ -63,13 +70,15 @@ List remote access configurations for a given device
 
 	// Required flags
 
+	_ = cmd.Flags().MarkHidden("credentialsType")
+
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
 
 // RunE executes the command
-func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *CreateTelnetCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -99,11 +108,6 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -118,6 +122,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -135,11 +140,20 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
+		flags.WithDataFlagValue(),
+		flags.WithStringValue("name", "name"),
+		flags.WithStringValue("hostname", "hostname"),
+		flags.WithIntValue("port", "port"),
+		flags.WithStringValue("credentialsType", "credentialsType"),
+		flags.WithStringValue("protocol", "protocol"),
+		cmdutil.WithTemplateValue(n.factory),
+		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("name", "hostname", "port", "protocol", "credentialsType"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -158,7 +172,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "GET",
+		Method:       "POST",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

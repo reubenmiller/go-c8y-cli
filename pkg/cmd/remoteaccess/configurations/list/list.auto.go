@@ -1,7 +1,8 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package create_passthrough
+package list
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -17,32 +18,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CreatePassthroughCmd command
-type CreatePassthroughCmd struct {
+// ListCmd command
+type ListCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreatePassthroughCmd creates a command to Create passthrough configuration
-func NewCreatePassthroughCmd(f *cmdutil.Factory) *CreatePassthroughCmd {
-	ccmd := &CreatePassthroughCmd{
+// NewListCmd creates a command to List remote access configurations
+func NewListCmd(f *cmdutil.Factory) *ListCmd {
+	ccmd := &ListCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "create-passthrough",
-		Short: "Create passthrough configuration",
-		Long: `Create passthrough configuration
+		Use:   "list",
+		Short: "List remote access configurations",
+		Long: `List the remote access configurations already configured for a device
 `,
 		Example: heredoc.Doc(`
-$ c8y remoteaccess configurations create-passthrough --device mydevice
-Create a SSH passthrough configuration to the localhost
-
-$ c8y remoteaccess configurations create-passthrough --device mydevice --hostname customhost --port 1234 --name "My custom configuration"
-Create a SSH passthrough configuration with custom details
+$ c8y remoteaccess configurations list --device device01
+List remote access configurations for a given device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return nil
 		},
 		RunE: ccmd.RunE,
 	}
@@ -50,20 +48,14 @@ Create a SSH passthrough configuration with custom details
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device (accepts pipeline)")
-	cmd.Flags().String("name", "passthrough", "Connection name")
-	cmd.Flags().String("hostname", "127.0.0.1", "Hostname")
-	cmd.Flags().Int("port", 22, "Port")
-	cmd.Flags().String("protocol", "PASSTHROUGH", "Protocol")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("protocol", "PASSTHROUGH"),
 	)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("device", "device", false, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
@@ -77,7 +69,7 @@ Create a SSH passthrough configuration with custom details
 }
 
 // RunE executes the command
-func (n *CreatePassthroughCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -107,6 +99,11 @@ func (n *CreatePassthroughCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -121,7 +118,6 @@ func (n *CreatePassthroughCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -139,21 +135,11 @@ func (n *CreatePassthroughCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
-		flags.WithDataFlagValue(),
-		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("hostname", "hostname"),
-		flags.WithIntValue("port", "port"),
-		flags.WithStringValue("protocol", "protocol"),
-		flags.WithDefaultTemplateString(`
-{credentialsType:'NONE'}`),
-		cmdutil.WithTemplateValue(n.factory),
-		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("hostname", "port", "protocol", "name"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -172,7 +158,7 @@ func (n *CreatePassthroughCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "POST",
+		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

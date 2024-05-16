@@ -8,10 +8,10 @@ Get remote access configuration
 Get an existing remote access configuration for a device
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configuration_get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_get
 
 .EXAMPLE
-PS> Get-RemoteAccessConfiguration -Device mydevice -Id 1
+PS> Get-RemoteAccessConfiguration -Device device01 -Id 1
 
 Get existing remote access configuration
 
@@ -44,7 +44,7 @@ Get existing remote access configuration
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configuration get"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configurations get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -58,13 +58,13 @@ Get existing remote access configuration
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration get $c8yargs `
+            | c8y remoteaccess configurations get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration get $c8yargs
+            | c8y remoteaccess configurations get $c8yargs
         }
         
     }

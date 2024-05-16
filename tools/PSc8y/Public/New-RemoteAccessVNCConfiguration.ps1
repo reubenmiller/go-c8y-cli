@@ -5,11 +5,12 @@ Function New-RemoteAccessVNCConfiguration {
 Create vnc configuration
 
 .DESCRIPTION
-Create vnc configuration
+Create a new VNC configuration. If no arguments are provided
+then sensible defaults will be used.
 
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configuration_create-vnc
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_create-vnc
 
 .EXAMPLE
 PS> New-RemoteAccessVNCConfiguration
@@ -72,7 +73,7 @@ Create a VNC configuration that requires a password
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configuration create-vnc"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configurations create-vnc"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -86,13 +87,13 @@ Create a VNC configuration that requires a password
         if ($ClientOptions.ConvertToPS) {
             $Device `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration create-vnc $c8yargs `
+            | c8y remoteaccess configurations create-vnc $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration create-vnc $c8yargs
+            | c8y remoteaccess configurations create-vnc $c8yargs
         }
         
     }

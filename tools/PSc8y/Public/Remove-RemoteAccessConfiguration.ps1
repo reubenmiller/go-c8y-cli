@@ -5,13 +5,13 @@ Function Remove-RemoteAccessConfiguration {
 Delete remote access configuration
 
 .DESCRIPTION
-Delete remote access configuration
+Delete an existing remote access configuration
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configuration_delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_delete
 
 .EXAMPLE
-PS> Remove-RemoteAccessConfiguration -Device mydevice -Id 1
+PS> Remove-RemoteAccessConfiguration -Device device01 -Id 1
 
 Delete an existing remote access configuration
 
@@ -44,7 +44,7 @@ Delete an existing remote access configuration
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configuration delete"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "remoteaccess configurations delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -58,13 +58,13 @@ Delete an existing remote access configuration
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration delete $c8yargs `
+            | c8y remoteaccess configurations delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y remoteaccess configuration delete $c8yargs
+            | c8y remoteaccess configurations delete $c8yargs
         }
         
     }
