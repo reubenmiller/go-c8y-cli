@@ -23,12 +23,10 @@ import (
 )
 
 type CmdSSH struct {
-	device         []string
-	externalID     []string
-	externalIDType string
-	listen         string
-	user           string
-	configuration  string
+	device        []string
+	listen        string
+	user          string
+	configuration string
 
 	*subcommand.SubCommand
 
@@ -51,22 +49,20 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 		interactive, and it will return upon completion of the command.
 		`),
 		Example: heredoc.Doc(`
-$ c8y remoteaccess ssh --device 12345
-Start an interactive SSH session on the device
+			$ c8y remoteaccess ssh --device 12345
+			Start an interactive SSH session on the device
 
-$ c8y remoteaccess ssh --device 12345 --user admin
-Start an interactive SSH session on the device with a given ssh user
+			$ c8y remoteaccess ssh --device 12345 --user admin
+			Start an interactive SSH session on the device with a given ssh user
 
-$ c8y remoteaccess ssh --device 12345 --user admin -- systemctl status
-Use a non-interactive session to execute a single command and print the result
+			$ c8y remoteaccess ssh --device 12345 --user admin -- systemctl status
+			Use a non-interactive session to execute a single command and print the result
 		`),
 		RunE: ccmd.RunE,
 	}
 
 	// Flags
 	cmd.Flags().StringSliceVar(&ccmd.device, "device", []string{}, "Device")
-	// cmd.Flags().StringSliceVar(&ccmd.externalID, "external-id", []string{}, "Device external identity")
-	// cmd.Flags().StringVar(&ccmd.externalIDType, "external-type", "c8y_Serial", "Device external identity")
 	cmd.Flags().StringVar(&ccmd.listen, "listen", "127.0.0.1:0", "Listener address. unix:///run/example.sock")
 	cmd.Flags().StringVar(&ccmd.user, "user", "", "Default ssh user")
 	cmd.Flags().StringVar(&ccmd.configuration, "configuration", "", "Remote Access Configuration")
@@ -80,9 +76,6 @@ Use a non-interactive session to execute a single command and print the result
 		cmd,
 		flags.WithExtendedPipelineSupport("device", "device", false, "deviceId", "source.id", "managedObject.id", "id"),
 	)
-
-	// cmd.MarkFlagsMutuallyExclusive("device", "external-id")
-	// cmd.MarkFlagsMutuallyExclusive("device", "external-type")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -108,7 +101,6 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// TODO: This is overly complicated. Refactor once the generic work is done
 	body := mapbuilder.NewInitializedMapBuilder(true)
 	body.SetApplyTemplateOnMarshalPreference(true)
 	err = flags.WithBody(
@@ -149,7 +141,7 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
 			ManagedObjectID: device,
 			RemoteAccessID:  craConfig.ID,
-		}, log)
+		})
 
 		// TCP / socket listener
 		if err := craClient.Listen(n.listen); err != nil {
@@ -163,7 +155,6 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		// Start in background
-		// TODO: Work out how to shut it down cleanly
 		go craClient.Serve()
 
 		// Build ssh command
@@ -185,7 +176,6 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 			sshArgs = append(sshArgs, args[dashIdx:]...)
 		}
 
-		// TODO: Should output templates be considered here?
 		sshCmd := exec.CommandContext(context.Background(), "ssh", sshArgs...)
 		sshCmd.Stdout = n.factory.IOStreams.Out
 		sshCmd.Stdin = n.factory.IOStreams.In
@@ -201,10 +191,6 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		duration := time.Since(start).Truncate(time.Millisecond)
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", duration)
 
-		// err := n.factory.WriteOutput(output, cmdutil.OutputContext{
-		// 	Input: j.Input,
-		// }, &commonOptions)
-		// return nil, err
 		return nil, sshErr
 	})
 }

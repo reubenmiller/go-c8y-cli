@@ -41,20 +41,20 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 		Short: "Start a local proxy server",
 		Long:  `Start a local proxy server`,
 		Example: heredoc.Doc(`
-$ c8y remoteaccess server --device 12345
-Start a local proxy server on a random local port
+			$ c8y remoteaccess server --device 12345
+			Start a local proxy server on a random local port
 
-$ c8y remoteaccess server --device 12345 --listen -
-Start a local proxy server reading from stdin and writing to stdout (useful for usage with the ProxyCommand in ssh)
+			$ c8y remoteaccess server --device 12345 --listen -
+			Start a local proxy server reading from stdin and writing to stdout (useful for usage with the ProxyCommand in ssh)
 
-$ c8y remoteaccess server --device 12345 --listen unix:///run/example.sock
-Start a local proxy using a UNIX socket
+			$ c8y remoteaccess server --device 12345 --listen unix:///run/example.sock
+			Start a local proxy using a UNIX socket
 
-$ c8y remoteaccess server --device 12345 --listen 127.0.0.1:22022
-Start a local proxy using a local TCP server on a fixed port 22022
+			$ c8y remoteaccess server --device 12345 --listen 127.0.0.1:22022
+			Start a local proxy using a local TCP server on a fixed port 22022
 
-$ c8y remoteaccess server --device 12345 --configuration "*rugpi*" --browser
-Start a local proxy and match on the configuration using wildcards, then open the browser to the endpoint
+			$ c8y remoteaccess server --device 12345 --configuration "*rugpi*" --browser
+			Start a local proxy and match on the configuration using wildcards, then open the browser to the endpoint
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -101,7 +101,6 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// TODO: This is overly complicated. Refactor once the generic work is done
 	body := mapbuilder.NewInitializedMapBuilder(true)
 	body.SetApplyTemplateOnMarshalPreference(true)
 	err = flags.WithBody(
@@ -142,7 +141,7 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 		craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
 			ManagedObjectID: device,
 			RemoteAccessID:  craConfig.ID,
-		}, log)
+		})
 
 		if n.listen == "-" {
 			log.Debugf("Listening to request from stdin")
@@ -196,8 +195,6 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 
 		if n.open {
 			go func() {
-				// TODO: Should it wait for the server to be up?
-				// time.Sleep(200 * time.Millisecond)
 				targetURL := fmt.Sprintf("http://%s:%s", host, port)
 				if err := n.factory.Browser.Browse(targetURL); err != nil {
 					cfg.Logger.Warnf("%s", err)
