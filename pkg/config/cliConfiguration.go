@@ -1469,6 +1469,11 @@ func (c *Config) DisableStdin() bool {
 	return c.viper.GetBool(SettingsDisableInput)
 }
 
+// Change the disable stdin value
+func (c *Config) SetDisableStdin(v bool) {
+	c.viper.Set(SettingsDisableInput, v)
+}
+
 // AllowEmptyPipe check if empty piped data is allowed
 func (c *Config) AllowEmptyPipe() bool {
 	return c.viper.GetBool(SettingsAllowEmptyPipe)
