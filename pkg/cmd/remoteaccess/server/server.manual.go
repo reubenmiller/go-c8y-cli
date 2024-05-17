@@ -39,7 +39,25 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 	cmd := &cobra.Command{
 		Use:   "server",
 		Short: "Start a local proxy server",
-		Long:  `Start a local proxy server`,
+		Long: `
+		Start a local proxy server
+
+		You can add use the remote access local proxy within your ssh config file, to use it to
+		connect to your device with ssh without having to manually launch the proxy yourself!
+
+		To do this add the following configuration to your device.
+
+		---
+		Host <device>
+			User <device_username>
+			PreferredAuthentications publickey
+			IdentityFile <identify_file>
+			ServerAliveInterval 120
+			StrictHostKeyChecking no
+			UserKnownHostsFile /dev/null
+			ProxyCommand c8y remoteaccess server --device %n --listen -
+		---
+		`,
 		Example: heredoc.Doc(`
 			$ c8y remoteaccess server --device 12345
 			Start a local proxy server on a random local port
@@ -94,6 +112,12 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 	log, err := n.factory.Logger()
 	if err != nil {
 		return err
+	}
+
+	// Disable if stdio mode is being used
+	if n.listen == "-" {
+		log.Debug("Disabling pipeline stdin parsing when in stdio mode")
+		cfg.SetDisableStdin(true)
 	}
 
 	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
