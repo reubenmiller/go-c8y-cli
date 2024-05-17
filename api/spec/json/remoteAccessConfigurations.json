@@ -1,7 +1,7 @@
 {
   "group": {
     "name": "remoteaccess/configurations",
-    "description": "Manage Cloud Remote Access configuration",
+    "description": "Manage remote access configurations",
     "descriptionLong": "Cloud Remote Access configuration management",
     "link": "https://cumulocity.com/docs/cloud-remote-access/using-cloud-remote-access/"
   },
@@ -47,7 +47,7 @@
     },
     {
       "name": "get",
-      "description": "Get remote access configuration",
+      "description": "Get a remote access configuration",
       "descriptionLong": "Get an existing remote access configuration for a device",
       "alias": {
         "go": "get",
@@ -138,10 +138,11 @@
       ],
       "body": [
         {
-          "name": "name",
+          "name": "newName",
           "type": "string",
-          "description": "Profile name",
-          "required": true
+          "property": "name",
+          "required": false,
+          "description": "New configuration name"
         }
       ]
     },

@@ -49,7 +49,7 @@ Update an existing remote access configuration
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device")
 	cmd.Flags().String("id", "", "Connection (accepts pipeline)")
-	cmd.Flags().String("name", "", "Profile name (required)")
+	cmd.Flags().String("newName", "", "New configuration name")
 
 	completion.WithOptions(
 		cmd,
@@ -65,7 +65,6 @@ Update an existing remote access configuration
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("name")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -141,7 +140,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("name", "name"),
+		flags.WithStringValue("newName", "name"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)

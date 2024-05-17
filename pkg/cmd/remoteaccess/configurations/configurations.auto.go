@@ -23,7 +23,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdConfigurations {
 
 	cmd := &cobra.Command{
 		Use:   "configurations",
-		Short: "Manage Cloud Remote Access configuration",
+		Short: "Manage remote access configurations",
 		Long:  `Cloud Remote Access configuration management`,
 	}
 

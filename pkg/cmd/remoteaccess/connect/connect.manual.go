@@ -16,8 +16,8 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdConnect {
 
 	cmd := &cobra.Command{
 		Use:   "connect",
-		Short: "Connect to device via remote access",
-		Long:  `Connect to device via remote access`,
+		Short: "Connect to a device",
+		Long:  `Connect to a device using the protocol defined in an existing configuration`,
 	}
 
 	// Subcommands

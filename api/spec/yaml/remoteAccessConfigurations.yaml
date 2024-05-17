@@ -2,7 +2,7 @@
 ---
 group:
   name: remoteaccess/configurations
-  description: Manage Cloud Remote Access configuration
+  description: Manage remote access configurations
   descriptionLong: Cloud Remote Access configuration management
   link: https://cumulocity.com/docs/cloud-remote-access/using-cloud-remote-access/
 
@@ -35,7 +35,7 @@ commands:
         pipeline: true
 
   - name: get
-    description: Get remote access configuration
+    description: Get a remote access configuration
     descriptionLong: Get an existing remote access configuration for a device
     alias:
       go: get
@@ -65,6 +65,8 @@ commands:
         pipeline: true
   
   - name: update
+    # Hide for now, as updating requires to PUT the entire existing state into the body plus the desired changes
+    # For power-users this might be manageable but it is just a poor user experience
     hidden: true
     description: Update remote access configuration
     descriptionLong: Update an existing remote access configuration
@@ -96,10 +98,11 @@ commands:
         description: Connection
         pipeline: true
     body:
-      - name: name
+      - name: newName
         type: string
-        description: Profile name
-        required: true
+        property: name
+        required: false
+        description: New configuration name
 
   - name: delete
     description: Delete remote access configuration

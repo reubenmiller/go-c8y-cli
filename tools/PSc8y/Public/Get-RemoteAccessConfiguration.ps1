@@ -2,7 +2,7 @@
 Function Get-RemoteAccessConfiguration {
 <#
 .SYNOPSIS
-Get remote access configuration
+Get a remote access configuration
 
 .DESCRIPTION
 Get an existing remote access configuration for a device

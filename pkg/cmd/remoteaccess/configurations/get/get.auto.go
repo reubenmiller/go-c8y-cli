@@ -25,14 +25,14 @@ type GetCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewGetCmd creates a command to Get remote access configuration
+// NewGetCmd creates a command to Get a remote access configuration
 func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 	ccmd := &GetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get remote access configuration",
+		Short: "Get a remote access configuration",
 		Long:  `Get an existing remote access configuration for a device`,
 		Example: heredoc.Doc(`
 $ c8y remoteaccess configurations get --device device01 --id 1
