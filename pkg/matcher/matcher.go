@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func MatchWithWildcards(s, pattern string) (bool, error) {
+func ConvertWildcardToRegex(pattern string) (*regexp.Regexp, error) {
 	pattern = strings.ReplaceAll(pattern, "\\", "\\\\")
 	pattern = strings.ReplaceAll(pattern, ".", "\\.")
 
@@ -17,8 +17,11 @@ func MatchWithWildcards(s, pattern string) (bool, error) {
 	// and whole string matching
 	pattern = "(?ims)^" + pattern + "$"
 
-	r, err := regexp.Compile(pattern)
+	return regexp.Compile(pattern)
+}
 
+func MatchWithWildcards(s, pattern string) (bool, error) {
+	r, err := ConvertWildcardToRegex(pattern)
 	if err != nil {
 		return false, fmt.Errorf("invalid regex patter")
 	}

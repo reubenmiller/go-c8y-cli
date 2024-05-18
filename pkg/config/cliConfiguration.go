@@ -326,6 +326,12 @@ const (
 	// SettingsBrowser default browser
 	SettingsBrowser = "settings.browser"
 
+	//
+	// Remote Access preferences
+	//
+	// SettingsRemoteAccessDefaultSSHUser the default ssh user
+	SettingsRemoteAccessDefaultSSHUser = "settings.remoteaccess.sshuser"
+
 	// Extensions
 	SettingsExtensionDataDir         = "settings.extensions.datadir"
 	SettingsExtensionDefaultHost     = "settings.extensions.defaultHost"
@@ -1469,6 +1475,11 @@ func (c *Config) DisableStdin() bool {
 	return c.viper.GetBool(SettingsDisableInput)
 }
 
+// Change the disable stdin value
+func (c *Config) SetDisableStdin(v bool) {
+	c.viper.Set(SettingsDisableInput, v)
+}
+
 // AllowEmptyPipe check if empty piped data is allowed
 func (c *Config) AllowEmptyPipe() bool {
 	return c.viper.GetBool(SettingsAllowEmptyPipe)
@@ -1574,6 +1585,10 @@ func (c *Config) DefaultHost() string {
 
 func (c *Config) ExtensionDefaultUsername() string {
 	return c.viper.GetString(SettingsExtensionDefaultUsername)
+}
+
+func (c *Config) GetRemoteAccessDefaultSSHUser() string {
+	return c.viper.GetString(SettingsRemoteAccessDefaultSSHUser)
 }
 
 // GetJSONSelect get json properties to be selected from the output. Only the given properties will be returned

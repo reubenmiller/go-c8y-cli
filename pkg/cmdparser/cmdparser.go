@@ -226,6 +226,8 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 		return completion.WithNotification2SubscriptionName(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "subscriptionId":
 		return completion.WithNotification2SubscriptionId(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+	case "remoteaccessconfiguration":
+		return completion.WithRemoteAccessConfiguration(p.Name, p.GetDependentProperty(0, "device"), func() (*c8y.Client, error) { return factory.Client() })
 	}
 	return nil
 }
@@ -494,6 +496,9 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 
 	case "usergroup[]":
 		opts = append(opts, c8yfetcher.WithUserGroupByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+
+	case "remoteaccessconfiguration":
+		opts = append(opts, c8yfetcher.WithRemoteAccessConfigurationFirstMatch(factory, p.GetDependentProperty(0, "device"), args, p.Name, targetProp))
 	}
 
 	return opts

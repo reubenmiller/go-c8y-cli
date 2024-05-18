@@ -247,6 +247,7 @@
         "devicegroup[]",
         "usergroup[]",
         "userself[]",
+        "remoteaccessconfiguration",
         "roleself[]",
         "role[]",
         "user[]",

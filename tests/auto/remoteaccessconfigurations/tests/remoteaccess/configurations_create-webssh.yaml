@@ -1,0 +1,23 @@
+tests:
+    remoteaccess/configurations_create-webssh_Create a webssh configuration (with username/password authentication):
+        command: |
+            c8y remoteaccess configurations create-webssh --device device01 --username admin --password "3Xz7cEj%oAmt#dnUMP*N"
+        exit-code: 0
+        stdout:
+            json:
+                body.password: 3Xz7cEj%oAmt#dnUMP*N
+                body.username: admin
+                method: POST
+                path: r//service/remoteaccess/devices/\d+/configurations$
+    ? remoteaccess/configurations_create-webssh_Create a webssh configuration with a custom hostname and port (with ssh key authentication)
+    :   command: c8y remoteaccess configurations create-webssh --device device01 --hostname 127.0.0.1 --port 2222 --username admin --privateKey "xxxx" --publicKey "yyyyy"
+        exit-code: 0
+        stdout:
+            json:
+                body.hostname: 127.0.0.1
+                body.port: "2222"
+                body.privateKey: xxxx
+                body.publicKey: yyyyy
+                body.username: admin
+                method: POST
+                path: r//service/remoteaccess/devices/\d+/configurations$

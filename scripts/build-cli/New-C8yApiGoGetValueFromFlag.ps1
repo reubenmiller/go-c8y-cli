@@ -217,6 +217,9 @@
         
         # user group array
         "usergroup[]" = "c8yfetcher.WithUserGroupByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
+
+        # remote access configuration
+        "remoteaccessconfiguration" = "c8yfetcher.WithRemoteAccessConfigurationFirstMatch(n.factory, `"device`", args, `"${prop}`", `"${queryParam}`"),"
     }
 
 

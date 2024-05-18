@@ -1,0 +1,8 @@
+tests:
+    remoteaccess/configurations_delete_Delete an existing remote access configuration:
+        command: c8y remoteaccess configurations delete --device device01 --id 1
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: r//service/remoteaccess/devices/\d+/configurations/1$

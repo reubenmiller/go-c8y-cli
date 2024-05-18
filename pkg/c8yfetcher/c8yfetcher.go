@@ -570,10 +570,17 @@ func WithManagedObjectPropertyFirstMatch(factory *cmdutil.Factory, fetcher Entit
 	}
 }
 
+func ignoreArgsAfterDash(cmd *cobra.Command, args []string) []string {
+	if i := cmd.ArgsLenAtDash(); i > -1 {
+		return args[0:i]
+	}
+	return args[:]
+}
+
 // WithReferenceByNameFirstMatch add reference by name matching using a fetcher via cli args. Only the first match will be used
 func WithReferenceByNameFirstMatch(factory *cmdutil.Factory, fetcher EntityFetcher, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
-		opt := WithReferenceByName(factory, fetcher, args, opts...)
+		opt := WithReferenceByName(factory, fetcher, ignoreArgsAfterDash(cmd, args), opts...)
 		name, values, err := opt(cmd, inputIterators)
 
 		if name == "" {
@@ -602,7 +609,7 @@ func WithReferenceByNameFirstMatch(factory *cmdutil.Factory, fetcher EntityFetch
 // WithSelfReferenceByNameFirstMatch add reference by name matching using a fetcher via cli args. Only the first match will be used
 func WithSelfReferenceByNameFirstMatch(factory *cmdutil.Factory, fetcher EntityFetcher, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
-		opt := WithSelfReferenceByName(factory, fetcher, args, opts...)
+		opt := WithSelfReferenceByName(factory, fetcher, ignoreArgsAfterDash(cmd, args), opts...)
 		name, values, err := opt(cmd, inputIterators)
 
 		if name == "" {
@@ -1058,6 +1065,29 @@ func WithCertificateByNameFirstMatch(factory *cmdutil.Factory, args []string, op
 func WithExternalCommandByNameFirstMatch(factory *cmdutil.Factory, args []string, externalCommand []string, idPattern string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(factory, NewExternalFetcher(externalCommand, idPattern), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
+// WithRemoteAccessConfigurationFirstMatch returns the first matching remote access configuration for a device
+func WithRemoteAccessConfigurationFirstMatch(factory *cmdutil.Factory, flagDevice string, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		mo_id := ""
+		// Note: Lookup of device does not work if "device" is piped input
+		if values, err := cmd.Flags().GetStringSlice(flagDevice); err == nil && len(values) > 0 {
+			formattedValues, err := lookupEntity(NewDeviceFetcher(factory), values, false, "")
+			if err != nil {
+				return "", nil, err
+			}
+			if len(formattedValues) > 0 {
+				mo_id = formattedValues[0].ID
+			}
+		}
+		if mo_id == "" {
+			return "", nil, fmt.Errorf("device not found")
+		}
+
+		opt := WithReferenceByNameFirstMatch(factory, NewRemoteAccessFetcher(factory, mo_id), args, opts...)
 		return opt(cmd, inputIterators)
 	}
 }

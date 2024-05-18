@@ -299,7 +299,8 @@
                 "uipluginversion",
                 "user[]",
                 "usergroup[]",
-                "userself[]"
+                "userself[]",
+                "remoteaccessconfiguration"
             ]
         },
         "pipelineAliases": {

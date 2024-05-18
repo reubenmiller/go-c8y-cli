@@ -1,0 +1,8 @@
+tests:
+    remoteaccess/configurations_get_Get existing remote access configuration:
+        command: c8y remoteaccess configurations get --device device01 --id 1
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//service/remoteaccess/devices/\d+/configurations/1$

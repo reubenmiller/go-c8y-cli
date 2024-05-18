@@ -84,6 +84,7 @@ import (
 	operationsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/subscribe"
 	operationsWaitCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/wait"
 	realtimeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/realtime"
+	remoteaccessCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/remoteaccess"
 	retentionrulesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/retentionrules"
 	sessionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions"
 	settingsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/settings"
@@ -415,6 +416,10 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	notification2.AddCommand(subscriptions)
 	notification2.AddCommand(notification2TokensCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(notification2)
+
+	// Cloud Remote Access
+	remoteaccess := remoteaccessCmd.NewSubCommand(f).GetCommand()
+	cmd.AddCommand(remoteaccess)
 
 	// configuration
 	configuration := configurationCmd.NewSubCommand(f).GetCommand()
