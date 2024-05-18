@@ -22,6 +22,7 @@ var NamespaceSeparator = "::"
 // Definition contains the view definition of when to use a specific view
 type Definition struct {
 	FileName      string   `json:"-"`
+	Path          string   `json:"-"`
 	Extension     string   `json:"-"`
 	Name          string   `json:"name,omitempty"`
 	Priority      int      `json:"priority,omitempty"`
@@ -138,6 +139,7 @@ func (v *DataView) LoadDefinitions() error {
 				}
 				for i := range viewDefinition.Definitions {
 					viewDefinition.Definitions[i].FileName = d.Name()
+					viewDefinition.Definitions[i].Path = path
 					viewDefinition.Definitions[i].Extension = extName
 				}
 				definitions = append(definitions, viewDefinition.Definitions...)
@@ -311,7 +313,11 @@ func (v *DataView) GetView(r *ViewData) ([]string, error) {
 		}
 	}
 	if matchingDefinition != nil {
-		v.Logger.Debugf("Found matching view: name=%s", matchingDefinition.Name)
+		if matchingDefinition.Extension != "" {
+			v.Logger.Debugf("Found matching view: name=%s, extension=%s, file: %s", matchingDefinition.Name, matchingDefinition.Extension, matchingDefinition.Path)
+		} else {
+			v.Logger.Debugf("Found matching view: name=%s, file: %s", matchingDefinition.Name, matchingDefinition.Path)
+		}
 		v.ActiveView = matchingDefinition
 		return matchingDefinition.Columns, nil
 	}
