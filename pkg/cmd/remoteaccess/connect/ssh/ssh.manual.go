@@ -55,13 +55,13 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 
 		`),
 		Example: heredoc.Doc(`
-			$ c8y remoteaccess ssh --device 12345
+			$ c8y remoteaccess connect ssh --device 12345
 			Start an interactive SSH session on the device
 
-			$ c8y remoteaccess ssh --device 12345 --user admin
+			$ c8y remoteaccess connect ssh --device 12345 --user admin
 			Start an interactive SSH session on the device with a given ssh user
 
-			$ c8y remoteaccess ssh --device 12345 --user admin -- systemctl status
+			$ c8y remoteaccess connect ssh --device 12345 --user admin -- systemctl status
 			Use a non-interactive session to execute a single command and print the result
 		`),
 		RunE: ccmd.RunE,
