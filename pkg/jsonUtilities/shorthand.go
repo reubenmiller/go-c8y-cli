@@ -187,7 +187,9 @@ func parseShorthandJSONStructure(value string, data map[string]interface{}) erro
 
 	for i := 0; i < len(outputValues); i += 2 {
 		key := strings.Trim(outputValues[i], " ")
-		setValue(data, key, parseValue(outputValues[i+1]))
+		if setErr := setValue(data, key, parseValue(outputValues[i+1])); setErr != nil {
+			return setErr
+		}
 		// data[key] = parseValue(outputValues[i+1])
 		validItems++
 	}
@@ -201,7 +203,7 @@ func parseShorthandJSONStructure(value string, data map[string]interface{}) erro
 	return nil
 }
 
-func setValue(data map[string]interface{}, path string, value interface{}) {
+func setValue(data map[string]interface{}, path string, value interface{}) error {
 	keys := strings.Split(path, Separator)
 	currentMap := data
 
@@ -213,10 +215,22 @@ func setValue(data map[string]interface{}, path string, value interface{}) {
 				if _, ok := currentMap[key]; !ok {
 					currentMap[key] = make(map[string]interface{})
 				}
-				currentMap = currentMap[key].(map[string]interface{})
+				// check if type is as exampled
+				if cm, ok := currentMap[key].(map[string]interface{}); ok {
+					currentMap = cm
+				} else {
+					// throw an error if users are trying to write an object
+					// to an existing non-object field (e.g. string/float etc.)
+					return fmt.Errorf(
+						"mixed types detected. trying to assign an object to a %T. path=%s",
+						currentMap[key],
+						strings.Join(keys[0:i+1], Separator),
+					)
+				}
 			} else {
 				currentMap[key] = value
 			}
 		}
 	}
+	return nil
 }
