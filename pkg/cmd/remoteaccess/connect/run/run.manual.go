@@ -194,6 +194,11 @@ func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 		// complex scripts
 		runCmd.Env = append(runCmd.Env, fmt.Sprintf("PORT=%s", port))
 		runCmd.Env = append(runCmd.Env, fmt.Sprintf("TARGET=%s", host))
+		runCmd.Env = append(runCmd.Env, fmt.Sprintf("DEVICE=%s", device))
+
+		// Support WSL environments and expose variables to WSL
+		runCmd.Env = append(runCmd.Env, "WSLENV=PORT/u:TARGET/u:DEVICE/u:C8Y_HOST/u")
+
 		runCmd.Stdout = n.factory.IOStreams.Out
 		runCmd.Stdin = n.factory.IOStreams.In
 		runCmd.Stderr = n.factory.IOStreams.ErrOut
