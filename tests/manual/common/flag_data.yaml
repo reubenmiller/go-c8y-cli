@@ -64,3 +64,11 @@ tests:
             "subtypes": ["linuxA", "linuxB"]
           }
         }
+
+  It should not panic when mixing data types:
+    command: |
+      c8y devices create -n --data one=1 --data one.two=null --dry
+    exit-code: 101
+    stderr:
+      not-contains:
+        - panic
