@@ -10,6 +10,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
@@ -63,6 +64,9 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 
 			$ c8y remoteaccess connect ssh --device 12345 --user admin -- systemctl status
 			Use a non-interactive session to execute a single command and print the result
+
+			$ c8y remoteaccess connect ssh --device 12345 --user admin -- "sh -c 'cat /etc/os-release'"
+			use a non-interactive session to execute a custom shell command (notice the surrounding double quotes on the command!)
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -191,7 +195,6 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		sshCmd.Stdout = n.factory.IOStreams.Out
 		sshCmd.Stdin = n.factory.IOStreams.In
 		sshCmd.Stderr = n.factory.IOStreams.ErrOut
-
 		log.Infof("Executing command: ssh %s\n", strings.Join(sshArgs, " "))
 
 		cs := n.factory.IOStreams.ColorScheme()
@@ -201,6 +204,16 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		sshErr := sshCmd.Run()
 		duration := time.Since(start).Truncate(time.Millisecond)
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", duration)
+
+		// Use exit code from the command
+		if sshCmd.ProcessState != nil {
+			if sshCmd.ProcessState.ExitCode() != 0 {
+				return nil, cmderrors.NewErrorWithExitCode(
+					cmderrors.ExitCode(sshCmd.ProcessState.ExitCode()),
+					sshErr,
+				)
+			}
+		}
 
 		return nil, sshErr
 	})

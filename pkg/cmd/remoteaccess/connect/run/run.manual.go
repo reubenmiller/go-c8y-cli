@@ -209,10 +209,20 @@ func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 		fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting external command on %s (%s)\n", device, strings.TrimRight(client.BaseURL.String(), "/"))))
 
 		start := time.Now()
-		sshErr := runCmd.Run()
+		runErr := runCmd.Run()
 		duration := time.Since(start).Truncate(time.Millisecond)
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", duration)
 
-		return nil, sshErr
+		// Use exit code from the command
+		if runCmd.ProcessState != nil {
+			if runCmd.ProcessState.ExitCode() != 0 {
+				return nil, cmderrors.NewErrorWithExitCode(
+					cmderrors.ExitCode(runCmd.ProcessState.ExitCode()),
+					runErr,
+				)
+			}
+		}
+
+		return nil, runErr
 	})
 }
