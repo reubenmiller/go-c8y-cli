@@ -1,4 +1,4 @@
-package ssh
+package run
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
@@ -22,10 +23,9 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-type CmdSSH struct {
+type CmdRun struct {
 	device        []string
 	listen        string
-	user          string
 	configuration string
 
 	*subcommand.SubCommand
@@ -33,36 +33,39 @@ type CmdSSH struct {
 	factory *cmdutil.Factory
 }
 
-func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
-	ccmd := &CmdSSH{
+func NewCmdRun(f *cmdutil.Factory) *CmdRun {
+	ccmd := &CmdRun{
 		factory: f,
 	}
 
 	cmd := &cobra.Command{
-		Use:   "ssh",
-		Short: "Connect to a device via ssh",
+		Use:   "run",
+		Short: "Connect to a device and run a custom command",
 		Long: heredoc.Doc(`
-			Connect to a device via ssh
+			Connect to a device using the local proxy, then run a given command which makes use of the proxy.
 
-			Additional arguments can be passed to the ssh shell by using the "--" convention where everything
-			after the "--" will be passed untouched to the ssh shell. In this mode, the shell will not be
-			interactive, and it will return upon completion of the command.
+			You can run any command you want by providing all arguments after the "--", for example:
 
-			You can set the default ssh user to use for all ssh connections for your current c8y session file
-			using:
+				c8y remoteaccess connect run --device mydevice -- ./run-something.sh %h %p
 
-				c8y settings update remoteaccess.sshuser root
+			The local proxy server port and target can be accessed either by using variable references:
+				* Target - Use '%h' or the environment variable '$TARGET'
+				* Port - Use '%p' or the environment variable '$PORT'
 
+			It is recommended to use the "%h" (target) "%p" (port) to refer to the local proxy server
+			as this avoid potential problems with variable expansions and removes the need to have to
+			escape variable etc. (e.g. \$HOST). Below shows an example using a custom ssh command:
+
+				c8y remoteaccess connect run --device mydevice -- ssh -p %p root@%h
+
+			Or you can use a shell to do something more complex and use environment variable references, though not the
+			single quotes around the shell command to prevent the variable expansion in your current shell.
+
+				c8y remoteaccess connect run --device mydevice -- sh -c 'ssh -p $PORT root@$TARGET'
 		`),
 		Example: heredoc.Doc(`
-			$ c8y remoteaccess connect ssh --device 12345
-			Start an interactive SSH session on the device
-
-			$ c8y remoteaccess connect ssh --device 12345 --user admin
+			$ c8y remoteaccess connect run --device 12345 -- ssh -p %p root@%h
 			Start an interactive SSH session on the device with a given ssh user
-
-			$ c8y remoteaccess connect ssh --device 12345 --user admin -- systemctl status
-			Use a non-interactive session to execute a single command and print the result
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -70,7 +73,6 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 	// Flags
 	cmd.Flags().StringSliceVar(&ccmd.device, "device", []string{}, "Device")
 	cmd.Flags().StringVar(&ccmd.listen, "listen", "127.0.0.1:0", "Listener address. unix:///run/example.sock")
-	cmd.Flags().StringVar(&ccmd.user, "user", "", "Default ssh user")
 	cmd.Flags().StringVar(&ccmd.configuration, "configuration", "", "Remote Access Configuration")
 
 	completion.WithOptions(
@@ -89,7 +91,7 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 	return ccmd
 }
 
-func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
+func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -165,40 +167,44 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		go craClient.Serve()
 
 		// Build ssh command
-		sshArgs := []string{
-			"-o", "ServerAliveInterval=120",
-			"-o", "StrictHostKeyChecking=no",
-			"-o", "UserKnownHostsFile=/dev/null",
-		}
-
-		sshTarget := host
-		if n.user == "" {
-			// Use default user (if set)
-			n.user = cfg.GetRemoteAccessDefaultSSHUser()
-		}
-		if n.user != "" {
-			sshTarget = fmt.Sprintf("%s@%s", n.user, host)
-		}
-		sshArgs = append(sshArgs, "-p", port, sshTarget)
+		run := ""
+		runArgs := []string{}
 
 		dashIdx := cmd.ArgsLenAtDash()
 		if dashIdx > -1 {
-			sshArgs = append(sshArgs, "--")
-			sshArgs = append(sshArgs, args[dashIdx:]...)
+			run = args[dashIdx]
+			if dashIdx+1 < len(args) {
+				// Allow users to access port via variables (similar to what ssh does)
+				for _, v := range args[dashIdx+1:] {
+					expandedValue := v
+					expandedValue = strings.ReplaceAll(expandedValue, "%h", host)
+					expandedValue = strings.ReplaceAll(expandedValue, "%p", port)
+					runArgs = append(runArgs, expandedValue)
+				}
+			}
 		}
 
-		sshCmd := exec.CommandContext(context.Background(), "ssh", sshArgs...)
-		sshCmd.Stdout = n.factory.IOStreams.Out
-		sshCmd.Stdin = n.factory.IOStreams.In
-		sshCmd.Stderr = n.factory.IOStreams.ErrOut
+		if run == "" {
+			return nil, cmderrors.NewUserError("Missing run command")
+		}
 
-		log.Infof("Executing command: ssh %s\n", strings.Join(sshArgs, " "))
+		runCmd := exec.CommandContext(context.Background(), run, runArgs...)
+
+		// Add target and port to the environment variables so it can be easily accessed from more
+		// complex scripts
+		runCmd.Env = append(runCmd.Env, fmt.Sprintf("PORT=%s", port))
+		runCmd.Env = append(runCmd.Env, fmt.Sprintf("TARGET=%s", host))
+		runCmd.Stdout = n.factory.IOStreams.Out
+		runCmd.Stdin = n.factory.IOStreams.In
+		runCmd.Stderr = n.factory.IOStreams.ErrOut
+
+		log.Infof("Executing command: %s %s\n", run, strings.Join(runArgs, " "))
 
 		cs := n.factory.IOStreams.ColorScheme()
-		fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting interactive ssh session with %s (%s)\n", device, strings.TrimRight(client.BaseURL.String(), "/"))))
+		fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting external command on %s (%s)\n", device, strings.TrimRight(client.BaseURL.String(), "/"))))
 
 		start := time.Now()
-		sshErr := sshCmd.Run()
+		sshErr := runCmd.Run()
 		duration := time.Since(start).Truncate(time.Millisecond)
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", duration)
 

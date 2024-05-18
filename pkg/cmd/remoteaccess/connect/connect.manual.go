@@ -1,6 +1,7 @@
 package connect
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/remoteaccess/connect/run"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/remoteaccess/connect/ssh"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -22,6 +23,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdConnect {
 
 	// Subcommands
 	cmd.AddCommand(ssh.NewCmdSSH(f).GetCommand())
+	cmd.AddCommand(run.NewCmdRun(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
