@@ -799,7 +799,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 		}
 	}
 
-	if resp != nil && respError == nil && (r.Config.IsResponseOutput() || resp.Response.Header.Get("Content-Type") == "application/octet-stream") && len(resp.Body()) > 0 {
+	if resp != nil && respError == nil && !hasOutputTemplate && (r.Config.IsResponseOutput() || resp.Response.Header.Get("Content-Type") == "application/octet-stream") && len(resp.Body()) > 0 {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
 		r.Logger.Debugf("Writing https response output")
 
@@ -873,11 +873,27 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 				resp.SetBody(pretty.Ugly(tmplOutput))
 			} else {
 				isJSONResponse = false
-				// TODO: Is removing the quotes doing too much, what happens if someone is building csv, and it using quotes around some fields?
-				// e.g. `"my value",100`, that would get transformed to `my value",100`
-				// Trim any quotes wrapping the values
-				tmplOutput = bytes.TrimSpace(tmplOutput)
-				resp.SetBody(bytes.Trim(tmplOutput, "\""))
+				// Try to unmarshal json for situations when the user has used "response.body"
+				// and body contains escaped json chars (e.g. \n)
+				// https://github.com/reubenmiller/go-c8y-cli/issues/306
+				var maybeJSON any
+				jsonErr := json.Unmarshal(tmplOutput, &maybeJSON)
+				skipTrimming := false
+				if jsonErr == nil {
+					switch v := maybeJSON.(type) {
+					case string:
+						tmplOutput = []byte(v)
+						skipTrimming = true
+					}
+				}
+				if !skipTrimming {
+					// TODO: Is removing the quotes doing too much, what happens if someone is building csv, and it using quotes around some fields?
+					// e.g. `"my value",100`, that would get transformed to `my value",100`
+					// Trim any quotes wrapping the values
+					tmplOutput = bytes.TrimSpace(tmplOutput)
+					tmplOutput = bytes.Trim(tmplOutput, "\"")
+				}
+				resp.SetBody(tmplOutput)
 			}
 		}
 
