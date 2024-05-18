@@ -60,9 +60,11 @@ commands:
         pipeline: false
 
       - name: id
-        type: string
+        type: remoteaccessconfiguration
         description: Connection
         pipeline: true
+        dependsOn:
+          - device
   
   - name: update
     # Hide for now, as updating requires to PUT the entire existing state into the body plus the desired changes
@@ -94,9 +96,11 @@ commands:
         pipeline: false
 
       - name: id
-        type: string
+        type: remoteaccessconfiguration
         description: Connection
         pipeline: true
+        dependsOn:
+          - device
     body:
       - name: newName
         type: string
@@ -130,9 +134,11 @@ commands:
         pipeline: false
 
       - name: id
-        type: string
+        type: remoteaccessconfiguration
         description: Connection
         pipeline: true
+        dependsOn:
+          - device
 
   - name: create-passthrough
     description: Create passthrough configuration
@@ -306,17 +312,6 @@ commands:
       - protocol
       - name
       - credentialsType
-    # bodyTemplates:
-    #   - type: jsonnet
-    #     template: |
-          
-    #       {
-    #         local credType = if std.objectHas($, "privateKey") && std.objectHas($, "publicKey") then "USER_PASS" else if std.objectHas($, "password") else,
-    #         local credValue = {
-
-    #         },  
-    #         credentialsType: credType
-    #       }
 
   - name: create-vnc
     description: Create vnc configuration

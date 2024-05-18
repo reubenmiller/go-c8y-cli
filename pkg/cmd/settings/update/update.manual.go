@@ -395,6 +395,11 @@ var updateSettingsOptions = map[string]argumentHandler{
 
 	// extensions
 	"extensions.datadir": {"extensions.datadir", "string", config.SettingsExtensionDataDir, []string{}, nil, cobra.ShellCompDirectiveDefault},
+
+	// remote access
+	"remoteaccess.sshuser": {"remoteaccess.sshuser", "string", config.SettingsRemoteAccessDefaultSSHUser, []string{
+		"root",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
 }
 
 // NewCmdUpdate returns a new command used to update session settings

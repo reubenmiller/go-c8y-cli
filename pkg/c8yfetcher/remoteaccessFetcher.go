@@ -19,6 +19,17 @@ type RemoteAccessFetcher struct {
 }
 
 func DetectRemoteAccessConfiguration(client *c8y.Client, mo_id string, name string) (*c8y.RemoteAccessConfiguration, error) {
+	if c8y.IsID(name) {
+		config, _, err := client.RemoteAccess.GetConfiguration(
+			c8y.WithDisabledDryRunContext(context.Background()),
+			mo_id,
+			name,
+		)
+		if err == nil {
+			return config, err
+		}
+		// Fall through if it could not be found (as the name might just look like an id)
+	}
 	configs, _, err := client.RemoteAccess.GetConfigurations(
 		c8y.WithDisabledDryRunContext(context.Background()),
 		mo_id,

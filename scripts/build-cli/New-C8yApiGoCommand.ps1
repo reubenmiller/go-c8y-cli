@@ -221,6 +221,7 @@
             "certificate[]" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceCertificate(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "subscriptionName" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionName(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "subscriptionId" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionId(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "remoteaccessconfiguration" { [void] $CompletionBuilderOptions.AppendLine("completion.WithRemoteAccessConfiguration(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
         }
 
         $ArgParams = @{
@@ -1408,6 +1409,18 @@ Function Get-C8yGoArgs {
             } else {
                 "cmd.Flags().String(`"${Name}`", `"${Default}`", `"${Description}`")"
             }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "remoteaccessconfiguration" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSlice(`"${Name}`", `"${OptionName}`", []string{`"${Default}`"}, `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
             @{
                 SetFlag = $SetFlag
             }

@@ -1068,3 +1068,26 @@ func WithExternalCommandByNameFirstMatch(factory *cmdutil.Factory, args []string
 		return opt(cmd, inputIterators)
 	}
 }
+
+// WithRemoteAccessConfigurationFirstMatch returns the first matching remote access configuration for a device
+func WithRemoteAccessConfigurationFirstMatch(factory *cmdutil.Factory, flagDevice string, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		mo_id := ""
+		// Note: Lookup of device does not work if "device" is piped input
+		if values, err := cmd.Flags().GetStringSlice(flagDevice); err == nil && len(values) > 0 {
+			formattedValues, err := lookupEntity(NewDeviceFetcher(factory), values, false, "")
+			if err != nil {
+				return "", nil, err
+			}
+			if len(formattedValues) > 0 {
+				mo_id = formattedValues[0].ID
+			}
+		}
+		if mo_id == "" {
+			return "", nil, fmt.Errorf("device not found")
+		}
+
+		opt := WithReferenceByNameFirstMatch(factory, NewRemoteAccessFetcher(factory, mo_id), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}

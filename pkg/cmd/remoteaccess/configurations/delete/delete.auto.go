@@ -46,11 +46,12 @@ Delete an existing remote access configuration
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device")
-	cmd.Flags().String("id", "", "Connection (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Connection (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithRemoteAccessConfiguration("id", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -148,7 +149,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
-		flags.WithStringValue("id", "id"),
+		c8yfetcher.WithRemoteAccessConfigurationFirstMatch(n.factory, "device", args, "id", "id"),
 	)
 	if err != nil {
 		return err

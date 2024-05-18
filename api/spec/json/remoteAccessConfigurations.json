@@ -84,9 +84,12 @@
         },
         {
           "name": "id",
-          "type": "string",
+          "type": "remoteaccessconfiguration",
           "description": "Connection",
-          "pipeline": true
+          "pipeline": true,
+          "dependsOn": [
+            "device"
+          ]
         }
       ]
     },
@@ -131,9 +134,12 @@
         },
         {
           "name": "id",
-          "type": "string",
+          "type": "remoteaccessconfiguration",
           "description": "Connection",
-          "pipeline": true
+          "pipeline": true,
+          "dependsOn": [
+            "device"
+          ]
         }
       ],
       "body": [
@@ -185,9 +191,12 @@
         },
         {
           "name": "id",
-          "type": "string",
+          "type": "remoteaccessconfiguration",
           "description": "Connection",
-          "pipeline": true
+          "pipeline": true,
+          "dependsOn": [
+            "device"
+          ]
         }
       ]
     },

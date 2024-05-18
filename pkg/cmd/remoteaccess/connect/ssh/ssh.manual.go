@@ -42,11 +42,17 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 		Use:   "ssh",
 		Short: "Connect to a device via ssh",
 		Long: heredoc.Doc(`
-		Connect to a device via ssh
+			Connect to a device via ssh
 
-		Additional arguments can be passed to the ssh shell by using the "--" convention where everything
-		after the "--" will be passed untouched to the ssh shell. In this mode, the shell will not be
-		interactive, and it will return upon completion of the command.
+			Additional arguments can be passed to the ssh shell by using the "--" convention where everything
+			after the "--" will be passed untouched to the ssh shell. In this mode, the shell will not be
+			interactive, and it will return upon completion of the command.
+
+			You can set the default ssh user to use for all ssh connections for your current c8y session file
+			using:
+
+				c8y settings update remoteaccess.sshuser root
+
 		`),
 		Example: heredoc.Doc(`
 			$ c8y remoteaccess ssh --device 12345
@@ -70,6 +76,7 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithRemoteAccessPassthroughConfiguration("configuration", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -165,6 +172,10 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		sshTarget := host
+		if n.user == "" {
+			// Use default user (if set)
+			n.user = cfg.GetRemoteAccessDefaultSSHUser()
+		}
 		if n.user != "" {
 			sshTarget = fmt.Sprintf("%s@%s", n.user, host)
 		}
