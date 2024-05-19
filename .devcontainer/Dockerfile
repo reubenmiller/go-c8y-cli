@@ -20,7 +20,7 @@ COPY .devcontainer/install-powershell.sh /tmp/install/
 
 # Configure apt, install packages and tools
 RUN /tmp/install/install-powershell.sh \
-    && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     #
     # Update and install packages
     #
@@ -121,14 +121,8 @@ RUN chown -R $USER_UID:$USER_GID /home/$USERNAME \
     && chsh -s /bin/zsh $USERNAME
 COPY tools/asciinema/config /home/$USERNAME/.config/asciinema/
 
-# Install powershell dependencies
+# Install shell dependencies
 USER $USERNAME
-#RUN pwsh -Command "Install-Module -Name platyPS -Scope CurrentUser -Force" \
-#   && pwsh -Command "Install-Module -Name Pester -Scope CurrentUser -MinimumVersion '5.0.0' -Force"
-    #
-    # create symlink to c8y
-#    && mkdir -p /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/Dependencies/ \
-#    && ln -s /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/Dependencies/c8y.linux /usr/local/bin/c8y
 
 # Install oh-my-zsh
 RUN curl -sSfL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh -s -- "" --unattended 2>&1 \
@@ -144,18 +138,13 @@ RUN echo "autoload -U compinit; compinit -i" | sudo tee -a /home/$USERNAME/.zshr
     #
     # fish config
     && sudo mkdir -p /home/$USERNAME/.config/fish/
-    # && echo "c8y completion fish | source" >> /home/$USERNAME/.config/fish/config.fish
-    # && echo "source ~/c8y.plugin.fish" >> /home/$USERNAME/.config/fish/config.fish
 
 # CI/CD tools
 RUN cd /tmp \
     && command -v task || sudo /usr/local/go/bin/go install github.com/go-task/task/v3/cmd/task@latest \
     && sudo cp /root/go/bin/task /usr/local/bin/ \
     && sudo /usr/local/go/bin/go install github.com/goreleaser/goreleaser@latest \
-    && sudo cp /root/go/bin/goreleaser /usr/local/bin/ \
-    && curl -fL https://getcli.jfrog.io | sudo sh \
-    && sudo chmod a+x jfrog \
-    && sudo mv jfrog /usr/local/bin/
+    && sudo cp /root/go/bin/goreleaser /usr/local/bin/
 
 # Fix gopath permissions for non-root user
 RUN sudo chown -R "$USERNAME:$USERNAME" /go
