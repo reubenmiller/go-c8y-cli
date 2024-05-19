@@ -1,6 +1,6 @@
 tests:
     remoteaccess/configurations_update_Update an existing remote access configuration:
-        command: c8y remoteaccess configurations update --device device01 --id 1 --name hello
+        command: c8y remoteaccess configurations update --device device01 --id 1 --newName hello
         exit-code: 0
         skip: true
         stdout:

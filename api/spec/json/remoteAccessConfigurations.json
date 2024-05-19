@@ -105,7 +105,7 @@
       "examples": {
         "go": [
           {
-            "command": "c8y remoteaccess configurations update --device device01 --id 1 --name hello",
+            "command": "c8y remoteaccess configurations update --device device01 --id 1 --newName hello",
             "description": "Update an existing remote access configuration",
             "assertStdOut": {
               "json": {
@@ -117,7 +117,7 @@
         ],
         "powershell": [
           {
-            "command": "Update-RemoteAccessConfiguration -Device device01 -Id 1 -Name hello",
+            "command": "Update-RemoteAccessConfiguration -Device device01 -Id 1 -NewName hello",
             "description": "Update an existing remote access configuration",
             "skipTest": true
           }

@@ -36,7 +36,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Hidden: true,
 
 		Example: heredoc.Doc(`
-$ c8y remoteaccess configurations update --device device01 --id 1 --name hello
+$ c8y remoteaccess configurations update --device device01 --id 1 --newName hello
 Update an existing remote access configuration
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

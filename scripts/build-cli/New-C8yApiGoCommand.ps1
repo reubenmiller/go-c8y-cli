@@ -18,7 +18,7 @@
 	$NameCamel = ($Name[0].ToString().ToUpperInvariant() + $Name.Substring(1)) -replace '-(\p{L})', { $_.Groups[1].Value.ToUpper() }
     $PackageName = $Name.ToLower() -replace "-", "_"
 
-    $FileName = $PackageName
+    $FileName = $NameCamel[0].ToString().ToLowerInvariant() + $NameCamel.Substring(1)
 	$File = Join-Path -Path $OutputDir -ChildPath ("{0}.auto.go" -f $FileName)
 
 
