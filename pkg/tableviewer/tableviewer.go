@@ -10,6 +10,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/olekukonko/ts"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/gjsonpath"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/numbers"
 	"github.com/tidwall/gjson"
 )
 
@@ -40,12 +41,26 @@ type TableView struct {
 	TableData                [][]string
 	EnableColor              bool
 	RowMode                  string
+	NumberFormatter          numbers.NumberFormatter
 }
 
 func (v *TableView) getValue(value gjson.Result) []string {
 	row := []string{}
 	for i, col := range v.Columns {
-		columnValue := strings.Trim(value.Get(gjsonpath.EscapePath(col)).Raw, "\"")
+		node := value.Get(gjsonpath.EscapePath(col))
+
+		columnValue := ""
+		columnAlignment := tablewriter.ALIGN_LEFT
+		if node.Type == gjson.Number {
+			columnAlignment = tablewriter.ALIGN_RIGHT
+			columnValue = v.NumberFormatter.Display(node.Float(), node.Raw, "")
+		} else {
+			columnValue = strings.Trim(node.Raw, "\"")
+		}
+
+		if addAlignments {
+			v.ColumnAlignments = append(v.ColumnAlignments, columnAlignment)
+		}
 
 		columnWidth := v.MaxColumnWidth
 		if i < len(v.ColumnWidths) {

@@ -47,6 +47,7 @@ require github.com/hashicorp/go-version v1.6.0
 
 require (
 	github.com/cli/browser v1.3.0
+	github.com/dustin/go-humanize v1.0.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/hashicorp/go-retryablehttp v0.7.5
 	github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3

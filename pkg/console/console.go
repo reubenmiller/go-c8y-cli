@@ -9,6 +9,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/numbers"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/tableviewer"
 	"github.com/tidwall/pretty"
 )
@@ -45,6 +46,9 @@ type TableOptions struct {
 
 	// Row mode (truncate or wrap)
 	RowMode string
+
+	// NumberFormatter formatting used when rendering numbers
+	NumberFormatter numbers.NumberFormatter
 }
 
 // NewConsole create a new console writer
@@ -54,13 +58,17 @@ func NewConsole(w io.Writer, tableOptions *TableOptions, header func([]string) [
 	columnPadding := 15
 	minEmptyWidth := 0
 	rowMode := ""
+	var numberFormatter numbers.NumberFormatter
+
 	if tableOptions != nil {
 		minColumnWidth = tableOptions.MinColumnWidth
 		maxColumnWidth = tableOptions.MaxColumnWidth
 		columnPadding = tableOptions.ColumnPadding
 		minEmptyWidth = tableOptions.MinEmptyValueColumnWidth
 		rowMode = tableOptions.RowMode
+		numberFormatter = tableOptions.NumberFormatter
 	}
+
 	return &Console{
 		out:    w,
 		header: header,
@@ -72,6 +80,7 @@ func NewConsole(w io.Writer, tableOptions *TableOptions, header func([]string) [
 			MinEmptyValueColumnWidth: minEmptyWidth,
 			EnableColor:              false,
 			RowMode:                  rowMode,
+			NumberFormatter:          numberFormatter,
 		},
 		Format: config.OutputTable,
 	}
