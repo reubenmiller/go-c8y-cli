@@ -152,10 +152,7 @@ RUN cd /tmp \
     && command -v task || sudo /usr/local/go/bin/go install github.com/go-task/task/v3/cmd/task@latest \
     && sudo cp /root/go/bin/task /usr/local/bin/ \
     && sudo /usr/local/go/bin/go install github.com/goreleaser/goreleaser@latest \
-    && sudo cp /root/go/bin/goreleaser /usr/local/bin/ \
-    && curl -fL https://getcli.jfrog.io | sudo sh \
-    && sudo chmod a+x jfrog \
-    && sudo mv jfrog /usr/local/bin/
+    && sudo cp /root/go/bin/goreleaser /usr/local/bin/
 
 # Fix gopath permissions for non-root user
 RUN sudo chown -R "$USERNAME:$USERNAME" /go
