@@ -408,6 +408,7 @@ func Initialize() (*root.CmdRoot, error) {
 		MinEmptyValueColumnWidth: configHandler.ViewColumnEmptyValueMinWidth(),
 		ColumnPadding:            configHandler.ViewColumnPadding(),
 		RowMode:                  configHandler.ViewRowMode(),
+		NumberFormatter:          configHandler.GetTableViewNumberFormatter(),
 	}
 	consoleHandler = console.NewConsole(rootCmd.OutOrStdout(), tableOptions, func(s []string) []byte {
 		return getOutputHeaders(consoleHandler, configHandler, s)

@@ -59,6 +59,11 @@ func (h argumentHandler) GetValue(rawValue string) interface{} {
 			return v
 		}
 		return nil
+	case "float64":
+		if v, err := strconv.ParseFloat(rawValue, 64); err == nil {
+			return v
+		}
+		return nil
 	default:
 		return rawValue
 	}
@@ -391,6 +396,34 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"20",
 		"25",
 		"30",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	//
+	// Table view number format
+	//
+	"views.numberFormat": {"views.numberFormat", "string", config.SettingsViewNumberFormat, []string{
+		"none",
+		"metric",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"views.metric.precision": {"views.metric.precision", "int", config.SettingsViewNumbersMetricPrecision, []string{
+		"2",
+		"3",
+		"4",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"views.metric.rangeMin": {"views.metric.rangeMin", "float64", config.SettingsViewNumbersMetricActivateRangeMin, []string{
+		"0.00001",
+		"0.001",
+		"0.1",
+		"1",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"views.metric.rangeMax": {"views.metric.rangeMax", "float64", config.SettingsViewNumbersMetricActivateRangeMax, []string{
+		"1000",
+		"10000",
+		"100000\tdefault",
+		"1000000",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// extensions

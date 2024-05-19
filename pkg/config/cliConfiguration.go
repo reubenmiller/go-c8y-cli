@@ -20,6 +20,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/numbers"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/totp"
@@ -276,6 +277,18 @@ const (
 	// SettingsViewRowMode controls row rendering, e.g. wrapping or truncation
 	SettingsViewRowMode = "settings.views.rowMode"
 
+	// SettingsViewNumberFormat number format
+	SettingsViewNumberFormat = "settings.views.numberFormat"
+
+	// SettingsViewNumbersMetricPrecision precision to use when using metrics
+	SettingsViewNumbersMetricPrecision = "settings.views.metric.precision"
+
+	// SettingsViewNumbersMetricActivateRangeMin minimum number that the metric prefix will be added to
+	SettingsViewNumbersMetricActivateRangeMin = "settings.views.metric.rangeMin"
+
+	// SettingsViewNumbersMetricActivateRangeMax maximum number that the metric prefix will be added to
+	SettingsViewNumbersMetricActivateRangeMax = "settings.views.metric.rangeMax"
+
 	// SettingsLoggerHideSensitive hide sensitive information in log entries
 	SettingsLoggerHideSensitive = "settings.logger.hideSensitive"
 
@@ -492,6 +505,12 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsViewMaxColumnWidth, 80),
 		WithBindEnv(SettingsViewColumnPadding, 15),
 		WithBindEnv(SettingsViewRowMode, "truncate"),
+
+		// Table number formatter
+		WithBindEnv(SettingsViewNumberFormat, NumberFormatMetric),
+		WithBindEnv(SettingsViewNumbersMetricPrecision, 2),
+		WithBindEnv(SettingsViewNumbersMetricActivateRangeMin, 0.00001),
+		WithBindEnv(SettingsViewNumbersMetricActivateRangeMax, 100000),
 
 		WithBindEnv(SettingsLoggerHideSensitive, true),
 
@@ -1725,6 +1744,30 @@ func (c *Config) ShouldConfirm(methods ...string) bool {
 		}
 	}
 	return false
+}
+
+const (
+	NumberFormatNone   string = "none"
+	NumberFormatMetric string = "metric"
+)
+
+// GetTableViewNumberFormatter get the number formatter to be used when rendering numbers
+func (c *Config) GetTableViewNumberFormatter() numbers.NumberFormatter {
+	formatName := strings.ToLower(c.viper.GetString(SettingsViewNumberFormat))
+	if formatName == "" {
+		formatName = NumberFormatNone
+	}
+
+	switch formatName {
+	case NumberFormatMetric:
+		return numbers.NewNumberViewOptions(
+			c.viper.GetInt(SettingsViewNumbersMetricPrecision),
+			c.viper.GetFloat64(SettingsViewNumbersMetricActivateRangeMin),
+			c.viper.GetFloat64(SettingsViewNumbersMetricActivateRangeMax),
+		)
+	default:
+		return &numbers.RawNumber{}
+	}
 }
 
 // BindPFlag binds flags to the configuration
