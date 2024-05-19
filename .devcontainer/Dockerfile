@@ -20,7 +20,7 @@ COPY .devcontainer/install-powershell.sh /tmp/install/
 
 # Configure apt, install packages and tools
 RUN /tmp/install/install-powershell.sh \
-    && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     #
     # Update and install packages
     #
