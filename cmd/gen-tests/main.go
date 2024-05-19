@@ -301,7 +301,7 @@ func formatJsonAssertion(jsonAssertion map[string]string, propType string, prop 
 		if strings.HasSuffix(prop, ".data") || strings.EqualFold(propType, "json_custom") {
 			data := make(map[string]interface{})
 			if err := jsonUtilities.ParseJSON(values[0], data); err != nil {
-				loggerS.Warnf("Could not parse shorthand json. %s", err)
+				loggerS.Warnf("Could not parse shorthand json. error=%s, data=%s", err, values[0])
 				return
 			}
 
