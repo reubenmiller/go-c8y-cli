@@ -44,7 +44,7 @@ jobs:
     - name: Install GoReleaser
       uses: goreleaser/goreleaser-action@v5
       with:
-        version: latest
+        version: '~> v1'
         install-only: true
 
     - name: Install Task
