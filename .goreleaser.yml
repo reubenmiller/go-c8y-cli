@@ -174,7 +174,7 @@ brews:
       email: reuben.d.miller@gmail.com
 
     # Folder inside the repository to put the formula.
-    folder: Formula
+    directory: Formula
 
     # Caveats for the user of your binary.
     caveats: |
