@@ -33,6 +33,7 @@ type TableView struct {
 	Out                      io.Writer
 	Columns                  []string
 	ColumnWidths             []int
+	ColumnAlignments         []int
 	MinColumnWidth           int
 	MinEmptyValueColumnWidth int
 	MaxColumnWidth           int
@@ -46,6 +47,13 @@ type TableView struct {
 
 func (v *TableView) getValue(value gjson.Result) []string {
 	row := []string{}
+
+	addAlignments := false
+	if v.ColumnAlignments == nil {
+		v.ColumnAlignments = make([]int, 0)
+		addAlignments = true
+	}
+
 	for i, col := range v.Columns {
 		node := value.Get(gjsonpath.EscapePath(col))
 
@@ -267,6 +275,7 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetColumnAlignment(v.ColumnAlignments)
 
 	wrapEnabled := v.RowMode == RowModeWrap
 
