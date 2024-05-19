@@ -41,3 +41,98 @@ tests:
         | with@at    | with#hash  | with|pipe  | with*star  | with?questionmark |
         |------------|------------|------------|------------|-------------------|
         | one        | two        | three      | four       | five              |
+
+  It can display very small and very large numbers using a metric prefix:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+    command: |
+      cat manual/common/output/numbers.jsonl |
+        c8y util show --select "value" --output table
+    exit-code: 0
+    stdout:
+      exactly: |
+        | value      |
+        |------------|
+        |        1 p |
+        |        1 n |
+        |        1 µ |
+        |         10 |
+        |        110 |
+        |       3000 |
+        |      10000 |
+        |      50000 |
+        |     9.99 M |
+        |   123.45 M |
+        |     1.23 M |
+        |     2.03 P |
+        |   203.83 G |
+
+  It can control the precision and min/max range of the metric prefix:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+        C8Y_SETTINGS_VIEWS_NUMBERFORMAT: metric
+        C8Y_SETTINGS_VIEWS_METRIC_PRECISION: 3
+        C8Y_SETTINGS_VIEWS_METRIC_RANGEMIN: 0.00000001
+        C8Y_SETTINGS_VIEWS_METRIC_RANGEMAX: 100000
+    command: |
+      cat manual/common/output/numbers.jsonl |
+        c8y util show --select "value" --output table
+    exit-code: 0
+    stdout:
+      exactly: |
+        | value      |
+        |------------|
+        |        1 p |
+        |        1 n |
+        |   0.000001 |
+        |         10 |
+        |        110 |
+        |       3000 |
+        |      10000 |
+        |      50000 |
+        |    9.999 M |
+        |  123.456 M |
+        |    1.234 M |
+        |    2.038 P |
+        |  203.837 G |
+
+  It can use no number formatter:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+        C8Y_SETTINGS_VIEWS_NUMBERFORMAT: none
+        C8Y_SETTINGS_VIEWS_METRIC_PRECISION: 3
+        C8Y_SETTINGS_VIEWS_METRIC_RANGEMIN: 0.00000001
+        C8Y_SETTINGS_VIEWS_METRIC_RANGEMAX: 100000
+    command: |
+      cat manual/common/output/numbers.jsonl |
+        c8y util show --select "value" --output table
+    exit-code: 0
+    stdout:
+      exactly: |
+        | value      |
+        |------------|
+        |      1e-12 |
+        |       1e-9 |
+        |   0.000001 |
+        |         10 |
+        |        110 |
+        |       3000 |
+        |      10000 |
+        |      50000 |
+        |    9999999 |
+        |  123456789 |
+        | 1234567.5… |
+        | 203837347… |
+        | 203837347… |
