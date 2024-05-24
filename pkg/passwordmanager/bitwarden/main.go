@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cli/safeexec"
 	"github.com/manifoldco/promptui"
 	"github.com/pquerna/otp/totp"
 )
@@ -19,6 +20,16 @@ type BWItem struct {
 	Name   string    `json:"name"`
 	Login  BWLogin   `json:"login"`
 	Fields []BWField `json:"fields"`
+}
+
+func (bwi *BWItem) HasTenantField() bool {
+	for _, field := range bwi.Fields {
+		name := strings.ToLower(field.Name)
+		if strings.Contains(name, "tenant") && strings.TrimSpace(field.Value) != "" {
+			return true
+		}
+	}
+	return false
 }
 
 // BWLogin bitwarden login credentials
@@ -38,9 +49,30 @@ type BWField struct {
 	Type  int32  `json:"type"`
 }
 
+func (b *BWLogin) MatchesUri(search string) bool {
+	for _, uri := range b.Uris {
+		if strings.Contains(strings.ToLower(uri.URI), search) {
+			return true
+		}
+	}
+	return false
+}
+
 // BWUri bitwarden URI associated with the login credentials
 type BWUri struct {
 	URI string `json:"uri"`
+}
+
+func checkBitwarden() error {
+	if os.Getenv("BW_SESSION") == "" {
+		return fmt.Errorf("bitwarden env variable not set. Expected BW_SESSION to be defined and not empty")
+	}
+
+	if _, err := safeexec.LookPath("bw"); err != nil {
+		return fmt.Errorf("could not find 'bw' (bitwarden-cli). Check if it is installed on your machine")
+	}
+
+	return nil
 }
 
 func getBWItems(name ...string) []BWItem {
@@ -62,7 +94,7 @@ func getBWItems(name ...string) []BWItem {
 		}
 
 		for _, pattern := range name {
-			if strings.Contains(item.Name, pattern) {
+			if strings.Contains(item.Name, pattern) || item.HasTenantField() {
 
 				if len(item.Fields) > 0 {
 					for _, field := range item.Fields {
@@ -93,12 +125,16 @@ func getBWItems(name ...string) []BWItem {
 
 func main() {
 
-	bwItems := getBWItems("c8y", "cumulocity")
+	if err := checkBitwarden(); err != nil {
+		fmt.Printf(err.Error())
+		return
+	}
 
-	itemTemplate := `{{ .Name | cyan }} {{ if .Login.Uris }} ({{ (index .Login.Uris 0).Uri | red }}) {{end}} ({{ .Login.Tenant | cyan }}/{{ .Login.Username | cyan }})`
+	bwItems := getBWItems("c8y", "cumulocity")
+	itemTemplate := `{{ .Name | cyan }} {{ if .Login.Uris }} ({{ (index .Login.Uris 0).URI | red }}){{end}} ({{ .Login.Tenant | cyan }}/{{ .Login.Username | cyan }})`
 
 	templates := &promptui.SelectTemplates{
-		Label:    "{{ . }}?",
+		Label:    "{{ .Name }}?",
 		Active:   "\U00002192 " + itemTemplate,
 		Inactive: "  " + itemTemplate,
 		// Selected: "{{ .ID }}",
@@ -107,8 +143,8 @@ func main() {
 --------- Session ----------
 {{ "Name:" | faint }}	{{ .Name }}
 {{ "ID:" | faint }}	{{ .ID }}
-{{ "Uri:" | faint }}	{{ (index .Login.Uris 0).Uri }}
 {{ "Tenant:" | faint }}	{{ .Login.Tenant }}
+{{ "Uri:" | faint }}	{{ (index .Login.Uris 0).URI }}
 {{ "Username:" | faint }}	{{ .Login.Username }}
 `,
 	}
@@ -118,7 +154,7 @@ func main() {
 		name := strings.Replace(strings.ToLower(item.Name), " ", "", -1)
 		input = strings.Replace(strings.ToLower(input), " ", "", -1)
 
-		return strings.Contains(name, input)
+		return strings.Contains(name, input) || item.Login.MatchesUri(input)
 	}
 
 	prompt := promptui.Select{
