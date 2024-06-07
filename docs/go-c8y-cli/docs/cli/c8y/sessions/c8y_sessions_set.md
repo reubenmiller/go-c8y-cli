@@ -15,7 +15,7 @@ c8y sessions set [flags]
 ### Examples
 
 ```
-$ eval $( c8y session set )
+$ eval $( c8y sessions set )
 Set a session interactively
 
 $ eval $( c8y sessions set --sessionFilter "company dev" )
