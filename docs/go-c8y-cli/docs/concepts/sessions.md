@@ -338,7 +338,7 @@ c8y sessions set --shell=auto --session "/my/path/session.json" | Out-String | I
 </Tabs>
 
 :::info
-`set-session` is a small helper function (for each supported shell) which wraps the call to `c8y session set` and sets the returned environment variables which are then read by subsequent calls to `c8y`.
+`set-session` is a small helper function (for each supported shell) which wraps the call to `c8y sessions set` and sets the returned environment variables which are then read by subsequent calls to `c8y`.
 :::
 
 ### Switching session for a single command

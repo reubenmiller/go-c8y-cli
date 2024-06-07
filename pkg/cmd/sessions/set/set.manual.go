@@ -45,7 +45,7 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 		Short: "Set Cumulocity session",
 		Long:  `Set a session, login and test the session and get either OAuth2 token, or using two factor authentication`,
 		Example: heredoc.Doc(`
-			$ eval $( c8y session set )
+			$ eval $( c8y sessions set )
 			Set a session interactively
 
 			$ eval $( c8y sessions set --sessionFilter "company dev" )

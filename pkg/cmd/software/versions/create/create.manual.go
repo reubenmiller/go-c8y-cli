@@ -179,6 +179,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	var resp *c8y.Response
 	var respErr error
 	bounded := inputIterators.Total > 0
+	// TODO: Use new generic worker setup and execute both path and body!
 	for {
 		softwareID, _, err := path.Execute(false)
 		if err != nil {
