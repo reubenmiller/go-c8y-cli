@@ -120,7 +120,7 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 
 	labelS.Fprintf(w, "---------------------  Cumulocity Session  ---------------------\n")
 	if session.SessionUri != "" {
-		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(cfg.HideSensitiveInformationIfActive(client, session.SessionUri)))
+		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "source"), header(cfg.HideSensitiveInformationIfActive(client, session.SessionUri)))
 	} else {
 		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(cfg.HideSensitiveInformationIfActive(client, session.Path)))
 	}
@@ -145,6 +145,10 @@ func WriteOutput(w io.Writer, client *c8y.Client, cfg *config.Config, session *C
 	if isShell {
 		output := GetVariablesFromSession(session, client, cfg.AlwaysIncludePassword())
 		utilities.WriteShellVariables(w, output, shell)
+		return nil
+	}
+
+	if format == "" {
 		return nil
 	}
 

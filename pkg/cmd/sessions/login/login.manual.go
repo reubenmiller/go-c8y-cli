@@ -18,6 +18,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -40,6 +41,7 @@ type CmdLogin struct {
 	// Output options
 	Shell        string
 	OutputFormat string
+	NoBanner     bool
 
 	*subcommand.SubCommand
 
@@ -64,17 +66,20 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 		Short: "login to Cumulocity IoT and return environment variables (including a token)",
 		Long:  `Set a session, login and test the session and get either OAuth2 token, or using two factor authentication`,
 		Example: heredoc.Doc(`
-			$ eval "$( c8y-session-bitwarden | c8y session login --from-stdin )"
-			Set a session interactively
-
-			$ eval "$( c8y sessions login --exec "c8y-session-bitwarden list --folder c8y" )"
-			Set a session but only include session matching company AND dev
-
 			$ eval "$( c8y sessions login --from-file .env )"
 			Set a session from a dotenv file
 
 			$ eval "$( c8y sessions login --from-env )"
-			Set a session from existing environment variables
+			Set a session from environment variables (e.g. in Github)
+
+			$ eval "$( c8y-session-bitwarden | c8y sessions login --from-stdin --format json )"
+			Set a session from an external command, accepting the selected session via stdin
+
+			$ eval "$( c8y sessions login --from-cmd "c8y sessions set --output json" )"
+			Set a session using the in-built "c8y sessions set"
+
+			$ eval "$( c8y sessions login --from-cmd "c8y-session-bitwarden list --folder c8y" --format json )"
+			Set a session from an external command, where the external commands returns the selected session in json format on stdout
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -86,6 +91,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().StringVar(&ccmd.Exec, "from-cmd", "", "External command to execute to get the log in details")
 	cmd.Flags().BoolVar(&ccmd.Env, "from-env", false, "Read from environment variables")
 	cmd.Flags().BoolVar(&ccmd.Stdin, "from-stdin", false, "Read from standard input")
+	cmd.Flags().BoolVar(&ccmd.NoBanner, "no-banner", false, "Don't show the session banner")
 	cmd.Flags().StringVar(&ccmd.Format, "format", "", "External command format, e.g. json, yaml, toml")
 	cmd.Flags().StringVar(&ccmd.OutputFormat, "output-format", "", "Output format")
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", "", "Shell type to return the environment variables")
@@ -198,16 +204,30 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 }
 
 func (n *CmdLogin) FromViper(v *viper.Viper) (*c8ysession.CumulocitySession, error) {
-	session := &c8ysession.CumulocitySession{
-		SessionUri: v.GetString("sessionUri"),
-		Path:       v.GetString("path"),
-		Username:   v.GetString("username"),
-		Password:   v.GetString("password"),
-		Tenant:     v.GetString("tenant"),
-		Token:      v.GetString("token"),
-		TOTP:       v.GetString("totp"),
+
+	getValue := func(keys ...string) string {
+		for _, k := range keys {
+			if value := v.GetString(k); value != "" {
+				return value
+			}
+			// use fallback value
+			if value := v.GetString(config.EnvSettingsPrefix + "_" + k); value != "" {
+				return value
+			}
+		}
+		return ""
 	}
-	session.SetHost(v.GetString("host"))
+
+	session := &c8ysession.CumulocitySession{
+		SessionUri: getValue("sessionUri"),
+		Path:       getValue("path"),
+		Username:   getValue("username"),
+		Password:   getValue("password"),
+		Tenant:     getValue("tenant"),
+		Token:      getValue("token"),
+		TOTP:       getValue("totp"),
+	}
+	session.SetHost(getValue("host"))
 	return session, nil
 }
 
@@ -333,7 +353,9 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	session.Path = cfg.GetSessionFile()
 
 	// Write session details to stderr (for humans)
-	c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, *session)
+	if !n.NoBanner {
+		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, *session)
+	}
 
 	outputFormat := n.OutputFormat
 	if outputFormat == "" {
