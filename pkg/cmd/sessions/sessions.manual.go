@@ -22,9 +22,10 @@ func NewSubCommand(f *cmdutil.Factory) *sessionsCmd {
 	ccmd := &sessionsCmd{}
 
 	cmd := &cobra.Command{
-		Use:   "sessions",
-		Short: "Cumulocity sessions",
-		Long:  `Manage Cumulocity sessions`,
+		Use:     "sessions",
+		Aliases: []string{"session"},
+		Short:   "Cumulocity sessions",
+		Long:    `Manage Cumulocity sessions`,
 	}
 
 	// Subcommands
