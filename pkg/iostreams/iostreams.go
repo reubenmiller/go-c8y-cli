@@ -141,7 +141,7 @@ func (s *IOStreams) IsStderrTTY() bool {
 
 func (s *IOStreams) HasStdin() bool {
 	stat, _ := os.Stdin.Stat()
-	return (stat.Mode()&os.ModeCharDevice) == 0 && stat.Size() > 0
+	return (stat.Mode() & os.ModeCharDevice) == 0
 }
 
 func (s *IOStreams) CanPrompt() bool {
