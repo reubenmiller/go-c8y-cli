@@ -34,12 +34,12 @@ func NewCmdClearSession(f *cmdutil.Factory) *CmdClearSession {
 		Long:  `Clear the current session by returning all the environment variables which should be unset via a shell snippet`,
 		Example: heredoc.Doc(`
 ### Example 1: Clear session in bash
-$ eval $(c8y session clear)
+$ eval $(c8y sessions clear)
 
 Clear the current session
 
 ## Example 2: Clear session in fish
-$ c8y session clear | source
+$ c8y sessions clear | source
 		`),
 		RunE: ccmd.RunE,
 	}

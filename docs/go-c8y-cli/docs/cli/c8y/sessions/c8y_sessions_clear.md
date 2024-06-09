@@ -16,12 +16,12 @@ c8y sessions clear [flags]
 
 ```
 ### Example 1: Clear session in bash
-$ eval $(c8y session clear)
+$ eval $(c8y sessions clear)
 
 Clear the current session
 
 ## Example 2: Clear session in fish
-$ c8y session clear | source
+$ c8y sessions clear | source
 		
 ```
 

@@ -30,13 +30,13 @@ func NewCmdEncryptText(f *cmdutil.Factory) *CmdEncryptText {
 		Example: `
 Example 1: Encrypt the text "Hello World". You will be prompted for the passphrase to encrypt the data.
 
-> c8y session encryptText --text "Hello World"
+> c8y sessions encryptText --text "Hello World"
 Enter password 🔒: [input is hidden] 
 Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189e504b6840bc027cece28b3f36717839d96af1c5dba8c850b9a9079846066ee1596cc8d26f4138f76ce3
 
 Example 2: Encrypt the text "Hello World", the text will be encrypted using the given passphrase (without being prompted)
 
-> c8y session encryptText --text "Hello World" --passphrase "so4methIng-7hat-Matters"
+> c8y sessions encryptText --text "Hello World" --passphrase "so4methIng-7hat-Matters"
 Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189e504b6840bc027cece28b3f36717839d96af1c5dba8c850b9a9079846066ee1596cc8d26f4138f76ce3
 		`,
 		RunE: ccmd.RunE,
