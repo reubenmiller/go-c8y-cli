@@ -114,7 +114,12 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 }
 
 func (n *CmdLogin) FromStdin(format string, args []string) (*c8ysession.CumulocitySession, error) {
-	return n.FromReader(bufio.NewReader(os.Stdin), format)
+	session, err := n.FromReader(bufio.NewReader(os.Stdin), format)
+
+	if session.SessionUri == "" {
+		session.SessionUri = "stdin://host"
+	}
+	return session, err
 }
 
 func (n *CmdLogin) FromEnv() (*c8ysession.CumulocitySession, error) {
@@ -147,6 +152,10 @@ func (n *CmdLogin) FromEnv() (*c8ysession.CumulocitySession, error) {
 			session.Username = v
 			break
 		}
+	}
+
+	if session.SessionUri == "" {
+		session.SessionUri = "env://host"
 	}
 
 	return session, nil

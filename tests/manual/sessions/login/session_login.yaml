@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It reads a session from a command:
+    command: |
+      env -i PATH="$PATH" C8Y_HOST="$C8Y_HOST" C8Y_USERNAME="$C8Y_USERNAME" C8Y_PASSWORD="$C8Y_PASSWORD" \
+        c8y sessions login --from-cmd "c8y sessions login --from-env --output-format json --no-banner" --output-format json
+    exit-code: 0
+    stdout:
+      json:
+        host: r/^.+$
+        tenant: r/^.+$
+        version: r/^.+$
+        username: r/^.+$
+        token: r/^.+$
+
+  It reads a session from environment variables:
+    command: |
+      env -i PATH="$PATH" C8Y_HOST="$C8Y_HOST" C8Y_USERNAME="$C8Y_USERNAME" C8Y_PASSWORD="$C8Y_PASSWORD" \
+        c8y sessions login --from-env --output-format json
+    exit-code: 0
+    stdout:
+      json:
+        host: r/^.+$
+        tenant: r/^.+$
+        version: r/^.+$
+        username: r/^.+$
+        token: r/^.+$
