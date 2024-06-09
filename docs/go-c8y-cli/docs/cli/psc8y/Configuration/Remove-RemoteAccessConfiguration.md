@@ -1,38 +1,28 @@
 ---
-category: Applications
+category: Configuration
 external help file: PSc8y-help.xml
-id: Get-ApplicationCollection
+id: Remove-RemoteAccessConfiguration
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_delete
 schema: 2.0.0
-slug: /docs/cli/psc8y/Applications/get-applicationcollection
-title: Get-ApplicationCollection
+slug: /docs/cli/psc8y/Configuration/remove-remoteaccessconfiguration
+title: Remove-RemoteAccessConfiguration
 ---
 
 
 
 ## SYNOPSIS
-Get application collection
+Delete remote access configuration
 
 ## SYNTAX
 
 ```
-Get-ApplicationCollection
-	[[-Type] <Object[]>]
-	[[-Name] <String>]
-	[[-Owner] <String>]
-	[[-ProvidedFor] <String>]
-	[[-Subscriber] <String>]
-	[[-User] <Object[]>]
-	[[-Tenant] <String>]
-	[-HasVersions]
-	[[-Availability] <String>]
-	[-PageSize <Int32>]
-	[-WithTotalPages]
-	[-WithTotalElements]
-	[-CurrentPage <Int32>]
-	[-TotalPages <Int32>]
-	[-IncludeAll]
+Remove-RemoteAccessConfiguration
+	[[-Device] <Object[]>]
+	[[-Id] <Object[]>]
+	[-NoAccept]
+	[-ProcessingMode <String>]
+	[-Force]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -80,21 +70,21 @@ Get-ApplicationCollection
 ```
 
 ## DESCRIPTION
-Get a collection of applications by a given filter
+Delete an existing remote access configuration
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-ApplicationCollection -PageSize 100
+Remove-RemoteAccessConfiguration -Device device01 -Id 1
 ```
 
-Get applications
+Delete an existing remote access configuration
 
 ## PARAMETERS
 
-### -Type
-Application type
+### -Device
+Device
 
 ```yaml
 Type: Object[]
@@ -104,72 +94,12 @@ Aliases:
 Required: False
 Position: 1
 Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
-Accept wildcard characters: False
-```
-
-### -Name
-The name of the application.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 2
-Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Owner
-The ID of the tenant that owns the applications.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ProvidedFor
-The ID of a tenant that is subscribed to the applications but doesn't own them.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Subscriber
-The ID of a tenant that is subscribed to the applications.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -User
-The ID of a user that has access to the applications.
+### -Id
+Connection
 
 ```yaml
 Type: Object[]
@@ -177,55 +107,9 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 2
 Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Tenant
-The ID of a tenant that either owns the application or is subscribed to the applications.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -HasVersions
-When set to true, the returned result contains applications with an applicationVersions field that is not empty.
-When set to false, the result will contain applications with an empty applicationVersions field.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Availability
-Application access level for other tenants.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 8
-Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
@@ -341,21 +225,6 @@ Custom confirmation text
 
 ```yaml
 Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -CurrentPage
-Current page which should be returned
-
-```yaml
-Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -495,6 +364,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Force
+Do not prompt for confirmation.
+Ignored when using --confirm
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Header
 custom headers.
 i.e.
@@ -514,21 +399,6 @@ Accept wildcard characters: False
 
 ### -Help
 Show command help
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -IncludeAll
-Include all results by iterating through each page
 
 ```yaml
 Type: SwitchParameter
@@ -578,6 +448,21 @@ Maximum number of jobs.
 
 ```yaml
 Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoAccept
+Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
@@ -724,11 +609,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -PageSize
-Maximum results per page
+### -ProcessingMode
+Cumulocity processing mode
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -898,21 +783,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TotalPages
-Total number of pages to get
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -View
 Use views when displaying data on the terminal.
 Disable using --view off
@@ -931,36 +801,6 @@ Accept wildcard characters: False
 
 ### -WithError
 Errors will be printed on stdout instead of stderr
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithTotalElements
-Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithTotalPages
-Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
 
 ```yaml
 Type: SwitchParameter
@@ -1001,5 +841,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_delete](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_delete)
 

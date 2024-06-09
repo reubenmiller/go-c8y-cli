@@ -1,25 +1,24 @@
 ---
-category: Applications
+category: Misc
 external help file: PSc8y-help.xml
-id: Get-ApplicationCollection
+id: Get-UIPluginCollection
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_list
 schema: 2.0.0
-slug: /docs/cli/psc8y/Applications/get-applicationcollection
-title: Get-ApplicationCollection
+slug: /docs/cli/psc8y/Misc/get-uiplugincollection
+title: Get-UIPluginCollection
 ---
 
 
 
 ## SYNOPSIS
-Get application collection
+Get UI plugin collection
 
 ## SYNTAX
 
 ```
-Get-ApplicationCollection
-	[[-Type] <Object[]>]
-	[[-Name] <String>]
+Get-UIPluginCollection
+	[[-Name] <Object[]>]
 	[[-Owner] <String>]
 	[[-ProvidedFor] <String>]
 	[[-Subscriber] <String>]
@@ -80,21 +79,21 @@ Get-ApplicationCollection
 ```
 
 ## DESCRIPTION
-Get a collection of applications by a given filter
+Get a collection of UI plugins by a given filter
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-ApplicationCollection -PageSize 100
+Get-UIPluginCollection -PageSize 100
 ```
 
-Get applications
+Get UI plugins
 
 ## PARAMETERS
 
-### -Type
-Application type
+### -Name
+The name of the plugin.
 
 ```yaml
 Type: Object[]
@@ -108,8 +107,8 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -Name
-The name of the application.
+### -Owner
+The ID of the tenant that owns the plugin.
 
 ```yaml
 Type: String
@@ -123,8 +122,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Owner
-The ID of the tenant that owns the applications.
+### -ProvidedFor
+The ID of a tenant that is subscribed to the plugin but doesn't own them.
 
 ```yaml
 Type: String
@@ -138,8 +137,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ProvidedFor
-The ID of a tenant that is subscribed to the applications but doesn't own them.
+### -Subscriber
+The ID of a tenant that is subscribed to the plugin.
 
 ```yaml
 Type: String
@@ -153,11 +152,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Subscriber
-The ID of a tenant that is subscribed to the applications.
+### -User
+The ID of a user that has access to the plugin.
 
 ```yaml
-Type: String
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
@@ -168,11 +167,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -User
-The ID of a user that has access to the applications.
+### -Tenant
+The ID of a tenant that either owns the plugin or is subscribed to the plugins.
 
 ```yaml
-Type: Object[]
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -183,23 +182,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Tenant
-The ID of a tenant that either owns the application or is subscribed to the applications.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -HasVersions
-When set to true, the returned result contains applications with an applicationVersions field that is not empty.
+When set to true, the returned result contains plugins with an applicationVersions field that is not empty.
 When set to false, the result will contain applications with an empty applicationVersions field.
 
 ```yaml
@@ -215,7 +199,7 @@ Accept wildcard characters: False
 ```
 
 ### -Availability
-Application access level for other tenants.
+Plugin access level for other tenants.
 
 ```yaml
 Type: String
@@ -223,7 +207,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -1001,5 +985,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_list](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_list)
 

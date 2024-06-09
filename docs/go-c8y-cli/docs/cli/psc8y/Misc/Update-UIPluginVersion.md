@@ -1,38 +1,32 @@
 ---
-category: Applications
+category: Misc
 external help file: PSc8y-help.xml
-id: Get-ApplicationCollection
+id: Update-UIPluginVersion
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_versions_update
 schema: 2.0.0
-slug: /docs/cli/psc8y/Applications/get-applicationcollection
-title: Get-ApplicationCollection
+slug: /docs/cli/psc8y/Misc/update-uipluginversion
+title: Update-UIPluginVersion
 ---
 
 
 
 ## SYNOPSIS
-Get application collection
+Replace tags related to a plugin version
 
 ## SYNTAX
 
 ```
-Get-ApplicationCollection
-	[[-Type] <Object[]>]
-	[[-Name] <String>]
-	[[-Owner] <String>]
-	[[-ProvidedFor] <String>]
-	[[-Subscriber] <String>]
-	[[-User] <Object[]>]
-	[[-Tenant] <String>]
-	[-HasVersions]
-	[[-Availability] <String>]
-	[-PageSize <Int32>]
-	[-WithTotalPages]
-	[-WithTotalElements]
-	[-CurrentPage <Int32>]
-	[-TotalPages <Int32>]
-	[-IncludeAll]
+Update-UIPluginVersion
+	[[-Plugin] <Object[]>]
+	[[-Version] <Object[]>]
+	[[-Tags] <String[]>]
+	[-Data <Object>]
+	[-NoAccept]
+	[-ProcessingMode <String>]
+	[-Force]
+	[-Template <String>]
+	[-TemplateVars <String>]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -80,21 +74,21 @@ Get-ApplicationCollection
 ```
 
 ## DESCRIPTION
-Get a collection of applications by a given filter
+Replaces the tags of a given plugin version in your tenant
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-ApplicationCollection -PageSize 100
+Update-UIPluginVersion -Plugin 1234 -Version 1.0 -Tags tag1,latest
 ```
 
-Get applications
+Replace tags assigned to a version of a plugin
 
 ## PARAMETERS
 
-### -Type
-Application type
+### -Plugin
+Plugin
 
 ```yaml
 Type: Object[]
@@ -108,11 +102,11 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -Name
-The name of the application.
+### -Version
+Version
 
 ```yaml
-Type: String
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
@@ -123,107 +117,17 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Owner
-The ID of the tenant that owns the applications.
+### -Tags
+Tag assigned to the version.
+Version tags must be unique across all versions and version fields of plugin versions
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ProvidedFor
-The ID of a tenant that is subscribed to the applications but doesn't own them.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Subscriber
-The ID of a tenant that is subscribed to the applications.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -User
-The ID of a user that has access to the applications.
-
-```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Tenant
-The ID of a tenant that either owns the application or is subscribed to the applications.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -HasVersions
-When set to true, the returned result contains applications with an applicationVersions field that is not empty.
-When set to false, the result will contain applications with an empty applicationVersions field.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Availability
-Application access level for other tenants.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -351,11 +255,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CurrentPage
-Current page which should be returned
+### -CustomQueryParam
+add custom URL query parameters.
+i.e.
+--customQueryParam 'withCustomOption=true,myOtherOption=myvalue'
 
 ```yaml
-Type: Int32
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
@@ -366,13 +272,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CustomQueryParam
-add custom URL query parameters.
-i.e.
---customQueryParam 'withCustomOption=true,myOtherOption=myvalue'
+### -Data
+static data to be applied to body.
+accepts json or shorthande json, i.e.
+--data 'value1=1,my.nested.value=100'
 
 ```yaml
-Type: String[]
+Type: Object
 Parameter Sets: (All)
 Aliases:
 
@@ -495,6 +401,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Force
+Do not prompt for confirmation.
+Ignored when using --confirm
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Header
 custom headers.
 i.e.
@@ -514,21 +436,6 @@ Accept wildcard characters: False
 
 ### -Help
 Show command help
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -IncludeAll
-Include all results by iterating through each page
 
 ```yaml
 Type: SwitchParameter
@@ -578,6 +485,21 @@ Maximum number of jobs.
 
 ```yaml
 Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoAccept
+Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
@@ -724,11 +646,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -PageSize
-Maximum results per page
+### -ProcessingMode
+Cumulocity processing mode
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -881,10 +803,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Timeout
-Request timeout.
-It accepts a duration, i.e.
-1ms, 0.5s, 1m etc.
+### -Template
+Body template
 
 ```yaml
 Type: String
@@ -898,11 +818,28 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TotalPages
-Total number of pages to get
+### -TemplateVars
+Body template variables
 
 ```yaml
-Type: Int32
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Timeout
+Request timeout.
+It accepts a duration, i.e.
+1ms, 0.5s, 1m etc.
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -944,36 +881,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WithTotalElements
-Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithTotalPages
-Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Workers
 Number of workers
 
@@ -1001,5 +908,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_versions_update](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_versions_update)
 
