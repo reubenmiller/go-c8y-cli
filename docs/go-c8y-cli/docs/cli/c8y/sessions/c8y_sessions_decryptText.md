@@ -17,12 +17,12 @@ c8y sessions decryptText [flags]
 ```
 
 Example 1:
-c8y session decryptText --text "{encrypted}asdfasdfasdfasdfasdf"
+c8y sessions decryptText --text "{encrypted}asdfasdfasdfasdfasdf"
 
 Encrypt the text "Hello World". You will be prompted for the passphrase to encrypt the data.
 
 Example 2:
-c8y session encryptText --text "Hello World" --passphrase "so4methIng-7hat-Matters"
+c8y sessions encryptText --text "Hello World" --passphrase "so4methIng-7hat-Matters"
 
 Encrypt the text "Hello World", the text will be encrypted using the given passphrase (without being prompted)
 		

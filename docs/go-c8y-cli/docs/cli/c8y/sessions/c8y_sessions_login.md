@@ -1,35 +1,51 @@
 ---
 category: sessions
-title: c8y sessions clear
+title: c8y sessions login
 ---
-Clear current session
+login to Cumulocity IoT and return environment variables (including a token)
 
 ### Synopsis
 
-Clear the current session by returning all the environment variables which should be unset via a shell snippet
+Set a session, login and test the session and get either OAuth2 token, or using two factor authentication
 
 ```
-c8y sessions clear [flags]
+c8y sessions login [flags]
 ```
 
 ### Examples
 
 ```
-### Example 1: Clear session in bash
-$ eval $(c8y sessions clear)
+$ eval "$( c8y sessions login --from-file .env )"
+Set a session from a dotenv file
 
-Clear the current session
+$ eval "$( c8y sessions login --from-env )"
+Set a session from environment variables (e.g. in Github)
 
-## Example 2: Clear session in fish
-$ c8y sessions clear | source
-		
+$ eval "$( c8y-session-bitwarden | c8y sessions login --from-stdin --format json )"
+Set a session from an external command, accepting the selected session via stdin
+
+$ eval "$( c8y sessions login --from-cmd "c8y sessions set --output json" )"
+Set a session using the in-built "c8y sessions set"
+
+$ eval "$( c8y sessions login --from-cmd "c8y-session-bitwarden list --folder c8y" --format json )"
+Set a session from an external command, where the external commands returns the selected session in json format on stdout
+
 ```
 
 ### Options
 
 ```
-  -h, --help           help for clear
-      --shell string   Shell type. Defaults to auto if not printing to terminal (default "auto")
+      --format string          External command format, e.g. json, yaml, toml
+      --from-cmd string        External command to execute to get the log in details
+      --from-env               Read from environment variables
+      --from-file string       Read session from a file
+      --from-stdin             Read from standard input
+  -h, --help                   help for login
+      --loginType string       Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared
+      --no-banner              Don't show the session banner
+      --output-format string   Output format
+      --provider string        Session provider which returns the session to use
+      --shell string           Shell type to return the environment variables
 ```
 
 ### Options inherited from parent commands

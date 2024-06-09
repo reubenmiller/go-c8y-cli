@@ -1,38 +1,39 @@
 ---
-category: Applications
+category: Configuration
 external help file: PSc8y-help.xml
-id: Get-ApplicationCollection
+id: New-RemoteAccessWebSSHConfiguration
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_create-webssh
 schema: 2.0.0
-slug: /docs/cli/psc8y/Applications/get-applicationcollection
-title: Get-ApplicationCollection
+slug: /docs/cli/psc8y/Configuration/new-remoteaccesswebsshconfiguration
+title: New-RemoteAccessWebSSHConfiguration
 ---
 
 
 
 ## SYNOPSIS
-Get application collection
+Create web ssh configuration
 
 ## SYNTAX
 
 ```
-Get-ApplicationCollection
-	[[-Type] <Object[]>]
+New-RemoteAccessWebSSHConfiguration
+	[[-Device] <Object[]>]
 	[[-Name] <String>]
-	[[-Owner] <String>]
-	[[-ProvidedFor] <String>]
-	[[-Subscriber] <String>]
-	[[-User] <Object[]>]
-	[[-Tenant] <String>]
-	[-HasVersions]
-	[[-Availability] <String>]
-	[-PageSize <Int32>]
-	[-WithTotalPages]
-	[-WithTotalElements]
-	[-CurrentPage <Int32>]
-	[-TotalPages <Int32>]
-	[-IncludeAll]
+	[[-Hostname] <String>]
+	[[-Port] <Int64>]
+	[[-CredentialsType] <String>]
+	[[-PrivateKey] <String>]
+	[[-PublicKey] <String>]
+	[[-Username] <String>]
+	[[-Password] <String>]
+	[[-Protocol] <String>]
+	[-Data <Object>]
+	[-NoAccept]
+	[-ProcessingMode <String>]
+	[-Force]
+	[-Template <String>]
+	[-TemplateVars <String>]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -80,21 +81,30 @@ Get-ApplicationCollection
 ```
 
 ## DESCRIPTION
-Get a collection of applications by a given filter
+Create a new WebSSH configuration.
+If no arguments are provided
+then sensible defaults will be used.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-ApplicationCollection -PageSize 100
+New-RemoteAccessWebSSHConfiguration -Device device01 -Username admin -Password "3Xz7cEj%oAmt#dnUMP*N"
 ```
 
-Get applications
+Create a webssh configuration (with username/password authentication)
+
+### EXAMPLE 2
+```
+New-RemoteAccessWebSSHConfiguration -Device device01 -Hostname 127.0.0.1 -Port 2222 -Username admin -PrivateKey "xxxx" -PublicKey "yyyyy"
+```
+
+Create a webssh configuration with a custom hostname and port (with ssh key authentication)
 
 ## PARAMETERS
 
-### -Type
-Application type
+### -Device
+Device
 
 ```yaml
 Type: Object[]
@@ -109,7 +119,7 @@ Accept wildcard characters: False
 ```
 
 ### -Name
-The name of the application.
+Connection name
 
 ```yaml
 Type: String
@@ -123,8 +133,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Owner
-The ID of the tenant that owns the applications.
+### -Hostname
+Hostname
 
 ```yaml
 Type: String
@@ -138,23 +148,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ProvidedFor
-The ID of a tenant that is subscribed to the applications but doesn't own them.
+### -Port
+Port
 
 ```yaml
-Type: String
+Type: Int64
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 4
-Default value: None
+Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Subscriber
-The ID of a tenant that is subscribed to the applications.
+### -CredentialsType
+Credentials type
 
 ```yaml
 Type: String
@@ -168,11 +178,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -User
-The ID of a user that has access to the applications.
+### -PrivateKey
+Private ssh key
 
 ```yaml
-Type: Object[]
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -183,8 +193,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Tenant
-The ID of a tenant that either owns the application or is subscribed to the applications.
+### -PublicKey
+Public ssh key
 
 ```yaml
 Type: String
@@ -198,24 +208,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -HasVersions
-When set to true, the returned result contains applications with an applicationVersions field that is not empty.
-When set to false, the result will contain applications with an empty applicationVersions field.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Availability
-Application access level for other tenants.
+### -Username
+Username
 
 ```yaml
 Type: String
@@ -224,6 +218,36 @@ Aliases:
 
 Required: False
 Position: 8
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Password
+Username
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 9
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Protocol
+Protocol
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 10
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -351,11 +375,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CurrentPage
-Current page which should be returned
+### -CustomQueryParam
+add custom URL query parameters.
+i.e.
+--customQueryParam 'withCustomOption=true,myOtherOption=myvalue'
 
 ```yaml
-Type: Int32
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
@@ -366,13 +392,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CustomQueryParam
-add custom URL query parameters.
-i.e.
---customQueryParam 'withCustomOption=true,myOtherOption=myvalue'
+### -Data
+static data to be applied to body.
+accepts json or shorthande json, i.e.
+--data 'value1=1,my.nested.value=100'
 
 ```yaml
-Type: String[]
+Type: Object
 Parameter Sets: (All)
 Aliases:
 
@@ -495,6 +521,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Force
+Do not prompt for confirmation.
+Ignored when using --confirm
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Header
 custom headers.
 i.e.
@@ -514,21 +556,6 @@ Accept wildcard characters: False
 
 ### -Help
 Show command help
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -IncludeAll
-Include all results by iterating through each page
 
 ```yaml
 Type: SwitchParameter
@@ -578,6 +605,21 @@ Maximum number of jobs.
 
 ```yaml
 Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoAccept
+Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
@@ -724,11 +766,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -PageSize
-Maximum results per page
+### -ProcessingMode
+Cumulocity processing mode
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -881,10 +923,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Timeout
-Request timeout.
-It accepts a duration, i.e.
-1ms, 0.5s, 1m etc.
+### -Template
+Body template
 
 ```yaml
 Type: String
@@ -898,11 +938,28 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TotalPages
-Total number of pages to get
+### -TemplateVars
+Body template variables
 
 ```yaml
-Type: Int32
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Timeout
+Request timeout.
+It accepts a duration, i.e.
+1ms, 0.5s, 1m etc.
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -944,36 +1001,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WithTotalElements
-Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithTotalPages
-Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Workers
 Number of workers
 
@@ -1001,5 +1028,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_create-webssh](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/remoteaccess_configurations_create-webssh)
 
