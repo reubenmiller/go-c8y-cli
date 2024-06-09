@@ -419,6 +419,11 @@ func NewConfig(v *viper.Viper) *Config {
 	return c
 }
 
+// Set non-persisted values
+func (c *Config) Set(key string, value any) {
+	c.viper.Set(key, value)
+}
+
 func (c *Config) RegisterTemplateResolver(resolver flags.Resolver) {
 	c.templateResolver = resolver
 }
@@ -1443,6 +1448,15 @@ func (c *Config) GetOutputFormat() OutputFormat {
 	return outputFormat
 }
 
+// GetOutputFormat Get output format type, i.e. json, csv, table etc.
+func (c *Config) GetOutputFormatWithDefault(fallback OutputFormat) OutputFormat {
+	if c.RawOutput() {
+		return OutputJSON
+	}
+	format := c.viper.GetString(SettingsOutputFormat)
+	return fallback.FromString(format)
+}
+
 // IsCSVOutput check if csv output is enabled
 func (c *Config) IsCSVOutput() bool {
 	format := c.GetOutputFormat()
@@ -1467,6 +1481,11 @@ func (c *Config) IsResponseOutput() bool {
 // EncryptionEnabled enables encryption when storing sensitive session data
 func (c *Config) EncryptionEnabled() bool {
 	return c.viper.GetBool(SettingsEncryptionEnabled)
+}
+
+// Enable/Disable encryption
+func (c *Config) SetEncryptionEnabled(v bool) {
+	c.viper.Set(SettingsEncryptionEnabled, v)
 }
 
 // GetActivityLogPath path where the activity log will be stored

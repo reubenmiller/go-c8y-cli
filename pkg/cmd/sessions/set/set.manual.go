@@ -210,23 +210,39 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		n.onSave(handler.C8Yclient)
 	}
 
-	c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, c8ysession.CumulocitySession{
-		Path:     cfg.GetSessionFile(),
-		Host:     handler.C8Yclient.BaseURL.Host,
-		Tenant:   cfg.GetTenant(),
-		Version:  cfg.GetCumulocityVersion(),
-		Username: handler.C8Yclient.Username,
-	})
+	session := &c8ysession.CumulocitySession{
+		Path:       cfg.GetSessionFile(),
+		SessionUri: "file://" + cfg.GetSessionFile(),
+		Host:       handler.C8Yclient.BaseURL.Host,
+		Password:   handler.C8Yclient.Password,
+		Token:      handler.C8Yclient.Token,
+		Tenant:     cfg.GetTenant(),
+		Version:    cfg.GetCumulocityVersion(),
+		Username:   handler.C8Yclient.Username,
+	}
 
-	if n.Shell != "" {
+	outputFormat := cfg.GetOutputFormatWithDefault(config.OutputUnknown).String()
+
+	// Write session details to stderr (for humans)
+	if outputFormat != config.OutputJSON.String() {
+		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, *session)
+	}
+
+	if outputFormat == config.OutputUnknown.String() {
+		if n.Shell == "" && !n.factory.IOStreams.IsStdoutTTY() {
+			n.Shell = "auto"
+		}
 		if strings.EqualFold(n.Shell, "auto") {
 			n.Shell = shell.DetectShell("bash")
 		}
-		shell := utilities.ShellBash
-		utilities.ShowClientEnvironmentVariables(cfg, handler.C8Yclient, shell.FromString(n.Shell))
+		outputFormat = n.Shell
+	} else if outputFormat != config.OutputJSON.String() {
+		// Don't output for any other format
+		return nil
 	}
 
-	return nil
+	// Write session details to stdout (for machines)
+	return c8ysession.WriteOutput(n.GetCommand().OutOrStdout(), client, cfg, session, outputFormat)
 }
 
 func hasChanged(client *c8y.Client, cfg *config.Config) bool {

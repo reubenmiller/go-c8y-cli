@@ -206,7 +206,7 @@ func (lh *LoginHandler) init() {
 				lh.Logger.Infof("Login options returned 401. This may happen when your c8y hostname is not setup correctly")
 				return nil
 			}
-			lh.Logger.Warnf("Failed to get login options")
+			lh.Logger.Warnf("Failed to get login options. %s", err)
 			return err
 		}
 		if loginOptions == nil {

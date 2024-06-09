@@ -3,6 +3,7 @@ package utilities
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"runtime"
@@ -25,7 +26,7 @@ func GetFileContentType(out *os.File) (string, error) {
 		return "", err
 	}
 
-	// Use the net/http package's handy DectectContentType function. Always returns a valid
+	// Use the net/http package's handy DetectContentType function. Always returns a valid
 	// content-type by returning "application/octet-stream" if no others seemed to match.
 	contentType := http.DetectContentType(buffer)
 
@@ -48,6 +49,18 @@ func (t ShellType) FromString(name string) ShellType {
 	return t
 }
 
+func (t ShellType) Parse(name string) (ShellType, bool) {
+	values := map[string]ShellType{
+		"powershell": ShellPowerShell,
+		"bash":       ShellBash,
+		"zsh":        ShellZSH,
+		"fish":       ShellFish,
+	}
+
+	v, ok := values[strings.ToLower(name)]
+	return v, ok
+}
+
 const (
 	// ShellBash bash
 	ShellBash ShellType = iota
@@ -62,12 +75,7 @@ const (
 	ShellFish
 )
 
-func ShowClientEnvironmentVariables(cfg *config.Config, c8yclient *c8y.Client, shell ShellType) {
-	output := cfg.GetEnvironmentVariables(c8yclient, cfg.AlwaysIncludePassword())
-	ShowEnvironmentVariables(output, shell)
-}
-
-func ShowEnvironmentVariables(cfg map[string]interface{}, shell ShellType) {
+func WriteShellVariables(w io.Writer, cfg map[string]interface{}, shell ShellType) {
 	// sort output variables
 	variables := []string{}
 
@@ -81,21 +89,21 @@ func ShowEnvironmentVariables(cfg map[string]interface{}, shell ShellType) {
 		switch shell {
 		case ShellPowerShell:
 			if value == "" {
-				fmt.Printf("$env:%s = $null\n", name)
+				fmt.Fprintf(w, "$env:%s = $null\n", name)
 			} else {
-				fmt.Printf("$env:%s = '%v'\n", name, value)
+				fmt.Fprintf(w, "$env:%s = '%v'\n", name, value)
 			}
 		case ShellFish:
 			if value == "" {
-				fmt.Printf("set -e %s\n", name)
+				fmt.Fprintf(w, "set -e %s\n", name)
 			} else {
-				fmt.Printf("set -gx %s '%v'\n", name, value)
+				fmt.Fprintf(w, "set -gx %s '%v'\n", name, value)
 			}
 		default:
 			if value == "" {
-				fmt.Printf("unset %s\n", name)
+				fmt.Fprintf(w, "unset %s\n", name)
 			} else {
-				fmt.Printf("export %s='%v'\n", name, value)
+				fmt.Fprintf(w, "export %s='%v'\n", name, value)
 			}
 		}
 	}
@@ -103,26 +111,7 @@ func ShowEnvironmentVariables(cfg map[string]interface{}, shell ShellType) {
 
 // ClearEnvironmentVariables clears all the session related environment variables by passing
 // a shell snippet to execute via source or eval.
-func ClearEnvironmentVariables(shell ShellType) {
-	variables := []string{
-		"C8Y_HOST",
-		"C8Y_URL",
-		"C8Y_BASEURL",
-		"C8Y_DOMAIN",
-		"C8Y_TENANT",
-		"C8Y_USER",
-		"C8Y_USERNAME",
-		"C8Y_PASSWORD",
-		"C8Y_TOKEN",
-		"C8Y_VERSION",
-		"C8Y_SESSION",
-		"C8Y_HEADER",
-		"C8Y_HEADER_AUTHORIZATION",
-		"C8Y_SETTINGS_MODE_ENABLECREATE",
-		"C8Y_SETTINGS_MODE_ENABLEUPDATE",
-		"C8Y_SETTINGS_MODE_ENABLEDELETE",
-	}
-
+func ClearEnvironmentVariables(variables []string, shell ShellType) {
 	sort.Strings(variables)
 	for _, name := range variables {
 		switch shell {
@@ -133,6 +122,12 @@ func ClearEnvironmentVariables(shell ShellType) {
 		default:
 			fmt.Printf("unset %s\n", name)
 		}
+	}
+}
+
+func ClearProcessEnvironment(variables []string) {
+	for _, key := range variables {
+		os.Unsetenv(key)
 	}
 }
 

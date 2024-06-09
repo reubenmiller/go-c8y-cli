@@ -584,7 +584,7 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 			envKey := strings.ToUpper(strings.ReplaceAll(config.EnvSettingsPrefix+"_"+key, ".", "_"))
 			cfg[envKey] = v.Get(key)
 		}
-		utilities.ShowEnvironmentVariables(cfg, shell.FromString(n.shell))
+		utilities.WriteShellVariables(cmd.OutOrStdout(), cfg, shell.FromString(n.shell))
 	}
 
 	return nil

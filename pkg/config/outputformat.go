@@ -25,6 +25,9 @@ const (
 
 	// OutputServerResponse unparsed output as received from the server
 	OutputServerResponse
+
+	// OutputUnknown unknown/unsupported output format
+	OutputUnknown
 )
 
 func (f OutputFormat) String() string {
@@ -36,6 +39,7 @@ func (f OutputFormat) String() string {
 		OutputCompletion:     "completion",
 		OutputCSVWithHeader:  "csvheader",
 		OutputServerResponse: "serverresponse",
+		OutputUnknown:        "unknown",
 	}
 
 	if v, ok := values[f]; ok {
@@ -53,6 +57,7 @@ func (f OutputFormat) FromString(name string) OutputFormat {
 		"completion":     OutputCompletion,
 		"csvheader":      OutputCSVWithHeader,
 		"serverresponse": OutputServerResponse,
+		"unknown":        OutputUnknown,
 	}
 
 	if v, ok := values[strings.ToLower(name)]; ok {

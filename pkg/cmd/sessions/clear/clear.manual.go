@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
@@ -62,6 +63,6 @@ func (n *CmdClearSession) RunE(cmd *cobra.Command, args []string) error {
 	if strings.EqualFold(n.Shell, "auto") {
 		n.Shell = shell.DetectShell("bash")
 	}
-	utilities.ClearEnvironmentVariables(shellType.FromString(n.Shell))
+	c8ysession.ClearEnvironmentVariables(shellType.FromString(n.Shell))
 	return nil
 }
