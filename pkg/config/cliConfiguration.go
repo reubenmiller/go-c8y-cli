@@ -1449,12 +1449,15 @@ func (c *Config) GetOutputFormat() OutputFormat {
 }
 
 // GetOutputFormat Get output format type, i.e. json, csv, table etc.
-func (c *Config) GetOutputFormatWithDefault(fallback OutputFormat) OutputFormat {
-	if c.RawOutput() {
-		return OutputJSON
+func (c *Config) GetOutputFormatWithDefault(cmd *cobra.Command, fallback OutputFormat) OutputFormat {
+	if !cmd.Flags().Changed("output") {
+		return fallback
 	}
-	format := c.viper.GetString(SettingsOutputFormat)
-	return fallback.FromString(format)
+	value, err := cmd.Flags().GetString("output")
+	if err != nil {
+		return fallback
+	}
+	return fallback.FromString(value)
 }
 
 // IsCSVOutput check if csv output is enabled
