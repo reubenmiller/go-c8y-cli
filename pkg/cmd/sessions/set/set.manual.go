@@ -221,7 +221,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		Username:   handler.C8Yclient.Username,
 	}
 
-	outputFormat := cfg.GetOutputFormatWithDefault(config.OutputUnknown).String()
+	outputFormat := cfg.GetOutputFormatWithDefault(cmd, config.OutputUnknown).String()
 
 	// Write session details to stderr (for humans)
 	if outputFormat != config.OutputJSON.String() {
