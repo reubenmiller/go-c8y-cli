@@ -1864,6 +1864,10 @@ func SupportsFileExtension(p string) bool {
 	return false
 }
 
+func (c *Config) ClearSessionFile() {
+	c.sessionFile = ""
+}
+
 func (c *Config) SetSessionFile(path string) {
 	if _, fileErr := os.Stat(path); fileErr != nil {
 		home := c.GetSessionHomeDir()
@@ -1901,6 +1905,7 @@ func (c *Config) GetSessionFile(overrideSession ...string) string {
 		sessionFile = os.Getenv("C8Y_SESSION")
 	}
 
+	sessionFile = strings.TrimPrefix(sessionFile, "file://")
 	if _, fileErr := os.Stat(sessionFile); fileErr != nil {
 		home := c.GetSessionHomeDir()
 		c.Logger.Debugf("Resolving session %s in %s", sessionFile, home)

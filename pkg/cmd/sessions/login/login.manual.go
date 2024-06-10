@@ -284,6 +284,10 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	// Clear any existing session file.
+	// If the user wants to load from a file, then use the --from-file option
+	cfg.ClearSessionFile()
+
 	if strings.EqualFold(n.Provider, ProviderTypeAuto) {
 		//
 		// Try guessing a sensible default
