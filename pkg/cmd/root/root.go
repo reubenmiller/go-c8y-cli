@@ -11,6 +11,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydefaults"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
 	activityLogCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/activitylog"
 	agentsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/agents"
 	alarmsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms"
@@ -815,7 +816,9 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	if sessionFile != "" {
 		log.Infof("Loaded session: %s", cfg.HideSensitiveInformationIfActive(client, sessionFile))
 		if _, err := os.Stat(sessionFile); err != nil {
-			log.Warnf("Failed to verify session file. %s", err)
+			if c8ysession.IsSessionFilePath(sessionFile) {
+				log.Warnf("Failed to verify session file. %s", err)
+			}
 		}
 	}
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -64,7 +65,7 @@ func (n *CmdGetSession) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// Support looking up a session which is only controlled via env variables
-	if sessionPath == "" && client != nil {
+	if !c8ysession.IsSessionFilePath(sessionPath) && client != nil {
 		cfg.Persistent.Set("host", client.GetHostname())
 		cfg.Persistent.Set("tenant", client.TenantName)
 		cfg.Persistent.Set("username", client.GetUsername())

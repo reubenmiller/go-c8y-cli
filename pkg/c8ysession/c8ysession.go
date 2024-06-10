@@ -251,3 +251,11 @@ func ClearEnvironmentVariables(shell utilities.ShellType) {
 func ClearProcessEnvironment() {
 	utilities.ClearProcessEnvironment(GetSessionEnvKeys())
 }
+
+func IsSessionFilePath(path string) bool {
+	if path == "" {
+		return false
+	}
+	path = strings.TrimPrefix(path, "file://")
+	return !strings.Contains(path, "://")
+}
