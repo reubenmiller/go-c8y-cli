@@ -195,7 +195,7 @@ func GetVariablesFromSession(session *CumulocitySession, client *c8y.Client, set
 	}
 
 	output := map[string]interface{}{
-		// "C8Y_SESSION":              c.GetSessionFile(),
+		"C8Y_SESSION":              "",
 		"C8Y_URL":                  host,
 		"C8Y_BASEURL":              host,
 		"C8Y_HOST":                 host,
@@ -208,6 +208,13 @@ func GetVariablesFromSession(session *CumulocitySession, client *c8y.Client, set
 		"C8Y_PASSWORD":             password,
 		"C8Y_HEADER_AUTHORIZATION": authHeaderValue,
 		"C8Y_HEADER":               authHeader,
+	}
+
+	// Favor older path style over sessionUri to help with backwards compatibility
+	if session.Path != "" {
+		output["C8Y_SESSION"] = session.Path
+	} else if session.SessionUri != "" {
+		output["C8Y_SESSION"] = session.SessionUri
 	}
 	return output
 }
