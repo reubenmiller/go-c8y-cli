@@ -161,11 +161,15 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 			shouldBeValidFor := cfg.TokenValidFor()
 			expiresSoon, expiresAt := ShouldRenewToken(tok, shouldBeValidFor)
 
-			if expiresSoon {
-				log.Warnf("Ignoring existing token as it will expire soon. minimumValidFor=%s, tokenExpiresAt=%s", shouldBeValidFor, expiresAt.Format(time.RFC3339))
-				client.SetToken("")
-			} else if expiresAt != nil {
-				log.Infof("Token expiresAt: %s", expiresAt.Format(time.RFC3339))
+			if expiresAt != nil {
+				if expiresSoon {
+					log.Warnf("Ignoring existing token as it will expire soon. minimumValidFor=%s, tokenExpiresAt=%s", shouldBeValidFor, expiresAt.Format(time.RFC3339))
+					client.SetToken("")
+				} else {
+					log.Infof("Token expiresAt: %s", expiresAt.Format(time.RFC3339))
+				}
+			} else {
+				log.Infof("Ignoring invalid token")
 			}
 		}
 	}
