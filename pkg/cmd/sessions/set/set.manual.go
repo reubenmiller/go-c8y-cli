@@ -29,6 +29,7 @@ type CmdSet struct {
 	LoginType     string
 	Shell         string
 	ClearToken    bool
+	NoBanner      bool
 	sessionFilter string
 
 	*subcommand.SubCommand
@@ -69,6 +70,7 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 	cmd.Flags().StringVar(&ccmd.TFACode, "tfaCode", "", "Two Factor Authentication code")
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", defaultShell, "Shell type to return the environment variables")
 	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared")
+	cmd.Flags().BoolVar(&ccmd.NoBanner, "no-banner", false, "Don't show the session banner")
 	cmd.Flags().BoolVar(&ccmd.ClearToken, "clear", false, "Clear any existing tokens")
 
 	completion.WithOptions(
@@ -236,7 +238,9 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	if outputFormat != config.OutputJSON.String() {
 		cs := n.factory.IOStreams.ColorScheme()
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is now active\n", cs.SuccessIcon())
-		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, *session)
+		if !n.NoBanner {
+			c8ysession.PrintSessionInfo(n.factory.IOStreams.ErrOut, client, cfg, *session)
+		}
 	}
 
 	if outputFormat == config.OutputUnknown.String() {
