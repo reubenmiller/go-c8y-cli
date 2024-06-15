@@ -75,6 +75,9 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 		completion.WithValidateSet("shell", "auto", "bash", "zsh", "fish", "powershell"),
 		completion.WithValidateSet("loginType", c8y.AuthMethodOAuth2Internal, c8y.AuthMethodBasic),
 	)
+	// Disable the encryption check, as the login handler will take care
+	// of checking the encryption
+	cmdutil.DisableEncryptionCheck(cmd)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
