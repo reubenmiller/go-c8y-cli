@@ -508,7 +508,6 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 	// Enable flag parsing when using tab completion, otherwise disable it
 	// as it affects passing the arguments to the extension binary
 	disableFlagParsing := !isTabCompletionCommand()
-	_ = disableFlagParsing
 
 	log, err := f.Logger()
 	if err != nil {
