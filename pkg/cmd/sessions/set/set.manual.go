@@ -134,7 +134,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		if n.LoginType == c8y.AuthMethodBasic {
 			cfg.Logger.Infof("Clearing any existing token when using %s auth", c8y.AuthMethodBasic)
 			os.Unsetenv("C8Y_TOKEN")
-			if cfg.MustGetToken() != "" {
+			if cfg.MustGetToken(false) != "" {
 				cfg.SetToken("")
 				n.onSave(nil)
 			}
@@ -160,7 +160,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		client.SetToken("")
 	} else {
 		// Check if token is valid for the minimum period
-		if tok := cfg.MustGetToken(); tok != "" {
+		if tok := cfg.MustGetToken(true); tok != "" {
 			shouldBeValidFor := cfg.TokenValidFor()
 			expiresSoon, expiresAt := ShouldRenewToken(tok, shouldBeValidFor)
 
@@ -262,7 +262,7 @@ func hasChanged(client *c8y.Client, cfg *config.Config) bool {
 		return true
 	}
 
-	if client.Token != "" && client.Token != cfg.MustGetToken() && cfg.StoreToken() {
+	if client.Token != "" && client.Token != cfg.MustGetToken(false) && cfg.StoreToken() {
 		return true
 	}
 
