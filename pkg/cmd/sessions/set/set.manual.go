@@ -170,6 +170,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 				}
 			} else {
 				log.Infof("Ignoring invalid token")
+				client.SetToken("")
 			}
 		}
 	}
