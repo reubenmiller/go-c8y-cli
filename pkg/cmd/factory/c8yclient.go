@@ -155,12 +155,15 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		if tenant == "" {
 			tenant = cfg.GetTenant()
 		}
+
+		authErrors := make([]error, 0)
 		if password == "" {
-			pass, err := cfg.GetPassword()
-			if !disableEncryptionCheck && err != nil {
-				return nil, err
+			// Only log errors
+			if pass, err := cfg.GetPassword(); err == nil {
+				password = pass
+			} else {
+				authErrors = append(authErrors, err)
 			}
-			password = pass
 		}
 
 		c8yURL := cfg.GetHost()
@@ -209,9 +212,16 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		})
 
 		// load authentication
-		if err := loadAuthentication(cfg, client); !disableEncryptionCheck && err != nil {
-			log.Warnf("Could not load authentication. %s", err)
-			return nil, err
+		if err := loadAuthentication(cfg, client); err != nil {
+			// Only log errors
+			authErrors = append(authErrors, err)
+		} else {
+			// Clear any existing auth errors
+			authErrors = nil
+		}
+
+		if !disableEncryptionCheck && len(authErrors) > 0 {
+			log.Warnf("Could not load authentication. error=%v", authErrors[0])
 		}
 
 		timeout := cfg.RequestTimeout()

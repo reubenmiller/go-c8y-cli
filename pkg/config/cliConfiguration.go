@@ -754,7 +754,7 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 	c8yVersion := c.GetCumulocityVersion()
 	username := c.GetUsername()
 	password := c.MustGetPassword()
-	token := c.MustGetToken()
+	token := c.MustGetToken(false)
 	authHeaderValue := ""
 	authHeader := ""
 
@@ -949,10 +949,12 @@ func (c *Config) MustGetPassword() string {
 }
 
 // MustGetToken returns the decrypted token if there are no encryption errors, otherwise it will return an encrypted value
-func (c *Config) MustGetToken() string {
+func (c *Config) MustGetToken(silent bool) string {
 	decryptedValue, err := c.GetToken()
 	if err != nil {
-		c.Logger.Warningf("Could not decrypt token. %s", err)
+		if !silent {
+			c.Logger.Warningf("Could not decrypt token. %s", err)
+		}
 	}
 	return decryptedValue
 }
@@ -1039,7 +1041,7 @@ func (c *Config) bindEnv(name string, defaultValue interface{}) error {
 // DecryptSession decrypts a session (as long as the encryption passphrase has already been provided)
 func (c *Config) DecryptSession() error {
 	c.SetPassword(c.MustGetPassword())
-	c.SetToken(c.MustGetToken())
+	c.SetToken(c.MustGetToken(false))
 	return c.WritePersistentConfig()
 }
 

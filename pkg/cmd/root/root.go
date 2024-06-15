@@ -189,7 +189,15 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 				// Command "listAssets" is deprecated,
 				fmt.Fprintf(f.IOStreams.ErrOut, "Command \"%s\" is deprecated, %s\n", cmd.CommandPath(), notice)
 			}
-			return ccmd.checkSessionExists(cmd, args)
+			cmdErr := ccmd.checkSessionExists(cmd, args)
+
+			if cmdErr != nil {
+				logg, logErr := f.Logger()
+				if logg != nil && logErr == nil {
+					logg.Warnf("Check existing session failed. %s", cmdErr)
+				}
+			}
+			return cmdErr
 		},
 	}
 
@@ -500,7 +508,6 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 	// Enable flag parsing when using tab completion, otherwise disable it
 	// as it affects passing the arguments to the extension binary
 	disableFlagParsing := !isTabCompletionCommand()
-	_ = disableFlagParsing
 
 	log, err := f.Logger()
 	if err != nil {
@@ -773,9 +780,11 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 			return c.client, nil
 		}
 		client, err := factory.CreateCumulocityClient(c.Factory, c.SessionFile, c.SessionUsername, c.SessionPassword, disableEncryptionCheck)()
-		if c.SessionUsername != "" || c.SessionPassword != "" {
-			client.AuthorizationMethod = c8y.AuthMethodBasic
-			c.log.Debug("Forcing basic authentication as user provided username/password")
+		if client != nil {
+			if c.SessionUsername != "" || c.SessionPassword != "" {
+				client.AuthorizationMethod = c8y.AuthMethodBasic
+				c.log.Debug("Forcing basic authentication as user provided username/password")
+			}
 		}
 
 		if c.log != nil {

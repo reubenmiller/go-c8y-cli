@@ -75,6 +75,9 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 		completion.WithValidateSet("shell", "auto", "bash", "zsh", "fish", "powershell"),
 		completion.WithValidateSet("loginType", c8y.AuthMethodOAuth2Internal, c8y.AuthMethodBasic),
 	)
+	// Disable the encryption check, as the login handler will take care
+	// of checking the encryption
+	cmdutil.DisableEncryptionCheck(cmd)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
@@ -131,7 +134,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		if n.LoginType == c8y.AuthMethodBasic {
 			cfg.Logger.Infof("Clearing any existing token when using %s auth", c8y.AuthMethodBasic)
 			os.Unsetenv("C8Y_TOKEN")
-			if cfg.MustGetToken() != "" {
+			if cfg.MustGetToken(false) != "" {
 				cfg.SetToken("")
 				n.onSave(nil)
 			}
@@ -157,7 +160,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		client.SetToken("")
 	} else {
 		// Check if token is valid for the minimum period
-		if tok := cfg.MustGetToken(); tok != "" {
+		if tok := cfg.MustGetToken(true); tok != "" {
 			shouldBeValidFor := cfg.TokenValidFor()
 			expiresSoon, expiresAt := ShouldRenewToken(tok, shouldBeValidFor)
 
@@ -170,6 +173,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 				}
 			} else {
 				log.Infof("Ignoring invalid token")
+				client.SetToken("")
 			}
 		}
 	}
@@ -258,7 +262,7 @@ func hasChanged(client *c8y.Client, cfg *config.Config) bool {
 		return true
 	}
 
-	if client.Token != "" && client.Token != cfg.MustGetToken() && cfg.StoreToken() {
+	if client.Token != "" && client.Token != cfg.MustGetToken(false) && cfg.StoreToken() {
 		return true
 	}
 
