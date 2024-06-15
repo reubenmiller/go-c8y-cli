@@ -316,6 +316,12 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"7d",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
+	// Hide session info when setting a session
+	"session.hide": {"session.hide", "bool", "settings.session.hide", []string{
+		"true",
+		"false",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
 	// cache
 	"defaults.cache": {"defaults.cache", "bool", config.SettingsDefaultsCacheEnabled, []string{
 		"true",

@@ -117,25 +117,36 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 	label := labelS.SprintfFunc()
 	value := color.New(color.FgWhite).SprintFunc()
 	header := color.New(color.FgCyan).SprintFunc()
+	maybeHideMessage := func(client *c8y.Client, message string) string {
+		return message
+	}
+	hideInfo := cfg.HideSessionBanner()
+	if hideInfo {
+		maybeHideMessage = cfg.HideSensitiveInformation
+	}
 
-	labelS.Fprintf(w, "---------------------  Cumulocity Session  ---------------------\n")
-	if session.SessionUri != "" {
-		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "source"), header(cfg.HideSensitiveInformationIfActive(client, session.SessionUri)))
+	if hideInfo {
+		labelS.Fprintf(w, "---------------------  Cumulocity Session (sensitive info is hidden)  ---------------------\n")
 	} else {
-		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(cfg.HideSensitiveInformationIfActive(client, session.Path)))
+		labelS.Fprintf(w, "---------------------  Cumulocity Session  ---------------------\n")
+	}
+	if session.SessionUri != "" {
+		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "source"), header(maybeHideMessage(client, session.SessionUri)))
+	} else {
+		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(maybeHideMessage(client, session.Path)))
 	}
 	if session.Description != "" {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(cfg.HideSensitiveInformationIfActive(client, session.Host)))
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(maybeHideMessage(client, session.Host)))
 	}
 
-	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "host")), value(cfg.HideSensitiveInformationIfActive(client, session.Host)))
+	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "host")), value(maybeHideMessage(client, session.Host)))
 	if session.Tenant != "" {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "tenant")), value(cfg.HideSensitiveInformationIfActive(client, session.Tenant)))
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "tenant")), value(maybeHideMessage(client, session.Tenant)))
 	}
 	if session.Version != "" {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "version")), value(cfg.HideSensitiveInformationIfActive(client, session.Version)))
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "version")), value(maybeHideMessage(client, session.Version)))
 	}
-	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(cfg.HideSensitiveInformationIfActive(client, session.Username)))
+	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(maybeHideMessage(client, session.Username)))
 	fmt.Fprintf(w, "\n")
 }
 
