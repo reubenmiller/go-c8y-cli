@@ -130,10 +130,11 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 	} else {
 		labelS.Fprintf(w, "---------------------  Cumulocity Session  ---------------------\n")
 	}
+	// Always show the source of the session
 	if session.SessionUri != "" {
-		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "source"), header(maybeHideMessage(client, session.SessionUri)))
+		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "source"), header(session.SessionUri))
 	} else {
-		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(maybeHideMessage(client, session.Path)))
+		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(session.Path))
 	}
 	if session.Description != "" {
 		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(maybeHideMessage(client, session.Host)))
