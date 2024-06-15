@@ -251,7 +251,11 @@ func (n *CmdLogin) FromFile(file string, format string) (*c8ysession.CumulocityS
 		return nil, err
 	}
 
-	return n.FromViper(v)
+	session, err := n.FromViper(v)
+	if session.SessionUri == "" {
+		session.SessionUri = "file://" + file
+	}
+	return session, err
 }
 
 func (n *CmdLogin) FromReader(r io.Reader, format string) (*c8ysession.CumulocitySession, error) {
@@ -366,6 +370,8 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	session.Path = cfg.GetSessionFile()
 
 	// Write session details to stderr (for humans)
+	cs := n.factory.IOStreams.ColorScheme()
+	fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is now active\n", cs.SuccessIcon())
 	if !n.NoBanner {
 		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, *session)
 	}

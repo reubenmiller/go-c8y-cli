@@ -122,7 +122,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	funcMap["highlight"] = customStyle()
 
 	funcMap["hide"] = func(v interface{}) string {
-		if cfg.HideSensitive() {
+		if cfg.HideSessionBanner() {
 			return "*****"
 		}
 		return fmt.Sprintf("%v", v)
@@ -131,7 +131,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	funcMap["hideUser"] = func(v interface{}) string {
 		msg := fmt.Sprintf("%v", v)
 
-		if !cfg.HideSensitive() {
+		if !cfg.HideSessionBanner() {
 			return msg
 		}
 		if os.Getenv("USERNAME") != "" {

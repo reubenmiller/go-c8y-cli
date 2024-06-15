@@ -307,6 +307,9 @@ const (
 	// SettingsSessionTokenValidFor interval which the token must be valid for in order to reuse it
 	SettingsSessionTokenValidFor = "settings.session.tokenValidFor"
 
+	// SettingsSessionHide hide sensitive information in the session banner
+	SettingsSessionHide = "settings.session.hide"
+
 	// Cache settings
 	// SettingsDefaultsCacheEnabled enable caching
 	SettingsDefaultsCacheEnabled = "settings.defaults.cache"
@@ -532,6 +535,7 @@ func (c *Config) bindSettings() {
 		// Session options
 		WithBindEnv(SettingsSessionAlwaysIncludePassword, false),
 		WithBindEnv(SettingsSessionTokenValidFor, "8h"),
+		WithBindEnv(SettingsSessionHide, false),
 
 		WithBindEnv(SettingsBrowser, ""),
 
@@ -1513,6 +1517,11 @@ func (c *Config) HideSensitive() bool {
 	return c.viper.GetBool(SettingsLoggerHideSensitive)
 }
 
+// HideSessionBanner hide sensitive information in the session banner
+func (c *Config) HideSessionBanner() bool {
+	return c.viper.GetBool(SettingsSessionHide)
+}
+
 // DisableStdin hide sensitive information in log entries
 func (c *Config) DisableStdin() bool {
 	return c.viper.GetBool(SettingsDisableInput)
@@ -1978,11 +1987,14 @@ func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
 }
 
 func (c *Config) HideSensitiveInformationIfActive(client *c8y.Client, message string) string {
-	if client == nil {
+	if !c.HideSensitive() {
 		return message
 	}
+	return c.HideSensitiveInformation(client, message)
+}
 
-	if !c.HideSensitive() {
+func (c *Config) HideSensitiveInformation(client *c8y.Client, message string) string {
+	if client == nil {
 		return message
 	}
 
@@ -1991,22 +2003,20 @@ func (c *Config) HideSensitiveInformationIfActive(client *c8y.Client, message st
 		message = strings.ReplaceAll(message, username, "******")
 	}
 
-	if client != nil {
-		if client.TenantName != "" {
-			message = strings.ReplaceAll(message, client.TenantName, "{tenant}")
-		}
-		if client.Username != "" {
-			message = strings.ReplaceAll(message, client.Username, "{username}")
-		}
-		if client.Password != "" {
-			message = strings.ReplaceAll(message, client.Password, "{password}")
-		}
-		if client.Token != "" {
-			message = strings.ReplaceAll(message, client.Token, "{token}")
-		}
-		if client.BaseURL != nil {
-			message = strings.ReplaceAll(message, strings.TrimRight(client.BaseURL.Host, "/"), "{host}")
-		}
+	if client.TenantName != "" {
+		message = strings.ReplaceAll(message, client.TenantName, "{tenant}")
+	}
+	if client.Username != "" {
+		message = strings.ReplaceAll(message, client.Username, "{username}")
+	}
+	if client.Password != "" {
+		message = strings.ReplaceAll(message, client.Password, "{password}")
+	}
+	if client.Token != "" {
+		message = strings.ReplaceAll(message, client.Token, "{token}")
+	}
+	if client.BaseURL != nil {
+		message = strings.ReplaceAll(message, strings.TrimRight(client.BaseURL.Host, "/"), "{host}")
 	}
 
 	basicAuthMatcher := regexp.MustCompile(`(Basic\s+)[A-Za-z0-9=]+`)

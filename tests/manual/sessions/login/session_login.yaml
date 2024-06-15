@@ -26,3 +26,31 @@ tests:
         version: r/^.+$
         username: r/^.+$
         token: r/^.+$
+
+  It does not hide sensitive info in the session banner by default:
+    command: |
+      c8y sessions login --from-env
+    exit-code: 0
+    stderr:
+      not-contains:
+        - "{host}"
+        - "{tenant}"
+        - "{username}"
+        - "hidden"
+
+  It hides sensitive information in the session banner:
+    command: |
+      c8y sessions login --from-env
+    exit-code: 0
+    config:
+      retries: 0
+      inherit-env: false
+      env:
+        C8Y_SETTINGS_SESSION_HIDE: true
+    stderr:
+      contains:
+        - "✓ Session is now active"
+        - ---------------------  Cumulocity Session (sensitive info is hidden)  ---------------------
+        - "host         : {host}"
+        - "tenant       : {tenant}"
+        - "username     : {username}"
