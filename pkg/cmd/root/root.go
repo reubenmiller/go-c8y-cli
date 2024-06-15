@@ -189,7 +189,15 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 				// Command "listAssets" is deprecated,
 				fmt.Fprintf(f.IOStreams.ErrOut, "Command \"%s\" is deprecated, %s\n", cmd.CommandPath(), notice)
 			}
-			return ccmd.checkSessionExists(cmd, args)
+			cmdErr := ccmd.checkSessionExists(cmd, args)
+
+			if cmdErr != nil {
+				logg, logErr := f.Logger()
+				if logg != nil && logErr == nil {
+					logg.Warnf("Check existing session failed. %s", cmdErr)
+				}
+			}
+			return cmdErr
 		},
 	}
 
