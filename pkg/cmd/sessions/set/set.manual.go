@@ -1,6 +1,7 @@
 package login
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -233,6 +234,8 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 
 	// Write session details to stderr (for humans)
 	if outputFormat != config.OutputJSON.String() {
+		cs := n.factory.IOStreams.ColorScheme()
+		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is now active\n", cs.SuccessIcon())
 		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, *session)
 	}
 
