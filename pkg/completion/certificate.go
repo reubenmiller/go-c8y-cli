@@ -18,6 +18,7 @@ func WithDeviceCertificate(flagName string, clientFunc func() (*c8y.Client, erro
 			}
 			items, _, err := client.DeviceCertificate.GetCertificates(
 				c8y.WithDisabledDryRunContext(context.Background()),
+				client.TenantName,
 				&c8y.DeviceCertificateCollectionOptions{
 					PaginationOptions: *c8y.NewPaginationOptions(100),
 				},

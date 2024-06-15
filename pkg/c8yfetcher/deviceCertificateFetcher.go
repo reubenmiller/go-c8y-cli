@@ -38,6 +38,7 @@ func (f *DeviceCertificateFetcher) IsID(id string) bool {
 func (f *DeviceCertificateFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	cert, resp, err := f.Client().DeviceCertificate.GetCertificate(
 		c8y.WithDisabledDryRunContext(context.Background()),
+		f.Client().TenantName,
 		id,
 	)
 
@@ -59,6 +60,7 @@ func (f *DeviceCertificateFetcher) getByName(name string) ([]fetcherResultSet, e
 	// check if already resolved, so we can save a lookup
 	col, _, err := f.Client().DeviceCertificate.GetCertificates(
 		c8y.WithDisabledDryRunContext(context.Background()),
+		f.Client().TenantName,
 		&c8y.DeviceCertificateCollectionOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(100),
 		},
