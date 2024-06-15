@@ -370,6 +370,8 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	session.Path = cfg.GetSessionFile()
 
 	// Write session details to stderr (for humans)
+	cs := n.factory.IOStreams.ColorScheme()
+	fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is now active\n", cs.SuccessIcon())
 	if !n.NoBanner {
 		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, *session)
 	}
