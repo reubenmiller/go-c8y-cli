@@ -251,7 +251,11 @@ func (n *CmdLogin) FromFile(file string, format string) (*c8ysession.CumulocityS
 		return nil, err
 	}
 
-	return n.FromViper(v)
+	session, err := n.FromViper(v)
+	if session.SessionUri == "" {
+		session.SessionUri = "file://" + file
+	}
+	return session, err
 }
 
 func (n *CmdLogin) FromReader(r io.Reader, format string) (*c8ysession.CumulocitySession, error) {
