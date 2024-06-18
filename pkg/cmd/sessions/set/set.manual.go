@@ -124,7 +124,14 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		// the user is most likely switching session so does not want to inherit any environment variables
 		// set from the last instance.
 		// But this has a side effect that you can't control the profile handing via environment variables when using the interact session selection
-		allowedEnvValues := []string{"C8Y_SETTINGS_SESSION_HIDE"}
+		allowedEnvValues := []string{
+			"C8Y_SETTINGS_SESSION_HIDE",
+			// Also preserve encryption settings
+			"C8Y_PASSPHRASE",
+			"C8Y_PASSPHRASE_TEXT",
+			"C8Y_SETTINGS_ENCRYPTION_ENABLED",
+			"C8Y_SETTINGS_ENCRYPTION_CACHEPASSPHRASE",
+		}
 		env_prefix := strings.ToUpper(config.EnvSettingsPrefix)
 		for _, env := range os.Environ() {
 			if strings.HasPrefix(env, env_prefix) && !strings.HasPrefix(env, config.EnvPassphrase) && !strings.HasPrefix(env, config.EnvSessionHome) {
