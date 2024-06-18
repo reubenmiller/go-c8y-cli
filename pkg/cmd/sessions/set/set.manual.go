@@ -126,18 +126,16 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		// But this has a side effect that you can't control the profile handing via environment variables when using the interact session selection
 		allowedEnvValues := []string{
 			"C8Y_SETTINGS_SESSION_HIDE",
-			// Also preserve encryption settings
+			// Preserve encryption settings
 			"C8Y_PASSPHRASE",
 			"C8Y_PASSPHRASE_TEXT",
-			"C8Y_SETTINGS_ENCRYPTION_ENABLED",
-			"C8Y_SETTINGS_ENCRYPTION_CACHEPASSPHRASE",
 		}
 		env_prefix := strings.ToUpper(config.EnvSettingsPrefix)
 		for _, env := range os.Environ() {
 			if strings.HasPrefix(env, env_prefix) && !strings.HasPrefix(env, config.EnvPassphrase) && !strings.HasPrefix(env, config.EnvSessionHome) {
 				parts := strings.SplitN(env, "=", 2)
 				if len(parts) == 2 {
-					if !slices.Contains(allowedEnvValues, parts[0]) {
+					if !slices.Contains(allowedEnvValues, parts[0]) && !strings.HasPrefix("C8Y_SETTINGS_", parts[0]) {
 						os.Unsetenv(parts[0])
 					}
 				}
