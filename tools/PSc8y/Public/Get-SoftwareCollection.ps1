@@ -48,6 +48,11 @@ Get a list of software packages
         [string]
         $DeviceType,
 
+        # Filter by softwareType
+        [Parameter()]
+        [string]
+        $SoftwareType,
+
         # Filter by description
         [Parameter()]
         [string]

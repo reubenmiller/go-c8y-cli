@@ -8,7 +8,7 @@ tests:
                 method: GET
                 path: /inventory/managedObjects
     software_list_Get a list of software packages starting with "python3":
-        command: c8y software list --name "python3*"
+        command: c8y software list --name "python3*" --softwareType apt
         exit-code: 0
         skip: true
         stdout:
@@ -17,3 +17,14 @@ tests:
                 path: /inventory/managedObjects
             contains:
                 - name=python3*
+                - softwareType=apt
+    software_list_List all software packages of a given software type:
+        command: c8y software list --softwareType rpm
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+            contains:
+                - softwareType=rpm

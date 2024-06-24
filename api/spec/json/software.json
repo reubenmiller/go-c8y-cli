@@ -34,7 +34,12 @@
           },
           {
             "description": "Get a list of software packages starting with \"python3\"",
-            "command": "c8y software list --name \"python3*\"",
+            "command": "c8y software list --name \"python3*\" --softwareType apt",
+            "skipTest": true
+          },
+          {
+            "description": "List all software packages of a given software type",
+            "command": "c8y software list --softwareType rpm",
             "skipTest": true
           }
         ]
@@ -84,6 +89,12 @@
               "type": "string",
               "description": "Filter by deviceType",
               "format": "(c8y_Filter.type eq '%s')"
+            },
+            {
+              "name": "softwareType",
+              "type": "string",
+              "description": "Filter by softwareType",
+              "format": "(softwareType eq '%s')"
             },
             {
               "name": "description",
@@ -147,15 +158,15 @@
         "go": [
           {
             "description": "Create a software package",
-            "command": "c8y software create --name \"python3-requests\" --description \"python requests library\""
+            "command": "c8y software create --name \"python3-requests\" --description \"python requests library\" --softwareType apt"
           },
           {
             "description": "Create a software package which is only applicable for a specific device type",
-            "command": "c8y software create --name \"python3-requests\" --description \"python requests library\" --deviceType \"c8y_Linux\""
+            "command": "c8y software create --name \"python3-requests\" --description \"python requests library\" --deviceType \"c8y_Linux\" --softwareType apt"
           },
           {
             "description": "Create the same software package for multiple device types",
-            "command": "echo -e \"c8y_Linux\\nc8y_MacOS\" | c8y software create --name \"python3-requests\" --description \"python requests library\"",
+            "command": "echo -e \"c8y_Linux\\nc8y_MacOS\" | c8y software create --name \"python3-requests\" --description \"python requests library\"  --softwareType rpm",
             "assertStdOut": {
               "line-count": 2,
               "json": {
@@ -166,7 +177,8 @@
                 "..1.method": "POST",
                 "..1.body.name": "python3-requests",
                 "..1.body.description": "python requests library",
-                "..1.body.c8y_Filter.type": "c8y_MacOS"
+                "..1.body.c8y_Filter.type": "c8y_MacOS",
+                "..1.body.softwareType": "rpm"
               }
             }
           },
@@ -198,6 +210,11 @@
           "type": "string",
           "required": false,
           "description": "Description of the software package"
+        },
+        {
+          "name": "softwareType",
+          "type": "string",
+          "description": "Software type"
         },
         {
           "name": "deviceType",
@@ -362,6 +379,11 @@
           "type": "string",
           "required": false,
           "description": "Description of the software package"
+        },
+        {
+          "name": "softwareType",
+          "type": "string",
+          "description": "Software type"
         },
         {
           "name": "deviceType",

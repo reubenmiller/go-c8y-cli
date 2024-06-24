@@ -37,8 +37,11 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 $ c8y software list
 Get a list of software packages
 
-$ c8y software list --name "python3*"
+$ c8y software list --name "python3*" --softwareType apt
 Get a list of software packages starting with "python3"
+
+$ c8y software list --softwareType rpm
+List all software packages of a given software type
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -53,6 +56,7 @@ Get a list of software packages starting with "python3"
 	cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
 	cmd.Flags().String("name", "", "Filter by name")
 	cmd.Flags().String("deviceType", "", "Filter by deviceType")
+	cmd.Flags().String("softwareType", "", "Filter by softwareType")
 	cmd.Flags().String("description", "", "Filter by description")
 	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")
 	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
@@ -118,6 +122,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 				flags.WithStaticStringValue("software", "(type eq 'c8y_Software')"),
 				flags.WithStringValue("name", "name", "(name eq '%s')"),
 				flags.WithStringValue("deviceType", "deviceType", "(c8y_Filter.type eq '%s')"),
+				flags.WithStringValue("softwareType", "softwareType", "(softwareType eq '%s')"),
 				flags.WithStringValue("description", "description", "(description eq '%s')"),
 			},
 			"query",

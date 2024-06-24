@@ -33,13 +33,13 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create software package",
 		Long:  `Create a new software package (managedObject)`,
 		Example: heredoc.Doc(`
-$ c8y software create --name "python3-requests" --description "python requests library"
+$ c8y software create --name "python3-requests" --description "python requests library" --softwareType apt
 Create a software package
 
-$ c8y software create --name "python3-requests" --description "python requests library" --deviceType "c8y_Linux"
+$ c8y software create --name "python3-requests" --description "python requests library" --deviceType "c8y_Linux" --softwareType apt
 Create a software package which is only applicable for a specific device type
 
-$ echo -e "c8y_Linux\nc8y_MacOS" | c8y software create --name "python3-requests" --description "python requests library"
+$ echo -e "c8y_Linux\nc8y_MacOS" | c8y software create --name "python3-requests" --description "python requests library"  --softwareType rpm
 Create the same software package for multiple device types
 
 $ c8y software create --name "python3-requests" | c8y software versions create --version "1.0.0" --file "python3-requests.deb"
@@ -55,6 +55,7 @@ Create a software package and create a new version
 
 	cmd.Flags().String("name", "", "name")
 	cmd.Flags().String("description", "", "Description of the software package")
+	cmd.Flags().String("softwareType", "", "Software type")
 	cmd.Flags().String("deviceType", "", "Device type filter. Only allow software to be applied to devices of this type (accepts pipeline)")
 
 	completion.WithOptions(
@@ -148,6 +149,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("description", "description"),
+		flags.WithStringValue("softwareType", "softwareType"),
 		flags.WithStringValue("deviceType", "c8y_Filter.type"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_Software', c8y_Global:{}}`),

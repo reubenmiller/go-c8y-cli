@@ -48,6 +48,7 @@ Update a software package
 	cmd.Flags().StringSlice("id", []string{""}, "Software package (managedObject) id (required) (accepts pipeline)")
 	cmd.Flags().String("newName", "", "New software package name")
 	cmd.Flags().String("description", "", "Description of the software package")
+	cmd.Flags().String("softwareType", "", "Software type")
 	cmd.Flags().String("deviceType", "", "Device type filter. Only allow software to be applied to devices of this type")
 
 	completion.WithOptions(
@@ -141,6 +142,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("newName", "name"),
 		flags.WithStringValue("description", "description"),
+		flags.WithStringValue("softwareType", "softwareType"),
 		flags.WithStringValue("deviceType", "c8y_Filter.type"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
