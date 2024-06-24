@@ -32,6 +32,11 @@ Create a software package
         [string]
         $Description,
 
+        # Software type
+        [Parameter()]
+        [string]
+        $SoftwareType,
+
         # Device type filter. Only allow software to be applied to devices of this type
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]

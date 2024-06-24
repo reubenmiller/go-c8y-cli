@@ -1,11 +1,12 @@
 tests:
     software_create_Create a software package:
-        command: c8y software create --name "python3-requests" --description "python requests library"
+        command: c8y software create --name "python3-requests" --description "python requests library" --softwareType apt
         exit-code: 0
         stdout:
             json:
                 body.description: python requests library
                 body.name: python3-requests
+                body.softwareType: apt
                 method: POST
                 path: /inventory/managedObjects
     software_create_Create a software package and create a new version:
@@ -19,17 +20,18 @@ tests:
                 method: POST
                 path: /inventory/managedObjects
     software_create_Create a software package which is only applicable for a specific device type:
-        command: c8y software create --name "python3-requests" --description "python requests library" --deviceType "c8y_Linux"
+        command: c8y software create --name "python3-requests" --description "python requests library" --deviceType "c8y_Linux" --softwareType apt
         exit-code: 0
         stdout:
             json:
                 body.c8y_Filter.type: c8y_Linux
                 body.description: python requests library
                 body.name: python3-requests
+                body.softwareType: apt
                 method: POST
                 path: /inventory/managedObjects
     software_create_Create the same software package for multiple device types:
-        command: $TEST_SHELL -c 'echo -e "c8y_Linux\nc8y_MacOS" | c8y software create --name "python3-requests" --description "python requests library"'
+        command: $TEST_SHELL -c 'echo -e "c8y_Linux\nc8y_MacOS" | c8y software create --name "python3-requests" --description "python requests library"  --softwareType rpm'
         exit-code: 0
         stdout:
             json:
@@ -40,8 +42,10 @@ tests:
                 ..1.body.c8y_Filter.type: c8y_MacOS
                 ..1.body.description: python requests library
                 ..1.body.name: python3-requests
+                ..1.body.softwareType: rpm
                 ..1.method: POST
                 body.description: python requests library
                 body.name: python3-requests
+                body.softwareType: rpm
                 method: POST
                 path: /inventory/managedObjects
