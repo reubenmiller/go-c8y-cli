@@ -7,7 +7,7 @@
 </p>
 
 
-Unofficial Cumulocity IoT Command Line Tool
+Cumulocity IoT Command Line Tool
 
 Supported on
 
