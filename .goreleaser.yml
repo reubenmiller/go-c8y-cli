@@ -99,7 +99,7 @@ nfpms:
     maintainer: Reuben Miller <reuben.d.miller@gmail.com>
     homepage: http://goc8ycli.netlify.app
     bindir: /usr
-    description: Cumulocity's unofficial command line tool
+    description: Cumulocity IoT command line tool
     section: utils
     priority: optional
     file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}"
@@ -200,7 +200,7 @@ brews:
         source <profile>
 
     homepage: "https://goc8ycli.netlify.app/"
-    description: "Cumulocity's unofficial command line tool"
+    description: "Cumulocity IoT command line tool"
     license: "MIT"
 
     dependencies:
