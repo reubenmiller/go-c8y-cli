@@ -281,8 +281,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 			n.factory.IOStreams.WaitForProgressIndicator()
 
 			if err != nil {
-				// handle error
-				n.SubCommand.GetCommand().PrintErrf("failed to upload file. %s", err)
+				return fmt.Errorf("failed to upload file. path=%s, err=%s", n.file, err)
 			}
 		}
 	} else {

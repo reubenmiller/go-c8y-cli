@@ -316,8 +316,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 			n.factory.IOStreams.WaitForProgressIndicator()
 
 			if err != nil {
-				// handle error
-				n.SubCommand.GetCommand().PrintErrf("failed to upload file. %s", err)
+				return fmt.Errorf("failed to upload file. path=%s, err=%s", zipfile, err)
 			} else {
 				applicationBinaryID = resp.JSON("id").String()
 			}
