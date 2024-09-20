@@ -85,7 +85,7 @@ c8y settings list --select "**" --output json
     "sessionusername": "",
     "silentexit": false,
     "silentstatuscodes": "",
-    "timeout": "60s",
+    "timeout": "600s",
     "totalpages": 0,
     "verbose": false,
     "view": "auto",
