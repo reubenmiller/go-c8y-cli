@@ -151,7 +151,7 @@ func (n *SubscribeCmd) RunE(cmd *cobra.Command, args []string) error {
 	for {
 		select {
 		case msg := <-messagesCh:
-			cfg.Logger.Infof("Received message: (action=%s, description=%s) %s", msg.Action, msg.Description, msg.Payload)
+			cfg.Logger.Infof("Received message: (id=%s, action=%s, description=%s) %s", msg.Identifier, msg.Action, msg.Description, msg.Payload)
 
 			if len(n.ActionTypes) == 0 {
 				isMatch = true

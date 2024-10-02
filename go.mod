@@ -10,7 +10,7 @@ require (
 	github.com/fatih/color v1.16.0
 	github.com/google/go-jsonnet v0.20.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-	github.com/gorilla/websocket v1.5.1
+	github.com/gorilla/websocket v1.5.3
 	github.com/howeyc/gopass v0.0.0-20210920133722-c8aef6fb66ef
 	github.com/karrick/tparse/v2 v2.8.2
 	github.com/manifoldco/promptui v0.9.0
@@ -24,7 +24,7 @@ require (
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.4.0
-	github.com/reubenmiller/go-c8y v0.20.1
+	github.com/reubenmiller/go-c8y v0.20.3
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/sethvargo/go-password v0.3.0
