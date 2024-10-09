@@ -112,6 +112,7 @@
         "softwareversionName" { "object[]"; break }
         "source" { "object"; break }
         "string" { "string"; break }
+        "stringAny" { "string"; break }
         "strings" { "string"; break }
         "subscriptionId" { "string"; break }
         "subscriptionName" { "string"; break }

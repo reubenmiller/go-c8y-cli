@@ -245,7 +245,7 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		return nil
 	}
 	switch p.Type {
-	case "string", "stringStatic", "devicerequest", "json_custom", "directory", "softwareName", "softwareversionName", "softwareDetails", "firmwareName", "firmwareversionName", "firmwarepatchName", "firmwareDetails", "binaryUploadURL", "inventoryChildType", "subscriptionName", "subscriptionId", "file", "attachment", "fileContents", "fileContentsAsString", "certificatefile":
+	case "string", "stringAny", "stringStatic", "devicerequest", "json_custom", "directory", "softwareName", "softwareversionName", "softwareDetails", "firmwareName", "firmwareversionName", "firmwarepatchName", "firmwareDetails", "binaryUploadURL", "inventoryChildType", "subscriptionName", "subscriptionId", "file", "attachment", "fileContents", "fileContentsAsString", "certificatefile":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
 
 	case "json":
@@ -402,6 +402,9 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 
 	case "string", "source", "tenantname", "devicerequest", "subscriptionName", "subscriptionId", "applicationname", "microserviceinstance", "microservicename", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "uipluginversion":
 		opts = append(opts, flags.WithStringValue(p.Name, targetProp, p.Format))
+
+	case "stringAny":
+		opts = append(opts, flags.WithAnyStringValue(p.Name, targetProp, p.Format))
 
 	case "stringStatic":
 		opts = append(opts, flags.WithStaticStringValue(p.Name, p.Value))

@@ -325,6 +325,36 @@ func WithStringValue(opts ...string) GetOption {
 	}
 }
 
+// WithAnyStringValue adds a string from cli arguments but allows the user to set an empty string
+func WithAnyStringValue(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, format := UnpackGetterOptions("%s", opts...)
+
+		if inputIterators != nil && inputIterators.PipeOptions != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
+		if cmd.Flag(src) == nil {
+			return "", nil, nil
+		}
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+
+		if cmd.Flags().Changed(src) {
+			return dst, AnyString(applyFormatter(format, value)), err
+		}
+
+		return dst, applyFormatter(format, value), err
+	}
+}
+
 func WithVersion(fallbackSrc string, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 

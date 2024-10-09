@@ -1207,7 +1207,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "string" {
+        { $_ -in "string", "stringAny" } {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {
