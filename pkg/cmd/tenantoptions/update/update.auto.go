@@ -139,10 +139,9 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("value", "value"),
+		flags.WithAnyStringValue("value", "value"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("value"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -141,10 +141,10 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("category", "category"),
 		flags.WithStringValue("key", "key"),
-		flags.WithStringValue("value", "value"),
+		flags.WithAnyStringValue("value", "value"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("category", "key", "value"),
+		flags.WithRequiredProperties("category", "key"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
