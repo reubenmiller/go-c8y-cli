@@ -89,8 +89,7 @@
       ],
       "bodyRequiredKeys": [
         "category",
-        "key",
-        "value"
+        "key"
       ]
     },
     {
@@ -243,9 +242,6 @@
           "type": "json",
           "description": "Additional properties"
         }
-      ],
-      "bodyRequiredKeys": [
-        "value"
       ]
     },
     {

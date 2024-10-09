@@ -73,7 +73,6 @@ commands:
     bodyRequiredKeys:
       - "category"
       - "key"
-      - "value"
 
   - name: getTenantOption
     description: Get tenant option
@@ -182,9 +181,6 @@ commands:
       - name: data
         type: json
         description: Additional properties
-
-    bodyRequiredKeys:
-      - value
 
   - name: updateTenantOptionBulk
     description: Update multiple tenant options
