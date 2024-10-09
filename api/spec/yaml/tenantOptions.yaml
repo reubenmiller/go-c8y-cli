@@ -63,7 +63,7 @@ commands:
         description: Key of option
 
       - name: value
-        type: string
+        type: stringAny
         description: Value of option
 
       - name: data
@@ -175,7 +175,7 @@ commands:
 
     body:
       - name: value
-        type: string
+        type: stringAny
         description: New value
 
       - name: data

@@ -78,7 +78,7 @@
         },
         {
           "name": "value",
-          "type": "string",
+          "type": "stringAny",
           "description": "Value of option"
         },
         {
@@ -234,7 +234,7 @@
       "body": [
         {
           "name": "value",
-          "type": "string",
+          "type": "stringAny",
           "description": "New value"
         },
         {
