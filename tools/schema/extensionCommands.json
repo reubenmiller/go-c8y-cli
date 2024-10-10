@@ -288,6 +288,7 @@
                 "softwareversionName",
                 "source",
                 "string",
+                "stringAny",
                 "string[]",
                 "stringcsv[]",
                 "stringStatic",

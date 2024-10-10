@@ -78,7 +78,7 @@
         },
         {
           "name": "value",
-          "type": "string",
+          "type": "stringAny",
           "description": "Value of option"
         },
         {
@@ -89,8 +89,7 @@
       ],
       "bodyRequiredKeys": [
         "category",
-        "key",
-        "value"
+        "key"
       ]
     },
     {
@@ -235,7 +234,7 @@
       "body": [
         {
           "name": "value",
-          "type": "string",
+          "type": "stringAny",
           "description": "New value"
         },
         {
@@ -243,9 +242,6 @@
           "type": "json",
           "description": "Additional properties"
         }
-      ],
-      "bodyRequiredKeys": [
-        "value"
       ]
     },
     {

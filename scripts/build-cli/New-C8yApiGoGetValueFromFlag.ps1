@@ -71,6 +71,9 @@
         # string
         "string" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
+        # stringAny string value (allow users to set an empty string value)
+        "stringAny" = "flags.WithAnyStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
+
         # stringStatic
         "stringStatic" = "flags.WithStaticStringValue(`"${prop}`", `"$FixedValue`"),"
 

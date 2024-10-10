@@ -365,7 +365,7 @@ func getParameterValue(cmd *cobra.Command, parameter *models.Parameter) (value s
 		}
 	// case "applications":
 	// 	fallthrough
-	case "string", "application":
+	case "string", "application", "stringAny":
 		v, err := cmd.Flags().GetString(parameter.Name)
 		if err == nil {
 			value = v

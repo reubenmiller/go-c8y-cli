@@ -214,6 +214,7 @@
         "uipluginversion",
         "queryExpression",
         "string",
+        "stringAny",
         "stringStatic",
         "inventoryChildType",
         "source",

@@ -1,0 +1,24 @@
+tests:
+    It creates a tenant option with an empty string value:
+        command: >
+          c8y tenantoptions update --category measurement.series.latestvalue --key c8y_Power.V --value "" --dry --dryFormat json |
+           c8y util show --select body -c=false --output json
+        exit-code: 0
+        stdout:
+            exactly: |
+                {
+                  "body": {
+                    "value": ""
+                  }
+                }
+    
+    It creates a tenant option without a value:
+        command: >
+            c8y tenantoptions update --category measurement.series.latestvalue --key c8y_Power.V --dry --dryFormat json |
+            c8y util show --select body -c=false --output json
+        exit-code: 0
+        stdout:
+            exactly: |
+                {
+                  "body": {}
+                }
