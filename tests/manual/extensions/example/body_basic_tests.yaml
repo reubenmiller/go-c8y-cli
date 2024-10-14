@@ -85,6 +85,55 @@ tests:
       json:
         body: "{}"
 
+  booleanValue set true:
+    command: |
+      c8y kitchensink body booleanValue --value true | c8y util show --select body
+    stdout:
+      exactly: |
+        {"body":{"value":true}}
+  
+  booleanValue set 1:
+    command: |
+      c8y kitchensink body booleanValue --value 1 | c8y util show --select body
+    stdout:
+      exactly: |
+        {"body":{"value":true}}
+
+  booleanValue set TRUE:
+    command: |
+      c8y kitchensink body booleanValue --value TRUE | c8y util show --select body
+    stdout:
+      exactly: |
+        {"body":{"value":true}}
+
+  booleanValue set false:
+    command: |
+      c8y kitchensink body booleanValue --value false --select body | c8y util show --select body
+    stdout:
+      exactly: |
+        {"body":{"value":false}}
+
+  booleanValue set 0:
+    command: |
+      c8y kitchensink body booleanValue --value 0 --select body | c8y util show --select body
+    stdout:
+      exactly: |
+        {"body":{"value":false}}
+
+  booleanValue set FALSE:
+    command: |
+      c8y kitchensink body booleanValue --value FALSE --select body | c8y util show --select body
+    stdout:
+      exactly: |
+        {"body":{"value":false}}
+
+  booleanValue set no value:
+    command: |
+      c8y kitchensink body booleanValue --select body | c8y util show --select body
+    stdout:
+      exactly: |
+        {"body":{}}
+
   #
   # Date / Time
   #
