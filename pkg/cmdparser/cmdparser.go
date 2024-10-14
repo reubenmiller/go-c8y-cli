@@ -308,6 +308,13 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		}
 		cmd.Command.Flags().Float32P(p.Name, p.ShortName, float32(defaultValue), p.GetDescription())
 
+	case "booleanValue":
+		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
+		cmd.Completion = append(
+			cmd.Completion,
+			completion.WithValidateSet(p.Name, "true", "false"),
+		)
+
 	case "boolean", "booleanDefault", "optional_fragment":
 		defaultValue, err := strconv.ParseBool(p.Default)
 		if err != nil {
@@ -372,6 +379,8 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 		opts = append(opts, flags.WithFileContentsAsString(p.Name, targetProp, p.Value))
 	case "boolean":
 		opts = append(opts, flags.WithBoolValue(p.Name, targetProp, p.Value))
+	case "booleanValue":
+		opts = append(opts, flags.WithBooleanAsString(p.Name, targetProp, p.Value))
 	case "booleanDefault":
 		opts = append(opts, flags.WithDefaultBoolValue(p.Name, targetProp, p.Value))
 	case "optional_fragment":

@@ -243,6 +243,7 @@
                 "attachment",
                 "binaryUploadURL",
                 "boolean",
+                "booleanValue",
                 "booleanDefault",
                 "certificate[]",
                 "certificatefile",

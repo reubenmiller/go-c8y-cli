@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yquery"
@@ -248,6 +249,28 @@ func WithBoolValue(opts ...string) GetOption {
 				return dst, formattedValue, err
 			}
 			return dst, value, err
+		}
+		return "", false, nil
+	}
+}
+
+// WithBooleanAsString adds a boolean value from cli arguments where the flag accepts a value
+func WithBooleanAsString(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		src, dst, format := UnpackGetterOptions("", opts...)
+		if cmd.Flags().Changed(src) {
+			value, err := cmd.Flags().GetString(src)
+
+			if err != nil {
+				return "", false, err
+			}
+
+			if format != "" {
+				boolValue, err := strconv.ParseBool(applyFormatter(format, value))
+				return dst, boolValue, err
+			}
+			boolValue, err := strconv.ParseBool(value)
+			return dst, boolValue, err
 		}
 		return "", false, nil
 	}

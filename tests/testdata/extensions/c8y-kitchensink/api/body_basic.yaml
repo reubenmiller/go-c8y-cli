@@ -41,6 +41,15 @@ commands:
         type: optional_fragment
         description: enable
 
+  - name: booleanValue
+    path: inventory/managedObjects
+    description: Create object
+    method: POST
+    body:
+      - name: value
+        type: booleanValue
+        description: value
+
   #
   # Date / Time
   #
