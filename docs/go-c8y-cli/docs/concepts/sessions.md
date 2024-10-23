@@ -94,10 +94,14 @@ You can also provide additional flags to set session, as these are passed direct
 
 If you wish to manage your sessions manually, then you can set the `C8Y_SESSION` environment variable to an existing json session file.
 
-<CodeExample>
+<CodeExample transform="false">
 
 ```bash
 export C8Y_SESSION=~/.cumulocity/my-settings01.json
+```
+
+```powershell
+$env:C8Y_SESSION = "~/.cumulocity/my-settings01.json"
 ```
 
 ```powershell
@@ -198,10 +202,14 @@ The following shows how the functions can be controlled via session settings:
 
 When the commands are disabled in the session settings, they can be temporarily activated on the console by using the following command:
 
-<CodeExample>
+<CodeExample transform="false">
 
 ```bash
 eval $( c8y settings update mode dev --shell auto )
+```
+
+```powershell
+c8y settings update mode dev --shell auto | Out-String | Invoke-Expression
 ```
 
 ```powershell
@@ -215,10 +223,14 @@ The commands will remain enabled until the next time you call `set-session`.
 
 Afterwards you can disable them again using:
 
-<CodeExample>
+<CodeExample transform="false">
 
 ```bash
 eval $( c8y settings update mode prod --shell auto )
+```
+
+```powershell
+c8y settings update mode prod --shell auto | Out-String | Invoke-Expression
 ```
 
 ```powershell
@@ -375,6 +387,13 @@ c8y settings list --select session.home
 $myhome = c8y settings list --select session.home --output csv
 ```
 
+```powershell
+c8y settings list --select session.home
+
+# or if you want to write it to a variable
+$myhome = c8y settings list --select session.home --output csv
+```
+
 </CodeExample>
 
 ```bash title="Output"
@@ -393,7 +412,7 @@ vim ~/.cumulocity/my-manual-file.json
 ```
 
 ```powershell
-# using VSCode
+# Using VSCode
 code ~/.cumulocity/my-manual-file.json
 ```
 
