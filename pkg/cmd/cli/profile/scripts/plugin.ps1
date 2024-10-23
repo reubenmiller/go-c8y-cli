@@ -95,7 +95,7 @@ Enable dev mode (enables POST, PUT and DELETE commands)
         [parameter(ValueFromRemainingArguments=$true)]
         $Options
     )
-    c8y settings update --shell auto mode $Mode $Options | source
+    c8y settings update --shell auto mode $Mode $Options | Out-String | Invoke-Expression
     Write-Host "Enabled "$Mode" mode (temporarily)" -ForegroundColor Green
 }
 
