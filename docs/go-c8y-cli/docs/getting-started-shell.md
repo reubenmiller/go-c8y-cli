@@ -27,15 +27,12 @@ If you are using a local Cumulocity IoT user, it recommended that you use TFA (T
 <CodeExample>
 
 ```bash
-c8y sessions create \
-    --host "https://mytenant.eu-latest.cumulocity.com" \
-    --username "myUser@me.com" \
-    --type dev
+c8y sessions create --type dev
 ```
 
 </CodeExample>
 
-You will be prompted for your password. Alternatively you can also enter the password using the `password` parameter.
+You will be prompted the session information including url, username and password. Alternatively, you can provide any of the parameters via flags.
 
 You may also provide a more meaningful session name by using the `name` parameter.
 
