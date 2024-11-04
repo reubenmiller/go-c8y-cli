@@ -7,11 +7,9 @@ import TabItem from '@theme/TabItem';
 
 ## Installation
 
-`go-c8y-cli` is available as a pre-built linux package which can be installed and updated via a package manager. Please following the instructions in your operating system.
+**go-c8y-cli** is available as a pre-built binary which can be installed and updated via a package manager. Please following the instructions for your operating system.
 
-It is recommended to install `go-c8y-cli` using a package manager as it makes it easier to update it in the future, and it will be available for all users.
-
-After the installation, follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile).
+It is recommended to install **go-c8y-cli** using a package manager as it makes it easier to update it in the future, and it will be available for all users.
 
 ### Debian / Ubuntu (apt)
 
@@ -27,32 +25,48 @@ After the installation, follow the instructions to [setup your shell profile](/d
 
 2. Configure the repository
 
-    **Debian >=9 and Ubuntu >= 16.04**
+    <Tabs
+    groupId="debian-os"
+    defaultValue="debian"
+    values={[
+        { label: 'Debian >=9 and Ubuntu >= 16.04', value: 'debian', },
+        { label: 'Debian <=8 and Ubuntu <= 14.04', value: 'debian_legacy', }
+    ]
+    }>
+    <TabItem value="debian">
 
     ```bash
     curl https://reubenmiller.github.io/go-c8y-cli-repo/debian/PUBLIC.KEY | gpg --dearmor | sudo tee /usr/share/keyrings/go-c8y-cli-archive-keyring.gpg >/dev/null
     sudo sh -c "echo 'deb [signed-by=/usr/share/keyrings/go-c8y-cli-archive-keyring.gpg] http://reubenmiller.github.io/go-c8y-cli-repo/debian stable main' >> /etc/apt/sources.list"
     ```
 
-    :::note
-    This step does not make use of `apt-key` as it has been deprecated. The gpg key is stored in an individual store only related to the go-c8y-cli repository, and it is linked via the apt.source settings using the `signed-by` property.
-    :::
-
-    **Debian <=8 and Ubuntu <= 14.04**
+    </TabItem>
+    <TabItem value="debian_legacy">
 
     ```bash
     curl https://reubenmiller.github.io/go-c8y-cli-repo/debian/PUBLIC.KEY | sudo apt-key add -
     sudo sh -c "echo 'deb https://reubenmiller.github.io/go-c8y-cli-repo/debian stable main' >> /etc/apt/sources.list"
     ```
 
-3. Update the repo then install/update `go-c8y-cli`
+    </TabItem>
+    </Tabs>
+
+3. Update the repo then install/update **go-c8y-cli**
 
     ```bash
     sudo apt-get update
     sudo apt-get install go-c8y-cli
     ```
 
-4. Follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile)
+4. Install go-c8y-cli helper functions and reload your shell
+
+    ```bash
+    c8y cli install
+    ```
+
+5. Go to the [Getting started section](/docs/gettingstarted/) for the next steps
+
+---
 
 ### CentOS/RHEL/Fedora (dnf/yum)
 
@@ -75,18 +89,26 @@ After the installation, follow the instructions to [setup your shell profile](/d
     gpgkey=https://reubenmiller.github.io/go-c8y-cli-repo/rpm/PUBLIC.KEY
     ```
 
-2. Update the repo then install/update `go-c8y-cli`
+2. Update the repo then install/update **go-c8y-cli**
 
     ```sh
     sudo dnf update
     sudo dnf install go-c8y-cli
     ```
 
-3. Follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile)
+3. Install go-c8y-cli helper functions and reload your shell
+
+    ```bash
+    c8y cli install
+    ```
+
+4. Go to the [Getting started section](/docs/gettingstarted/) for the next steps
 
 :::note
-You can install `go-c8y-cli` via `yum` by just replacing `dnf` with `yum` in the above commands.
+You can install **go-c8y-cli** via `yum` by just replacing `dnf` with `yum` in the above commands.
 :::
+
+---
 
 ### Alpine (apk)
 
@@ -109,19 +131,26 @@ The following commands require sudo. If you don't have `sudo` installed, then re
     sudo sh -c "echo 'https://reubenmiller.github.io/go-c8y-cli-repo/alpine/stable/main'" >> /etc/apk/repositories
     ```
 
-3. Update the repo then install/update `go-c8y-cli`
+3. Update the repo then install/update **go-c8y-cli**
 
     ```bash
     sudo apk update
     sudo apk add go-c8y-cli
     ```
 
-4. Follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile)
+4. Install go-c8y-cli helper functions and reload your shell
 
+    ```bash
+    c8y cli install
+    ```
+
+4. Go to the [Getting started section](/docs/gettingstarted/) for the next steps
+
+---
 
 ### MacOS/Linux (Homebrew)
 
-`go-c8y-cli` can be installed using [homebrew](https://brew.sh/) on either macOS or linux.
+**go-c8y-cli** can be installed using [homebrew](https://brew.sh/) on either macOS or linux.
 
 1. Add the tap
 
@@ -129,7 +158,7 @@ The following commands require sudo. If you don't have `sudo` installed, then re
     brew tap reubenmiller/go-c8y-cli
     ```
 
-2. Update brew then install `go-c8y-cli`
+2. Update brew then install **go-c8y-cli**
 
     ```bash
     brew update
@@ -144,57 +173,19 @@ The following commands require sudo. If you don't have `sudo` installed, then re
     ```
     :::
 
-3. Edit your preferred shell by executing snippet (it will import functions each time you load your shell)
-
-    <Tabs
-    groupId="shell-types"
-    defaultValue="bash"
-    values={[
-        { label: 'Bash', value: 'bash', },
-        { label: 'Zsh', value: 'zsh', },
-        { label: 'Fish', value: 'fish', },
-        { label: 'PowerShell', value: 'powershell', },
-    ]
-    }>
-    <TabItem value="bash">
+3. Install go-c8y-cli helper functions and reload your shell
 
     ```bash
-    echo 'source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.sh"' >> ~/.bashrc
+    c8y cli install
     ```
 
-    </TabItem>
-    <TabItem value="zsh">
-
-    ```bash
-    echo 'source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.zsh"' >> ~/.zshrc
-    ```
-
-    </TabItem>
-    <TabItem value="fish">
-
-    ```bash
-    mkdir -p ~/.config/fish
-    echo 'source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.fish"' >> ~/.config/fish/config.fish
-    ```
-
-    </TabItem>
-
-    <TabItem value="powershell">
-
-    ```powershell
-    New-Item -type directory -path ~/.config/powershell -Force
-    '. "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.ps1"' >> ~/.config/powershell/Microsoft.PowerShell_profile.ps1
-    ```
-
-    </TabItem>
-
-    </Tabs>
-
-4. Restart your shell to reload your profile
+4. Go to the [Getting started section](/docs/gettingstarted/) for the next steps
 
 :::note
 You can also view the instructions on how to source the relevant plugin via the command `brew info go-c8y-cli`
 :::
+
+---
 
 ### Manually (via script)
 
@@ -204,7 +195,7 @@ The install script currently requires you to have `jq` installed. `jq` is a cli 
 See the [jq website](https://stedolan.github.io/jq/download/) for details how to install it on your operating system.
 :::
 
-`go-c8y-cli` can also be installed by cloning a git repository and running an install script. It will install the latest binary and add the plugin script to your shell profile.
+**go-c8y-cli** can also be installed by cloning a git repository and running an install script. It will install the latest binary and add the plugin script to your shell profile.
 
 This method does not require sudo rights, however the binary will be located inside your user's home folder.
 
@@ -270,108 +261,13 @@ This method does not require sudo rights, however the binary will be located ins
     Try closing your console and re-opening it so you can be sure that your setup will work next time
     :::
 
----
+5. Install go-c8y-cli helper functions and reload your shell
 
-## Setting up your shell profile
+    ```bash
+    c8y cli install
+    ```
 
-Add the following line to your shell profile to enable the shell functions like `set-session` and to configure tab completion for `go-c8y-cli`.
-
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Bash', value: 'bash', },
-    { label: 'Zsh', value: 'zsh', },
-    { label: 'Fish', value: 'fish', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
-
-```bash title="file: ~/.bashrc"
-source "/etc/go-c8y-cli/shell/c8y.plugin.sh"
-
-# or if you installed it via the script
-source "$HOME/.go-c8y-cli/shell/c8y.plugin.sh"
-```
-
-</TabItem>
-<TabItem value="zsh">
-
-```bash title="file: ~/.zshrc"
-source "/etc/go-c8y-cli/shell/c8y.plugin.zsh"
-
-# or if you installed it via the script
-source "$HOME/.go-c8y-cli/shell/c8y.plugin.zsh"
-```
-
-</TabItem>
-<TabItem value="fish">
-
-```bash title="file: ~/.config/fish/config.fish"
-source "/etc/go-c8y-cli/shell/c8y.plugin.fish"
-
-# or if you installed it via the script
-source "$HOME/.go-c8y-cli/shell/c8y.plugin.fish"
-```
-
-</TabItem>
-<TabItem value="powershell">
-
-```powershell title="file: ~/.config/powershell/Microsoft.PowerShell_profile.ps1"
-. "/etc/go-c8y-cli/shell/c8y.plugin.ps1"
-
-# or if you installed it via the script
-. "$HOME/.go-c8y-cli/shell/c8y.plugin.ps1"
-```
-
-</TabItem>
-</Tabs>
-
-:::note
-If you don't import the plugin script, then you will have to use the following to set your session:
-
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Bash', value: 'bash', },
-    { label: 'Zsh', value: 'zsh', },
-    { label: 'Fish', value: 'fish', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
-
-```bash
-eval $(c8y sessions set --shell bash)
-```
-
-</TabItem>
-<TabItem value="zsh">
-
-```bash
-eval $(c8y sessions set --shell zsh)
-```
-
-</TabItem>
-<TabItem value="fish">
-
-```bash
-c8y sessions set --shell fish | source
-```
-
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-c8y sessions set --shell powershell | out-string | Invoke-Expression
-```
-
-</TabItem>
-</Tabs>
-
-:::
+6. Go to the [Getting started section](/docs/gettingstarted/) for the next steps
 
 
 ---
@@ -380,7 +276,7 @@ c8y sessions set --shell powershell | out-string | Invoke-Expression
 
 ### jq
 
-Since the output of the c8y cli tool is mainly json, it is highly recommended that you install the json cli tool `jq` to help formatting the output.
+Since the output of **go-c8y-cli** is mainly json, it is highly recommended that you install the json cli tool `jq` to help formatting the output.
 
 #### Example: Get the id of each devices from a query
 
@@ -396,7 +292,3 @@ If you are more familiar with the popular `jq` tool, then you can use it to extr
 ```bash
 c8y devices list | jq -r ".id"
 ```
-
-## Getting started
-
-After `go-c8y-cli` has been installed, follow the [Getting started](/docs/gettingstarted/) section for instructions how to use it.
