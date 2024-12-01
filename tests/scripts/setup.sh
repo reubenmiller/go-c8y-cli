@@ -44,7 +44,7 @@ setup () {
     create_firmware_version "iot-linux" "1.0.0" "https://example.com"
     create_firmware_patch_version "iot-linux" "1.0.1" "https://example.com/patch1"
 
-    create_software "my-app"
+    create_software "my-app" "linux-package"
     create_software_version "my-app" "1.2.3" "https://example.com/debian/my-app-1.2.3.deb"
 
     create_device_profile "profile01"
@@ -203,8 +203,11 @@ create_configuration () {
 
 create_software () {
     local name="$1"
-    c8y software get -n --id "$name" --silentStatusCodes 404 ||
+    local software_type="$2"
+    {
+        c8y software get -n --id "$name" --silentStatusCodes 404 ||
         c8y software create -n --name "$name"
+    } | c8y software update --softwareType "$software_type"
 }
 
 create_software_version () {

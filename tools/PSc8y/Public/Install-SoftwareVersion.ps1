@@ -38,10 +38,15 @@ Get a software package
         [object[]]
         $Version,
 
-        # Software url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
+        # Software url. Leave blank to automatically set it if a matching software/version is found in the c8y software repository
         [Parameter()]
         [string]
         $Url,
+
+        # Software type. Leave blank to automatically set it if a matching software/version is found in the c8y software repository
+        [Parameter()]
+        [string]
+        $SoftwareType,
 
         # Operation description
         [Parameter()]

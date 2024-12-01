@@ -451,7 +451,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 		opts = append(opts, c8yfetcher.WithSoftwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
 
 	case "softwareDetails":
-		opts = append(opts, c8yfetcher.WithSoftwareVersionData(factory, p.GetDependentProperty(0, "software"), p.Name, p.GetDependentProperty(1, "url"), args, "", targetProp, p.Format))
+		opts = append(opts, c8yfetcher.WithSoftwareVersionData(factory, p.GetDependentProperty(0, "software"), p.Name, p.GetDependentProperty(1, "url"), p.GetDependentProperty(2, "softwareType"), args, "", targetProp, p.Format))
 
 	case "configurationDetails":
 		opts = append(opts, c8yfetcher.WithConfigurationFileData(factory, p.Name, p.GetDependentProperty(0, "configurationType"), p.GetDependentProperty(1, "url"), args, "", targetProp, p.Format))

@@ -710,7 +710,7 @@ func WithSoftwareByNameFirstMatch(factory *cmdutil.Factory, args []string, opts 
 }
 
 // WithSoftwareVersionData adds software information (name, version and url)
-func WithSoftwareVersionData(factory *cmdutil.Factory, flagSoftware, flagVersion, flagURL string, args []string, opts ...string) flags.GetOption {
+func WithSoftwareVersionData(factory *cmdutil.Factory, flagSoftware, flagVersion, flagURL string, flagSoftwareType string, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		client, err := factory.Client()
 		if err != nil {
@@ -731,9 +731,32 @@ func WithSoftwareVersionData(factory *cmdutil.Factory, flagSoftware, flagVersion
 			url = v[0]
 		}
 
+		softwareType := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagSoftwareType); err == nil && len(v) > 0 {
+			softwareType = v[0]
+		}
+
+		if softwareType == "" && software != "" {
+			// Set software type by looking up the software (if found)
+			matchingSoftware, _, err := client.Software.GetSoftwareByName(c8y.WithDisabledDryRunContext(context.Background()), software, c8y.NewPaginationOptions(5))
+			if err != nil {
+				return "", "", err
+			}
+
+			if len(matchingSoftware.ManagedObjects) > 0 {
+				if v := matchingSoftware.Items[0].Get("softwareType"); v.Exists() {
+					softwareType = v.String()
+				}
+			}
+		}
+
 		_, dst, _ := flags.UnpackGetterOptions("", opts...)
 
 		output := map[string]string{}
+
+		if softwareType != "" {
+			output["softwareType"] = softwareType
+		}
 
 		// If version is empty, then pass the values as is
 		if version == "" || (software != "" && version != "" && url != "") {

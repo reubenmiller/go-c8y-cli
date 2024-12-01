@@ -54,7 +54,8 @@ Install a software package version with an explicit url
 	cmd.Flags().StringSlice("device", []string{""}, "Device or agent where the software should be installed (accepts pipeline)")
 	cmd.Flags().String("software", "", "Software name (required)")
 	cmd.Flags().String("version", "", "Software version id or name")
-	cmd.Flags().String("url", "", "Software url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository")
+	cmd.Flags().String("url", "", "Software url. Leave blank to automatically set it if a matching software/version is found in the c8y software repository")
+	cmd.Flags().String("softwareType", "", "Software type. Leave blank to automatically set it if a matching software/version is found in the c8y software repository")
 	cmd.Flags().String("description", "Install software package", "Operation description")
 	cmd.Flags().String("action", "install", "Software action")
 
@@ -156,8 +157,9 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("software", "c8y_SoftwareUpdate.0.name"),
 		flags.WithStringValue("version", "c8y_SoftwareUpdate.0.version"),
 		flags.WithStringValue("url", "c8y_SoftwareUpdate.0.url"),
+		flags.WithStringValue("softwareType", "c8y_SoftwareUpdate.0.softwareType"),
 		flags.WithStringValue("description", "description"),
-		c8yfetcher.WithSoftwareVersionData(n.factory, "software", "version", "url", args, "", "c8y_SoftwareUpdate.0"),
+		c8yfetcher.WithSoftwareVersionData(n.factory, "software", "version", "url", "softwareType", args, "", "c8y_SoftwareUpdate.0"),
 		flags.WithStringValue("action", "c8y_SoftwareUpdate.0.action"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),

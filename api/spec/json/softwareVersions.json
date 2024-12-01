@@ -382,7 +382,14 @@
           "type": "string",
           "required": false,
           "property": "c8y_SoftwareUpdate.0.url",
-          "description": "Software url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository"
+          "description": "Software url. Leave blank to automatically set it if a matching software/version is found in the c8y software repository"
+        },
+        {
+          "name": "softwareType",
+          "type": "string",
+          "required": false,
+          "property": "c8y_SoftwareUpdate.0.softwareType",
+          "description": "Software type. Leave blank to automatically set it if a matching software/version is found in the c8y software repository"
         },
         {
           "name": "description",

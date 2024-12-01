@@ -140,7 +140,7 @@
         "software[]" = "c8yfetcher.WithSoftwareByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         "softwareDetails" = @(
-            "c8yfetcher.WithSoftwareVersionData(n.factory, `"software`", `"version`", `"url`", args, `"`", `"${queryParam}`"$FormatValue),"
+            "c8yfetcher.WithSoftwareVersionData(n.factory, `"software`", `"version`", `"url`", `"softwareType`", args, `"`", `"${queryParam}`"$FormatValue),"
         ) -join "`n"
 
         "configurationDetails" = @(
