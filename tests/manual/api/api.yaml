@@ -140,6 +140,16 @@ tests:
         path: /inventory/managedObjects
         query: myValue=2&pageSize=1
 
+  It adds multiple custom query parameters to an outgoing request with the same key:
+    command: |
+      echo "/inventory/managedObjects?pageSize=1" |
+        c8y api --customQueryParam "myValue=2" --customQueryParam "myValue=3" --customQueryParam other=value
+    stdout:
+      json:
+        method: GET
+        path: /inventory/managedObjects
+        query: myValue=2&myValue=3&other=value&pageSize=1
+
   It accepts positional arguments for method and path (not using pipeline):
     command: |
       c8y api GET "/alarm/alarms?pageSize=10&status=ACTIVE"

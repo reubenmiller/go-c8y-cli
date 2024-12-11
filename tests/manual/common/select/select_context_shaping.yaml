@@ -24,7 +24,8 @@ tests:
   
   It adds nested objects under a property name when using globstar **:
     command: |
-      c8y devices list --select "id:id,links:**.self" --pageSize 1
+      echo '{"additionParents":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/additionParents"},"assetParents":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/assetParents"},"c8y_IsDevice":{},"c8y_SupportedLogs":["software-management"],"c8y_SupportedOperations":["c8y_LogfileRequest","c8y_Restart","c8y_SoftwareUpdate"],"childAdditions":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/childAdditions"},"childAssets":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/childAssets"},"childDevices":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/childDevices"},"com_cumulocity_model_Agent":{},"creationTime":"2022-02-15T17:43:55.737Z","deviceParents":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/deviceParents"},"id":"12345","lastUpdated":"2022-02-23T11:57:02.657Z","name":"test","owner":"device_test","self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345","type":"thin-edge.io"}' |
+        c8y util show --select "id:id,links:**.self"
     stdout:
       json:
         id: r/\d+$

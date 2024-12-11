@@ -79,14 +79,16 @@ tests:
   
   It returns only objects on the selected level with the self property (1 level):
     command: |
-      c8y devices list --select "*.self" --pageSize 1
+      echo '{"additionParents":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/additionParents"},"assetParents":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/assetParents"},"c8y_IsDevice":{},"c8y_SupportedLogs":["software-management"],"c8y_SupportedOperations":["c8y_LogfileRequest","c8y_Restart","c8y_SoftwareUpdate"],"childAdditions":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/childAdditions"},"childAssets":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/childAssets"},"childDevices":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/childDevices"},"com_cumulocity_model_Agent":{},"creationTime":"2022-02-15T17:43:55.737Z","deviceParents":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/deviceParents"},"id":"12345","lastUpdated":"2022-02-23T11:57:02.657Z","name":"test","owner":"device_test","self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345","type":"thin-edge.io"}' |
+        c8y util show --select "*.self"
     stdout:
       # no globstar was used, so depth matching is explicit by number of dots
       match-pattern: '{"additionParents":{"self":".+"},"assetParents":{"self":".+"},"childAdditions":{"self":".+"},"childAssets":{"self":".+"},"childDevices":{"self":".+"},"deviceParents":{"self":".+"}}'
     
   It returns only objects on the selected level with the self property (multi level):
     command: |
-      c8y devices list --select "**.self" --pageSize 1
+      echo '{"additionParents":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/additionParents"},"assetParents":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/assetParents"},"c8y_IsDevice":{},"c8y_SupportedLogs":["software-management"],"c8y_SupportedOperations":["c8y_LogfileRequest","c8y_Restart","c8y_SoftwareUpdate"],"childAdditions":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/childAdditions"},"childAssets":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/childAssets"},"childDevices":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/childDevices"},"com_cumulocity_model_Agent":{},"creationTime":"2022-02-15T17:43:55.737Z","deviceParents":{"references":[],"self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345/deviceParents"},"id":"12345","lastUpdated":"2022-02-23T11:57:02.657Z","name":"test","owner":"device_test","self":"https://t12345.example.cumulocity.com/inventory/managedObjects/12345","type":"thin-edge.io"}' |
+        c8y util show --select "**.self"
     stdout:
       # globstar was used, so matching can occur on any depth
       match-pattern: '{"additionParents":{"self":".+"},"assetParents":{"self":".+"},"childAdditions":{"self":".+"},"childAssets":{"self":".+"},"childDevices":{"self":".+"},"deviceParents":{"self":".+"},"self":".+"}'

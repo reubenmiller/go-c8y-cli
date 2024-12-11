@@ -57,6 +57,15 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 					query.SetVariable(key, url.EscapeQueryString(val))
 				}
 			}
+		case map[string][]string:
+			// Collect values
+			for key, values := range v {
+				encodedValues := make([]string, 0, len(values))
+				for _, value := range values {
+					encodedValues = append(encodedValues, url.EscapeQueryString(value))
+				}
+				query.SetVariable(key, encodedValues)
+			}
 		case AnyString:
 			query.SetVariable(name, string(v))
 		default:
@@ -483,7 +492,9 @@ func WithCustomStringSlice(valuesFunc func() ([]string, error), opts ...string) 
 			dst = ""
 		}
 
-		outputValues := make(map[string]string)
+		// Support setting multiple values for query parameters
+		// e.g. foo=bar1&foo=bar2
+		outputValues := make(map[string][]string)
 		for _, v := range values {
 			parts := strings.Split(v, ":")
 			if len(parts) != 2 {
@@ -492,7 +503,12 @@ func WithCustomStringSlice(valuesFunc func() ([]string, error), opts ...string) 
 					continue
 				}
 			}
-			outputValues[strings.TrimSpace(parts[0])] = strings.TrimSpace(applyFormatter(format, parts[1]))
+			key := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(applyFormatter(format, parts[1]))
+			if _, ok := outputValues[key]; !ok {
+				outputValues[key] = make([]string, 0, 1)
+			}
+			outputValues[key] = append(outputValues[key], value)
 		}
 
 		return dst, outputValues, err

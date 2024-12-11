@@ -119,7 +119,7 @@ jobs:
         chmod +x /home/runner/.local/bin/c8y
         echo "/home/runner/.local/bin" >> $GITHUB_PATH
         c8y version
-        c8y currentuser get --select id
+        c8y currentuser get --select id --debug
         task test-cli
       shell: bash
       timeout-minutes: 20
