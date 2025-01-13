@@ -64,13 +64,13 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 			Start an interactive SSH session on the device with a given ssh user
 
 			$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1883:127.0.0.1:1883
-			Start an interactive SSH session and configure port-forwarding by mapping the remote's 127.0.0.1:1883 to your machine's port 1883
+			Start an interactive SSH session and configure port-forward by mapping the remote's 127.0.0.1:1883 to your machine's port 1883
 
 			$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1883
-			Start an interactive SSH session and configure port-forwarding: 127.0.0.11883 (remote) => 1883 (local)
+			Start an interactive SSH session and configure port-forward: 127.0.0.11883 (remote) => 1883 (local)
 
 			$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1884:1883
-			Start an interactive SSH session and configure port-forwarding: 127.0.0.11883 (remote) => 1884 (local)
+			Start an interactive SSH session and configure port-forward: 127.0.0.11883 (remote) => 1884 (local)
 
 			$ c8y remoteaccess connect ssh --device 12345 --user admin -- systemctl status
 			Use a non-interactive session to execute a single command and print the result
@@ -86,7 +86,7 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 	cmd.Flags().StringVar(&ccmd.listen, "listen", "127.0.0.1:0", "Listener address. unix:///run/example.sock")
 	cmd.Flags().StringVar(&ccmd.user, "user", "", "Default ssh user")
 	cmd.Flags().StringVar(&ccmd.configuration, "configuration", "", "Remote Access Configuration")
-	cmd.Flags().StringVarP(&ccmd.portForwarding, "port-forwarding", "L", "", "SSH Port-Forwarding option in the format [bind_address:]port:host:hostport. It also accepts a custom short form, <local>[:<remote>]. The value is passed to the ssh -L option, so read the ssh man page for more info")
+	cmd.Flags().StringVarP(&ccmd.portForwarding, "port-forward", "L", "", "SSH Port-Forwarding option in the format [bind_address:]port:host:hostport. It also accepts a custom short form, <local>[:<remote>]. The value is passed to the ssh -L option, so read the ssh man page for more info")
 
 	completion.WithOptions(
 		cmd,
