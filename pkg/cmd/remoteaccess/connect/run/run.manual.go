@@ -3,6 +3,7 @@ package run
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -66,6 +67,9 @@ func NewCmdRun(f *cmdutil.Factory) *CmdRun {
 		Example: heredoc.Doc(`
 			$ c8y remoteaccess connect run --device 12345 -- ssh -p %p root@%h
 			Start an interactive SSH session on the device with a given ssh user
+
+			$ c8y remoteaccess connect run --device rpi5-abcdef01 --configuration passthrough -- ssh -p %p -L 1885:127.0.0.1:1883 -o ServerAliveInterval=120 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@127.0.0.1
+			Start an SSH session to setup port-forwarding to map the remote's 127.0.0.1:1883 port to your machine's 1885 port
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -189,6 +193,7 @@ func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		runCmd := exec.CommandContext(context.Background(), run, runArgs...)
+		runCmd.Env = append(runCmd.Env, os.Environ()...)
 
 		// Add target and port to the environment variables so it can be easily accessed from more
 		// complex scripts

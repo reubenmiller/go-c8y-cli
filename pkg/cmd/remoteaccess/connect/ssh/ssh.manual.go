@@ -24,10 +24,11 @@ import (
 )
 
 type CmdSSH struct {
-	device        []string
-	listen        string
-	user          string
-	configuration string
+	device         []string
+	listen         string
+	user           string
+	configuration  string
+	portForwarding string
 
 	*subcommand.SubCommand
 
@@ -62,6 +63,15 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 			$ c8y remoteaccess connect ssh --device 12345 --user admin
 			Start an interactive SSH session on the device with a given ssh user
 
+			$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1883:127.0.0.1:1883
+			Start an interactive SSH session and configure port-forward by mapping the remote's 127.0.0.1:1883 to your machine's port 1883
+
+			$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1883
+			Start an interactive SSH session and configure port-forward: 127.0.0.11883 (remote) => 1883 (local)
+
+			$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1884:1883
+			Start an interactive SSH session and configure port-forward: 127.0.0.11883 (remote) => 1884 (local)
+
 			$ c8y remoteaccess connect ssh --device 12345 --user admin -- systemctl status
 			Use a non-interactive session to execute a single command and print the result
 
@@ -76,6 +86,7 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 	cmd.Flags().StringVar(&ccmd.listen, "listen", "127.0.0.1:0", "Listener address. unix:///run/example.sock")
 	cmd.Flags().StringVar(&ccmd.user, "user", "", "Default ssh user")
 	cmd.Flags().StringVar(&ccmd.configuration, "configuration", "", "Remote Access Configuration")
+	cmd.Flags().StringVarP(&ccmd.portForwarding, "port-forward", "L", "", "SSH Port-Forwarding option in the format [bind_address:]port:host:hostport. It also accepts a custom short form, <local>[:<remote>]. The value is passed to the ssh -L option, so read the ssh man page for more info")
 
 	completion.WithOptions(
 		cmd,
@@ -93,6 +104,20 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 	return ccmd
 }
 
+func (n *CmdSSH) GetPortForwarding() string {
+	// convenience functions to mirror docker port mapping options
+	portMapping := n.portForwarding
+	portForwardingParts := strings.Split(portMapping, ":")
+	switch len(portForwardingParts) {
+	case 1:
+		// -L 1883 => -L 1883:127.0.0.1:1883
+		portMapping = fmt.Sprintf("%s:127.0.0.1:%s", portForwardingParts[0], portForwardingParts[0])
+	case 2:
+		// -L 1884:1883 => -L 1884:127.0.0.1:1883
+		portMapping = fmt.Sprintf("%s:127.0.0.1:%s", portForwardingParts[0], portForwardingParts[1])
+	}
+	return portMapping
+}
 func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 	client, err := n.factory.Client()
 	if err != nil {
@@ -185,6 +210,11 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		}
 		sshArgs = append(sshArgs, "-p", port, sshTarget)
 
+		portForwarding := n.GetPortForwarding()
+		if portForwarding != "" {
+			sshArgs = append(sshArgs, "-L", portForwarding)
+		}
+
 		dashIdx := cmd.ArgsLenAtDash()
 		if dashIdx > -1 {
 			sshArgs = append(sshArgs, "--")
@@ -198,7 +228,11 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		log.Infof("Executing command: ssh %s\n", strings.Join(sshArgs, " "))
 
 		cs := n.factory.IOStreams.ColorScheme()
-		fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting interactive ssh session with %s (%s)\n", device, strings.TrimRight(client.BaseURL.String(), "/"))))
+		if portForwarding != "" {
+			fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting interactive ssh session with %s (%s) with port-forwarding %s\n", device, strings.TrimRight(client.BaseURL.String(), "/"), portForwarding)))
+		} else {
+			fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting interactive ssh session with %s (%s)\n", device, strings.TrimRight(client.BaseURL.String(), "/"))))
+		}
 
 		start := time.Now()
 		sshErr := sshCmd.Run()
