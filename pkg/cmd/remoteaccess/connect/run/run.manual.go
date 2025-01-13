@@ -3,6 +3,7 @@ package run
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -189,6 +190,7 @@ func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		runCmd := exec.CommandContext(context.Background(), run, runArgs...)
+		runCmd.Env = append(runCmd.Env, os.Environ()...)
 
 		// Add target and port to the environment variables so it can be easily accessed from more
 		// complex scripts
