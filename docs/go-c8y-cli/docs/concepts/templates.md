@@ -54,7 +54,7 @@ The template can then be used from the command line using the `template` paramet
 <CodeExample>
 
 ```bash
-c8y measurements create --device 1234 --template ./example.jsonnet --dry
+c8y measurements create --device 1234 --type iot_weather_sensor1 --template ./example.jsonnet --dry
 ```
 
 </CodeExample>
