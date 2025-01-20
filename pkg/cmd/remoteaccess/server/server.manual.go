@@ -25,6 +25,7 @@ type CmdServer struct {
 	listen        string
 	configuration string
 	open          bool
+	browserScheme string
 
 	*subcommand.SubCommand
 
@@ -57,6 +58,11 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 				UserKnownHostsFile /dev/null
 				ProxyCommand c8y remoteaccess server --device %n --listen -
 			---
+
+			Note: When using the "--browser" flag, by default the URL scheme (e.g. http, https) will be
+			auto detected based on the Remote Access configuration's name. For example, if the configuration
+			name has the "https:" prefix, then http will be used, otherwise http will be used. This aligns
+			with the naming convention used in https://github.com/Cumulocity-IoT/cumulocity-remote-access-cloud-http-proxy
 		`),
 		Example: heredoc.Doc(`
 			$ c8y remoteaccess server --device 12345
@@ -73,6 +79,9 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 
 			$ c8y remoteaccess server --device 12345 --configuration "*rugpi*" --browser
 			Start a local proxy and match on the configuration using wildcards, then open the browser to the endpoint
+
+			$ c8y remoteaccess server --device 12345 --configuration "*rugpi*" --browser --scheme https
+			Start a local proxy and match on the configuration using wildcards, then open the browser to the endpoint and force usage of https
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -82,9 +91,11 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 	cmd.Flags().StringVar(&ccmd.listen, "listen", "127.0.0.1:0", "Listen. unix:///run/example.sock")
 	cmd.Flags().StringVar(&ccmd.configuration, "configuration", "", "Remote Access Configuration. Accepts wildcards")
 	cmd.Flags().BoolVar(&ccmd.open, "browser", false, "Open the endpoint in a browser (if available)")
+	cmd.Flags().StringVar(&ccmd.browserScheme, "scheme", "auto", "URL scheme to use when opening the address in a browser, e.g. http, https or auto")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithValidateSet("scheme", "http", "https", "auto"),
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithRemoteAccessPassthroughConfiguration("configuration", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
@@ -185,6 +196,19 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 			host = "127.0.0.1"
 		}
 
+		// Set the scheme to be used when opening a browser
+		switch n.browserScheme {
+		case "auto":
+			// Align to convention used by
+			// https://github.com/Cumulocity-IoT/cumulocity-remote-access-cloud-http-proxy
+			n.browserScheme = "http"
+			if strings.HasPrefix(craConfig.Name, "https:") {
+				n.browserScheme = "https"
+			} else if strings.HasPrefix(craConfig.Name, "http:") {
+				n.browserScheme = "http"
+			}
+		}
+
 		type ServerInfo struct {
 			Port          string
 			Host          string
@@ -192,6 +216,7 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 			LocalAddress  string
 			User          string
 			CumulocityURL string
+			Scheme        string
 		}
 
 		messageTmpl := heredoc.Doc(`
@@ -203,7 +228,7 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 	
 				SSH:        ssh -p {{.Port}} {{.User}}@{{.Host}}
 	
-				Website:    http://{{.LocalAddress}}
+				Website:    {{.Scheme}}://{{.LocalAddress}}
 	
 			Press ctrl-c to shutdown the server
 		`)
@@ -216,11 +241,12 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 			LocalAddress:  localAddress,
 			Device:        device,
 			User:          "<device_username>",
+			Scheme:        n.browserScheme,
 		})
 
 		if n.open {
 			go func() {
-				targetURL := fmt.Sprintf("http://%s:%s", host, port)
+				targetURL := fmt.Sprintf("%s://%s:%s", n.browserScheme, host, port)
 				if err := n.factory.Browser.Browse(targetURL); err != nil {
 					cfg.Logger.Warnf("%s", err)
 				}
