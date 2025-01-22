@@ -11,9 +11,9 @@ Create a new user so that they can access the tenant
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_create
 
 .EXAMPLE
-PS> New-user -Username "$Username" -Email "testuser@no-reply.dummy.com" -Password "$NewPassword"
+PS> New-user -Username "$Username" -Email "testuser@no-reply.dummy.com" -Password "$NewPassword" -ShouldResetPassword
 
-Create a user
+Create a user and force user to change their password when logging in
 
 
 #>
@@ -57,6 +57,11 @@ Create a user
         [Parameter()]
         [string]
         $Password,
+
+        # User must reset password on next login
+        [Parameter()]
+        [switch]
+        $ShouldResetPassword,
 
         # Send password reset email to the user instead of setting a password
         [Parameter()]

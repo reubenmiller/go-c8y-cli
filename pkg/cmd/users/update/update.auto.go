@@ -53,6 +53,7 @@ Update a user
 	cmd.Flags().String("email", "", "User email address")
 	cmd.Flags().Bool("enabled", false, "User activation status (true/false)")
 	cmd.Flags().String("password", "", "User password. Min: 6, max: 32 characters. Only Latin1 chars allowed")
+	cmd.Flags().Bool("shouldResetPassword", false, "User must reset password on next login")
 	cmd.Flags().Bool("sendPasswordResetEmail", false, "Send password reset email to the user instead of setting a password")
 	cmd.Flags().String("customProperties", "", "Custom properties to be added to the user")
 
@@ -154,6 +155,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("email", "email"),
 		flags.WithBoolValue("enabled", "enabled", ""),
 		flags.WithStringValue("password", "password"),
+		flags.WithBoolValue("shouldResetPassword", "shouldResetPassword", ""),
 		flags.WithBoolValue("sendPasswordResetEmail", "sendPasswordResetEmail", ""),
 		flags.WithDataValue("customProperties", "customProperties"),
 		cmdutil.WithTemplateValue(n.factory),
