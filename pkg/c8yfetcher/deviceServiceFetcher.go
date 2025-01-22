@@ -18,11 +18,11 @@ func NewDeviceServiceFetcher(factory *cmdutil.Factory, device string) *DeviceSer
 			CumulocityFetcher: &CumulocityFetcher{
 				factory: factory,
 			},
-			Query: func(s string) string {
+			Query: func(s string) (string, error) {
 
 				client, err := factory.Client()
 				if err != nil {
-					return ""
+					return "", err
 				}
 
 				if !IsID(device) {
@@ -30,15 +30,18 @@ func NewDeviceServiceFetcher(factory *cmdutil.Factory, device string) *DeviceSer
 					moDevice, _, err := client.Inventory.GetDevicesByName(c8y.WithDisabledDryRunContext(context.Background()), device, &c8y.PaginationOptions{
 						PageSize: 5,
 					})
-					if err == nil && moDevice != nil && len(moDevice.ManagedObjects) > 0 {
+					if err != nil {
+						return "", NewQueryBuildErr(err)
+					}
+					if moDevice != nil && len(moDevice.ManagedObjects) > 0 {
 						device = moDevice.ManagedObjects[0].ID
 					}
 				}
 
 				if IsID(device) {
-					return fmt.Sprintf("(type eq 'c8y_Service') and name eq '%s' and (bygroupid(%s))", s, device)
+					return fmt.Sprintf("(type eq 'c8y_Service') and name eq '%s' and (bygroupid(%s))", s, device), nil
 				}
-				return fmt.Sprintf("(type eq 'c8y_Service') and name eq '%s'", s)
+				return fmt.Sprintf("(type eq 'c8y_Service') and name eq '%s'", s), nil
 			},
 		},
 	}

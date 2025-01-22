@@ -1060,10 +1060,8 @@ func (b *MapBuilder) MarshalJSONObject() (body []byte, err error) {
 		Logger.Debugf("body iterator. path=%s, value=%s", it.Path, value)
 
 		if itErr != nil {
-			if itErr == io.EOF {
-				err = itErr
-				return
-			}
+			err = itErr
+			return
 		} else {
 			switch extInput := input.(type) {
 			case []byte:

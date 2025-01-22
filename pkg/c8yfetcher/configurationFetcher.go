@@ -16,8 +16,8 @@ func NewConfigurationFetcher(factory *cmdutil.Factory) *ConfigurationFetcher {
 			CumulocityFetcher: &CumulocityFetcher{
 				factory: factory,
 			},
-			Query: func(s string) string {
-				return fmt.Sprintf("(type eq 'c8y_ConfigurationDump') and name eq '%s'", s)
+			Query: func(s string) (string, error) {
+				return fmt.Sprintf("(type eq 'c8y_ConfigurationDump') and name eq '%s'", s), nil
 			},
 		},
 	}

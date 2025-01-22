@@ -18,11 +18,11 @@ func NewSoftwareVersionFetcher(factory *cmdutil.Factory, software string) *Softw
 			CumulocityFetcher: &CumulocityFetcher{
 				factory: factory,
 			},
-			Query: func(s string) string {
+			Query: func(s string) (string, error) {
 				// Check
 				client, err := factory.Client()
 				if err != nil {
-					return ""
+					return "", err
 				}
 
 				if !IsID(software) {
@@ -30,15 +30,18 @@ func NewSoftwareVersionFetcher(factory *cmdutil.Factory, software string) *Softw
 					moSoftware, _, err := client.Software.GetSoftwareByName(c8y.WithDisabledDryRunContext(context.Background()), software, &c8y.PaginationOptions{
 						PageSize: 5,
 					})
-					if err == nil && moSoftware != nil && len(moSoftware.ManagedObjects) > 0 {
+					if err != nil {
+						return "", NewQueryBuildErr(err)
+					}
+					if moSoftware != nil && len(moSoftware.ManagedObjects) > 0 {
 						software = moSoftware.ManagedObjects[0].ID
 					}
 				}
 
 				if IsID(software) {
-					return fmt.Sprintf("(type eq 'c8y_SoftwareBinary') and not(has(c8y_Patch)) and c8y_Software.version eq '%s' and (bygroupid(%s))", s, software)
+					return fmt.Sprintf("(type eq 'c8y_SoftwareBinary') and not(has(c8y_Patch)) and c8y_Software.version eq '%s' and (bygroupid(%s))", s, software), nil
 				}
-				return fmt.Sprintf("(type eq 'c8y_SoftwareBinary') and not(has(c8y_Patch)) and c8y_Software.version eq '%s'", s)
+				return fmt.Sprintf("(type eq 'c8y_SoftwareBinary') and not(has(c8y_Patch)) and c8y_Software.version eq '%s'", s), nil
 			},
 		},
 	}
