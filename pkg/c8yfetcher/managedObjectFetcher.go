@@ -2,12 +2,17 @@ package c8yfetcher
 
 import (
 	"context"
+
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
-type QueryFilter func(string) string
+func NewQueryBuildErr(err error) error {
+	return errors.Wrap(err, "Fetcher could not build a query")
+}
+
+type QueryFilter func(string) (string, error)
 
 type ManagedObjectFetcher struct {
 	Query QueryFilter
@@ -43,9 +48,13 @@ func (f *ManagedObjectFetcher) getByID(id string) ([]fetcherResultSet, error) {
 }
 
 func (f *ManagedObjectFetcher) getByName(name string) ([]fetcherResultSet, error) {
+	var err error
 	query := "name eq '" + name + "'"
 	if f.Query != nil {
-		query = f.Query(name)
+		query, err = f.Query(name)
+		if err != nil {
+			return nil, errors.Wrap(err, "Fetcher could not build a valid query")
+		}
 	}
 	mcol, _, err := f.Client().Inventory.GetManagedObjects(
 		c8y.WithDisabledDryRunContext(context.Background()),

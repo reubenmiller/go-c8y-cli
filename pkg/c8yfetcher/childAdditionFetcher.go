@@ -2,6 +2,7 @@ package c8yfetcher
 
 import (
 	"context"
+
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
@@ -41,9 +42,13 @@ func (f *ChildAdditionFetcher) getByID(id string) ([]fetcherResultSet, error) {
 }
 
 func (f *ChildAdditionFetcher) getByName(name string) ([]fetcherResultSet, error) {
+	var err error
 	query := "name eq '" + name + "'"
 	if f.Query != nil {
-		query = f.Query(name)
+		query, err = f.Query(name)
+		if err != nil {
+			return nil, NewQueryBuildErr(err)
+		}
 	}
 	mcol, _, err := f.client.Inventory.GetChildAdditions(
 		c8y.WithDisabledDryRunContext(context.Background()),

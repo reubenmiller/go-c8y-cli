@@ -16,8 +16,8 @@ func NewFirmwareFetcher(factory *cmdutil.Factory) *FirmwareFetcher {
 			CumulocityFetcher: &CumulocityFetcher{
 				factory: factory,
 			},
-			Query: func(s string) string {
-				return fmt.Sprintf("(type eq 'c8y_Firmware') and name eq '%s'", s)
+			Query: func(s string) (string, error) {
+				return fmt.Sprintf("(type eq 'c8y_Firmware') and name eq '%s'", s), nil
 			},
 		},
 	}

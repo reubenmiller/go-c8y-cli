@@ -16,8 +16,8 @@ func NewSoftwareFetcher(factory *cmdutil.Factory) *SoftwareFetcher {
 			CumulocityFetcher: &CumulocityFetcher{
 				factory: factory,
 			},
-			Query: func(s string) string {
-				return fmt.Sprintf("(type eq 'c8y_Software') and name eq '%s'", s)
+			Query: func(s string) (string, error) {
+				return fmt.Sprintf("(type eq 'c8y_Software') and name eq '%s'", s), nil
 			},
 		},
 	}
