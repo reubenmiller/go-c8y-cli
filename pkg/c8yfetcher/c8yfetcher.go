@@ -130,8 +130,10 @@ func lookupEntity(fetch EntityFetcher, values []string, getID bool, format strin
 						Data: resultSet,
 					})
 				}
+			} else {
+				// Propagate errors back to the caller
+				return entities, err
 			}
-			// TODO: Handle error
 		} else {
 			entities = append(entities, entityReference{
 				ID: applyFormatter(id, format),
@@ -150,8 +152,10 @@ func lookupEntity(fetch EntityFetcher, values []string, getID bool, format strin
 					Data: resultSet,
 				})
 			}
+		} else {
+			// Propagate errors back to the caller
+			return entities, err
 		}
-		// TODO: Handle error
 	}
 
 	return entities, nil
