@@ -7,8 +7,8 @@ Describe -Name "New-User" {
 
     }
 
-    It "Create a user" {
-        $Response = PSc8y\New-user -Username "$Username" -Email "testuser@no-reply.dummy.com" -Password "$NewPassword"
+    It "Create a user and force user to change their password when logging in" {
+        $Response = PSc8y\New-user -Username "$Username" -Email "testuser@no-reply.dummy.com" -Password "$NewPassword" -ShouldResetPassword
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

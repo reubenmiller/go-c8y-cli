@@ -1,11 +1,12 @@
 tests:
-    users_create_Create a user:
-        command: c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm!"
+    users_create_Create a user and force user to change their password when logging in:
+        command: c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password 'a0)8k2kld9lm' --shouldResetPassword
         exit-code: 0
         stdout:
             json:
                 body.email: testuser@no-reply.dummy.com
-                body.password: a0)8k2kld9lm!
+                body.password: a0)8k2kld9lm
+                body.shouldResetPassword: "true"
                 body.userName: testuser1
                 method: POST
                 path: /user/$C8Y_TENANT/users

@@ -59,6 +59,11 @@ Update a user
         [string]
         $Password,
 
+        # User must reset password on next login
+        [Parameter()]
+        [switch]
+        $ShouldResetPassword,
+
         # Send password reset email to the user instead of setting a password
         [Parameter()]
         [ValidateSet('true','false')]
