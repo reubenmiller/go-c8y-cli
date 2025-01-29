@@ -107,6 +107,11 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 func (n *CmdSSH) GetPortForwarding() string {
 	// convenience functions to mirror docker port mapping options
 	portMapping := n.portForwarding
+
+	if portMapping == "" {
+		return portMapping
+	}
+
 	portForwardingParts := strings.Split(portMapping, ":")
 	switch len(portForwardingParts) {
 	case 1:
