@@ -193,7 +193,7 @@ tasks:
       - goreleaser build --clean --snapshot --single-target --id {{.OS_NAME}} {{.CLI_ARGS}}
       - rm -f .bin/c8y
       - mkdir -p .bin
-      - cp dist/{{.OS_NAME}}_{{OS}}_{{.ARCH_NAME}}/bin/c8y .bin/c8y
+      - cp dist/{{.OS_NAME}}_{{OS}}_{{.ARCH_NAME}}*/bin/c8y .bin/c8y
 
   generate:
     desc: Generate the cli code
