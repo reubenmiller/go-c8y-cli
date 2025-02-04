@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// WithDeviceGroup device group completion
+// WithDeviceGroup device group completion (including root groups and subgroups)
 func WithDeviceGroup(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -20,6 +20,42 @@ func WithDeviceGroup(flagName string, clientFunc func() (*c8y.Client, error)) Op
 			pattern := "*" + toComplete + "*"
 			opt := &c8y.ManagedObjectOptions{
 				Query:             fmt.Sprintf("(name eq '%s') and has(%s)", pattern, "c8y_IsDeviceGroup"),
+				PaginationOptions: *c8y.NewPaginationOptions(100),
+			}
+			items, _, err := client.Inventory.GetManagedObjects(
+				c8y.WithDisabledDryRunContext(context.Background()),
+				opt,
+			)
+
+			if err != nil {
+				values := []string{fmt.Sprintf("error. %s", err)}
+				return values, cobra.ShellCompDirectiveError
+			}
+			values := []string{}
+			for _, item := range items.ManagedObjects {
+				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
+					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+				}
+			}
+			return values, cobra.ShellCompDirectiveNoFileComp
+		})
+		return cmd
+	}
+}
+
+// WithRootDeviceGroup root device group completion
+func WithRootDeviceGroup(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			client, err := clientFunc()
+			if err != nil {
+				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
+			}
+
+			typePattern := "c8y_DeviceGroup"
+			pattern := "*" + toComplete + "*"
+			opt := &c8y.ManagedObjectOptions{
+				Query:             fmt.Sprintf("(name eq '%s') and has(%s) and type eq '%s'", pattern, "c8y_IsDeviceGroup", typePattern),
 				PaginationOptions: *c8y.NewPaginationOptions(100),
 			}
 			items, _, err := client.Inventory.GetManagedObjects(

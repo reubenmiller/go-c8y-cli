@@ -43,6 +43,7 @@ import (
 	deviceManagementCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement"
 	deviceprofilesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceprofiles"
 	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration/bulk"
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices"
 	devicesAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/assert"
 	devicesAvailabilityCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/availability"
@@ -327,7 +328,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		bulkoperationsCmd.NewSubCommand(f).GetCommand(),
 		currentapplicationCmd.NewSubCommand(f).GetCommand(),
 		databrokerCmd.NewSubCommand(f).GetCommand(),
-		deviceregistrationCmd.NewSubCommand(f).GetCommand(),
 		identityCmd.NewSubCommand(f).GetCommand(),
 		retentionrulesCmd.NewSubCommand(f).GetCommand(),
 		sessionsCmd.NewSubCommand(f).GetCommand(),
@@ -406,6 +406,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	agents := agentsCmd.NewSubCommand(f).GetCommand()
 	cmd.AddCommand(agents)
+
+	deviceregistration := deviceregistrationCmd.NewSubCommand(f).GetCommand()
+	bulkDeviceRegistration := bulk.NewSubCommand(f).GetCommand()
+	deviceregistration.AddCommand(bulkDeviceRegistration)
+	cmd.AddCommand(deviceregistration)
 
 	// microservices
 	microservices := microservicesCmd.NewSubCommand(f).GetCommand()

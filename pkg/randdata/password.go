@@ -7,9 +7,11 @@ func Password(total int) string {
 		total = 32
 	}
 	passwordGen, err := password.NewGenerator(&password.GeneratorInput{
-		// Don't use "#" as it can cause problems if the user stores
+		// Note: Don't use "#" as it can cause problems if the user stores
 		// the password in a dotenv file
-		Symbols: "!@%^()[]*+-_;,.",
+		// Note: Don't use '"' double quote as some api does not
+		// support parsing it (e.g. bulk device registration api)
+		Symbols: "`~!@$%^&*()_|+-=?;:',.<>{}[]\\/,",
 	})
 
 	if err != nil {
