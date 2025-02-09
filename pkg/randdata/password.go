@@ -11,7 +11,8 @@ func Password(total int) string {
 		// the password in a dotenv file
 		// Note: Don't use '"' double quote as some api does not
 		// support parsing it (e.g. bulk device registration api)
-		Symbols: "`~!@$%^&*()_|+-=?;:',.<>{}[]\\/,",
+		// Note: Don't use "\" as it just makes escaping more difficult
+		Symbols: "`~!@$%^&*()_|+-=?;:',.<>{}[]/,",
 	})
 
 	if err != nil {
