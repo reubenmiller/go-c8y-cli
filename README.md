@@ -1,6 +1,6 @@
 # go-c8y-cli
 
-![build](https://github.com/reubenmiller/go-c8y-cli/workflows/build/badge.svg)
+[![build](https://github.com/reubenmiller/go-c8y-cli/actions/workflows/main.yml/badge.svg?branch=v2)](https://github.com/reubenmiller/go-c8y-cli/actions/workflows/main.yml)
 
 <p align="center">
     <img width="1000" src="demo.svg">
