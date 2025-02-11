@@ -115,17 +115,17 @@ Create a new managed object but add a custom accept header value
     Process {
 
         if ($null -ne $QueryParameters) {
-            $queryparams = New-Object System.Collections.ArrayList
+            $QueryParams = New-Object System.Collections.ArrayList
             foreach ($key in $QueryParameters.Keys) {
                 $value = $QueryParameters[$key]
                 if ($value) {
                     $null = $c8yargs.AddRange(@("--customQueryParam", "${key}=${value}"))
-                    # $null = $queryparams.Add("${key}=${value}")
+                    # $null = $QueryParams.Add("${key}=${value}")
                 }
             }
 
-            if ($queryparams.Count -gt 0) {
-                $str = $queryparams -join "&"
+            if ($QueryParams.Count -gt 0) {
+                $str = $QueryParams -join "&"
                 if ($Uri.Contains("?")) {
                     # uri already has some query parameters, so just append the new one to it
                     $Uri = $Uri + "&" + $str

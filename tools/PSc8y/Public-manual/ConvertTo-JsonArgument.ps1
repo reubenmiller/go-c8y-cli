@@ -7,7 +7,7 @@ Convert a powershell hashtable/object to a json escaped string
 Helper function is used when passing Powershell hashtable or PSCustomObjects to
 the c8y binary. Before the c8y cli binary can accept it, it must be converted to json.
 
-The necessary character escaping of literal backslashed `\` will be done automatically.
+The necessary character escaping of literal backslash `\` will be done automatically.
 
 If Data parameter is a file path then it is returned as is.
 
@@ -63,7 +63,7 @@ Converts the hashtable to an escaped json string
         # Replace space with unicode char, as space can have console parsing problems
         $strArg = $strArg -replace " ", "\u0020"
     } else {
-        # Note: replace \" with the unicode character to prevent intepretation errors on the command line
+        # Note: replace \" with the unicode character to prevent interpretation errors on the command line
         $jsonRaw = (ConvertTo-Json $DataObj -Compress -Depth 100) -replace '\\"', '\u0022'
         $strArg = $jsonRaw
     }

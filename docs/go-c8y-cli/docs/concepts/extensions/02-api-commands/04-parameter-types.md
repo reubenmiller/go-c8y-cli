@@ -30,7 +30,7 @@ The following table shows how the parameter would be translated to a query param
 |----|----|
 |`--name example`|`?name=example`|
 
-Sometimes the name of the flag might be different to the corresponding query parameter name. This is an important usability aspect, as commands can provide a contextualized abstraction on top of the REST API, so a flag's meaning can be slighly different to the API's meaning. In this case a custom mapping can be provided by using the `property` field.
+Sometimes the name of the flag might be different to the corresponding query parameter name. This is an important usability aspect, as commands can provide a contextualized abstraction on top of the REST API, so a flag's meaning can be slightly different to the API's meaning. In this case a custom mapping can be provided by using the `property` field.
 
 Extending the previous snippet, the `name` flag can be changed to write to write to the `fragment` query parameter instead of the `name`.
 

@@ -159,7 +159,7 @@ func (w *Worker) ProcessRequestAndResponse(cmd *cobra.Command, r *c8y.RequestOpt
 		if inputIterators.Path != nil {
 			pathIter = inputIterators.Path
 		} else {
-			// use continuous path repeater so that it does not stop the other interators
+			// use continuous path repeater so that it does not stop the other iterators
 			pathIter = iterator.NewRepeatIterator(r.Path, 0)
 		}
 		if inputIterators.Body != nil {
@@ -236,7 +236,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			request, input, err := requestIterator.GetNext()
 
 			if errors.Is(err, io.EOF) {
-				// no more requests, decreement job id as the job was not started
+				// no more requests, decrement job id as the job was not started
 				jobID--
 				break
 			}

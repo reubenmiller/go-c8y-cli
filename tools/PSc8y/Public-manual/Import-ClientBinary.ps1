@@ -25,7 +25,7 @@ Download the client binary corresponding to your current platform
         [ValidateSet("amd64", "386", "arm64", "armv5")]
         [string] $Arch,
 
-        # Force redownloading of the binary
+        # Force downloading of the binary
         [switch] $Force
     )
 

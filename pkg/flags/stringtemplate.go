@@ -30,7 +30,7 @@ func (b *StringTemplate) SetTemplate(template string) {
 	b.template = template
 }
 
-// SetVariable sets a give path variable which will be evalulated when fetching the next value
+// SetVariable sets a give path variable which will be evaluated when fetching the next value
 func (b *StringTemplate) SetVariable(name string, value interface{}) {
 	b.templateVariables[name] = value
 }

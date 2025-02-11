@@ -47,7 +47,7 @@ type DefinitionCollection struct {
 	Definitions []Definition `json:"definitions,omitempty"`
 }
 
-// DataView data view containing pre-definied views
+// DataView data view containing predefined views
 type DataView struct {
 	mu          sync.RWMutex
 	Paths       []string

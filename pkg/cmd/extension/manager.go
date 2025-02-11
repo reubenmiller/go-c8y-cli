@@ -406,7 +406,7 @@ type binManifest struct {
 	Path string
 }
 
-// Install installs an extension from repo, and pins to commitish if provided
+// Install installs an extension from repo, and pins to a commit hash if provided
 func (m *Manager) Install(repo ghrepo.Interface, name string, target string) error {
 	// FUTURE: Disable binary extensions for now
 	if m.allowBinary && strings.Contains(repo.RepoHost(), "github") {
@@ -861,8 +861,8 @@ func isBinExtension(client *http.Client, repo ghrepo.Interface) (isBin bool, err
 	}
 
 	for _, a := range r.Assets {
-		dists := possibleDists()
-		for _, d := range dists {
+		distributions := possibleDistributions()
+		for _, d := range distributions {
 			suffix := d
 			if strings.HasPrefix(d, "windows") {
 				suffix += ".exe"
@@ -903,7 +903,7 @@ func repoFromPath(path string) (ghrepo.Interface, error) {
 	return ghrepo.FromURL(remote.FetchURL)
 }
 
-func possibleDists() []string {
+func possibleDistributions() []string {
 	return []string{
 		"aix-ppc64",
 		"android-386",

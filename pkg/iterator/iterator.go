@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Iterator is a simple interfact where the next value can be returned.
+// Iterator is a simple interface where the next value can be returned.
 type Iterator interface {
 	GetNext() (line []byte, input interface{}, err error)
 

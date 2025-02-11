@@ -6,7 +6,7 @@ type Annotations map[string]string
 // Option adds meta information to the Annotation
 type Option func(Annotations) Annotations
 
-// NewAnnotation creaete a new annotation to describe a command and configure it using a list of options
+// NewAnnotation create a new annotation to describe a command and configure it using a list of options
 func NewAnnotation(a Annotations, opts ...Option) Annotations {
 	if a == nil {
 		a = make(Annotations)

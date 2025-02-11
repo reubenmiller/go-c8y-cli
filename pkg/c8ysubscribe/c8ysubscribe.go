@@ -47,7 +47,7 @@ func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, op
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, os.Interrupt)
 
-	log.Infof("Listenening to subscriptions: %s", channelPattern)
+	log.Infof("Listening to subscriptions: %s", channelPattern)
 
 	client.Realtime.Subscribe(channelPattern, msgCh)
 
@@ -108,7 +108,7 @@ func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns [
 	signal.Notify(signalCh, os.Interrupt)
 
 	for _, pattern := range channelPatterns {
-		log.Infof("Listenening to subscriptions: %s", pattern)
+		log.Infof("Listening to subscriptions: %s", pattern)
 
 		client.Realtime.Subscribe(pattern, msgCh)
 	}

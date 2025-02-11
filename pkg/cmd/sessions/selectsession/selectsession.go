@@ -178,7 +178,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	// always enable color
 	color.NoColor = false
 	prompt := promptui.Select{
-		Stdout:            bellskipper.NewBellSkipper(os.Stderr), // Workaround to pervent the terminal bell on MacOS
+		Stdout:            bellskipper.NewBellSkipper(os.Stderr), // Workaround to prevent the terminal bell on MacOS
 		HideSelected:      true,
 		IsVimMode:         false,
 		StartInSearchMode: false,

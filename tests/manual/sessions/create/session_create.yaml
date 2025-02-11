@@ -31,7 +31,7 @@ tests:
           "username": "dummy"
         }
 
-  It santizes the session name:
+  It sanitizes the session name:
     command: |
       export C8Y_SESSION_HOME=/tmp/session_create_test02/
       rm -Rf /tmp/session_create_test02/
@@ -48,7 +48,7 @@ tests:
           "username": "dummy@me.com"
         }
 
-  It santizes the session name when specified by the user:
+  It sanitizes the session name when specified by the user:
     command: |
       export C8Y_SESSION_HOME=/tmp/session_create_test03/
       rm -Rf /tmp/session_create_test03/

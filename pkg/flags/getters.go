@@ -71,7 +71,7 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 		default:
 			strValue := fmt.Sprintf("%v", v)
 			if strValue != "" {
-				// keep value as intervalue, but filter out empty string values
+				// keep value as interface, but filter out empty string values
 				query.SetVariable(name, v)
 			}
 		}
@@ -435,7 +435,7 @@ func WithStaticStringValue2(opts ...string) GetOption {
 	}
 }
 
-// WithCustomStringValue add a custom string value with a custom tranform function
+// WithCustomStringValue add a custom string value with a custom transform function
 func WithCustomStringValue(transform func([]byte) []byte, targetFunc func() string, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
@@ -672,7 +672,7 @@ func WithIntValue(opts ...string) GetOption {
 
 		value, err := cmd.Flags().GetInt(src)
 
-		// Note: treat 0 values as non existant
+		// Note: treat 0 values as non existent
 		if value == 0 && !cmd.Flags().Changed(src) {
 			return "", "", nil
 		}

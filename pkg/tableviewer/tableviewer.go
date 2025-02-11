@@ -177,7 +177,7 @@ func (v *TableView) getHeaderRow() []string {
 	return header
 }
 
-// TransformData tranform the data so that is presentable in the terminal
+// TransformData transform the data so that is presentable in the terminal
 func (v *TableView) TransformData(j []byte, property string) [][]string {
 	r := gjson.ParseBytes(j)
 	data := [][]string{}

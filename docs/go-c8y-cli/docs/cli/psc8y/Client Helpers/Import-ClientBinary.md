@@ -88,7 +88,7 @@ Accept wildcard characters: False
 ```
 
 ### -Force
-Force redownloading of the binary
+Force downloading of the binary
 
 ```yaml
 Type: SwitchParameter

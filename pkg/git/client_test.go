@@ -303,7 +303,7 @@ func TestClientCurrentBranch(t *testing.T) {
 			wantBranch:  "branch\u00A0with\u00A0non\u00A0breaking\u00A0space",
 		},
 		{
-			name:          "detatched head",
+			name:          "detached head",
 			cmdExitStatus: 1,
 			wantCmdArgs:   `path/to/git symbolic-ref --quiet HEAD`,
 			wantErrorMsg:  "failed to run git: not on any branch",
@@ -328,7 +328,7 @@ func TestClientCurrentBranch(t *testing.T) {
 	}
 }
 
-func TestClientShowRefs(t *testing.T) {
+func TestClientShowReferences(t *testing.T) {
 	tests := []struct {
 		name          string
 		cmdExitStatus int
@@ -339,7 +339,7 @@ func TestClientShowRefs(t *testing.T) {
 		wantErrorMsg  string
 	}{
 		{
-			name:          "show refs with one vaid ref and one invalid ref",
+			name:          "show refs with one valid reference and one invalid reference",
 			cmdExitStatus: 128,
 			cmdStdout:     "9ea76237a557015e73446d33268569a114c0649c refs/heads/valid",
 			cmdStderr:     "fatal: 'refs/heads/invalid' - not a valid ref",
@@ -710,7 +710,7 @@ func TestClientCheckoutNewBranch(t *testing.T) {
 	}
 }
 
-func TestClientToplevelDir(t *testing.T) {
+func TestClientTopLevelDir(t *testing.T) {
 	tests := []struct {
 		name          string
 		cmdExitStatus int
@@ -741,7 +741,7 @@ func TestClientToplevelDir(t *testing.T) {
 				GitPath:        "path/to/git",
 				commandContext: cmdCtx,
 			}
-			dir, err := client.ToplevelDir(context.Background())
+			dir, err := client.TopLevelDir(context.Background())
 			assert.Equal(t, tt.wantCmdArgs, strings.Join(cmd.Args[3:], " "))
 			if tt.wantErrorMsg == "" {
 				assert.NoError(t, err)

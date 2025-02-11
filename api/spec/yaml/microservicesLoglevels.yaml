@@ -42,7 +42,7 @@ commands:
   - name: get
     description: Get log level of microservice
     descriptionLong: |
-      Get configured log level for a package (incl. subpackages), or a specific class.
+      Get configured log level for a package (incl. sub-packages), or a specific class.
       (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
     method: GET
     path: /service/{name}/loggers/{loggerName}
@@ -77,7 +77,7 @@ commands:
   - name: set
     description: Set log level of microservice
     descriptionLong: |
-      Set configured log level for a package (incl. subpackages), or a specific class.
+      Set configured log level for a package (incl. sub-packages), or a specific class.
       (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
     method: POST
     path: /service/{name}/loggers/{loggerName}
@@ -131,7 +131,7 @@ commands:
   - name: delete
     description: Delete configured log level of microservice
     descriptionLong: |
-      Delete configured log level for a package (incl. subpackages), or a specific class.
+      Delete configured log level for a package (incl. sub-packages), or a specific class.
       This resets its value to the default log level.
       (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
     method: POST

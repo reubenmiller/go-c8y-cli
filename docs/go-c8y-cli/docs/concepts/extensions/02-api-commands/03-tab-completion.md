@@ -99,5 +99,5 @@ c8y_lwm2m_connector_device   -- type: c8y_lwm2m_connector_device
 ```
 
 :::note
-The `--select type,type` part of the completion command is not a typo. By included more than one columns of data means that the the other colums will be used in the description of the option. In zsh it makes the list a bit more readable.
+The `--select type,type` part of the completion command is not a typo. By included more than one columns of data means that the the other columns will be used in the description of the option. In zsh it makes the list a bit more readable.
 :::

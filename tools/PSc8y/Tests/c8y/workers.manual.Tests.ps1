@@ -31,15 +31,15 @@ Describe -Name "c8y pipes" {
         }
 
         It "aborts on job errors" {
-            $output = @("NonExistantName1", "NonExistantName2", "NonExistantName3") | c8y events list --abortOnErrors 1 --dry --verbose 2>&1
+            $output = @("NonExistentName1", "NonExistentName2", "NonExistentName3") | c8y events list --abortOnErrors 1 --dry --verbose 2>&1
             $LASTEXITCODE | Should -Be 103
             $output | Should -ContainRequest "GET /inventory/managedObjects" -Minimum 1 -Maximum 2
             $output | Should -ContainRequest "GET /event/events" -Total 0
         }
 
-        It "aborts on job errors piping to non-existant values" {
+        It "aborts on job errors piping to non-existent values" {
             # Piping values to an id should not result in lookups!
-            $output = @("NonExistantName1", "NonExistantName2", "NonExistantName3") | c8y events list --abortOnErrors 1 --dry --verbose 2>&1
+            $output = @("NonExistentName1", "NonExistentName2", "NonExistentName3") | c8y events list --abortOnErrors 1 --dry --verbose 2>&1
             $LASTEXITCODE | Should -Be 103
             $output | Should -ContainRequest "GET" -Total 1
             $output | Should -ContainRequest "GET /inventory/managedObjects" -Total 1

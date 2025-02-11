@@ -263,7 +263,7 @@ func NewSystemErrorF(format string, a ...interface{}) CommandError {
 	return CommandError{Message: fmt.Sprintf(format, a...), ErrorType: ErrTypeCommand}
 }
 
-// NewErrorSummary create a error summary from a chanell of errors
+// NewErrorSummary create a error summary from a channel of errors
 func NewErrorSummary(message string, errorsCh <-chan error) error {
 	errorSummary := errors.New(message)
 	hasError := false

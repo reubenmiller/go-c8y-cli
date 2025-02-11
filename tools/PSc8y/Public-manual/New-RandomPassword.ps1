@@ -5,7 +5,7 @@ Create pseudo random password
 
 .DESCRIPTION
 Create a random password which can be used for one-time passwords if the
-the password reset functionilty in Cumulocity is not available.
+the password reset functionality in Cumulocity is not available.
 
 .EXAMPLE
 New-RandomPassword
@@ -29,13 +29,13 @@ New-RandomPassword -InputStrings abc, ABC, 123 -PasswordLength 4
 
 3ABa
 
-Generate a password with a length of 4 containing atleast one char from each InputString
+Generate a password with a length of 4 containing at least one char from each InputString
 
 .EXAMPLE
-New-RandomPassword -InputStrings abc, ABC, 123 -PasswordLength 4 -FirstChar abcdefghijkmnpqrstuvwxyzABCEFGHJKLMNPQRSTUVWXYZ
+New-RandomPassword -InputStrings abc, ABC, 123 -PasswordLength 4 -FirstChar abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
 3ABa
 
-Generates a password with a length of 4 containing atleast one char from each InputString that will start with a letter from 
+Generates a password with a length of 4 containing at least one char from each InputString that will start with a letter from 
 the string specified with the parameter FirstChar
 
 .OUTPUTS
@@ -77,9 +77,9 @@ http://blog.simonw.se/powershell-generating-random-password-for-active-directory
         [ValidateRange(1, 2147483647)]
         [int]$PasswordLength = 12,
         
-        # Specifies an array of strings containing charactergroups from which the password will be generated.
+        # Specifies an array of strings containing character groups from which the password will be generated.
         # At least one char from each group (string) will be used.
-        [String[]]$InputStrings = @('abcdefghijkmnpqrstuvwxyz', 'ABCEFGHJKLMNPQRSTUVWXYZ', '123456789', '!#%()[]*+-_;,.'),
+        [String[]]$InputStrings = @('abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '123456789', '!#%()[]*+-_;,.'),
 
         # Specifies a string containing a character group from which the first character in the password will be generated.
         # Useful for systems which requires first char in password to be alphabetic.

@@ -108,7 +108,7 @@ test_connect_run() {
     OUTPUT=$(c8y remoteaccess connect run --device "$DEVICE" -- ssh -p %p "$SSH_USER@%h" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -- cat /etc/os-release)    
     [ -n "$OUTPUT" ] || fail "Empty ssh response"
 
-    # Check if exit code is propogated
+    # Check if exit code is propagated
     set +e
     OUTPUT=$(c8y remoteaccess connect run --device "$DEVICE" -- sh -c 'exit 31')
     LAST_EXIT_CODE="$?"

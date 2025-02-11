@@ -8,7 +8,7 @@ import (
 )
 
 // GetIDs returns a list of IDs
-// --id 1234,1234 							(comma seperated list (without spaces!))
+// --id 1234,1234 							(comma separated list (without spaces!))
 // --id "22437097744 1235"					[22437097744, 1235]
 // --id 22437097744 1235,1234				(requires positional arguments as well)
 // --id 22437097744 1235,1234 asdfasdf		asdfasdf will be ignored as it does not match the pattern

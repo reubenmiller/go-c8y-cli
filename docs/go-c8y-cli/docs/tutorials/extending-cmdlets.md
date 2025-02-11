@@ -196,7 +196,7 @@ devices *example* | Invoke-CancelOperations
 
 ## Managing your scripts
 
-It is common practice to automate the importing of commonly used scripts into your PowerShell profile. This means that everytime you open up a PowerShell concole, then all of your scripts will be imported and ready to use.
+It is common practice to automate the importing of commonly used scripts into your PowerShell profile. This means that every time you open up a PowerShell console, then all of your scripts will be imported and ready to use.
 
 In order to make the importing of custom powershell extensible, you can add some code to you profile which will automatically import all `.ps1` files contained in a pre-defined folder. Note: `.ps1` is extension name for Powershell scripts.
 

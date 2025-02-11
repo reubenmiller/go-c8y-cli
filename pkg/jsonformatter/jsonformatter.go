@@ -37,7 +37,7 @@ func WithSuffix(enabled bool, suffix string) OutputFormatter {
 	})
 }
 
-// WithTrimSpace formatts the json into more human friendly format
+// WithTrimSpace formats the json into more human friendly format
 func WithTrimSpace(enabled bool) OutputFormatter {
 	return func(i io.Writer, b []byte) []byte {
 		return WithOptionalFormatter(enabled, bytes.TrimSpace)(i, b)

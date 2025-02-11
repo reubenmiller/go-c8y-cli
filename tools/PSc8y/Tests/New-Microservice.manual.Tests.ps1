@@ -34,7 +34,7 @@ Describe -Name "New-Microservice" {
         }
 
         It "Creates a new microservice from a zip file with a custom name" {
-            # Note: Cumulocity trial tenant does not support microservice hosting, so the binary can't be uploaded withouth a 403 error
+            # Note: Cumulocity trial tenant does not support microservice hosting, so the binary can't be uploaded without a 403 error
             $App = New-Microservice -Name $AppName -File $MicroserviceZip
             $AppList.Add($App.id)
 

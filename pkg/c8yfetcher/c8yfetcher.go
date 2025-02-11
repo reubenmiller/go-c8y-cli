@@ -563,7 +563,7 @@ func WithManagedObjectPropertyFirstMatch(factory *cmdutil.Factory, fetcher Entit
 
 			return name, value.Str, err
 		case iterator.Iterator:
-			// value will be evalulated later
+			// value will be evaluated later
 			return name, v, nil
 		default:
 			if err == nil {
@@ -599,7 +599,7 @@ func WithReferenceByNameFirstMatch(factory *cmdutil.Factory, fetcher EntityFetch
 
 			return name, NewIDValue(v[0]).GetID(), err
 		case iterator.Iterator:
-			// value will be evalulated later
+			// value will be evaluated later
 			return name, v, nil
 		default:
 			if err == nil {
@@ -628,7 +628,7 @@ func WithSelfReferenceByNameFirstMatch(factory *cmdutil.Factory, fetcher EntityF
 
 			return name, NewIDValue(v[0]).GetID(), err
 		case iterator.Iterator:
-			// value will be evalulated later
+			// value will be evaluated later
 			return name, v, nil
 		default:
 			if err == nil {

@@ -198,7 +198,7 @@ func (r *RequestHandler) DryRunHandler(iostream *iostreams.IOStreams, options *c
 	r.PrintRequestDetails(iostream.Out, options, req)
 }
 
-// PrintRequestDetails prints the request to the console making it easier to extra informatino from it
+// PrintRequestDetails prints the request to the console making it easier to extra information from it
 func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *http.Request) {
 	format := r.Config.DryRunFormat()
 	if format == "dump" {
@@ -918,7 +918,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 
 					switch strings.ToLower(view) {
 					case config.ViewsOff:
-						// dont apply a view
+						// don't apply a view
 						if !showRaw {
 							commonOptions.Filters.Pluck = []string{"**"}
 						}
@@ -1023,7 +1023,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 
 func (r *RequestHandler) guessDataProperty(resp *c8y.Response) string {
 	property := ""
-	arrayPropertes := []string{}
+	arrayProperties := []string{}
 	totalKeys := 0
 
 	if v := resp.JSON("id"); !v.Exists() {
@@ -1031,23 +1031,23 @@ func (r *RequestHandler) guessDataProperty(resp *c8y.Response) string {
 		resp.JSON().ForEach(func(key, value gjson.Result) bool {
 			totalKeys++
 			if value.IsArray() {
-				arrayPropertes = append(arrayPropertes, key.String())
+				arrayProperties = append(arrayProperties, key.String())
 			}
 			return true
 		})
 	}
 
-	if len(arrayPropertes) > 1 {
-		r.Logger.Debugf("Could not detect property as more than 1 array like property detected: %v", arrayPropertes)
+	if len(arrayProperties) > 1 {
+		r.Logger.Debugf("Could not detect property as more than 1 array like property detected: %v", arrayProperties)
 		return ""
 	}
-	r.Logger.Debugf("Array properties: %v", arrayPropertes)
+	r.Logger.Debugf("Array properties: %v", arrayProperties)
 
-	if len(arrayPropertes) == 0 {
+	if len(arrayProperties) == 0 {
 		return ""
 	}
 
-	property = arrayPropertes[0]
+	property = arrayProperties[0]
 
 	// if total keys is a high number, than it is most likely not an array of data
 	// i.e. for the /tenant/statistics

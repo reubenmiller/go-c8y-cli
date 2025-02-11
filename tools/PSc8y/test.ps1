@@ -33,7 +33,7 @@ if (!(Get-Module "Pester")) {
     Import-Module "Pester" -MinimumVersion "5.0.0" -MaximumVersion "5.100.0"
 }
 
-$originalLocaltion = Get-Location
+$originalLocation = Get-Location
 Set-Location $PSScriptRoot
 
 # Create the artifacts folder if not present
@@ -93,7 +93,7 @@ Get-MicroserviceCollection -PageSize 100 | Where-Object { $_.name -like "*testms
 
 $global:ConfirmPreference = $OldConfirmPreference
 
-Set-Location $originalLocaltion.Path
+Set-Location $originalLocation.Path
 
 if ($null -ne $ConsoleEncodingBackup) {
     Write-Verbose "Restoring original console encoding"

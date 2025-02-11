@@ -34,15 +34,15 @@
                                 <Text>path: </Text>
                                 <ExpressionBinding>
                                     <ScriptBlock>
-                                        $sanitziedPath = $_.path
+                                        $sanitizedPath = $_.path
                                         if ($HOME) {
-                                            $sanitziedPath = $sanitziedPath -replace "$HOME", "******"
+                                            $sanitizedPath = $sanitizedPath -replace "$HOME", "******"
                                         }
 
                                         if ($Env:USERNAME) {
-                                            $sanitziedPath = $sanitziedPath -replace "$env:USERNAME", "******"
+                                            $sanitizedPath = $sanitizedPath -replace "$env:USERNAME", "******"
                                         }
-                                        $sanitziedPath
+                                        $sanitizedPath
                                     </ScriptBlock>
                                 </ExpressionBinding>
                                 <NewLine/>

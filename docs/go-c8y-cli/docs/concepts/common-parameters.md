@@ -526,7 +526,7 @@ Include all results by iterating through each page
 Each page is written to standard output as the response is returned, so and downstream commands (via the pipeline) will not have to wait until all of the pages have been retrieved.
 
 :::info
-Commands which use the inventory query language (i.e. `inventory/managedObjects?q=` or `inventory/managedObjects?query=`) will be automatically optimized to use the technique of reformating the query to skip pagination via modifying the query search space by adding `_id gt <last_result_id>` to the query. If the tenant has a large about of devices (>20K), this technique drastically decreases the time it takes to retrieve all results instead of iterating over the pages via the `currentPage` query parameter. Some of the commands which use the technic are: `c8y device list` and `c8y inventory find --query "name eq '*'"`.
+Commands which use the inventory query language (i.e. `inventory/managedObjects?q=` or `inventory/managedObjects?query=`) will be automatically optimized to use the technique of reformatting the query to skip pagination via modifying the query search space by adding `_id gt <last_result_id>` to the query. If the tenant has a large about of devices (>20K), this technique drastically decreases the time it takes to retrieve all results instead of iterating over the pages via the `currentPage` query parameter. Some of the commands which use the technic are: `c8y device list` and `c8y inventory find --query "name eq '*'"`.
 
 This optimization happens without user intervention.
 :::

@@ -54,7 +54,7 @@ tests:
         C8Y_TENANT: ''
         C8Y_TOKEN: ''
         C8Y_USERNAME: '$C8Y_USER'
-        C8Y_PASSWORD: 'dummyP4s4wird'
+        C8Y_PASSWORD: 'dummyP4s4wArd'
     command: |
       c8y devices list -p 1 --select id
     exit-code: 1

@@ -2,7 +2,7 @@
 
 Describe -Name "c8y template" {
     Context "Template" {
-        It "template should preservce double quotes" {
+        It "template should preserve double quotes" {
             $output = if ($PSNativeCommandArgumentPassing -ne 'Standard') {
                 c8y template execute --template '{\"email\": \"he ll@ex ample.com\"}'
             } else {

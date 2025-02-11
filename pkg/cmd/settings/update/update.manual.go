@@ -168,7 +168,7 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"markdown\tMarkdown (default)",
 		"json\tJSON representation of full request",
 		"dump\tRaw HTTP Dump",
-		"curl\tEquavalent curl command (does not support multi-part/formdata)",
+		"curl\tEquivalent curl command (does not support multi-part/formdata)",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// max jobs

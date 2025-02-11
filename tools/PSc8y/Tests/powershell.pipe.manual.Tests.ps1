@@ -75,7 +75,7 @@ Describe -Name "powershell pipes" {
     }
 
     Context "Direct piping" {
-        It "Should pipe directly between cmdlets with interger id types" {
+        It "Should pipe directly between cmdlets with integer id types" {
             $output = Get-InventoryRoleCollection -PageSize 1 | Get-InventoryRole
             $output | Should -HaveCount 1
         }

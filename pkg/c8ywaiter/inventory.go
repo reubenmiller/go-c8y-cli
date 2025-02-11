@@ -99,7 +99,7 @@ func (s *InventoryState) Check(m interface{}) (done bool, err error) {
 				}
 			}
 
-			// check for existance
+			// check for existence
 			if exists == negate && valuePattern == "" {
 				done = false
 				break
@@ -147,8 +147,8 @@ func (s *InventoryState) Get() (interface{}, error) {
 	return item, err
 }
 
-// InventoryExistance inventory existance checker
-type InventoryExistance struct {
+// InventoryExistence inventory existence checker
+type InventoryExistence struct {
 	ID     string
 	Client *c8y.Client
 	Negate bool
@@ -160,7 +160,7 @@ type managedObjectResponse struct {
 }
 
 // Check check if inventory managed object exists or not
-func (s *InventoryExistance) Check(m interface{}) (done bool, err error) {
+func (s *InventoryExistence) Check(m interface{}) (done bool, err error) {
 	if result, ok := m.(*managedObjectResponse); ok {
 		var exists, notFound bool
 		moID := s.ID
@@ -202,7 +202,7 @@ func (s *InventoryExistance) Check(m interface{}) (done bool, err error) {
 	return
 }
 
-func (s *InventoryExistance) SetValue(v interface{}) error {
+func (s *InventoryExistence) SetValue(v interface{}) error {
 	if id, ok := v.(string); ok {
 		s.ID = id
 	}
@@ -210,7 +210,7 @@ func (s *InventoryExistance) SetValue(v interface{}) error {
 }
 
 // Get get current managed object state
-func (s *InventoryExistance) Get() (interface{}, error) {
+func (s *InventoryExistence) Get() (interface{}, error) {
 	mo, resp, err := s.Client.Inventory.GetManagedObject(
 		context.Background(),
 		s.ID,

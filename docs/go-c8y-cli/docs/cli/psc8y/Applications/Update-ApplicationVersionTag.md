@@ -281,7 +281,7 @@ Accept wildcard characters: False
 
 ### -Data
 static data to be applied to body.
-accepts json or shorthande json, i.e.
+accepts json or shorthand json, i.e.
 --data 'value1=1,my.nested.value=100'
 
 ```yaml

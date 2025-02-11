@@ -16,8 +16,8 @@ type Interface interface {
 	RepoURL() string
 }
 
-func NewRepoFromHost(u string, defaultHost string) (*Respository, error) {
-	repo := Respository{
+func NewRepoFromHost(u string, defaultHost string) (*Repository, error) {
+	repo := Repository{
 		host: defaultHost,
 	}
 
@@ -41,24 +41,24 @@ func NewRepoFromHost(u string, defaultHost string) (*Respository, error) {
 	return &repo, nil
 }
 
-type Respository struct {
+type Repository struct {
 	name   string
 	owner  string
 	host   string
 	rawURL string
 }
 
-func (r *Respository) Name() string {
+func (r *Repository) Name() string {
 	return r.name
 }
-func (r *Respository) Owner() string {
+func (r *Repository) Owner() string {
 	return r.owner
 }
-func (r *Respository) Host() string {
+func (r *Repository) Host() string {
 	return r.host
 }
 
-func (r *Respository) URL() string {
+func (r *Repository) URL() string {
 	return r.rawURL
 }
 

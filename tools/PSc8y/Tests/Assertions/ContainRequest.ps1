@@ -1,7 +1,7 @@
 Function ContainRequest {
     <#
     .SYNOPSIS
-    Tests whether a value contains a specific rest requets or not
+    Tests whether a value contains a specific rest requests or not
 
     .EXAMPLE
     $Responses | Should -ContainRequest "WHATIF GET /event/events" -Total 1
