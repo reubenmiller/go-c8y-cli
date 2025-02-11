@@ -59,3 +59,6 @@ tools/shell/completion/output/
 .task/checksum
 .bin/
 docker/c8y.linux
+
+# Linting
+typos*.txt

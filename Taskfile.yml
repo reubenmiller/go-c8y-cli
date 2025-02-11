@@ -56,6 +56,11 @@ tasks:
 
         echo Installed c8y successfully
 
+  spell-checker:
+    desc: Run the spell checker
+    cmds:
+      - docker run --rm -v $PWD:/workdir ghcr.io/streetsidesoftware/cspell:latest "**" | tee typos.txt
+      - cat typos.txt | cut -d'(' -f2 | tr -d ')' | sort | uniq -c > typos.summary.txt
 
   # ---------------------------------------------------------------
   # Docs
