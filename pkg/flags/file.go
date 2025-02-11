@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewFlagFileContents returns iterator which will interate over the lines in a file
+// NewFlagFileContents returns iterator which will iterate over the lines in a file
 func NewFlagFileContents(cmd *cobra.Command, name string) (iterator.Iterator, error) {
 	supportsPipeline := HasValueFromPipeline(cmd, name)
 	if cmd.Flags().Changed(name) {

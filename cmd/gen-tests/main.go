@@ -278,7 +278,7 @@ func buildAssertions(parentCmd string, endpoint *models.Command, exampleIdx int)
 				case "attachment", "file", "fileContents":
 					// TODO: Add support for checking file type
 				case "datetime":
-					// Note: Simplify checkings for relative time values
+					// Note: Simplify checking for relative time values
 					assertions.Contains = append(assertions.Contains, fmt.Sprintf("\"%s\":", parameter.GetTargetProperty()))
 				default:
 					formatJsonAssertion(assertions.JSON, parameter.Type, "body."+parameter.GetTargetProperty(), value)

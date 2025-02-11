@@ -101,9 +101,9 @@ func RunClone(cloneURL string, args []string) (target string, err error) {
 	return c.Clone(context.Background(), cloneURL, args)
 }
 
-func ToplevelDir() (string, error) {
+func TopLevelDir() (string, error) {
 	c := &Client{}
-	return c.ToplevelDir(context.Background())
+	return c.TopLevelDir(context.Background())
 }
 
 func GetDirFromPath(repoDir string) (string, error) {

@@ -32,7 +32,7 @@ func Test_BodyWithLargeNumbersWithTemplates(t *testing.T) {
 	assert.EqualMarshalJSON(t, body, `{"value":19.1010101E19}`)
 }
 
-func Test_BodyBuilder_SJON(t *testing.T) {
+func Test_BodyBuilder_SJSON(t *testing.T) {
 	body := NewMapBuilder()
 	assert.OK(t, body.SetPath("root.value.0.name", "one"))
 	assert.EqualJSON(t, body.BodyRaw, `{"root":{"value":[{"name":"one"}]}}`)

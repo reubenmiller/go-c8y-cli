@@ -35,7 +35,7 @@ Convert the base64 to utf8
     Process {
         foreach ($Item in $InputObject) {
             $Base64 = ($Item -split "\s+") | Select-Object -Last 1
-            [System.Text.Encoding]::UTF8.Getstring([System.Convert]::FromBase64String($Base64))
+            [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Base64))
         }
     }
 }

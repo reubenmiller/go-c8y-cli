@@ -117,7 +117,7 @@ Expand the devices and always fetch device managed object if an object is not pr
                 if ($iDevice -match "^\d+$") {
                     
                     if ($WhatIfPreference) {
-                        # Fake the reponse of the managed object
+                        # Fake the response of the managed object
                         [PSCustomObject]@{
                             id = $iDevice
                             # Dummy value

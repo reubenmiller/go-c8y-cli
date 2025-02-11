@@ -21,7 +21,7 @@ func NewQueryTemplate() *QueryTemplate {
 	}
 }
 
-// SetVariable sets a give path variable which will be evalulated when fetching the next value
+// SetVariable sets a give path variable which will be evaluated when fetching the next value
 func (b *QueryTemplate) SetVariable(name string, value interface{}) {
 	if name != "" {
 		b.templateVariables[name] = value
@@ -34,7 +34,7 @@ func (b *QueryTemplate) HasVariable(name string) bool {
 	return ok
 }
 
-// GetQueryUnescape returns the unescaped query. User can choose whether iterators are evalulated or not
+// GetQueryUnescape returns the unescaped query. User can choose whether iterators are evaluated or not
 func (b *QueryTemplate) GetQueryUnescape(ignoreIterators bool) (string, error) {
 	q, _, err := b.Execute(ignoreIterators)
 	if err != nil {
@@ -43,7 +43,7 @@ func (b *QueryTemplate) GetQueryUnescape(ignoreIterators bool) (string, error) {
 	return url.QueryUnescape(q.Encode())
 }
 
-// Execute evalulates the variables and returns a query parameters which can be used for rest requests
+// Execute evaluates the variables and returns a query parameters which can be used for rest requests
 func (b *QueryTemplate) Execute(ignoreIterators bool) (query url.Values, input any, err error) {
 	query = url.Values{}
 	if b.templateVariables == nil {

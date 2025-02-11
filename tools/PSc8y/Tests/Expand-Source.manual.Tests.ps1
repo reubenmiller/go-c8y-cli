@@ -8,7 +8,7 @@ Describe -Name "Expand-Source" {
     }
 
     It "Expand source id from a list of alarms" {
-        # Note, these alarms will be dededuplicated because they have the same
+        # Note, these alarms will be deduplicated because they have the same
         # alarm type. The count will be set to 2
         $Alarm1 = PSc8y\New-TestAlarm -Device $Device.id
         $Alarm2 = PSc8y\New-TestAlarm -Device $Device.id

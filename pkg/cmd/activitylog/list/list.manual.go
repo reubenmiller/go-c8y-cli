@@ -79,7 +79,7 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 		Type: n.entryType,
 	}
 	if strings.EqualFold(n.entryType, "all") {
-		// dont filter by type
+		// don't filter by type
 		filter.Type = ""
 	}
 

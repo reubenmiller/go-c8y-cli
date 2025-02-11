@@ -238,7 +238,7 @@ const (
 	// SettingsViewsCommonPaths paths to common view definition files
 	SettingsViewsCommonPaths = "settings.views.commonPaths"
 
-	// SettingsViewsCustomPaths paths to custom fiew definition files
+	// SettingsViewsCustomPaths paths to custom view definition files
 	SettingsViewsCustomPaths = "settings.views.customPaths"
 
 	// SettingsFilter json filter to be applied to the output
@@ -561,7 +561,7 @@ func (c *Config) ReadConfig(file string) error {
 	return c.Persistent.ReadInConfig()
 }
 
-// CheckEncryption checks if the usuer has provided the correct encryption password or not by testing the decryption of the secret text
+// CheckEncryption checks if the user has provided the correct encryption password or not by testing the decryption of the secret text
 func (c *Config) CheckEncryption(encryptedText ...string) (string, error) {
 	secretText := c.SecretText
 	if len(encryptedText) > 0 {
@@ -574,7 +574,7 @@ func (c *Config) CheckEncryption(encryptedText ...string) (string, error) {
 	return pass, err
 }
 
-// BindAuthorization binds environment variables related to the authrorization to the configuration
+// BindAuthorization binds environment variables related to the authorization to the configuration
 func (c *Config) BindAuthorization() error {
 	c.viper.SetEnvPrefix(EnvSettingsPrefix)
 	auth_variables := [...]string{
@@ -1147,7 +1147,7 @@ func (c *Config) GetQueryParameters() []string {
 	return c.viper.GetStringSlice(SettingsQueryParameters)
 }
 
-// DryRun dont sent any destructive requests. Just print out what would be sent
+// DryRun don't sent any destructive requests. Just print out what would be sent
 func (c *Config) DryRun() bool {
 	return c.viper.GetBool(SettingsDryRun)
 }
@@ -1645,7 +1645,7 @@ func (c *Config) GetRemoteAccessDefaultSSHUser() string {
 
 // GetJSONSelect get json properties to be selected from the output. Only the given properties will be returned
 func (c *Config) GetJSONSelect() []string {
-	// Note: select is stored as an cobra Array String, which add special formating of values.
+	// Note: select is stored as an cobra Array String, which add special formatting of values.
 	// so it needs to be converted to an array of strings
 	values := c.viper.GetStringSlice(SettingsSelect)
 	allitems := []string{}
@@ -1804,7 +1804,7 @@ func (c *Config) GetTableViewNumberFormatter() numbers.NumberFormatter {
 }
 
 // BindPFlag binds flags to the configuration
-// Configuration precendence is:
+// Configuration precedence is:
 // 1. Arguments
 // 2. Environment variables
 // 3. Session configuration

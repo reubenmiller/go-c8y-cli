@@ -59,7 +59,7 @@ func (s *SecureData) TryEncryptString(data string, passphrase string) (string, e
 	return s.EncryptString(data, passphrase)
 }
 
-// EncryptString encryptes a string to a hex encoded string using a passphrase and salt.
+// EncryptString encrypts a string to a hex encoded string using a passphrase and salt.
 // A prefix is also added to it (if defined)
 func (s *SecureData) EncryptString(data string, passphrase string) (string, error) {
 	encryptedData, err := s.Encrypt([]byte(data), passphrase)
@@ -87,7 +87,7 @@ func (s *SecureData) FromHexString(data string) ([]byte, error) {
 // IsEncrypted returns if the given data is encrypted or not.
 // The data is encrypted if it starts with the encryption marker. If an empty string
 // is used as the encryption prefix, then the it can not be reliably checked if the data
-// is enrypted or not.
+// is encrypted or not.
 // 1 - data is encrypted
 // 0 - data is not encrypted
 // -1 - data encryption is unknown (could be encrypted or not)
@@ -105,7 +105,7 @@ func (s *SecureData) IsEncrypted(data string) int {
 // IsEncryptedBytes returns if the given data is encrypted or not.
 // The data is encrypted if it starts with the encryption marker. If an empty string
 // is used as the encryption prefix, then the it can not be reliably checked if the data
-// is enrypted or not.
+// is encrypted or not.
 // 1 - data is encrypted
 // 0 - data is not encrypted
 // -1 - data encryption is unknown (could be encrypted or not)
@@ -120,7 +120,7 @@ func (s *SecureData) IsEncryptedBytes(data []byte) int {
 	return -1
 }
 
-// TryDecryptString tries to decrypt a string. If a encryption prefex string is used, then
+// TryDecryptString tries to decrypt a string. If a encryption prefix string is used, then
 // the data will only be decrypted if the input data has the prefix, otherwise it will be returned as is.
 func (s *SecureData) TryDecryptString(data string, passphrase string) (string, error) {
 

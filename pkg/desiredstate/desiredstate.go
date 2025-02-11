@@ -19,7 +19,7 @@ func WaitFor(interval time.Duration, timeout time.Duration, predicate StateDefin
 	return wait(-1, interval, timeout, predicate)
 }
 
-// WaitForWithRetries wait for a predicate to be true and limiting the retries by an explict count
+// WaitForWithRetries wait for a predicate to be true and limiting the retries by an explicit count
 func WaitForWithRetries(retries int64, interval time.Duration, timeout time.Duration, predicate StateDefiner) (interface{}, error) {
 	return wait(retries, interval, timeout, predicate)
 }

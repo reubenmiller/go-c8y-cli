@@ -81,7 +81,7 @@ tests:
         }
 
 # Use cases
-# Case 1: Updating a managed object: Only update the relevant fragment merge existing data. Merge data withint 
+# Case 1: Updating a managed object: Only update the relevant fragment merge existing data
 # Case 2: Append items to an already existing array (e.g. append an item to the supported operations list)
 # Case 3: 
 # Open questions: Do a deep object merge by default? e.g. append to arrays or not?

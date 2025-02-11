@@ -49,7 +49,7 @@ func Test_StringTemplateWithIterators(t *testing.T) {
 	assert.OK(t, err)
 	assert.True(t, out == "/inventory/managedObjects/12345/something/mydevice")
 
-	// calling a second time should not be possilbe (as the iterator only has 1 value)
+	// calling a second time should not be possible (as the iterator only has 1 value)
 	_, _, err = tmpl.Execute(false)
 	assert.ErrorType(t, err, io.EOF)
 }

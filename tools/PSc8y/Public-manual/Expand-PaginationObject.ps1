@@ -123,7 +123,7 @@ Get a measurement collection, then retrieve all the measurements by iterating th
 
         if ($null -eq $Prop)
         {
-          Write-Warning "Could not find the array object property. Only alarms, events, managedObjects, measurments and operations properties are supported"
+          Write-Warning "Could not find the array object property. Only alarms, events, managedObjects, measurements and operations properties are supported"
         }
         else
         {

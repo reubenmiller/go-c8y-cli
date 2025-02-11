@@ -332,7 +332,7 @@
         }
 
         #
-        # Activate seperate body templating (if not included in -Data parameter)
+        # Activate separate body templating (if not included in -Data parameter)
         #
         if ($Specification.bodyTemplateOptions.enabled -eq $true) {
             $CommandArgs += @{
@@ -350,7 +350,7 @@
                 switch ($BodyTemplate.type) {
                     "jsonnet" {
                         # ApplyLast: true == apply template to the existing json (potentially overriding values)
-                        #            false == Use template as base json, and the existing json will take precendence
+                        #            false == Use template as base json, and the existing json will take precedence
                         if ($BodyTemplate.applyLast -eq "true") {
                             $null = $RESTBodyBuilderOptions.AppendLine("flags.WithRequiredTemplateString(```n{0}``)," -f @(
                                 $BodyTemplate.template
@@ -1391,7 +1391,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        # Trusted device certficates
+        # Trusted device certificates
         "certificate[]" {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSlice(`"${Name}`", `"${OptionName}`", []string{`"${Default}`"}, `"${Description}`")"

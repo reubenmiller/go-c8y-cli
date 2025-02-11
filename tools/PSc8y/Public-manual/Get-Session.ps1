@@ -24,7 +24,7 @@ None
 #>
     [CmdletBinding()]
     Param(
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
+        # Specify alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,
@@ -45,7 +45,7 @@ None
         return
     }
 
-    # Convert session to powershell psobject
+    # Convert session to powershell PSObject
     $null = $c8yArgs.Add("--output=json")
     $sessionResponse = c8y sessions get $c8yArgs
     $data = $sessionResponse | ConvertFrom-Json

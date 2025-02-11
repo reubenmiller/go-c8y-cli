@@ -198,12 +198,12 @@ func genMan(cmd *cobra.Command, header *GenManHeader) []byte {
 	}
 	if hasSeeAlso(cmd) {
 		buf.WriteString("# SEE ALSO\n")
-		seealsos := make([]string, 0)
+		seeAlsoReferences := make([]string, 0)
 		if cmd.HasParent() {
 			parentPath := cmd.Parent().CommandPath()
 			dashParentPath := strings.Replace(parentPath, " ", "-", -1)
-			seealso := fmt.Sprintf("**%s(%s)**", dashParentPath, header.Section)
-			seealsos = append(seealsos, seealso)
+			seeAlso := fmt.Sprintf("**%s(%s)**", dashParentPath, header.Section)
+			seeAlsoReferences = append(seeAlsoReferences, seeAlso)
 		}
 		children := cmd.Commands()
 		sort.Sort(byName(children))
@@ -211,10 +211,10 @@ func genMan(cmd *cobra.Command, header *GenManHeader) []byte {
 			if !c.IsAvailableCommand() || c.IsAdditionalHelpTopicCommand() {
 				continue
 			}
-			seealso := fmt.Sprintf("**%s-%s(%s)**", dashCommandName, c.Name(), header.Section)
-			seealsos = append(seealsos, seealso)
+			seeAlso := fmt.Sprintf("**%s-%s(%s)**", dashCommandName, c.Name(), header.Section)
+			seeAlsoReferences = append(seeAlsoReferences, seeAlso)
 		}
-		buf.WriteString(strings.Join(seealsos, ", ") + "\n")
+		buf.WriteString(strings.Join(seeAlsoReferences, ", ") + "\n")
 	}
 	return buf.Bytes()
 }

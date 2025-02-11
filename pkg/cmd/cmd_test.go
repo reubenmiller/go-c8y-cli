@@ -316,7 +316,7 @@ func Test_PipeSourceId(t *testing.T) {
 	assert.OK(t, cmdErr)
 }
 
-func Test_PipingWithLookupNonExistant(t *testing.T) {
+func Test_PipingWithLookupNonExistence(t *testing.T) {
 	cmd := setupTest()
 
 	stdin := bytes.NewBufferString("pipeNameDoesNotExist1\npipeNameDoesNotExist2")
@@ -407,7 +407,7 @@ func Test_PipedDataToTemplate(t *testing.T) {
 }
 
 /*
-Using piped input in tempaltes
+Using piped input in templates
 */
 func Test_PipingWithObjectPipeToTemplate(t *testing.T) {
 	cmd := setupTest()

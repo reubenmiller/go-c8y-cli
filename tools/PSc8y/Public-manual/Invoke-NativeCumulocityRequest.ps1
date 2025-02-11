@@ -32,10 +32,10 @@ Function Invoke-NativeCumulocityRequest {
             $options.Method = $Method
         }
 
-        $Allheaders = @{}
+        $AllHeaders = @{}
 
         if ($PSBoundParameters.ContainsKey("Headers")) {
-            $Allheaders = @{} + $Headers
+            $AllHeaders = @{} + $Headers
         }
 
         if ($Env:C8Y_TOKEN) {
@@ -51,7 +51,7 @@ Function Invoke-NativeCumulocityRequest {
             $options.Body = $Body
         }
 
-        $options.Headers = $Allheaders
+        $options.Headers = $AllHeaders
         Invoke-RestMethod @options
     }
 }

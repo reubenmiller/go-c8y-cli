@@ -101,7 +101,7 @@
         # tenantname (optional)
         "tenantname" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
-        # Notifiation2
+        # Notification2
         "subscriptionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
         "subscriptionId" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 

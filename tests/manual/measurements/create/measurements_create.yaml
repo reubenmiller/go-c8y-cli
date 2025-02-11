@@ -31,7 +31,7 @@ tests:
             output=$(
                 c8y devices create --name ci_measurements_create |
                     c8y measurements create \
-                        --type "ciSeria1" \
+                        --type "ciSerial" \
                         --data "test1.signal1.value=1.234,test1.signal1.unit=°C"
             ) 
             echo "$output" | c8y devices delete >/dev/null

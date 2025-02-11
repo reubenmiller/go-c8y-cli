@@ -39,7 +39,7 @@ New-RandomPassword
 
 ## DESCRIPTION
 Create a random password which can be used for one-time passwords if the
-the password reset functionilty in Cumulocity is not available.
+the password reset functionality in Cumulocity is not available.
 
 ## EXAMPLES
 
@@ -75,7 +75,7 @@ Generate a password with a length of 4 containing atleast one char from each Inp
 
 ### EXAMPLE 4
 ```
-New-RandomPassword -InputStrings abc, ABC, 123 -PasswordLength 4 -FirstChar abcdefghijkmnpqrstuvwxyzABCEFGHJKLMNPQRSTUVWXYZ
+New-RandomPassword -InputStrings abc, ABC, 123 -PasswordLength 4 -FirstChar abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
 3ABa
 ```
 
@@ -130,7 +130,7 @@ Accept wildcard characters: False
 ```
 
 ### -InputStrings
-Specifies an array of strings containing charactergroups from which the password will be generated.
+Specifies an array of strings containing character groups from which the password will be generated.
 At least one char from each group (string) will be used.
 
 ```yaml
@@ -140,7 +140,7 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: @('abcdefghijkmnpqrstuvwxyz', 'ABCEFGHJKLMNPQRSTUVWXYZ', '123456789', '!#%()[]*+-_;,.')
+Default value: @('abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '123456789', '!#%()[]*+-_;,.')
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

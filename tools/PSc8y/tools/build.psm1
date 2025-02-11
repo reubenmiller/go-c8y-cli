@@ -106,7 +106,7 @@ function Update-ModuleManifestFunctions {
     [cmdletbinding()]
     Param()
     # Update the psd1 file with the /public/psgetfunctions
-    # Update-ModuleManifest is not used because a) it is not availabe for ps version <5.0 and b) it is destructive.
+    # Update-ModuleManifest is not used because a) it is not available for ps version <5.0 and b) it is destructive.
     # First a helper method removes the functions and replaces with the standard FunctionsToExport = @()
     # then this string is replaced by another string built from /public/psgetfunctions
 
@@ -118,17 +118,17 @@ function Update-ModuleManifestFunctions {
     $ManifestFileContent = Get-Content -Path "$ManifestFile"
 
     # FunctionsToExport string needs to be array definition with function names surrounded by quotes.
-    $formatedFunctionNames = @()
+    $formattedFunctionNames = @()
     foreach ($function in $PublicFunctions.BaseName) {
         $function = "`'$function`'"
-        $formatedFunctionNames += $function
+        $formattedFunctionNames += $function
     }
 
     # Tabbing and new lines to make the psd1 consistent
-    $formatedFunctionNames = $formatedFunctionNames -join ",`n`t"
-    $ManifestFunctionExportString = "FunctionsToExport = @(`n`t$formatedFunctionNames)`n"
+    $formattedFunctionNames = $formattedFunctionNames -join ",`n`t"
+    $ManifestFunctionExportString = "FunctionsToExport = @(`n`t$formattedFunctionNames)`n"
 
-    # Do the string replacement in the manifest file with the formated function names.
+    # Do the string replacement in the manifest file with the formatted function names.
     $ManifestFileContent = $ManifestFileContent.Replace('FunctionsToExport = "*"', $ManifestFunctionExportString)
     Set-Content -Path "$ManifestFile" -Value $ManifestFileContent.TrimEnd()
 }

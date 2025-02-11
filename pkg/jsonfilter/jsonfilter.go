@@ -157,7 +157,7 @@ func (f *JSONFilters) Add(property, operation string, value interface{}) {
 	})
 }
 
-// FilterPropertyByWildcard filtery a json string by using globstar (wildcards) on the nested json paths
+// FilterPropertyByWildcard filter a json string by using globstar (wildcards) on the nested json paths
 func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string, setAlias bool) (map[string]interface{}, []string, error) {
 	rawMap := make(map[string]interface{})
 	err := c8y.DecodeJSONBytes([]byte(jsonValue), &rawMap)
@@ -227,7 +227,7 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 		for _, key := range sourceKeys {
 			value := src[key]
 
-			// noramlize key, and strip the key identifier
+			// normalize key, and strip the key identifier
 			keyl := strings.ReplaceAll(strings.ToLower(key), flatten.KeyPrefix, "")
 
 			if strings.HasPrefix(keyl, pattern.String()+".") || (pattern.MatchString(keyl) && !pattern.IsNegative()) {
@@ -412,9 +412,9 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 	// selectAllProperties := len(f.Pluck) == 1 && f.Pluck[0] == "**"
 	// && !selectAllProperties
 	if (len(f.Pluck) > 0) || f.Flatten {
-		var bsub bytes.Buffer
-		jq.Writer(&bsub)
-		formattedJSON := gjson.ParseBytes(bsub.Bytes())
+		var tmpBuffer bytes.Buffer
+		jq.Writer(&tmpBuffer)
+		formattedJSON := gjson.ParseBytes(tmpBuffer.Bytes())
 
 		if formattedJSON.IsArray() {
 			outputValues := make([]string, 0)

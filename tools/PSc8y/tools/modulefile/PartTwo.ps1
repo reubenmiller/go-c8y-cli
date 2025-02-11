@@ -92,7 +92,7 @@ $script:Aliases = @{
     fromjson = "ConvertFrom-JsonStream"
     rest = "Invoke-ClientRequest"
     base64ToUtf8 = "ConvertFrom-Base64String"
-    utf8Tobase64 = "ConvertTo-Base64String"
+    utf8ToBase64 = "ConvertTo-Base64String"
     iterate = "Invoke-ClientIterator"
     batch = "Group-ClientRequests"
 

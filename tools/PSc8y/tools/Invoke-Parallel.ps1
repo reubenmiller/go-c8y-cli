@@ -221,7 +221,7 @@ function Invoke-Parallel {
                 Write-Verbose "Excluding variables $( ($VariablesToExclude | Sort-Object ) -join ", ")"
 
                 # we don't use 'Get-Variable -Exclude', because it uses regexps.
-                # One of the veriables that we pass is '$?'.
+                # One of the variables that we pass is '$?'.
                 # There could be other variables with such problems.
                 # Scope 2 required if we move to a real module
                 $UserVariables = @( Get-Variable | Where-Object { -not ($VariablesToExclude -contains $_.Name) } )

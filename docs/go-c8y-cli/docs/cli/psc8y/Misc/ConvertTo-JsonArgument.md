@@ -27,7 +27,7 @@ Helper function is used when passing Powershell hashtable or PSCustomObjects to
 the c8y binary.
 Before the c8y cli binary can accept it, it must be converted to json.
 
-The necessary character escaping of literal backslashed `\\` will be done automatically.
+The necessary character escaping of literal backslash `\\` will be done automatically.
 
 If Data parameter is a file path then it is returned as is.
 

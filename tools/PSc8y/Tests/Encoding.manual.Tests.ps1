@@ -54,7 +54,7 @@ Describe -Name "Encoding" {
             $Response = PSc8y\New-Measurement `
                 -Device $TestDevice.id `
                 -Time "0d" `
-                -Type "ciSeria1" `
+                -Type "ciSerial" `
                 -Data @{
                     "ÄnderungZahler" = @{
                         "ö1" = @{
@@ -73,7 +73,7 @@ Describe -Name "Encoding" {
             $Response = PSc8y\New-Measurement `
                 -Device $TestDevice.id `
                 -Time "0d" `
-                -Type "ciSeria1" `
+                -Type "ciSerial" `
                 -Data @{
                     test1 = @{
                         signal1 = @{

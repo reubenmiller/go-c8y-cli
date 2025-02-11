@@ -354,8 +354,8 @@ func (c *Client) CheckoutNewBranch(ctx context.Context, remoteName, branch strin
 	return nil
 }
 
-// ToplevelDir returns the top-level directory path of the current repository.
-func (c *Client) ToplevelDir(ctx context.Context) (string, error) {
+// TopLevelDir returns the top-level directory path of the current repository.
+func (c *Client) TopLevelDir(ctx context.Context) (string, error) {
 	args := []string{"rev-parse", "--show-toplevel"}
 	cmd, err := c.Command(ctx, args...)
 	if err != nil {

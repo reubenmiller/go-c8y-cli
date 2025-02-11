@@ -34,7 +34,7 @@ InModuleScope PSc8y {
             }
         }
 
-        It "Converts hashtables to escapped json" {
+        It "Converts hashtables to escaped json" {
             $Parameters = @{
                 complex = @{"id" = 1}
             }

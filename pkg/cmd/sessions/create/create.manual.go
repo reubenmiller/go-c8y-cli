@@ -303,7 +303,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	// session name (default to host and username)
 	hostname := "c8y"
 	if u, err := url.Parse(session.GetHost()); err == nil {
-		// Don't include port number by default as it causes problems with paths across differents OS's
+		// Don't include port number by default as it causes problems with paths across different OS's
 		hostname = u.Hostname()
 	}
 

@@ -112,12 +112,12 @@ New-Microservice -Name "myapp" -File "./cumulocity.json" -SkipUpload
 
 Create a microservice placeholder named "myapp" for use for local development of a microservice.
 
-The `-File` parameter is provided with the microserivce's manifest file `cumulocity.json` to set the correct required roles of the bootstrap
+The `-File` parameter is provided with the microservice's manifest file `cumulocity.json` to set the correct required roles of the bootstrap
 user which will be automatically created by Cumulocity.
 
 The microservice's bootstrap credentials can be retrieved using `Get-MicroserviceBootstrapUser` cmdlet.
 
-This example is usefuly for local development only, when you want to run the microservice locally (not hosted in Cumulocity).
+This example is usefully for local development only, when you want to run the microservice locally (not hosted in Cumulocity).
 
 ## PARAMETERS
 
@@ -389,7 +389,7 @@ Accept wildcard characters: False
 
 ### -Data
 static data to be applied to body.
-accepts json or shorthande json, i.e.
+accepts json or shorthand json, i.e.
 --data 'value1=1,my.nested.value=100'
 
 ```yaml

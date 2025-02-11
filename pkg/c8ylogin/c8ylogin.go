@@ -116,7 +116,7 @@ func (lh *LoginHandler) Clear() {
 func (lh *LoginHandler) Run() error {
 	lh.init()
 
-	// Check if any authenitcation is set
+	// Check if any authentication is set
 	if lh.C8Yclient.Token != "" || lh.C8Yclient.Password != "" {
 		lh.state <- LoginStateVerify
 	} else {
@@ -429,7 +429,7 @@ func (lh *LoginHandler) verify() {
 				} else if lh.errorContains(v.Message, "Bad credentials") || lh.errorContains(v.Message, "Invalid credentials") {
 					lh.Logger.Infof("Bad credentials, using auth method: %s", lh.C8Yclient.AuthorizationMethod)
 
-					// try reseting the tenant (in case if it is incorrect)
+					// try resetting the tenant (in case if it is incorrect)
 					lh.C8Yclient.TenantName = ""
 
 					if lh.C8Yclient.AuthorizationMethod != c8y.AuthMethodOAuth2Internal {

@@ -53,7 +53,7 @@ Inherit common parameters to a custom function. This will add parameters such as
 
                 {$_ -match "Create|Update|Delete" } {
                     if ($_ -notmatch "Delete") {
-                        New-DynamicParam -Name "Data" -Type "object" -DPDictionary $Dictionary -HelpMessage "static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'"
+                        New-DynamicParam -Name "Data" -Type "object" -DPDictionary $Dictionary -HelpMessage "static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'"
                     }
                     New-DynamicParam -Name "NoAccept" -Type "switch" -DPDictionary $Dictionary -HelpMessage "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect"
                     New-DynamicParam -Name "ProcessingMode" -Type "string" -ValidateSet @("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "") -DPDictionary $Dictionary -HelpMessage "Cumulocity processing mode"

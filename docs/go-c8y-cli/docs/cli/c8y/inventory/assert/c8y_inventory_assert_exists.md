@@ -2,7 +2,7 @@
 category: assert
 title: c8y inventory assert exists
 ---
-Assert existance of a managed object
+Assert existence of a managed object
 
 ### Synopsis
 

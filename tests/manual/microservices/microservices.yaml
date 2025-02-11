@@ -43,7 +43,7 @@ tests:
                 type: "MICROSERVICE"
                 contextPath: balancer
 
-    It reads the application name from a manifest file using bash substituion:
+    It reads the application name from a manifest file using bash substitution:
         command: |
           bash -c "c8y microservices create --file <(printf '{\"name\":\"dummyapp-02\"}') --skipUpload -o json -c"
         exit-code: 0

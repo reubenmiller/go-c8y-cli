@@ -52,11 +52,11 @@ func Test_FlattenNestedEmptyValues(t *testing.T) {
 }
 
 func Test_FlattenObjectWithLiteralDotInProperty(t *testing.T) {
-	rawjson := `
+	rawJSON := `
 	{"2021-03-25T17:57:14.973Z": { "max": 10, "min": 1 }}
 	`
 	inputMap := make(map[string]interface{})
-	err := json.Unmarshal([]byte(rawjson), &inputMap)
+	err := json.Unmarshal([]byte(rawJSON), &inputMap)
 	assert.OK(t, err)
 	flatMap, err := Flatten(inputMap, "", DotStyle)
 	assert.OK(t, err)
@@ -64,8 +64,8 @@ func Test_FlattenObjectWithLiteralDotInProperty(t *testing.T) {
 
 	unflattened, err := Unflatten(flatMap)
 	assert.OK(t, err)
-	wantjson := strings.TrimSpace(strings.ReplaceAll(rawjson, " ", ""))
-	if !bytes.Equal(unflattened, []byte(wantjson)) {
-		t.Errorf("Unflattened does not match. wanted=%s, got=%s", []byte(wantjson), unflattened)
+	wantJSON := strings.TrimSpace(strings.ReplaceAll(rawJSON, " ", ""))
+	if !bytes.Equal(unflattened, []byte(wantJSON)) {
+		t.Errorf("Unflattened does not match. wanted=%s, got=%s", []byte(wantJSON), unflattened)
 	}
 }

@@ -2,7 +2,7 @@
 category: assert
 title: c8y devices assert exists
 ---
-Assert existance of a device
+Assert existence of a device
 
 ### Synopsis
 

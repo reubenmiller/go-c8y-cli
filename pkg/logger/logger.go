@@ -50,7 +50,7 @@ type LoggerInterface interface {
 
 // Logger provides a log interface to verbose messages to the user
 type Logger struct {
-	zlogger *zap.Logger
+	zLogger *zap.Logger
 }
 
 // Printf is an alias for Infof
@@ -65,15 +65,15 @@ func (l Logger) Println(args ...interface{}) {
 
 // Warningf logs a warning message with a format string
 func (l Logger) Warningf(format string, args ...interface{}) {
-	if l.zlogger != nil {
-		l.zlogger.Sugar().Warnf(format, args...)
+	if l.zLogger != nil {
+		l.zLogger.Sugar().Warnf(format, args...)
 	}
 }
 
 // Warning logs a warning message
 func (l Logger) Warning(args ...interface{}) {
-	if l.zlogger != nil {
-		l.zlogger.Sugar().Warn(args...)
+	if l.zLogger != nil {
+		l.zLogger.Sugar().Warn(args...)
 	}
 }
 
@@ -89,57 +89,57 @@ func (l Logger) Warn(args ...interface{}) {
 
 // Errorf logs an error message with a format string
 func (l Logger) Errorf(format string, args ...interface{}) {
-	if l.zlogger != nil {
-		l.zlogger.Sugar().Errorf(format, args...)
+	if l.zLogger != nil {
+		l.zLogger.Sugar().Errorf(format, args...)
 	}
 }
 
 // Error logs an error message
 func (l Logger) Error(args ...interface{}) {
-	if l.zlogger != nil {
-		l.zlogger.Sugar().Error(args...)
+	if l.zLogger != nil {
+		l.zLogger.Sugar().Error(args...)
 	}
 }
 
 // Debug logs a debug message
 func (l Logger) Debug(args ...interface{}) {
-	if l.zlogger != nil {
-		l.zlogger.Sugar().Debug(args...)
+	if l.zLogger != nil {
+		l.zLogger.Sugar().Debug(args...)
 	}
 }
 
 // Debugf logs a debug message with a format string
 func (l Logger) Debugf(format string, args ...interface{}) {
-	if l.zlogger != nil {
-		l.zlogger.Sugar().Debugf(format, args...)
+	if l.zLogger != nil {
+		l.zLogger.Sugar().Debugf(format, args...)
 	}
 }
 
 // Info logs a information message
 func (l Logger) Info(args ...interface{}) {
-	if l.zlogger != nil {
-		l.zlogger.Sugar().Info(args...)
+	if l.zLogger != nil {
+		l.zLogger.Sugar().Info(args...)
 	}
 }
 
 // Infof logs a information message with a format string
 func (l Logger) Infof(format string, args ...interface{}) {
-	if l.zlogger != nil {
-		l.zlogger.Sugar().Infof(format, args...)
+	if l.zLogger != nil {
+		l.zLogger.Sugar().Infof(format, args...)
 	}
 }
 
 // Fatal logs a information message
 func (l Logger) Fatal(args ...interface{}) {
-	if l.zlogger != nil {
-		l.zlogger.Sugar().Fatal(args...)
+	if l.zLogger != nil {
+		l.zLogger.Sugar().Fatal(args...)
 	}
 }
 
 // Fatalf logs a information message with a format string
 func (l Logger) Fatalf(format string, args ...interface{}) {
-	if l.zlogger != nil {
-		l.zlogger.Sugar().Fatalf(format, args...)
+	if l.zLogger != nil {
+		l.zLogger.Sugar().Fatalf(format, args...)
 	}
 }
 
@@ -210,6 +210,6 @@ func NewLogger(name string, options Options) *Logger {
 	unsugared := zap.New(core)
 
 	return &Logger{
-		zlogger: unsugared,
+		zLogger: unsugared,
 	}
 }

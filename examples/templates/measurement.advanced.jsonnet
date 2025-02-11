@@ -1,6 +1,6 @@
 {
     name: "name1",
-    type: var("type", "c8y_Temparature"),
+    type: var("type", "c8y_Temperature"),
     
     ["c8y_" + var("type", "c8y_Temperature")]: {
         sensor1: {

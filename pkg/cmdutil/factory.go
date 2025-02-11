@@ -290,7 +290,7 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 	viewProperties := []string{}
 	switch strings.ToLower(view) {
 	case config.ViewsOff:
-		// dont apply a view
+		// don't apply a view
 		return []string{"**"}, nil
 	case config.ViewsAuto:
 		jsonResponse := gjson.ParseBytes(output)
@@ -681,7 +681,7 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 
 					switch strings.ToLower(view) {
 					case config.ViewsOff:
-						// dont apply a view
+						// don't apply a view
 						if !showRaw {
 							commonOptions.Filters.Pluck = []string{"**"}
 						}
@@ -771,7 +771,7 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 
 func (f *Factory) GuessDataProperty(output gjson.Result) string {
 	property := ""
-	arrayPropertes := []string{}
+	arrayProperties := []string{}
 	totalKeys := 0
 
 	logg, err := f.Logger()
@@ -784,23 +784,23 @@ func (f *Factory) GuessDataProperty(output gjson.Result) string {
 		output.ForEach(func(key, value gjson.Result) bool {
 			totalKeys++
 			if value.IsArray() {
-				arrayPropertes = append(arrayPropertes, key.String())
+				arrayProperties = append(arrayProperties, key.String())
 			}
 			return true
 		})
 	}
 
-	if len(arrayPropertes) > 1 {
-		logg.Debugf("Could not detect property as more than 1 array like property detected: %v", arrayPropertes)
+	if len(arrayProperties) > 1 {
+		logg.Debugf("Could not detect property as more than 1 array like property detected: %v", arrayProperties)
 		return ""
 	}
-	logg.Debugf("Array properties: %v", arrayPropertes)
+	logg.Debugf("Array properties: %v", arrayProperties)
 
-	if len(arrayPropertes) == 0 {
+	if len(arrayProperties) == 0 {
 		return ""
 	}
 
-	property = arrayPropertes[0]
+	property = arrayProperties[0]
 
 	// if total keys is a high number, than it is most likely not an array of data
 	// i.e. for the /tenant/statistics

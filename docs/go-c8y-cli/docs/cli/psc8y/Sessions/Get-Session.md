@@ -45,7 +45,7 @@ Print the current session information (if set)
 ## PARAMETERS
 
 ### -Session
-Specifiy alternative Cumulocity session to use when running the cmdlet
+Specify alternative Cumulocity session to use when running the cmdlet
 
 ```yaml
 Type: String

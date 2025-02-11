@@ -26,7 +26,7 @@ func IsEmptyPipeInputError(err error) bool {
 	return strings.Contains(err.Error(), ErrEmptyPipeInput.Error())
 }
 
-// Filter is a funciton applied on every iteration. Returning False will end the iterator
+// Filter is a function applied on every iteration. Returning False will end the iterator
 type Filter func([]byte) bool
 
 // Validator is a function applied to every iterator. If it returns an error then the error will be passed on.

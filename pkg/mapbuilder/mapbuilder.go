@@ -44,7 +44,7 @@ func init() {
 	})
 }
 
-func registerNativeFuntions(vm *jsonnet.VM) {
+func registerNativeFunctions(vm *jsonnet.VM) {
 	vm.NativeFunction(&jsonnet.NativeFunction{
 		Name:   "Name",
 		Params: ast.Identifiers{"prefix", "postfix"},
@@ -418,7 +418,7 @@ func getParameter(parameters []interface{}, i int) any {
 func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	// Create a JSonnet VM
 	vm := jsonnet.MakeVM()
-	registerNativeFuntions(vm)
+	registerNativeFunctions(vm)
 
 	// Add functions via jsonnet object
 	localFunctions := heredoc.Doc(`
@@ -759,7 +759,7 @@ func (b *MapBuilder) ApplyTemplates(existingJSON []byte, input []byte, appendTem
 	}
 
 	// Only merge in existing JSON if it is not just an empty object
-	// as the other templates might not be objects which can be merged together in jsonne
+	// as the other templates might not be objects which can be merged together in jsonnet
 	// e.g. "_.Int(1) + {}"  will cause an error
 	if !bytes.Equal(existingJSON, []byte("{}")) {
 		if appendTemplates {
@@ -992,7 +992,7 @@ func (b *MapBuilder) validateRequiredKeysBytes(body []byte) error {
 	return nil
 }
 
-// MarshalJSONWithInput convers the body to json and also injecting additional data into the template input to make
+// MarshalJSONWithInput converts the body to json and also injecting additional data into the template input to make
 // it available using the input.value variable in jsonnet
 func (b *MapBuilder) MarshalJSONWithInput(input interface{}) (body []byte, err error) {
 	b.mu.Lock()

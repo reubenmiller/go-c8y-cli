@@ -16,7 +16,7 @@ type AssertExists struct{}
 func (a *AssertExists) GetStateHandler(cmd *cobra.Command, client *c8y.Client) desiredstate.StateDefiner {
 	negate, err := cmd.Flags().GetBool("not")
 	_ = err
-	return &c8ywaiter.InventoryExistance{
+	return &c8ywaiter.InventoryExistence{
 		Client: client,
 		Negate: negate,
 	}
@@ -42,7 +42,7 @@ func NewCmdExists(f *cmdutil.Factory) *CmdExists {
 
 	cmd := &cobra.Command{
 		Use:   "exists",
-		Short: "Assert existance of a managed object",
+		Short: "Assert existence of a managed object",
 		Long: heredoc.Doc(`
 			Assert that a managed objects exists or not and pass input untouched
 

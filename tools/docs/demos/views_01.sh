@@ -9,7 +9,7 @@ demo () {
 
     showtitle "Using Views to focus on your data"
 
-    showbanner "Views are used when outputing to console"
+    showbanner "Views are used when writing to console"
     runCommand c8y applications list
     sleep 7
 

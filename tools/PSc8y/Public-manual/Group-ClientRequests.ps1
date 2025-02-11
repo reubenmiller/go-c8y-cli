@@ -32,11 +32,11 @@ Groups the input into array of a given maximum size. It will pass the piped inpu
     process {
         foreach ($item in $InputObject) {
             if ($AsPSObject -or $item -is [string] -or $item -is [int] -or $item -is [long]) {
-                $pipeitem = $item
+                $PipedItem = $item
             } else {
-                $pipeitem = ConvertTo-Json -InputObject $item -Depth 100 -Compress
+                $PipedItem = ConvertTo-Json -InputObject $item -Depth 100 -Compress
             }
-            [void]$Buffer.Add($pipeitem)
+            [void]$Buffer.Add($PipedItem)
 
             if ($Buffer.Count -eq $Size) {
                 $b = $Buffer;
