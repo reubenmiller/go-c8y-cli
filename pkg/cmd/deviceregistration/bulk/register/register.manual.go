@@ -47,7 +47,7 @@ func NewRegisterCmd(f *cmdutil.Factory) *RegisterCmd {
 			Register a new device using BASIC authentication and generate a random password (printed on the console)
 
 			$ c8y deviceregistration bulk register --id "ASDF098SD1J10912UD92JDLCNCU8" --password "example"
-			Register a new device using a user specificied password
+			Register a new device using a user specified password
 
 			$ c8y deviceregistration bulk register --id "ASDF098SD1J10912UD92JDLCNCU8" --auth-type CERTIFICATES 
 			Register a new device that will be connecting using x509 certificates (the certificate must be uploaded separately)
