@@ -6,3 +6,11 @@ tests:
             json:
                 method: PUT
                 path: /devicecontrol/newDeviceRequests/1234010101s01ldk208
+    deviceregistration_approve_Approve a new device request and provide a security token:
+        command: c8y deviceregistration approve --id "1234010101s01ldk208" --securityToken "abcdef123456"
+        exit-code: 0
+        stdout:
+            json:
+                body.securityToken: abcdef123456
+                method: PUT
+                path: /devicecontrol/newDeviceRequests/1234010101s01ldk208

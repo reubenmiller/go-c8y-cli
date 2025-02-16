@@ -5,8 +5,14 @@ Describe -Name "Register-Device" {
 
     }
 
-    It "Register a new device" {
+    It -Skip "Register a new device" {
         $Response = PSc8y\Register-Device -Id "ASDF098SD1J10912UD92JDLCNCU8"
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+    }
+
+    It -Skip "Register a new device" {
+        $Response = PSc8y\Register-Device -Id "ASDF098SD1J10912UD92JDLCNCU8" -Group "My Group"
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

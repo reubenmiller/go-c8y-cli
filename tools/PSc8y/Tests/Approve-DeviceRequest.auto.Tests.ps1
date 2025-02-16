@@ -13,6 +13,12 @@ Describe -Name "Approve-DeviceRequest" {
         $Response | Should -Not -BeNullOrEmpty
     }
 
+    It -Skip "Approve a new device request and provide a security token" {
+        $Response = PSc8y\Approve-DeviceRequest -Id $DeviceRequest.id -SecurityToken "abcdef123456"
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+    }
+
 
     AfterEach {
         Remove-DeviceRequest -Id $DeviceRequest.id

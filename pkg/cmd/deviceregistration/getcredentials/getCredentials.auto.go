@@ -38,7 +38,7 @@ $ c8y deviceregistration getCredentials --id "device-AD76-matrixer"
 Request credentials for a new device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return nil
 		},
 		RunE: ccmd.RunE,
 	}
@@ -55,8 +55,11 @@ Request credentials for a new device
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
+
+		flags.WithSemanticMethod("GET"),
 	)
 
 	// Required flags
