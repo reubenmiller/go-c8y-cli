@@ -36,6 +36,9 @@ func NewRegisterCmd(f *cmdutil.Factory) *RegisterCmd {
 		Example: heredoc.Doc(`
 $ c8y deviceregistration register --id "ASDF098SD1J10912UD92JDLCNCU8"
 Register a new device
+
+$ c8y deviceregistration register --id "ASDF098SD1J10912UD92JDLCNCU8" --group "My Group"
+Register a new device and assign to a group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -46,16 +49,21 @@ Register a new device
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Device identifier. Max: 1000 characters. E.g. IMEI (required) (accepts pipeline)")
+	cmd.Flags().String("type", "", "Type of the device")
+	cmd.Flags().StringSlice("group", []string{""}, "Group to which the device will be assigned")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDeviceGroup("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -135,6 +143,8 @@ func (n *RegisterCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithIDSlice(args, "id", "id"),
+		flags.WithStringValue("type", "type"),
+		c8yfetcher.WithDeviceGroupByNameFirstMatch(n.factory, args, "group", "groupId"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)

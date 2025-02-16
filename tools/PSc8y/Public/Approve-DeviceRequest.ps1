@@ -15,6 +15,11 @@ PS> Approve-DeviceRequest -Id $DeviceRequest.id
 
 Approve a new device request
 
+.EXAMPLE
+PS> Approve-DeviceRequest -Id $DeviceRequest.id -SecurityToken "abcdef123456"
+
+Approve a new device request and provide a security token
+
 
 #>
     [cmdletbinding(PositionalBinding=$true,
@@ -33,7 +38,12 @@ Approve a new device request
         [Parameter()]
         [ValidateSet('ACCEPTED')]
         [string]
-        $Status
+        $Status,
+
+        # When accepting a device request, the security token is verified against the token submitted by the device when requesting credentials
+        [Parameter()]
+        [string]
+        $SecurityToken
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Update", "Template"

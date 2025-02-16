@@ -36,6 +36,9 @@ func NewApproveCmd(f *cmdutil.Factory) *ApproveCmd {
 		Example: heredoc.Doc(`
 $ c8y deviceregistration approve --id "1234010101s01ldk208"
 Approve a new device request
+
+$ c8y deviceregistration approve --id "1234010101s01ldk208" --securityToken "abcdef123456"
+Approve a new device request and provide a security token
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.UpdateModeEnabled()
@@ -47,6 +50,7 @@ Approve a new device request
 
 	cmd.Flags().StringSlice("id", []string{""}, "Device identifier (required) (accepts pipeline)")
 	cmd.Flags().String("status", "", "Status of registration")
+	cmd.Flags().String("securityToken", "", "When accepting a device request, the security token is verified against the token submitted by the device when requesting credentials")
 
 	completion.WithOptions(
 		cmd,
@@ -57,7 +61,8 @@ Approve a new device request
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
@@ -138,6 +143,7 @@ func (n *ApproveCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("status", "status"),
+		flags.WithStringValue("securityToken", "securityToken"),
 		flags.WithDefaultTemplateString(`
 {status: 'ACCEPTED'}`),
 		cmdutil.WithTemplateValue(n.factory),

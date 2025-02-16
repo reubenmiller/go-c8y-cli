@@ -15,6 +15,11 @@ PS> Register-Device -Id "ASDF098SD1J10912UD92JDLCNCU8"
 
 Register a new device
 
+.EXAMPLE
+PS> Register-Device -Id "ASDF098SD1J10912UD92JDLCNCU8" -Group "My Group"
+
+Register a new device
+
 
 #>
     [cmdletbinding(PositionalBinding=$true,
@@ -27,7 +32,17 @@ Register a new device
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id
+        $Id,
+
+        # Type of the device
+        [Parameter()]
+        [string]
+        $Type,
+
+        # Group to which the device will be assigned
+        [Parameter()]
+        [object[]]
+        $Group
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"

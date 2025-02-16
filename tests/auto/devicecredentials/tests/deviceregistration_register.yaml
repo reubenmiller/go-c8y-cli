@@ -7,3 +7,12 @@ tests:
                 body.id: ASDF098SD1J10912UD92JDLCNCU8
                 method: POST
                 path: /devicecontrol/newDeviceRequests
+    deviceregistration_register_Register a new device and assign to a group:
+        command: c8y deviceregistration register --id "ASDF098SD1J10912UD92JDLCNCU8" --group "My Group"
+        exit-code: 0
+        stdout:
+            json:
+                body.groupId: r/^\d+$
+                body.id: ASDF098SD1J10912UD92JDLCNCU8
+                method: POST
+                path: /devicecontrol/newDeviceRequests
