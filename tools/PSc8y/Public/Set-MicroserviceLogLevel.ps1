@@ -5,7 +5,7 @@ Function Set-MicroserviceLogLevel {
 Set log level of microservice
 
 .DESCRIPTION
-Set configured log level for a package (incl. subpackages), or a specific class.
+Set configured log level for a package (incl. sub-packages), or a specific class.
 (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
 
 
