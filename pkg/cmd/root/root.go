@@ -1,6 +1,7 @@
 package root
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -194,7 +195,9 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			if cmdErr != nil {
 				logg, logErr := f.Logger()
 				if logg != nil && logErr == nil {
-					logg.Warnf("Check existing session failed. %s", cmdErr)
+					if !errors.Is(cmderrors.ErrHelp, cmdErr) {
+						logg.Warnf("Check existing session failed. %s", cmdErr)
+					}
 				}
 			}
 			return cmdErr
