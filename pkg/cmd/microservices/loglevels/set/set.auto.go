@@ -31,7 +31,7 @@ func NewSetCmd(f *cmdutil.Factory) *SetCmd {
 	cmd := &cobra.Command{
 		Use:   "set",
 		Short: "Set log level of microservice",
-		Long: `Set configured log level for a package (incl. subpackages), or a specific class.
+		Long: `Set configured log level for a package (incl. sub-packages), or a specific class.
 (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
 `,
 		Example: heredoc.Doc(`

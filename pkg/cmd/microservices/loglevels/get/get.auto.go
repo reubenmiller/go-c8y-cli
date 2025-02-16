@@ -32,7 +32,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get log level of microservice",
-		Long: `Get configured log level for a package (incl. subpackages), or a specific class.
+		Long: `Get configured log level for a package (incl. sub-packages), or a specific class.
 (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
 `,
 		Example: heredoc.Doc(`

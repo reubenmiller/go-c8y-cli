@@ -5,7 +5,7 @@ Function Remove-MicroserviceLogLevel {
 Delete configured log level of microservice
 
 .DESCRIPTION
-Delete configured log level for a package (incl. subpackages), or a specific class.
+Delete configured log level for a package (incl. sub-packages), or a specific class.
 This resets its value to the default log level.
 (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
 

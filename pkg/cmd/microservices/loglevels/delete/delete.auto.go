@@ -31,7 +31,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete configured log level of microservice",
-		Long: `Delete configured log level for a package (incl. subpackages), or a specific class.
+		Long: `Delete configured log level for a package (incl. sub-packages), or a specific class.
 This resets its value to the default log level.
 (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
 `,
