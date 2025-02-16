@@ -974,7 +974,12 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, raw bool, opts ...string) G
 
 		// Merge multiple data objects together
 		for _, value := range values {
-			err = jsonUtilities.ParseJSON(resolveContents(value), data)
+			v := resolveContents(value)
+			// data flag does not yet support arrays
+			if jsonUtilities.IsValidJSON([]byte(v)) && jsonUtilities.IsJSONArray([]byte(v)) {
+				return dst, "", fmt.Errorf("invalid data type (array) provided on the '%s' flag. Currently only key/value or json objects are supported. Hint: Try using the 'template' flag instead", src)
+			}
+			err = jsonUtilities.ParseJSON(v, data)
 			if err != nil {
 				return dst, "", fmt.Errorf("json error: %s parameter does not contain valid json or shorthand json. %w", src, err)
 			}
