@@ -79,6 +79,8 @@ Get a list of measurements
 
 	// Required flags
 
+	flags.MarkDeprecated(cmd, "fragmentType", "")
+
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
