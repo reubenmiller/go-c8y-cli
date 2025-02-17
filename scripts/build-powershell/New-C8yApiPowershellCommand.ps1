@@ -189,6 +189,10 @@
             Required = $iArg.required
             ReadFromPipeline = $ReadFromPipeline
         }
+        if ($iArg.deprecated) {
+            Write-Warning "Skipping deprecated argument: $($item.Name)"
+            continue
+        }
         $item = New-C8yPowershellArguments @ArgParams
 
         if ($item.ignore) {

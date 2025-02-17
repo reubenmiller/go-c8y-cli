@@ -33,11 +33,6 @@ Delete measurement collection for a device
         [string]
         $Type,
 
-        # Fragment name from measurement (deprecated).
-        [Parameter()]
-        [string]
-        $FragmentType,
-
         # Start date or date and time of measurement occurrence.
         [Parameter()]
         [string]

@@ -1,6 +1,6 @@
 tests:
     ui/plugins/versions_update_Replace tags assigned to a version of a plugin:
-        command: c8y ui plugins versions update --plugin 1234 --version 1.0 --tags tag1,latest
+        command: c8y ui plugins versions update --plugin 1234 --version 1.0 --tag tag1,latest
         exit-code: 0
         stdout:
             json:

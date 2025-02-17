@@ -48,7 +48,8 @@ Create a new version for a plugin
 	cmd.Flags().String("plugin", "", "Plugin (accepts pipeline)")
 	cmd.Flags().String("file", "", "The ZIP file to be uploaded")
 	cmd.Flags().String("version", "", "Plugin version (required)")
-	cmd.Flags().StringSlice("tags", []string{""}, "List of tags associated to the version (required)")
+	cmd.Flags().StringSlice("tags", []string{""}, "List of tags associated to the version")
+	cmd.Flags().StringSlice("tag", []string{""}, "List of tags associated to the version")
 	cmd.Flags().String("data", "", "data")
 
 	completion.WithOptions(
@@ -68,7 +69,8 @@ Create a new version for a plugin
 
 	// Required flags
 	_ = cmd.MarkFlagRequired("version")
-	_ = cmd.MarkFlagRequired("tags")
+
+	flags.MarkDeprecated(cmd, "tags", "please use 'tag' instead")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -137,6 +139,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 			Append(flags.WithStringValue("version", "version")).
 			Append(flags.WithFormDataProperty("applicationVersion")).
 			Append(flags.WithStringSliceValues("tags", "tags", "")).
+			Append(flags.WithFormDataProperty("applicationVersion")).
+			Append(flags.WithStringSliceValues("tag", "tags", "")).
 			Append(flags.WithDataValue("data", "data")).
 			Append(cmdutil.WithTemplateValue(n.factory)).
 			Append(flags.WithTemplateVariablesValue()).
@@ -152,6 +156,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithRequiredProperties("tags"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

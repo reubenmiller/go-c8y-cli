@@ -53,11 +53,6 @@ Get measurements from a device (using pipeline)
         [string]
         $ValueFragmentSeries,
 
-        # Fragment name from measurement (deprecated).
-        [Parameter()]
-        [string]
-        $FragmentType,
-
         # Start date or date and time of measurement occurrence.
         [Parameter()]
         [string]

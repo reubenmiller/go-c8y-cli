@@ -14,7 +14,7 @@ The `c8y ui plugins create` command is a "smart" command which will perform all 
 <CodeExample transform="false">
 
 ```bash
-c8y ui plugins create --file ./my_plugin.zip --tags latest
+c8y ui plugins create --file ./my_plugin.zip --tag latest
 ```
 
 </CodeExample>
@@ -24,7 +24,7 @@ Alternatively, you can install a plugin directly from a URL (provided the URL do
 <CodeExample transform="false">
 
 ```bash
-c8y ui plugins create --file "https://github.com/thin-edge/tedge-container-plugin/releases/download/1.2.3/tedge-container-plugin-ui_1.0.2.zip" --tags latest
+c8y ui plugins create --file "https://github.com/thin-edge/tedge-container-plugin/releases/download/1.2.3/tedge-container-plugin-ui_1.0.2.zip" --tag latest
 ```
 
 </CodeExample>
@@ -36,7 +36,7 @@ For example, you can provide a manual plugin name and version using:
 <CodeExample transform="false">
 
 ```bash
-c8y ui plugins create --file ./my_plugin.zip --name custom_name --version 1.0.0 --tags latest
+c8y ui plugins create --file ./my_plugin.zip --name custom_name --version 1.0.0 --tag latest
 ```
 
 </CodeExample>
@@ -72,7 +72,7 @@ For example the `latest` and `other` tags
 <CodeExample transform="false">
 
 ```bash
-c8y ui plugins versions update --plugin myplugin --version "1.0.0" --tags latest,other
+c8y ui plugins versions update --plugin myplugin --version "1.0.0" --tag latest,other
 ```
 
 </CodeExample>

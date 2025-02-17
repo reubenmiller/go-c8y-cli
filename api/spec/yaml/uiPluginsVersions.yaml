@@ -142,14 +142,27 @@ commands:
       - name: tags
         property: tags
         type: string[]
+        # Renamed from tags to tag to be more consistent
+        deprecatedAt: "2025-02-17"
+        deprecated: true
+        deprecationNotice: please use 'tag' instead
         options:
           formData: applicationVersion
-        required: true
+        description: List of tags associated to the version
+
+      - name: tag
+        property: tags
+        type: string[]
+        options:
+          formData: applicationVersion
         description: List of tags associated to the version
 
       - name: data
         type: json_custom
         description: data
+
+    bodyRequiredKeys:
+      - tags
 
   - name: delete
     description: Delete a specific version of a plugin
@@ -215,12 +228,12 @@ commands:
     examples:
       powershell:
         - description: Replace tags assigned to a version of a plugin
-          command: Update-UIPluginVersion -Plugin 1234 -Version 1.0 -Tags tag1,latest
+          command: Update-UIPluginVersion -Plugin 1234 -Version 1.0 -Tag tag1,latest
           skipTest: true
 
       go:
         - description: Replace tags assigned to a version of a plugin
-          command: c8y ui plugins versions update --plugin 1234 --version 1.0 --tags tag1,latest
+          command: c8y ui plugins versions update --plugin 1234 --version 1.0 --tag tag1,latest
           assertStdOut:
             json:
               path: /application/applications/1234/versions/1.0
@@ -246,8 +259,20 @@ commands:
       - name: tags
         property: tags
         type: string[]
+        # Renamed from tags to tag to be more consistent
+        deprecatedAt: "2025-02-17"
+        deprecated: true
+        deprecationNotice: please use 'tag' instead
+        description: Tag assigned to the version. Version tags must be unique across all versions and version fields of plugin versions
+
+      - name: tag
+        property: tags
+        type: string[]
         description: Tag assigned to the version. Version tags must be unique across all versions and version fields of plugin versions
 
       - name: data
         type: json
         description: Custom data
+
+    bodyRequiredKeys:
+      - tags

@@ -38,10 +38,10 @@ Create a new version for a plugin
         [string]
         $Version,
 
-        # List of tags associated to the version (required)
-        [Parameter(Mandatory = $true)]
+        # List of tags associated to the version
+        [Parameter()]
         [string[]]
-        $Tags
+        $Tag
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"
