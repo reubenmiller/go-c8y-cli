@@ -65,9 +65,12 @@ const c8yCommands = {
 
     'c8y devicegroups create': 'New-DeviceGroup',
     'c8y devicegroups list': 'Get-DeviceGroupCollection',
+    'c8y devicegroups listAssets': 'Get-DeviceGroupChildAssetCollection',
+    'c8y devicegroups children assign': 'Add-DeviceGroupChild',
+    'c8y devicegroups children unassign': 'Remove-DeviceGroupChild',
+    // Deprecated
     'c8y devicegroups assignDevice': 'Add-DeviceToGroup',
     'c8y devicegroups unassignDevice': 'Remove-DeviceFromGroup',
-    'c8y devicegroups listAssets': 'Get-DeviceGroupChildAssetCollection',
     
     'c8y applications create': 'New-Application',
     'c8y applications createHostedApplication': 'New-HostedApplication',

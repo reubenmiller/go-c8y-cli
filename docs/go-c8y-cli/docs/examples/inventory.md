@@ -14,15 +14,15 @@ import CodeExample from '@site/src/components/CodeExample';
 <CodeExample>
 
 ```bash
-$Group = c8y devicegroups create --name "AU_Group" -o csv --select id
+group=$(c8y devicegroups create --name "AU_Group" -o csv --select id)
 c8y devices create --name "myDevice01" |
-    c8y devicegroups assignDevice --group $Group
+    c8y devicegroups children assign --childType asset --id "$group"
 ```
 
 ```powershell
 $Group = c8y devicegroups create --name "AU_Group" | fromjson
 c8y devices create --name "myDevice01" |
-    c8y devicegroups assignDevice --group $Group.id
+    c8y devicegroups children assign --childType asset --id $Group.id
 ```
 
 </CodeExample>
