@@ -25,6 +25,12 @@ c8y devices create --name "myDevice01" |
     c8y devicegroups children assign --childType asset --id $Group.id
 ```
 
+```powershell
+$Group = c8y devicegroups create --name "AU_Group" | fromjson
+c8y devices create --name "myDevice01" |
+    c8y devicegroups children assign --childType asset --id $Group.id
+```
+
 </CodeExample>
 
 ## Update
