@@ -10,7 +10,7 @@ import CodeExample from '@site/src/components/CodeExample';
 
 ```bash
 c8y inventory find --query "agentVersion eq '1.*' and not(bygroupid(123456))" --includeAll |
-    c8y devicegroups assignDevice --group 123456 --workers 2 --progress
+    c8y devicegroups children assign --childType asset --id 123456 --workers 2 --progress
 ```
 
 </CodeExample>
@@ -64,7 +64,7 @@ UNIQUE_ID_4
 
     ```bash
     cat list.ids.csv |
-        c8y devicegroups assignDevice --group 1234 --workers 2 --progress --silentStatusCodes 409
+        c8y devicegroups children assign --childType asset --id 1234 --workers 2 --progress --silentStatusCodes 409
     ```
 
     </CodeExample>
@@ -101,7 +101,7 @@ group=$( c8y devicegroups create --name "my_custom_group" --output csv --select 
 
 # Assign the failed operations
 c8y operations list --bulkOperationId 8 --status FAILED --includeAll |
-    c8y devicegroups assignDevice --group $group --workers 2 --progress --silentStatusCodes 409
+    c8y devicegroups children assign --id $group --workers 2 --progress --silentStatusCodes 409
 ```
 
 ```powershell
@@ -110,7 +110,7 @@ $group = c8y devicegroups create --name "my_custom_group" --output csv --select 
 
 # Assign the failed operations
 c8y operations list --bulkOperationId 8 --status FAILED --includeAll |
-    c8y devicegroups assignDevice --group $group --workers 2 --progress --silentStatusCodes 409
+    c8y devicegroups children assign --id $group --workers 2 --progress --silentStatusCodes 409
 ```
 
 </CodeExample>
@@ -124,7 +124,7 @@ The Cumulocity inventory query language supports a the `bygroupid(x)` operator w
 
 ```bash
 c8y inventory find --query "agentVersion eq '1.*' and bygroupid(123456)" --includeAll |
-    c8y devicegroups unassignDevice --group 123456 --workers 2 --progress
+    c8y devicegroups children unassign --childType asset --id 123456 --workers 2 --progress
 ```
 
 </CodeExample>
