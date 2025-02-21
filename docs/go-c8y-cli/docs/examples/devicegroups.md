@@ -113,6 +113,15 @@ c8y operations list --bulkOperationId 8 --status FAILED --includeAll |
     c8y devicegroups children assign --id $group --workers 2 --progress --silentStatusCodes 409
 ```
 
+```powershell
+# Create a new group
+$group = c8y devicegroups create --name "my_custom_group" --output csv --select id
+
+# Assign the failed operations
+c8y operations list --bulkOperationId 8 --status FAILED --includeAll |
+    c8y devicegroups children assign --id $group --workers 2 --progress --silentStatusCodes 409
+```
+
 </CodeExample>
 
 ### Unassign devices from a group which match a custom inventory query
