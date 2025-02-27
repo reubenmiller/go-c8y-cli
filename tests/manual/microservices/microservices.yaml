@@ -84,3 +84,19 @@ tests:
           name: loader-dev
           requiredRoles.0: ROLE_INVENTORY_READ
           requiredRoles.1: ROLE_INVENTORY_ADMIN
+
+    Pipe an application via application.id:
+      command: |
+        c8y template execute --template '{application:{id:1111}}' |
+        c8y microservices enable --dry --dryFormat json
+      stdout:
+        json:
+          body.application.id: 1111
+
+    Pipe an application via id:
+      command: |
+        c8y template execute --template '{id:2222}' |
+        c8y microservices enable --dry --dryFormat json
+      stdout:
+        json:
+          body.application.id: 2222

@@ -163,6 +163,9 @@ commands:
         pipeline: true
         required: true
         description: Microservice id
+        pipelineAliases:
+          - application.id
+          - id
 
   - name: deleteMicroservice
     description: Delete microservice
@@ -201,6 +204,9 @@ commands:
         pipeline: true
         required: true
         description: Microservice id
+        pipelineAliases:
+          - application.id
+          - id
 
   - name: updateMicroservice
     description: Update microservice details
@@ -233,6 +239,9 @@ commands:
         pipeline: true
         required: true
         description: Microservice id
+        pipelineAliases:
+          - application.id
+          - id
 
     body:
       - name: data
@@ -298,6 +307,9 @@ commands:
         pipeline: true
         required: true
         description: Microservice id
+        pipelineAliases:
+          - application.id
+          - id
     body:
       - name: file
         type: file
@@ -340,6 +352,9 @@ commands:
         pipeline: true
         required: true
         description: Microservice id
+        pipelineAliases:
+          - application.id
+          - id
 
   - name: enableMicroservice
     description: subscribe to microservice
@@ -381,8 +396,12 @@ commands:
         type: microservice
         property: application.id
         pipeline: true
-        required: true
         description: Microservice id
+        pipelineAliases:
+          - application.id
+          - id
+    bodyRequiredKeys:
+      - application.id
 
   - name: disableMicroservice
     description: unsubscribe microservice
@@ -418,6 +437,9 @@ commands:
         pipeline: true
         required: true
         description: Microservice id
+        pipelineAliases:
+          - application.id
+          - id
 
       - name: tenant
         type: tenant
@@ -467,6 +489,9 @@ commands:
         pipeline: true
         required: true
         description: Microservice id
+        pipelineAliases:
+          - application.id
+          - id
 
   - name: getLog
     # Currently a bug when parsing the output
@@ -496,6 +521,9 @@ commands:
         pipeline: true
         required: true
         description: Microservice id
+        pipelineAliases:
+          - application.id
+          - id
       
       - name: instance
         type: microserviceinstance

@@ -61,7 +61,7 @@ Get application bootstrap user by app name
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("id", "id", true, "application.id", "id"),
 		flags.WithPipelineAliases("id", "id"),
 	)
 
