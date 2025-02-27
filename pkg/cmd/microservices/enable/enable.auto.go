@@ -50,7 +50,7 @@ Enable (subscribe) to a microservice by name
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant id")
-	cmd.Flags().String("id", "", "Microservice id (required) (accepts pipeline)")
+	cmd.Flags().String("id", "", "Microservice id (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -61,8 +61,9 @@ Enable (subscribe) to a microservice by name
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
-		flags.WithExtendedPipelineSupport("id", "application.id", true),
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
+		flags.WithExtendedPipelineSupport("id", "application.id", false, "application.id", "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 		flags.WithPipelineAliases("id", "id"),
 	)
@@ -146,6 +147,7 @@ func (n *EnableCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithMicroserviceByNameFirstMatch(n.factory, args, "id", "application.id"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("application.id"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

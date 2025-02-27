@@ -59,7 +59,7 @@ Delete a microservice by name
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("id", "id", true, "application.id", "id"),
 		flags.WithPipelineAliases("id", "id"),
 	)
 

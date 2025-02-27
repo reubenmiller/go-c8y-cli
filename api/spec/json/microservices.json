@@ -218,7 +218,11 @@
           "type": "microservice",
           "pipeline": true,
           "required": true,
-          "description": "Microservice id"
+          "description": "Microservice id",
+          "pipelineAliases": [
+            "application.id",
+            "id"
+          ]
         }
       ]
     },
@@ -273,7 +277,11 @@
           "type": "microservice",
           "pipeline": true,
           "required": true,
-          "description": "Microservice id"
+          "description": "Microservice id",
+          "pipelineAliases": [
+            "application.id",
+            "id"
+          ]
         }
       ]
     },
@@ -320,7 +328,11 @@
           "type": "microservice",
           "pipeline": true,
           "required": true,
-          "description": "Microservice id"
+          "description": "Microservice id",
+          "pipelineAliases": [
+            "application.id",
+            "id"
+          ]
         }
       ],
       "body": [
@@ -399,7 +411,11 @@
           "type": "microservice",
           "pipeline": true,
           "required": true,
-          "description": "Microservice id"
+          "description": "Microservice id",
+          "pipelineAliases": [
+            "application.id",
+            "id"
+          ]
         }
       ],
       "body": [
@@ -458,7 +474,11 @@
           "type": "microservice",
           "pipeline": true,
           "required": true,
-          "description": "Microservice id"
+          "description": "Microservice id",
+          "pipelineAliases": [
+            "application.id",
+            "id"
+          ]
         }
       ]
     },
@@ -518,9 +538,20 @@
           "type": "microservice",
           "property": "application.id",
           "pipeline": true,
-          "required": true,
-          "description": "Microservice id"
+          "description": "Microservice id",
+          "pipelineAliases": [
+            "application.id",
+            "id"
+          ]
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the inventory."
         }
+      ],
+      "bodyRequiredKeys": [
+        "application.id"
       ]
     },
     {
@@ -569,7 +600,11 @@
           "type": "microservice",
           "pipeline": true,
           "required": true,
-          "description": "Microservice id"
+          "description": "Microservice id",
+          "pipelineAliases": [
+            "application.id",
+            "id"
+          ]
         },
         {
           "name": "tenant",
@@ -635,7 +670,11 @@
           "type": "microservice",
           "pipeline": true,
           "required": true,
-          "description": "Microservice id"
+          "description": "Microservice id",
+          "pipelineAliases": [
+            "application.id",
+            "id"
+          ]
         }
       ]
     },
@@ -674,7 +713,11 @@
           "type": "microservice",
           "pipeline": true,
           "required": true,
-          "description": "Microservice id"
+          "description": "Microservice id",
+          "pipelineAliases": [
+            "application.id",
+            "id"
+          ]
         },
         {
           "name": "instance",

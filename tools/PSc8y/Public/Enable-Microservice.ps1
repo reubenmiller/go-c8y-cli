@@ -23,9 +23,8 @@ Enable (subscribe) to a microservice
     [Alias()]
     [OutputType([object])]
     Param(
-        # Microservice id (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # Microservice id
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,

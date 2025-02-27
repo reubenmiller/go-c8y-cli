@@ -62,7 +62,7 @@ Disable (unsubscribe) to a microservice
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("id", "id", true, "application.id", "id"),
 		flags.WithPipelineAliases("id", "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
