@@ -191,8 +191,8 @@ func WithRuntimePipelineProperty() Option {
 		}
 		cmd.Annotations[AnnotationValueFromPipeline] = name
 
-		aliases := []string{name}
-
+		// Note: User given aliases should take precedence (as they're specifying it)
+		aliases := []string{}
 		if alias != "" {
 			for _, a := range strings.Split(alias, ",") {
 				a = strings.TrimLeft(a, ".")
@@ -201,14 +201,23 @@ func WithRuntimePipelineProperty() Option {
 				}
 			}
 		}
+		aliases = append(aliases, name)
 
 		if aliasValue, ok := cmd.Annotations[AnnotationValuePipelineAlias+"."+name]; ok {
 			aliases = append(aliases, strings.Split(aliasValue, ",")...)
 		}
 
+		// Check for existing pipe options
+		targetProperty := name
+		if existingPipeLineOptions, err := GetPipeOptionsFromAnnotation(cmd); err == nil {
+			if existingPipeLineOptions.Name == name {
+				targetProperty = existingPipeLineOptions.Property
+			}
+		}
+
 		options := &PipelineOptions{
 			Name:     name,
-			Property: name,
+			Property: targetProperty,
 			Aliases:  aliases,
 			Required: true,
 			IsID:     true,

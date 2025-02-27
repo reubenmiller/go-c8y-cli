@@ -108,3 +108,15 @@ tests:
       json:
         method: GET
         path: /inventory/managedObjects/12345/childDevices
+
+  It does not override body target when using custom pipe mapping:
+    command: |
+        c8y template execute --template "{custom:{id:12345}}" |
+          c8y alarms create --device -.custom.id --type example --text foo --severity MAJOR --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.source.id: "12345"
+        body.type: example
+        body.text: foo
+        body.severity: MAJOR
