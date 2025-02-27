@@ -61,7 +61,8 @@ Enable (subscribe) to a microservice by name
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "application.id", false, "application.id", "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 		flags.WithPipelineAliases("id", "id"),

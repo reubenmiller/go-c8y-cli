@@ -91,7 +91,7 @@ tests:
         c8y microservices enable --dry --dryFormat json
       stdout:
         json:
-          body.application.id: 1111
+          body.application.id: "1111"
 
     Pipe an application via id:
       command: |
@@ -99,4 +99,27 @@ tests:
         c8y microservices enable --dry --dryFormat json
       stdout:
         json:
-          body.application.id: 2222
+          body.application.id: "2222"
+
+    Enable microservice by explicit id:
+      command: |
+        c8y microservices enable --id 3333 --dry --dryFormat json
+      stdout:
+        json:
+          body.application.id: "3333"
+
+    Enable microservice via template:
+      command: |
+        c8y template execute --template '{other:4444}' |
+        c8y microservices enable --template "{application:{id:input.value.other}}" --dry --dryFormat json
+      stdout:
+        json:
+          body.application.id: "4444"
+    
+    Enable microservice via custom piped values:
+      command: |
+        c8y template execute --template '{other:5555}' |
+        c8y microservices enable --id -.other --dry --dryFormat json
+      stdout:
+        json:
+          body.application.id: "5555"

@@ -543,6 +543,11 @@
             "application.id",
             "id"
           ]
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the inventory."
         }
       ],
       "bodyRequiredKeys": [
