@@ -7,7 +7,9 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/tidwall/pretty"
 )
 
 const (
@@ -70,12 +72,14 @@ type CommandError struct {
 	ErrorType       string `json:"errorType,omitempty"`
 	Message         string `json:"message,omitempty"`
 	silent          bool
-	StatusCode      int                `json:"statusCode,omitempty"`
-	ExitCode        ExitCode           `json:"exitCode,omitempty"`
-	URL             string             `json:"url,omitempty"`
-	CumulocityError *c8y.ErrorResponse `json:"c8yResponse,omitempty"`
-	Err             error              `json:"error,omitempty"`
-	Processed       bool               `json:"-"`
+	StatusCode      int                  `json:"statusCode,omitempty"`
+	ExitCode        ExitCode             `json:"exitCode,omitempty"`
+	URL             string               `json:"url,omitempty"`
+	CumulocityError json.RawMessage      `json:"c8yResponse,omitempty"`
+	Err             error                `json:"error,omitempty"`
+	Processed       bool                 `json:"-"`
+	WithRawMessage  bool                 `json:"-"`
+	IO              *iostreams.IOStreams `json:"-"`
 }
 
 func (c CommandError) Unwrap() error {
@@ -100,6 +104,26 @@ func (c CommandError) Error() string {
 	if details != "" {
 		message.WriteString(" " + details)
 	}
+
+	// Print raw response as microservices add additional information in the response
+	if c.WithRawMessage && len(c.CumulocityError) > 0 && c.IO != nil {
+		message.WriteString(c.IO.ColorScheme().Red("\n\nError Response\n\n"))
+		if json.Valid(c.CumulocityError) {
+			b := pretty.PrettyOptions(c.CumulocityError, &pretty.Options{
+				SortKeys: true,
+				Width:    80,
+				Prefix:   "",
+				Indent:   "  ",
+			})
+			if c.IO.ColorEnabled() {
+				b = pretty.Color(b, pretty.TerminalStyle)
+			}
+			message.Write(b)
+		} else {
+			message.Write(c.CumulocityError)
+		}
+	}
+
 	return message.String()
 }
 
@@ -220,14 +244,16 @@ var httpStatusCodeToExitCode = map[int]ExitCode{
 }
 
 // NewServerError creates a server error from a Cumulocity response
-func NewServerError(r *c8y.Response, err error) CommandError {
+func NewServerError(r *c8y.Response, err error, iostream *iostreams.IOStreams, withRawMessage bool) CommandError {
 	cmdError := CommandError{
-		Message:    err.Error(),
-		ErrorType:  ErrTypeServer,
-		silent:     false,
-		ExitCode:   ExitUnknownError,
-		StatusCode: 0,
-		Err:        err,
+		Message:        err.Error(),
+		ErrorType:      ErrTypeServer,
+		silent:         false,
+		ExitCode:       ExitUnknownError,
+		StatusCode:     0,
+		Err:            err,
+		WithRawMessage: withRawMessage,
+		IO:             iostream,
 	}
 
 	if errors.Is(err, context.DeadlineExceeded) {
@@ -237,7 +263,14 @@ func NewServerError(r *c8y.Response, err error) CommandError {
 	}
 
 	if v, ok := err.(*c8y.ErrorResponse); ok {
-		cmdError.CumulocityError = v
+		if v.Response != nil {
+			if json.Valid(v.Response.Body()) {
+				cmdError.CumulocityError = json.RawMessage(v.Response.Body())
+			} else if b, jsonErr := json.Marshal(v.Response.Body()); jsonErr == nil {
+				// handle non json response
+				cmdError.CumulocityError = json.RawMessage(b)
+			}
+		}
 		cmdError.Message = v.Message
 	}
 

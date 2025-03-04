@@ -1016,7 +1016,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 		if userErr, ok := respError.(cmderrors.CommandError); ok {
 			return unfilteredSize, userErr
 		}
-		return unfilteredSize, cmderrors.NewServerError(resp, respError)
+		return unfilteredSize, cmderrors.NewServerError(resp, respError, r.IO, !r.Config.WithError())
 	}
 	return unfilteredSize, nil
 }
