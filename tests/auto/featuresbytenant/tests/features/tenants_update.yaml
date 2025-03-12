@@ -1,0 +1,9 @@
+tests:
+    features/tenants_update_Enable a feature for a given specific tenant:
+        command: c8y features tenants update --key example --active --tenant t12345
+        exit-code: 0
+        stdout:
+            json:
+                body.active: "true"
+                method: PUT
+                path: /features/example/by-tenant/t12345

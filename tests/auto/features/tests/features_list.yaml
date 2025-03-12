@@ -1,0 +1,8 @@
+tests:
+    features_list_Get a list of features for the current tenant:
+        command: c8y features list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /features

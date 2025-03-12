@@ -55,6 +55,8 @@ import (
 	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/events/subscribe"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/extension"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/factory"
+	featuresCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/features"
+	featuresByTenantCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/features/tenants"
 	firmwareCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware"
 	firmwareVersionsPatchesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/patches"
 	firmwarePatchesCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/patches/create"
@@ -351,6 +353,10 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	}
 
 	cmd.AddCommand(commands...)
+
+	features := featuresCmd.NewSubCommand(f).GetCommand()
+	features.AddCommand(featuresByTenantCmd.NewSubCommand(f).GetCommand())
+	cmd.AddCommand(features)
 
 	alarms := alarmsCmd.NewSubCommand(f).GetCommand()
 	alarms.AddCommand(alarmsSubscribeCmd.NewCmdSubscribe(f).GetCommand())

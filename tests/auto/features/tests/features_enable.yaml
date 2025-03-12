@@ -1,0 +1,8 @@
+tests:
+    features_enable_Enable a feature in the current tenant:
+        command: c8y features enable --key example
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /features/example/by-tenant

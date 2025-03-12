@@ -74,6 +74,15 @@ commands:
         type: devicerequest[]
         description: device request
 
+  - name: platform_features
+    description: platform feature lookups
+    path: inventory/managedObjects
+    method: POST
+    body:
+      - name: key
+        type: feature
+        description: Feature key
+
   - name: user
     description: user lookups
     path: inventory/managedObjects

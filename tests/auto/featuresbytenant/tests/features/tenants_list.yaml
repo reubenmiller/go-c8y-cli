@@ -1,0 +1,8 @@
+tests:
+    features/tenants_list_Get the feature toggle override status for each child tenant:
+        command: c8y features tenants list --key example
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /features/example/by-tenant

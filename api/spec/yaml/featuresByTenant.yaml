@@ -1,0 +1,202 @@
+# yaml-language-server: $schema=../schema.json
+---
+
+group:
+  name: features/tenants
+  description: Cumulocity tenant features from the management tenant
+  descriptionLong: Managed feature toggles from the management tenant
+  link: https://cumulocity.com/api/core/#tag/Feature-toggles-API
+
+commands:
+  - name: update
+    description: Set a feature override for a given tenant
+    descriptionLong: Set a feature override for a given tenant
+    method: PUT
+    path: /features/{key}/by-tenant/{tenant}
+    alias:
+        go: update
+        powershell: Update-FeatureByTenant
+    examples:
+        powershell:
+          - description: Enable a feature for a given specific tenant
+            command: Update-FeatureByTenant -Id example -Active -Tenant t12345
+            skipTest: true
+        go:
+          - description: Enable a feature for a given specific tenant
+            command: c8y features tenants update --key example --active --tenant t12345
+    pathParameters:
+      - name: key
+        type: feature
+        description: Feature ID / Key
+        required: true
+
+      - name: tenant
+        type: tenant
+        pipeline: true
+        pipelineAliases:
+          - tenantId
+          - owner.tenant.id
+          - tenant
+          - id
+        description: Unique identifier of a Cumulocity tenant
+    body:
+      - name: active
+        property: active
+        type: booleanDefault
+        required: false
+        description: Enable feature
+
+      - name: data
+        type: json
+        property: customProperties
+        required: false
+        description: A set of custom properties of the tenant
+    bodyRequiredKeys:
+      - active
+
+  - name: enable
+    description: Enable a feature override for a given tenant
+    descriptionLong: Enable a feature override for a given tenant
+    method: PUT
+    path: /features/{key}/by-tenant/{tenant}
+    alias:
+        go: enable
+        powershell: Enable-FeatureByTenant
+    examples:
+        powershell:
+          - description: Enable a feature for a given tenant
+            command: Enable-FeatureByTenant -Id example -Active -Tenant t12345
+            skipTest: true
+        go:
+          - description: Enable a feature for a given tenant
+            command: c8y features tenants enable --key example --tenant t12345
+
+          - description: Enable a specific feature on all subtenants
+            command: c8y tenants list | c8y features tenants enable --key ui.datapoint-graph.v2
+            skipTest: true
+
+    pathParameters:
+      - name: key
+        type: feature
+        description: Feature ID / Key
+
+      - name: tenant
+        type: tenant
+        pipeline: true
+        pipelineAliases:
+          - tenantId
+          - owner.tenant.id
+          - tenant
+          - id
+        description: Unique identifier of a Cumulocity tenant
+
+    body:
+      - name: data
+        type: json
+        property: customProperties
+        required: false
+        description: A set of custom properties of the tenant
+    bodyTemplates:
+      - type: jsonnet
+        template: '{"active":true}'
+    bodyRequiredKeys:
+      - active
+
+  - name: disable
+    description: Disable a feature override for a given tenant
+    descriptionLong: Disable a feature override for a given tenant
+    method: PUT
+    path: /features/{key}/by-tenant/{tenant}
+    alias:
+        go: disable
+        powershell: Disable-FeatureByTenant
+    examples:
+        powershell:
+          - description: Disable a feature in the current tenant
+            command: Disable-FeatureByTenant -Id example -Active -Tenant t12345
+            skipTest: true
+        go:
+          - description: Disable a feature in the current tenant
+            command: c8y features tenants disable --key example --tenant t12345
+
+          - description: Disable the feature when it is active on subtenants
+            command: c8y features tenants list --key ui.datapoint-graph.v2 | c8y features tenants disable --key ui.datapoint-graph.v2
+            skipTest: true
+    pathParameters:
+      - name: key
+        type: feature
+        description: Feature ID / Key
+
+      - name: tenant
+        type: tenant
+        pipeline: true
+        pipelineAliases:
+          - tenantId
+          - owner.tenant.id
+          - tenant
+          - id
+        description: Unique identifier of a Cumulocity tenant
+    body:
+      - name: data
+        type: json
+        property: customProperties
+        required: false
+        description: A set of custom properties of the tenant
+    bodyTemplates:
+      - type: jsonnet
+        template: '{"active":false}'
+    bodyRequiredKeys:
+      - active
+
+  - name: list
+    description: Get features toggle by tenant
+    descriptionLong: Retrieve a list of all existing feature toggle value overrides for all tenants
+    method: GET
+    path: /features/{key}/by-tenant
+    alias:
+        go: list
+        powershell: Get-FeatureByTenant
+    examples:
+        powershell:
+          - description: Get the feature toggle override status for each child tenant
+            command: Get-FeatureByTenant -Id example
+            skipTest: true
+        go:
+          - description: Get the feature toggle override status for each child tenant
+            command: c8y features tenants list --key example
+    pathParameters:
+      - name: key
+        type: feature
+        pipeline: true
+        description: Feature ID/Key
+
+  - name: delete
+    description: Removes the feature toggle override for a tenant of authenticated user
+    descriptionLong: Removes the feature toggle override for a tenant of authenticated user
+    method: DELETE
+    path: /features/{key}/by-tenant/{tenant}
+    alias:
+        go: delete
+        powershell: Remove-FeatureByTenant
+    examples:
+        powershell:
+          - description: Remove the feature override from a given tenant
+            command: Remove-FeatureByTenant -Id example -Tenant t12345
+            skipTest: true
+        go:
+          - description: Remove the feature override from a given tenant
+            command: c8y features tenants delete --key example --tenant t12345
+    pathParameters:
+      - name: key
+        type: feature
+        description: Feature ID/Key
+
+      - name: tenant
+        type: tenant
+        description: Unique identifier of a Cumulocity tenant
+        pipeline: true
+        pipelineAliases:
+          - tenantId
+          - owner.tenant.id
+          - tenant
+          - id

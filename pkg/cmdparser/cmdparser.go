@@ -180,6 +180,8 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 		return completion.WithMicroservice(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "microserviceinstance":
 		return completion.WithMicroserviceInstance(p.Name, p.GetDependentProperty(0, "id"), func() (*c8y.Client, error) { return factory.Client() })
+	case "feature":
+		return completion.WithFeature(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "uiplugin":
 		return completion.WithUIPlugin(p.Name, func() (*c8y.Client, error) { return factory.Client() })
 	case "uipluginversion":
@@ -289,6 +291,10 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 	case "microservicename":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
 		p.PipelineAliases = append(p.PipelineAliases, "name")
+
+	case "feature":
+		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
+		p.PipelineAliases = append(p.PipelineAliases, "key")
 
 	case "tenant", "tenantname":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
@@ -409,7 +415,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "inventoryChildType":
 		opts = append(opts, flags.WithInventoryChildType(p.Name, targetProp, p.Format))
 
-	case "string", "source", "tenantname", "devicerequest", "subscriptionName", "subscriptionId", "applicationname", "microserviceinstance", "microservicename", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "uipluginversion":
+	case "string", "source", "tenantname", "devicerequest", "subscriptionName", "subscriptionId", "applicationname", "microserviceinstance", "microservicename", "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName", "uipluginversion", "feature":
 		opts = append(opts, flags.WithStringValue(p.Name, targetProp, p.Format))
 
 	case "stringAny":
