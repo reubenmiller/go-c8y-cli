@@ -66,7 +66,7 @@ func NewSubscribeCmd(f *cmdutil.Factory) *SubscribeCmd {
 
 	cmd.Flags().StringVar(&ccmd.Subscription, "name", "", "The subscription name. Each subscription is identified by a unique name within a specific context")
 	cmd.Flags().StringVar(&ccmd.Token, "token", "", "Token for the subscription. If not provided, then a token will be created")
-	cmd.Flags().StringVar(&ccmd.Subscriber, "subscriber", "goc8ycli", "The subscriber name which the client wishes to be identified with. Defaults to goc8ycli")
+	cmd.Flags().StringVar(&ccmd.Subscriber, "subscriber", "", "The subscriber name which the client wishes to be identified with. Defaults to goc8ycli")
 	cmd.Flags().StringVar(&ccmd.Consumer, "consumer", "", "Consumer name. Required for shared subscriptions")
 	cmd.Flags().StringSliceVar(&ccmd.ActionTypes, "actionTypes", []string{}, "Only listen for specific action types, CREATE, UPDATE or DELETE (client side filtering)")
 	cmd.Flags().String("duration", "", "Subscription duration")
@@ -111,9 +111,10 @@ func (n *SubscribeCmd) RunE(cmd *cobra.Command, args []string) error {
 		Consumer: n.Consumer,
 		Token:    n.Token,
 		Options: c8y.Notification2TokenOptions{
-			Subscriber:       n.Subscriber,
-			Subscription:     n.Subscription,
-			ExpiresInMinutes: n.ExpiresInMinutes,
+			Subscriber:        n.Subscriber,
+			Subscription:      n.Subscription,
+			ExpiresInMinutes:  n.ExpiresInMinutes,
+			DefaultSubscriber: "goc8ycli",
 		},
 		ConnectionOptions: notification2.ConnectionOptions{
 			PingInterval: 60 * time.Second,
