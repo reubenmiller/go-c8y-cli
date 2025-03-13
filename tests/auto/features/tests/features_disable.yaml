@@ -1,0 +1,8 @@
+tests:
+    features_disable_Disable a feature in the current tenant:
+        command: c8y features disable --key example
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /features/example/by-tenant

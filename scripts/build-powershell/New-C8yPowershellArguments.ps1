@@ -105,6 +105,7 @@
         "microservice" { "object[]"; break }
         "microserviceinstance" { "string"; break }
         "microservicename" { "object[]"; break }
+        "feature" { "feature"; break }
         "optional_fragment" { "switch"; break }
         "remoteaccessconfiguration" { "object[]"; break }
         "set" { "object[]"; break }

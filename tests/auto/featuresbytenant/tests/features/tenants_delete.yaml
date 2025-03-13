@@ -1,0 +1,8 @@
+tests:
+    features/tenants_delete_Remove the feature override from a given tenant:
+        command: c8y features tenants delete --key example --tenant t12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /features/example/by-tenant/t12345

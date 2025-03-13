@@ -124,6 +124,9 @@
         # microservice name
         "microservicename" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
+        # feature
+        "feature" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
+
         # uiplugin
         "uiplugin" = "c8yfetcher.WithUIPluginByNameFirstMatch(n.factory, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 

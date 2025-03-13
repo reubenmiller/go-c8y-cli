@@ -1,0 +1,16 @@
+tests:
+    features/tenants_enable_Enable a feature for a given tenant:
+        command: c8y features tenants enable --key example --tenant t12345
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /features/example/by-tenant/t12345
+    features/tenants_enable_Enable a specific feature on all subtenants:
+        command: $TEST_SHELL -c 'c8y tenants list | c8y features tenants enable --key ui.datapoint-graph.v2'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: PUT
+                path: /features/{key}/by-tenant/$C8Y_TENANT

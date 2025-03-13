@@ -1,0 +1,271 @@
+{
+  "group": {
+    "name": "features",
+    "description": "Cumulocity tenant features",
+    "descriptionLong": "Managed feature toggles",
+    "link": "https://cumulocity.com/api/core/#tag/Feature-toggles-API"
+  },
+  "commands": [
+    {
+      "name": "list",
+      "description": "Get feature list for current tenant",
+      "descriptionLong": "Get feature list for current tenant",
+      "method": "GET",
+      "path": "/features",
+      "accept": "application/json",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-CurrentTenantFeatureCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of features for the current tenant",
+            "command": "Get-CurrentTenantFeatureCollection",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of features for the current tenant",
+            "command": "c8y features list"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update",
+      "description": "Update tenant features",
+      "descriptionLong": "Update tenant features",
+      "method": "PUT",
+      "path": "/features/{key}/by-tenant",
+      "accept": "application/vnd.com.nsn.cumulocity.tenant+json",
+      "alias": {
+        "go": "update",
+        "powershell": "Update-CurrentTenantFeature"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Enable a feature in the current tenant",
+            "command": "Update-CurrentTenantFeature -Key example -Active",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Enable a feature in the current tenant",
+            "command": "c8y features update --key example --active"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "key",
+          "type": "feature",
+          "description": "Feature ID / Key",
+          "required": true,
+          "pipeline": true
+        }
+      ],
+      "body": [
+        {
+          "name": "active",
+          "property": "active",
+          "type": "booleanDefault",
+          "required": false,
+          "description": "Enable feature"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "property": "customProperties",
+          "required": false,
+          "description": "A set of custom properties of the tenant"
+        }
+      ],
+      "bodyRequiredKeys": [
+        "active"
+      ]
+    },
+    {
+      "name": "enable",
+      "description": "Enable tenant feature",
+      "descriptionLong": "Enable tenant feature",
+      "method": "PUT",
+      "path": "/features/{key}/by-tenant",
+      "accept": "application/vnd.com.nsn.cumulocity.tenant+json",
+      "alias": {
+        "go": "enable",
+        "powershell": "Enable-CurrentTenantFeature"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Enable a feature in the current tenant",
+            "command": "Enable-CurrentTenantFeature -Key example -Active",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Enable a feature in the current tenant",
+            "command": "c8y features enable --key example"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "key",
+          "type": "feature",
+          "description": "Feature ID / Key",
+          "required": true,
+          "pipeline": true
+        }
+      ],
+      "body": [
+        {
+          "name": "data",
+          "type": "json",
+          "property": "customProperties",
+          "required": false,
+          "description": "A set of custom properties of the tenant"
+        }
+      ],
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "template": "{\"active\":true}"
+        }
+      ],
+      "bodyRequiredKeys": [
+        "active"
+      ]
+    },
+    {
+      "name": "disable",
+      "description": "Disable tenant feature",
+      "descriptionLong": "Disable tenant feature",
+      "method": "PUT",
+      "path": "/features/{key}/by-tenant",
+      "accept": "application/vnd.com.nsn.cumulocity.tenant+json",
+      "alias": {
+        "go": "disable",
+        "powershell": "Disable-CurrentTenantFeature"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Disable a feature in the current tenant",
+            "command": "Disable-CurrentTenantFeature -Key example -Active",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Disable a feature in the current tenant",
+            "command": "c8y features disable --key example"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "key",
+          "type": "feature",
+          "description": "Feature ID / Key",
+          "required": true,
+          "pipeline": true
+        }
+      ],
+      "body": [
+        {
+          "name": "data",
+          "type": "json",
+          "property": "customProperties",
+          "required": false,
+          "description": "A set of custom properties of the tenant"
+        }
+      ],
+      "bodyTemplates": [
+        {
+          "type": "jsonnet",
+          "template": "{\"active\":false}"
+        }
+      ],
+      "bodyRequiredKeys": [
+        "active"
+      ]
+    },
+    {
+      "name": "get",
+      "description": "Get feature",
+      "descriptionLong": "Get a feature in the current tenant",
+      "method": "GET",
+      "path": "/features/{key}",
+      "accept": "application/vnd.com.nsn.cumulocity.tenant+json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-CurrentTenantFeature"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a specific feature status in the current tenant",
+            "command": "Get-CurrentTenantFeature -Key example",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a specific feature status in the current tenant",
+            "command": "c8y features get --key example"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "key",
+          "type": "feature",
+          "pipeline": true,
+          "required": false,
+          "description": "Feature ID/Key"
+        }
+      ]
+    },
+    {
+      "name": "delete",
+      "description": "Removes the feature toggle override for a tenant of authenticated user",
+      "descriptionLong": "Removes the feature toggle override for a tenant of authenticated user",
+      "method": "DELETE",
+      "path": "/features/{key}/by-tenant",
+      "alias": {
+        "go": "delete",
+        "powershell": "Remove-CurrentTenantFeature"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Remove the feature override for the current tenant",
+            "command": "Remove-CurrentTenantFeature -Key example",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Remove the feature override for the current tenant",
+            "command": "c8y features delete --key example"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "key",
+          "type": "feature",
+          "pipeline": true,
+          "required": false,
+          "description": "Feature ID/Key"
+        }
+      ]
+    }
+  ]
+}

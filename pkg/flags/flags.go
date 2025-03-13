@@ -316,6 +316,15 @@ func GetPipeOptionsFromAnnotation(cmd *cobra.Command) (options *PipelineOptions,
 	if cmd.Annotations == nil {
 		return
 	}
+
+	// if aliasValue, ok := cmd.Annotations[AnnotationValuePipelineAlias+"."+name]; ok {
+	// 	aliases = append(aliases, strings.Split(aliasValue, ",")...)
+	// }
+
+	// if v, ok := cmd.Annotations[AnnotationValuePipelineAlias]; ok {
+
+	// }
+
 	if v, ok := cmd.Annotations[AnnotationValueFromPipelineData]; ok {
 		err = json.Unmarshal([]byte(v), options)
 		if err != nil {
