@@ -37,7 +37,7 @@ require (
 	github.com/tidwall/sjson v1.2.5
 	github.com/vbauerster/mpb/v6 v6.0.4
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.35.0
 	golang.org/x/term v0.29.0
 	gopkg.in/yaml.v3 v3.0.1
 	moul.io/http2curl/v2 v2.3.0
@@ -98,7 +98,7 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.3 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b // indirect
-	golang.org/x/net v0.34.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
@@ -108,5 +108,4 @@ require (
 )
 
 go 1.22
-
-toolchain go1.22.3
+toolchain go1.23.7
