@@ -248,7 +248,8 @@ func (n *RegisterESTCmd) RunE(cmd *cobra.Command, args []string) error {
 		output["name"] = deviceName
 		output["username"] = fmt.Sprintf("device_%s", externalID)
 		if showPassword {
-			output["otp"] = deviceCredentials
+			// Use password so the output is normalized with the register-basic output
+			output["password"] = deviceCredentials
 		}
 		output["type"] = deviceType
 
