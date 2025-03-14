@@ -125,7 +125,7 @@ func (n *RegisterESTCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("external-type", "external-type"),
 		flags.WithStringValue("iccid", "iccid"),
-		flags.WithStringValue("one-time-password", "otp"),
+		flags.WithStringValue("one-time-password", "password"),
 		flags.WithStringValue("tenant", "tenant"),
 		flags.WithStringValue("group", "group"),
 		cmdutil.WithTemplateValue(n.factory),
@@ -168,7 +168,7 @@ func (n *RegisterESTCmd) RunE(cmd *cobra.Command, args []string) error {
 			deviceName = externalID
 		}
 		deviceType := options.Get("type").String()
-		deviceCredentials := options.Get("otp").String()
+		deviceCredentials := options.Get("password").String()
 
 		showPassword := false
 		if deviceCredentials == "" {
