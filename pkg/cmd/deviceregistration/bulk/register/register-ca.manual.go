@@ -217,7 +217,6 @@ func (n *RegisterESTCmd) RunE(cmd *cobra.Command, args []string) error {
 			return "", nil
 		}
 
-		// TODO: inspect the response to see if the bulk registration was successful
 		body := response.Body()
 		totalFailed := gjson.GetBytes(body, "numberOfFailed").Int()
 		if totalFailed != 0 {

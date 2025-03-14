@@ -231,7 +231,6 @@ func (n *RegisterCmd) RunE(cmd *cobra.Command, args []string) error {
 			return "", nil
 		}
 
-		// TODO: inspect the response to see if the bulk registration was successful
 		body := response.Body()
 		totalFailed := gjson.GetBytes(body, "numberOfFailed").Int()
 		if totalFailed != 0 {
@@ -303,8 +302,6 @@ func writeCSV(w io.ReadWriter, items []KeyValuePair) {
 
 	contents.Write(record[0])
 
-	// Custom writer that does not add quoting
-	// contents.Write(record[1])
 	contents.Flush()
 
 	s := strings.Join(record[1], string(contents.Comma))
