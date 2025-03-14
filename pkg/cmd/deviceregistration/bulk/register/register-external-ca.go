@@ -13,35 +13,34 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// RegisterCumulocityCACmd command
-type RegisterCumulocityCACmd struct {
+// RegisterExternalCACmd command
+type RegisterExternalCACmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewRegisterCumulocityCACmd creates a command to Register device via the Cumulocity CA
-func NewRegisterCumulocityCACmd(f *cmdutil.Factory) *RegisterCumulocityCACmd {
-	ccmd := &RegisterCumulocityCACmd{
+// NewRegisterExternalCACmd creates a command to Register device
+func NewRegisterExternalCACmd(f *cmdutil.Factory) *RegisterExternalCACmd {
+	ccmd := &RegisterExternalCACmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "register-ca",
-		Short: "Register device via the Cumulocity CA (private preview feature)",
+		Use:   "register-external-ca",
+		Short: "Register device which is issued a certificate by an external CA",
 		Long: heredoc.Doc(`
-			Register a new device using the bulk registration api
+			The certificate should already be issued to the device by the external CA and the CA certificate
+			should be added to Cumulocity as a Trusted Certificate.
 
-			This feature requires the private preview feature toggle, "certificate-authority"
+			This is required when the Trusted Certificate has the autoRegistration setting disabled, so it will
+			require a device to be registered with the platform before the certificate is accepted by Cumulocity
 		`),
 		Example: heredoc.Doc(`
-			$ c8y deviceregistration bulk register-ca --id "ASDF098SD1J10912UD92JDLCNCU8"
-			Register a new device using BASIC authentication and generate a random password (printed on the console)
+			$ c8y deviceregistration bulk register-external-ca --id "ASDF098SD1J10912UD92JDLCNCU8"
+			Register a new device which which is signed by an external ca
 
-			$ c8y deviceregistration bulk register-ca --id "ASDF098SD1J10912UD92JDLCNCU8" --one-time-password "example"
-			Register a new device and provide the one-time-password to be used for enrollment
-
-			$ echo -e "device1\ndevice2" | c8y deviceregistration bulk register-ca --type linux --template "{name: input.value}"
-			Register 2 devices, and set the names based on their external id
+			$ echo -e "device1\ndevice2" | c8y deviceregistration bulk register-certificate --type linux --template "{name: input.value}"
+			Register 2 devices, and set the names based on their external id (using CERTIFICATES auth)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -56,7 +55,6 @@ func NewRegisterCumulocityCACmd(f *cmdutil.Factory) *RegisterCumulocityCACmd {
 	cmd.Flags().String("type", "thin-edge.io", "Device type")
 	cmd.Flags().String("iccid", "", "The ICCID of the device (SIM card number). If the ICCID appears in file, the import adds a fragment c8y_Mobile.iccid.")
 	cmd.Flags().String("external-type", "c8y_Serial", "The type of the external ID. If IDTYPE doesn't appear in the file, the default value is used. The default value is c8y_Serial")
-	cmd.Flags().String("one-time-password", "", "One Time Password used for initial enrollment. Leave blank for a randomly generated password")
 	cmd.Flags().String("tenant", "", "The ID of the tenant for which the registration is executed (only allowed for the management tenant)")
 	cmd.Flags().String("group", "", "The path in the groups hierarchy where the device is added. PATH contains the name of each group separated by /, that is: main_group/sub_group/.../last_sub_group. If a group does not exist, the import creates the group")
 
@@ -81,7 +79,7 @@ func NewRegisterCumulocityCACmd(f *cmdutil.Factory) *RegisterCumulocityCACmd {
 }
 
 // RunE executes the command
-func (n *RegisterCumulocityCACmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *RegisterExternalCACmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -116,7 +114,6 @@ func (n *RegisterCumulocityCACmd) RunE(cmd *cobra.Command, args []string) error 
 		flags.WithStaticStringValue("isAgent", "true"),
 		flags.WithStringValue("external-type", "external-type"),
 		flags.WithStringValue("iccid", "iccid"),
-		flags.WithStringValue("one-time-password", "password"),
 		flags.WithStringValue("tenant", "tenant"),
 		flags.WithStringValue("group", "group"),
 		cmdutil.WithTemplateValue(n.factory),
@@ -144,7 +141,6 @@ func (n *RegisterCumulocityCACmd) RunE(cmd *cobra.Command, args []string) error 
 	mappings := []PayloadMapping{
 		{CSVHeader: "ID", Properties: WithValue("id"), Output: WithValue("externalId")},
 		{CSVHeader: "AUTH_TYPE", Properties: WithValue("authType"), Output: WithValue("authType")},
-		{CSVHeader: "ENROLLMENT_OTP", Properties: WithPasswordOrDefault("password"), Output: WithValue("password")},
 		{CSVHeader: "NAME", Properties: WithValue("name", "id"), Output: WithValue("name")},
 		{CSVHeader: "TYPE", Properties: WithValue("type"), Output: WithValue("type")},
 		{CSVHeader: "IDTYPE", Properties: WithValue("external-type"), Output: WithValue("externalType")},

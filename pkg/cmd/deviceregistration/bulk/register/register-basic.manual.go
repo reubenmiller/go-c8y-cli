@@ -1,15 +1,6 @@
 package register
 
 import (
-	"bytes"
-	"context"
-	"encoding/csv"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"strings"
-
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
@@ -18,23 +9,20 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/randdata"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/gjson"
 )
 
-// RegisterCmd command
-type RegisterCmd struct {
+// RegisterBasicCmd command
+type RegisterBasicCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewRegisterCmd creates a command to Register device
-func NewRegisterCmd(f *cmdutil.Factory) *RegisterCmd {
-	ccmd := &RegisterCmd{
+// NewRegisterBasicCmd creates a command to Register device
+func NewRegisterBasicCmd(f *cmdutil.Factory) *RegisterBasicCmd {
+	ccmd := &RegisterBasicCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
@@ -47,9 +35,6 @@ func NewRegisterCmd(f *cmdutil.Factory) *RegisterCmd {
 
 			$ c8y deviceregistration bulk register-basic --id "ASDF098SD1J10912UD92JDLCNCU8" --password "example"
 			Register a new device using a user specified password
-
-			$ c8y deviceregistration bulk register-basic --id "ASDF098SD1J10912UD92JDLCNCU8" --auth-type CERTIFICATES 
-			Register a new device that will be connecting using x509 certificates (the certificate must be uploaded separately)
 
 			$ echo -e "device1\ndevice2" | c8y deviceregistration bulk register-basic --type linux --template "{name: input.value}"
 			Register 2 devices, and set the names based on their external id (using basic auth)
@@ -66,7 +51,6 @@ func NewRegisterCmd(f *cmdutil.Factory) *RegisterCmd {
 	cmd.Flags().String("name", "", "Device name. Defaults to the external id")
 	cmd.Flags().String("type", "thin-edge.io", "Device type")
 	cmd.Flags().String("iccid", "", "The ICCID of the device (SIM card number). If the ICCID appears in file, the import adds a fragment c8y_Mobile.iccid.")
-	cmd.Flags().String("auth-type", "BASIC", "Required authentication type for the device's user. If the device uses credentials, this can be skipped or filled with 'BASIC'. Devices that use certificates must set 'CERTIFICATES'")
 	cmd.Flags().String("external-type", "c8y_Serial", "The type of the external ID. If IDTYPE doesn't appear in the file, the default value is used. The default value is c8y_Serial")
 	cmd.Flags().String("password", "", "Device password. Leave blank for a randomly generated password")
 	cmd.Flags().String("tenant", "", "The ID of the tenant for which the registration is executed (only allowed for the management tenant)")
@@ -75,7 +59,6 @@ func NewRegisterCmd(f *cmdutil.Factory) *RegisterCmd {
 	completion.WithOptions(
 		cmd,
 		completion.WithRootDeviceGroup("group", func() (*c8y.Client, error) { return f.Client() }),
-		completion.WithValidateSet("auth-type", "BASIC", "CERTIFICATES"),
 	)
 
 	flags.WithOptions(
@@ -94,7 +77,7 @@ func NewRegisterCmd(f *cmdutil.Factory) *RegisterCmd {
 }
 
 // RunE executes the command
-func (n *RegisterCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *RegisterBasicCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -125,7 +108,8 @@ func (n *RegisterCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("type", "type"),
-		flags.WithStringValue("auth-type", "authType"),
+		flags.WithStaticStringValue("authType", "BASIC"),
+		flags.WithStaticStringValue("isAgent", "true"),
 		flags.WithStringValue("external-type", "external-type"),
 		flags.WithStringValue("iccid", "iccid"),
 		flags.WithStringValue("password", "password"),
@@ -153,157 +137,24 @@ func (n *RegisterCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 	commonOptions.DisableResultPropertyDetection()
 
-	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
-		options := gjson.ParseBytes(j.Value.([]byte))
-
-		formData := make(map[string]io.Reader)
-		b := bytes.NewBufferString("")
-
-		externalID := options.Get("id").String()
-		externalIDType := options.Get("external-type").String()
-		iccid := options.Get("iccid").String()
-		tenant := options.Get("tenant").String()
-		groupPath := options.Get("group").String()
-
-		deviceName := options.Get("name").String()
-		if deviceName == "" {
-			deviceName = externalID
-		}
-		deviceType := options.Get("type").String()
-		deviceCredentials := options.Get("password").String()
-		authType := options.Get("authType").String()
-
-		useOneTimeToken := true
-
-		showPassword := false
-		if deviceCredentials == "" && authType == "BASIC" {
-			// Show the password to the user (as they need this when connecting the device)
-			deviceCredentials = randdata.Password(32)
-			showPassword = true
-		} else if useOneTimeToken && deviceCredentials == "" && authType == "CERTIFICATES" {
-			// Show the password to the user (as they need this when connecting the device)
-			deviceCredentials = randdata.Password(32)
-			showPassword = true
-		}
-
-		passwordWarningChars := "\""
-		if strings.ContainsAny(deviceCredentials, passwordWarningChars) {
-			llog.Warnf("Device password contains some unsupported characters [%s]. Please avoid using any of them", passwordWarningChars)
-		}
-
-		// Cumulocity CA uses a one-time password header
-		credentialsHeader := "CREDENTIALS"
-		if useOneTimeToken {
-			credentialsHeader = "ENROLLMENT_OTP"
-		}
-
-		writeCSV(b, []KeyValuePair{
-			{"ID", externalID},
-			{"AUTH_TYPE", authType},
-			{credentialsHeader, deviceCredentials},
-			{"NAME", deviceName},
-			{"TYPE", deviceType},
-			{"IDTYPE", externalIDType},
-			{"ICCID", iccid},
-			{"TENANT", tenant},
-			{"PATH", groupPath},
-			{"com_cumulocity_model_Agent.active", "true"},
-		})
-
-		formData["file"] = b
-
-		req := c8y.RequestOptions{
-			Method:       http.MethodPost,
-			Path:         "devicecontrol/bulkNewDeviceRequests",
-			Accept:       "application/json",
-			FormData:     formData,
-			IgnoreAccept: cfg.IgnoreAcceptHeader(),
-			DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-		}
-
-		response, responseErr := c8yclient.SendRequest(context.Background(), req)
-		if responseErr != nil {
-			return response, responseErr
-		}
-
-		// dry run
-		if response == nil {
-			return "", nil
-		}
-
-		body := response.Body()
-		totalFailed := gjson.GetBytes(body, "numberOfFailed").Int()
-		if totalFailed != 0 {
-			llog.Infof("Response: %v", response)
-			failuresReasons := make([]string, 0)
-			response.JSON("failedCreationList").ForEach(func(key, value gjson.Result) bool {
-				if v := value.Get("failureReason"); v.Exists() {
-					if reason := v.String(); reason != "" {
-						failuresReasons = append(failuresReasons, fmt.Sprintf("id=%s, reason=%s", value.Get("deviceId").String(), reason))
-					}
-				}
-				return true
-			})
-			return response, cmderrors.NewUserError(fmt.Sprintf("bulk registration has some failures. failed=%d, reasons=%v", totalFailed, failuresReasons))
-		}
-		llog.Infof("Bulk registration was successful. %v", response)
-
-		// Lookup device id so that the command can be piped to downstream items
-		identity, _, identityErr := c8yclient.Identity.GetExternalID(context.Background(), externalIDType, externalID)
-		if identityErr != nil {
-			return "", identityErr
-		}
-
-		// Build a response to return to the user (this is not the response receive from c8y)
-		output := map[string]any{}
-		output["id"] = identity.ManagedObject.ID
-		output["externalId"] = externalID
-		output["name"] = deviceName
-		output["username"] = fmt.Sprintf("device_%s", externalID)
-		if showPassword {
-			output["password"] = deviceCredentials
-		}
-		output["type"] = deviceType
-		output["authType"] = authType
-
-		outB, jsonErr := json.Marshal(output)
-		if jsonErr != nil {
-			return "", jsonErr
-		}
-
-		contentType := response.Response.Header.Get("Content-Type")
-		llog.Infof("API Content-Type: %s", contentType)
-
-		err := n.factory.WriteOutput(outB, cmdutil.OutputContext{
-			Input:    j.Input,
-			Response: response.Response,
-		}, &commonOptions)
-		return nil, err
-	})
-}
-
-type KeyValuePair struct {
-	Key   string
-	Value string
-}
-
-func writeCSV(w io.ReadWriter, items []KeyValuePair) {
-	contents := csv.NewWriter(w)
-	// Use tab delimiter to avoid csv problems when values container a comma
-	contents.Comma = '\t'
-
-	record := [2][]string{}
-	for _, i := range items {
-		if i.Value != "" {
-			record[0] = append(record[0], i.Key)
-			record[1] = append(record[1], i.Value)
-		}
+	mappings := []PayloadMapping{
+		{CSVHeader: "ID", Properties: WithValue("id"), Output: WithValue("externalId")},
+		{CSVHeader: "AUTH_TYPE", Properties: WithValue("authType"), Output: WithValue("authType")},
+		{CSVHeader: "CREDENTIALS", Properties: WithPasswordOrDefault("password"), Output: WithValue("password")},
+		{CSVHeader: "NAME", Properties: WithValue("name", "id"), Output: WithValue("name")},
+		{CSVHeader: "TYPE", Properties: WithValue("type"), Output: WithValue("type")},
+		{CSVHeader: "IDTYPE", Properties: WithValue("external-type"), Output: WithValue("externalType")},
+		{CSVHeader: "ICCID", Properties: WithValue("iccid")},
+		{CSVHeader: "TENANT", Properties: WithValue("tenant")},
+		{CSVHeader: "PATH", Properties: WithValue("group")},
+		{CSVHeader: "com_cumulocity_model_Agent.active", Properties: WithValue("isAgent")},
 	}
 
-	contents.Write(record[0])
-
-	contents.Flush()
-
-	s := strings.Join(record[1], string(contents.Comma))
-	io.WriteString(w, s+"\n")
+	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, RunBulkRegistrationJob(cmd, &RegistrationOptions{
+		Config:        cfg,
+		Log:           llog,
+		Client:        c8yclient,
+		Factory:       n.factory,
+		CommonOptions: commonOptions,
+	}, mappings))
 }

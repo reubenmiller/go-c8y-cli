@@ -20,8 +20,9 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdBulk {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdRegister.NewRegisterCmd(f).GetCommand())
-	cmd.AddCommand(cmdRegister.NewRegisterESTCmd(f).GetCommand())
+	cmd.AddCommand(cmdRegister.NewRegisterBasicCmd(f).GetCommand())
+	cmd.AddCommand(cmdRegister.NewRegisterCumulocityCACmd(f).GetCommand())
+	cmd.AddCommand(cmdRegister.NewRegisterExternalCACmd(f).GetCommand())
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
