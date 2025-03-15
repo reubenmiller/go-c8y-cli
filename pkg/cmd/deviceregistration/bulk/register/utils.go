@@ -171,7 +171,12 @@ func RunBulkRegistrationJob(cmd *cobra.Command, opts *RegistrationOptions, mappi
 
 		// Build a response to return to the user (this is not the response receive from c8y)
 		output["id"] = identity.ManagedObject.ID
-		output["username"] = fmt.Sprintf("device_%s", options.Get("id").String())
+		if tenant := options.Get("tenant").String(); tenant != "" {
+			output["username"] = fmt.Sprintf("%s/device_%s", tenant, options.Get("id").String())
+		} else {
+			tenant := opts.Client.GetTenantName(context.Background())
+			output["username"] = fmt.Sprintf("%s/device_%s", tenant, options.Get("id").String())
+		}
 
 		outB, jsonErr := json.Marshal(output)
 		if jsonErr != nil {

@@ -145,7 +145,7 @@ func (n *RegisterBasicCmd) RunE(cmd *cobra.Command, args []string) error {
 		{CSVHeader: "TYPE", Properties: WithValue("type"), Output: WithValue("type")},
 		{CSVHeader: "IDTYPE", Properties: WithValue("external-type"), Output: WithValue("externalType")},
 		{CSVHeader: "ICCID", Properties: WithValue("iccid")},
-		{CSVHeader: "TENANT", Properties: WithValue("tenant")},
+		{CSVHeader: "TENANT", Properties: WithValue("tenant"), Output: WithValue("tenant")},
 		{CSVHeader: "PATH", Properties: WithValue("group")},
 		{CSVHeader: "com_cumulocity_model_Agent.active", Properties: WithValue("isAgent")},
 	}
