@@ -3,6 +3,8 @@ category: Concepts - Extensions - API based commands
 title: Tab completion
 ---
 
+import CodeExample from '@site/src/components/CodeExample';
+
 Tab completion is the killer feature on the commands line. It improves the useability of the extension and can reduce the reliance on documentation (though it shouldn't be a substitute for good docs :wink:)
 
 The following sections detail the different tab completion mechanisms available for use.

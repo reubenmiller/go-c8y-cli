@@ -3,6 +3,8 @@ category: Concepts - Extensions - API based commands
 title: Command groups
 ---
 
+import CodeExample from '@site/src/components/CodeExample';
+
 A command group is used to logically group commands of a similar nature together.
 
 For example the following in-built commands related to devices is grouped together under a command group called `devices`.
