@@ -14,7 +14,7 @@ The URL format is useful when the repository is not hosted on github.com.
 To install an extension in development from the current directory, use "." as the
 value of the repository argument.
 
-See the list of available extensions at <https://github.com/topics/c8y-extension>.
+See the list of available extensions at https://github.com/topics/c8y-extension
 
 
 ```

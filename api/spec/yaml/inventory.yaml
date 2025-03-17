@@ -69,7 +69,7 @@ commands:
 
       - name: text
         type: string
-        description: managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
+        description: "Search for managed objects where a property value is equal to the given one. The following properties are examined: id, type, name, owner, externalIds."
 
       - name: onlyRoots
         type: boolean
@@ -160,7 +160,7 @@ commands:
 
       - name: text
         type: string
-        description: managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
+        description: "Search for managed objects where a property value is equal to the given one. The following properties are examined: id, type, name, owner, externalIds."
 
       - name: childAdditionId
         type: string
@@ -218,7 +218,7 @@ commands:
         type: string
         pipeline: true
         required: true
-        description: managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
+        description: "Search for managed objects where a property value is equal to the given one. The following properties are examined: id, type, name, owner, externalIds."
 
       - name: type
         type: string

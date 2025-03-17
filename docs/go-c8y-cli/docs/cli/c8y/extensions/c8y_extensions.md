@@ -14,7 +14,7 @@ will be forwarded to the `c8y-<extname>` executable of the extension.
 
 An extension cannot override any of the core c8y commands.
 
-See the list of available extensions at <https://github.com/topics/c8y-extension>.
+See the list of available extensions at https://github.com/topics/c8y-extension
 
 
 ### Options
