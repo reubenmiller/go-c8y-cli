@@ -38,7 +38,7 @@ func NewRegisterCumulocityCACmd(f *cmdutil.Factory) *RegisterCumulocityCACmd {
 			$ c8y deviceregistration register-ca --id "ASDF098SD1J10912UD92JDLCNCU8"
 			Register a new device using BASIC authentication and generate a random password (printed on the console)
 
-			$ c8y deviceregistration register-ca --id "ASDF098SD1J10912UD92JDLCNCU8" --one-time-password "example"
+			$ c8y deviceregistration register-ca --id "ASDF098SD1J10912UD92JDLCNCU8" --one-time-password "RqzwJeTusABlk4)KmtIc"
 			Register a new device and provide the one-time-password to be used for enrollment
 
 			$ echo -e "device1\ndevice2" | c8y deviceregistration register-ca --type linux --template "{name: input.value}"

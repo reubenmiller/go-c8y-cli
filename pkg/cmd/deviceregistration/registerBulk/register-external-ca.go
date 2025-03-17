@@ -39,7 +39,7 @@ func NewRegisterExternalCACmd(f *cmdutil.Factory) *RegisterExternalCACmd {
 			$ c8y deviceregistration register-external-ca --id "ASDF098SD1J10912UD92JDLCNCU8"
 			Register a new device which which is signed by an external ca
 
-			$ echo -e "device1\ndevice2" | c8y deviceregistration register-certificate --type linux --template "{name: input.value}"
+			$ echo -e "device1\ndevice2" | c8y deviceregistration register-external-ca --type linux --template "{name: input.value}"
 			Register 2 devices, and set the names based on their external id (using CERTIFICATES auth)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
