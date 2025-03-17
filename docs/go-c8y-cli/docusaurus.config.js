@@ -2,6 +2,7 @@
 
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
+import {themes as prismThemes} from 'prism-react-renderer';
 
 const isDeployPreview =
   process.env.NETLIFY && process.env.CONTEXT === 'deploy-preview';
@@ -166,8 +167,8 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
       },
     },
     prism: {
-      theme: require('prism-react-renderer/themes/github'),
-      darkTheme: require('prism-react-renderer/themes/dracula'),
+      theme: prismThemes.github,
+      darkTheme: prismThemes.dracula,
       additionalLanguages: ['powershell', 'bash', 'markdown'],
     },
     algolia: {

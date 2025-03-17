@@ -3,10 +3,11 @@ import React from 'react';
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from 'react-live';
 import { mdx } from '@mdx-js/react';
 import { useColorMode } from '@docusaurus/theme-common';
-import lightTheme from 'prism-react-renderer/themes/github';
-import darkTheme from 'prism-react-renderer/themes/dracula';
+import {themes as prismThemes} from 'prism-react-renderer';
 import Code from '@docusaurus/theme-classic/lib/theme/CodeBlock';
 
+const lightTheme = prismThemes.github;
+const darkTheme = prismThemes.dracula;
 
 const c8yCommands = {
     // alarms
