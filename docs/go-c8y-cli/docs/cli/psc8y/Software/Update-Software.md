@@ -21,6 +21,7 @@ Update-Software
 	[-Id] <Object[]>
 	[[-NewName] <String>]
 	[[-Description] <String>]
+	[[-SoftwareType] <String>]
 	[[-DeviceType] <String>]
 	[-Data <Object>]
 	[-NoAccept]
@@ -140,6 +141,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -SoftwareType
+Software type
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -DeviceType
 Device type filter.
 Only allow software to be applied to devices of this type
@@ -150,7 +166,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

@@ -47,7 +47,7 @@ Execute a jsonnet template
 
 ### EXAMPLE 3
 ```
-Invoke-Template -Template ./template.jsonnet -TemplateVars "name=input,type=mytype"
+Invoke-Template -Template ./template.jsonnet -TemplateVars "name=input,type=myType"
 ```
 
 Execute a jsonnet template which has multiple template variables (using a comma separated string)

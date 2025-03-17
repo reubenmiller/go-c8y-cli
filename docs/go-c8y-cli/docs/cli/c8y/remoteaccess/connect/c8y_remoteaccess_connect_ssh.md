@@ -32,6 +32,15 @@ Start an interactive SSH session on the device
 $ c8y remoteaccess connect ssh --device 12345 --user admin
 Start an interactive SSH session on the device with a given ssh user
 
+$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1883:127.0.0.1:1883
+Start an interactive SSH session and configure port-forward by mapping the remote's 127.0.0.1:1883 to your machine's port 1883
+
+$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1883
+Start an interactive SSH session and configure port-forward: 127.0.0.11883 (remote) => 1883 (local)
+
+$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1884:1883
+Start an interactive SSH session and configure port-forward: 127.0.0.11883 (remote) => 1884 (local)
+
 $ c8y remoteaccess connect ssh --device 12345 --user admin -- systemctl status
 Use a non-interactive session to execute a single command and print the result
 
@@ -47,6 +56,7 @@ use a non-interactive session to execute a custom shell command (notice the surr
       --device strings         Device
   -h, --help                   help for ssh
       --listen string          Listener address. unix:///run/example.sock (default "127.0.0.1:0")
+  -L, --port-forward string    SSH Port-Forwarding option in the format [bind_address:]port:host:hostport. It also accepts a custom short form, <local>[:<remote>]. The value is passed to the ssh -L option, so read the ssh man page for more info
       --user string            Default ssh user
 ```
 
@@ -99,7 +109,7 @@ use a non-interactive session to execute a custom shell command (notice the surr
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

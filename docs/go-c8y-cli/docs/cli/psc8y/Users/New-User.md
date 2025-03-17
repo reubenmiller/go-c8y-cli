@@ -25,6 +25,7 @@ New-User
 	[[-Email] <String>]
 	[-Enabled]
 	[[-Password] <String>]
+	[-ShouldResetPassword]
 	[-SendPasswordResetEmail]
 	[[-CustomProperties] <Object>]
 	[[-Tenant] <Object>]
@@ -87,10 +88,10 @@ Create a new user so that they can access the tenant
 
 ### EXAMPLE 1
 ```
-New-user -Username "$Username" -Email "testuser@no-reply.dummy.com" -Password "$NewPassword"
+New-user -Username "$Username" -Email "testuser@no-reply.dummy.com" -Password "$NewPassword" -ShouldResetPassword
 ```
 
-Create a user
+Create a user and force user to change their password when logging in
 
 ## PARAMETERS
 
@@ -199,6 +200,21 @@ Aliases:
 Required: False
 Position: 6
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ShouldResetPassword
+User must reset password on next login
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

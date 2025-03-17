@@ -86,7 +86,7 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

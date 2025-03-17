@@ -12,13 +12,15 @@ title: Register-Device
 
 
 ## SYNOPSIS
-Register device
+Register device with username/password and manual device approval/bootstrapping
 
 ## SYNTAX
 
 ```
 Register-Device
 	[-Id] <Object[]>
+	[[-Type] <String>]
+	[[-Group] <Object[]>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -72,13 +74,23 @@ Register-Device
 ```
 
 ## DESCRIPTION
-Register a new device (request)
+Register a new device (request) where the device is using the manual device bootstrapping
+process to retrieve its device credentials (username/password).
+
+See Cumulocity docs for more details: https://cumulocity.com/docs/2024/device-integration/rest/
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
 Register-Device -Id "ASDF098SD1J10912UD92JDLCNCU8"
+```
+
+Register a new device
+
+### EXAMPLE 2
+```
+Register-Device -Id "ASDF098SD1J10912UD92JDLCNCU8" -Group "My Group"
 ```
 
 Register a new device
@@ -100,6 +112,36 @@ Required: True
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Type
+Type of the device
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Group
+Group to which the device will be assigned
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

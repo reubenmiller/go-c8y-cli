@@ -18,8 +18,11 @@ c8y software list [flags]
 $ c8y software list
 Get a list of software packages
 
-$ c8y software list --name "python3*"
+$ c8y software list --name "python3*" --softwareType apt
 Get a list of software packages starting with "python3"
+
+$ c8y software list --softwareType rpm
+List all software packages of a given software type
         
 ```
 
@@ -34,6 +37,7 @@ Get a list of software packages starting with "python3"
       --query string           Additional query filter (accepts pipeline)
       --queryTemplate string   String template to be used when applying the given query. Use %s to reference the query/pipeline input
       --skipChildrenNames      Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
+      --softwareType string    Filter by softwareType
       --withChildren           Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
       --withChildrenCount      When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
       --withGroups             When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
@@ -89,7 +93,7 @@ Get a list of software packages starting with "python3"
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

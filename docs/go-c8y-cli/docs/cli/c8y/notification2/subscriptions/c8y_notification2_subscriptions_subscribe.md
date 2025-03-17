@@ -43,7 +43,7 @@ Subscribe using a given token (instead of generating a token)
       --expiresInMinutes int   Token expiration duration (default 1440)
   -h, --help                   help for subscribe
       --name string            The subscription name. Each subscription is identified by a unique name within a specific context
-      --subscriber string      The subscriber name which the client wishes to be identified with. Defaults to goc8ycli (default "goc8ycli")
+      --subscriber string      The subscriber name which the client wishes to be identified with. Defaults to token subject if not empty otherwise 'goc8ycli'
       --token string           Token for the subscription. If not provided, then a token will be created
 ```
 
@@ -96,7 +96,7 @@ Subscribe using a given token (instead of generating a token)
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

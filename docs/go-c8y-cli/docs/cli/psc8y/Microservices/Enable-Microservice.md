@@ -18,7 +18,7 @@ subscribe to microservice
 
 ```
 Enable-Microservice
-	[-Id] <Object[]>
+	[[-Id] <Object[]>]
 	[[-Tenant] <Object>]
 	[-Data <Object>]
 	[-NoAccept]
@@ -87,14 +87,14 @@ Enable (subscribe) to a microservice
 ## PARAMETERS
 
 ### -Id
-Microservice id (required)
+Microservice id
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)

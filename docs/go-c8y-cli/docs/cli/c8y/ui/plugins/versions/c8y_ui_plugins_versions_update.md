@@ -15,7 +15,7 @@ c8y ui plugins versions update [flags]
 ### Examples
 
 ```
-$ c8y ui plugins versions update --plugin 1234 --version 1.0 --tags tag1,latest
+$ c8y ui plugins versions update --plugin 1234 --version 1.0 --tag tag1,latest
 Replace tags assigned to a version of a plugin
         
 ```
@@ -27,7 +27,7 @@ Replace tags assigned to a version of a plugin
   -h, --help                       help for update
       --plugin string              Plugin (accepts pipeline)
       --processingMode string      Cumulocity processing mode
-      --tags strings               Tag assigned to the version. Version tags must be unique across all versions and version fields of plugin versions
+      --tag strings                Tag assigned to the version. Version tags must be unique across all versions and version fields of plugin versions
       --template string            Body template
       --templateVars stringArray   Body template variables
       --version string             Version
@@ -82,7 +82,7 @@ Replace tags assigned to a version of a plugin
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

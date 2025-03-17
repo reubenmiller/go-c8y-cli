@@ -25,6 +25,7 @@ Update-User
 	[[-Email] <String>]
 	[-Enabled]
 	[[-Password] <String>]
+	[-ShouldResetPassword]
 	[-SendPasswordResetEmail]
 	[[-CustomProperties] <Object>]
 	[[-Tenant] <Object>]
@@ -198,6 +199,21 @@ Aliases:
 Required: False
 Position: 6
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ShouldResetPassword
+User must reset password on next login
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

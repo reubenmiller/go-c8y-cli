@@ -68,7 +68,7 @@ Get-MicroserviceLogLevel
 
 ## DESCRIPTION
 Get configured log level for a package (incl.
-subpackages), or a specific class.
+sub-packages), or a specific class.
 (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
 
 ## EXAMPLES

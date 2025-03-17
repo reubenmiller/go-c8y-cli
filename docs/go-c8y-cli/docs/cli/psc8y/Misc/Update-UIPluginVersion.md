@@ -20,7 +20,7 @@ Replace tags related to a plugin version
 Update-UIPluginVersion
 	[[-Plugin] <Object[]>]
 	[[-Version] <Object[]>]
-	[[-Tags] <String[]>]
+	[[-Tag] <String[]>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -80,7 +80,7 @@ Replaces the tags of a given plugin version in your tenant
 
 ### EXAMPLE 1
 ```
-Update-UIPluginVersion -Plugin 1234 -Version 1.0 -Tags tag1,latest
+Update-UIPluginVersion -Plugin 1234 -Version 1.0 -Tag tag1,latest
 ```
 
 Replace tags assigned to a version of a plugin
@@ -117,7 +117,7 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Tags
+### -Tag
 Tag assigned to the version.
 Version tags must be unique across all versions and version fields of plugin versions
 
