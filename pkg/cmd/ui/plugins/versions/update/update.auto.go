@@ -34,7 +34,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Short: "Replace tags related to a plugin version",
 		Long:  `Replaces the tags of a given plugin version in your tenant`,
 		Example: heredoc.Doc(`
-$ c8y ui plugins versions update --plugin 1234 --version 1.0 --tags tag1,latest
+$ c8y ui plugins versions update --plugin 1234 --version 1.0 --tag tag1,latest
 Replace tags assigned to a version of a plugin
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -48,6 +48,7 @@ Replace tags assigned to a version of a plugin
 	cmd.Flags().String("plugin", "", "Plugin (accepts pipeline)")
 	cmd.Flags().String("version", "", "Version")
 	cmd.Flags().StringSlice("tags", []string{""}, "Tag assigned to the version. Version tags must be unique across all versions and version fields of plugin versions")
+	cmd.Flags().StringSlice("tag", []string{""}, "Tag assigned to the version. Version tags must be unique across all versions and version fields of plugin versions")
 
 	completion.WithOptions(
 		cmd,
@@ -68,6 +69,8 @@ Replace tags assigned to a version of a plugin
 	)
 
 	// Required flags
+
+	flags.MarkDeprecated(cmd, "tags", "please use 'tag' instead")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -145,8 +148,10 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringSliceValues("tags", "tags", ""),
+		flags.WithStringSliceValues("tag", "tags", ""),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("tags"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

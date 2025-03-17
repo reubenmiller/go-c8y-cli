@@ -11,7 +11,7 @@ Replaces the tags of a given plugin version in your tenant
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/ui_plugins_versions_update
 
 .EXAMPLE
-PS> Update-UIPluginVersion -Plugin 1234 -Version 1.0 -Tags tag1,latest
+PS> Update-UIPluginVersion -Plugin 1234 -Version 1.0 -Tag tag1,latest
 
 Replace tags assigned to a version of a plugin
 
@@ -36,7 +36,7 @@ Replace tags assigned to a version of a plugin
         # Tag assigned to the version. Version tags must be unique across all versions and version fields of plugin versions
         [Parameter()]
         [string[]]
-        $Tags
+        $Tag
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Update", "Template"

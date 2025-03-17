@@ -157,6 +157,16 @@
       "title": "Is Hidden",
       "description": "The parameter should be hidden from docs and completions but is still parsed. This is used to deprecate a flag without breaking existing scripts"
     },
+    "deprecatedParameter": {
+      "type": "boolean",
+      "title": "Is Deprecated",
+      "description": "The parameter should be hidden from docs and completions but is still parsed. This is used to deprecate a flag without breaking existing scripts"
+    },
+    "deprecationNoticeParameter": {
+      "type": "string",
+      "title": "Deprecation notice",
+      "description": "Add information that will be presented to the user"
+    },
     "defaultValue": {
       "type": "string",
       "title": "Default value",
@@ -588,6 +598,12 @@
                 "hidden": {
                   "$ref": "#/definitions/hiddenParameter"
                 },
+                "deprecated": {
+                  "$ref": "#/definitions/deprecatedParameter"
+                },
+                "deprecationNotice": {
+                  "$ref": "#/definitions/deprecationNoticeParameter"
+                },
                 "position": {
                   "$ref": "#/definitions/argumentPosition"
                 },
@@ -641,6 +657,12 @@
                 },
                 "hidden": {
                   "$ref": "#/definitions/hiddenParameter"
+                },
+                "deprecated": {
+                  "$ref": "#/definitions/deprecatedParameter"
+                },
+                "deprecationNotice": {
+                  "$ref": "#/definitions/deprecationNoticeParameter"
                 },
                 "position": {
                   "$ref": "#/definitions/argumentPosition"
@@ -770,6 +792,12 @@
                 },
                 "hidden": {
                   "$ref": "#/definitions/hiddenParameter"
+                },
+                "deprecated": {
+                  "$ref": "#/definitions/deprecatedParameter"
+                },
+                "deprecationNotice": {
+                  "$ref": "#/definitions/deprecationNoticeParameter"
                 },
                 "default": {
                   "$ref": "#/definitions/defaultValue"

@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -83,6 +84,7 @@ func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 	cmd.Flags().StringVar(&ccmd.contextPath, "contextPath", "", "contextPath of the hosted application. Required when application type is HOSTED")
 	cmd.Flags().StringVar(&ccmd.resourceURL, "resourcesUrl", "", "URL to application base directory hosted on an external server. Required when application type is HOSTED")
 	cmd.Flags().StringSliceVar(&ccmd.tags, "tags", []string{}, "Tags. Include 'latest' to change the activeVersionId of the application")
+	cmd.Flags().StringSliceVar(&ccmd.tags, "tag", []string{}, "Tags. Include 'latest' to change the activeVersionId of the application")
 
 	completion.WithOptions(
 		cmd,
@@ -94,6 +96,7 @@ func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
+		flags.MarkRenamed("tags", "tag"),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("file")
@@ -114,8 +117,9 @@ func (n *CmdCreate) getApplicationDetails(client *c8y.Client, log *logger.Logger
 	}
 
 	// Check if it is really a plugin!
-	if app.ManifestFile.Package != "plugin" {
-		return nil, fmt.Errorf("invalid file. The given file is not a UI plugin (e.g. the manifest.package != 'plugin'). file=%s", n.file)
+	allowedTypes := []string{"plugin", "blueprint"}
+	if !slices.Contains(allowedTypes, strings.ToLower(app.ManifestFile.Package)) {
+		return nil, fmt.Errorf("invalid file. The given file is not a UI plugin or blueprint (e.g. the manifest.package is not one of [%v]). file=%s", allowedTypes, n.file)
 	}
 
 	// Set application name using the following preferences (first match wins)

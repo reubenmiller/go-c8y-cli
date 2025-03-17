@@ -40,7 +40,7 @@ c8y ui plugins create --file "$VERSION1_URL" --name "$NAME"
 echo "Creating plugin from file"
 PLUGIN_FILE="${TEMP_DIR}/${NAME}.zip" 
 wget -O "$PLUGIN_FILE" "$VERSION2_URL"
-c8y ui plugins create --file "$PLUGIN_FILE" --tags latest -v
+c8y ui plugins create --file "$PLUGIN_FILE" --tag latest -v
 
 echo "List plugins"
 [ -n "$(c8y ui plugins list)" ]
@@ -58,7 +58,7 @@ echo "List versions"
 [ "$(c8y ui plugins versions list --plugin "$NAME" | wc -l | xargs)" = "2" ]
 
 echo "Update version tags"
-c8y ui plugins versions update --plugin "$NAME" --version "1.0.1" --tags latest,v1-info
+c8y ui plugins versions update --plugin "$NAME" --version "1.0.1" --tag latest,v1-info
 [ "$(c8y ui plugins versions get --plugin "$NAME" --tag v1-info --select version -o csv)" = "1.0.1" ]
 [ "$(c8y ui plugins versions get --plugin "$NAME" --tag latest --select version -o csv)" = "1.0.1" ]
 

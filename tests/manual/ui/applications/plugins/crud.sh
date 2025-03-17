@@ -57,7 +57,7 @@ c8y applications create --name "$NAME" --type HOSTED --template "{key: $.name + 
 #
 # Create a custom dummy with two versions
 #
-c8y ui plugins create --name "$PLUGIN_NAME" --file "$PLUGIN_VERSION1_URL" --version "1.0.1" --tags latest
+c8y ui plugins create --name "$PLUGIN_NAME" --file "$PLUGIN_VERSION1_URL" --version "1.0.1" --tag latest
 c8y ui plugins create --name "$PLUGIN_NAME" --file "$PLUGIN_VERSION2_URL" --version "1.0.2"
 
 
@@ -128,7 +128,7 @@ c8y ui applications plugins update --application "$NAME" --plugin "$PLUGIN_NAME"
 assert_application_remotes_contains "$NAME" "$SHARED_PLUGIN_CONTEXT_PATH@*" "$PLUGIN_NAME@1.0.1"
 
 echo "Marking $PLUGIN_NAME 1.0.2 as the latest version"
-echo "$PLUGIN_NAME" | c8y ui plugins versions update --tags "latest" --version "1.0.2"
+echo "$PLUGIN_NAME" | c8y ui plugins versions update --tag "latest" --version "1.0.2"
 
 echo "Updating all plugins"
 c8y ui applications plugins update --application "$NAME" --all

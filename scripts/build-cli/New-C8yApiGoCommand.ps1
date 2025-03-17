@@ -233,6 +233,8 @@
             Default = $iArg.default
             Required = $iArg.required
             Hidden = $iArg.hidden
+            Deprecated = $iArg.deprecated
+            DeprecationNotice = $iArg.deprecationNotice
             Pipeline = $iArg.pipeline
         }
         $CurrentArg = Get-C8yGoArgs @ArgParams
@@ -664,6 +666,7 @@ $($Examples -join "`n`n")
     // Required flags
     $($CommandArgs.Required -join "`n	")
     $($CommandArgs.Hidden -join "`n	")
+    $($CommandArgs.Deprecated -join "`n	")
 
     ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -895,6 +898,10 @@ Function Get-C8yGoArgs {
         [string] $Required,
 
         [string] $Hidden,
+
+        [string] $Deprecated,
+
+        [string] $DeprecationNotice,
 
         [string] $OptionName,
 
@@ -1449,6 +1456,10 @@ Function Get-C8yGoArgs {
 
     if ($Hidden -match "true|yes" -and $Pipeline -notmatch "true") {
         $Entry | Add-Member -MemberType NoteProperty -Name "Hidden" -Value "_ = cmd.Flags().MarkHidden(`"${Name}`")"
+    }
+
+    if ($Deprecated -match "true|yes") {
+        $Entry | Add-Member -MemberType NoteProperty -Name "Deprecated" -Value "flags.MarkDeprecated(cmd, `"${Name}`", `"${DeprecationNotice}`")"
     }
 
     $Entry.Name = $Name
