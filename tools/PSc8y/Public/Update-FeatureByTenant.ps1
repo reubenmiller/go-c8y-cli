@@ -24,7 +24,7 @@ Enable a feature for a given specific tenant
     Param(
         # Feature ID / Key (required)
         [Parameter(Mandatory = $true)]
-        [feature]
+        [string]
         $Key,
 
         # Unique identifier of a Cumulocity tenant

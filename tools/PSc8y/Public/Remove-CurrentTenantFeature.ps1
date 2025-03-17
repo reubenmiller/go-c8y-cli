@@ -25,7 +25,7 @@ Remove the feature override for the current tenant
         # Feature ID/Key
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [feature]
+        [object[]]
         $Key
     )
     DynamicParam {

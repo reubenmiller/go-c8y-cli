@@ -24,7 +24,7 @@ Remove the feature override from a given tenant
     Param(
         # Feature ID/Key
         [Parameter()]
-        [feature]
+        [string]
         $Key,
 
         # Unique identifier of a Cumulocity tenant

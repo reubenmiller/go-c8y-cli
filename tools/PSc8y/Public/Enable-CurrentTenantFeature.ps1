@@ -26,7 +26,7 @@ Enable a feature in the current tenant
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [feature]
+        [object[]]
         $Key
     )
     DynamicParam {

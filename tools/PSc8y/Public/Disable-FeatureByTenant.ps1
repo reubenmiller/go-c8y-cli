@@ -24,7 +24,7 @@ Disable a feature in the current tenant
     Param(
         # Feature ID / Key
         [Parameter()]
-        [feature]
+        [string]
         $Key,
 
         # Unique identifier of a Cumulocity tenant
