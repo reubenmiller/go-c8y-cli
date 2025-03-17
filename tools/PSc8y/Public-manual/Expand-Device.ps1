@@ -9,7 +9,7 @@ the data from Cumulocity.
 
 .NOTES
 If the function calling the Expand-Device has a "Force" parameter and it is set to True, then Expand-Device will not fetch the device managed object
-from the server. Instead it will return an object with only the id and name set (and the name will be set to [id={}]). This is to save the
+from the server. Instead it will return an object with only the id and name set (and the name will be set to the id). This is to save the
 number of calls to the server as usually the ID is the item you need to use in subsequent calls.
 
 If the given object is already an device object, then it is added with no additional lookup
@@ -28,17 +28,7 @@ Cases when the managed object IS NOT fetched from the server
 
 
 .OUTPUTS
-# Without fetch
-[pscustomobject]@{
-    id = "1234"
-    name = "[id=1234]"
-}
-
-# With fetch
-[pscustomobject]@{
-    id = "1234"
-    name = "mydevice"
-}
+[pscustomobject]
 
 .PARAMETER InputObject
 List of ids, names or device objects

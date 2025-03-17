@@ -166,8 +166,8 @@ Accept wildcard characters: False
 ```
 
 ### -Text
-managed objects containing a text value starting with the given text (placeholder {text}).
-Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
+Search for managed objects where a property value is equal to the given one.
+The following properties are examined: id, type, name, owner, externalIds.
 
 ```yaml
 Type: String

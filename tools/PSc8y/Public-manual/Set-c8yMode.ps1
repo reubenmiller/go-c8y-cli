@@ -3,6 +3,10 @@ Function Set-c8yMode {
     .SYNOPSIS
     Set cli mode temporarily
 
+    .DESCRIPTION
+    Set the mode to control which commands can be be used. The change will only affect the current
+    console.
+
     .EXAMPLE
     Set-c8yMode -Mode dev
 

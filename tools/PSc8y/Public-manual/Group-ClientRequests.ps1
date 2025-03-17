@@ -2,6 +2,15 @@ function Group-ClientRequests {
 <# 
 .SYNOPSIS
 Groups the input into array of a given maximum size. It will pass the piped input as array rather than individual items
+
+.DESCRIPTION
+Groups the input into array of a given maximum size. It will pass the piped input as array rather than individual items
+
+.EXAMPLE
+Group-ClientRequests
+
+Group-ClientRequests is only meant to be used internally by PSc8y
+
 #>
     [CmdletBinding()]
     param (
@@ -18,9 +27,11 @@ Groups the input into array of a given maximum size. It will pass the piped inpu
         [object[]]
         $InputObject,
 
+        # Size
         [int]
         $Size = 2000,
 
+        # AsPSObject
         [switch]
         $AsPSObject
     )

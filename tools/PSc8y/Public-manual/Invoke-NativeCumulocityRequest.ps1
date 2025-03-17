@@ -1,9 +1,22 @@
 Function Invoke-NativeCumulocityRequest {
+<#
+.SYNOPSIS
+Invoke a native Cumulocity Request using only PowerShell
+
+.DESCRIPTION
+Invoke a native Cumulocity Request using only PowerShell
+
+.EXAMPLE
+Invoke-NativeCumulocityRequest -Uri inventory/managedObjects
+
+Send a REST request to inventory/managedObjects
+#>
     [cmdletbinding(
         SupportsShouldProcess = $true,
         ConfirmImpact = "High"
     )]
     Param(
+        # Uri
         [Alias("Url")]
         [Parameter(
             Mandatory = $true,
@@ -11,10 +24,13 @@ Function Invoke-NativeCumulocityRequest {
         )]
         [string] $Uri,
 
+        # Method
         [string] $Method,
 
+        # Body
         [object] $Body,
 
+        # Headers
         [object] $Headers
     )
 

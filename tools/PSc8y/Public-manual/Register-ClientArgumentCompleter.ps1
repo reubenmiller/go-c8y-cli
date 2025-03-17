@@ -34,6 +34,7 @@ Force the registration of argument completers on a function which uses dynamic p
         [object]
         $Command,
 
+        # Bound parameters
         [hashtable]
         $BoundParameters
     )

@@ -12,7 +12,7 @@ title: Invoke-NativeCumulocityRequest
 
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Invoke a native Cumulocity Request using only PowerShell
 
 ## SYNTAX
 
@@ -28,26 +28,87 @@ Invoke-NativeCumulocityRequest
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Invoke a native Cumulocity Request using only PowerShell
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+Invoke-NativeCumulocityRequest -Uri inventory/managedObjects
 ```
 
-{{ Add example description here }}
+Send a REST request to inventory/managedObjects
 
 ## PARAMETERS
 
+### -Uri
+Uri
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: Url
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Method
+Method
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Body
-{{ Fill Body Description }}
+Body
 
 ```yaml
 Type: Object
 Parameter Sets: (All)
 Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Headers
+Headers
+
+```yaml
+Type: Object
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WhatIf
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: wi
 
 Required: False
 Position: Named
@@ -71,76 +132,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Headers
-{{ Fill Headers Description }}
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Method
-{{ Fill Method Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Uri
-{{ Fill Uri Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases: Url
-
-Required: True
-Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WhatIf
-Shows what would happen if the cmdlet runs.
-The cmdlet is not run.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases: wi
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
 ## NOTES
 
 ## RELATED LINKS

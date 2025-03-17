@@ -3,7 +3,7 @@ category: Misc
 external help file: PSc8y-help.xml
 id: ConvertTo-NestedJson
 Module Name: PSc8y
-online version: https://go.microsoft.com/fwlink/?LinkID=2096925
+online version:
 schema: 2.0.0
 slug: /docs/cli/psc8y/Misc/convertto-nestedjson
 title: ConvertTo-NestedJson
@@ -12,7 +12,7 @@ title: ConvertTo-NestedJson
 
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Convert object to JSON
 
 ## SYNTAX
 
@@ -25,36 +25,36 @@ ConvertTo-NestedJson
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Convert object to JSON but increase the default depth used by ConvertTo-Json
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+@{example = "one"} | ConvertTo-NestedJson
 ```
 
-{{ Add example description here }}
+Convert object to JSON
 
 ## PARAMETERS
 
-### -Compress
-{{ Fill Compress Description }}
+### -InputObject
+Input object
 
 ```yaml
-Type: SwitchParameter
+Type: Object
 Parameter Sets: (All)
 Aliases:
 
-Required: False
-Position: Named
+Required: True
+Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
 ### -Depth
-{{ Fill Depth Description }}
+Max depth
 
 ```yaml
 Type: Int32
@@ -63,23 +63,23 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: 20
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -InputObject
-{{ Fill InputObject Description }}
+### -Compress
+Compress
 
 ```yaml
-Type: Object
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
-Required: True
-Position: 0
-Default value: None
-Accept pipeline input: True (ByValue)
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
@@ -88,13 +88,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.Object
 ## OUTPUTS
 
-### System.String
 ## NOTES
 
 ## RELATED LINKS
-
-[https://go.microsoft.com/fwlink/?LinkID=2096925](https://go.microsoft.com/fwlink/?LinkID=2096925)
-

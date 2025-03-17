@@ -98,20 +98,11 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### # Without fetch
-### [pscustomobject]@{
-###     id = "1234"
-###     name = "[id=1234]"
-### }
-### # With fetch
-### [pscustomobject]@{
-###     id = "1234"
-###     name = "mydevice"
-### }
+### [pscustomobject]
 ## NOTES
 If the function calling the Expand-Device has a "Force" parameter and it is set to True, then Expand-Device will not fetch the device managed object
 from the server.
-Instead it will return an object with only the id and name set (and the name will be set to [id={}]).
+Instead it will return an object with only the id and name set (and the name will be set to the id).
 This is to save the
 number of calls to the server as usually the ID is the item you need to use in subsequent calls.
 
