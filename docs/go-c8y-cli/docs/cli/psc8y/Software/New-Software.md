@@ -20,6 +20,7 @@ Create software package
 New-Software
 	[[-Name] <String>]
 	[[-Description] <String>]
+	[[-SoftwareType] <String>]
 	[[-DeviceType] <Object[]>]
 	[-Data <Object>]
 	[-NoAccept]
@@ -117,6 +118,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -SoftwareType
+Software type
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -DeviceType
 Device type filter.
 Only allow software to be applied to devices of this type
@@ -127,7 +143,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False

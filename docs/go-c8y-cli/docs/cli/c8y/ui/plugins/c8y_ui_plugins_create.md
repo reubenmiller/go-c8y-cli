@@ -47,7 +47,7 @@ Create/update a ui plugin from a URL
       --name string                Name of application
       --processingMode string      Cumulocity processing mode
       --resourcesUrl string        URL to application base directory hosted on an external server. Required when application type is HOSTED
-      --tags strings               Tags. Include 'latest' to change the activeVersionId of the application
+      --tag strings                Tags. Include 'latest' to change the activeVersionId of the application
       --template string            Body template
       --templateVars stringArray   Body template variables
       --version string             Plugin version
@@ -102,7 +102,7 @@ Create/update a ui plugin from a URL
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

@@ -2,11 +2,15 @@
 category: deviceregistration
 title: c8y deviceregistration register
 ---
-Register device
+Register device with username/password and manual device approval/bootstrapping
 
 ### Synopsis
 
-Register a new device (request)
+Register a new device (request) where the device is using the manual device bootstrapping
+process to retrieve its device credentials (username/password).
+
+See Cumulocity docs for more details: https://cumulocity.com/docs/2024/device-integration/rest/
+
 
 ```
 c8y deviceregistration register [flags]
@@ -17,15 +21,23 @@ c8y deviceregistration register [flags]
 ```
 $ c8y deviceregistration register --id "ASDF098SD1J10912UD92JDLCNCU8"
 Register a new device
+
+$ c8y deviceregistration register --id "ASDF098SD1J10912UD92JDLCNCU8" --group "My Group"
+Register a new device and assign to a group
         
 ```
 
 ### Options
 
 ```
-  -h, --help                    help for register
-      --id strings              Device identifier. Max: 1000 characters. E.g. IMEI (required) (accepts pipeline)
-      --processingMode string   Cumulocity processing mode
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --group strings              Group to which the device will be assigned
+  -h, --help                       help for register
+      --id strings                 Device identifier. Max: 1000 characters. E.g. IMEI (required) (accepts pipeline)
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --type string                Type of the device
 ```
 
 ### Options inherited from parent commands
@@ -77,7 +89,7 @@ Register a new device
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

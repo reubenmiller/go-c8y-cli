@@ -15,13 +15,13 @@ c8y software create [flags]
 ### Examples
 
 ```
-$ c8y software create --name "python3-requests" --description "python requests library"
+$ c8y software create --name "python3-requests" --description "python requests library" --softwareType apt
 Create a software package
 
-$ c8y software create --name "python3-requests" --description "python requests library" --deviceType "c8y_Linux"
+$ c8y software create --name "python3-requests" --description "python requests library" --deviceType "c8y_Linux" --softwareType apt
 Create a software package which is only applicable for a specific device type
 
-$ echo -e "c8y_Linux\nc8y_MacOS" | c8y software create --name "python3-requests" --description "python requests library"
+$ echo -e "c8y_Linux\nc8y_MacOS" | c8y software create --name "python3-requests" --description "python requests library"  --softwareType rpm
 Create the same software package for multiple device types
 
 $ c8y software create --name "python3-requests" | c8y software versions create --version "1.0.0" --file "python3-requests.deb"
@@ -38,6 +38,7 @@ Create a software package and create a new version
   -h, --help                       help for create
       --name string                name
       --processingMode string      Cumulocity processing mode
+      --softwareType string        Software type
       --template string            Body template
       --templateVars stringArray   Body template variables
 ```
@@ -91,7 +92,7 @@ Create a software package and create a new version
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

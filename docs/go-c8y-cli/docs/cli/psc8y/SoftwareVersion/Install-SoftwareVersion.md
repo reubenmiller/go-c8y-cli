@@ -22,6 +22,7 @@ Install-SoftwareVersion
 	[-Software] <Object[]>
 	[[-Version] <Object[]>]
 	[[-Url] <String>]
+	[[-SoftwareType] <String>]
 	[[-Description] <String>]
 	[[-Action] <String>]
 	[-Data <Object>]
@@ -137,7 +138,7 @@ Accept wildcard characters: False
 
 ### -Url
 Software url.
-Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
+Leave blank to automatically set it if a matching software/version is found in the c8y software repository
 
 ```yaml
 Type: String
@@ -146,6 +147,22 @@ Aliases:
 
 Required: False
 Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SoftwareType
+Software type.
+Leave blank to automatically set it if a matching software/version is found in the c8y software repository
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -160,7 +177,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -175,7 +192,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

@@ -20,6 +20,7 @@ Approve device request
 Approve-DeviceRequest
 	[-Id] <Object[]>
 	[[-Status] <String>]
+	[[-SecurityToken] <String>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -85,6 +86,13 @@ Approve-DeviceRequest -Id $DeviceRequest.id
 
 Approve a new device request
 
+### EXAMPLE 2
+```
+Approve-DeviceRequest -Id $DeviceRequest.id -SecurityToken "abcdef123456"
+```
+
+Approve a new device request and provide a security token
+
 ## PARAMETERS
 
 ### -Id
@@ -112,6 +120,21 @@ Aliases:
 
 Required: False
 Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SecurityToken
+When accepting a device request, the security token is verified against the token submitted by the device when requesting credentials
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

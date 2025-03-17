@@ -21,7 +21,7 @@ New-UIPluginVersion
 	[[-Plugin] <Object[]>]
 	[[-File] <String>]
 	[-Version] <String>
-	[-Tags] <String[]>
+	[[-Tag] <String[]>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -134,15 +134,15 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Tags
-List of tags associated to the version (required)
+### -Tag
+List of tags associated to the version
 
 ```yaml
 Type: String[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 4
 Default value: None
 Accept pipeline input: False

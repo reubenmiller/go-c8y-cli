@@ -28,7 +28,6 @@ Get a list of measurements
       --dateTo string                End date or date and time of measurement occurrence.
       --device strings               Device ID (accepts pipeline)
       --excelFormat                  Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter
-      --fragmentType string          Fragment name from measurement (deprecated).
   -h, --help                         help for list
       --revert                       Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters
       --type string                  Measurement type.
@@ -86,7 +85,7 @@ Get a list of measurements
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

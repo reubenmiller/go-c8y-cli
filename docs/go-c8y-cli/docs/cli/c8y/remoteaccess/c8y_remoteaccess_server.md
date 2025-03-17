@@ -6,25 +6,29 @@ Start a local proxy server
 
 ### Synopsis
 
+Start a local proxy server
 
-		Start a local proxy server
+You can add use the remote access local proxy within your ssh config file, to use it to
+connect to your device with ssh without having to manually launch the proxy yourself!
 
-		You can add use the remote access local proxy within your ssh config file, to use it to
-		connect to your device with ssh without having to manually launch the proxy yourself!
+To do this add the following configuration to your device.
 
-		To do this add the following configuration to your device.
+---
+Host <device>
+	User <device_username>
+	PreferredAuthentications publickey
+	IdentityFile <identify_file>
+	ServerAliveInterval 120
+	StrictHostKeyChecking no
+	UserKnownHostsFile /dev/null
+	ProxyCommand c8y remoteaccess server --device %n --listen -
+---
 
-		---
-		Host <device>
-			User <device_username>
-			PreferredAuthentications publickey
-			IdentityFile <identify_file>
-			ServerAliveInterval 120
-			StrictHostKeyChecking no
-			UserKnownHostsFile /dev/null
-			ProxyCommand c8y remoteaccess server --device %n --listen -
-		---
-		
+Note: When using the "--browser" flag, by default the URL scheme (e.g. http, https) will be
+auto detected based on the Remote Access configuration's name. For example, if the configuration
+name has the "https:" prefix, then http will be used, otherwise http will be used. This aligns
+with the naming convention used in https://github.com/Cumulocity-IoT/cumulocity-remote-access-cloud-http-proxy
+
 
 ```
 c8y remoteaccess server [flags]
@@ -48,6 +52,9 @@ Start a local proxy using a local TCP server on a fixed port 22022
 $ c8y remoteaccess server --device 12345 --configuration "*rugpi*" --browser
 Start a local proxy and match on the configuration using wildcards, then open the browser to the endpoint
 
+$ c8y remoteaccess server --device 12345 --configuration "*rugpi*" --browser --scheme https
+Start a local proxy and match on the configuration using wildcards, then open the browser to the endpoint and force usage of https
+
 ```
 
 ### Options
@@ -58,6 +65,7 @@ Start a local proxy and match on the configuration using wildcards, then open th
       --device strings         Device
   -h, --help                   help for server
       --listen string          Listen. unix:///run/example.sock (default "127.0.0.1:0")
+      --scheme string          URL scheme to use when opening the address in a browser, e.g. http, https or auto (default "auto")
 ```
 
 ### Options inherited from parent commands
@@ -109,7 +117,7 @@ Start a local proxy and match on the configuration using wildcards, then open th
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

@@ -23,6 +23,7 @@ Get-SoftwareCollection
 	[[-OrderBy] <String>]
 	[[-Name] <String>]
 	[[-DeviceType] <String>]
+	[[-SoftwareType] <String>]
 	[[-Description] <String>]
 	[-SkipChildrenNames]
 	[-WithChildren]
@@ -173,6 +174,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -SoftwareType
+Filter by softwareType
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Description
 Filter by description
 
@@ -182,7 +198,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

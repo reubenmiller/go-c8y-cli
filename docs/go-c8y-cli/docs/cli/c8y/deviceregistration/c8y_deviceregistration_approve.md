@@ -17,16 +17,23 @@ c8y deviceregistration approve [flags]
 ```
 $ c8y deviceregistration approve --id "1234010101s01ldk208"
 Approve a new device request
+
+$ c8y deviceregistration approve --id "1234010101s01ldk208" --securityToken "abcdef123456"
+Approve a new device request and provide a security token
         
 ```
 
 ### Options
 
 ```
-  -h, --help                    help for approve
-      --id strings              Device identifier (required) (accepts pipeline)
-      --processingMode string   Cumulocity processing mode
-      --status string           Status of registration
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help                       help for approve
+      --id strings                 Device identifier (required) (accepts pipeline)
+      --processingMode string      Cumulocity processing mode
+      --securityToken string       When accepting a device request, the security token is verified against the token submitted by the device when requesting credentials
+      --status string              Status of registration
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands
@@ -78,7 +85,7 @@ Approve a new device request
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

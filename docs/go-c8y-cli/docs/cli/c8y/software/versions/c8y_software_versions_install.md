@@ -36,9 +36,10 @@ Install a software package version with an explicit url
   -h, --help                       help for install
       --processingMode string      Cumulocity processing mode
       --software string            Software name (required)
+      --softwareType string        Software type. Leave blank to automatically set it if a matching software/version is found in the c8y software repository
       --template string            Body template
       --templateVars stringArray   Body template variables
-      --url string                 Software url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
+      --url string                 Software url. Leave blank to automatically set it if a matching software/version is found in the c8y software repository
       --version string             Software version id or name
 ```
 
@@ -91,7 +92,7 @@ Install a software package version with an explicit url
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

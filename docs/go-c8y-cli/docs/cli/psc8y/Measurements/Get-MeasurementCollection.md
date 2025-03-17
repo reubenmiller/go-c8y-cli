@@ -22,7 +22,6 @@ Get-MeasurementCollection
 	[[-Type] <String>]
 	[[-ValueFragmentType] <String>]
 	[[-ValueFragmentSeries] <String>]
-	[[-FragmentType] <String>]
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
 	[-Revert]
@@ -169,21 +168,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -FragmentType
-Fragment name from measurement (deprecated).
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -DateFrom
 Start date or date and time of measurement occurrence.
 
@@ -193,7 +177,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -208,7 +192,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -270,7 +254,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

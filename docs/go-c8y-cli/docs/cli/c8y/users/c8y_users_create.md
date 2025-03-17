@@ -15,8 +15,8 @@ c8y users create [flags]
 ### Examples
 
 ```
-$ c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm!"
-Create a user
+$ c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password 'a0)8k2kld9lm' --shouldResetPassword
+Create a user and force user to change their password when logging in
 
 $ c8y users create --template "{email: 'test@me.com', userName: $.email, firstName: 'Peter'}" --sendPasswordResetEmail
 Create a user using a template
@@ -37,6 +37,7 @@ Create a user using a template
       --phone string               User phone number. Format: '+[country code][number]', has to be a valid MSISDN
       --processingMode string      Cumulocity processing mode
       --sendPasswordResetEmail     Send password reset email to the user instead of setting a password
+      --shouldResetPassword        User must reset password on next login
       --template string            Body template
       --templateVars stringArray   Body template variables
       --tenant string              Tenant
@@ -92,7 +93,7 @@ Create a user using a template
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

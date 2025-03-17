@@ -27,10 +27,13 @@ Enable (subscribe) to a microservice by name
 ### Options
 
 ```
-  -h, --help                    help for enable
-      --id string               Microservice id (required) (accepts pipeline)
-      --processingMode string   Cumulocity processing mode
-      --tenant string           Tenant id
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help                       help for enable
+      --id string                  Microservice id (accepts pipeline)
+      --processingMode string      Cumulocity processing mode
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --tenant string              Tenant id
 ```
 
 ### Options inherited from parent commands
@@ -82,7 +85,7 @@ Enable (subscribe) to a microservice by name
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
-      --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
+      --timeout string             Request timeout duration, i.e. 60s, 2m (default "600s")
       --totalPages int             Total number of pages to get
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")

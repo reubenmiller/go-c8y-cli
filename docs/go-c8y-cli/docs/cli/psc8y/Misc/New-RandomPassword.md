@@ -71,7 +71,7 @@ New-RandomPassword -InputStrings abc, ABC, 123 -PasswordLength 4
 
 3ABa
 
-Generate a password with a length of 4 containing atleast one char from each InputString
+Generate a password with a length of 4 containing at least one char from each InputString
 
 ### EXAMPLE 4
 ```
@@ -79,7 +79,7 @@ New-RandomPassword -InputStrings abc, ABC, 123 -PasswordLength 4 -FirstChar abcd
 3ABa
 ```
 
-Generates a password with a length of 4 containing atleast one char from each InputString that will start with a letter from 
+Generates a password with a length of 4 containing at least one char from each InputString that will start with a letter from 
 the string specified with the parameter FirstChar
 
 ## PARAMETERS
