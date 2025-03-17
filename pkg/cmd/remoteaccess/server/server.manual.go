@@ -49,10 +49,10 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 			To do this add the following configuration to your device.
 
 			---
-			Host <device>
-				User <device_username>
+			Host {{device}}
+				User {{device_username}}
 				PreferredAuthentications publickey
-				IdentityFile <identify_file>
+				IdentityFile {{identify_file}}
 				ServerAliveInterval 120
 				StrictHostKeyChecking no
 				UserKnownHostsFile /dev/null

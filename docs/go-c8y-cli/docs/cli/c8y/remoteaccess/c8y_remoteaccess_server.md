@@ -14,10 +14,10 @@ connect to your device with ssh without having to manually launch the proxy your
 To do this add the following configuration to your device.
 
 ---
-Host <device>
-	User <device_username>
+Host {{device}}
+	User {{device_username}}
 	PreferredAuthentications publickey
-	IdentityFile <identify_file>
+	IdentityFile {{identify_file}}
 	ServerAliveInterval 120
 	StrictHostKeyChecking no
 	UserKnownHostsFile /dev/null
