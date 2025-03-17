@@ -1,4 +1,4 @@
-package register
+package registerBulk
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
@@ -27,20 +27,21 @@ func NewRegisterCumulocityCACmd(f *cmdutil.Factory) *RegisterCumulocityCACmd {
 	}
 	cmd := &cobra.Command{
 		Use:   "register-ca",
-		Short: "Register device via the Cumulocity CA (private preview feature)",
+		Short: "Register device with an x509 certificate from the Cumulocity Certificate Authority (private preview feature)",
 		Long: heredoc.Doc(`
-			Register a new device using the bulk registration api
+			Register a device using the Cumulocity Certificate Authority to enable the device to request a device certificate
+			securely using EST. This will be supported by thin-edge.io out-of-the-box.
 
 			This feature requires the private preview feature toggle, "certificate-authority"
 		`),
 		Example: heredoc.Doc(`
-			$ c8y deviceregistration bulk register-ca --id "ASDF098SD1J10912UD92JDLCNCU8"
+			$ c8y deviceregistration register-ca --id "ASDF098SD1J10912UD92JDLCNCU8"
 			Register a new device using BASIC authentication and generate a random password (printed on the console)
 
-			$ c8y deviceregistration bulk register-ca --id "ASDF098SD1J10912UD92JDLCNCU8" --one-time-password "example"
+			$ c8y deviceregistration register-ca --id "ASDF098SD1J10912UD92JDLCNCU8" --one-time-password "example"
 			Register a new device and provide the one-time-password to be used for enrollment
 
-			$ echo -e "device1\ndevice2" | c8y deviceregistration bulk register-ca --type linux --template "{name: input.value}"
+			$ echo -e "device1\ndevice2" | c8y deviceregistration register-ca --type linux --template "{name: input.value}"
 			Register 2 devices, and set the names based on their external id
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

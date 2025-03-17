@@ -2,10 +2,14 @@
 Function Register-Device {
 <#
 .SYNOPSIS
-Register device
+Register device with username/password and manual device approval/bootstrapping
 
 .DESCRIPTION
-Register a new device (request)
+Register a new device (request) where the device is using the manual device bootstrapping
+process to retrieve its device credentials (username/password).
+
+See Cumulocity docs for more details: https://cumulocity.com/docs/2024/device-integration/rest/
+
 
 .LINK
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/deviceregistration_register
