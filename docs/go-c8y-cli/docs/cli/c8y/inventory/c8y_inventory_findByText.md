@@ -32,7 +32,7 @@ Find managed objects which contain the text 'myText' and is a device (using pipe
       --fragmentType string   ManagedObject fragment type.
   -h, --help                  help for findByText
       --skipChildrenNames     Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --text string           managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z). (required) (accepts pipeline)
+      --text string           Search for managed objects where a property value is equal to the given one. The following properties are examined: id, type, name, owner, externalIds. (required) (accepts pipeline)
       --type string           ManagedObject type.
       --withChildren          Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
       --withChildrenCount     When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)

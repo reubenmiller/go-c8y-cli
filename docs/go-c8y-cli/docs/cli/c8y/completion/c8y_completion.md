@@ -10,7 +10,7 @@ To load completions:
 	
 	Bash:
 	
-	  $ source <(c8y completion bash)
+	  $ source \<(c8y completion bash)
 	
 	  # To load completions for each session, execute once:
 	  # Linux:
@@ -21,7 +21,7 @@ To load completions:
 	Zsh:
 
 	  $ autoload -U compinit; compinit;
-	  $ source <(c8y completion zsh)
+	  $ source \<(c8y completion zsh)
 	
 	  # If shell completion is not already enabled in your environment,
 	  # you will need to enable it.  You can execute the following once:
@@ -29,7 +29,7 @@ To load completions:
 	  $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 	
 	  # To load completions for each session, execute once:
-	  $ c8y completion zsh > "${fpath[1]}/_c8y"
+	  $ c8y completion zsh > "$\{fpath[1]}/_c8y"
 	
 	  # You will need to start a new shell for this setup to take effect.
 	

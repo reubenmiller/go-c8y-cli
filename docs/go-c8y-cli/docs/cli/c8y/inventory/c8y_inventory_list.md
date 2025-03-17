@@ -41,7 +41,7 @@ Get managed objects which have the same type as the managed object id=1234. pipe
       --onlyRoots true           When set to true it returns managed objects which don't have any parent. If the current user doesn't have access to the parent, this is also root for the user
       --owner string             List of managed objects that are owned by the given username.
       --skipChildrenNames        Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --text string              managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
+      --text string              Search for managed objects where a property value is equal to the given one. The following properties are examined: id, type, name, owner, externalIds.
       --type string              ManagedObject type. (accepts pipeline)
       --withChildren             Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
       --withChildrenCount        When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)

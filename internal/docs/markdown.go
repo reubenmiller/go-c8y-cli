@@ -35,6 +35,12 @@ func GenMarkdown(cmd *cobra.Command, w io.Writer) error {
 	return GenMarkdownCustom(cmd, w, func(s string, opts ...string) string { return s })
 }
 
+func escapeMDX(v string) string {
+	v = strings.Replace(v, "{", "\\{", -1)
+	v = strings.Replace(v, "<", "\\<", -1)
+	return v
+}
+
 // GenMarkdownCustom creates custom markdown output.
 func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string, ...string) string) error {
 	cmd.InitDefaultHelpCmd()
@@ -47,7 +53,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string,
 	buf.WriteString(cmd.Short + "\n\n")
 	if len(cmd.Long) > 0 {
 		buf.WriteString("### Synopsis\n\n")
-		buf.WriteString(cmd.Long + "\n\n")
+		buf.WriteString(escapeMDX(cmd.Long) + "\n\n")
 	}
 
 	if cmd.Runnable() {

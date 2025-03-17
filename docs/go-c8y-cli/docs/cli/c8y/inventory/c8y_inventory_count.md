@@ -42,7 +42,7 @@ Get total number of devices
   -h, --help                     help for count
       --ids strings              List of ids.
       --owner string             List of managed objects that are owned by the given username.
-      --text string              managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
+      --text string              Search for managed objects where a property value is equal to the given one. The following properties are examined: id, type, name, owner, externalIds.
       --type string              ManagedObject type. (accepts pipeline)
 ```
 
