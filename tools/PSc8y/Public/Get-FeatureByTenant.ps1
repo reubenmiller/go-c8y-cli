@@ -25,7 +25,7 @@ Get the feature toggle override status for each child tenant
         # Feature ID/Key
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [feature]
+        [object[]]
         $Key
     )
     DynamicParam {

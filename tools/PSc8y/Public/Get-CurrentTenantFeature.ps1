@@ -25,7 +25,7 @@ Get a specific feature status in the current tenant
         # Feature ID/Key
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [feature]
+        [object[]]
         $Key
     )
     DynamicParam {
