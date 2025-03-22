@@ -220,6 +220,8 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 			authErrors = nil
 		}
 
+		log.Infof("Using client auth type: %s", client.AuthorizationMethod)
+
 		if !disableEncryptionCheck && len(authErrors) > 0 {
 			log.Warnf("Could not load authentication. error=%v", authErrors[0])
 		}
@@ -264,14 +266,55 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 	}
 }
 
-func loadAuthentication(v *config.Config, c *c8y.Client) error {
-	token, err := v.GetToken()
-	if err != nil {
-		return err
+func loadAuthentication(conf *config.Config, client *c8y.Client) error {
+	loginType := conf.GetLoginTypeRaw()
+	if loginType == "" {
+		// auto detect auth method based on the info which is there
+
+		// oauth2_internal / token
+		token, err := conf.GetToken()
+		if err == nil && token != "" {
+			client.SetToken(token)
+			client.AuthorizationMethod = c8y.AuthMethodOAuth2Internal
+			return nil
+		}
+
+		// password
+		if p, err := conf.GetPassword(); err == nil && p != "" {
+			client.AuthorizationMethod = c8y.AuthMethodBasic
+			return nil
+		}
+
+		// none
+		client.AuthorizationMethod = c8y.AuthMethodNone
+		return nil
 	}
-	if token != "" {
-		c.SetToken(token)
-		c.AuthorizationMethod = c8y.AuthMethodOAuth2Internal
+
+	// Force the usage of an auth method regardless if the pre-requisites for
+	// such auth method are available (this allows users to also enforce it)
+	client.AuthorizationMethod = conf.GetLoginTypeWithDefault()
+	if strings.EqualFold(client.AuthorizationMethod, c8y.AuthMethodOAuth2Internal) {
+		token, err := conf.GetToken()
+		if err != nil {
+			return err
+		}
+		client.SetToken(token)
+		client.AuthorizationMethod = c8y.AuthMethodOAuth2Internal
+		return nil
+	}
+
+	if strings.EqualFold(client.AuthorizationMethod, c8y.AuthMethodBasic) {
+		// clear token as we want to force basic auth
+		client.SetToken("")
+		return nil
+	}
+
+	if strings.EqualFold(client.AuthorizationMethod, c8y.AuthMethodNone) {
+		// clear token as we want to force basic auth
+		client.SetToken("")
+		client.Username = ""
+		client.Password = ""
+		return nil
 	}
 	return nil
 }

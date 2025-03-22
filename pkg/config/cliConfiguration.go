@@ -539,6 +539,7 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsSessionAlwaysIncludePassword, false),
 		WithBindEnv(SettingsSessionTokenValidFor, "8h"),
 		WithBindEnv(SettingsSessionHide, false),
+		WithBindEnv(SettingsLoginType, ""),
 
 		WithBindEnv(SettingsBrowser, ""),
 
@@ -1567,9 +1568,39 @@ func (c *Config) GetSilentExit() bool {
 	return c.viper.GetBool(SettingsSilentExit)
 }
 
-// GetLoginType get the preferred login type
-func (c *Config) GetLoginType() string {
-	return c.viper.GetString(SettingsLoginType)
+func ParseLoginTypeWithDefault(v string) string {
+	value, err := c8y.ParseAuthMethod(v)
+	if err != nil {
+		value = c8y.AuthMethodOAuth2Internal
+	}
+	return value
+}
+
+// GetLoginTypeWithDefault get the preferred login type
+func (c *Config) GetLoginTypeWithDefault() string {
+	v := c.Persistent.GetString(SettingsLoginType)
+	if v == "" {
+		v = c.viper.GetString(SettingsLoginType)
+	}
+	return ParseLoginTypeWithDefault(v)
+}
+
+// GetLoginTypeRaw get the raw value, where it could also be an empty value
+func (c *Config) GetLoginTypeRaw() string {
+	v := c.Persistent.GetString(SettingsLoginType)
+	if v == "" {
+		v = c.viper.GetString(SettingsLoginType)
+	}
+	return strings.ToUpper(v)
+}
+
+// SetLoginType sets the authorization method, e.g. BASIC, OAUTH2_INTERNAL, NONE
+func (c *Config) SetLoginType(v string) {
+	value, err := c8y.ParseAuthMethod(v)
+	if err != nil {
+		value = c8y.AuthMethodOAuth2Internal
+	}
+	c.Set(SettingsLoginType, value)
 }
 
 // CacheEnabled shows if caching is enabled or not

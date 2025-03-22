@@ -347,7 +347,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 	handler := c8ylogin.NewLoginHandler(client, cmd.ErrOrStderr(), func() {})
 	handler.Interactive = true
-	handler.LoginType = strings.ToUpper(cfg.GetLoginType())
+	handler.LoginType = strings.ToUpper(cfg.GetLoginTypeWithDefault())
 	if n.LoginType != "" {
 		handler.LoginType = strings.ToUpper(n.LoginType)
 	}
