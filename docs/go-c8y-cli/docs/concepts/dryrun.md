@@ -95,7 +95,7 @@ What If: Sending [POST] request to [https://example.com/inventory/managedObjects
 | header            | value
 |-------------------|---------------------------
 | Accept            | application/json 
-| Authorization     | Basic  {base64 tenant/username:password}
+| Authorization     | Basic {base64 tenant/username:password}
 | Content-Type      | application/json 
 
 #### Body

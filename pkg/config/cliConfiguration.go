@@ -2019,7 +2019,7 @@ func (c *Config) HideSensitiveInformation(client *c8y.Client, message string) st
 		message = strings.ReplaceAll(message, strings.TrimRight(client.BaseURL.Host, "/"), "{host}")
 	}
 
-	basicAuthMatcher := regexp.MustCompile(`(Basic\s+)[A-Za-z0-9=]+`)
+	basicAuthMatcher := regexp.MustCompile(`(Basic)\s+[A-Za-z0-9=]+`)
 	message = basicAuthMatcher.ReplaceAllString(message, "$1 {base64 tenant/username:password}")
 
 	return message
