@@ -6,7 +6,7 @@ Cumulocity device statistics (for a single tenant) statistics
 
 ### Synopsis
 
-Device statistics are collected for each inventory object with at least one measurement, event or alarm. There are no additional checks if the inventory object is marked as device using the c8y_IsDevice fragment. When the first measurement, event or alarm is created for a specific inventory object, Cumulocity IoT is always considering this as a device and starts counting.
+Device statistics are collected for each inventory object with at least one measurement, event or alarm. There are no additional checks if the inventory object is marked as device using the c8y_IsDevice fragment. When the first measurement, event or alarm is created for a specific inventory object, Cumulocity is always considering this as a device and starts counting.
 
 Device statistics are counted with daily and monthly rate. All requests are considered when counting device statistics, no matter which processing mode is used.
 

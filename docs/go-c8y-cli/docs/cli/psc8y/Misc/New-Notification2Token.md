@@ -170,7 +170,7 @@ Accept wildcard characters: False
 ```
 
 ### -Signed
-If true, the token will be securely signed by the Cumulocity IoT platform.
+If true, the token will be securely signed by the Cumulocity platform.
 \>= 1016.x
 
 ```yaml

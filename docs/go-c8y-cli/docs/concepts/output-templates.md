@@ -163,7 +163,7 @@ Reference to the command's flags which are used. This can be useful either for d
 ```
 
 :::note
-Note for powershell users; The flags are the native `c8y` flags and not the PowerShell flags/parameters, though it should be fairly easy to see what the mapping is.
+Note for powershell users; The flags are the native %%c8y%% flags and not the PowerShell flags/parameters, though it should be fairly easy to see what the mapping is.
 :::
 
 ### `request`

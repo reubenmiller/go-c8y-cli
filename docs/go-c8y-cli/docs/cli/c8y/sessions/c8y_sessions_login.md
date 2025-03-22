@@ -2,7 +2,7 @@
 category: sessions
 title: c8y sessions login
 ---
-login to Cumulocity IoT and return environment variables (including a token)
+login to Cumulocity and return environment variables (including a token)
 
 ### Synopsis
 

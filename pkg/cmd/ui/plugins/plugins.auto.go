@@ -19,7 +19,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdPlugins {
 
 	cmd := &cobra.Command{
 		Use:   "plugins",
-		Short: "Cumulocity IoT UI Plugins",
+		Short: "Cumulocity UI Plugins",
 		Long:  `Managed UI Plugins`,
 	}
 

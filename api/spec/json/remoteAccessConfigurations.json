@@ -203,7 +203,7 @@
     {
       "name": "create-passthrough",
       "description": "Create passthrough configuration",
-      "descriptionLong": "Create a passthrough configuration which enables you to connect\ndirectly to the device (via Cumulocity IoT) using a native client such as ssh.\n\nAfter a passthrough connection has been added, you can open a proxy to it using\none of the following commands:\n\n  * c8y remoteaccess server\n  * c8y remoteaccess connect ssh\n",
+      "descriptionLong": "Create a passthrough configuration which enables you to connect\ndirectly to the device (via Cumulocity) using a native client such as ssh.\n\nAfter a passthrough connection has been added, you can open a proxy to it using\none of the following commands:\n\n  * c8y remoteaccess server\n  * c8y remoteaccess connect ssh\n",
       "alias": {
         "go": "create-passthrough",
         "powershell": "New-RemoteAccessPassthroughConfiguration"

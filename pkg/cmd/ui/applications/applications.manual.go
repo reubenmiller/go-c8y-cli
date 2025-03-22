@@ -16,7 +16,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdExtensions {
 
 	cmd := &cobra.Command{
 		Use:   "applications",
-		Short: "Cumulocity IoT UI Applications",
+		Short: "Cumulocity UI Applications",
 		Long:  `Managed UI Applications`,
 	}
 

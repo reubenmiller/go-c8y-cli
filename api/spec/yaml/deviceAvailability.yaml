@@ -65,7 +65,7 @@ commands:
   - name: getDeviceAvailability
     method: GET
     description: Get device availability
-    descriptionLong: Retrieve the date when a specific managed object (by a given ID) sent the last message to Cumulocity IoT.
+    descriptionLong: Retrieve the date when a specific managed object (by a given ID) sent the last message to Cumulocity.
     path: inventory/managedObjects/{id}/availability
     alias:
         go: get

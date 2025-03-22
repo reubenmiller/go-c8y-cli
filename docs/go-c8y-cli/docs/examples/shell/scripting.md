@@ -34,7 +34,7 @@ done
 ```
 
 :::tip
-c8y automatically detects and reads from standard input. When using read inside a loop, it will write to standard input, `c8y` will intercept the input and the loop will only be run once instead of once per line.
+c8y automatically detects and reads from standard input. When using read inside a loop, it will write to standard input, %%c8y%% will intercept the input and the loop will only be run once instead of once per line.
 
 To get around this, use the `-n/--nullInput` parameter. This parameter will disable reading from standard input.
 :::
@@ -90,7 +90,7 @@ echo "match3.out: matches: $(cat match3.out | wc -l)"
 
 ### Backup EPL Monitor files from the Streaming Analytics engine
 
-You can easily backup EPL Monitor files by exporting them from Cumulocity IoT and saving them to disk.
+You can easily backup EPL Monitor files by exporting them from Cumulocity and saving them to disk.
 
 Each EPL Monitor file is saved as a separate file using it's name.
 

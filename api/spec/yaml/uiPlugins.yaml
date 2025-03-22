@@ -3,7 +3,7 @@
 
 group:
   name: ui/plugins
-  description: Cumulocity IoT UI Plugins
+  description: Cumulocity UI Plugins
   descriptionLong: 'Managed UI Plugins'
   link: https://cumulocity.com/api/core/
 

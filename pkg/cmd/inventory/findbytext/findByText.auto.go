@@ -51,7 +51,7 @@ Find managed objects which contain the text 'myText' and is a device (using pipe
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("text", "", "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z). (required) (accepts pipeline)")
+	cmd.Flags().String("text", "", "Search for managed objects where a property value is equal to the given one. The following properties are examined: id, type, name, owner, externalIds. (required) (accepts pipeline)")
 	cmd.Flags().String("type", "", "ManagedObject type.")
 	cmd.Flags().String("fragmentType", "", "ManagedObject fragment type.")
 	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")

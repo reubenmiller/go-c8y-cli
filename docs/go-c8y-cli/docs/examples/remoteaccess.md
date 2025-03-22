@@ -8,9 +8,9 @@ import CodeExample from '@site/src/components/CodeExample';
 The `remoteacccess` subcommand is only available from go-c8y-cli >= 2.41
 :::
 
-The [Cumulocity IoT Cloud Remote Access ](https://cumulocity.com/docs/cloud-remote-access/cra-general-aspects/) features allows you to connect to your devices using a number of different protocols like SSH, VNC, Telnet etc. In addition, it also supports a **PASSTHROUGH** mode which allows you to use any TCP based protocol.
+The [Cumulocity Cloud Remote Access ](https://cumulocity.com/docs/cloud-remote-access/cra-general-aspects/) features allows you to connect to your devices using a number of different protocols like SSH, VNC, Telnet etc. In addition, it also supports a **PASSTHROUGH** mode which allows you to use any TCP based protocol.
 
-Please refer to the [official Cumulocity IoT documentation](https://cumulocity.com/docs/cloud-remote-access/cra-general-aspects/) for more details.
+Please refer to the [official Cumulocity documentation](https://cumulocity.com/docs/cloud-remote-access/cra-general-aspects/) for more details.
 
 **Common use-cases**
 
@@ -22,20 +22,20 @@ Below are some common use-cases for the Cloud Remote Access Feature:
 
 **What it is not designed for**
 
-The Cloud Remote Access feature is designed for adhoc connections to provide access to services running locally on a device in a secure manner. For instance, if you need to perform some troubleshooting (e.g. root-cause analysis) on individual devices, in order to develop a fix that can be deployed to the rest of the device fleet using the other Cumulocity IoT device management features like [Firmware](https://cumulocity.com/docs/device-management-application/managing-device-data/#managing-firmware) and [Software Updates](https://cumulocity.com/docs/device-management-application/managing-device-data/#managing-software).
+The Cloud Remote Access feature is designed for adhoc connections to provide access to services running locally on a device in a secure manner. For instance, if you need to perform some troubleshooting (e.g. root-cause analysis) on individual devices, in order to develop a fix that can be deployed to the rest of the device fleet using the other Cumulocity device management features like [Firmware](https://cumulocity.com/docs/device-management-application/managing-device-data/#managing-firmware) and [Software Updates](https://cumulocity.com/docs/device-management-application/managing-device-data/#managing-software).
 
 The feature (in my opinion) is not designed for "always-on" connections and a large number of parallel connections. You should definitely NOT be trying to abuse the feature by performing some kind of Ansible deployment to devices via SSH. If you have this use-case, it is highly recommended looking into [thin-edge.io](https://thin-edge.io) which can fulfill all your device management requirements in a more scalable manner.
 
 **Background on the PASSTHROUGH feature**
 
-The **PASSTHROUGH** is relatively new and there doesn't seem to be much documentation out there about it. The feature is insanely useful as it allows you to create secure adhoc connections to your device using existing technologies such as SSH (using the standard ssh client). Cumulocity IoT facilitates the connection between a client on your local machine, and a component on the device, and routes traffic bi-directionally between the two. Since Cumulocity IoT is just passing bytes between the two clients, any TCP based protocol can be used.
+The **PASSTHROUGH** is relatively new and there doesn't seem to be much documentation out there about it. The feature is insanely useful as it allows you to create secure adhoc connections to your device using existing technologies such as SSH (using the standard ssh client). Cumulocity facilitates the connection between a client on your local machine, and a component on the device, and routes traffic bi-directionally between the two. Since Cumulocity is just passing bytes between the two clients, any TCP based protocol can be used.
 
 There are a few moving parts in this scenario, as there needs to be a client on both sides of the connection; one on your machine, which is interfacing with the local protocol, and a client on the device which routes the traffic between the cloud and a local service (such as the SSH daemon/service, or a local HTTP server).
 
 The good news is that there are existing open source projects which can be used to take advantage of the Remote Access feature; these components are:
 
 * [go-c8y-cli](https://goc8ycli.netlify.app/docs/introduction/) (on your machine)
-* [thin-edge.io](https://thin-edge.io) - a Rust based agent that has out-of-the-box support for the Cumulocity IoT Cloud Remote Access feature (on the device)
+* [thin-edge.io](https://thin-edge.io) - a Rust based agent that has out-of-the-box support for the Cumulocity Cloud Remote Access feature (on the device)
 
 ### Prerequisites
 
@@ -43,9 +43,9 @@ Before you can use this feature you need to have the "Cloud Remote Access" featu
 
 #### Granting permission to use Cloud Remote Access
 
-By default, the Cumulocity IoT `ROLE_REMOTE_ACCESS_ADMIN` permission is not assigned to any user group or user. This means that you'll need to add it before you will even be able to add any configurations and even see it in the Cumulocity IoT Device Management application.
+By default, the Cumulocity `ROLE_REMOTE_ACCESS_ADMIN` permission is not assigned to any user group or user. This means that you'll need to add it before you will even be able to add any configurations and even see it in the Cumulocity Device Management application.
 
-One option is to add the permission to the existing "admins" user group, and then assign the "admins" group to your user. You can do this via the Cumulocity IoT Administration app, or using the following command:
+One option is to add the permission to the existing "admins" user group, and then assign the "admins" group to your user. You can do this via the Cumulocity Administration app, or using the following command:
 
 <CodeExample>
 
@@ -80,9 +80,9 @@ c8y userreferences addUserToGroup --group devmgmt-powerusers --user "myuser@exam
 
 ### Using ssh config to launch proxy command automatically
 
-The remote access feature works very well with the ssh `ProxyCommand` which provides the most "native" ssh experience as you don't have to manually call the `c8y` command when you want to start your ssh session.
+The remote access feature works very well with the ssh `ProxyCommand` which provides the most "native" ssh experience as you don't have to manually call the %%c8y%% command when you want to start your ssh session.
 
-For example, with specific configuration, you can then connect to your device (via Cumulocity IoT) using a plain ssh command.
+For example, with specific configuration, you can then connect to your device (via Cumulocity) using a plain ssh command.
 
 ```sh
 ssh my_device
@@ -127,7 +127,7 @@ This example walks you through connecting to your device using ssh. The ssh conn
 Before we can connect to the device with a native ssh session, you will need to ensure that a **PASSTHROUGH** configuration has been added to the device. This configuration tells the Remote Access service which port the traffic should be routed to on the target device.
 
 
-#### Step 1: Create the passthrough configuration in Cumulocity IoT
+#### Step 1: Create the passthrough configuration in Cumulocity
 
 You can create the required remote access configuration using the following command:
 
@@ -270,7 +270,7 @@ The **c8y remoteaccess** commands can be used to provide the same functionality,
 
 The following are the main differences between **c8ylp** and the **c8y remoteaccess** commands:
 
-* The `--env-file` flag is not supported as **go-c8y-cli** uses session files/env variables to managed the Cumulocity IoT tenant/credentials
+* The `--env-file` flag is not supported as **go-c8y-cli** uses session files/env variables to managed the Cumulocity tenant/credentials
 
 * **c8ylp** only supported referring to a device by its external identity (with the `c8y_Serial` type). The **go-c8y-cli** version uses [reference by name](/docs/concepts/reference-by-name/) which allows supports both a named lookup and providing the explicit external id. The new way is more consistent with existing behaviour where you can also benefit from tab completion, something that is not possible when using external identities. In the future, **go-c8y-cli** will support additional lookup methods, however for now if you need to do a lookup via the external identity, then you can use an alias which can include an identity lookup. See the [migrating from c8ylp](#migrating-from-c8ylp) section for more details.
 

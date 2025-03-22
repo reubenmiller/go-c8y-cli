@@ -3,6 +3,8 @@ category: Concepts - Extensions
 title: Script based commands
 ---
 
+import CodeExample from '@site/src/components/CodeExample';
+
 An extension can include any number of commands. The structure of the commands is based on the folder structure, so you can group commands by placing them under the same sub folder. There is no limit to the number of sub folders, however you should keep it under 4-5 levels so it is not annoying for users to type.
 
 Below shows some examples of commands provided by an extension called `c8y-myext` and how each command can be executed.
@@ -318,7 +320,7 @@ c8y organizer devices list --name "my device*"
 
 </CodeExample>
 
-The above script was built to pass extra flags/arguments provided by the user to the underlying `c8y devices|agents list` command, so we can provide the additional flags such as `--pageSize 100` will be passed to the other `c8y` commands.
+The above script was built to pass extra flags/arguments provided by the user to the underlying `c8y devices|agents list` command, so we can provide the additional flags such as `--pageSize 100` will be passed to the other %%c8y%% commands.
 
 <CodeExample>
 

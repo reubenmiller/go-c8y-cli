@@ -10,15 +10,14 @@ Get the common parameters which can be added to a function which extends PSc8y f
 Function Get-MyObject {
     [cmdletbinding()]
     Param()
-
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"
     }
-
     Process {
         Find-ManagedObjects @PSBoundParameters
     }
 }
+
 Inherit common parameters to a custom function. This will add parameters such as "PageSize", "TotalPages", "Template" to your function
 #>
     [cmdletbinding()]

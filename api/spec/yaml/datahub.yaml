@@ -2,7 +2,7 @@
 ---
 group:
   name: datahub
-  description: Cumulocity IoT Data Hub api
+  description: Cumulocity Data Hub api
   descriptionLong: Data Hub api
   link: https://cumulocity.com/guides/datahub/datahub-overview/
 

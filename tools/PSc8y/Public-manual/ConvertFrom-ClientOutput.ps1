@@ -1,6 +1,20 @@
 Function ConvertFrom-ClientOutput {
+<#
+.SYNOPSIS
+Convert from the c8y client output into PowerShell objects
+
+.DESCRIPTION
+Convert from the c8y client output into a PowerShell object
+
+.EXAMPLE
+c8y devices list | ConvertFrom-ClientOutput -Type application/json
+
+Convert the raw object list into PowerShell objects
+
+#>
     [CmdletBinding()]
     param (
+        # Input Object
         [Parameter(
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true,
@@ -10,9 +24,11 @@ Function ConvertFrom-ClientOutput {
         [object[]]
         $InputObject,
 
+        # Type
         [string]
         $Type = "application/json",
 
+        # Item type
         [string]
         $ItemType = "application/json",
 

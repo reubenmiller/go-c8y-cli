@@ -102,6 +102,12 @@ Function Invoke-FixMarkdownFormatting {
     }
     # Fix any markdown escaping 
     $OutputText = $OutputText -replace '\\([`\[\]])', "`$1"
+
+    # Escape any brackets, as these are unsupported in mdx v3 (used by docusaurus)
+    $OutputText = $OutputText -replace '{filename}', "\{filename}"
+    $OutputText = $OutputText -replace '{id}', "\{id}"
+    $OutputText = $OutputText -replace '{basename}', "\{basename}"
+
     $OutputText = $OutputText -replace "##? $Name", ""
     $OutputText | Out-File $File
 

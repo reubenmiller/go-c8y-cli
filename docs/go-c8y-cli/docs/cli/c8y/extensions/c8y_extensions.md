@@ -9,12 +9,12 @@ Manage c8y extensions
 go-c8y-cli extensions are repositories that provide additional c8y commands.
 
 The name of the extension repository must start with "c8y-" and it must contain an
-executable of the same name. All arguments passed to the `c8y <extname>` invocation
-will be forwarded to the `c8y-<extname>` executable of the extension.
+executable of the same name. All arguments passed to the `c8y [extname]` invocation
+will be forwarded to the `c8y-[extname]` executable of the extension.
 
 An extension cannot override any of the core c8y commands.
 
-See the list of available extensions at <https://github.com/topics/c8y-extension>.
+See the list of available extensions at https://github.com/topics/c8y-extension
 
 
 ### Options

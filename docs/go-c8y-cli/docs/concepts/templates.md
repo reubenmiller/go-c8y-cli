@@ -159,7 +159,7 @@ c8y inventory create \
 }
 ```
 
-When using `c8y` directly, `--templateVars` can be used multiple times in the same command. This provides a better tab completion experience for the template variable names.
+When using %%c8y%% directly, `--templateVars` can be used multiple times in the same command. This provides a better tab completion experience for the template variable names.
 
 <CodeExample>
 

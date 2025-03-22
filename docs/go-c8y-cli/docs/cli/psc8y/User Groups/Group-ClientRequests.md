@@ -26,16 +26,17 @@ Group-ClientRequests
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Groups the input into array of a given maximum size.
+It will pass the piped input as array rather than individual items
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+Group-ClientRequests
 ```
 
-{{ Add example description here }}
+Group-ClientRequests is only meant to be used internally by PSc8y
 
 ## PARAMETERS
 
@@ -55,7 +56,7 @@ Accept wildcard characters: False
 ```
 
 ### -Size
-{{ Fill Size Description }}
+Size
 
 ```yaml
 Type: Int32
@@ -70,7 +71,7 @@ Accept wildcard characters: False
 ```
 
 ### -AsPSObject
-{{ Fill AsPSObject Description }}
+AsPSObject
 
 ```yaml
 Type: SwitchParameter

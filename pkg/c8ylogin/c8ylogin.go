@@ -458,7 +458,7 @@ func (lh *LoginHandler) verify() {
 				if version, err := lh.C8Yclient.TenantOptions.GetVersion(context.Background()); err == nil {
 					lh.C8Yclient.Version = version
 				} else {
-					lh.Logger.Warnf("Could not get Cumulocity IoT System version. %s", err)
+					lh.Logger.Warnf("Could not get Cumulocity System version. %s", err)
 				}
 			}
 		}

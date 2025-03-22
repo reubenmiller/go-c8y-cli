@@ -30,7 +30,7 @@ $ c8y sessions create \
 
 $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.com" --noStorage
 
-### Example 4: Create a session which points to a local api endpoint (most like an Cumulocity IoT Edge instance)
+### Example 4: Create a session which points to a local api endpoint (most like an Cumulocity Edge instance)
 
 $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 		

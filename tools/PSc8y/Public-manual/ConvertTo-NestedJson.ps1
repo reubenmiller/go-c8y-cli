@@ -1,21 +1,30 @@
 Function ConvertTo-NestedJson {
 <#
+.SYNOPSIS
+Convert object to JSON
 
-.ForwardHelpTargetName Microsoft.PowerShell.Utility\ConvertTo-Json
-.ForwardHelpCategory Cmdlet
+.DESCRIPTION
+Convert object to JSON but increase the default depth used by ConvertTo-Json
 
+.EXAMPLE
+@{example = "one"} | ConvertTo-NestedJson
+
+Convert object to JSON
 #>
-    [CmdletBinding(HelpUri = 'https://go.microsoft.com/fwlink/?LinkID=2096925', RemotingCapability = 'None')]
+    [CmdletBinding()]
     param(
+        # Input object
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
         [AllowNull()]
         [System.Object]
         ${InputObject},
 
+        # Max depth
         [ValidateRange(1, 2147483647)]
         [int]
         ${Depth} = 20,
 
+        # Compress
         [switch]
         ${Compress})
 

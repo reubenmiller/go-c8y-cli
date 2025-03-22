@@ -43,6 +43,7 @@ String
 #>
     [cmdletbinding()]
     Param(
+        # Filter sessions
         [Parameter(
             Position = 0
         )]

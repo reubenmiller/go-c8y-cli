@@ -3,6 +3,8 @@ category: Concepts - Extensions - API based commands
 title: Tab completion
 ---
 
+import CodeExample from '@site/src/components/CodeExample';
+
 Tab completion is the killer feature on the commands line. It improves the useability of the extension and can reduce the reliance on documentation (though it shouldn't be a substitute for good docs :wink:)
 
 The following sections detail the different tab completion mechanisms available for use.
@@ -11,7 +13,7 @@ The following sections detail the different tab completion mechanisms available 
 
 If a flag has a fixed number of allowed values, then the `validationSet` option is the perfect fit. The options will be presented to the user when they try tab completion when using the flag.
 
-For example, Cumulocity IoT's operation endpoint supports filtering the type of operations by status, and the states should be one of; `PENDING`, `EXECUTING`, `FAILED` or `SUCCESSFUL`. So using this knowledge a flag can be added to the `list` command which sets the `status` query parameter, and the users can use tab completion to check which options are available for usage. Below shows a snippet of the commands:
+For example, Cumulocity's operation endpoint supports filtering the type of operations by status, and the states should be one of; `PENDING`, `EXECUTING`, `FAILED` or `SUCCESSFUL`. So using this knowledge a flag can be added to the `list` command which sets the `status` query parameter, and the users can use tab completion to check which options are available for usage. Below shows a snippet of the commands:
 
 ```yaml
 commands:
@@ -49,12 +51,12 @@ SUCCESSFUL
 
 ## Tab completion using shell commands
 
-The external tab completion is not just limited to `c8y` commands, you can also use a shell to call any commands you would like.
+The external tab completion is not just limited to %%c8y%% commands, you can also use a shell to call any commands you would like.
 
 :::warning
 If the extensions uses a shell to execute the completion command then it might make your extension less portable as Windows users might not have access to a bash shell.
 
-Instead try to use the `c8y` command instead of calling a shell if possible.
+Instead try to use the %%c8y%% command instead of calling a shell if possible.
 :::
 
 The command snippet below shows an example of a `create` command which accepts a type flag when building the request body. The type flag has a tab completion command which queries existing devices in the tenant, and returns a unique list of device types (only based on the first 2000 devices found).

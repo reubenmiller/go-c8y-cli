@@ -107,7 +107,7 @@ The following basic types are available for use.
 
 ## Cumulocity specific types
 
-This section contains Cumulocity IoT specific types which most involve both tab completion and/or lookups depending on the exact type.
+This section contains Cumulocity specific types which most involve both tab completion and/or lookups depending on the exact type.
 
 ### Applications
 

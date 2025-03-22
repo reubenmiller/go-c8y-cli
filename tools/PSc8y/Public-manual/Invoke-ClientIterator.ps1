@@ -66,12 +66,7 @@ device_2-2
 
         # Format string to be applied to each value. The format string is $Format -f $item
         # The value will be prefixed to the input objects by default. However the format string
-        # can be customized by using a powershell string format (i.e. "{0:00}" )
-        #
-        # Other format variables (additional )
-        # "{0}" is the current input object (i.e. {0:000} for 0 padded numbers)
-        # "{1}" is the repeat counter from 0..Repeat-1
-        # "{2}" is the repeat counter from 1..Repeat
+        # can be customized by using a powershell string format (i.e. "\{0:00}" )
         [Parameter(
             Position = 0,
             ParameterSetName = "string"

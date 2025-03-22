@@ -12,7 +12,7 @@ All commands which send a Cumulocity API request support the dry run mode. A dry
 
 The dry run mode can be activated by supplying the `dry` parameter to any command.
 
-Previously in go-c8y-cli, dry run mode (formally known as WhatIf mode) was only supported in the PowerShell module, `PSc8y`. In go-c8y-cli v2 onwards, dry run mode is supported natively by the client allowing non-PowerShell users to benefit from it.
+Previously in go-c8y-cli, dry run mode (formally known as WhatIf mode) was only supported in the PowerShell module, %%psc8y%%. In go-c8y-cli v2 onwards, dry run mode is supported natively by the client allowing non-PowerShell users to benefit from it.
 
 ## Using dry run mode for documentation
 

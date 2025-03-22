@@ -10,7 +10,7 @@ It is recommended to use [extensions](/docs/concepts/extensions/) instead of cre
 Or just check out the [Tutorials](/docs/tutorials/extensions/).
 :::
 
-An example how to extend the `PSc8y` PowerShell module using another PowerShell module is shown in the following demo project:
+An example how to extend the %%psc8y%% PowerShell module using another PowerShell module is shown in the following demo project:
 
 [Example PSc8y.example Module](https://github.com/reubenmiller/PSc8y.example)
 
@@ -91,7 +91,7 @@ The module can be used as a template for your own PSc8y extension module. For co
 
     **Notes**
     
-    You can change the -Name parameter to anything you want. By convention the module name should start with `PSc8y.` to show that the module is an extension of `PSc8y`, however this convention is not enforced.
+    You can change the -Name parameter to anything you want. By convention the module name should start with `PSc8y.` to show that the module is an extension of %%psc8y%%, however this convention is not enforced.
 
 2. Change directory to the new module output folder, and import it into your current PowerShell session
 

@@ -8,11 +8,11 @@ import CodeExample from '@site/src/components/CodeExample';
 
 **Scenario**
 
-A customer provides some data exported by a 3rd party service that contains some data that should be converted to Cumulocity IoT events.
+A customer provides some data exported by a 3rd party service that contains some data that should be converted to Cumulocity events.
 
 **Goal**
 
-Create a Cumulocity IoT event for each for from a csv file.
+Create a Cumulocity event for each for from a csv file.
 
 **Procedure**
 
@@ -28,7 +28,7 @@ Create a Cumulocity IoT event for each for from a csv file.
     1686393000,Alarm Sattelheizung1: Stoppen aktiv AKTIV
     ```
 
-    The `machine_events.csv` contains just two columns; `timestamp` and `text`. However you may notice that the `timestamp` column contains a timestamp a unix timestamp (e.g. number of second since 1970-01-01), so this means that we will have to convert this to a Cumulocity IoT compatible timestamp (e.g. [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)), but we will worry about this conversion later on.
+    The `machine_events.csv` contains just two columns; `timestamp` and `text`. However you may notice that the `timestamp` column contains a timestamp a unix timestamp (e.g. number of second since 1970-01-01), so this means that we will have to convert this to a Cumulocity compatible timestamp (e.g. [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)), but we will worry about this conversion later on.
 
 2. We can check if the csv data is being read correctly and that it can be converted to json as the output will be the input mechanism used by downstream commands.
 
@@ -130,7 +130,7 @@ Create a Cumulocity IoT event for each for from a csv file.
     * The `text` just uses the `.text` data untouched from the input object (`input.value`)
     * The `type` uses a static string
 
-4. Now that we have verified that the template looks ok, then we can remove the `--first <lines>` flag from the `repeatcsv` command and the dry flag can be removed so that the events are created in Cumulocity IoT.
+4. Now that we have verified that the template looks ok, then we can remove the `--first <lines>` flag from the `repeatcsv` command and the dry flag can be removed so that the events are created in Cumulocity.
 
     <CodeExample>
     

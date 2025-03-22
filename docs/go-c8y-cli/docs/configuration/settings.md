@@ -18,7 +18,7 @@ The settings are read and applied in the following order:
 4. Read setting from env variable (if defined)
 5. Read from command argument equivalent (if it exists)
 
-The value last set will be used by `c8y`.
+The value last set will be used by %%c8y%%.
 
 You can inspect the current settings interpreted by go-c8y-cli by running:
 

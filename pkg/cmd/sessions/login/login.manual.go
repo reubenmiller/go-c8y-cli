@@ -63,7 +63,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 
 	cmd := &cobra.Command{
 		Use:   "login",
-		Short: "login to Cumulocity IoT and return environment variables (including a token)",
+		Short: "login to Cumulocity and return environment variables (including a token)",
 		Long:  `Set a session, login and test the session and get either OAuth2 token, or using two factor authentication`,
 		Example: heredoc.Doc(`
 			$ eval "$( c8y sessions login --from-file .env )"

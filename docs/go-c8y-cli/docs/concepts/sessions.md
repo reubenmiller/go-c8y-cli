@@ -19,10 +19,10 @@ SSO (Single Sign On) is not currently supported due to a security mechanism on t
 
 If you are an SSO user, then you will have to do one of the following before you can use go-c8y-cli:
 
-* Create a dedicated local user in Cumulocity IoT (via the Administration -> Users page)
+* Create a dedicated local user in Cumulocity (via the Administration -> Users page)
 * Create a service user via the Application User interface (though only for advanced users whom already have a username/password, see the [example](../../cli/c8y/microservices/serviceusers/c8y_microservices_serviceusers_create/#examples))
 
-If you are using a local Cumulocity IoT user, it recommended that you use TFA (Two-Factor Authentication) and use the "OAI-Secure" preferred login mode, which enables the usage of tokens (e.g. Bearer Authorization header), all of which is supported out of the box by go-c8y-cli.
+If you are using a local Cumulocity user, it recommended that you use TFA (Two-Factor Authentication) and use the "OAI-Secure" preferred login mode, which enables the usage of tokens (e.g. Bearer Authorization header), all of which is supported out of the box by go-c8y-cli.
 :::
 
 ## Create a new session
@@ -40,7 +40,7 @@ You will be prompted for the username and password.
 
 ### Create a session for a host with self-signed certificates
 
-If your Cumulocity host is using a self-signed certificate (which is usually the case if you are using the Cumulocity IoT Edge), then you may want to use the `allowInsecure` flag. This option ignores the SSL verification. It should only be used if you trust the host and you have no option available (e.g. importing the missing CA certificate to the operating system)!
+If your Cumulocity host is using a self-signed certificate (which is usually the case if you are using the Cumulocity Edge), then you may want to use the `allowInsecure` flag. This option ignores the SSL verification. It should only be used if you trust the host and you have no option available (e.g. importing the missing CA certificate to the operating system)!
 
 <CodeExample>
 
@@ -73,7 +73,7 @@ Alternatively, VIM style shortcuts "j" (down) and "k" (up) keys can be also used
 :::
 
 :::caution
-`set-session` is not provided by `c8y` itself, and it is installed automatically for you if you following the [installation guide](/docs/installation/shell-installation)
+`set-session` is not provided by %%c8y%% itself, and it is installed automatically for you if you following the [installation guide](/docs/installation/shell-installation)
 :::
 
 <CodeExample>
@@ -350,7 +350,7 @@ c8y sessions set --shell=auto --session "/my/path/session.json" | Out-String | I
 </Tabs>
 
 :::info
-`set-session` is a small helper function (for each supported shell) which wraps the call to `c8y sessions set` and sets the returned environment variables which are then read by subsequent calls to `c8y`.
+`set-session` is a small helper function (for each supported shell) which wraps the call to `c8y sessions set` and sets the returned environment variables which are then read by subsequent calls to %%c8y%%.
 :::
 
 ### Switching session for a single command

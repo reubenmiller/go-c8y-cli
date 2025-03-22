@@ -59,7 +59,7 @@ Get managed objects which have the same type as the managed object id=1234. pipe
 	cmd.Flags().String("type", "", "ManagedObject type. (accepts pipeline)")
 	cmd.Flags().String("fragmentType", "", "ManagedObject fragment type.")
 	cmd.Flags().String("owner", "", "List of managed objects that are owned by the given username.")
-	cmd.Flags().String("text", "", "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).")
+	cmd.Flags().String("text", "", "Search for managed objects where a property value is equal to the given one. The following properties are examined: id, type, name, owner, externalIds.")
 	cmd.Flags().Bool("onlyRoots", false, "When set to `true` it returns managed objects which don't have any parent. If the current user doesn't have access to the parent, this is also root for the user")
 	cmd.Flags().String("childAdditionId", "", "Search for a specific child addition and list all the groups to which it belongs.")
 	cmd.Flags().String("childAssetId", "", "Search for a specific child asset and list all the groups to which it belongs.")

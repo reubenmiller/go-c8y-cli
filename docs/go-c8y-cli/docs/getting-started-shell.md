@@ -14,10 +14,10 @@ SSO (Single Sign On) is not currently supported due to a security mechanism on t
 
 If you are an SSO user, then you will have to do one of the following before you can use go-c8y-cli:
 
-* Create a dedicated local user in Cumulocity IoT (via the Administration -> Users page)
+* Create a dedicated local user in Cumulocity (via the Administration -> Users page)
 * Create a service user via the Application User interface (though only for advanced users whom already have a username/password, see the [example](../cli/c8y/microservices/serviceusers/c8y_microservices_serviceusers_create/#examples))
 
-If you are using a local Cumulocity IoT user, it recommended that you use TFA (Two-Factor Authentication) and use the "OAI-Secure" preferred login mode, which enables the usage of tokens (e.g. Bearer Authorization header), all of which is supported out of the box by go-c8y-cli.
+If you are using a local Cumulocity user, it recommended that you use TFA (Two-Factor Authentication) and use the "OAI-Secure" preferred login mode, which enables the usage of tokens (e.g. Bearer Authorization header), all of which is supported out of the box by go-c8y-cli.
 :::
 
 ## Basics

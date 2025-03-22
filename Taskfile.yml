@@ -78,8 +78,17 @@ tasks:
   
   docs-c8y:
     desc: create c8y documentation
+    env:
+      # ignore any extensions which maybe be used on the host
+      C8Y_SETTINGS_EXTENSIONS_DATADIR: /tmp/dummy
     cmds:
       - go run ./cmd/gen-docs --website --doc-path "docs/go-c8y-cli/docs/cli/c8y"
+
+  docs-check:
+    desc: Check docusaurus MDX compatibility
+    cmds:
+      - npx docusaurus-mdx-checker
+    dir: docs/go-c8y-cli
 
   manpages:
     desc: create c8y man packages

@@ -23,7 +23,9 @@ Set-c8yMode
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Set the mode to control which commands can be be used.
+The change will only affect the current
+console.
 
 ## EXAMPLES
 

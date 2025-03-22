@@ -5,7 +5,7 @@ Function Get-DeviceAvailability {
 Get device availability
 
 .DESCRIPTION
-Retrieve the date when a specific managed object (by a given ID) sent the last message to Cumulocity IoT.
+Retrieve the date when a specific managed object (by a given ID) sent the last message to Cumulocity.
 
 .LINK
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_availability_get

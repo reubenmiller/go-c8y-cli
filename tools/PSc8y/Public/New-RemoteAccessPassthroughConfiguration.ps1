@@ -6,7 +6,7 @@ Create passthrough configuration
 
 .DESCRIPTION
 Create a passthrough configuration which enables you to connect
-directly to the device (via Cumulocity IoT) using a native client such as ssh.
+directly to the device (via Cumulocity) using a native client such as ssh.
 
 After a passthrough connection has been added, you can open a proxy to it using
 one of the following commands:

@@ -25,7 +25,7 @@ In the future there might be tooling to create the command specs automatically f
 
 ## Example 1: Create an extension for a microservice
 
-Let's say that you have developed a microservice that is deployed in Cumulocity IoT, and now you would like to create some a CLI interface which can be used by users to get the most out of your new microservice.
+Let's say that you have developed a microservice that is deployed in Cumulocity, and now you would like to create some a CLI interface which can be used by users to get the most out of your new microservice.
 
 For this example, let's assume we have a microservice called `organizer` and it is responsible for the management of some generic IoT assets.
 
@@ -282,7 +282,7 @@ There are a lot of different types that you can use when building your commands 
 
 Tab completion is a very useful feature which saves the user looking up things themselves as they can just press `<TAB><TAB>` and select an option from the response.
 
-Some parameter types (such as `device[]` and `application[]`) include built-in tab completion and named lookups, however if you don't find any types that meet your exact need then you can use the external tab completion option. The external tab completion mechanism allows you to execute another `c8y` command, or a shell of your choosing, to provide the completion values that should be displayed to the user.
+Some parameter types (such as `device[]` and `application[]`) include built-in tab completion and named lookups, however if you don't find any types that meet your exact need then you can use the external tab completion option. The external tab completion mechanism allows you to execute another %%c8y%% command, or a shell of your choosing, to provide the completion values that should be displayed to the user.
 
 Below shows an example of an external completion which uses the `c8y devices list` to provide the device names (with the device id being shown in the option's description for more context).
 

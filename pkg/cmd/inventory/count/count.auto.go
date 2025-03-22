@@ -62,7 +62,7 @@ Get total number of devices
 	cmd.Flags().String("type", "", "ManagedObject type. (accepts pipeline)")
 	cmd.Flags().String("fragmentType", "", "ManagedObject fragment type.")
 	cmd.Flags().String("owner", "", "List of managed objects that are owned by the given username.")
-	cmd.Flags().String("text", "", "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).")
+	cmd.Flags().String("text", "", "Search for managed objects where a property value is equal to the given one. The following properties are examined: id, type, name, owner, externalIds.")
 	cmd.Flags().String("childAdditionId", "", "Search for a specific child addition and list all the groups to which it belongs.")
 	cmd.Flags().String("childAssetId", "", "Search for a specific child asset and list all the groups to which it belongs.")
 	cmd.Flags().StringSlice("childDeviceId", []string{""}, "Search for a specific child device and list all the groups to which it belongs.")

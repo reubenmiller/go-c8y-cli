@@ -35,7 +35,7 @@ Using aliases have the current limitations but maybe lifted in future versions:
 Create a shortcut to display a single managed object in json
 
 :::info
-If you don't use the `--shell` option then you shouldn't prefix the command with `c8y`.
+If you don't use the `--shell` option then you shouldn't prefix the command with %%c8y%%.
 :::
 
 <CodeExample transform="false">
