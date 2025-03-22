@@ -233,10 +233,12 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		n.onSave(handler.C8Yclient)
 	}
 
+	// include scheme so the user is aware if they are using http or https
+	formatURL := strings.TrimSuffix(c8y.FormatBaseURL(handler.C8Yclient.BaseURL.String()), "/")
 	session := &c8ysession.CumulocitySession{
 		Path:       cfg.GetSessionFile(),
 		SessionUri: "file://" + cfg.GetSessionFile(),
-		Host:       handler.C8Yclient.BaseURL.Host,
+		Host:       formatURL,
 		Password:   handler.C8Yclient.Password,
 		Token:      handler.C8Yclient.Token,
 		Tenant:     cfg.GetTenant(),
