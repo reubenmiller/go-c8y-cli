@@ -2,8 +2,8 @@
 ---
 group:
   name: datahub/jobs
-  description: Cumulocity IoT DataHub Jobs
-  descriptionLong: Cumulocity IoT DataHub Jobs
+  description: Cumulocity DataHub Jobs
+  descriptionLong: Cumulocity DataHub Jobs
   link: https://cumulocity.com/guides/datahub/datahub-overview/
 
 commands:

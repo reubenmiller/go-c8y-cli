@@ -510,7 +510,7 @@
     {
       "name": "resetUserPassword",
       "description": "Reset user password",
-      "descriptionLong": "The password can be reset either by issuing a password reset email (default), or be specifying a new password.\n\nNote: In more recent Cumulocity IoT versions,  you can't set a fixed password for another user.\n",
+      "descriptionLong": "The password can be reset either by issuing a password reset email (default), or be specifying a new password.\n\nNote: In more recent Cumulocity versions,  you can't set a fixed password for another user.\n",
       "method": "PUT",
       "path": "user/{tenant}/users/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.user+json",

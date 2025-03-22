@@ -49,7 +49,7 @@ Create a new token which is valid for 30 minutes
         [string]
         $Type,
 
-        # If true, the token will be securely signed by the Cumulocity IoT platform. >= 1016.x
+        # If true, the token will be securely signed by the Cumulocity platform. >= 1016.x
         [Parameter()]
         [switch]
         $Signed,

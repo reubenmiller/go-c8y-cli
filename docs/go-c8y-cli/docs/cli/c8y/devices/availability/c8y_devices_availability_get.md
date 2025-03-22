@@ -6,7 +6,7 @@ Get device availability
 
 ### Synopsis
 
-Retrieve the date when a specific managed object (by a given ID) sent the last message to Cumulocity IoT.
+Retrieve the date when a specific managed object (by a given ID) sent the last message to Cumulocity.
 
 ```
 c8y devices availability get [flags]

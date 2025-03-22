@@ -12,7 +12,7 @@ The `pageSize` has an upper limit of 2000 which is enforced on the server side.
 
 In addition, Cumulocity also supports a `currentPage` parameter which can be used to control which page from the collection the server should return. The `currentPage` defaults 1, however can be changed to return a different page of the collection.
 
-Please read the [Cumulocity IoT documentation](http://cumulocity.com/guides/reference/rest-implementation/#rest-usage) for further details about paging.
+Please read the [Cumulocity documentation](http://cumulocity.com/guides/reference/rest-implementation/#rest-usage) for further details about paging.
 
 
 ### Using paging on the command line

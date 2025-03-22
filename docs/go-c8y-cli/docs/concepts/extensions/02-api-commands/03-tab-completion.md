@@ -13,7 +13,7 @@ The following sections detail the different tab completion mechanisms available 
 
 If a flag has a fixed number of allowed values, then the `validationSet` option is the perfect fit. The options will be presented to the user when they try tab completion when using the flag.
 
-For example, Cumulocity IoT's operation endpoint supports filtering the type of operations by status, and the states should be one of; `PENDING`, `EXECUTING`, `FAILED` or `SUCCESSFUL`. So using this knowledge a flag can be added to the `list` command which sets the `status` query parameter, and the users can use tab completion to check which options are available for usage. Below shows a snippet of the commands:
+For example, Cumulocity's operation endpoint supports filtering the type of operations by status, and the states should be one of; `PENDING`, `EXECUTING`, `FAILED` or `SUCCESSFUL`. So using this knowledge a flag can be added to the `list` command which sets the `status` query parameter, and the users can use tab completion to check which options are available for usage. Below shows a snippet of the commands:
 
 ```yaml
 commands:

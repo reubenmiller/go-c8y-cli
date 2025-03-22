@@ -25,7 +25,7 @@ In the future there might be tooling to create the command specs automatically f
 
 ## Example 1: Create an extension for a microservice
 
-Let's say that you have developed a microservice that is deployed in Cumulocity IoT, and now you would like to create some a CLI interface which can be used by users to get the most out of your new microservice.
+Let's say that you have developed a microservice that is deployed in Cumulocity, and now you would like to create some a CLI interface which can be used by users to get the most out of your new microservice.
 
 For this example, let's assume we have a microservice called `organizer` and it is responsible for the management of some generic IoT assets.
 

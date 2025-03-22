@@ -9,7 +9,7 @@ import Video from '@site/src/components/video';
 
 ### Installing a new version of a plugin
 
-The `c8y ui plugins create` command is a "smart" command which will perform all the required steps to create a new version of a plugin in Cumulocity IoT. The command will automatically check if an application placeholder needs to be created or not and add the binary (reading the version from the manifest inside the zip file). This takes allows users to focus on deploying new plugins easily.
+The `c8y ui plugins create` command is a "smart" command which will perform all the required steps to create a new version of a plugin in Cumulocity. The command will automatically check if an application placeholder needs to be created or not and add the binary (reading the version from the manifest inside the zip file). This takes allows users to focus on deploying new plugins easily.
 
 <CodeExample transform="false">
 
@@ -121,11 +121,11 @@ c8y ui plugins versions list --plugin mycustom-ui-plugin --includeAll --select v
 
 </CodeExample>
 
-**Note** If the version that is tagged as *latest* is not included in the recent N versions, then you will end up with N+1 versions as Cumulocity IoT will prevent you from deleting the version marked as *latest*.
+**Note** If the version that is tagged as *latest* is not included in the recent N versions, then you will end up with N+1 versions as Cumulocity will prevent you from deleting the version marked as *latest*.
 
 ### Delete all versions by the latest
 
-Cumulocity IoT will not allow you to delete a plugin which is tagged as "latest", therefore this makes it very easy to delete all of the versions by using the following 
+Cumulocity will not allow you to delete a plugin which is tagged as "latest", therefore this makes it very easy to delete all of the versions by using the following 
 
 <CodeExample transform="false">
 

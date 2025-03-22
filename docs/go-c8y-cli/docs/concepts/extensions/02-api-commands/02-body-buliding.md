@@ -117,7 +117,7 @@ What If: Sending [POST] request to [https://{host}/inventory/managedObjects]
 
 This kind of upload is called a `multipart/form-data` request. The request is generally used for uploading both binary files in addition to extra meta information describing the binary being uploaded.
 
-It is typically used in Cumulocity IoT to add new inventory binaries or application binaries to the platform.
+It is typically used in Cumulocity to add new inventory binaries or application binaries to the platform.
 
 The file upload scenario can be utilized by using the special `file` type in the body section. The snippet below adds a `utils` group command with a single command called `upload`.
 

@@ -90,7 +90,7 @@ echo "match3.out: matches: $(cat match3.out | wc -l)"
 
 ### Backup EPL Monitor files from the Streaming Analytics engine
 
-You can easily backup EPL Monitor files by exporting them from Cumulocity IoT and saving them to disk.
+You can easily backup EPL Monitor files by exporting them from Cumulocity and saving them to disk.
 
 Each EPL Monitor file is saved as a separate file using it's name.
 

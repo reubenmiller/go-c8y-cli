@@ -6,9 +6,9 @@ import CodeExample from '@site/src/components/CodeExample';
 
 ## Replace domain used in urls
 
-When uploading binaries to a configuration repository item, it can use the Cumulocity IoT url which includes the tenant name, for example a url like `https://t12345.cumulocity.com/inventory/binaries/11111`. Depending on your tenant setup, this URL might not be publicly reachable which might cause a problem to any agents/microservices want to download the binary behind the url.
+When uploading binaries to a configuration repository item, it can use the Cumulocity url which includes the tenant name, for example a url like `https://t12345.cumulocity.com/inventory/binaries/11111`. Depending on your tenant setup, this URL might not be publicly reachable which might cause a problem to any agents/microservices want to download the binary behind the url.
 
-Let's say that our Cumulocity IoT tenant is using a custom domain called `https://mycompany.iot.com`, however the configuration repository items are using urls the following the format; `https://t12345.cumulocity.com/inventory/binaries/11111`.
+Let's say that our Cumulocity tenant is using a custom domain called `https://mycompany.iot.com`, however the configuration repository items are using urls the following the format; `https://t12345.cumulocity.com/inventory/binaries/11111`.
 
 Replacing the domain can be done using the following chained command.
 

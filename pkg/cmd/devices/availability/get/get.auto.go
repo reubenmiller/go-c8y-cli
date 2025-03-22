@@ -33,7 +33,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get device availability",
-		Long:  `Retrieve the date when a specific managed object (by a given ID) sent the last message to Cumulocity IoT.`,
+		Long:  `Retrieve the date when a specific managed object (by a given ID) sent the last message to Cumulocity.`,
 		Example: heredoc.Doc(`
 $ c8y devices availability get --id 12345
 Get a device's availability by id

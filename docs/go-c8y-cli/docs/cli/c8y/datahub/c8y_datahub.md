@@ -2,7 +2,7 @@
 category: datahub
 title: c8y datahub
 ---
-Cumulocity IoT Data Hub api
+Cumulocity Data Hub api
 
 ### Synopsis
 

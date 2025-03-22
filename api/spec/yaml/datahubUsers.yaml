@@ -2,8 +2,8 @@
 ---
 group:
   name: datahub/users
-  description: Cumulocity IoT DataHub Users
-  descriptionLong: Cumulocity IoT DataHub Users
+  description: Cumulocity DataHub Users
+  descriptionLong: Cumulocity DataHub Users
   link: https://cumulocity.com/guides/datahub/datahub-overview/
   skip: true
 

@@ -16,7 +16,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdDatahub {
 
 	cmd := &cobra.Command{
 		Use:   "datahub",
-		Short: "Cumulocity IoT Data Hub api",
+		Short: "Cumulocity Data Hub api",
 		Long:  `Data Hub api`,
 	}
 

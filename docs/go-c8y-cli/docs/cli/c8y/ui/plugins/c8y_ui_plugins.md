@@ -2,7 +2,7 @@
 category: plugins
 title: c8y ui plugins
 ---
-Cumulocity IoT UI Plugins
+Cumulocity UI Plugins
 
 ### Synopsis
 

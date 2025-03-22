@@ -1,8 +1,8 @@
 {
   "group": {
     "name": "datahub/scheduler",
-    "description": "Cumulocity IoT DataHub Scheduler",
-    "descriptionLong": "Cumulocity IoT DataHub Scheduler",
+    "description": "Cumulocity DataHub Scheduler",
+    "descriptionLong": "Cumulocity DataHub Scheduler",
     "link": "https://cumulocity.com/guides/datahub/datahub-overview/",
     "skip": true
   },

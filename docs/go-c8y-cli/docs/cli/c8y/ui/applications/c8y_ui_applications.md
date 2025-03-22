@@ -2,7 +2,7 @@
 category: applications
 title: c8y ui applications
 ---
-Cumulocity IoT UI Applications
+Cumulocity UI Applications
 
 ### Synopsis
 

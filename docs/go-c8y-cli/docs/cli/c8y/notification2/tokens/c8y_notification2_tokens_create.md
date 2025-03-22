@@ -33,7 +33,7 @@ Create a new token which is valid for 30 minutes
       --nonPersistent              If true, indicates that the created token refers to the non-persistent variant of the named subscription. >= 1016.x
       --processingMode string      Cumulocity processing mode
       --shared                     Subscription is shared amongst multiple subscribers. >= 1016.x
-      --signed                     If true, the token will be securely signed by the Cumulocity IoT platform. >= 1016.x
+      --signed                     If true, the token will be securely signed by the Cumulocity platform. >= 1016.x
       --subscriber string          The subscriber name which the client wishes to be identified with. (accepts pipeline)
       --template string            Body template
       --templateVars stringArray   Body template variables

@@ -2,7 +2,7 @@
 category: plugins
 title: c8y ui applications plugins
 ---
-Cumulocity IoT UI Application plugin management
+Cumulocity UI Application plugin management
 
 ### Synopsis
 

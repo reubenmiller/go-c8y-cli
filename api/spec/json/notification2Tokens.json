@@ -73,7 +73,7 @@
         {
           "name": "signed",
           "type": "boolean",
-          "description": "If true, the token will be securely signed by the Cumulocity IoT platform. >= 1016.x"
+          "description": "If true, the token will be securely signed by the Cumulocity platform. >= 1016.x"
         },
         {
           "name": "nonPersistent",

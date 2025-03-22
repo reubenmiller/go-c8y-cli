@@ -2,11 +2,11 @@
 category: jobs
 title: c8y datahub jobs
 ---
-Cumulocity IoT DataHub Jobs
+Cumulocity DataHub Jobs
 
 ### Synopsis
 
-Cumulocity IoT DataHub Jobs
+Cumulocity DataHub Jobs
 
 ### Options
 
