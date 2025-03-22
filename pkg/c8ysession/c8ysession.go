@@ -147,7 +147,10 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 	if session.Version != "" {
 		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "version")), value(maybeHideMessage(client, session.Version)))
 	}
-	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(maybeHideMessage(client, session.Username)))
+	if session.Username != "" {
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(maybeHideMessage(client, session.Username)))
+	}
+	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "loginType")), value(client.AuthorizationMethod))
 	fmt.Fprintf(w, "\n")
 }
 
@@ -195,6 +198,7 @@ func GetVariablesFromSession(session *CumulocitySession, client *c8y.Client, set
 	token := session.Token
 	authHeaderValue := ""
 	authHeader := ""
+	loginType := client.AuthorizationMethod
 
 	if dummyReq, err := client.NewRequest("GET", "/", "", nil); err == nil {
 		authHeaderValue = dummyReq.Header.Get("Authorization")
@@ -220,6 +224,11 @@ func GetVariablesFromSession(session *CumulocitySession, client *c8y.Client, set
 		"C8Y_PASSWORD":             password,
 		"C8Y_HEADER_AUTHORIZATION": authHeaderValue,
 		"C8Y_HEADER":               authHeader,
+		"C8Y_SETTINGS_LOGIN_TYPE":  loginType,
+	}
+
+	if loginType != c8y.AuthMethodOAuth2Internal {
+		output["C8Y_TOKEN"] = ""
 	}
 
 	// Favor older path style over sessionUri to help with backwards compatibility

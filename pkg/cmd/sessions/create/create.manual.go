@@ -21,6 +21,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -69,6 +70,7 @@ type CmdCreate struct {
 	name           string
 	tenant         string
 	sessionType    string
+	loginType      string
 	noTenantPrefix bool
 	noStorage      bool
 	encrypt        bool
@@ -124,6 +126,7 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 	cmd.Flags().StringVar(&ccmd.description, "description", "", "Description about the session")
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of the session")
 	cmd.Flags().StringVar(&ccmd.sessionType, "type", "", "Session type. List of predefined session types")
+	cmd.Flags().StringVar(&ccmd.loginType, "loginType", "", "Login Type, e.g. BASIC, OAUTH_INTERNAL, NONE")
 	cmd.Flags().BoolVar(&ccmd.noTenantPrefix, "noTenantPrefix", false, "Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false")
 	cmd.Flags().BoolVar(&ccmd.noStorage, "noStorage", false, "Don't store any passwords or tokens in the session file")
 	cmd.Flags().BoolVar(&ccmd.encrypt, "encrypt", false, "Encrypt passwords and tokens (occurs when logging in)")
@@ -138,6 +141,12 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 			"prod\tProduction mode (read only)",
 			"qual\tQA mode (delete disabled)",
 			"dev\tDevelopment mode (no restrictions)",
+		),
+		completion.WithValidateSet(
+			"loginType",
+			c8y.AuthMethodBasic,
+			c8y.AuthMethodOAuth2Internal,
+			c8y.AuthMethodNone,
 		),
 	)
 
@@ -173,7 +182,7 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 		n.host = strings.TrimSpace(v)
 	}
 
-	if !cmd.Flags().Changed("username") {
+	if !cmd.Flags().Changed("username") && n.loginType != c8y.AuthMethodNone {
 		v, err := prompter.Username("Enter username", " "+cfg.GetDefaultUsername())
 
 		if err != nil {
@@ -182,7 +191,7 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 		n.username = strings.TrimSpace(v)
 	}
 
-	if !n.noStorage && !cmd.Flags().Changed("password") {
+	if !n.noStorage && !cmd.Flags().Changed("password") && n.loginType != c8y.AuthMethodNone {
 		password, err := prompter.Password("Enter c8y password", "")
 		if err != nil {
 			return err
@@ -215,7 +224,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if n.username == "" {
+	if n.username == "" && n.loginType != c8y.AuthMethodNone {
 		return &flags.ParameterError{
 			Name: "username",
 			Err:  flags.ErrParameterMissing,
@@ -252,6 +261,12 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		settings.Storage = &config.StorageSettings{
 			StorePassword: settings.Bool(false),
 			StoreToken:    settings.Bool(false),
+		}
+	}
+
+	if n.loginType != "" {
+		settings.Login = &config.LoginSettings{
+			Type: n.loginType,
 		}
 	}
 
@@ -307,7 +322,11 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		hostname = u.Hostname()
 	}
 
-	sessionName := hostname + "-" + session.Username
+	sessionName := hostname
+	if session.Username != "" {
+		sessionName += "-" + session.Username
+	}
+
 	if v, err := cmd.Flags().GetString("name"); err == nil && v != "" {
 		sessionName = v
 	}
