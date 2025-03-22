@@ -24,7 +24,7 @@ require (
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.4.0
-	github.com/reubenmiller/go-c8y v0.25.0
+	github.com/reubenmiller/go-c8y v0.25.1
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/sethvargo/go-password v0.3.1
 	github.com/spf13/cobra v1.9.1
@@ -47,7 +47,7 @@ require github.com/hashicorp/go-version v1.7.0
 require (
 	github.com/cli/browser v1.3.0
 	github.com/dustin/go-humanize v1.0.1
-	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3
