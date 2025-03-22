@@ -117,7 +117,7 @@ func (lh *LoginHandler) Run() error {
 	lh.init()
 
 	// Check if any authentication is set
-	if lh.C8Yclient.Token != "" || lh.C8Yclient.Password != "" {
+	if lh.C8Yclient.Token != "" || lh.C8Yclient.Password != "" || lh.LoginType == c8y.AuthMethodNone {
 		lh.state <- LoginStateVerify
 	} else {
 		lh.state <- LoginStatePromptPassword
@@ -168,6 +168,7 @@ func (lh *LoginHandler) sortLoginOptions() {
 	}
 
 	optionOrder := map[string]int{
+		c8y.AuthMethodNone:           3,
 		c8y.AuthMethodBasic:          2,
 		c8y.AuthMethodOAuth2Internal: 1,
 	}
@@ -199,6 +200,10 @@ func (lh *LoginHandler) sortLoginOptions() {
 
 func (lh *LoginHandler) init() {
 	lh.do(func() error {
+		// Special case where no auth is required
+		if lh.LoginType == c8y.AuthMethodNone {
+			return nil
+		}
 		loginOptions, _, err := lh.C8Yclient.Tenant.GetLoginOptions(context.Background())
 
 		if err != nil {
