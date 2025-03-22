@@ -32,6 +32,9 @@ import (
 )
 
 var (
+	// EnvSessionHide hides sensitive session information
+	EnvSessionHide = "C8Y_SETTINGS_SESSION_HIDE"
+
 	// EnvPassphrase passphrase environment variable name
 	EnvPassphrase = "C8Y_PASSPHRASE"
 

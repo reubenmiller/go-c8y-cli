@@ -125,7 +125,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		// set from the last instance.
 		// But this has a side effect that you can't control the profile handing via environment variables when using the interact session selection
 		allowedEnvValues := []string{
-			"C8Y_SETTINGS_SESSION_HIDE",
+			config.EnvSessionHide,
 			// Preserve encryption settings
 			"C8Y_PASSPHRASE",
 			"C8Y_PASSPHRASE_TEXT",
