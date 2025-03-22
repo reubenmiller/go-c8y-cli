@@ -320,7 +320,7 @@ c8y organizer devices list --name "my device*"
 
 </CodeExample>
 
-The above script was built to pass extra flags/arguments provided by the user to the underlying `c8y devices|agents list` command, so we can provide the additional flags such as `--pageSize 100` will be passed to the other `c8y` commands.
+The above script was built to pass extra flags/arguments provided by the user to the underlying `c8y devices|agents list` command, so we can provide the additional flags such as `--pageSize 100` will be passed to the other %%c8y%% commands.
 
 <CodeExample>
 

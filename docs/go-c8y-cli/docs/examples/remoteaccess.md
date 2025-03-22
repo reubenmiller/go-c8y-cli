@@ -80,7 +80,7 @@ c8y userreferences addUserToGroup --group devmgmt-powerusers --user "myuser@exam
 
 ### Using ssh config to launch proxy command automatically
 
-The remote access feature works very well with the ssh `ProxyCommand` which provides the most "native" ssh experience as you don't have to manually call the `c8y` command when you want to start your ssh session.
+The remote access feature works very well with the ssh `ProxyCommand` which provides the most "native" ssh experience as you don't have to manually call the %%c8y%% command when you want to start your ssh session.
 
 For example, with specific configuration, you can then connect to your device (via Cumulocity) using a plain ssh command.
 

@@ -34,7 +34,7 @@ done
 ```
 
 :::tip
-c8y automatically detects and reads from standard input. When using read inside a loop, it will write to standard input, `c8y` will intercept the input and the loop will only be run once instead of once per line.
+c8y automatically detects and reads from standard input. When using read inside a loop, it will write to standard input, %%c8y%% will intercept the input and the loop will only be run once instead of once per line.
 
 To get around this, use the `-n/--nullInput` parameter. This parameter will disable reading from standard input.
 :::

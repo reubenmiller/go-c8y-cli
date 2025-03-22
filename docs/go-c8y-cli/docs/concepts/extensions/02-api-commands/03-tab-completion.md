@@ -51,12 +51,12 @@ SUCCESSFUL
 
 ## Tab completion using shell commands
 
-The external tab completion is not just limited to `c8y` commands, you can also use a shell to call any commands you would like.
+The external tab completion is not just limited to %%c8y%% commands, you can also use a shell to call any commands you would like.
 
 :::warning
 If the extensions uses a shell to execute the completion command then it might make your extension less portable as Windows users might not have access to a bash shell.
 
-Instead try to use the `c8y` command instead of calling a shell if possible.
+Instead try to use the %%c8y%% command instead of calling a shell if possible.
 :::
 
 The command snippet below shows an example of a `create` command which accepts a type flag when building the request body. The type flag has a tab completion command which queries existing devices in the tenant, and returns a unique list of device types (only based on the first 2000 devices found).

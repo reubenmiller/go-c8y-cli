@@ -7,6 +7,12 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const isDeployPreview =
   process.env.NETLIFY && process.env.CONTEXT === 'deploy-preview';
 
+const substitutePlaceholders = (value, { bold = false } = {}) => {
+  if (bold) {
+    return value.replaceAll('%%c8y%%', '**c8y**').replaceAll('%%psc8y%%', '**PSc8y**');
+  }
+  return value.replaceAll('%%c8y%%', 'c8y').replaceAll('%%psc8y%%', 'PSc8y');
+};
 
 // Special deployment for staging locales until they get enough translations
 // https://app.netlify.com/sites/docusaurus-i18n-staging
@@ -34,6 +40,22 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
   trailingSlash: true,
   markdown: {
     mermaid: true,
+    preprocessor: ({ filePath, fileContent }) => {
+      return substitutePlaceholders(fileContent, { bold: true });
+    },
+    parseFrontMatter: async (params) => {
+      // Reuse the default parser
+      const result = await params.defaultParseFrontMatter(params);
+
+      // Replace text placeholders
+      if (result.frontMatter.description) {
+        result.frontMatter.description = substitutePlaceholders(
+          result.frontMatter.description,
+          { bold: false },
+        );
+      }
+      return result;
+    },
   },
   i18n: {
     defaultLocale: 'en',

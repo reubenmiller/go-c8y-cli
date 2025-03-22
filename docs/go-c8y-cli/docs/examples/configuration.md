@@ -40,7 +40,7 @@ Get-ConfigurationCollection -Query "url eq '*https://t*/inventory/binaries/*'" `
 
 ### Explanation
 
-The solution involves two `c8y` commands:
+The solution involves two %%c8y%% commands:
 
 1. Find the configuration repository items which have a url which includes the tenant internal path (e.g. `https://t12345.cumulocity.com/...`)
 2. Update the `.url` field by replacing the existing host with the new one.

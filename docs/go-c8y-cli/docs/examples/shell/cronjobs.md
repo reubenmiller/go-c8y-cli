@@ -9,7 +9,7 @@ Cronjobs are commonly used linux to run a task/script periodically. This page pr
 
 The cron daemon uses a different environment to your normal shell instance, so there are a few things to watch out for when creating a cronjob which uses `go-c8y-cli`.
 
-* Ensure the `c8y` binary is within the `PATH` environment variable. By default cron only adds `/usr/bin` and `/usr/sbin` to `PATH`. Check where `c8y` is installed by running `which c8y`.
+* Ensure the %%c8y%% binary is within the `PATH` environment variable. By default cron only adds `/usr/bin` and `/usr/sbin` to `PATH`. Check where %%c8y%% is installed by running `which c8y`.
 * Always redirect stdin to `/dev/null` in the cronjob. This prevents stdin detection errors in go-c8y-cli which can be hard to debug
 * Consider using a lock file (or similar mechanism) within the script being called in the cronjob to prevent multiple instances running at the same time
 

@@ -10,7 +10,7 @@ title: PowerShell
     ```
 
     :::info
-    This repository is not strictly required to run `c8y` however it makes is much more useful as it provides some  default views and templates to get the most out of `c8y`. The defaults also show you how you can create your own custom views.
+    This repository is not strictly required to run %%c8y%% however it makes is much more useful as it provides some  default views and templates to get the most out of %%c8y%%. The defaults also show you how you can create your own custom views.
     :::
 
 2. Install go-c8y-cli binary
@@ -44,7 +44,7 @@ title: PowerShell
     ```
     :::
 
-3. Verify that the `c8y` binary is executable and can be found on the command line 
+3. Verify that the %%c8y%% binary is executable and can be found on the command line 
 
     ```bash
     Get-Command c8y
@@ -86,7 +86,7 @@ PSc8y is no longer required to get the best out of go-c8y-cli, so it recommended
 PowerShell (Core) 7 is available on many operating systems (i.e. Windows, MacOS, Linux). Following the [installation guide](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) to install it on your machine.
 
 :::caution
-`PSc8y` no longer supports PowerShell 5. Users should install PowerShell 7 (aka pwsh) as it provides a lot of benefits and is also supported on multiple platforms (linux, MacOS and Windows).
+%%psc8y%% no longer supports PowerShell 5. Users should install PowerShell 7 (aka pwsh) as it provides a lot of benefits and is also supported on multiple platforms (linux, MacOS and Windows).
 
 If you still don't want to or can't install PowerShell 7 then install the native go-c8y-cli binary.
 :::
@@ -109,7 +109,7 @@ If you still don't want to or can't install PowerShell 7 then install the native
     More information on PowerShell's execution policy can be found on the [Microsoft website](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies)
     :::
 
-1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
+1. Install %%psc8y%% module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
     ```powershell
     Install-Module PSc8y -AllowPrerelease -Repository PSGallery -AllowClobber -Scope CurrentUser
@@ -126,7 +126,7 @@ If you still don't want to or can't install PowerShell 7 then install the native
 
 ### Updating PSc8y
 
-Once the `PSc8y` PowerShell module has been installed, then it can be updated from within PowerShell itself assuming it was installed as per the "Installing PSc8y" section above.
+Once the %%psc8y%% PowerShell module has been installed, then it can be updated from within PowerShell itself assuming it was installed as per the "Installing PSc8y" section above.
 
 1. Update to the latest version
 
@@ -158,19 +158,19 @@ Once the `PSc8y` PowerShell module has been installed, then it can be updated fr
 
 ### Downloading using Save-Module
 
-The `PSc8y` module can be downloaded manually using `Save-Module`. This has the advantage over  `Install-Module` as you can control where the module is saved to.
+The %%psc8y%% module can be downloaded manually using `Save-Module`. This has the advantage over  `Install-Module` as you can control where the module is saved to.
 
 :::info
-`Install-Module` does not allow you to control where the modules are installed. By default the target folder is inside your home directory, however if you have your home folder synced automatically to Microsoft OneDrive then you might run into problems as `PSc8y` contains executables (i.e. `.exe` files).
+`Install-Module` does not allow you to control where the modules are installed. By default the target folder is inside your home directory, however if you have your home folder synced automatically to Microsoft OneDrive then you might run into problems as %%psc8y%% contains executables (i.e. `.exe` files).
 :::
 
-1. Create a folder where you want to store `PSc8y`
+1. Create a folder where you want to store %%psc8y%%
 
     ```powershell
     mkdir ~/PSModules
     ```
 
-1. Download the `PSc8y` Module to the folder `~/PSModules`
+1. Download the %%psc8y%% Module to the folder `~/PSModules`
 
     ```powershell
     Save-Module -Name PSc8y -AllowPrerelease -Repository PSGallery -Path ~/PSModules
@@ -180,7 +180,7 @@ The `PSc8y` module can be downloaded manually using `Save-Module`. This has the 
     Save-Module also accepts `-RequiredVersion` where you can specify an exact version instead of the latest.
     :::
 
-1. Import `PSc8y`
+1. Import %%psc8y%%
 
     ```powershell
     Import-Module ~/PSModules/PSc8y -Force

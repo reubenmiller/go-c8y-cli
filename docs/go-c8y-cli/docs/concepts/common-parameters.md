@@ -9,7 +9,7 @@ import TabItem from '@theme/TabItem';
 
 ## Overview
 
-`c8y` supports common parameters to handle a range of different scenarios.
+%%c8y%% supports common parameters to handle a range of different scenarios.
 
 For example:
 
@@ -19,7 +19,7 @@ For example:
 * control pagination
 * change output format
 
-Common parameters are also supported in the `PSc8y` PowerShell module, however the parameters have a slightly different format. Below shows a few examples of how they map to PSc8y. 
+Common parameters are also supported in the %%psc8y%% PowerShell module, however the parameters have a slightly different format. Below shows a few examples of how they map to PSc8y. 
 
 |c8y|PSc8y|
 |---|-----|
@@ -28,10 +28,10 @@ Common parameters are also supported in the `PSc8y` PowerShell module, however t
 
 :::info
 * In PowerShell use a single dash `-` before parameter instead of two dashes `--`.
-* `c8y` parameters are **case-sensitive**, however PowerShell is not
+* %%c8y%% parameters are **case-sensitive**, however PowerShell is not
 :::
 
-Below is an example showing the differences between `c8y` and `PSc8y` 
+Below is an example showing the differences between %%c8y%% and %%psc8y%% 
 
 <CodeExample>
 

@@ -190,7 +190,7 @@ You can also view the instructions on how to source the relevant plugin via the 
 ### Manually (via script)
 
 :::info
-The install script currently requires you to have `jq` installed. `jq` is a cli json parsing tool which is recommended to have anyways to do complex json manipulations that you might need during your daily use of `c8y`.
+The install script currently requires you to have `jq` installed. `jq` is a cli json parsing tool which is recommended to have anyways to do complex json manipulations that you might need during your daily use of %%c8y%%.
 
 See the [jq website](https://stedolan.github.io/jq/download/) for details how to install it on your operating system.
 :::
@@ -247,7 +247,7 @@ This method does not require sudo rights, however the binary will be located ins
 
     Reload your shell, or source your profile directly, i.e. bash: `source ~/.bashrc`
 
-4. Verify that the `c8y` binary is executable and can be found on the command line 
+4. Verify that the %%c8y%% binary is executable and can be found on the command line 
 
     ```bash
     which c8y

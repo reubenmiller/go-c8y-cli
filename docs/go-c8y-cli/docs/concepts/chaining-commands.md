@@ -196,14 +196,14 @@ Get-OperationCollection -Status PENDING -DateFrom "-14d" -WithTotalPages -PageSi
 ## Piping to non-default flags (not supported in PSc8y)
 
 :::note
-Custom pipeline mapping is supported from `c8y` ≥ 2.17.0
+Custom pipeline mapping is supported from %%c8y%% ≥ 2.17.0
 :::
 
 Most commands have a default flag which is marked as the default consumer of piped input. For most cases this is ok, however there are special cases where you might what to map the piped input to another flag.
 
 The default pipeline variable can be changed by using the `-` (dash) character on the desired flag. The `-` value will be substituted with the piped input (standard input) line by line.
 
-If the piped input is compressed JSON, then `c8y` will try to pick the correct property by a default list of properties defined internally on the command. If inbuilt properties do not match your use-case then you can specify a single or list of properties using the syntax `-.prop1,.prop2`, then `c8y` will take the value form the first matching property.
+If the piped input is compressed JSON, then %%c8y%% will try to pick the correct property by a default list of properties defined internally on the command. If inbuilt properties do not match your use-case then you can specify a single or list of properties using the syntax `-.prop1,.prop2`, then %%c8y%% will take the value form the first matching property.
 
 :::warning Not supported in PowerShell
 Custom piped input to flag mapping is not supported in PSc8y (PowerShell) cmdlets as PowerShell does not support this.

@@ -282,7 +282,7 @@ There are a lot of different types that you can use when building your commands 
 
 Tab completion is a very useful feature which saves the user looking up things themselves as they can just press `<TAB><TAB>` and select an option from the response.
 
-Some parameter types (such as `device[]` and `application[]`) include built-in tab completion and named lookups, however if you don't find any types that meet your exact need then you can use the external tab completion option. The external tab completion mechanism allows you to execute another `c8y` command, or a shell of your choosing, to provide the completion values that should be displayed to the user.
+Some parameter types (such as `device[]` and `application[]`) include built-in tab completion and named lookups, however if you don't find any types that meet your exact need then you can use the external tab completion option. The external tab completion mechanism allows you to execute another %%c8y%% command, or a shell of your choosing, to provide the completion values that should be displayed to the user.
 
 Below shows an example of an external completion which uses the `c8y devices list` to provide the device names (with the device id being shown in the option's description for more context).
 

@@ -73,7 +73,7 @@ Alternatively, VIM style shortcuts "j" (down) and "k" (up) keys can be also used
 :::
 
 :::caution
-`set-session` is not provided by `c8y` itself, and it is installed automatically for you if you following the [installation guide](/docs/installation/shell-installation)
+`set-session` is not provided by %%c8y%% itself, and it is installed automatically for you if you following the [installation guide](/docs/installation/shell-installation)
 :::
 
 <CodeExample>
@@ -350,7 +350,7 @@ c8y sessions set --shell=auto --session "/my/path/session.json" | Out-String | I
 </Tabs>
 
 :::info
-`set-session` is a small helper function (for each supported shell) which wraps the call to `c8y sessions set` and sets the returned environment variables which are then read by subsequent calls to `c8y`.
+`set-session` is a small helper function (for each supported shell) which wraps the call to `c8y sessions set` and sets the returned environment variables which are then read by subsequent calls to %%c8y%%.
 :::
 
 ### Switching session for a single command
