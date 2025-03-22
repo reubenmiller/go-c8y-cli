@@ -36,8 +36,8 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 			go-c8y-cli extensions are repositories that provide additional c8y commands.
 
 			The name of the extension repository must start with "c8y-" and it must contain an
-			executable of the same name. All arguments passed to the %[1]sc8y <extname>%[1]s invocation
-			will be forwarded to the %[1]sc8y-<extname>%[1]s executable of the extension.
+			executable of the same name. All arguments passed to the %[1]sc8y [extname]%[1]s invocation
+			will be forwarded to the %[1]sc8y-[extname]%[1]s executable of the extension.
 
 			An extension cannot override any of the core c8y commands.
 
