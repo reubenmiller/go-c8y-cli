@@ -83,6 +83,21 @@
                         }
                     }
                 },
+                "login": {
+                    "type": "object",
+                    "description": "Login settings",
+                    "properties": {
+                        "type": {
+                            "description": "Login Type / Authorization Type",
+                            "type": "string",
+                            "enum": [
+                                "BASIC",
+                                "OAUTH_INTERNAL",
+                                "NONE"
+                            ]
+                        }
+                    }
+                },
                 "includeAll.delayMS": {
                     "description": "Delay in milliseconds between fetching the next result when using the includeAll option. If value is 0 or less, then it will be ignored",
                     "type": "integer",

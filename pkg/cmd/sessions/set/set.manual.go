@@ -77,7 +77,7 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("shell", "auto", "bash", "zsh", "fish", "powershell"),
-		completion.WithValidateSet("loginType", c8y.AuthMethodOAuth2Internal, c8y.AuthMethodBasic),
+		completion.WithValidateSet("loginType", c8y.AuthMethodOAuth2Internal, c8y.AuthMethodBasic, c8y.AuthMethodNone),
 	)
 	// Disable the encryption check, as the login handler will take care
 	// of checking the encryption
@@ -125,17 +125,24 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		// set from the last instance.
 		// But this has a side effect that you can't control the profile handing via environment variables when using the interact session selection
 		allowedEnvValues := []string{
-			"C8Y_SETTINGS_SESSION_HIDE",
+			config.EnvSessionHide,
 			// Preserve encryption settings
-			"C8Y_PASSPHRASE",
-			"C8Y_PASSPHRASE_TEXT",
+			config.EnvPassphrase,
+			config.EnvPassphraseText,
+			config.EnvSessionHome,
+		}
+		unsetEnvSettings := []string{
+			"C8Y_SETTINGS_LOGIN_TYPE",
 		}
 		env_prefix := strings.ToUpper(config.EnvSettingsPrefix)
 		for _, env := range os.Environ() {
-			if strings.HasPrefix(env, env_prefix) && !strings.HasPrefix(env, config.EnvPassphrase) && !strings.HasPrefix(env, config.EnvSessionHome) {
+			if strings.HasPrefix(env, env_prefix) {
 				parts := strings.SplitN(env, "=", 2)
 				if len(parts) == 2 {
-					if !slices.Contains(allowedEnvValues, parts[0]) && !strings.HasPrefix("C8Y_SETTINGS_", parts[0]) {
+					if strings.HasPrefix(parts[0], "C8Y_SETTINGS_") && !slices.Contains(unsetEnvSettings, parts[0]) {
+						continue
+					}
+					if !slices.Contains(allowedEnvValues, parts[0]) {
 						os.Unsetenv(parts[0])
 					}
 				}
@@ -143,14 +150,6 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		// Clear existing token when using basic auth
-		if n.LoginType == c8y.AuthMethodBasic {
-			cfg.Logger.Infof("Clearing any existing token when using %s auth", c8y.AuthMethodBasic)
-			os.Unsetenv("C8Y_TOKEN")
-			if cfg.MustGetToken(false) != "" {
-				cfg.SetToken("")
-				n.onSave(nil)
-			}
-		}
 
 		cfg.SetSessionFile(sessionFile)
 		_, err = cfg.ReadConfigFiles(nil)
@@ -167,6 +166,19 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	if n.LoginType == "" {
+		n.LoginType = cfg.GetLoginTypeWithDefault()
+	} else {
+		if v, err := c8y.ParseAuthMethod(n.LoginType); err != nil {
+			n.LoginType = c8y.AuthMethodOAuth2Internal
+		} else {
+			n.LoginType = v
+		}
+	}
+
+	cfg.SetLoginType(n.LoginType)
+	client.AuthorizationMethod = n.LoginType
 
 	if n.ClearToken {
 		client.SetToken("")
@@ -193,8 +205,10 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if err := utilities.CheckEncryption(n.factory.IOStreams, cfg, client); err != nil {
-		return err
+	if n.LoginType != c8y.AuthMethodNone {
+		if err := utilities.CheckEncryption(n.factory.IOStreams, cfg, client); err != nil {
+			return err
+		}
 	}
 
 	// If the password is not encrypted, then save it (which will apply the encryption)
@@ -208,10 +222,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	handler := c8ylogin.NewLoginHandler(client, cmd.ErrOrStderr(), func() {
 		n.onSave(client)
 	})
-	handler.LoginType = strings.ToUpper(cfg.GetLoginType())
-	if n.LoginType != "" {
-		handler.LoginType = strings.ToUpper(n.LoginType)
-	}
+	handler.LoginType = n.LoginType
 	log.Infof("User preference for login type: %s", handler.LoginType)
 
 	if n.TFACode == "" {

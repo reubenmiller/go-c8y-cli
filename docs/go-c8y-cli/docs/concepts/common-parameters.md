@@ -335,7 +335,7 @@ What If: Sending [POST] request to [https://example.com/inventory/managedObjects
 | header            | value
 |-------------------|---------------------------
 | Accept            | application/json
-| Authorization     | Basic  {base64 tenant/username:password}
+| Authorization     | Basic {base64 tenant/username:password}
 | Content-Type      | application/json
 
 
@@ -1070,7 +1070,7 @@ c8y devices list --verbose
 2021-04-24T08:44:34.592Z        INFO    Max jobs: 0
 2021-04-24T08:44:34.595Z        INFO    worker 1: started job 1
 2021-04-24T08:44:34.595Z        INFO    Current username: {tenant}/{username}
-2021-04-24T08:44:34.595Z        INFO    Headers: map[Accept:[application/json] Authorization:[Basic  {base64 tenant/username:password}] User-Agent:[go-client] X-Application:[go-client]]
+2021-04-24T08:44:34.595Z        INFO    Headers: map[Accept:[application/json] Authorization:[Basic {base64 tenant/username:password}] User-Agent:[go-client] X-Application:[go-client]]
 2021-04-24T08:44:34.595Z        INFO    Sending request: GET https://{host}/inventory/managedObjects?q=$filter=+$orderby=name
 2021-04-24T08:44:34.698Z        INFO    Status code: 200
 2021-04-24T08:44:34.698Z        INFO    Response time: 102ms

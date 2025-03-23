@@ -295,6 +295,7 @@ var updateSettingsOptions = map[string]argumentHandler{
 	"login.type": {"login.type", "string", config.SettingsLoginType, []string{
 		c8y.AuthMethodBasic + "\tBasic Auth (not recommended)",
 		c8y.AuthMethodOAuth2Internal + "\tInternal OAUTH2 (tokens)",
+		c8y.AuthMethodNone + "\tNone",
 		"",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 

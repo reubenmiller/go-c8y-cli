@@ -44,7 +44,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {"headers":{"Accept":"application/json","Authorization":"Basic  {base64 tenant/username:password}","Content-Type":"application/json"},"path":"/inventory/managedObjects"}
+        {"headers":{"Accept":"application/json","Authorization":"Basic {base64 tenant/username:password}","Content-Type":"application/json"},"path":"/inventory/managedObjects"}
 
   It show information about the request in markdown:
     config:
@@ -63,7 +63,7 @@ tests:
         | header            | value
         |-------------------|---------------------------
         | Accept            | application/json 
-        | Authorization     | Basic  {base64 tenant/username:password} 
+        | Authorization     | Basic {base64 tenant/username:password} 
         | Content-Type      | application/json 
 
         #### Body

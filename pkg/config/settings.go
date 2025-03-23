@@ -10,6 +10,7 @@ type CommandSettings struct {
 	Storage     *StorageSettings       `json:"storage,omitempty"`
 	Template    *TemplateSettings      `json:"template,omitempty"`
 	View        *ViewSettings          `json:"views,omitempty"`
+	Login       *LoginSettings         `json:"login,omitempty"`
 	Defaults    map[string]interface{} `json:"defaults,omitempty"`
 }
 
@@ -66,4 +67,8 @@ type ViewSettings struct {
 
 type SessionSettings struct {
 	DefaultUsername string `json:"defaultUsername,omitempty"`
+}
+
+type LoginSettings struct {
+	Type string `json:"type,omitempty"`
 }

@@ -146,7 +146,7 @@ c8y devices list --cache -v
 2021-09-27T05:50:24.733Z        INFO    Max jobs: 0
 2021-09-27T05:50:24.734Z        INFO    worker 1: started job 1
 2021-09-27T05:50:24.734Z        INFO    Current username: {tenant}/{username}
-2021-09-27T05:50:24.735Z        INFO    Headers: map[Accept:[application/json] Authorization:[Basic  {base64 tenant/username:password}] User-Agent:[go-client] X-Application:[go-client]]
+2021-09-27T05:50:24.735Z        INFO    Headers: map[Accept:[application/json] Authorization:[Basic {base64 tenant/username:password}] User-Agent:[go-client] X-Application:[go-client]]
 2021-09-27T05:50:24.735Z        INFO    Sending request: GET https://{host}/inventory/managedObjects?pageSize=1&q=$filter=+$orderby=name
 2021-09-27T05:50:24.735Z        INFO    Using cached response. file: /tmp/go-c8y-cli-cache/5a/f6/f2d746aba15b47d3f2dfc517c782f030bb28cfc1acca6fc3698ed532948b, age: 2.2051073s, ttl: 1m0s
 2021-09-27T05:50:24.735Z        INFO    Status code: 200
