@@ -37,7 +37,7 @@ It is recommended that you run these commands from your home folder, so that the
 
 ```bash
 cd ~
-docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell
+docker run -it -v $HOME/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell
 ```
 
 </TabItem>
@@ -45,7 +45,7 @@ docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell
 
 ```powershell
 cd $HOME
-docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-pwsh
+docker run -it -v $HOME/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-pwsh
 ```
 
 </TabItem>
