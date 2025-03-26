@@ -1,0 +1,239 @@
+// Code generated from specification version 1.0.0: DO NOT EDIT
+package {{ snakecase .Context.Name }}
+
+import (
+    "fmt"
+    "io"
+    "net/http"
+    "net/url"
+
+    "github.com/MakeNowJust/heredoc/v2"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
+    "github.com/reubenmiller/go-c8y/pkg/c8y"
+    "github.com/spf13/cobra"
+)
+
+// {{ camelcase .Context.Name }}Cmd command
+type {{ camelcase .Context.Name }}Cmd struct {
+    *subcommand.SubCommand
+
+    factory *cmdutil.Factory
+}
+
+// New{{ camelcase .Context.Name }}Cmd creates a command to {{ .Context.Spec.Description }}
+func New{{ camelcase .Context.Name }}Cmd(f *cmdutil.Factory) *{{ camelcase .Context.Name }}Cmd {
+    ccmd := &{{ camelcase .Context.Name }}Cmd{
+        factory: f,
+    }
+    cmd := &cobra.Command{
+        Use:   "{{ .Context.Use }}",
+        Short: "{{ .Context.Spec.Description }}",
+        Long:  `{{ .Context.Spec.DescriptionLong }}`,
+        {{- if .Context.Spec.Hidden }}
+        Hidden: true,
+        {{ end }}
+        Example: heredoc.Doc(`{{ .Context.Examples }}`),
+        PreRunE: func(cmd *cobra.Command, args []string) error {
+            return {{ .Context.PreRunFunction }}
+        },
+        RunE: ccmd.RunE,
+    }
+
+    cmd.SilenceUsage = true
+
+    $($CommandArgs.SetFlag -join "`n    ")
+
+    completion.WithOptions(
+        cmd,
+        $CompletionBuilderOptions
+    )
+
+    flags.WithOptions(
+        cmd,
+        {{ .Context.FlagBuilderOptions -}}
+        {{- range $index, $element := (GetAllParameters .Context.Spec) }}
+            {{- with toCobraFlag $element }}
+                {{- indent 8 .Code }}
+            {{ end -}}
+        {{ end -}}
+        
+        $(
+            if ($CommandArgs.SetFlagOptions) {
+                ($CommandArgs.SetFlagOptions -join ",`n") + ","
+            }
+        )
+        $(
+            if ($PipelineVariableAliases) {
+                $aliases = ($PipelineVariableAliases | ForEach-Object { "`"$_`""` }) -join ", "
+                "flags.WithExtendedPipelineSupport(`"$PipelineVariableName`", `"$PipelineVariableProperty`", $PipelineVariableRequired, $aliases),"
+            } else {
+                "flags.WithExtendedPipelineSupport(`"$PipelineVariableName`", `"$PipelineVariableProperty`", $PipelineVariableRequired),"
+            }   
+        )
+        $(
+            foreach ($item in $CommandArgs) {
+                $iAliases = $item.PipelineAliases
+                if (!$iAliases) {
+                    $iAliases = @($item.Name)
+                }
+                if ($item.PipelineAliases) {
+                    $usedAliases = @{}
+                    $sourceAliases = ($item.PipelineAliases | ForEach-Object {
+                        if (!$usedAliases.ContainsKey($_)) {
+                            "`"$_`""`
+                        }
+                        $usedAliases[$_] = $true
+                    } | Where-Object { $_ }) -join ", "
+                    if ($sourceAliases) {
+                        "flags.WithPipelineAliases(`"$($item.Name)`", $sourceAliases),`n"
+                    }
+                }
+            }
+        )
+        {{ if .Context.Spec.CollectionProperty }}
+            flags.WithCollectionProperty("{{ .Context.Spec.CollectionProperty }}"),
+        {{ end }}
+        {{ if .Context.Spec.Deprecated }}
+            flags.WithDeprecationNotice("{{ .Context.Spec.Deprecated }}"),
+        {{ end }}
+        {{ if .Context.Spec.SemanticMethod }}
+            flags.WithSemanticMethod("{{ .Context.Spec.SemanticMethod }}"),
+        {{ end }}
+    )
+
+    // Required flags
+    $($CommandArgs.Required -join "`n    ")
+    $($CommandArgs.Hidden -join "`n    ")
+    $($CommandArgs.Deprecated -join "`n    ")
+
+    ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+
+    return ccmd
+}
+
+// RunE executes the command
+func (n *{{ camelcase .Context.Name }}Cmd) RunE(cmd *cobra.Command, args []string) error {
+    cfg, err := n.factory.Config()
+    if err != nil {
+        return err
+    }
+    // Runtime flag options
+    flags.WithOptions(
+        cmd,
+        flags.WithRuntimePipelineProperty(),
+    )
+    client, err := n.factory.Client()
+    if err != nil {
+        return err
+    }
+    inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+    if err != nil {
+        return err
+    }
+
+    // query parameters
+    query := flags.NewQueryTemplate()
+    err = flags.WithQueryParameters(
+        cmd,
+        query,
+        inputIterators,
+        flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+        $RESTQueryBuilderWithValues
+        $CumulocityQueryExpressionBuilder
+    )
+    if err != nil {
+        return cmderrors.NewUserError(err)
+    }
+    $RESTQueryBuilderPost
+    queryValue, err := query.GetQueryUnescape(true)
+
+    if err != nil {
+        return cmderrors.NewSystemError("Invalid query parameter")
+    }
+
+    // headers
+    headers := http.Header{}
+    err = flags.WithHeaders(
+        cmd,
+        headers,
+        inputIterators,
+        flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
+        {{- range .Context.RestHeaderBuilderOptions }}
+        {{ . -}}
+        {{ end }}
+    )
+    if err != nil {
+        return cmderrors.NewUserError(err)
+    }
+
+    // form data
+    formData := make(map[string]io.Reader)
+    err = flags.WithFormDataOptions(
+        cmd,
+        formData,
+        inputIterators,$(
+            if ($RESTFormDataBuilderOptions.Length -gt 0) {
+                @"
+                flags.WithOptionBuilder().
+                    $RESTFormDataBuilderOptions
+                Build()...
+"@
+            }
+        )
+    )
+    if err != nil {
+        return cmderrors.NewUserError(err)
+    }
+    
+
+    // body
+    body := mapbuilder.NewInitializedMapBuilder({{ .Context.InitBody }})
+    err = flags.WithBody(
+        cmd,
+        body,
+        inputIterators,
+        {{- .Context.RESTBodyBuilderOptions -}}
+    )
+    if err != nil {
+        return cmderrors.NewUserError(err)
+    }
+
+    // path parameters
+    path := flags.NewStringTemplate("{{ .Context.RESTPath }}")
+    err = flags.WithPathParameters(
+        cmd,
+        path,
+        inputIterators,
+        {{ range $index, $element := .Context.Spec.PathParameters -}}
+            {{- with toCobraGetter $element -}}
+        {{ .Code -}}
+            {{ end -}}
+        {{- end }}
+    )
+    if err != nil {
+        return err
+    }
+
+    req := c8y.RequestOptions{
+        Method:       "{{ .Context.RESTMethod }}",
+        Path:         path.GetTemplate(),
+        Query:        queryValue,
+        Body:         {{ .Context.GetBodyContents }},
+        FormData:     formData,
+        Header:       headers,
+        IgnoreAccept: cfg.IgnoreAcceptHeader(),
+        DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+        {{ .Context.PrepareRequest }}
+    }
+    {{ .Context.PostActionOptions -}}
+    $(Get-FlagConstraints $Specification)
+
+    return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+}

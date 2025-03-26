@@ -213,25 +213,27 @@ type BodyContent struct {
 }
 
 type Parameter struct {
-	Name            string      `yaml:"name,omitempty"`
-	ShortName       string      `yaml:"shortname,omitempty"`
-	Type            string      `yaml:"type,omitempty"`
-	Value           string      `yaml:"value,omitempty"`
-	Completion      Completion  `yaml:"completion,omitempty"`
-	NamedLookup     NamedLookup `yaml:"lookup,omitempty"`
-	Format          string      `yaml:"format,omitempty"`
-	Property        string      `yaml:"property,omitempty"`
-	Hidden          *bool       `yaml:"hidden,omitempty"`
-	Pipeline        *bool       `yaml:"pipeline,omitempty"`
-	PipelineAliases []string    `yaml:"pipelineAliases,omitempty"`
-	Required        *bool       `yaml:"required,omitempty"`
-	Description     string      `yaml:"description,omitempty"`
-	Default         string      `yaml:"default,omitempty"`
-	Position        *int        `yaml:"position,omitempty"`
-	ValidationSet   []string    `yaml:"validationSet,omitempty"`
-	Skip            *bool       `yaml:"skip,omitempty"`
-	Children        []Parameter `yaml:"children,omitempty"`
-	DependsOn       []string    `yaml:"dependsOn,omitempty"`
+	Name              string      `yaml:"name,omitempty"`
+	ShortName         string      `yaml:"shortname,omitempty"`
+	Type              string      `yaml:"type,omitempty"`
+	Value             string      `yaml:"value,omitempty"`
+	Completion        Completion  `yaml:"completion,omitempty"`
+	NamedLookup       NamedLookup `yaml:"lookup,omitempty"`
+	Format            string      `yaml:"format,omitempty"`
+	Property          string      `yaml:"property,omitempty"`
+	Hidden            *bool       `yaml:"hidden,omitempty"`
+	Pipeline          *bool       `yaml:"pipeline,omitempty"`
+	PipelineAliases   []string    `yaml:"pipelineAliases,omitempty"`
+	Required          *bool       `yaml:"required,omitempty"`
+	Description       string      `yaml:"description,omitempty"`
+	Default           string      `yaml:"default,omitempty"`
+	Position          *int        `yaml:"position,omitempty"`
+	ValidationSet     []string    `yaml:"validationSet,omitempty"`
+	Skip              *bool       `yaml:"skip,omitempty"`
+	Children          []Parameter `yaml:"children,omitempty"`
+	DependsOn         []string    `yaml:"dependsOn,omitempty"`
+	Deprecated        bool        `yaml:"deprecated,omitempty"`
+	DeprecationNotice string      `yaml:"deprecationNotice,omitempty"`
 
 	TargetType TargetType `yaml:"-"`
 }

@@ -398,14 +398,6 @@
     }
 
     #
-    # Host
-    #
-    $RESTHost = ""
-    if ($null -ne $Specification.host) {
-        $RESTHost = "`nHost:         replacePathParameters(`"$($Specification.host)`", pathParameters),"
-    }
-
-    #
     # Path Parameters
     #
     $RESTPathBuilderOptions = New-Object System.Text.StringBuilder
@@ -540,14 +532,6 @@
         "PUT" { "f.UpdateModeEnabled()" }
         "DELETE" { "f.DeleteModeEnabled()" }
         default { "nil" }
-    }
-
-    # Additional options
-    $RequestOptionsBuilder = New-Object System.Text.StringBuilder
-    if ($Specification.responseType -eq "array") {
-        $null = $RequestOptionsBuilder.AppendLine("ResponseData: make([]map[string]interface{}, 0),")
-    } elseif ($Specification.responseType -eq "object") {
-        # Do nothing, so it already defaults to a map[string]interface{}
     }
 
     #
@@ -770,7 +754,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         return err
     }
 
-    req := c8y.RequestOptions{$RESTHost
+    req := c8y.RequestOptions{
         Method:       "${RESTMethod}",
         Path:         path.GetTemplate(),
         Query:        queryValue,
