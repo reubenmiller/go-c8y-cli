@@ -1,0 +1,8 @@
+tests:
+    tenants_enable_Enable a tenant (from the management tenant):
+        command: c8y tenants enable --id "mycompany"
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /tenant/tenants/mycompany

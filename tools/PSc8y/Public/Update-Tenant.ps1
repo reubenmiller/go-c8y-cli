@@ -31,12 +31,17 @@ Update a tenant by name (from the management tenant)
         # Company name. Maximum 256 characters
         [Parameter()]
         [string]
-        $Company,
+        $Name,
 
         # Domain name to be used for the tenant. Maximum 256 characters
         [Parameter()]
         [string]
         $Domain,
+
+        # Email address of the tenant's administrator
+        [Parameter()]
+        [string]
+        $AdminEmail,
 
         # Username of the tenant administrator
         [Parameter()]
@@ -56,7 +61,12 @@ Update a tenant by name (from the management tenant)
         # An international contact phone number
         [Parameter()]
         [string]
-        $ContactPhone
+        $ContactPhone,
+
+        # Allow the tenant to create sub-tenants
+        [Parameter()]
+        [switch]
+        $AllowCreateTenants
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Update", "Template"

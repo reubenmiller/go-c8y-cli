@@ -40,13 +40,29 @@ commands:
     examples:
         powershell:
           - description: Create a new tenant (from the management tenant)
-            command: New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -AdminPass "mys3curep9d8"
+            command: New-Tenant -Name "mycompany" -Domain "mycompany" -AdminEmail "admin@example.com" -AdminName "admin" -AdminPass "mys3curep9d8"
+            skipTest: true
+
+          - description: Create a new tenant and send a password reset email (from the management tenant)
+            command: New-Tenant -Name "mycompany" -Domain "mycompany" -AdminEmail "admin@example.com" -AdminName "admin" -SendPasswordResetEmail
             skipTest: true
         go:
           - description: Create a new tenant (from the management tenant)
-            command: c8y tenants create --company "mycompany" --domain "mycompany" --adminName "admin" --adminPass "mys3curep9d8"
+            command: c8y tenants create --name "mycompany" --domain "mycompany" --adminEmail "admin@example.com" --adminName "admin" --adminPass "mys3curep9d8"
+          
+          - description: Create a new tenant and send a password reset email (from the management tenant)
+            command: c8y tenants create --name "mycompany" --domain "mycompany" --adminEmail "admin@example.com" --adminName "admin" --sendPasswordResetEmail
     body:
       - name: company
+        type: string
+        deprecated: true
+        # deprecated: 2025-03-27
+        deprecationNotice: please use 'name' instead
+        required: false
+        description: Company name. Maximum 256 characters
+      
+      - name: name
+        property: company
         type: string
         required: false
         description: Company name. Maximum 256 characters
@@ -56,6 +72,11 @@ commands:
         required: false
         pipeline: true
         description: Domain name to be used for the tenant. Maximum 256 characters
+
+      - name: adminEmail
+        type: string
+        required: false
+        description: Email address of the tenant's administrator
 
       - name: adminName
         type: string
@@ -75,7 +96,6 @@ commands:
       - name: contactPhone
         type: string
         required: false
-        property: contact_phone
         description: An international contact phone number
 
       - name: tenantId
@@ -83,14 +103,25 @@ commands:
         required: false
         description: The tenant ID. This should be left bank unless you know what you are doing. Will be auto-generated if not present.
 
+      - name: allowCreateTenants
+        type: boolean
+        required: false
+        description: Allow the tenant to create sub-tenants
+
+      - name: sendPasswordResetEmail
+        type: boolean
+        required: false
+        description: Send password reset email to the user instead of setting a password
+
       - name: data
         type: json
-        property: customProperties
         required: false
         description: A set of custom properties of the tenant
     bodyRequiredKeys:
       - company
       - domain
+      - adminName
+      - adminEmail
 
   - name: getTenant
     description: Get tenant
@@ -166,6 +197,15 @@ commands:
     body:
       - name: company
         type: string
+        deprecated: true
+        # deprecated: 2025-03-27
+        deprecationNotice: please use 'name' instead
+        required: false
+        description: Company name. Maximum 256 characters
+
+      - name: name
+        property: company
+        type: string
         required: false
         description: Company name. Maximum 256 characters
 
@@ -173,6 +213,11 @@ commands:
         type: string
         required: false
         description: Domain name to be used for the tenant. Maximum 256 characters
+
+      - name: adminEmail
+        type: string
+        required: false
+        description: Email address of the tenant's administrator
 
       - name: adminName
         type: string
@@ -191,13 +236,16 @@ commands:
 
       - name: contactPhone
         type: string
-        property: contact_phone
         required: false
         description: An international contact phone number
 
+      - name: allowCreateTenants
+        type: boolean
+        required: false
+        description: Allow the tenant to create sub-tenants
+
       - name: data
         type: json
-        property: customProperties
         required: false
         description: A set of custom properties of the tenant
 
@@ -288,3 +336,76 @@ commands:
         pipeline: true
         required: false
         description: Tenant id
+
+  - name: enable
+    description: Enable/Activate tenant
+    descriptionLong: Enable/Activate an existing tenant
+    method: PUT
+    path: /tenant/tenants/{id}
+    accept: application/vnd.com.nsn.cumulocity.tenant+json
+    alias:
+        go: enable
+        powershell: Enable-Tenant
+    examples:
+        powershell:
+          - description: Enable a tenant (from the management tenant)
+            command: Enable-Tenant -Id mycompany
+            skipTest: true
+        go:
+          - description: Enable a tenant (from the management tenant)
+            command: c8y tenants enable --id "mycompany"
+    pathParameters:
+      - name: id
+        type: tenant
+        pipeline: true
+        required: false
+        description: Tenant id
+
+    body:
+      - name: status
+        type: stringStatic
+        description: ""
+        hidden: true
+        value: "ACTIVE"
+        
+      - name: data
+        type: json
+        required: false
+        description: A set of custom properties of the tenant
+
+
+  - name: disable
+    description: Disable/Suspend tenant
+    descriptionLong: Disable/Suspend an existing tenant
+    method: PUT
+    path: /tenant/tenants/{id}
+    accept: application/vnd.com.nsn.cumulocity.tenant+json
+    alias:
+        go: disable
+        powershell: Disable-Tenant
+    examples:
+        powershell:
+          - description: Disable a tenant (from the management tenant)
+            command: Disable-Tenant -Id mycompany
+            skipTest: true
+        go:
+          - description: Disable a tenant (from the management tenant)
+            command: c8y tenants disable --id "mycompany"
+    pathParameters:
+      - name: id
+        type: tenant
+        pipeline: true
+        required: false
+        description: Tenant id
+
+    body:
+      - name: status
+        type: stringStatic
+        description: ""
+        hidden: true
+        value: "SUSPENDED"
+        
+      - name: data
+        type: json
+        required: false
+        description: A set of custom properties of the tenant

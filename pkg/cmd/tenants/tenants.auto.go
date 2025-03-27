@@ -4,7 +4,9 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/create"
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/delete"
+	cmdDisable "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/disable"
 	cmdDisableApplication "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/disableapplication"
+	cmdEnable "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/enable"
 	cmdEnableApplication "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/enableapplication"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/get"
 	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/list"
@@ -36,6 +38,8 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdTenants {
 	cmd.AddCommand(cmdEnableApplication.NewEnableApplicationCmd(f).GetCommand())
 	cmd.AddCommand(cmdDisableApplication.NewDisableApplicationCmd(f).GetCommand())
 	cmd.AddCommand(cmdListReferences.NewListReferencesCmd(f).GetCommand())
+	cmd.AddCommand(cmdEnable.NewEnableCmd(f).GetCommand())
+	cmd.AddCommand(cmdDisable.NewDisableCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

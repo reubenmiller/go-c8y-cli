@@ -1,0 +1,8 @@
+tests:
+    tenants_disable_Disable a tenant (from the management tenant):
+        command: c8y tenants disable --id "mycompany"
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /tenant/tenants/mycompany

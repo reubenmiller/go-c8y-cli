@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package update
+package disable
 
 import (
 	"io"
@@ -16,25 +16,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// UpdateCmd command
-type UpdateCmd struct {
+// DisableCmd command
+type DisableCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewUpdateCmd creates a command to Update tenant
-func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
-	ccmd := &UpdateCmd{
+// NewDisableCmd creates a command to Disable/Suspend tenant
+func NewDisableCmd(f *cmdutil.Factory) *DisableCmd {
+	ccmd := &DisableCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "update",
-		Short: "Update tenant",
-		Long:  `Update an existing tenant`,
+		Use:   "disable",
+		Short: "Disable/Suspend tenant",
+		Long:  `Disable/Suspend an existing tenant`,
 		Example: heredoc.Doc(`
-$ c8y tenants update --id "mycompany" --contactName "John Smith"
-Update a tenant by name (from the management tenant)
+$ c8y tenants disable --id "mycompany"
+Disable a tenant (from the management tenant)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.UpdateModeEnabled()
@@ -45,15 +45,7 @@ Update a tenant by name (from the management tenant)
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Tenant id (accepts pipeline)")
-	cmd.Flags().String("company", "", "Company name. Maximum 256 characters")
-	cmd.Flags().String("name", "", "Company name. Maximum 256 characters")
-	cmd.Flags().String("domain", "", "Domain name to be used for the tenant. Maximum 256 characters")
-	cmd.Flags().String("adminEmail", "", "Email address of the tenant's administrator")
-	cmd.Flags().String("adminName", "", "Username of the tenant administrator")
-	cmd.Flags().String("adminPass", "", "Password of the tenant administrator")
-	cmd.Flags().String("contactName", "", "A contact name, for example an administrator, of the tenant")
-	cmd.Flags().String("contactPhone", "", "An international contact phone number")
-	cmd.Flags().Bool("allowCreateTenants", false, "Allow the tenant to create sub-tenants")
+	cmd.Flags().String("status", "", "")
 
 	completion.WithOptions(
 		cmd,
@@ -71,7 +63,7 @@ Update a tenant by name (from the management tenant)
 
 	// Required flags
 
-	flags.MarkDeprecated(cmd, "company", "please use 'name' instead")
+	_ = cmd.Flags().MarkHidden("status")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -79,7 +71,7 @@ Update a tenant by name (from the management tenant)
 }
 
 // RunE executes the command
-func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *DisableCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -147,15 +139,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("company", "company"),
-		flags.WithStringValue("name", "company"),
-		flags.WithStringValue("domain", "domain"),
-		flags.WithStringValue("adminEmail", "adminEmail"),
-		flags.WithStringValue("adminName", "adminName"),
-		flags.WithStringValue("adminPass", "adminPass"),
-		flags.WithStringValue("contactName", "contactName"),
-		flags.WithStringValue("contactPhone", "contactPhone"),
-		flags.WithBoolValue("allowCreateTenants", "allowCreateTenants", ""),
+		flags.WithStaticStringValue("status", "SUSPENDED"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)

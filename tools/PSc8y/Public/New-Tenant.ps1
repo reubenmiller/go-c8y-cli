@@ -11,9 +11,14 @@ Create a new tenant
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_create
 
 .EXAMPLE
-PS> New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -AdminPass "mys3curep9d8"
+PS> New-Tenant -Name "mycompany" -Domain "mycompany" -AdminEmail "admin@example.com" -AdminName "admin" -AdminPass "mys3curep9d8"
 
 Create a new tenant (from the management tenant)
+
+.EXAMPLE
+PS> New-Tenant -Name "mycompany" -Domain "mycompany" -AdminEmail "admin@example.com" -AdminName "admin" -SendPasswordResetEmail
+
+Create a new tenant and send a password reset email (from the management tenant)
 
 
 #>
@@ -25,13 +30,18 @@ Create a new tenant (from the management tenant)
         # Company name. Maximum 256 characters
         [Parameter()]
         [string]
-        $Company,
+        $Name,
 
         # Domain name to be used for the tenant. Maximum 256 characters
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Domain,
+
+        # Email address of the tenant's administrator
+        [Parameter()]
+        [string]
+        $AdminEmail,
 
         # Username of the tenant administrator
         [Parameter()]
@@ -56,7 +66,17 @@ Create a new tenant (from the management tenant)
         # The tenant ID. This should be left bank unless you know what you are doing. Will be auto-generated if not present.
         [Parameter()]
         [string]
-        $TenantId
+        $TenantId,
+
+        # Allow the tenant to create sub-tenants
+        [Parameter()]
+        [switch]
+        $AllowCreateTenants,
+
+        # Send password reset email to the user instead of setting a password
+        [Parameter()]
+        [switch]
+        $SendPasswordResetEmail
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"
