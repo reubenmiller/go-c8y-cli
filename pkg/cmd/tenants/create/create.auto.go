@@ -33,8 +33,11 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create tenant",
 		Long:  `Create a new tenant`,
 		Example: heredoc.Doc(`
-$ c8y tenants create --company "mycompany" --domain "mycompany" --adminName "admin" --adminPass "mys3curep9d8"
+$ c8y tenants create --name "mycompany" --domain "mycompany" --adminEmail "admin@example.com" --adminName "admin" --adminPass "mys3curep9d8"
 Create a new tenant (from the management tenant)
+
+$ c8y tenants create --name "mycompany" --domain "mycompany" --adminEmail "admin@example.com" --adminName "admin" --sendPasswordResetEmail
+Create a new tenant and send a password reset email (from the management tenant)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -45,12 +48,16 @@ Create a new tenant (from the management tenant)
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("company", "", "Company name. Maximum 256 characters")
+	cmd.Flags().String("name", "", "Company name. Maximum 256 characters")
 	cmd.Flags().String("domain", "", "Domain name to be used for the tenant. Maximum 256 characters (accepts pipeline)")
+	cmd.Flags().String("adminEmail", "", "Email address of the tenant's administrator")
 	cmd.Flags().String("adminName", "", "Username of the tenant administrator")
 	cmd.Flags().String("adminPass", "", "Password of the tenant administrator")
 	cmd.Flags().String("contactName", "", "A contact name, for example an administrator, of the tenant")
 	cmd.Flags().String("contactPhone", "", "An international contact phone number")
 	cmd.Flags().String("tenantId", "", "The tenant ID. This should be left bank unless you know what you are doing. Will be auto-generated if not present.")
+	cmd.Flags().Bool("allowCreateTenants", false, "Allow the tenant to create sub-tenants")
+	cmd.Flags().Bool("sendPasswordResetEmail", false, "Send password reset email to the user instead of setting a password")
 
 	completion.WithOptions(
 		cmd,
@@ -65,6 +72,8 @@ Create a new tenant (from the management tenant)
 	)
 
 	// Required flags
+
+	flags.MarkDeprecated(cmd, "company", "please use 'name' instead")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -142,15 +151,19 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithOverrideValue("domain", "domain"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("company", "company"),
+		flags.WithStringValue("name", "company"),
 		flags.WithStringValue("domain", "domain"),
+		flags.WithStringValue("adminEmail", "adminEmail"),
 		flags.WithStringValue("adminName", "adminName"),
 		flags.WithStringValue("adminPass", "adminPass"),
 		flags.WithStringValue("contactName", "contactName"),
-		flags.WithStringValue("contactPhone", "contact_phone"),
+		flags.WithStringValue("contactPhone", "contactPhone"),
 		flags.WithStringValue("tenantId", "tenantId"),
+		flags.WithBoolValue("allowCreateTenants", "allowCreateTenants", ""),
+		flags.WithBoolValue("sendPasswordResetEmail", "sendPasswordResetEmail", ""),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("company", "domain"),
+		flags.WithRequiredProperties("company", "domain", "adminName", "adminEmail"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -46,11 +46,14 @@ Update a tenant by name (from the management tenant)
 
 	cmd.Flags().String("id", "", "Tenant id (accepts pipeline)")
 	cmd.Flags().String("company", "", "Company name. Maximum 256 characters")
+	cmd.Flags().String("name", "", "Company name. Maximum 256 characters")
 	cmd.Flags().String("domain", "", "Domain name to be used for the tenant. Maximum 256 characters")
+	cmd.Flags().String("adminEmail", "", "Email address of the tenant's administrator")
 	cmd.Flags().String("adminName", "", "Username of the tenant administrator")
 	cmd.Flags().String("adminPass", "", "Password of the tenant administrator")
 	cmd.Flags().String("contactName", "", "A contact name, for example an administrator, of the tenant")
 	cmd.Flags().String("contactPhone", "", "An international contact phone number")
+	cmd.Flags().Bool("allowCreateTenants", false, "Allow the tenant to create sub-tenants")
 
 	completion.WithOptions(
 		cmd,
@@ -67,6 +70,8 @@ Update a tenant by name (from the management tenant)
 	)
 
 	// Required flags
+
+	flags.MarkDeprecated(cmd, "company", "please use 'name' instead")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -143,11 +148,14 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("company", "company"),
+		flags.WithStringValue("name", "company"),
 		flags.WithStringValue("domain", "domain"),
+		flags.WithStringValue("adminEmail", "adminEmail"),
 		flags.WithStringValue("adminName", "adminName"),
 		flags.WithStringValue("adminPass", "adminPass"),
 		flags.WithStringValue("contactName", "contactName"),
-		flags.WithStringValue("contactPhone", "contact_phone"),
+		flags.WithStringValue("contactPhone", "contactPhone"),
+		flags.WithBoolValue("allowCreateTenants", "allowCreateTenants", ""),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
