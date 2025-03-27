@@ -336,3 +336,76 @@ commands:
         pipeline: true
         required: false
         description: Tenant id
+
+  - name: enable
+    description: Enable/Activate tenant
+    descriptionLong: Enable/Activate an existing tenant
+    method: PUT
+    path: /tenant/tenants/{id}
+    accept: application/vnd.com.nsn.cumulocity.tenant+json
+    alias:
+        go: enable
+        powershell: Enable-Tenant
+    examples:
+        powershell:
+          - description: Enable a tenant (from the management tenant)
+            command: Enable-Tenant -Id mycompany
+            skipTest: true
+        go:
+          - description: Enable a tenant (from the management tenant)
+            command: c8y tenants enable --id "mycompany"
+    pathParameters:
+      - name: id
+        type: tenant
+        pipeline: true
+        required: false
+        description: Tenant id
+
+    body:
+      - name: status
+        type: stringStatic
+        description: ""
+        hidden: true
+        value: "ACTIVE"
+        
+      - name: data
+        type: json
+        required: false
+        description: A set of custom properties of the tenant
+
+
+  - name: disable
+    description: Disable/Suspend tenant
+    descriptionLong: Disable/Suspend an existing tenant
+    method: PUT
+    path: /tenant/tenants/{id}
+    accept: application/vnd.com.nsn.cumulocity.tenant+json
+    alias:
+        go: disable
+        powershell: Disable-Tenant
+    examples:
+        powershell:
+          - description: Disable a tenant (from the management tenant)
+            command: Disable-Tenant -Id mycompany
+            skipTest: true
+        go:
+          - description: Disable a tenant (from the management tenant)
+            command: c8y tenants disable --id "mycompany"
+    pathParameters:
+      - name: id
+        type: tenant
+        pipeline: true
+        required: false
+        description: Tenant id
+
+    body:
+      - name: status
+        type: stringStatic
+        description: ""
+        hidden: true
+        value: "SUSPENDED"
+        
+      - name: data
+        type: json
+        required: false
+        description: A set of custom properties of the tenant
