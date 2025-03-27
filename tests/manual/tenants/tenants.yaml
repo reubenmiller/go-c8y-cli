@@ -1,7 +1,7 @@
 tests:
     It creates a tenant using just a template:
         command: >
-          c8y tenants create --template "{company: 'ABC Con', domain: 'abc.con.iot'}" --dry
+          c8y tenants create --template "{company: 'ABC Con', domain: 'abc.con.iot', adminName: 'admin', adminEmail: 'admin@example.com'}" --dry
         exit-code: 0
         stdout:
             json:
@@ -9,6 +9,8 @@ tests:
                 path: /tenant/tenants
                 body.domain: "abc.con.iot"
                 body.company: "ABC Con"
+                body.adminName: admin
+                body.adminEmail: admin@example.com
 
     It uses explicit tenant id over piped value:
         command: >
