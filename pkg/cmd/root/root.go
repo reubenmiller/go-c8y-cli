@@ -101,6 +101,7 @@ import (
 	templateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/template"
 	tenantoptionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions"
 	tenantsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants"
+	tenantsApplicationsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/applications"
 	tenantstatisticsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantstatistics"
 	uiCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui"
 	uiApplicationsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui/applications"
@@ -333,7 +334,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		sessionsCmd.NewSubCommand(f).GetCommand(),
 		systemoptionsCmd.NewSubCommand(f).GetCommand(),
 		tenantoptionsCmd.NewSubCommand(f).GetCommand(),
-		tenantsCmd.NewSubCommand(f).GetCommand(),
 		tenantstatisticsCmd.NewSubCommand(f).GetCommand(),
 		usergroupsCmd.NewSubCommand(f).GetCommand(),
 		userreferencesCmd.NewSubCommand(f).GetCommand(),
@@ -353,6 +353,10 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	}
 
 	cmd.AddCommand(commands...)
+
+	tenants := tenantsCmd.NewSubCommand(f).GetCommand()
+	tenants.AddCommand(tenantsApplicationsCmd.NewSubCommand(f).GetCommand())
+	cmd.AddCommand(tenants)
 
 	features := featuresCmd.NewSubCommand(f).GetCommand()
 	features.AddCommand(featuresByTenantCmd.NewSubCommand(f).GetCommand())

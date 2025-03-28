@@ -30,9 +30,11 @@ func NewEnableApplicationCmd(f *cmdutil.Factory) *EnableApplicationCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "enableApplication",
-		Short: "Subscribe application",
-		Long:  `Enable/subscribe an application to a tenant`,
+		Use:    "enableApplication",
+		Short:  "Subscribe application",
+		Long:   `Enable/subscribe an application to a tenant`,
+		Hidden: true,
+
 		Example: heredoc.Doc(`
 $ c8y tenants enableApplication --tenant "t12345" --application "myMicroservice"
 Enable an application of a tenant by name
@@ -61,6 +63,8 @@ Enable an application of a tenant by name
 		flags.WithExtendedPipelineSupport("application", "application.id", true, "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 		flags.WithPipelineAliases("application", "id"),
+
+		flags.WithDeprecationNotice("please use 'c8y tenants applications enable' instead"),
 	)
 
 	// Required flags
