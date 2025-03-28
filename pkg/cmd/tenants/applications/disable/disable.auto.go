@@ -1,12 +1,12 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package listreferences
+package disable
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -17,51 +17,50 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// ListReferencesCmd command
-type ListReferencesCmd struct {
+// DisableCmd command
+type DisableCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewListReferencesCmd creates a command to Get application reference collection
-func NewListReferencesCmd(f *cmdutil.Factory) *ListReferencesCmd {
-	ccmd := &ListReferencesCmd{
+// NewDisableCmd creates a command to Unsubscribe application
+func NewDisableCmd(f *cmdutil.Factory) *DisableCmd {
+	ccmd := &DisableCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:    "listReferences",
-		Short:  "Get application reference collection",
-		Long:   `Get a collection of application references on a tenant`,
-		Hidden: true,
-
+		Use:   "disable",
+		Short: "Unsubscribe application",
+		Long:  `Disable/unsubscribe an application from a tenant`,
 		Example: heredoc.Doc(`
-$ c8y tenants listReferences --tenant "mycompany"
-Get a list of referenced applications on a given tenant (from management tenant)
+$ c8y tenants applications disable --tenant "t12345" --application "myMicroservice"
+Disable an application of a tenant by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			return f.DeleteModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("tenant", "", "Tenant id (accepts pipeline)")
+	cmd.Flags().String("tenant", "", "Tenant id. Defaults to current tenant (based on credentials)")
+	cmd.Flags().String("application", "", "Application id (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithApplication("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
+		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("tenant", "tenant", false, "id"),
+		flags.WithExtendedPipelineSupport("application", "application", true, "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
-
-		flags.WithCollectionProperty("references"),
-		flags.WithDeprecationNotice("please use 'c8y tenants applications list' instead"),
+		flags.WithPipelineAliases("application", "id"),
 	)
 
 	// Required flags
@@ -72,7 +71,7 @@ Get a list of referenced applications on a given tenant (from management tenant)
 }
 
 // RunE executes the command
-func (n *ListReferencesCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *DisableCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -102,11 +101,6 @@ func (n *ListReferencesCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -121,6 +115,7 @@ func (n *ListReferencesCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -149,19 +144,20 @@ func (n *ListReferencesCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/tenant/tenants/{tenant}/applications")
+	path := flags.NewStringTemplate("/tenant/tenants/{tenant}/applications/{application}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
 		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
+		c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, "application", "application"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "GET",
+		Method:       "DELETE",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

@@ -1,0 +1,138 @@
+{
+  "group": {
+    "name": "tenants/applications",
+    "description": "Manage applications by tenant",
+    "descriptionLong": "Manage the applications used by sub-tenants",
+    "link": "https://cumulocity.com/guides/reference/tenants/#tenants"
+  },
+  "commands": [
+    {
+      "name": "enable",
+      "description": "Subscribe application",
+      "descriptionLong": "Enable/subscribe an application to a tenant",
+      "method": "POST",
+      "path": "/tenant/tenants/{tenant}/applications",
+      "accept": "application/vnd.com.nsn.cumulocity.applicationReference+json",
+      "alias": {
+        "go": "enable",
+        "powershell": "Enable-ApplicationByTenant"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Enable an application of a tenant",
+            "command": "Enable-ApplicationByTenant -Tenant t12345 -Application myMicroservice",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Enable an application of a tenant by name",
+            "command": "c8y tenants applications enable --tenant \"t12345\" --application \"myMicroservice\"",
+            "skipTest": true
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "required": false,
+          "position": 99,
+          "description": "Tenant id. Defaults to current tenant (based on credentials)"
+        }
+      ],
+      "body": [
+        {
+          "name": "application",
+          "pipeline": true,
+          "type": "application",
+          "property": "application.id",
+          "required": true,
+          "description": "Application id"
+        }
+      ]
+    },
+    {
+      "name": "disable",
+      "description": "Unsubscribe application",
+      "descriptionLong": "Disable/unsubscribe an application from a tenant",
+      "method": "DELETE",
+      "path": "/tenant/tenants/{tenant}/applications/{application}",
+      "alias": {
+        "go": "disable",
+        "powershell": "Disable-ApplicationByTenant"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Disable an application of a tenant",
+            "command": "Disable-ApplicationByTenant -Tenant t12345 -Application myMicroservice",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Disable an application of a tenant by name",
+            "command": "c8y tenants applications disable --tenant \"t12345\" --application \"myMicroservice\"",
+            "skipTest": true
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "required": false,
+          "position": 99,
+          "description": "Tenant id. Defaults to current tenant (based on credentials)"
+        },
+        {
+          "name": "application",
+          "type": "application",
+          "pipeline": true,
+          "required": true,
+          "description": "Application id"
+        }
+      ]
+    },
+    {
+      "name": "list",
+      "description": "Get application reference collection",
+      "descriptionLong": "Get a collection of application references on a tenant",
+      "method": "GET",
+      "path": "/tenant/tenants/{tenant}/applications",
+      "accept": "application/vnd.com.nsn.cumulocity.applicationReferenceCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.applicationReference+json",
+      "collectionProperty": "references",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-ApplicationCollectionByTenant"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of referenced applications on a given tenant (from management tenant)",
+            "command": "Get-ApplicationCollectionByTenant -Tenant mycompany",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of referenced applications on a given tenant (from management tenant)",
+            "command": "c8y tenants applications list --tenant \"mycompany\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "pipeline": true,
+          "required": false,
+          "description": "Tenant id"
+        }
+      ]
+    }
+  ]
+}

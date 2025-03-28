@@ -249,12 +249,18 @@ commands:
         required: false
         description: A set of custom properties of the tenant
 
+  #
+  # Deprecated commands as they have been moved under c8y tenants applications enable|disable|list
+  #
   - name: enableApplicationOnTenant
     description: Subscribe application
     descriptionLong: Enable/subscribe an application to a tenant
     method: POST
     path: /tenant/tenants/{tenant}/applications
     accept: application/vnd.com.nsn.cumulocity.applicationReference+json
+    deprecated: "please use 'c8y tenants applications enable' instead"
+    deprecatedAt: "2025-03-28"
+    hidden: true
     alias:
         go: enableApplication
         powershell: Enable-Application
@@ -286,6 +292,9 @@ commands:
     descriptionLong: Disable/unsubscribe an application from a tenant
     method: DELETE
     path: /tenant/tenants/{tenant}/applications/{application}
+    deprecated: "please use 'c8y tenants applications disable' instead"
+    deprecatedAt: "2025-03-28"
+    hidden: true
     alias:
         go: disableApplication
         powershell: Disable-Application
@@ -319,6 +328,9 @@ commands:
     accept: application/vnd.com.nsn.cumulocity.applicationReferenceCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.applicationReference+json
     collectionProperty: references
+    deprecated: "please use 'c8y tenants applications list' instead"
+    deprecatedAt: "2025-03-28"
+    hidden: true
     alias:
         go: listReferences
         powershell: Get-ApplicationReferenceCollection

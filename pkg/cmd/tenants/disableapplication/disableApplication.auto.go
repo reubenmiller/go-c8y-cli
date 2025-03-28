@@ -30,9 +30,11 @@ func NewDisableApplicationCmd(f *cmdutil.Factory) *DisableApplicationCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "disableApplication",
-		Short: "Unsubscribe application",
-		Long:  `Disable/unsubscribe an application from a tenant`,
+		Use:    "disableApplication",
+		Short:  "Unsubscribe application",
+		Long:   `Disable/unsubscribe an application from a tenant`,
+		Hidden: true,
+
 		Example: heredoc.Doc(`
 $ c8y tenants disableApplication --tenant "t12345" --application "myMicroservice"
 Disable an application of a tenant by name
@@ -61,6 +63,8 @@ Disable an application of a tenant by name
 		flags.WithExtendedPipelineSupport("application", "application", true, "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 		flags.WithPipelineAliases("application", "id"),
+
+		flags.WithDeprecationNotice("please use 'c8y tenants applications disable' instead"),
 	)
 
 	// Required flags

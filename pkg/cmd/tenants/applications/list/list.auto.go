@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package listreferences
+package list
 
 import (
 	"fmt"
@@ -17,26 +17,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// ListReferencesCmd command
-type ListReferencesCmd struct {
+// ListCmd command
+type ListCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewListReferencesCmd creates a command to Get application reference collection
-func NewListReferencesCmd(f *cmdutil.Factory) *ListReferencesCmd {
-	ccmd := &ListReferencesCmd{
+// NewListCmd creates a command to Get application reference collection
+func NewListCmd(f *cmdutil.Factory) *ListCmd {
+	ccmd := &ListCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:    "listReferences",
-		Short:  "Get application reference collection",
-		Long:   `Get a collection of application references on a tenant`,
-		Hidden: true,
-
+		Use:   "list",
+		Short: "Get application reference collection",
+		Long:  `Get a collection of application references on a tenant`,
 		Example: heredoc.Doc(`
-$ c8y tenants listReferences --tenant "mycompany"
+$ c8y tenants applications list --tenant "mycompany"
 Get a list of referenced applications on a given tenant (from management tenant)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -61,7 +59,6 @@ Get a list of referenced applications on a given tenant (from management tenant)
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 
 		flags.WithCollectionProperty("references"),
-		flags.WithDeprecationNotice("please use 'c8y tenants applications list' instead"),
 	)
 
 	// Required flags
@@ -72,7 +69,7 @@ Get a list of referenced applications on a given tenant (from management tenant)
 }
 
 // RunE executes the command
-func (n *ListReferencesCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err

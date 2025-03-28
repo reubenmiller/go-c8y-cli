@@ -1,0 +1,9 @@
+tests:
+    tenants/applications_disable_Disable an application of a tenant by name:
+        command: c8y tenants applications disable --tenant "t12345" --application "myMicroservice"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: DELETE
+                path: /tenant/tenants/t12345/applications/myMicroservice
