@@ -1,0 +1,17 @@
+tests:
+    tenants/tfa_update_Update the Tenant's TFA setting of the current tenant:
+        command: c8y tenants tfa update --strategy TOTP
+        exit-code: 0
+        stdout:
+            json:
+                body.strategy: TOTP
+                method: PUT
+                path: /tenant/tenants/$C8Y_TENANT/tfa
+    tenants/tfa_update_Update the Tenant's TFA setting to use time based one-time-password:
+        command: c8y tenants tfa update --tenant t12345 --strategy TOTP
+        exit-code: 0
+        stdout:
+            json:
+                body.strategy: TOTP
+                method: PUT
+                path: /tenant/tenants/t12345/tfa
