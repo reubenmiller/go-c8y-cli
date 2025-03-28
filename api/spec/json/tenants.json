@@ -33,7 +33,25 @@
             "command": "c8y tenants list"
           }
         ]
-      }
+      },
+      "queryParameters": [
+        {
+          "name": "name",
+          "property": "company",
+          "type": "string",
+          "description": "Company name associated with the Cumulocity tenant"
+        },
+        {
+          "name": "domain",
+          "type": "string",
+          "description": "Domain name of the Cumulocity tenant"
+        },
+        {
+          "name": "parent",
+          "type": "tenant",
+          "description": "Identifier of the Cumulocity tenant's parent"
+        }
+      ]
     },
     {
       "name": "newTenant",

@@ -22,7 +22,20 @@ Get a list of tenants
     [Alias()]
     [OutputType([object])]
     Param(
+        # Company name associated with the Cumulocity tenant
+        [Parameter()]
+        [string]
+        $Name,
 
+        # Domain name of the Cumulocity tenant
+        [Parameter()]
+        [string]
+        $Domain,
+
+        # Identifier of the Cumulocity tenant's parent
+        [Parameter()]
+        [object]
+        $Parent
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
