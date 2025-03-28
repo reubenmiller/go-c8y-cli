@@ -1,0 +1,108 @@
+{
+  "group": {
+    "name": "tenants/tfa",
+    "description": "Cumulocity Tenant Two-Factor-Authentication Setting",
+    "descriptionLong": "Managed the Two-Factor-Authentication settings used by a tenant",
+    "link": "https://cumulocity.com/guides/reference/tenants/#tenants"
+  },
+  "commands": [
+    {
+      "name": "get",
+      "description": "Get Tenant TFA setting",
+      "descriptionLong": "Get a Tenant's Two-Factor-Authentication setting",
+      "method": "GET",
+      "path": "/tenant/tenants/{tenant}/tfa",
+      "accept": "application/json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-TenantTFASetting"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get the Two-Factor-Authentication setting of a tenant",
+            "command": "Get-TenantTFASetting",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Get the Two-Factor-Authentication setting of a tenant",
+            "command": "c8y tenants tfa get --tenant t12345"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "description": "Tenant id"
+        }
+      ]
+    },
+    {
+      "name": "update",
+      "description": "Update Tenant TFA setting",
+      "descriptionLong": "Update a Tenant's Two-Factor-Authentication setting",
+      "method": "PUT",
+      "path": "/tenant/tenants/{tenant}/tfa",
+      "accept": "application/json",
+      "alias": {
+        "go": "update",
+        "powershell": "Update-TenantTFASetting"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Update the Tenant's TFA setting of the current tenant",
+            "command": "Update-TenantTFASetting -Strategy TOTP",
+            "skipTest": true
+          },
+          {
+            "description": "Update the Tenant's TFA setting to use time based one-time-password",
+            "command": "Update-TenantTFASetting -Tenant t12345 -Strategy TOTP",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Update the Tenant's TFA setting of the current tenant",
+            "command": "c8y tenants tfa update --strategy TOTP"
+          },
+          {
+            "description": "Update the Tenant's TFA setting to use time based one-time-password",
+            "command": "c8y tenants tfa update --tenant t12345 --strategy TOTP"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "description": "Tenant id. Defaults to current tenant"
+        }
+      ],
+      "body": [
+        {
+          "name": "strategy",
+          "type": "string",
+          "required": false,
+          "validationSet": [
+            "SMS",
+            "TOTP"
+          ],
+          "description": "Company name. Maximum 256 characters"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "required": false,
+          "description": "Enable templating"
+        }
+      ],
+      "bodyRequiredKeys": [
+        "strategy"
+      ]
+    }
+  ]
+}

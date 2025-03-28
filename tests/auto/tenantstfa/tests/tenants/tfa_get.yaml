@@ -1,0 +1,8 @@
+tests:
+    tenants/tfa_get_Get the Two-Factor-Authentication setting of a tenant:
+        command: c8y tenants tfa get --tenant t12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/tenants/t12345/tfa
