@@ -36,6 +36,9 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Example: heredoc.Doc(`
 $ c8y currenttenant get
 Get the current tenant (based on your current credentials)
+
+$ c8y currenttenant get --withParent
+Get the current tenant including the parent tenant (based on your current credentials)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -44,6 +47,8 @@ Get the current tenant (based on your current credentials)
 	}
 
 	cmd.SilenceUsage = true
+
+	cmd.Flags().Bool("withParent", false, "When set to true, the returned result will contain the parent of the current tenant")
 
 	completion.WithOptions(
 		cmd,
@@ -89,6 +94,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithBoolValue("withParent", "withParent", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
