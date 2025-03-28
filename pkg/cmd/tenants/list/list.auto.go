@@ -45,14 +45,20 @@ Get a list of tenants
 
 	cmd.SilenceUsage = true
 
+	cmd.Flags().String("name", "", "Company name associated with the Cumulocity tenant")
+	cmd.Flags().String("domain", "", "Domain name of the Cumulocity tenant")
+	cmd.Flags().String("parent", "", "Identifier of the Cumulocity tenant's parent")
+
 	completion.WithOptions(
 		cmd,
+		completion.WithTenantID("parent", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithPipelineAliases("parent", "tenant", "owner.tenant.id"),
 
 		flags.WithCollectionProperty("tenants"),
 	)
@@ -91,6 +97,9 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithStringValue("name", "company"),
+		flags.WithStringValue("domain", "domain"),
+		flags.WithStringDefaultValue(n.factory.GetTenant(), "parent", "parent"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
