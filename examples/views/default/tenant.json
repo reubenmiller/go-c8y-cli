@@ -23,7 +23,8 @@
             "columns": [
                 "name",
                 "domainName",
-                "allowCreateTenants"
+                "allowCreateTenants",
+                "parent"
             ]
         }
     ]

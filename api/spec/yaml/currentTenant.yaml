@@ -21,9 +21,19 @@ commands:
         powershell:
           - description: Get the current tenant (based on your current credentials)
             command: Get-CurrentTenant
+          - description: Get the current tenant including the parent tenant (based on your current credentials)
+            command: Get-CurrentTenant -WithParent
+
         go:
           - description: Get the current tenant (based on your current credentials)
             command: c8y currenttenant get
+
+          - description: Get the current tenant including the parent tenant (based on your current credentials)
+            command: c8y currenttenant get --withParent
+    queryParameters:
+      - name: withParent
+        type: boolean
+        description: When set to true, the returned result will contain the parent of the current tenant
   
   - name: listApplications
     description: List applications in current tenant

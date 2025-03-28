@@ -15,6 +15,11 @@ PS> Get-CurrentTenant
 
 Get the current tenant (based on your current credentials)
 
+.EXAMPLE
+PS> Get-CurrentTenant -WithParent
+
+Get the current tenant including the parent tenant (based on your current credentials)
+
 
 #>
     [cmdletbinding(PositionalBinding=$true,
@@ -22,7 +27,10 @@ Get the current tenant (based on your current credentials)
     [Alias()]
     [OutputType([object])]
     Param(
-
+        # When set to true, the returned result will contain the parent of the current tenant
+        [Parameter()]
+        [switch]
+        $WithParent
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get"

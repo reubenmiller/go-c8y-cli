@@ -11,6 +11,12 @@ Describe -Name "Get-CurrentTenant" {
         $Response | Should -Not -BeNullOrEmpty
     }
 
+    It "Get the current tenant including the parent tenant (based on your current credentials)" {
+        $Response = PSc8y\Get-CurrentTenant -WithParent
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+    }
+
 
     AfterEach {
 
