@@ -208,6 +208,12 @@ commands:
           - application.id
           - id
 
+    queryParameters:
+      - name: unsubscribeAll
+        property: force
+        type: boolean
+        description: Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.
+
   - name: updateMicroservice
     description: Update microservice details
     descriptionLong: |
