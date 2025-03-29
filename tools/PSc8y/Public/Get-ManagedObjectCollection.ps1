@@ -96,7 +96,12 @@ Get a list of managed objects by id
         # When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
         [Parameter()]
         [switch]
-        $WithGroups
+        $WithGroups,
+
+        # (FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform
+        [Parameter()]
+        [switch]
+        $WithLatestValues
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

@@ -122,7 +122,12 @@ Find all managed objects with their names starting with 'roomUpperFloor_'
         # Include a flat list of all parents and grandparents of the given object
         [Parameter()]
         [switch]
-        $WithParents
+        $WithParents,
+
+        # (FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform
+        [Parameter()]
+        [switch]
+        $WithLatestValues
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

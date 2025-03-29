@@ -72,6 +72,7 @@ Invert a given query received via piped input (stdin) by using a template
 	cmd.Flags().Bool("withChildrenCount", false, "When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)")
 	cmd.Flags().Bool("withGroups", false, "When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.")
 	cmd.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
+	cmd.Flags().Bool("withLatestValues", false, "(FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform")
 
 	completion.WithOptions(
 		cmd,
@@ -133,6 +134,7 @@ func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
 		flags.WithBoolValue("withGroups", "withGroups", ""),
 		flags.WithBoolValue("withParents", "withParents", ""),
+		flags.WithBoolValue("withLatestValues", "withLatestValues", ""),
 
 		flags.WithCumulocityQuery(
 			[]flags.GetOption{

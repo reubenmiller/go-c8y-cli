@@ -133,6 +133,11 @@
           "name": "withGroups",
           "type": "boolean",
           "description": "When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups."
+        },
+        {
+          "name": "withLatestValues",
+          "type": "boolean",
+          "description": "(FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform"
         }
       ]
     },
@@ -319,6 +324,11 @@
           "name": "withParents",
           "type": "boolean",
           "description": "Include a flat list of all parents and grandparents of the given object"
+        },
+        {
+          "name": "withLatestValues",
+          "type": "boolean",
+          "description": "(FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform"
         }
       ]
     },
@@ -498,6 +508,11 @@
           "name": "withParents",
           "type": "boolean",
           "description": "Include a flat list of all parents and grandparents of the given object"
+        },
+        {
+          "name": "withLatestValues",
+          "type": "boolean",
+          "description": "(FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform"
         }
       ]
     },
@@ -650,6 +665,11 @@
           "name": "withParents",
           "type": "boolean",
           "description": "Include a flat list of all parents and grandparents of the given object"
+        },
+        {
+          "name": "withLatestValues",
+          "type": "boolean",
+          "description": "(FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform"
         }
       ]
     },

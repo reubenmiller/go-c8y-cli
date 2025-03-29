@@ -69,6 +69,7 @@ Get managed objects which have the same type as the managed object id=1234. pipe
 	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
 	cmd.Flags().Bool("withChildrenCount", false, "When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)")
 	cmd.Flags().Bool("withGroups", false, "When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.")
+	cmd.Flags().Bool("withLatestValues", false, "(FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform")
 
 	completion.WithOptions(
 		cmd,
@@ -132,6 +133,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithBoolValue("withChildren", "withChildren", ""),
 		flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
 		flags.WithBoolValue("withGroups", "withGroups", ""),
+		flags.WithBoolValue("withLatestValues", "withLatestValues", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
