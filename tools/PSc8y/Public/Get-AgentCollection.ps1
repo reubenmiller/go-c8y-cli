@@ -112,7 +112,12 @@ Get a collection of agents with type "myType", and their names start with "senso
         # Include a flat list of all parents and grandparents of the given object
         [Parameter()]
         [switch]
-        $WithParents
+        $WithParents,
+
+        # (FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform
+        [Parameter()]
+        [switch]
+        $WithLatestValues
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
