@@ -46,6 +46,7 @@ Create a user group
 
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().String("name", "", "Group name (accepts pipeline)")
+	cmd.Flags().String("description", "", "A description of the group")
 	cmd.Flags().StringSlice("deviceProperties", []string{""}, "List of device permissions")
 
 	completion.WithOptions(
@@ -140,6 +141,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithOverrideValue("name", "name"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
+		flags.WithStringValue("description", "description"),
 		flags.WithStringSliceValues("deviceProperties", "deviceProperties", ""),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),

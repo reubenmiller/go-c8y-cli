@@ -28,6 +28,11 @@ Create a user group
         [object[]]
         $Name,
 
+        # A description of the group
+        [Parameter()]
+        [string]
+        $Description,
+
         # List of device permissions
         [Parameter()]
         [string[]]
