@@ -39,6 +39,11 @@ Update a user
         [string]
         $LastName,
 
+        # The user's display name in Cumulocity
+        [Parameter()]
+        [string]
+        $DisplayName,
+
         # User phone number. Format: '+[country code][number]', has to be a valid MSISDN
         [Parameter()]
         [string]
@@ -69,6 +74,11 @@ Update a user
         [ValidateSet('true','false')]
         [switch]
         $SendPasswordResetEmail,
+
+        # Indicates whether the user is subscribed to the newsletter or not
+        [Parameter()]
+        [switch]
+        $Newsletter,
 
         # Custom properties to be added to the user
         [Parameter()]
