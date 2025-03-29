@@ -138,6 +138,10 @@ commands:
         pipeline: true
         description: 'User name, unique for a given domain. Max: 1000 characters'
 
+      - name: displayName
+        type: string
+        description: The user's display name in Cumulocity
+
       - name: firstName
         type: string
         required: false
@@ -180,6 +184,11 @@ commands:
         required: false
         validationSet: ["true", "false"]
         description: Send password reset email to the user instead of setting a password
+
+      - name: newsletter
+        type: boolean
+        required: false
+        description: Indicates whether the user is subscribed to the newsletter or not
 
       - name: customProperties
         type: json_custom
@@ -336,6 +345,10 @@ commands:
         type: string
         required: false
         description: User last name
+      
+      - name: displayName
+        type: string
+        description: The user's display name in Cumulocity
 
       - name: phone
         type: string
@@ -369,6 +382,11 @@ commands:
         required: false
         validationSet: ["true", "false"]
         description: Send password reset email to the user instead of setting a password
+
+      - name: newsletter
+        type: boolean
+        required: false
+        description: Indicates whether the user is subscribed to the newsletter or not
 
       - name: customProperties
         type: json_custom

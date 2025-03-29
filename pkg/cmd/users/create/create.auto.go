@@ -49,6 +49,7 @@ Create a user using a template
 
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().String("userName", "", "User name, unique for a given domain. Max: 1000 characters (accepts pipeline)")
+	cmd.Flags().String("displayName", "", "The user's display name in Cumulocity")
 	cmd.Flags().String("firstName", "", "User first name")
 	cmd.Flags().String("lastName", "", "User last name")
 	cmd.Flags().String("phone", "", "User phone number. Format: '+[country code][number]', has to be a valid MSISDN")
@@ -57,6 +58,7 @@ Create a user using a template
 	cmd.Flags().String("password", "", "User password. Min: 6, max: 32 characters. Only Latin1 chars allowed")
 	cmd.Flags().Bool("shouldResetPassword", false, "User must reset password on next login")
 	cmd.Flags().Bool("sendPasswordResetEmail", false, "Send password reset email to the user instead of setting a password")
+	cmd.Flags().Bool("newsletter", false, "Indicates whether the user is subscribed to the newsletter or not")
 	cmd.Flags().String("customProperties", "", "Custom properties to be added to the user")
 
 	completion.WithOptions(
@@ -152,6 +154,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithOverrideValue("userName", "userName"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("userName", "userName"),
+		flags.WithStringValue("displayName", "displayName"),
 		flags.WithStringValue("firstName", "firstName"),
 		flags.WithStringValue("lastName", "lastName"),
 		flags.WithStringValue("phone", "phone"),
@@ -160,6 +163,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("password", "password"),
 		flags.WithBoolValue("shouldResetPassword", "shouldResetPassword", ""),
 		flags.WithBoolValue("sendPasswordResetEmail", "sendPasswordResetEmail", ""),
+		flags.WithBoolValue("newsletter", "newsletter", ""),
 		flags.WithDataValue("customProperties", "customProperties"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
