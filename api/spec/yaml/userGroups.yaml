@@ -67,6 +67,10 @@ commands:
         pipelineAliases:
           - "name"
 
+      - name: description
+        type: string
+        description: A description of the group
+
       - name: deviceProperties
         type: string[]
         description: List of device permissions
@@ -228,6 +232,10 @@ commands:
       - name: name
         type: string
         description: name
+
+      - name: description
+        type: string
+        description: A description of the group
 
       - name: data
         type: json

@@ -51,6 +51,7 @@ Update a user group with custom properties
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().StringSlice("id", []string{""}, "Group id (required) (accepts pipeline)")
 	cmd.Flags().String("name", "", "name")
+	cmd.Flags().String("description", "", "A description of the group")
 
 	completion.WithOptions(
 		cmd,
@@ -145,6 +146,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
+		flags.WithStringValue("description", "description"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)

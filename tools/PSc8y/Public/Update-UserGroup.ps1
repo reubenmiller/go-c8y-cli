@@ -39,6 +39,11 @@ Update a user group (using pipeline)
         [string]
         $Name,
 
+        # A description of the group
+        [Parameter()]
+        [string]
+        $Description,
+
         # Tenant
         [Parameter()]
         [object]
