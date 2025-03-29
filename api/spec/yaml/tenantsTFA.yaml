@@ -67,7 +67,7 @@ commands:
         validationSet:
           - SMS
           - TOTP
-        description: Company name. Maximum 256 characters
+        description: Two-factor authentication strategy
 
       - name: data
         type: json

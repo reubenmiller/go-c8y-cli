@@ -32,7 +32,7 @@ Update the Tenant's TFA setting to use time based one-time-password
         [object]
         $Tenant,
 
-        # Company name. Maximum 256 characters
+        # Two-factor authentication strategy
         [Parameter()]
         [ValidateSet('SMS','TOTP')]
         [string]

@@ -48,7 +48,7 @@ Update the Tenant's TFA setting to use time based one-time-password
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant id. Defaults to current tenant")
-	cmd.Flags().String("strategy", "", "Company name. Maximum 256 characters")
+	cmd.Flags().String("strategy", "", "Two-factor authentication strategy")
 
 	completion.WithOptions(
 		cmd,
