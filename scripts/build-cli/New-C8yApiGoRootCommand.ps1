@@ -10,8 +10,9 @@
         [string] $OutputDir = "./"
     )
 
-    $Name = $Specification.group.name.ToLower()
+    $Name = $Specification.group.name.ToLower() -replace "-", "_"
     $BaseName = Split-Path -Path $Specification.group.name.ToLower() -Leaf
+    $UseName = (Split-Path -Path $Specification.group.name -Leaf).ToLower()
 
     if ($Specification.group.skip -eq $true) {
         Write-Information "Specification is marked to be ignored"
@@ -22,7 +23,7 @@
         Write-Error "Missing root command name"
         return
     }
-    $BaseNameLowercase = $BaseName.ToLower()
+    $BaseNameLowercase = $BaseName.ToLower() -replace "-", "_"
     $NameCamel = $BaseNameLowercase[0].ToString().ToUpperInvariant() + $BaseNameLowercase.Substring(1)
     $Description = $Specification.group.description
     $DescriptionLong = $Specification.group.descriptionLong
@@ -77,7 +78,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmd${NameCamel} {
     ccmd := &SubCmd${NameCamel}{}
 
     cmd := &cobra.Command{
-        Use:   "${BaseNameLowercase}",
+        Use:   "${UseName}",
         Short: "${Description}",
         Long:  ``${DescriptionLong}``,$(
             if ($CommandOptions) {

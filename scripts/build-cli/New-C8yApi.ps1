@@ -38,7 +38,7 @@
             }
 
             # Create root command (golang convention is to use lower case packages names)
-            $packageName = $Specification.group.name.ToLower()
+            $packageName = $Specification.group.name.ToLower() -replace "-", "_"
             $CommandOutput = Join-Path $OutputDir -ChildPath $packageName
             $null = New-Item -Path $CommandOutput -ItemType Directory -Force
             New-C8yApiGoRootCommand -Specification:$Specification -OutputDir:$CommandOutput
