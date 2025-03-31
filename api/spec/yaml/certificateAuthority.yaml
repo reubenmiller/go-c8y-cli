@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=../schema.json
+---
+group:
+  # commands are currently manually created as it does a compound action
+  skip: true
+  name: devicemanagement/certificate-authority
+  description: Cumulocity certificate authority
+  descriptionLong: Cumulocity certificate authority
+  link: https://cumulocity.com/api/core/#tag/Certificate-authority
+
+commands:
+  - name: create
+    method: POST
+    description: (PREVIEW FEATURE) Create tenant certificate authority
+    descriptionLong: |
+      Create a key pair and self-sign a certificate with as the Common Name (CN).
+      Store the private key in an encrypted tenant option. Store the certificate in
+      the trusted certificate repository with auto-registration unchecked by default.
+      The devices can be registered automatically only when device administrator checks
+      this option ON. If the CA certificate is removed from the trusted certificate list,
+      corresponding public and private key removed automatically from the database collection.
+      If a CA is already present, return a message indicating the CA is already present.
+    path: certificate-authority
+    accept: application/json
+    alias:
+        go: create
+        powershell: New-CertificateAuthority
+    examples:
+      powershell:
+        - description: Create new certificate authority
+          skipTest: true
+          command: New-CertificateAuthority
+
+      go:
+        - description: Create new certificate authority
+          command: c8y devicemanagement certificate-authority create

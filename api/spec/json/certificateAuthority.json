@@ -1,0 +1,38 @@
+{
+  "group": {
+    "skip": true,
+    "name": "devicemanagement/certificate-authority",
+    "description": "Cumulocity certificate authority",
+    "descriptionLong": "Cumulocity certificate authority",
+    "link": "https://cumulocity.com/api/core/#tag/Certificate-authority"
+  },
+  "commands": [
+    {
+      "name": "create",
+      "method": "POST",
+      "description": "(PREVIEW FEATURE) Create tenant certificate authority",
+      "descriptionLong": "Create a key pair and self-sign a certificate with as the Common Name (CN).\nStore the private key in an encrypted tenant option. Store the certificate in\nthe trusted certificate repository with auto-registration unchecked by default.\nThe devices can be registered automatically only when device administrator checks\nthis option ON. If the CA certificate is removed from the trusted certificate list,\ncorresponding public and private key removed automatically from the database collection.\nIf a CA is already present, return a message indicating the CA is already present.\n",
+      "path": "certificate-authority",
+      "accept": "application/json",
+      "alias": {
+        "go": "create",
+        "powershell": "New-CertificateAuthority"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Create new certificate authority",
+            "skipTest": true,
+            "command": "New-CertificateAuthority"
+          }
+        ],
+        "go": [
+          {
+            "description": "Create new certificate authority",
+            "command": "c8y devicemanagement certificate-authority create"
+          }
+        ]
+      }
+    }
+  ]
+}

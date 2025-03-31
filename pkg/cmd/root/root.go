@@ -41,6 +41,7 @@ import (
 	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups"
 	devicegroupsChildrenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/children"
 	deviceManagementCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement"
+	certificateAuthorityCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement/certificate_authority"
 	deviceprofilesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceprofiles"
 	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration"
 	deviceregistrationBulkCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration/registerBulk"
@@ -393,6 +394,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// device management
 	devicemanagement := deviceManagementCmd.NewSubCommand(f).GetCommand()
+	devicemanagement.AddCommand(certificateAuthorityCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(devicemanagement)
 
 	// devices
