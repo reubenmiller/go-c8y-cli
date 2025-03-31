@@ -46,7 +46,7 @@ Disable certificate authority
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().BoolVar(&ccmd.AutoRegistrationEnabled, "autoRegistrationEnabled", true, "Enable auto registration")
+	cmd.Flags().BoolVar(&ccmd.AutoRegistrationEnabled, "autoRegistrationEnabled", false, "Enable auto registration")
 	cmd.Flags().StringVar(&ccmd.Status, "status", "", "Status")
 
 	completion.WithOptions(
@@ -63,19 +63,31 @@ Disable certificate authority
 
 // RunE executes the command
 func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
+	cfg, cfgErr := n.factory.Config()
+	if cfgErr != nil {
+		return cfgErr
+	}
+
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
 	}
 
-	cert, _, err := client.CertificateAuthority.Update(context.Background(), "", &c8y.Certificate{
-		AutoRegistrationEnabled: n.AutoRegistrationEnabled,
-		Status:                  n.Status,
-	})
+	certOptions := c8y.NewCertificate()
+
+	if cmd.Flags().Changed("status") {
+		certOptions.WithStatus(n.Status)
+	}
+
+	if cmd.Flags().Changed("autoRegistrationEnabled") {
+		certOptions.WithAutoRegistration(n.AutoRegistrationEnabled)
+	}
+
+	cert, _, err := client.CertificateAuthority.Update(context.Background(), "", certOptions)
 	if err != nil {
 		return err
 	}
-	if cert == nil {
+	if cfg.DryRun() {
 		return nil
 	}
 

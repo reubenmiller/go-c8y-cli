@@ -50,6 +50,11 @@ Delete certificate authority
 
 // RunE executes the command
 func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
+	cfg, cfgErr := n.factory.Config()
+	if cfgErr != nil {
+		return cfgErr
+	}
+
 	cs := n.factory.IOStreams.ColorScheme()
 	client, err := n.factory.Client()
 	if err != nil {
@@ -60,7 +65,9 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-
+	if cfg.DryRun() {
+		return nil
+	}
 	fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Deleted certificate-authority for tenant %s\n", cs.SuccessIconWithColor(cs.Red), client.GetTenantName(context.Background()))
 	return nil
 }

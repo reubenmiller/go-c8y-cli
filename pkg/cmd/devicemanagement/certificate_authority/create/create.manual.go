@@ -72,6 +72,10 @@ Create new certificate authority but disable it
 
 // RunE executes the command
 func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
+	cfg, cfgErr := n.factory.Config()
+	if cfgErr != nil {
+		return cfgErr
+	}
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -84,7 +88,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if cert == nil {
+	if cfg.DryRun() {
 		return nil
 	}
 
