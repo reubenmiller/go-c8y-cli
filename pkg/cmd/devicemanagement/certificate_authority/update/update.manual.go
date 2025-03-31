@@ -47,7 +47,7 @@ Disable certificate authority
 	cmd.SilenceUsage = true
 
 	cmd.Flags().BoolVar(&ccmd.AutoRegistrationEnabled, "autoRegistrationEnabled", false, "Enable auto registration")
-	cmd.Flags().StringVar(&ccmd.Status, "status", "", "Status")
+	cmd.Flags().StringVar(&ccmd.Status, "status", "", "Status. Can be either ENABLED or DISABLED")
 
 	completion.WithOptions(
 		cmd,
