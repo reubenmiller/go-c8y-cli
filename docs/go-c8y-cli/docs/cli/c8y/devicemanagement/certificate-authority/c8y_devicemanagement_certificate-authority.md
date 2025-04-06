@@ -1,61 +1,20 @@
 ---
-category: devices
-title: c8y devices list
+category: certificate-authority
+title: c8y devicemanagement certificate-authority
 ---
-Get device collection
+(PREVIEW FEATURE) Cumulocity certificate authority
 
 ### Synopsis
 
-Get a collection of devices based on filter parameters
+The Cumulocity certificate authority must be first enabled in your tenant
+by the Cumulocity feature toggles. Please contact support if you wish to
+use the preview of this feature.
 
-```
-c8y devices list [flags]
-```
-
-### Examples
-
-```
-$ c8y devices list --name "sensor*" --type myType
-Get a collection of devices of type "myType", and their names start with "sensor"
-
-$ c8y devices list --query "name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'"
-Get devices which names containing 'sensor' and were created after 2021-04-02
-
-$ c8y devices list --creationTimeDateFrom -7d
-Get devices which where registered longer than 7 days ago
-
-$ c8y devices list --creationTimeDateTo -1d
-Get devices which where registered in the last day
-
-$ echo -e "c8y_MacOS\nc8y_Linux" | c8y devices list --queryTemplate "type eq '%s'"
-Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipeline)
-        
-```
 
 ### Options
 
 ```
-      --agents                        Only include agents
-      --availability string           Filter by c8y_Availability.status
-      --creationTimeDateFrom string   Filter creationTime.date from a specific date
-      --creationTimeDateTo string     Filter creationTime.date to a specific date
-      --fragmentType string           Filter by fragment type
-      --group strings                 Filter by group inclusion
-  -h, --help                          help for list
-      --lastMessageDateFrom string    Filter c8y_Availability.lastMessage from a specific date
-      --lastMessageDateTo string      Filter c8y_Availability.lastMessage to a specific date
-      --name string                   Filter by name
-      --orderBy string                Order by. e.g. _id asc or name asc or creationTime.date desc (default "name")
-      --owner string                  Filter by owner
-      --query string                  Additional query filter (accepts pipeline)
-      --queryTemplate string          String template to be used when applying the given query. Use %s to reference the query/pipeline input
-      --skipChildrenNames             Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --type string                   Filter by type
-      --withChildren                  Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
-      --withChildrenCount             When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
-      --withGroups                    When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
-      --withLatestValues              (FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform
-      --withParents                   Include a flat list of all parents and grandparents of the given object
+  -h, --help   help for certificate-authority
 ```
 
 ### Options inherited from parent commands

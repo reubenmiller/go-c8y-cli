@@ -18,6 +18,7 @@ Get current tenant
 
 ```
 Get-CurrentTenant
+	[-WithParent]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -76,7 +77,29 @@ Get-CurrentTenant
 
 Get the current tenant (based on your current credentials)
 
+### EXAMPLE 2
+```
+Get-CurrentTenant -WithParent
+```
+
+Get the current tenant including the parent tenant (based on your current credentials)
+
 ## PARAMETERS
+
+### -WithParent
+When set to true, the returned result will contain the parent of the current tenant
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -AbortOnErrors
 Abort batch when reaching specified number of errors

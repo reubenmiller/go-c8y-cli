@@ -23,7 +23,10 @@ Get a list of tenants
 ### Options
 
 ```
-  -h, --help   help for list
+      --domain string   Domain name of the Cumulocity tenant
+  -h, --help            help for list
+      --name string     Company name associated with the Cumulocity tenant
+      --parent string   Identifier of the Cumulocity tenant's parent
 ```
 
 ### Options inherited from parent commands

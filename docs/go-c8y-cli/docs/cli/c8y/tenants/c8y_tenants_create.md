@@ -15,23 +15,29 @@ c8y tenants create [flags]
 ### Examples
 
 ```
-$ c8y tenants create --company "mycompany" --domain "mycompany" --adminName "admin" --adminPass "mys3curep9d8"
+$ c8y tenants create --name "mycompany" --domain "mycompany" --adminEmail "admin@example.com" --adminName "admin" --adminPass "mys3curep9d8"
 Create a new tenant (from the management tenant)
+
+$ c8y tenants create --name "mycompany" --domain "mycompany" --adminEmail "admin@example.com" --adminName "admin" --sendPasswordResetEmail
+Create a new tenant and send a password reset email (from the management tenant)
         
 ```
 
 ### Options
 
 ```
+      --adminEmail string          Email address of the tenant's administrator
       --adminName string           Username of the tenant administrator
       --adminPass string           Password of the tenant administrator
-      --company string             Company name. Maximum 256 characters
+      --allowCreateTenants         Allow the tenant to create sub-tenants
       --contactName string         A contact name, for example an administrator, of the tenant
       --contactPhone string        An international contact phone number
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --domain string              Domain name to be used for the tenant. Maximum 256 characters (accepts pipeline)
   -h, --help                       help for create
+      --name string                Company name. Maximum 256 characters
       --processingMode string      Cumulocity processing mode
+      --sendPasswordResetEmail     Send password reset email to the user instead of setting a password
       --template string            Body template
       --templateVars stringArray   Body template variables
       --tenantId string            The tenant ID. This should be left bank unless you know what you are doing. Will be auto-generated if not present.

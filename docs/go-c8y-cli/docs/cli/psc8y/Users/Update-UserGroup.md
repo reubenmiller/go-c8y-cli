@@ -20,6 +20,7 @@ Update user group
 Update-UserGroup
 	[-Id] <Object[]>
 	[[-Name] <String>]
+	[[-Description] <String>]
 	[[-Tenant] <Object>]
 	[-Data <Object>]
 	[-NoAccept]
@@ -124,6 +125,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Description
+A description of the group
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Tenant
 Tenant
 
@@ -133,7 +149,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

@@ -29,6 +29,7 @@ Uninstall a software package version
   -h, --help                       help for uninstall
       --processingMode string      Cumulocity processing mode
       --software string            Software name (required)
+      --softwareType string        Software type. Leave blank to automatically set it if a matching software/version is found in the c8y software repository
       --template string            Body template
       --templateVars stringArray   Body template variables
       --version string             Software version name or id

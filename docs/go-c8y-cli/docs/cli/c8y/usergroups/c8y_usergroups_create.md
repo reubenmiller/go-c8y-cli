@@ -24,6 +24,7 @@ Create a user group
 
 ```
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --description string         A description of the group
       --deviceProperties strings   List of device permissions
   -h, --help                       help for create
       --name string                Group name (accepts pipeline)

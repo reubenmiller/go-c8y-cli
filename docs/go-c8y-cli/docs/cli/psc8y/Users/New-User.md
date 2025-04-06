@@ -19,6 +19,7 @@ Create user
 ```
 New-User
 	[[-UserName] <Object[]>]
+	[[-DisplayName] <String>]
 	[[-FirstName] <String>]
 	[[-LastName] <String>]
 	[[-Phone] <String>]
@@ -27,6 +28,7 @@ New-User
 	[[-Password] <String>]
 	[-ShouldResetPassword]
 	[-SendPasswordResetEmail]
+	[-Newsletter]
 	[[-CustomProperties] <Object>]
 	[[-Tenant] <Object>]
 	[-Data <Object>]
@@ -111,6 +113,21 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
+### -DisplayName
+The user's display name in Cumulocity
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -FirstName
 User first name
 
@@ -120,7 +137,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -135,7 +152,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -151,7 +168,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -166,7 +183,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -198,7 +215,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -234,6 +251,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Newsletter
+Indicates whether the user is subscribed to the newsletter or not
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -CustomProperties
 Custom properties to be added to the user
 
@@ -243,7 +275,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -258,7 +290,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 9
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

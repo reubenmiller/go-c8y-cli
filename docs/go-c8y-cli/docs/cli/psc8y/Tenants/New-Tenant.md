@@ -18,13 +18,16 @@ Create tenant
 
 ```
 New-Tenant
-	[[-Company] <String>]
+	[[-Name] <String>]
 	[[-Domain] <Object[]>]
+	[[-AdminEmail] <String>]
 	[[-AdminName] <String>]
 	[[-AdminPass] <String>]
 	[[-ContactName] <String>]
 	[[-ContactPhone] <String>]
 	[[-TenantId] <String>]
+	[-AllowCreateTenants]
+	[-SendPasswordResetEmail]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -84,14 +87,21 @@ Create a new tenant
 
 ### EXAMPLE 1
 ```
-New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -AdminPass "mys3curep9d8"
+New-Tenant -Name "mycompany" -Domain "mycompany" -AdminEmail "admin@example.com" -AdminName "admin" -AdminPass "mys3curep9d8"
 ```
 
 Create a new tenant (from the management tenant)
 
+### EXAMPLE 2
+```
+New-Tenant -Name "mycompany" -Domain "mycompany" -AdminEmail "admin@example.com" -AdminName "admin" -SendPasswordResetEmail
+```
+
+Create a new tenant and send a password reset email (from the management tenant)
+
 ## PARAMETERS
 
-### -Company
+### -Name
 Company name.
 Maximum 256 characters
 
@@ -123,6 +133,21 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
+### -AdminEmail
+Email address of the tenant's administrator
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -AdminName
 Username of the tenant administrator
 
@@ -132,7 +157,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -147,7 +172,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -162,7 +187,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -177,7 +202,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -194,8 +219,38 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AllowCreateTenants
+Allow the tenant to create sub-tenants
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SendPasswordResetEmail
+Send password reset email to the user instead of setting a password
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

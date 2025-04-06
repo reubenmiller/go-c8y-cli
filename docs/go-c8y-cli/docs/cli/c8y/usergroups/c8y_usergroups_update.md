@@ -27,6 +27,7 @@ Update a user group with custom properties
 
 ```
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --description string         A description of the group
   -h, --help                       help for update
       --id strings                 Group id (required) (accepts pipeline)
       --name string                name

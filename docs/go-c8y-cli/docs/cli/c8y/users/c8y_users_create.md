@@ -28,11 +28,13 @@ Create a user using a template
 ```
       --customProperties string    Custom properties to be added to the user
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --displayName string         The user's display name in Cumulocity
       --email string               User email address
       --enabled                    User activation status (true/false)
       --firstName string           User first name
   -h, --help                       help for create
       --lastName string            User last name
+      --newsletter                 Indicates whether the user is subscribed to the newsletter or not
       --password string            User password. Min: 6, max: 32 characters. Only Latin1 chars allowed
       --phone string               User phone number. Format: '+[country code][number]', has to be a valid MSISDN
       --processingMode string      Cumulocity processing mode

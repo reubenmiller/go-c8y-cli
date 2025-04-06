@@ -29,6 +29,7 @@ Delete a microservice by name
   -h, --help                    help for delete
       --id string               Microservice id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
+      --unsubscribeAll          Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.
 ```
 
 ### Options inherited from parent commands

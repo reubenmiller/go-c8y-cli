@@ -21,6 +21,7 @@ Remove-SoftwareVersion
 	[[-Device] <Object[]>]
 	[-Software] <Object[]>
 	[[-Version] <Object[]>]
+	[[-SoftwareType] <String>]
 	[[-Action] <String>]
 	[-Data <Object>]
 	[-NoAccept]
@@ -133,6 +134,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -SoftwareType
+Software type.
+Leave blank to automatically set it if a matching software/version is found in the c8y software repository
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Action
 Software action
 
@@ -142,7 +159,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

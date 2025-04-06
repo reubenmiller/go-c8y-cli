@@ -19,6 +19,7 @@ Create user group
 ```
 New-UserGroup
 	[[-Name] <Object[]>]
+	[[-Description] <String>]
 	[[-DeviceProperties] <String[]>]
 	[[-Tenant] <Object>]
 	[-Data <Object>]
@@ -102,6 +103,21 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
+### -Description
+A description of the group
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -DeviceProperties
 List of device permissions
 
@@ -111,7 +127,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -126,7 +142,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
