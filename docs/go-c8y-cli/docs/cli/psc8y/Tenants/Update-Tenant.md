@@ -19,12 +19,14 @@ Update tenant
 ```
 Update-Tenant
 	[[-Id] <Object>]
-	[[-Company] <String>]
+	[[-Name] <String>]
 	[[-Domain] <String>]
+	[[-AdminEmail] <String>]
 	[[-AdminName] <String>]
 	[[-AdminPass] <String>]
 	[[-ContactName] <String>]
 	[[-ContactPhone] <String>]
+	[-AllowCreateTenants]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -106,7 +108,7 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -Company
+### -Name
 Company name.
 Maximum 256 characters
 
@@ -138,6 +140,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -AdminEmail
+Email address of the tenant's administrator
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -AdminName
 Username of the tenant administrator
 
@@ -147,7 +164,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -162,7 +179,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -177,7 +194,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -192,8 +209,23 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AllowCreateTenants
+Allow the tenant to create sub-tenants
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

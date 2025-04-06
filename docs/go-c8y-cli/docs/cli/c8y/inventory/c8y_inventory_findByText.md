@@ -37,6 +37,7 @@ Find managed objects which contain the text 'myText' and is a device (using pipe
       --withChildren          Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
       --withChildrenCount     When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
       --withGroups            When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
+      --withLatestValues      (FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform
       --withParents           Include a flat list of all parents and grandparents of the given object
 ```
 

@@ -23,15 +23,17 @@ Update a tenant by name (from the management tenant)
 ### Options
 
 ```
+      --adminEmail string          Email address of the tenant's administrator
       --adminName string           Username of the tenant administrator
       --adminPass string           Password of the tenant administrator
-      --company string             Company name. Maximum 256 characters
+      --allowCreateTenants         Allow the tenant to create sub-tenants
       --contactName string         A contact name, for example an administrator, of the tenant
       --contactPhone string        An international contact phone number
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --domain string              Domain name to be used for the tenant. Maximum 256 characters
   -h, --help                       help for update
       --id string                  Tenant id (accepts pipeline)
+      --name string                Company name. Maximum 256 characters
       --processingMode string      Cumulocity processing mode
       --template string            Body template
       --templateVars stringArray   Body template variables

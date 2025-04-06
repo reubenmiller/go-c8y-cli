@@ -37,6 +37,7 @@ Get-DeviceCollection
 	[-WithChildrenCount]
 	[-WithGroups]
 	[-WithParents]
+	[-WithLatestValues]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-WithTotalElements]
@@ -381,6 +382,21 @@ Accept wildcard characters: False
 
 ### -WithParents
 Include a flat list of all parents and grandparents of the given object
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithLatestValues
+(FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform
 
 ```yaml
 Type: SwitchParameter

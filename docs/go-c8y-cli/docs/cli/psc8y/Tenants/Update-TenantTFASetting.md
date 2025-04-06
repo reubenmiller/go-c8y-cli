@@ -1,36 +1,25 @@
 ---
-category: Users
+category: Tenants
 external help file: PSc8y-help.xml
-id: Update-User
+id: Update-TenantTFASetting
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_update
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_tfa_update
 schema: 2.0.0
-slug: /docs/cli/psc8y/Users/update-user
-title: Update-User
+slug: /docs/cli/psc8y/Tenants/update-tenanttfasetting
+title: Update-TenantTFASetting
 ---
 
 
 
 ## SYNOPSIS
-Update user
+Update Tenant TFA setting
 
 ## SYNTAX
 
 ```
-Update-User
-	[-Id] <Object[]>
-	[[-FirstName] <String>]
-	[[-LastName] <String>]
-	[[-DisplayName] <String>]
-	[[-Phone] <String>]
-	[[-Email] <String>]
-	[-Enabled]
-	[[-Password] <String>]
-	[-ShouldResetPassword]
-	[-SendPasswordResetEmail]
-	[-Newsletter]
-	[[-CustomProperties] <Object>]
+Update-TenantTFASetting
 	[[-Tenant] <Object>]
+	[[-Strategy] <String>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -84,36 +73,44 @@ Update-User
 ```
 
 ## DESCRIPTION
-Update properties, reset password or enable/disable for a user in a tenant
+Update a Tenant's Two-Factor-Authentication setting
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Update-User -Id $User.id -FirstName "Simon"
+Update-TenantTFASetting -Strategy TOTP
 ```
 
-Update a user
+Update the Tenant's TFA setting of the current tenant
+
+### EXAMPLE 2
+```
+Update-TenantTFASetting -Tenant t12345 -Strategy TOTP
+```
+
+Update the Tenant's TFA setting to use time based one-time-password
 
 ## PARAMETERS
 
-### -Id
-User id (required)
+### -Tenant
+Tenant id.
+Defaults to current tenant
 
 ```yaml
-Type: Object[]
+Type: Object
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -FirstName
-User first name
+### -Strategy
+Two-factor authentication strategy
 
 ```yaml
 Type: String
@@ -122,174 +119,6 @@ Aliases:
 
 Required: False
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -LastName
-User last name
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -DisplayName
-The user's display name in Cumulocity
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Phone
-User phone number.
-Format: '+[country code][number]', has to be a valid MSISDN
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Email
-User email address
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Enabled
-User activation status (true/false)
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Password
-User password.
-Min: 6, max: 32 characters.
-Only Latin1 chars allowed
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ShouldResetPassword
-User must reset password on next login
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -SendPasswordResetEmail
-Send password reset email to the user instead of setting a password
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Newsletter
-Indicates whether the user is subscribed to the newsletter or not
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -CustomProperties
-Custom properties to be added to the user
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 8
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Tenant
-Tenant
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 9
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -1070,5 +899,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_update](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_update)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_tfa_update](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_tfa_update)
 

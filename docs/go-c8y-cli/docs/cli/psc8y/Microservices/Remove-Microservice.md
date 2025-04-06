@@ -19,6 +19,7 @@ Delete microservice
 ```
 Remove-Microservice
 	[-Id] <Object[]>
+	[-UnsubscribeAll]
 	[-NoAccept]
 	[-ProcessingMode <String>]
 	[-Force]
@@ -101,6 +102,21 @@ Required: True
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -UnsubscribeAll
+Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

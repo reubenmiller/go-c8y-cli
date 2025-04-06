@@ -1,42 +1,24 @@
 ---
-category: Users
+category: Tenants
 external help file: PSc8y-help.xml
-id: Update-User
+id: Get-TenantTFASetting
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_update
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_tfa_get
 schema: 2.0.0
-slug: /docs/cli/psc8y/Users/update-user
-title: Update-User
+slug: /docs/cli/psc8y/Tenants/get-tenanttfasetting
+title: Get-TenantTFASetting
 ---
 
 
 
 ## SYNOPSIS
-Update user
+Get Tenant TFA setting
 
 ## SYNTAX
 
 ```
-Update-User
-	[-Id] <Object[]>
-	[[-FirstName] <String>]
-	[[-LastName] <String>]
-	[[-DisplayName] <String>]
-	[[-Phone] <String>]
-	[[-Email] <String>]
-	[-Enabled]
-	[[-Password] <String>]
-	[-ShouldResetPassword]
-	[-SendPasswordResetEmail]
-	[-Newsletter]
-	[[-CustomProperties] <Object>]
+Get-TenantTFASetting
 	[[-Tenant] <Object>]
-	[-Data <Object>]
-	[-NoAccept]
-	[-ProcessingMode <String>]
-	[-Force]
-	[-Template <String>]
-	[-TemplateVars <String>]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -84,204 +66,21 @@ Update-User
 ```
 
 ## DESCRIPTION
-Update properties, reset password or enable/disable for a user in a tenant
+Get a Tenant's Two-Factor-Authentication setting
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Update-User -Id $User.id -FirstName "Simon"
+Get-TenantTFASetting
 ```
 
-Update a user
+Get the Two-Factor-Authentication setting of a tenant
 
 ## PARAMETERS
 
-### -Id
-User id (required)
-
-```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
-Accept wildcard characters: False
-```
-
-### -FirstName
-User first name
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -LastName
-User last name
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -DisplayName
-The user's display name in Cumulocity
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Phone
-User phone number.
-Format: '+[country code][number]', has to be a valid MSISDN
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Email
-User email address
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Enabled
-User activation status (true/false)
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Password
-User password.
-Min: 6, max: 32 characters.
-Only Latin1 chars allowed
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ShouldResetPassword
-User must reset password on next login
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -SendPasswordResetEmail
-Send password reset email to the user instead of setting a password
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Newsletter
-Indicates whether the user is subscribed to the newsletter or not
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -CustomProperties
-Custom properties to be added to the user
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 8
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Tenant
-Tenant
+Tenant id
 
 ```yaml
 Type: Object
@@ -289,7 +88,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 9
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -434,23 +233,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Data
-static data to be applied to body.
-accepts json or shorthand json, i.e.
---data 'value1=1,my.nested.value=100'
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Delay
 delay after each request.
 It accepts a duration, i.e.
@@ -563,22 +345,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Force
-Do not prompt for confirmation.
-Ignored when using --confirm
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Header
 custom headers.
 i.e.
@@ -647,21 +413,6 @@ Maximum number of jobs.
 
 ```yaml
 Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -NoAccept
-Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
-
-```yaml
-Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
@@ -795,21 +546,6 @@ Accept wildcard characters: False
 
 ### -OutputTemplate
 jsonnet template to apply to the output
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ProcessingMode
-Cumulocity processing mode
 
 ```yaml
 Type: String
@@ -965,36 +701,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Template
-Body template
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -TemplateVars
-Body template variables
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Timeout
 Request timeout.
 It accepts a duration, i.e.
@@ -1070,5 +776,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_update](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_update)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_tfa_get](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_tfa_get)
 

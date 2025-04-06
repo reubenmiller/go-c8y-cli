@@ -18,6 +18,9 @@ Get tenant collection
 
 ```
 Get-TenantCollection
+	[[-Name] <String>]
+	[[-Domain] <String>]
+	[[-Parent] <Object>]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-WithTotalElements]
@@ -83,6 +86,51 @@ Get-TenantCollection
 Get a list of tenants
 
 ## PARAMETERS
+
+### -Name
+Company name associated with the Cumulocity tenant
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Domain
+Domain name of the Cumulocity tenant
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Parent
+Identifier of the Cumulocity tenant's parent
+
+```yaml
+Type: Object
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -AbortOnErrors
 Abort batch when reaching specified number of errors

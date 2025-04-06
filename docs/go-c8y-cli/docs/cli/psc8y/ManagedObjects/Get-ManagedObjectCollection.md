@@ -32,6 +32,7 @@ Get-ManagedObjectCollection
 	[-WithChildren]
 	[-WithChildrenCount]
 	[-WithGroups]
+	[-WithLatestValues]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-WithTotalElements]
@@ -307,6 +308,21 @@ Accept wildcard characters: False
 ### -WithGroups
 When set to true it returns additional information about the groups to which the searched managed object belongs.
 This results in setting the assetParents property with additional information about the groups.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithLatestValues
+(FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform
 
 ```yaml
 Type: SwitchParameter

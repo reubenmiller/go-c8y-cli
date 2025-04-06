@@ -17,13 +17,17 @@ c8y currenttenant get [flags]
 ```
 $ c8y currenttenant get
 Get the current tenant (based on your current credentials)
+
+$ c8y currenttenant get --withParent
+Get the current tenant including the parent tenant (based on your current credentials)
         
 ```
 
 ### Options
 
 ```
-  -h, --help   help for get
+  -h, --help         help for get
+      --withParent   When set to true, the returned result will contain the parent of the current tenant
 ```
 
 ### Options inherited from parent commands

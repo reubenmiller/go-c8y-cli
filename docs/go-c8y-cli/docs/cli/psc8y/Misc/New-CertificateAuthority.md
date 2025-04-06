@@ -1,36 +1,23 @@
 ---
-category: Users
+category: Misc
 external help file: PSc8y-help.xml
-id: Update-User
+id: New-CertificateAuthority
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_update
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificate-authority_create
 schema: 2.0.0
-slug: /docs/cli/psc8y/Users/update-user
-title: Update-User
+slug: /docs/cli/psc8y/Misc/new-certificateauthority
+title: New-CertificateAuthority
 ---
 
 
 
 ## SYNOPSIS
-Update user
+(PREVIEW FEATURE) Create tenant certificate authority
 
 ## SYNTAX
 
 ```
-Update-User
-	[-Id] <Object[]>
-	[[-FirstName] <String>]
-	[[-LastName] <String>]
-	[[-DisplayName] <String>]
-	[[-Phone] <String>]
-	[[-Email] <String>]
-	[-Enabled]
-	[[-Password] <String>]
-	[-ShouldResetPassword]
-	[-SendPasswordResetEmail]
-	[-Newsletter]
-	[[-CustomProperties] <Object>]
-	[[-Tenant] <Object>]
+New-CertificateAuthority
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -84,216 +71,26 @@ Update-User
 ```
 
 ## DESCRIPTION
-Update properties, reset password or enable/disable for a user in a tenant
+Create a key pair and self-sign a certificate with as the Common Name (CN).
+Store the private key in an encrypted tenant option.
+Store the certificate in
+the trusted certificate repository with auto-registration unchecked by default.
+The devices can be registered automatically only when device administrator checks
+this option ON.
+If the CA certificate is removed from the trusted certificate list,
+corresponding public and private key removed automatically from the database collection.
+If a CA is already present, return a message indicating the CA is already present.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Update-User -Id $User.id -FirstName "Simon"
+New-CertificateAuthority
 ```
 
-Update a user
+Create new certificate authority
 
 ## PARAMETERS
-
-### -Id
-User id (required)
-
-```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
-Accept wildcard characters: False
-```
-
-### -FirstName
-User first name
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -LastName
-User last name
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -DisplayName
-The user's display name in Cumulocity
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Phone
-User phone number.
-Format: '+[country code][number]', has to be a valid MSISDN
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Email
-User email address
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Enabled
-User activation status (true/false)
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Password
-User password.
-Min: 6, max: 32 characters.
-Only Latin1 chars allowed
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ShouldResetPassword
-User must reset password on next login
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -SendPasswordResetEmail
-Send password reset email to the user instead of setting a password
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Newsletter
-Indicates whether the user is subscribed to the newsletter or not
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -CustomProperties
-Custom properties to be added to the user
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 8
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Tenant
-Tenant
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 9
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
 
 ### -AbortOnErrors
 Abort batch when reaching specified number of errors
@@ -1070,5 +867,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_update](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_update)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificate-authority_create](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificate-authority_create)
 
