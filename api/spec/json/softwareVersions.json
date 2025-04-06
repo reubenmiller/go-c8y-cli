@@ -481,6 +481,13 @@
           "description": "Software version name or id"
         },
         {
+          "name": "softwareType",
+          "type": "string",
+          "required": false,
+          "property": "c8y_SoftwareUpdate.0.softwareType",
+          "description": "Software type. Leave blank to automatically set it if a matching software/version is found in the c8y software repository"
+        },
+        {
           "name": "action",
           "type": "string",
           "static": true,

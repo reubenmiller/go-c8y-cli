@@ -38,6 +38,11 @@ Uninstall a software package version
         [object[]]
         $Version,
 
+        # Software type. Leave blank to automatically set it if a matching software/version is found in the c8y software repository
+        [Parameter()]
+        [string]
+        $SoftwareType,
+
         # Software action
         [Parameter()]
         [ValidateSet('delete')]
