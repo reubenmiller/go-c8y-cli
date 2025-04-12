@@ -180,8 +180,15 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 
 	maxJobs := w.GetMaxJobs()
 	tenantName := ""
+	targetInfo := ""
 	if w.Client != nil {
 		tenantName = w.Client.TenantName
+		// Include tenant FQDN in the confirmation message
+		if w.Client.BaseURL != nil {
+			targetInfo = fmt.Sprintf("host %s (tenant %s)", w.Client.GetHostname(), tenantName)
+		} else {
+			targetInfo = fmt.Sprintf("tenant %s", tenantName)
+		}
 	}
 	w.Logger.Infof("Max jobs: %d", maxJobs)
 
@@ -259,7 +266,7 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 					operation = fmt.Sprintf("%s %s", os.Args[2], strings.TrimRight(os.Args[1], "s"))
 				}
 				promptMessage, _ := batchOptions.GetConfirmationMessage(operation, value, input)
-				confirmResult, err := prompt.Confirm(fmt.Sprintf("(job: %d)", jobID), promptMessage, "tenant "+tenantName, prompt.ConfirmYes.String(), false)
+				confirmResult, err := prompt.Confirm(fmt.Sprintf("(job: %d)", jobID), promptMessage, targetInfo, prompt.ConfirmYes.String(), false)
 
 				switch confirmResult {
 				case prompt.ConfirmYesToAll:
