@@ -219,8 +219,15 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 
 	maxJobs := w.GetMaxJobs()
 	tenantName := ""
+	targetInfo := ""
 	if w.client != nil {
 		tenantName = w.client.TenantName
+		// Include tenant FQDN in the confirmation message
+		if w.client.BaseURL != nil {
+			targetInfo = fmt.Sprintf("host %s (tenant %s)", w.client.GetHostname(), tenantName)
+		} else {
+			targetInfo = fmt.Sprintf("tenant %s", tenantName)
+		}
 	}
 	w.logger.Infof("Max jobs: %d", maxJobs)
 
@@ -297,7 +304,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 					operation = fmt.Sprintf("%s %s", os.Args[2], strings.TrimRight(os.Args[1], "s"))
 				}
 				promptMessage, _ := w.getConfirmationMessage(operation, request, input)
-				confirmResult, err := prompt.Confirm(fmt.Sprintf("(job: %d)", jobID), promptMessage, "tenant "+tenantName, prompt.ConfirmYes.String(), false)
+				confirmResult, err := prompt.Confirm(fmt.Sprintf("(job: %d)", jobID), promptMessage, targetInfo, prompt.ConfirmYes.String(), false)
 
 				switch confirmResult {
 				case prompt.ConfirmYesToAll:
