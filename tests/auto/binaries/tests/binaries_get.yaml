@@ -1,4 +1,12 @@
 tests:
+    binaries_get_Download a list of binaries and save the files to the current working directory:
+        command: $TEST_SHELL -c 'c8y binaries list | c8y binaries get --outputFileRaw "download-{id}-{filename}" > /dev/null'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /inventory/binaries/{id}
     binaries_get_Get a binary and display the contents on the console:
         command: c8y binaries get --id 12345
         exit-code: 0
