@@ -191,6 +191,9 @@ Below lists the additional functions which are available in jsonnet template fil
 |_.NowNano([offset='0s'])| Generate ISO8601 date (with nanosecond resolution) from a relative date or date string | `2021-05-09T07:48:33.0030745Z` |
 |_.Name([prefix=''],[postfix=''])| Generate a random name with an optional prefix and postfix | `GfheJoa;Ktx,F56s` |
 |_.Password([length=32])| Generate a randomized password of a specified length | `NlXYngK;bj!xeOvhpydJ4VIG6HuDcLBR`  |
+|_.PasswordUrlSafe([length=32])| Generate a randomized password of a specified length which is URL friendly | `uWhlijOVPz_mknJ4LrKyb0SR.GNoxDBA` |
+|_.UrlEncode([value='')| Encode a string to a URL compatible value | `foo#@%bar` => `foo%23%40%25bar`  |
+|_.UrlDecode([value='')| Decode a URL string | `foo%23%40%25bar` => `foo#@%bar`  |
 |_.Hex([length=16])| Random Hexadecimal string of a given length. | `8b7e0736a5a6ed80` |
 |_.Char([length=16])| Random string with only character a-zA-Z of a given length  | `exxUQqCDFwRHpUog` |
 |_.Digit([length=16])| Random 0 padded string with only digits | `0261177197719716` |
