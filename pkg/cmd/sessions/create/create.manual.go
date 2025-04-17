@@ -377,7 +377,7 @@ func (n *CmdCreate) writeSessionFile(outputDir, outputFile string, session c8yse
 	}
 	log.Debugf("output file: %s", outputPath)
 
-	if err := os.WriteFile(path.Join(outputDir, outputFile), data, 0644); err != nil {
+	if err := os.WriteFile(path.Join(outputDir, outputFile), data, 0600); err != nil {
 		return errors.Wrap(err, "failed to write to file")
 	}
 	return nil
