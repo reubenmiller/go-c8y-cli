@@ -482,7 +482,7 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsStorageStoreToken, true),
 		WithBindEnv(SettingsModeConfirmation, "PUT POST DELETE"),
 
-		WithBindEnv(SettingsEncryptionEnabled, false),
+		WithBindEnv(SettingsEncryptionEnabled, true),
 		WithBindEnv(SettingsActivityLogEnabled, true),
 		WithBindEnv(SettingsActivityLogPath, path.Join(c.GetSessionHomeDir(), ActivityLogDirName)),
 		WithBindEnv(SettingsActivityLogMethodFilter, "GET PUT POST DELETE"),
