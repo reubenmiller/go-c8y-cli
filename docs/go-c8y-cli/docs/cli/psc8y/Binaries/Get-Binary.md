@@ -70,6 +70,12 @@ Download a binary stored in Cumulocity and display it on the console.
 
 For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.
 
+When downloading a binary it is useful to use the outputFileRaw global parameter and to use one of the following references:
+
+* \{filename} - Filename found in the Content-Disposition response header
+* \{id} - An id like value found in the request path (/inventory/binaries/12345 =\> 12345)
+* \{basename} - The last path section of the request path (/some/nested/url/withafilename.json =\> withafilename.json)
+
 ## EXAMPLES
 
 ### EXAMPLE 1
