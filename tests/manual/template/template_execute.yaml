@@ -301,3 +301,22 @@ tests:
           "name": "testdevice",
           "prop2": false
         }
+
+  It suports encoding a string to a URL compatible string:
+    command: |
+      c8y template execute --template "_.UrlEncode('foo#@%bar')"
+    exit-code: 0
+    stdout:
+      exactly: foo%23%40%25bar
+
+  It suports decoding a URL encoded string to a string:
+    command: |
+      c8y template execute --template "_.UrlDecode('foo%23%40%25bar')"
+    exit-code: 0
+    stdout:
+      exactly: foo#@%bar
+  
+  It creates a URL safe password which does not require any encoding:
+    command: |
+      c8y template execute --template "_.PasswordUrlSafe(12)"
+    exit-code: 0

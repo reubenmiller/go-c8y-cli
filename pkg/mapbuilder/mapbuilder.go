@@ -65,6 +65,33 @@ func registerNativeFunctions(vm *jsonnet.VM) {
 	})
 
 	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "PasswordUrlSafe",
+		Params: ast.Identifiers{"length"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			length := getIntParameter(parameters, 0)
+			return randdata.PasswordURLSafe(int(length)), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "UrlEncode",
+		Params: ast.Identifiers{"value"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			value := getStringParameter(parameters, 0)
+			return url.QueryEscape(value), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "UrlDecode",
+		Params: ast.Identifiers{"value"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			value := getStringParameter(parameters, 0)
+			return url.QueryUnescape(value)
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
 		Name:   "Bool",
 		Params: ast.Identifiers{},
 		Func: func(parameters []interface{}) (interface{}, error) {
@@ -427,6 +454,9 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		GetURLPath(url):: std.native("GetURLPath")(url),
 		GetURLHost(url):: std.native("GetURLHost")(url),
 		Password(length=32):: std.native("Password")(length),
+		PasswordUrlSafe(length=32):: std.native("PasswordUrlSafe")(length),
+		UrlEncode(value=""):: std.native("UrlEncode")(value),
+		UrlDecode(value=""):: std.native("UrlDecode")(value),
 		Now(offset='0s'):: std.native("Now")(std.toString(offset)),
 		NowNano(offset='0s'):: std.native("NowNano")(std.toString(offset)),
 		Bool():: std.native("Bool"),
