@@ -24,7 +24,7 @@ require (
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.4.0
-	github.com/reubenmiller/go-c8y v0.27.5
+	github.com/reubenmiller/go-c8y v0.27.9
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/sethvargo/go-password v0.3.1
 	github.com/spf13/cobra v1.9.1
@@ -101,7 +101,7 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect

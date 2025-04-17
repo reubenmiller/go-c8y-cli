@@ -167,8 +167,8 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRI
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pquerna/otp v1.4.0 h1:wZvl1TIVxKRThZIBiwOOHOGP/1+nZyWBil9Y2XNEDzg=
 github.com/pquerna/otp v1.4.0/go.mod h1:dkJfzwRKNiegxyNb54X/3fLwhCynbMspSyWKnvi1AEg=
-github.com/reubenmiller/go-c8y v0.27.5 h1:Fl4vAo1k/UTu2JOUlUh4Jiw/yQSZE2wzKS/keq8Bv9Q=
-github.com/reubenmiller/go-c8y v0.27.5/go.mod h1:wnd2RcePmAg7qTsHrdgmvbCINWS8a7j/dOBJWbLf2XM=
+github.com/reubenmiller/go-c8y v0.27.9 h1:VyAaIYE8/oGdZXxTC6KzYpM7Fv1bm2L3YYqXM80pYeU=
+github.com/reubenmiller/go-c8y v0.27.9/go.mod h1:v+869bDL2g4Z3nkWtWROC2lBqMMvJdGQtMnWKhUBDGI=
 github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3 h1:v8Q77ObTxkm0Wj9iAjcc0VMLxqEzKIdAnaTNPzSiw8Q=
 github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3/go.mod h1:QidmUT4ebNVwyjKXAQgx9VFHxpOxBKWs32EEXaXnEfE=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
@@ -263,8 +263,8 @@ golang.org/x/net v0.0.0-20190620200207-3b0461eec859/go.mod h1:z5CRVTTTmAJ677TzLL
 golang.org/x/net v0.0.0-20201021035429-f5854403a974/go.mod h1:sp8m0HH+o8qH0wwXwYZr8TS3Oi6o0r6Gce1SSxlDquU=
 golang.org/x/net v0.0.0-20210226172049-e18ecbb05110/go.mod h1:m0MpNAwzfU5UDzcl9v0D8zg8gWTRqZa9RBIspLL5mdg=
 golang.org/x/net v0.0.0-20220722155237-a158d28d115b/go.mod h1:XRhObCWvk6IyKnWLug+ECip1KBveYUHfp+8e9klMJ9c=
-golang.org/x/net v0.37.0 h1:1zLorHbz+LYj7MQlSf1+2tPIIgibq2eL5xkrGk6f+2c=
-golang.org/x/net v0.37.0/go.mod h1:ivrbrMbzFq5J41QOQh0siUuly180yBYtLp+CKbEaFx8=
+golang.org/x/net v0.38.0 h1:vRMAPTMaeGqVhG5QyLJHqNDwecKTomGeqbnfZyKlBI8=
+golang.org/x/net v0.38.0/go.mod h1:ivrbrMbzFq5J41QOQh0siUuly180yBYtLp+CKbEaFx8=
 golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
