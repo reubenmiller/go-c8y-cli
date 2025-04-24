@@ -40,7 +40,7 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 	cmd := &cobra.Command{
 		Use:   "server",
 		Short: "Start a local proxy server",
-		Long: heredoc.Doc(`
+		Long: heredoc.Docf(`
 			Start a local proxy server
 
 			You can add use the remote access local proxy within your ssh config file, to use it to
@@ -48,22 +48,22 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 
 			To do this add the following configuration to your device.
 
-			---
-			Host {{device}}
-				User {{device_username}}
+			%[1]s
+			Host [device]
+				User [device_username]
 				PreferredAuthentications publickey
-				IdentityFile {{identify_file}}
+				IdentityFile [identify_file]
 				ServerAliveInterval 120
 				StrictHostKeyChecking no
 				UserKnownHostsFile /dev/null
-				ProxyCommand c8y remoteaccess server --device %n --listen -
-			---
+				ProxyCommand c8y remoteaccess server --device %%n --listen -
+			%[1]s
 
 			Note: When using the "--browser" flag, by default the URL scheme (e.g. http, https) will be
 			auto detected based on the Remote Access configuration's name. For example, if the configuration
 			name has the "https:" prefix, then http will be used, otherwise http will be used. This aligns
 			with the naming convention used in https://github.com/Cumulocity-IoT/cumulocity-remote-access-cloud-http-proxy
-		`),
+		`, "````"),
 		Example: heredoc.Doc(`
 			$ c8y remoteaccess server --device 12345
 			Start a local proxy server on a random local port
