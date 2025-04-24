@@ -13,16 +13,16 @@ connect to your device with ssh without having to manually launch the proxy your
 
 To do this add the following configuration to your device.
 
----
-Host \{\{device}}
-	User \{\{device_username}}
+````
+Host [device]
+	User [device_username]
 	PreferredAuthentications publickey
-	IdentityFile \{\{identify_file}}
+	IdentityFile [identify_file]
 	ServerAliveInterval 120
 	StrictHostKeyChecking no
 	UserKnownHostsFile /dev/null
 	ProxyCommand c8y remoteaccess server --device %n --listen -
----
+````
 
 Note: When using the "--browser" flag, by default the URL scheme (e.g. http, https) will be
 auto detected based on the Remote Access configuration's name. For example, if the configuration
