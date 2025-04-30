@@ -41,3 +41,50 @@ tests:
             "dummy": 2
           }
         }
+
+  It safely access input if when there is no piped input:
+    command: |
+        c8y template execute --template "_.Get(input.value, 'nestedProp2', {dummy: 2})" -c=false -o json
+    stdout:
+      exactly: |
+        {
+          "dummy": 2
+        }
+
+  It safely access nested properties of input if when there is no piped input:
+    command: |
+        c8y template execute --template "_.Get(input, 'value.nestedProp2', {dummy: 2})" -c=false -o json
+    stdout:
+      exactly: |
+        {
+          "dummy": 2
+        }
+
+  It safely access nested properties of input if when there is piped input:
+    command: |
+        c8y template execute --template "{nestedProp2: 1}" \
+        | c8y template execute --template "{output: _.Get(input, 'value.nestedProp2', {dummy: 2})}" -c=false -o json
+    stdout:
+      exactly: |
+        {
+          "output": 1
+        }
+  
+  It safely checks for nested properties when there is piped input:
+    command: |
+        c8y template execute --template "{nestedProp2: 1}" \
+        | c8y template execute --template "{output: _.Has(input, 'value.nestedProp2')}" -c=false -o json
+    stdout:
+      exactly: |
+        {
+          "output": true
+        }
+
+  It safely checks for nested properties when there is no piped input:
+    command: |
+        c8y template execute --template "{output: _.Has(input, 'value.nestedProp2')}" -c=false -o json
+    stdout:
+      exactly: |
+        {
+          "output": false
+        }
