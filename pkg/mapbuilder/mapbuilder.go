@@ -500,7 +500,9 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 				},
 		Get(o, f, default=null)::
 			local get_(o, ks) =
-				if ! std.objectHas(o, ks[0]) then
+				if std.type(o) != 'object' then
+					default
+				else if ! std.objectHas(o, ks[0]) then
 					default
 				else if std.length(ks) == 1 then
 					o[ks[0]]
@@ -509,7 +511,9 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 				get_(o, std.split(f, '.')),
 		Has(o, f)::
 			local has_(o, ks) =
-				if ! std.objectHas(o, ks[0]) then
+				if std.type(o) != 'object' then
+					false
+				else if ! std.objectHas(o, ks[0]) then
 					false
 				else if std.length(ks) == 1 then
 					true
