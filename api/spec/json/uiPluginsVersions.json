@@ -127,7 +127,7 @@
       "description": "Create a new version of a plugin",
       "descriptionLong": "Uploaded version and tags can only contain upper and lower case letters, integers and ., +, -. Other characters are prohibited.",
       "method": "POST",
-      "path": "/application/applications/{application}/versions",
+      "path": "/application/applications/{plugin}/versions",
       "accept": "application/json",
       "collectionProperty": "-",
       "alias": {
@@ -211,9 +211,6 @@
           "type": "json_custom",
           "description": "data"
         }
-      ],
-      "bodyRequiredKeys": [
-        "tags"
       ]
     },
     {

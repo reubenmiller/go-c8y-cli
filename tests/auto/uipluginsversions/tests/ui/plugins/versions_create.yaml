@@ -6,4 +6,4 @@ tests:
         stdout:
             json:
                 method: POST
-                path: /application/applications/{application}/versions
+                path: /application/applications/1234/versions
