@@ -156,14 +156,13 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithRequiredProperties("tags"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/application/applications/{application}/versions")
+	path := flags.NewStringTemplate("/application/applications/{plugin}/versions")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
