@@ -10,6 +10,19 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     steps:
+      # free disk space due to avoid runner errors when it runs out of space
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: false
+          swap-storage: true
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
