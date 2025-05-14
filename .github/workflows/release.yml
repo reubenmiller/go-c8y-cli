@@ -15,11 +15,10 @@ jobs:
         uses: jlumbroso/free-disk-space@main
         with:
           tool-cache: false
-          
           android: true
-          dotnet: true
+          dotnet: false
           haskell: true
-          large-packages: true
+          large-packages: false
           docker-images: false
           swap-storage: true
 
