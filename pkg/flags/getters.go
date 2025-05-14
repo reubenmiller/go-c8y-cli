@@ -142,6 +142,12 @@ func WithHeaders(cmd *cobra.Command, header http.Header, inputIterators *Request
 				for key, val := range v {
 					header.Add(key, val)
 				}
+			case map[string][]string:
+				for key, values := range v {
+					for _, val := range values {
+						header.Add(key, val)
+					}
+				}
 			default:
 				headerValue := fmt.Sprintf("%v", value)
 				header.Add(name, headerValue)
