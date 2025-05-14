@@ -34,3 +34,14 @@ tests:
         method: GET
         path: /event/events
         pathEncoded: /event/events?fragmentType=test1&pageSize=21
+
+  It supports custom header values:
+    command: >
+      c8y events create -n --device 1 --text "Example event" --type "c8y_Example" --header "X-Cumulocity-Processing-Mode: TRANSIENT, X-Hello: value" --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        method: POST
+        path: /event/events
+        headers.X-Cumulocity-Processing-Mode: TRANSIENT
+        headers.X-Hello: value
