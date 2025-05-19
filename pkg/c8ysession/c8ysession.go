@@ -240,11 +240,6 @@ func GetVariablesFromSession(session *CumulocitySession, client *c8y.Client, set
 	return output
 }
 
-func ShowClientEnvironmentVariables(cfg *config.Config, c8yclient *c8y.Client, shell utilities.ShellType) {
-	output := cfg.GetEnvironmentVariables(c8yclient, cfg.AlwaysIncludePassword())
-	utilities.WriteShellVariables(os.Stdout, output, shell)
-}
-
 func ShowSessionEnvironmentVariables(session *CumulocitySession, cfg *config.Config, c8yclient *c8y.Client, shell utilities.ShellType) {
 	output := GetVariablesFromSession(session, c8yclient, cfg.AlwaysIncludePassword())
 	utilities.WriteShellVariables(os.Stdout, output, shell)
