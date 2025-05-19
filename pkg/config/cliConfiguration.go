@@ -474,7 +474,7 @@ func (c *Config) bindSettings() {
 	c.viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	c.viper.SetEnvPrefix(EnvSettingsPrefix)
 	err := c.WithOptions(
-		WithBindEnv(SettingEncryptionCachePassphrase, true),
+		WithBindEnv(SettingEncryptionCachePassphrase, false),
 		WithBindEnv(SettingsMaxWorkers, 50),
 		WithBindEnv(SettingsWorkers, 1),
 		WithBindEnv(SettingsIncludeAllPageSize, 2000),
