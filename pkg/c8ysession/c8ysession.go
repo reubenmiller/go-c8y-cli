@@ -158,7 +158,7 @@ func WriteOutput(w io.Writer, client *c8y.Client, cfg *config.Config, session *C
 
 	shell, isShell := utilities.ShellType.Parse(utilities.ShellBash, format)
 	if isShell {
-		output := GetVariablesFromSession(session, client, cfg.AlwaysIncludePassword())
+		output := GetVariablesFromSession(session, cfg, client, cfg.AlwaysIncludePassword())
 		utilities.WriteShellVariables(w, output, shell)
 		return nil
 	}
@@ -175,7 +175,7 @@ func WriteOutput(w io.Writer, client *c8y.Client, cfg *config.Config, session *C
 		}
 		fmt.Fprintf(w, "%s\n", out)
 	case "env", "dotenv":
-		output := GetVariablesFromSession(session, client, cfg.AlwaysIncludePassword())
+		output := GetVariablesFromSession(session, cfg, client, cfg.AlwaysIncludePassword())
 		for k, v := range output {
 			if v != "" {
 				fmt.Fprintf(w, "%s=%s\n", k, v)
@@ -188,7 +188,7 @@ func WriteOutput(w io.Writer, client *c8y.Client, cfg *config.Config, session *C
 }
 
 // GetVariablesFromSession gets all the environment variables associated with the current session
-func GetVariablesFromSession(session *CumulocitySession, client *c8y.Client, setPassword bool) map[string]interface{} {
+func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, client *c8y.Client, setPassword bool) map[string]interface{} {
 	host := session.Host
 	domain := session.GetDomain()
 	tenant := session.Tenant
@@ -227,6 +227,17 @@ func GetVariablesFromSession(session *CumulocitySession, client *c8y.Client, set
 		"C8Y_SETTINGS_LOGIN_TYPE":  loginType,
 	}
 
+	cache := cfg.CachePassphraseVariables()
+	cfg.Logger.Debugf("Cache passphrase: %v", cache)
+	if cache {
+		if cfg.Passphrase != "" {
+			output[config.EnvPassphrase] = cfg.Passphrase
+		}
+		if cfg.SecretText != "" {
+			output[config.EnvPassphraseText] = cfg.SecretText
+		}
+	}
+
 	if loginType != c8y.AuthMethodOAuth2Internal {
 		output["C8Y_TOKEN"] = ""
 	}
@@ -240,13 +251,8 @@ func GetVariablesFromSession(session *CumulocitySession, client *c8y.Client, set
 	return output
 }
 
-func ShowClientEnvironmentVariables(cfg *config.Config, c8yclient *c8y.Client, shell utilities.ShellType) {
-	output := cfg.GetEnvironmentVariables(c8yclient, cfg.AlwaysIncludePassword())
-	utilities.WriteShellVariables(os.Stdout, output, shell)
-}
-
 func ShowSessionEnvironmentVariables(session *CumulocitySession, cfg *config.Config, c8yclient *c8y.Client, shell utilities.ShellType) {
-	output := GetVariablesFromSession(session, c8yclient, cfg.AlwaysIncludePassword())
+	output := GetVariablesFromSession(session, cfg, c8yclient, cfg.AlwaysIncludePassword())
 	utilities.WriteShellVariables(os.Stdout, output, shell)
 }
 

@@ -474,7 +474,7 @@ func (c *Config) bindSettings() {
 	c.viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	c.viper.SetEnvPrefix(EnvSettingsPrefix)
 	err := c.WithOptions(
-		WithBindEnv(SettingEncryptionCachePassphrase, true),
+		WithBindEnv(SettingEncryptionCachePassphrase, false),
 		WithBindEnv(SettingsMaxWorkers, 50),
 		WithBindEnv(SettingsWorkers, 1),
 		WithBindEnv(SettingsIncludeAllPageSize, 2000),
@@ -752,77 +752,6 @@ func (c Config) DecryptAllProperties() (err error) {
 		}
 	}
 	return err
-}
-
-// GetEnvironmentVariables gets all the environment variables associated with the current session
-func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) map[string]interface{} {
-	host := c.GetHost()
-	domain := c.GetDomain()
-	tenant := c.GetTenant()
-	c8yVersion := c.GetCumulocityVersion()
-	username := c.GetUsername()
-	password := c.MustGetPassword()
-	token := c.MustGetToken(false)
-	authHeaderValue := ""
-	authHeader := ""
-
-	if client != nil {
-		if client.TenantName != "" {
-			tenant = client.TenantName
-		}
-		if client.Username != "" {
-			username = client.Username
-		}
-		if client.BaseURL.Host != "" {
-			host = client.BaseURL.Scheme + "://" + client.BaseURL.Host
-		}
-		if client.Domain != "" {
-			domain = client.Domain
-		}
-		if client.Password != "" {
-			password = client.Password
-		}
-		if client.Token != "" {
-			token = client.Token
-		}
-		if dummyReq, err := client.NewRequest("GET", "/", "", nil); err == nil {
-			authHeaderValue = dummyReq.Header.Get("Authorization")
-			authHeader = "Authorization: " + authHeaderValue
-		}
-	}
-
-	// hide password if it is not needed
-	if !setPassword && token != "" {
-		password = ""
-	}
-
-	output := map[string]interface{}{
-		"C8Y_SESSION":              c.GetSessionFile(),
-		"C8Y_URL":                  host,
-		"C8Y_BASEURL":              host,
-		"C8Y_HOST":                 host,
-		"C8Y_DOMAIN":               domain,
-		"C8Y_TENANT":               tenant,
-		"C8Y_VERSION":              c8yVersion,
-		"C8Y_USER":                 username,
-		"C8Y_TOKEN":                token,
-		"C8Y_USERNAME":             username,
-		"C8Y_PASSWORD":             password,
-		"C8Y_HEADER_AUTHORIZATION": authHeaderValue,
-		"C8Y_HEADER":               authHeader,
-	}
-
-	cache := c.CachePassphraseVariables()
-	c.Logger.Debugf("Cache passphrase: %v", cache)
-	if cache {
-		if c.Passphrase != "" {
-			output[EnvPassphrase] = c.Passphrase
-		}
-		if c.SecretText != "" {
-			output[EnvPassphraseText] = c.SecretText
-		}
-	}
-	return output
 }
 
 // GetEnvKey returns the environment key value associated
