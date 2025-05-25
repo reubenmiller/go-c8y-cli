@@ -1,0 +1,18 @@
+{
+  "name": "c8y-as",
+  "version": "1.0.0",
+  "description": "WasmTime WASI go-c8y-cli extension in AssemblyScript",
+  "scripts": {
+    "build": "asc c8y-as.ts --target c8y-as",
+    "start": "wasmtime ./build/c8y-as.wasm"
+  },
+  "author": "Reuben Miller",
+  "contributors": [],
+  "license": "MIT",
+  "dependencies": {
+    "@assemblyscript/wasi-shim": "^0.1.0",
+    "as-rainbow": "^0.1.0",
+    "assemblyscript": "^0.27.1",
+    "json-as": "^1.1.6"
+  }
+}

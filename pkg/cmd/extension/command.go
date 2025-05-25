@@ -1,6 +1,7 @@
 package extension
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/ghrepo"
@@ -15,6 +17,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions_wasi"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/git"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
@@ -47,6 +50,36 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	extCmd.AddCommand(
+		func() *cobra.Command {
+			var timeout time.Duration
+			cmd := &cobra.Command{
+				Use:     "run",
+				Short:   "Run a WASM extension",
+				Aliases: []string{"r"},
+				Args:    cobra.MinimumNArgs(1),
+				RunE: func(cmd *cobra.Command, args []string) error {
+					llog, err := f.Logger()
+					if err != nil {
+						return err
+					}
+					runtimeOptions := extensions_wasi.RuntimeOptions{
+						File:    args[0],
+						Args:    args,
+						IO:      io,
+						Logger:  llog,
+						Timeout: timeout,
+					}
+
+					return extensions_wasi.NewRuntimeWASI(context.Background(), runtimeOptions)
+				},
+			}
+			cmd.Flags().DurationVar(&timeout, "runtime-timeout", 0, "WASM runtime timeout")
+			completion.WithOptions(
+				cmd,
+				completion.MarkLocalFlag(),
+			)
+			return cmd
+		}(),
 		&cobra.Command{
 			Use:     "list",
 			Short:   "List installed extension commands",

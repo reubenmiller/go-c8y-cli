@@ -51,6 +51,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3
+	github.com/tetratelabs/wazero v1.9.0
 )
 
 require (

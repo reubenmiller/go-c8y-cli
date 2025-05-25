@@ -368,3 +368,33 @@ tasks:
           -e C8Y_USER=$C8Y_USER \
           -e C8Y_PASSWORD=$C8Y_PASSWORD \
           reubenmiller/c8y-pwsh
+
+  #
+  # WASM/WASI extensions
+  #
+  build-wasm-examples-as:
+    desc: Build WASM examples
+    dir: tools/extensions_wasm/assembly-script
+    cmds:
+      - npm install
+      - npm run build
+      - ls -lh c8y-as.wasm
+    sources:
+      - tools/extensions_wasm/assembly-script/*.js
+      - tools/extensions_wasm/assembly-script/*.json
+    generates:
+      - tools/extensions_wasm/assembly-script/*.wasm
+
+  build-wasm-examples-tinygo:
+    desc: Build WASM tinygo example
+    dir: tools/extensions_wasm/tinygo
+    cmds:
+      # -scheduler=none
+      - GOARCH=wasm tinygo build -buildmode=c-shared -target=wasip1 -o c8y-tinygo.wasm -no-debug  main.go
+      - ls -lh c8y-tinygo.wasm
+
+  # build all wasm examples
+  run-wasm-example:
+    deps:
+      - build-wasm-examples-as
+      - build-wasm-examples-tinygo
