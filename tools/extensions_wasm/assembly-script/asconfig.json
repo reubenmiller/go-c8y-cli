@@ -1,0 +1,15 @@
+{
+    "targets": {
+        "c8y-as": {
+            "outFile": "c8y-as.wasm",
+            "optimizeLevel": 0,
+            "shrinkLevel": 0,
+            "converge": false,
+            "noAssert": false
+        }
+    },
+    "extends": "./node_modules/@assemblyscript/wasi-shim/asconfig.json",
+    "options": {
+        "transform": ["json-as/transform"]
+    }
+}
