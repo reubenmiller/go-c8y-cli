@@ -831,6 +831,9 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 
 	unfilteredSize := 0
 
+	// Trim space from json object/array output
+	trimSpaceFromOutput := true
+
 	if resp != nil && (len(resp.Body()) > 0 || hasOutputTemplate) {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
 		printResponseSize(r.Logger, resp)
@@ -872,28 +875,19 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 				isJSONResponse = true
 				resp.SetBody(pretty.Ugly(tmplOutput))
 			} else {
+				// Preserve output
+				trimSpaceFromOutput = false
 				isJSONResponse = false
-				// Try to unmarshal json for situations when the user has used "response.body"
-				// and body contains escaped json chars (e.g. \n)
-				// https://github.com/reubenmiller/go-c8y-cli/issues/306
-				var maybeJSON any
-				jsonErr := json.Unmarshal(tmplOutput, &maybeJSON)
-				skipTrimming := false
-				if jsonErr == nil {
-					switch v := maybeJSON.(type) {
-					case string:
-						tmplOutput = []byte(v)
-						skipTrimming = true
-					}
+
+				// Decode output
+				var tmplOutputDecoded []byte
+				if parsedOutput := gjson.ParseBytes(tmplOutput); parsedOutput.Exists() && parsedOutput.Type == gjson.String {
+					tmplOutputDecoded = []byte(parsedOutput.Str)
+				} else {
+					tmplOutputDecoded = tmplOutput
 				}
-				if !skipTrimming {
-					// TODO: Is removing the quotes doing too much, what happens if someone is building csv, and it using quotes around some fields?
-					// e.g. `"my value",100`, that would get transformed to `my value",100`
-					// Trim any quotes wrapping the values
-					tmplOutput = bytes.TrimSpace(tmplOutput)
-					tmplOutput = bytes.Trim(tmplOutput, "\"")
-				}
-				resp.SetBody(tmplOutput)
+
+				resp.SetBody(tmplOutputDecoded)
 			}
 		}
 
@@ -1002,7 +996,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 				responseText,
 				!isJSONResponse,
 				jsonformatter.WithFileOutput(commonOptions.OutputFile != "", commonOptions.OutputFile, false),
-				jsonformatter.WithTrimSpace(true),
+				jsonformatter.WithTrimSpace(trimSpaceFromOutput),
 				jsonformatter.WithJSONStreamOutput(isJSONResponse, consol.IsJSONStream(), consol.IsTextOutput()),
 				jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
 			)
