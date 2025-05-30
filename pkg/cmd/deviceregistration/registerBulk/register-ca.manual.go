@@ -72,6 +72,9 @@ func NewRegisterCumulocityCACmd(f *cmdutil.Factory) *RegisterCumulocityCACmd {
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true, "externalId", "name", "id"),
+
+		// Enable confirmation prompts
+		flags.WithSemanticMethod("POST"),
 	)
 
 	// Required flags
