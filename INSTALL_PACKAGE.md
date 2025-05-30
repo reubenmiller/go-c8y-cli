@@ -111,14 +111,7 @@ You can install `go-c8y-cli` via `yum` by just replacing `dnf` with `yum` in the
 To enable command completion, the following needs to be added to your shell. Follow the instructions for the shell that you want to work with.
 
 ```sh
-# bash
-echo 'source "/etc/go-c8y-cli/shell/c8y.plugin.sh"' >> ~/.bashrc
-
-# zsh
-echo 'source "/etc/go-c8y-cli/shell/c8y.plugin.zsh"' >> ~/.zshrc
-
-# fish
-echo 'source "/etc/go-c8y-cli/shell/c8y.plugin.fish"' >> ~/.config/fish/config.fish
+c8y cli install
 ```
 
 :::info

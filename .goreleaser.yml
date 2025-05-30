@@ -171,26 +171,11 @@ brews:
 
     # Caveats for the user of your binary.
     caveats: |
-      Please add the following to your shell profile to enable usage of "set-session" and other helpful c8y utility functions
+      Please run the following command to edit your shell profiles to enable usage of "set-session" and other helpful c8y utility functions
 
-      bash: ~/.bashrc
+        c8y cli install
 
-        source "#{etc}/go-c8y-cli/shell/c8y.plugin.sh"
-
-      zsh: ~/.zshrc
-
-        source "#{etc}/go-c8y-cli/shell/c8y.plugin.zsh"
-
-      fish: ~/.config/fish/config.fish
-
-        source "#{etc}/go-c8y-cli/shell/c8y.plugin.fish"
-
-      powershell: ~/.config/powershell/Microsoft.PowerShell_profile.ps1
-        . "#{etc}/go-c8y-cli/shell/c8y.plugin.ps1"
-
-      You will also need to force reload of your profile:
-
-        source <profile>
+      Then reload your shell to see the effects.
 
     homepage: "https://goc8ycli.netlify.app/"
     description: "Cumulocity command line tool"
