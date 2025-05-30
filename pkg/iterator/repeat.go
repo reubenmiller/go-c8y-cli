@@ -41,3 +41,11 @@ func NewRepeatIterator(value string, n int64) *RepeatIterator {
 		endIndex: n,
 	}
 }
+
+// NewRunOnceIterator creates a simple iterator that only runs once
+func NewRunOnceIterator() *RepeatIterator {
+	return &RepeatIterator{
+		value:    "",
+		endIndex: 1,
+	}
+}
