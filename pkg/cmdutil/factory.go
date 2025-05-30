@@ -222,6 +222,11 @@ func (f *Factory) RunWithGenericWorkers(cmd *cobra.Command, inputIterators *flag
 		return err
 	}
 
+	// set a default run once iterator if one is not defined
+	if iter == nil {
+		iter = iterator.NewRunOnceIterator()
+	}
+
 	activityLogger, err := f.ActivityLogger()
 	if err != nil {
 		return err
@@ -260,6 +265,11 @@ func (f *Factory) RunSequentiallyWithGenericWorkers(cmd *cobra.Command, iter ite
 	activityLogger, err := f.ActivityLogger()
 	if err != nil {
 		return err
+	}
+
+	// set a default run once iterator if one is not defined
+	if iter == nil {
+		iter = iterator.NewRunOnceIterator()
 	}
 
 	w, err := worker.NewGenericWorker(log, cfg, f.IOStreams, client, activityLogger, runFunc, f.CheckPostCommandError)
