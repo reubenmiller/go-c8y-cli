@@ -41,11 +41,11 @@ builds:
 
 archives:
   - id: nix
-    builds: [linux]
+    ids: [linux]
     <<: &archive_defaults
       name_template: '{{ .ProjectName }}_{{ .Version }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     wrap_in_directory: "true"
-    format: tar.gz
+    formats: [tar.gz]
     files:
       - LICENSE
       - ./share/man/man1/c8y*.1
@@ -56,10 +56,10 @@ archives:
       - .go-c8y-cli/views
 
   - id: homebrew
-    builds: [macOS]
+    ids: [macOS]
     <<: *archive_defaults
     wrap_in_directory: "true"
-    format: tar.gz
+    formats: [tar.gz]
     files:
       - LICENSE
       - ./share/man/man1/c8y*.1
@@ -70,10 +70,10 @@ archives:
       - .go-c8y-cli/views
 
   - id: windows
-    builds: [windows]
+    ids: [windows]
     <<: *archive_defaults
     wrap_in_directory: "false"
-    format: zip
+    formats: [zip]
     files:
       - LICENSE
       - .go-c8y-cli/README.md
@@ -83,11 +83,11 @@ archives:
       - .go-c8y-cli/views
   
   - id: plainBinaries
-    builds: [macOS, linux, windows]
+    ids: [macOS, linux, windows]
     # Don't include the binary in the filename so it is easier to download the latest
     <<: &archive_defaults
       name_template: '{{ .ProjectName }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    format: binary
+    formats: [binary]
 
 nfpms:
   - 
