@@ -92,11 +92,6 @@ type Job struct {
 }
 
 func (w *GenericWorker) RunSequentially(cmd *cobra.Command, iter iterator.Iterator, inputIterators *flags.RequestInputIterators) error {
-	// TODO: How does an unbound iterator get caught here?
-	if inputIterators == nil {
-		return fmt.Errorf("missing input iterators")
-	}
-
 	// get common options and batch settings
 	commonOptions, err := w.Config.GetOutputCommonOptions(cmd)
 	if err != nil {
@@ -109,7 +104,9 @@ func (w *GenericWorker) RunSequentially(cmd *cobra.Command, iter iterator.Iterat
 	}
 
 	// Configure post actions
-	batchOptions.PostActions = inputIterators.PipeOptions.PostActions
+	if inputIterators != nil {
+		batchOptions.PostActions = inputIterators.PipeOptions.PostActions
+	}
 
 	out, input, err := iter.GetNext()
 	if err != nil {
@@ -128,11 +125,6 @@ func (w *GenericWorker) RunSequentially(cmd *cobra.Command, iter iterator.Iterat
 }
 
 func (w *GenericWorker) Run(cmd *cobra.Command, iter iterator.Iterator, inputIterators *flags.RequestInputIterators) error {
-	// TODO: How does an unbound iterator get caught here?
-	if inputIterators == nil {
-		return fmt.Errorf("missing input iterators")
-	}
-
 	// get common options and batch settings
 	commonOptions, err := w.Config.GetOutputCommonOptions(cmd)
 	if err != nil {
@@ -145,7 +137,9 @@ func (w *GenericWorker) Run(cmd *cobra.Command, iter iterator.Iterator, inputIte
 	}
 
 	// Configure post actions
-	batchOptions.PostActions = inputIterators.PipeOptions.PostActions
+	if inputIterators != nil {
+		batchOptions.PostActions = inputIterators.PipeOptions.PostActions
+	}
 
 	return w.run(iter, commonOptions, *batchOptions)
 }
