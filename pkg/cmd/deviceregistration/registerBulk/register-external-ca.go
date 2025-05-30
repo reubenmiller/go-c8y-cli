@@ -69,6 +69,9 @@ func NewRegisterExternalCACmd(f *cmdutil.Factory) *RegisterExternalCACmd {
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true, "externalId", "name", "id"),
+
+		// Enable confirmation prompts
+		flags.WithSemanticMethod("POST"),
 	)
 
 	// Required flags

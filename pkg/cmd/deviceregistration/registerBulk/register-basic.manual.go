@@ -67,6 +67,9 @@ func NewRegisterBasicCmd(f *cmdutil.Factory) *RegisterBasicCmd {
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true, "externalId", "name", "id"),
+
+		// Enable confirmation prompts
+		flags.WithSemanticMethod("POST"),
 	)
 
 	// Required flags
