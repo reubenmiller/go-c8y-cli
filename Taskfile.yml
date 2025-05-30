@@ -201,6 +201,11 @@ tasks:
     cmds:
       - goreleaser build --clean --snapshot {{.CLI_ARGS}}
 
+  release-snapshot:
+    desc: Release snapshot (useful to test building everything including the containers)
+    cmds:
+      - goreleaser release --clean --snapshot {{.CLI_ARGS}}
+
   build-snapshot-single:
     desc: Build Snapshot (single) for the current operating system
     cmds:
