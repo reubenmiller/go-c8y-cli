@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM alpine:3.21
 
 ARG USERNAME=c8yuser
 
@@ -24,26 +24,16 @@ COPY bin/c8y /home/$USERNAME/bin/c8y
 
 
 # install plugins
-RUN echo "source /home/$USERNAME/.go-c8y-cli/shell/c8y.plugin.sh" >> /home/$USERNAME/.bashrc \
-    # && echo "export C8Y_SESSION_HOME=/sessions" >> /home/$USERNAME/.bashrc \
+RUN sudo -u "${USERNAME}" /home/$USERNAME/bin/c8y cli install \
     && bash -c "c8y version" \
     #
     # zsh
-    && mkdir -p /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/ \
-    && cp /home/$USERNAME/.go-c8y-cli/shell/c8y.plugin.zsh /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/ \
-    && sed -iE 's/^plugins=(\(.*\))/plugins=(\1 c8y)/' /home/$USERNAME/.zshrc \
-    #
-    # Create completions before zsh runs otherwise
-    # it will not automatically load the completions until the user
-    # runs 'source ~/.zshrc'
-    && c8y completion zsh > /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/_c8y \
-    # && echo "export C8Y_SESSION_HOME=/sessions" >> /home/$USERNAME/.zshrc \
+    && zsh -c "c8y version" \
     #
     # fish
-    && mkdir -p /home/$USERNAME/.config/fish \
-    && echo "source /home/$USERNAME/.go-c8y-cli/shell/c8y.plugin.fish" >> /home/$USERNAME/.config/fish/config.fish \
-    # && echo "set -gx C8Y_SESSION_HOME /sessions" >> /home/$USERNAME/.config/fish/config.fish \
     && fish -c "c8y version" \
+    #
+    # cleanup
     && rm -f /home/$USERNAME/c8y.activitylog*
 
 

@@ -14,6 +14,16 @@ end
 ########################################################################
 # c8y helpers
 ########################################################################
+# -------------
+# session
+# -------------
+# Description: Get the current cumulocity session
+# Usage:
+#   session
+#
+function session --description "Get the current Cumulocity session"
+    c8y sessions get $argv
+end
 
 # -----------
 # set-session
@@ -182,55 +192,3 @@ function c8y-update --description "Update the c8y binary"
     # show new version to user
     c8y version
 end
-
-########################################################################
-# c8y aliases
-########################################################################
-
-# alarms
-alias alarms=c8y\ alarms\ list
-
-# apps
-alias apps=c8y\ applications\ list
-
-# devices
-alias devices=c8y\ devices\ list
-
-# events
-alias events=c8y\ events\ list
-
-# fmo
-alias fmo=c8y\ inventory\ find\ --query
-
-# measurements
-alias measurements=c8y\ measurements\ list
-
-# operations
-alias ops=c8y\ operations\ list
-
-# series
-alias series=c8y\ measurements\ getSeries
-
-#
-# Single item getters
-#
-# alarm
-alias alarm=c8y\ alarms\ get\ --id
-
-# app
-alias app=c8y\ applications\ get\ --id
-
-# event
-alias event=c8y\ events\ get\ --id
-
-# m
-alias m=c8y\ measurements\ get\ --id
-
-# mo
-alias mo=c8y\ inventory\ get\ --id
-
-# op
-alias op=c8y\ operations\ get\ --id
-
-# session
-alias session=c8y\ sessions\ get

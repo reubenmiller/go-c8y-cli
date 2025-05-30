@@ -14,6 +14,16 @@ end
 ########################################################################
 # c8y helpers
 ########################################################################
+# -------------
+# session
+# -------------
+# Description: Get the current cumulocity session
+# Usage:
+#   session
+#
+function session --description "Get the current Cumulocity session"
+    c8y sessions get $argv
+end
 
 # -----------
 # set-session

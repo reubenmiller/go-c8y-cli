@@ -68,24 +68,6 @@ if ($CurrentEncodingName -ne $RequiredEncodingName) {
 }
 
 $script:Aliases = @{
-    # collections
-    alarms = "Get-AlarmCollection"
-    apps = "Get-ApplicationCollection"
-    devices = "Get-DeviceCollection"
-    events = "Get-EventCollection"
-    fmo = "Find-ManagedObjectCollection"
-    measurements = "Get-MeasurementCollection"
-    ops = "Get-OperationCollection"
-    series = "Get-MeasurementSeries"
-
-    # single items
-    alarm = "Get-Alarm"
-    app = "Get-Application"
-    event = "Get-Event"
-    m = "Get-Measurement"
-    mo = "Get-ManagedObject"
-    op = "Get-Operation"
-
     # utilities
     json = "ConvertTo-NestedJson"
     tojson = "ConvertTo-NestedJson"

@@ -12,7 +12,7 @@ plugins=(
 )
 
 if c8y version >/dev/null 2>&1; then
-    plugins+=(c8y)
+    eval "$(c8y cli profile)"
 fi
 
 source $ZSH/oh-my-zsh.sh

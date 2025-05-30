@@ -51,7 +51,6 @@ archives:
       - .go-c8y-cli/README.md
       - .go-c8y-cli/install.*
       - .go-c8y-cli/settings.*
-      - .go-c8y-cli/shell
       - .go-c8y-cli/templates
       - .go-c8y-cli/views
 
@@ -66,7 +65,6 @@ archives:
       - .go-c8y-cli/README.md
       - .go-c8y-cli/install.*
       - .go-c8y-cli/settings.*
-      - .go-c8y-cli/shell
       - .go-c8y-cli/templates
       - .go-c8y-cli/views
 
@@ -80,7 +78,6 @@ archives:
       - .go-c8y-cli/README.md
       - .go-c8y-cli/install.*
       - .go-c8y-cli/settings.*
-      - .go-c8y-cli/shell
       - .go-c8y-cli/templates
       - .go-c8y-cli/views
   
@@ -131,10 +128,6 @@ nfpms:
       - src: .go-c8y-cli/settings.*
         dst: /etc/go-c8y-cli/
         type: config|noreplace
-      
-      - src: .go-c8y-cli/shell
-        dst: /etc/go-c8y-cli/shell
-        type: config
 
       - src: .go-c8y-cli/templates
         dst: /etc/go-c8y-cli/templates
