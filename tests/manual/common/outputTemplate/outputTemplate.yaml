@@ -5,6 +5,7 @@ config:
     C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
     C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
     C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+    C8Y_SETTINGS_DEFAULTS_PAGESIZE: " "
     C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
     C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
     C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
@@ -65,3 +66,18 @@ tests:
     stdout:
       json:
         id: r/^\d+$
+
+  It supports outputting toml output:
+    command: |
+      c8y devices get --id agent01 --outputTemplate 'std.manifestTomlEx({c8y:{name: output.name}}, "  ")'
+    exit-code: 0
+    stdout:
+      exactly: |
+        [c8y]
+          name = "agent01"
+
+  # Note: use shell to compare the exact string output as the test framework seems to have an issue
+  It preserves leading and trailing whitespace:
+    command: |
+      [ "$(c8y devices get --id agent01 --outputTemplate '" a\n b "')" = "$(printf ' a\n b ')" ]
+    exit-code: 0

@@ -639,6 +639,9 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 			logg.Infof("Unfiltered array size. len=%d", unfilteredSize)
 		}
 
+		// Trim space from json object/array output
+		trimSpaceFromOutput := isJSONResponse
+
 		// Apply output template (before the data is processed as the template can transform text to json or other way around)
 		if commonOptions.HasOutputTemplate() {
 			var tempBody []byte
@@ -659,14 +662,16 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 				output = pretty.Ugly(tmplOutput)
 				outputJSON = gjson.ParseBytes(output)
 			} else {
-				isJSONResponse = false
-				// TODO: Is removing the quotes doing too much, what happens if someone is building csv, and it using quotes around some fields?
-				// e.g. `"my value",100`, that would get transformed to `my value",100`
-				// Trim any quotes wrapping the values
-				tmplOutput = bytes.TrimSpace(tmplOutput)
+				// Preserve output
+				trimSpaceFromOutput = false
 
-				output = pretty.Ugly(bytes.Trim(tmplOutput, "\""))
-				outputJSON = gjson.ParseBytes([]byte(""))
+				// Decode output
+				if parsedOutput := gjson.ParseBytes(tmplOutput); parsedOutput.Exists() && parsedOutput.Type == gjson.String {
+					output = []byte(parsedOutput.Str)
+				} else {
+					output = tmplOutput
+				}
+				isJSONResponse = false
 			}
 		}
 
@@ -771,7 +776,7 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 			responseText,
 			!isJSONResponse,
 			jsonformatter.WithFileOutput(commonOptions.OutputFile != "", commonOptions.OutputFile, false),
-			jsonformatter.WithTrimSpace(true),
+			jsonformatter.WithTrimSpace(trimSpaceFromOutput),
 			jsonformatter.WithJSONStreamOutput(isJSONResponse, consol.IsJSONStream(), consol.IsTextOutput()),
 			jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
 		)
