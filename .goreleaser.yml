@@ -1,4 +1,5 @@
 project_name: c8y
+version: 2
 
 release:
   prerelease: auto
@@ -237,6 +238,10 @@ dockers:
     - "--label=org.opencontainers.image.revision={{.FullCommit}}"
     - "--label=org.opencontainers.image.version={{.Version}}"
     - "--platform=linux/amd64"
+    extra_files:
+      - docker/zshrc
+      - pkg/cmd/cli/profile/scripts/plugin.sh
+      - output/zsh/_c8y
 
   - dockerfile: docker/shell.dockerfile
     use: buildx
@@ -255,6 +260,10 @@ dockers:
     - "--label=org.opencontainers.image.revision={{.FullCommit}}"
     - "--label=org.opencontainers.image.version={{.Version}}"
     - "--platform=linux/arm64/v8"
+    extra_files:
+      - docker/zshrc
+      - pkg/cmd/cli/profile/scripts/plugin.sh
+      - output/zsh/_c8y
 
   #
   # pwsh image
