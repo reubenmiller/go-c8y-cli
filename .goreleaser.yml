@@ -1,4 +1,5 @@
 project_name: c8y
+version: 2
 
 release:
   prerelease: auto
@@ -40,56 +41,53 @@ builds:
 
 archives:
   - id: nix
-    builds: [linux]
+    ids: [linux]
     <<: &archive_defaults
       name_template: '{{ .ProjectName }}_{{ .Version }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     wrap_in_directory: "true"
-    format: tar.gz
+    formats: [tar.gz]
     files:
       - LICENSE
       - ./share/man/man1/c8y*.1
       - .go-c8y-cli/README.md
       - .go-c8y-cli/install.*
       - .go-c8y-cli/settings.*
-      - .go-c8y-cli/shell
       - .go-c8y-cli/templates
       - .go-c8y-cli/views
 
   - id: homebrew
-    builds: [macOS]
+    ids: [macOS]
     <<: *archive_defaults
     wrap_in_directory: "true"
-    format: tar.gz
+    formats: [tar.gz]
     files:
       - LICENSE
       - ./share/man/man1/c8y*.1
       - .go-c8y-cli/README.md
       - .go-c8y-cli/install.*
       - .go-c8y-cli/settings.*
-      - .go-c8y-cli/shell
       - .go-c8y-cli/templates
       - .go-c8y-cli/views
 
   - id: windows
-    builds: [windows]
+    ids: [windows]
     <<: *archive_defaults
     wrap_in_directory: "false"
-    format: zip
+    formats: [zip]
     files:
       - LICENSE
       - .go-c8y-cli/README.md
       - .go-c8y-cli/install.*
       - .go-c8y-cli/settings.*
-      - .go-c8y-cli/shell
       - .go-c8y-cli/templates
       - .go-c8y-cli/views
   
   - id: plainBinaries
-    builds: [macOS, linux, windows]
+    ids: [macOS, linux, windows]
     # Don't include the binary in the filename so it is easier to download the latest
     <<: &archive_defaults
       name_template: '{{ .ProjectName }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    format: binary
+    formats: [binary]
 
 nfpms:
   - 
@@ -131,10 +129,6 @@ nfpms:
       - src: .go-c8y-cli/settings.*
         dst: /etc/go-c8y-cli/
         type: config|noreplace
-      
-      - src: .go-c8y-cli/shell
-        dst: /etc/go-c8y-cli/shell
-        type: config
 
       - src: .go-c8y-cli/templates
         dst: /etc/go-c8y-cli/templates
@@ -178,26 +172,11 @@ brews:
 
     # Caveats for the user of your binary.
     caveats: |
-      Please add the following to your shell profile to enable usage of "set-session" and other helpful c8y utility functions
+      Please run the following command to edit your shell profiles to enable usage of "set-session" and other helpful c8y utility functions
 
-      bash: ~/.bashrc
+        c8y cli install
 
-        source "#{etc}/go-c8y-cli/shell/c8y.plugin.sh"
-
-      zsh: ~/.zshrc
-
-        source "#{etc}/go-c8y-cli/shell/c8y.plugin.zsh"
-
-      fish: ~/.config/fish/config.fish
-
-        source "#{etc}/go-c8y-cli/shell/c8y.plugin.fish"
-
-      powershell: ~/.config/powershell/Microsoft.PowerShell_profile.ps1
-        . "#{etc}/go-c8y-cli/shell/c8y.plugin.ps1"
-
-      You will also need to force reload of your profile:
-
-        source <profile>
+      Then reload your shell to see the effects.
 
     homepage: "https://goc8ycli.netlify.app/"
     description: "Cumulocity command line tool"
@@ -259,6 +238,10 @@ dockers:
     - "--label=org.opencontainers.image.revision={{.FullCommit}}"
     - "--label=org.opencontainers.image.version={{.Version}}"
     - "--platform=linux/amd64"
+    extra_files:
+      - docker/zshrc
+      - pkg/cmd/cli/profile/scripts/plugin.sh
+      - output/zsh/_c8y
 
   - dockerfile: docker/shell.dockerfile
     use: buildx
@@ -277,6 +260,10 @@ dockers:
     - "--label=org.opencontainers.image.revision={{.FullCommit}}"
     - "--label=org.opencontainers.image.version={{.Version}}"
     - "--platform=linux/arm64/v8"
+    extra_files:
+      - docker/zshrc
+      - pkg/cmd/cli/profile/scripts/plugin.sh
+      - output/zsh/_c8y
 
   #
   # pwsh image

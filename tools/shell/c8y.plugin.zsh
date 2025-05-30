@@ -58,6 +58,17 @@ init-c8y
 ########################################################################
 # c8y helpers
 ########################################################################
+# -------------
+# session
+# -------------
+# Description: Get the current cumulocity session
+# Usage:
+#   session
+#
+session() {
+    c8y sessions get "$@"
+}
+
 # -----------
 # set-session
 # -----------
@@ -200,133 +211,3 @@ c8y-update () {
     # show new version to user
     c8y version
 }
-
-########################################################################
-# c8y aliases
-########################################################################
-
-set_c8y_alias () {
-    if [ "$C8Y_SHELL" = "zsh" ]; then
-        set_c8y_zsh_alias
-    elif [ "$C8Y_SHELL" = "bash" ]; then
-        set_c8y_bash_alias
-    fi
-}
-
-set_c8y_bash_alias () {
-
-    # alarms
-    alias alarms=c8y\ alarms\ list
-    complete -F _complete_alias alarms
-
-    # apps
-    alias apps=c8y\ applications\ list
-    complete -F _complete_alias apps
-
-    # devices
-    alias devices=c8y\ devices\ list
-    complete -F _complete_alias devices
-
-    # events
-    alias events=c8y\ events\ list
-    complete -F _complete_alias events
-
-    # fmo
-    alias fmo=c8y\ inventory\ find\ --query
-    complete -F _complete_alias fmo
-
-    # measurements
-    alias measurements=c8y\ measurements\ list
-    complete -F _complete_alias measurements
-
-    # operations
-    alias ops=c8y\ operations\ list
-    complete -F _complete_alias ops
-
-    # series
-    alias series=c8y\ measurements\ getSeries
-    complete -F _complete_alias series
-
-    #
-    # Single item getters
-    #
-    # alarm
-    alias alarm=c8y\ alarms\ get\ --id
-    complete -F _complete_alias alarm
-
-    # app
-    alias app=c8y\ applications\ get\ --id
-    complete -F _complete_alias app
-
-    # event
-    alias event=c8y\ events\ get\ --id
-    complete -F _complete_alias event
-
-    # m
-    alias m=c8y\ measurements\ get\ --id
-    complete -F _complete_alias m
-
-    # mo
-    alias mo=c8y\ inventory\ get\ --id
-    complete -F _complete_alias mo
-
-    # op
-    alias op=c8y\ operations\ get\ --id
-    complete -F _complete_alias op
-
-    # session
-    alias session=c8y\ sessions\ get
-    complete -F _complete_alias session
-}
-
-set_c8y_zsh_alias () {
-    # alarms
-    alias alarms=c8y\ alarms\ list
-
-    # apps
-    alias apps=c8y\ applications\ list
-
-    # devices
-    alias devices=c8y\ devices\ list
-
-    # events
-    alias events=c8y\ events\ list
-
-    # fmo
-    alias fmo=c8y\ inventory\ find\ --query
-
-    # measurements
-    alias measurements=c8y\ measurements\ list
-
-    # operations
-    alias ops=c8y\ operations\ list
-
-    # series
-    alias series=c8y\ measurements\ getSeries
-
-    #
-    # Single item getters
-    #
-    # alarm
-    alias alarm=c8y\ alarms\ get\ --id
-
-    # app
-    alias app=c8y\ applications\ get\ --id
-
-    # event
-    alias event=c8y\ events\ get\ --id
-
-    # m
-    alias m=c8y\ measurements\ get\ --id
-
-    # mo
-    alias mo=c8y\ inventory\ get\ --id
-
-    # op
-    alias op=c8y\ operations\ get\ --id
-
-    # session
-    alias session=c8y\ sessions\ get
-}
-
-set_c8y_alias

@@ -129,8 +129,6 @@ RUN curl -sSfL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/t
     && mkdir -p /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y
 
 COPY tools/shell/.zshrc /home/$USERNAME/.zshrc
-COPY tools/shell/c8y.plugin.zsh /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/
-COPY tools/shell/c8y.plugin.fish /home/$USERNAME/
 RUN echo "autoload -U compinit; compinit -i" | sudo tee -a /home/$USERNAME/.zshrc \
     #
     # taskfile completion
