@@ -8,6 +8,8 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -54,6 +56,16 @@ Disable certificate authority
 		completion.WithValidateSet("status", "ENABLED", "DISABLED"),
 	)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithProcessingMode(),
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
+
+		// Enable confirmation prompts
+		flags.WithSemanticMethod("PUT"),
+	)
+
 	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
@@ -83,18 +95,21 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		certOptions.WithAutoRegistration(n.AutoRegistrationEnabled)
 	}
 
-	cert, _, err := client.CertificateAuthority.Update(context.Background(), "", certOptions)
-	if err != nil {
-		return err
-	}
-	if cfg.DryRun() {
-		return nil
-	}
+	return n.factory.RunWithGenericWorkers(cmd, nil, nil, func(j worker.Job) (any, error) {
+		cert, _, err := client.CertificateAuthority.Update(context.Background(), "", certOptions)
+		if err != nil {
+			return nil, err
+		}
+		if cfg.DryRun() {
+			return nil, nil
+		}
 
-	b, err := json.Marshal(cert)
-	if err != nil {
-		return err
-	}
+		b, err := json.Marshal(cert)
+		if err != nil {
+			return nil, err
+		}
 
-	return n.factory.WriteOutputWithoutPropertyGuess(b, cmdutil.OutputContext{})
+		err = n.factory.WriteOutputWithoutPropertyGuess(b, cmdutil.OutputContext{})
+		return nil, err
+	})
 }

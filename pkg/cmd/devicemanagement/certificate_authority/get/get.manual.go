@@ -7,6 +7,8 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/spf13/cobra"
 )
 
@@ -39,6 +41,13 @@ Get certificate authority to allow auto registration
 		RunE: ccmd.RunE,
 	}
 
+	flags.WithOptions(
+		cmd,
+
+		// Enable confirmation prompts
+		flags.WithSemanticMethod("GET"),
+	)
+
 	cmd.SilenceUsage = true
 
 	// Required flags
@@ -60,18 +69,21 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	cert, err := client.CertificateAuthority.Get(context.Background())
-	if err != nil {
-		return err
-	}
-	if cfg.DryRun() {
-		return nil
-	}
+	return n.factory.RunWithGenericWorkers(cmd, nil, nil, func(j worker.Job) (any, error) {
+		cert, err := client.CertificateAuthority.Get(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		if cfg.DryRun() {
+			return nil, nil
+		}
 
-	b, err := json.Marshal(cert)
-	if err != nil {
-		return err
-	}
+		b, err := json.Marshal(cert)
+		if err != nil {
+			return nil, err
+		}
 
-	return n.factory.WriteOutputWithoutPropertyGuess(b, cmdutil.OutputContext{})
+		err = n.factory.WriteOutputWithoutPropertyGuess(b, cmdutil.OutputContext{})
+		return nil, err
+	})
 }

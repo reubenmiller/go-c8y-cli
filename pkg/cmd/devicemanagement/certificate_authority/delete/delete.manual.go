@@ -7,6 +7,8 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/spf13/cobra"
 )
 
@@ -39,6 +41,13 @@ Delete certificate authority
 		RunE: ccmd.RunE,
 	}
 
+	flags.WithOptions(
+		cmd,
+
+		// Enable confirmation prompts
+		flags.WithSemanticMethod("DELETE"),
+	)
+
 	cmd.SilenceUsage = true
 
 	// Required flags
@@ -61,13 +70,15 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	_, err = client.CertificateAuthority.Delete(context.Background(), "")
-	if err != nil {
-		return err
-	}
-	if cfg.DryRun() {
-		return nil
-	}
-	fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Deleted certificate-authority for tenant %s\n", cs.SuccessIconWithColor(cs.Red), client.GetTenantName(context.Background()))
-	return nil
+	return n.factory.RunWithGenericWorkers(cmd, nil, nil, func(j worker.Job) (any, error) {
+		_, err = client.CertificateAuthority.Delete(context.Background(), "")
+		if err != nil {
+			return nil, err
+		}
+		if cfg.DryRun() {
+			return nil, nil
+		}
+		_, err = fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Deleted certificate-authority for tenant %s\n", cs.SuccessIconWithColor(cs.Red), client.GetTenantName(context.Background()))
+		return nil, err
+	})
 }
