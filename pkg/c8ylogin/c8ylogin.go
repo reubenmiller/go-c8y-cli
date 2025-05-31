@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/manifoldco/promptui"
-	"github.com/mdp/qrterminal"
+	"github.com/mdp/qrterminal/v3"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
@@ -511,11 +511,12 @@ func (lh *LoginHandler) setupTFA() error {
 	if v := resp.JSON("rawSecret"); v.Exists() {
 		totpURL := fmt.Sprintf("otpauth://totp/%s?secret=%s&issuer=%s", lh.C8Yclient.Username, v.String(), lh.C8Yclient.BaseURL.Host)
 		qrterminal.GenerateWithConfig(totpURL, qrterminal.Config{
-			Level:     qrterminal.M,
-			Writer:    lh.Writer,
-			BlackChar: qrterminal.BLACK,
-			WhiteChar: qrterminal.WHITE,
-			QuietZone: 1,
+			Level:      qrterminal.M,
+			Writer:     lh.Writer,
+			HalfBlocks: true,
+			BlackChar:  qrterminal.BLACK,
+			WhiteChar:  qrterminal.WHITE,
+			QuietZone:  1,
 		})
 
 		lh.writeMessage("\n")
