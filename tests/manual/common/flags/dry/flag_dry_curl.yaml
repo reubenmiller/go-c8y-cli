@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: markdown
+    C8Y_SETTINGS_LOGGER_HIDESENSITIVE: true
+tests:
+  It displays the curl command for creating a binary:
+    command: |
+      c8y binaries create --file ./manual/common/flags/dry/input01.txt --dry --dryFormat curl
+    exit-code: 0
+    stdout:
+      file: ./manual/common/flags/dry/golden.curl.binary.create.txt
+
+  It displays the curl command for a device registration for the Cumulocity CA:
+    command: |
+      c8y deviceregistration register-ca --id "tmp01" --one-time-password "LookHowSecretThisIs1337" --dry --dryFormat curl
+    exit-code: 0
+    stdout:
+      file: ./manual/common/flags/dry/golden.curl.device.register-ca.create.txt

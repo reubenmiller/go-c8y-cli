@@ -24,6 +24,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/curly"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encoding"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
@@ -34,7 +35,6 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/pretty"
-	"moul.io/http2curl/v2"
 )
 
 // Check if method supports a body with the request
@@ -272,7 +272,7 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 		}
 	}
 
-	shell, pwsh, _ := r.GetCurlCommands(req)
+	shell, pwsh, dummyFiles, _ := r.GetCurlCommands(requestOptions, req)
 
 	details := &RequestDetails{
 		URL:         fullURL,
@@ -305,11 +305,22 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	}
 
 	if format == "curl" {
-		sectionLabel.Fprintf(w, "##### Curl (shell)\n\n")
+		sectionLabel.Fprintf(w, "##### curl (shell)\n\n")
 		label.Fprintf(w, "```sh\n%s\n```\n", details.Shell)
 
-		sectionLabel.Fprintf(w, "\n##### Curl (PowerShell)\n\n")
+		sectionLabel.Fprintf(w, "\n##### curl (PowerShell)\n\n")
 		label.Fprintf(w, "```powershell\n%s\n```\n", details.PowerShell)
+
+		if len(dummyFiles.Files) > 0 {
+			for _, file := range dummyFiles.Files {
+				contents := file.Contents
+				if len(contents) > 1024 {
+					contents = append(contents[:1024], []byte("\n...")...)
+				}
+				sectionLabel.Fprintf(w, "\n##### file: %s\n\n", file.Name)
+				label.Fprintf(w, "\n```text/plain\n%s\n```\n", contents)
+			}
+		}
 		return
 	}
 
@@ -370,18 +381,16 @@ func TryUnescapeURL(v string) string {
 	return unescapedQuery
 }
 
-func (r *RequestHandler) GetCurlCommands(req *http.Request) (shell string, pwsh string, err error) {
+func (r *RequestHandler) GetCurlCommands(requestOptions *c8y.RequestOptions, req *http.Request) (shell string, pwsh string, dummyFiles *curly.DummyFileCollection, err error) {
 	if !strings.Contains("POST PUT DELETE", req.Method) {
 		req.Body = nil
 	}
-	var command *http2curl.CurlCommand
-	command, err = http2curl.GetCurlCommand(req)
 
+	curlCmd, dummyFiles, err := curly.ToCurl(req)
 	if err != nil {
 		r.Logger.Warningf("failed to get curl command. %s", err)
 		return
 	}
-	curlCmd := command.String()
 	curlCmd = strings.ReplaceAll(curlCmd, "\n", "")
 
 	shell = r.HideSensitive(r.Client, curlCmd)

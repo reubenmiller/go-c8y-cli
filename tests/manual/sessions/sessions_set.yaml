@@ -223,6 +223,6 @@ tests:
           "headers": {
             "Accept": "application/json"
           },
-          "shell": "curl -X 'GET' -H 'Accept: application/json' 'http://{host}/c8y/inventory/managedObjects?pageSize=1'",
-          "powershell": "curl -X 'GET' -H 'Accept: application/json' 'http://{host}/c8y/inventory/managedObjects?pageSize=1'"
+          "shell": "curl -X GET 'http://{host}/c8y/inventory/managedObjects?pageSize=1' -H 'Accept: application/json'",
+          "powershell": "curl -X GET 'http://{host}/c8y/inventory/managedObjects?pageSize=1' -H 'Accept: application/json'"
         }

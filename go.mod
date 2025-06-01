@@ -38,7 +38,6 @@ require (
 	golang.org/x/crypto v0.36.0
 	golang.org/x/term v0.30.0
 	gopkg.in/yaml.v3 v3.0.1
-	moul.io/http2curl/v2 v2.3.0
 )
 
 require github.com/hashicorp/go-version v1.7.0
@@ -70,6 +69,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect

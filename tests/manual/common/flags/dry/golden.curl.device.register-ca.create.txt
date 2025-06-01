@@ -1,0 +1,20 @@
+##### curl (shell)
+
+```sh
+curl -X POST 'https://{host}/devicecontrol/bulkNewDeviceRequests' -H 'Accept: application/json' -H 'Authorization: Basic {base64 tenant/username:password}' -F 'file=@input1.txt'
+```
+
+##### curl (PowerShell)
+
+```powershell
+curl -X POST 'https://{host}/devicecontrol/bulkNewDeviceRequests' -H 'Accept: application/json' -H 'Authorization: Basic {base64 tenant/username:password}' -F 'file=@input1.txt'
+```
+
+##### file: input1.txt
+
+
+```text/plain
+ID	AUTH_TYPE	ENROLLMENT_OTP	NAME	TYPE	IDTYPE	com_cumulocity_model_Agent.active
+tmp01	CERTIFICATES	LookHowSecretThisIs1337	tmp01	thin-edge.io	c8y_Serial	true
+
+```
