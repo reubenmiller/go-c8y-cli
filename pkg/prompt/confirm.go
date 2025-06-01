@@ -11,6 +11,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/clio"
 )
 
 // ErrAbortAction indicates that the user did not confirm an action
@@ -125,8 +126,7 @@ func Confirm(prefix, label string, target, defaultValue string, force bool) (Con
 	}
 
 	stdIn := os.Stdin
-	stat, _ := os.Stdin.Stat()
-	if (stat.Mode() & os.ModeCharDevice) == 0 {
+	if !clio.IsInteractiveTerminal(stdIn) {
 		// stdin is handling Piped input, so we have to prompt on a different input
 		if runtime.GOOS == "windows" {
 			if file, err := os.Open("CON"); err == nil {

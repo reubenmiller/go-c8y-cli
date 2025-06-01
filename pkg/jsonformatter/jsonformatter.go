@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/clio"
 	"github.com/tidwall/gjson"
 )
 
@@ -24,6 +25,14 @@ func WithOutputFormatters(w io.Writer, input []byte, out bool, formatters ...Out
 	if out {
 		fmt.Fprintf(w, "%s", input)
 	}
+
+	if len(input) == 0 {
+		// If there is no output, write an null marker so that downstream commands
+		// can determine if there was empty input or if it is the stdin is
+		// mapped to some unexpected fifo (like in Github / CI environments)
+		clio.WriteEmptyMarker(w)
+	}
+
 	return input
 }
 

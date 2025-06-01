@@ -11,6 +11,7 @@ import (
 
 	"errors"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/clio"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/stream"
 	"github.com/tidwall/gjson"
@@ -149,27 +150,33 @@ func (i *PipeIterator) MarshalJSON() (line []byte, err error) {
 	return MarshalJSON(i)
 }
 
-// NewPipeIterator returns a new pipe iterator
-func NewPipeIterator(in io.Reader, filter ...Filter) (Iterator, error) {
-	var input io.Reader
+func NewPipeReader(in io.Reader) (*bufio.Reader, error) {
+	var reader *bufio.Reader
+
 	switch v := in.(type) {
 	case *os.File:
-		// check if there is input (otherwise calling .Peek(1) will hang)
-		info, err := v.Stat()
-		if err != nil {
-			return nil, err
-		}
 
-		if info.Mode()&os.ModeCharDevice != 0 {
+		if !clio.IsInputPiped(v) {
 			return nil, ErrNoPipeInput
 		}
-		input = v
+
+		reader = bufio.NewReader(v)
+
 	case io.Reader:
-		input = v
+		reader = bufio.NewReader(v)
 	}
 
-	reader := bufio.NewReader(input)
 	if err := PeekReader(reader); err != nil {
+		return nil, err
+	}
+
+	return reader, nil
+}
+
+// NewPipeIterator returns a new pipe iterator
+func NewPipeIterator(in io.Reader, filter ...Filter) (Iterator, error) {
+	reader, err := NewPipeReader(in)
+	if err != nil {
 		return nil, err
 	}
 
@@ -189,25 +196,8 @@ func NewPipeIterator(in io.Reader, filter ...Filter) (Iterator, error) {
 
 // NewJSONPipeIterator returns a new pipe iterator
 func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) (Iterator, error) {
-	var input io.Reader
-	switch v := in.(type) {
-	case *os.File:
-		// check if there is input (otherwise calling .Peek(1) will hang)
-		info, err := v.Stat()
-		if err != nil {
-			return nil, err
-		}
-
-		if info.Mode()&os.ModeCharDevice != 0 {
-			return nil, ErrNoPipeInput
-		}
-		input = v
-	case io.Reader:
-		input = v
-	}
-
-	reader := bufio.NewReader(input)
-	if err := PeekReader(reader); err != nil {
+	reader, err := NewPipeReader(in)
+	if err != nil {
 		return nil, err
 	}
 
@@ -231,18 +221,25 @@ func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) 
 // is whitespace
 func PeekReader(r *bufio.Reader) error {
 	peek, err := r.Peek(1)
+	outErr := err
 	if err != nil {
 		if err == io.EOF {
-			return ErrEmptyPipeInput
+			outErr = ErrEmptyPipeInput
+			if len(peek) == 0 {
+				outErr = ErrNoPipeInput
+			}
 		}
-		return err
+		return outErr
 	}
-	// check first character contains only whitespace
-	if len(bytes.Trim(peek, "\n\r")) == 0 {
+
+	if clio.IsEmptyMarker(peek) {
+		outErr = ErrEmptyPipeInput
+	} else if len(bytes.Trim(peek, "\n\r")) == 0 {
+		// check first character contains only whitespace
 		// Treat input starting with an empty line like
 		// no pipe input, as when it runs in a cronjob
 		// stdin starts with a new lineline char
-		return ErrNoPipeInput
+		outErr = ErrNoPipeInput
 	}
-	return nil
+	return outErr
 }
