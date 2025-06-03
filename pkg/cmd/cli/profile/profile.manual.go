@@ -7,7 +7,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
 	"github.com/spf13/cobra"
 )
 
@@ -17,8 +16,14 @@ var scriptPowerShell string
 //go:embed scripts/plugin.sh
 var scriptBash string
 
+//go:embed scripts/plugin.posix.sh
+var scriptPosixShell string
+
 //go:embed scripts/plugin.sh
 var scriptZsh string
+
+//go:embed scripts/plugin.auto.sh
+var scriptLinuxAuto string
 
 //go:embed scripts/plugin.fish
 var scriptFish string
@@ -44,17 +49,22 @@ func NewCmdProfile(f *cmdutil.Factory) *CmdProfile {
 			This command can be used to load the associated shell helpers.
 		`),
 		Example: heredoc.Doc(`
+		## zsh/bash/sh
+			eval "$(c8y cli profile)"
+
 		## zsh
 			source <(c8y cli profile --shell zsh)
 		
 		## bash
-			source <(c8y cli profile --shell bash)
+			eval "$(c8y cli profile --shell bash)"
+		
+		## sh (posix)
+			eval "$(c8y cli profile --shell sh)"
 
 		## fish
 			c8y cli profile --shell fish | source
 
 		## PowerShell
-
 			c8y cli profile --shell powershell | Out-String | Invoke-Expression
 		`),
 		RunE: ccmd.RunE,
@@ -66,7 +76,7 @@ func NewCmdProfile(f *cmdutil.Factory) *CmdProfile {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("shell", "bash", "zsh", "powershell", "fish"),
+		completion.WithValidateSet("shell", "bash", "zsh", "powershell", "fish", "sh"),
 	)
 
 	cmdutil.DisableAuthCheck(cmd)
@@ -77,16 +87,29 @@ func NewCmdProfile(f *cmdutil.Factory) *CmdProfile {
 
 func (n *CmdProfile) RunE(cmd *cobra.Command, args []string) error {
 	activeShell := n.shell
-	if n.shell == "" {
-		activeShell = shell.DetectShell("zsh")
+	if activeShell == "" {
+		activeShell = "sh"
 	}
 	var script *string
 
+	// Note: for sh based shells, use a generic entrypoint
+	// which is able to detect the exact shell type before running
+	// the eval, as the process can't do it as it does not have access
+	// to the special shell variables as they are not exposed as env variables
+	// so a minimal source is still required to then detect the correct variant,
+	// and then the real shell type (with a prefixed "__{shell}") is used after
+	// the real shell type has been determined.
+	// This does not work for fish, or powershell as the syntax is too different
 	switch activeShell {
-	case "zsh":
+	case "zsh", "bash", "sh", "auto":
+		// generic entry point which will find the correct shell
+		script = &scriptLinuxAuto
+	case "__zsh":
 		script = &scriptZsh
-	case "bash":
+	case "__bash":
 		script = &scriptBash
+	case "__sh":
+		script = &scriptPosixShell
 	case "fish":
 		script = &scriptFish
 	case "powershell":
