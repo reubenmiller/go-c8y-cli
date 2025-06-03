@@ -106,6 +106,27 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Warn users if they try to use this command directly
+	if n.factory.IOStreams != nil {
+		if n.factory.IOStreams.IsStdoutTTY() {
+			notice := heredoc.Docf(`
+				You shouldn't run 'c8y session set' directly as it will have no effect on your current session.
+
+				Instead, you will need to use the 'set-session' helper function, or if you can't use the helper function, then run:
+		
+				  # zsh/bash/sh
+				  eval "$(c8y sessions set)"
+
+				  # fish
+				  c8y sessions set | source
+
+				  # powershell
+				  c8y sessions set | Out-String | Invoke-Expression
+			`)
+			fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s %s\n\n", strings.Repeat(n.factory.IOStreams.ColorScheme().WarningIcon(), 3), notice)
+		}
+	}
+
 	sessionFile := ""
 	if cmd.Root().PersistentFlags().Changed("session") {
 		sessionFile = cfg.GetSessionFile()
