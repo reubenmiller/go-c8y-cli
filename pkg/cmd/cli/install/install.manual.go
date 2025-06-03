@@ -13,13 +13,17 @@ import (
 	"github.com/cli/safeexec"
 	"github.com/mitchellh/go-homedir"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/spf13/cobra"
 )
 
 var ErrInstallFailed = errors.New("failed to install one or more profiles")
-var validShells = []string{"bash", "fish", "powershell", "zsh"}
+var validShells = []string{"bash", "fish", "powershell", "zsh", "sh"}
+
+// Skip sh when installing all shells as it generally does not have a profile defined
+var defaultShells = []string{"bash", "fish", "powershell", "zsh"}
 
 type CmdInstall struct {
 	*subcommand.SubCommand
@@ -50,7 +54,7 @@ func NewCmdInstall(f *cmdutil.Factory) *CmdInstall {
 		RunE: ccmd.RunE,
 	}
 
-	cmd.Flags().StringSliceVar(&ccmd.shell, "shell", validShells, "Type of shell")
+	cmd.Flags().StringSliceVar(&ccmd.shell, "shell", defaultShells, "Type of shell")
 
 	cmd.SilenceUsage = true
 
@@ -65,24 +69,30 @@ func NewCmdInstall(f *cmdutil.Factory) *CmdInstall {
 	return ccmd
 }
 
+type Shell struct {
+	Name   string
+	Binary string
+}
+
 func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
 
-	shells := map[string]struct {
-		Name   string
-		Binary string
-	}{
+	shells := map[string]Shell{
 		"bash":       {Name: "bash", Binary: "bash"},
 		"zsh":        {Name: "zsh", Binary: "zsh"},
+		"sh":         {Name: "sh", Binary: "sh"},
 		"powershell": {Name: "powershell", Binary: "pwsh"},
 		"fish":       {Name: "fish", Binary: "fish"},
 	}
 
 	var Errs []error
 	reloadRequired := false
+
+	// Detect shells
+	detectedShells := make([]Shell, 0, len(n.shell))
 	for _, name := range n.shell {
 		shell, ok := shells[name]
 		if !ok {
@@ -92,14 +102,34 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 
 		cfg.Logger.Debugf("Checking shell. name=%s, shell=%s", shell.Name, shell.Binary)
 		if _, err := safeexec.LookPath(shell.Binary); err == nil {
-			changed, installErr := n.InstallProfile(shell.Name)
-			if installErr != nil {
-				Errs = append(Errs, installErr)
-			}
-			reloadRequired = reloadRequired || changed
+			detectedShells = append(detectedShells, shell)
 		} else {
 			cfg.Logger.Debugf("Shell was not found. name=%s, shell=%s", shell.Name, shell.Binary)
 		}
+	}
+
+	if len(detectedShells) == 0 {
+		// Add sh as a last resort, but since it does not have a commonly used
+		// configuration file, don't display this warning all the time, otherwise it would be really
+		// annoying to users as sh is installed on all Linux and macOS versions
+		if _, err := safeexec.LookPath("sh"); err == nil {
+			detectedShells = append(detectedShells, Shell{
+				Name:   "sh",
+				Binary: "sh",
+			})
+		} else {
+			fmt.Fprint(n.factory.IOStreams.ErrOut, "Did not detect any valid shells\n")
+			return nil
+		}
+	}
+
+	// Install profiles in each shell that was found
+	for _, shell := range detectedShells {
+		changed, installErr := n.InstallProfile(shell.Name)
+		if installErr != nil {
+			Errs = append(Errs, installErr)
+		}
+		reloadRequired = reloadRequired || changed
 	}
 
 	if len(Errs) == 0 {
@@ -107,6 +137,10 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 			fmt.Fprint(n.factory.IOStreams.ErrOut, "\nPlease reload your shell\n\n")
 		}
 		return nil
+	}
+
+	if len(Errs) == 1 {
+		return Errs[0]
 	}
 
 	summaryErr := ErrInstallFailed
@@ -126,12 +160,29 @@ func (n *CmdInstall) InstallProfile(shell string) (bool, error) {
 	profileSnippet := ""
 
 	switch shell {
+	case "sh":
+		// sh/ash uses a special env variable called 'ENV' which controls whether a profile is auto loaded or not
+		profilePath = os.Getenv("ENV")
+		profileSnippet = `eval "$(c8y cli profile --shell sh)"`
+		if profilePath == "" {
+			if n.factory.IOStreams != nil {
+				fmt.Fprintf(
+					n.factory.IOStreams.ErrOut,
+					"%s sh is not using a config file (set via the 'ENV' env variable), so you will need to load the profile yourself using:\n\n  %s\n\n",
+					n.factory.IOStreams.ColorScheme().FailureIcon(),
+					profileSnippet,
+				)
+			}
+			return false, cmderrors.NewSilentError()
+		}
+
 	case "zsh":
 		profilePath = "~/.zshrc"
 		profileSnippet = "source <(c8y cli profile --shell zsh)"
 	case "bash":
+		// use eval over source as process substitution was only added in bash >= v4
 		profilePath = "~/.bashrc"
-		profileSnippet = "source <(c8y cli profile --shell bash)"
+		profileSnippet = `eval "$(c8y cli profile --shell bash)"`
 	case "fish":
 		profilePath = "~/.config/fish/config.fish"
 		profileSnippet = "c8y cli profile --shell fish | source"
