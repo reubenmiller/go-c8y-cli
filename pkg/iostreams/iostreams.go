@@ -14,6 +14,7 @@ import (
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/clio"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/vbauerster/mpb/v6"
 	"golang.org/x/term"
@@ -140,8 +141,7 @@ func (s *IOStreams) IsStderrTTY() bool {
 }
 
 func (s *IOStreams) HasStdin() bool {
-	stat, _ := os.Stdin.Stat()
-	return (stat.Mode() & os.ModeCharDevice) == 0
+	return clio.HasPipedInput(nil)
 }
 
 func (s *IOStreams) CanPrompt() bool {

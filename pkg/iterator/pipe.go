@@ -11,6 +11,7 @@ import (
 
 	"errors"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/clio"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/stream"
 	"github.com/tidwall/gjson"
@@ -149,27 +150,30 @@ func (i *PipeIterator) MarshalJSON() (line []byte, err error) {
 	return MarshalJSON(i)
 }
 
-// NewPipeIterator returns a new pipe iterator
-func NewPipeIterator(in io.Reader, filter ...Filter) (Iterator, error) {
-	var input io.Reader
+// NewPipeReader returns a reader from any detected input pipeline
+func NewPipeReader(in io.Reader) (*bufio.Reader, error) {
+	var reader *bufio.Reader
 	switch v := in.(type) {
 	case *os.File:
-		// check if there is input (otherwise calling .Peek(1) will hang)
-		info, err := v.Stat()
-		if err != nil {
-			return nil, err
-		}
-
-		if info.Mode()&os.ModeCharDevice != 0 {
+		if !clio.HasPipedInput(v) {
 			return nil, ErrNoPipeInput
 		}
-		input = v
+		reader = bufio.NewReader(v)
 	case io.Reader:
-		input = v
+		reader = bufio.NewReader(v)
 	}
 
-	reader := bufio.NewReader(input)
 	if err := PeekReader(reader); err != nil {
+		return nil, err
+	}
+
+	return reader, nil
+}
+
+// NewPipeIterator returns a new pipe iterator
+func NewPipeIterator(in io.Reader, filter ...Filter) (Iterator, error) {
+	reader, err := NewPipeReader(in)
+	if err != nil {
 		return nil, err
 	}
 
@@ -189,25 +193,8 @@ func NewPipeIterator(in io.Reader, filter ...Filter) (Iterator, error) {
 
 // NewJSONPipeIterator returns a new pipe iterator
 func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) (Iterator, error) {
-	var input io.Reader
-	switch v := in.(type) {
-	case *os.File:
-		// check if there is input (otherwise calling .Peek(1) will hang)
-		info, err := v.Stat()
-		if err != nil {
-			return nil, err
-		}
-
-		if info.Mode()&os.ModeCharDevice != 0 {
-			return nil, ErrNoPipeInput
-		}
-		input = v
-	case io.Reader:
-		input = v
-	}
-
-	reader := bufio.NewReader(input)
-	if err := PeekReader(reader); err != nil {
+	reader, err := NewPipeReader(in)
+	if err != nil {
 		return nil, err
 	}
 
