@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yquery"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/stream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 
@@ -1145,6 +1146,7 @@ type PipelineOptions struct {
 	Aliases     []string            `json:"aliases"`
 	IsID        bool                `json:"isID"`
 	Values      []string            `json:"values"`
+	Mode        stream.Mode         `json:"mode"`
 	Validator   iterator.Validator  `json:"-"`
 	Formatter   func([]byte) []byte `json:"-"`
 	Format      string              `json:"-"`

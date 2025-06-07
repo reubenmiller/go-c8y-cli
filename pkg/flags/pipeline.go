@@ -44,6 +44,7 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 			AllowEmpty: !pipeOpt.Required,
 			Formatter:  pipeOpt.Formatter,
 			Format:     pipeOpt.Format,
+			Mode:       pipeOpt.Mode,
 		}
 		lineFilter := FilterJsonLines
 		if pipeOpt.InputFilter != nil {

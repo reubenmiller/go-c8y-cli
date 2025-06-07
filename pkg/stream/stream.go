@@ -8,10 +8,18 @@ import (
 	"unicode"
 )
 
+type Mode int
+
+const (
+	ModeAuto Mode = 0
+	ModeText Mode = 1
+)
+
 // InputStreamer an input streamer which breaks down a buffer into input values
 type InputStreamer struct {
 	IgnoreEmptyLines bool
 	Buffer           *bufio.Reader
+	Mode             Mode
 }
 
 func (r *InputStreamer) isJSONObject() (bool, error) {
@@ -120,8 +128,10 @@ func (r *InputStreamer) Read() (output []byte, err error) {
 		}
 
 	} else {
-		if err := r.consumeWhitespaceOnLine(); err != nil {
-			return output, err
+		if r.Mode != ModeText {
+			if err := r.consumeWhitespaceOnLine(); err != nil {
+				return output, err
+			}
 		}
 	}
 
@@ -131,7 +141,7 @@ func (r *InputStreamer) Read() (output []byte, err error) {
 		return output, err
 	}
 
-	if isJSON {
+	if isJSON && r.Mode != ModeText {
 		output, err = r.ReadJSONObject()
 	} else {
 		output, err = r.ReadLine()

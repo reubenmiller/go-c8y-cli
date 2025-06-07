@@ -63,6 +63,9 @@ type PipeOptions struct {
 
 	// Format simple custom format string
 	Format string
+
+	// Pipe detection mode
+	Mode stream.Mode
 }
 
 // PipeIterator is a thread safe iterator to retrieve the input values from piped standard input
@@ -110,7 +113,7 @@ func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 	}
 
 	// check if json, if so pluck the value from it
-	if i.opts != nil && jsonUtilities.IsJSONObject(line) {
+	if i.opts != nil && i.opts.Mode == stream.ModeAuto && jsonUtilities.IsJSONObject(line) {
 		if len(i.opts.Properties) > 0 {
 			// select first property
 			for _, prop := range i.opts.Properties {
@@ -203,10 +206,16 @@ func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) 
 		pipelineFilter = filter[0]
 	}
 
+	streamMode := stream.ModeAuto
+	if pipeOpts != nil {
+		streamMode = pipeOpts.Mode
+	}
+
 	return &PipeIterator{
 		reader: reader,
 		stream: &stream.InputStreamer{
 			Buffer: reader,
+			Mode:   streamMode,
 		},
 		filter: pipelineFilter,
 		opts:   pipeOpts,
