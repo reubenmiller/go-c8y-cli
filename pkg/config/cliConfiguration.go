@@ -199,6 +199,9 @@ const (
 	// SettingsModeEnableDelete enables delete commands
 	SettingsModeEnableDelete = "settings.mode.enableDelete"
 
+	// SettingsPinEntry sets the command to run to get the user's passphrase
+	SettingsPinEntry = "settings.pinEntry"
+
 	// SettingsModeCI enable continuous integration mode (this will enable all commands)
 	SettingsModeCI = "settings.ci"
 
@@ -536,6 +539,7 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsForceTTY, false),
 
 		// Session options
+		WithBindEnv(SettingsPinEntry, ""),
 		WithBindEnv(SettingsSessionAlwaysIncludePassword, false),
 		WithBindEnv(SettingsSessionTokenValidFor, "8h"),
 		WithBindEnv(SettingsSessionHide, false),
@@ -551,6 +555,9 @@ func (c *Config) bindSettings() {
 	if err != nil {
 		c.Logger.Warnf("Could not bind settings. %s", err)
 	}
+
+	// Set pin entry command
+	c.prompter.PinEntry = c.PinEntry()
 }
 
 // SetLogger sets the logger
@@ -565,6 +572,11 @@ func (c *Config) ReadConfig(file string) error {
 	return c.Persistent.ReadInConfig()
 }
 
+// PinEntry returns the command to use to request a user's credentials
+func (c *Config) PinEntry() string {
+	return c.viper.GetString(SettingsPinEntry)
+}
+
 // CheckEncryption checks if the user has provided the correct encryption password or not by testing the decryption of the secret text
 func (c *Config) CheckEncryption(encryptedText ...string) (string, error) {
 	secretText := c.SecretText
@@ -573,7 +585,7 @@ func (c *Config) CheckEncryption(encryptedText ...string) (string, error) {
 	}
 
 	c.Logger.Infof("Checking encryption passphrase against secret text: %s", secretText)
-	pass, err := c.prompter.EncryptionPassphrase(secretText, c.Passphrase, "")
+	pass, err := c.prompter.EncryptionPassphrase(secretText, EnvPassphrase, c.Passphrase, "")
 	c.Passphrase = pass
 	return pass, err
 }
