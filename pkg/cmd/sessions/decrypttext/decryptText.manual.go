@@ -1,11 +1,17 @@
 package decrypttext
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 
-	"github.com/howeyc/gopass"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/stream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/spf13/cobra"
 )
 
@@ -43,10 +49,10 @@ Encrypt the text "Hello World", the text will be encrypted using the given passp
 	cmdutil.DisableEncryptionCheck(cmd)
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("text", "", "Encrypted text. (required)")
-	cmd.Flags().StringVar(&ccmd.passphrase, "passphrase", "", "Passphrase use for encoding your files")
+	cmd.Flags().String("text", "", "Encrypted text. (required) (accepts pipeline)")
+	cmd.Flags().StringVar(&ccmd.passphrase, "passphrase", "", "Passphrase to use for encrypting the text. Read from env C8Y_PASSPHRASE or prompted if missing")
 
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("text")
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
@@ -60,30 +66,67 @@ func (n *CmdDecryptText) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if n.passphrase == "" {
-		cmd.Printf("Enter password 🔒: [input is hidden] ")
-		inputPassphrase, err := gopass.GetPasswd() // Silent
-		if err != nil {
-			return err
+
+	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	if err != nil {
+		return err
+	}
+	_ = log
+
+	var iter iterator.Iterator
+	_, input, err := flags.WithPipelineIterator(&flags.PipelineOptions{
+		Name:     "text",
+		Disabled: inputIterators.PipeOptions.Disabled,
+		Formatter: func(b []byte) []byte {
+			return bytes.TrimPrefix(bytes.TrimSpace(b), cfg.SecureData.Prefix)
+		},
+		InputFilter: func(b []byte) bool {
+			return true
+		},
+		Required: true,
+		Mode:     stream.ModeText,
+	})(cmd, inputIterators)
+
+	if err != nil {
+		return &flags.ParameterError{
+			Name: "text",
+			Err:  fmt.Errorf("missing required parameter or pipeline input. %w", flags.ErrParameterMissing),
 		}
-		n.passphrase = string(inputPassphrase)
 	}
 
-	password := ""
+	switch v := input.(type) {
+	case iterator.Iterator:
+		iter = v
+	default:
+		// use a single input iterator
+		iter = iterator.NewRepeatIterator("", 1)
+	}
 
-	if v, err := cmd.Flags().GetString("text"); err == nil && v != "" {
+	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
+		if v, ok := j.Value.([]byte); ok {
 
-		if cfg.SecureData.IsEncrypted(v) != 0 {
-			password, err = cfg.SecureData.DecryptString(v, n.passphrase)
-			if err != nil {
-				return err
+			if n.passphrase == "" {
+				inputPassphrase, err := cfg.PromptPassphrase()
+				if err != nil {
+					return nil, err
+				}
+				n.passphrase = string(inputPassphrase)
 			}
-		} else {
-			log.Info("Text is already decrypted")
-			password = v
-		}
-	}
 
-	fmt.Printf("%s\n", password)
-	return nil
+			data, err := cfg.SecureData.DecryptString(string(v), n.passphrase)
+
+			// Don't treat the text (most likely being unencrypted as an error)
+			if errors.Is(err, encrypt.ErrNotEncrypted) {
+				err = nil
+			}
+
+			if err != nil {
+				return "", fmt.Errorf("failed to decrypt text. %w", err)
+			}
+
+			err = n.factory.WriteOutputWithoutPropertyGuess([]byte(data), cmdutil.OutputContext{})
+			return "", err
+		}
+		return "", nil
+	})
 }

@@ -3,15 +3,16 @@ package encrypttext
 import (
 	"fmt"
 
-	"github.com/howeyc/gopass"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/spf13/cobra"
 )
 
 type CmdEncryptText struct {
 	passphrase string
-	raw        bool
 
 	*subcommand.SubCommand
 
@@ -31,13 +32,13 @@ func NewCmdEncryptText(f *cmdutil.Factory) *CmdEncryptText {
 Example 1: Encrypt the text "Hello World". You will be prompted for the passphrase to encrypt the data.
 
 > c8y sessions encryptText --text "Hello World"
-Enter password 🔒: [input is hidden] 
-Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189e504b6840bc027cece28b3f36717839d96af1c5dba8c850b9a9079846066ee1596cc8d26f4138f76ce3
+Enter passphrase 🔒: [input is hidden] 
+{encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189e504b6840bc027cece28b3f36717839d96af1c5dba8c850b9a9079846066ee1596cc8d26f4138f76ce3
 
 Example 2: Encrypt the text "Hello World", the text will be encrypted using the given passphrase (without being prompted)
 
 > c8y sessions encryptText --text "Hello World" --passphrase "so4methIng-7hat-Matters"
-Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189e504b6840bc027cece28b3f36717839d96af1c5dba8c850b9a9079846066ee1596cc8d26f4138f76ce3
+{encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189e504b6840bc027cece28b3f36717839d96af1c5dba8c850b9a9079846066ee1596cc8d26f4138f76ce3
 		`,
 		RunE: ccmd.RunE,
 	}
@@ -45,11 +46,10 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
 	cmdutil.DisableEncryptionCheck(cmd)
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("text", "", "Text to be encrypted. (required)")
-	cmd.Flags().StringVar(&ccmd.passphrase, "passphrase", "", "Passphrase use for encrypting the text")
-	cmd.Flags().BoolVar(&ccmd.raw, "raw", false, "Only return the encrypted text and nothing else")
+	cmd.Flags().String("text", "", "Text to be encrypted. (required) (accepts pipeline)")
+	cmd.Flags().StringVar(&ccmd.passphrase, "passphrase", "", "Passphrase to use for encrypting the text. Read from env C8Y_PASSPHRASE or prompted if missing")
 
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("text")
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
@@ -64,35 +64,55 @@ func (n *CmdEncryptText) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if n.passphrase == "" {
-		cmd.Printf("Enter password 🔒: [input is hidden] ")
-		inputPassphrase, err := gopass.GetPasswd() // Silent
+		inputPassphrase, err := cfg.PromptPassphrase()
 		if err != nil {
 			return err
 		}
 		n.passphrase = string(inputPassphrase)
 	}
 
-	encryptedPassword := ""
-	if v, err := cmd.Flags().GetString("text"); err == nil && v != "" {
+	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	if err != nil {
+		return err
+	}
 
-		if cfg.SecureData.IsEncrypted(v) != 1 {
-			data, err := cfg.SecureData.EncryptString(v, n.passphrase)
+	var iter iterator.Iterator
+	_, input, err := flags.WithPipelineIterator(&flags.PipelineOptions{
+		Name:     "text",
+		Disabled: inputIterators.PipeOptions.Disabled,
+		Required: true,
+	})(cmd, inputIterators)
 
-			if err != nil {
-				return err
-			}
-			encryptedPassword = data
-		} else {
-			log.Info("Text is already encrypted")
-			encryptedPassword = v
+	if err != nil {
+		return &flags.ParameterError{
+			Name: "text",
+			Err:  fmt.Errorf("missing required parameter or pipeline input. %w", flags.ErrParameterMissing),
 		}
 	}
 
-	if n.raw {
-		fmt.Printf("%s\n", encryptedPassword)
-	} else {
-		fmt.Printf("Password: %s\n", encryptedPassword)
+	switch v := input.(type) {
+	case iterator.Iterator:
+		iter = v
+	default:
+		// use a single input iterator
+		iter = iterator.NewRepeatIterator("", 1)
 	}
 
-	return nil
+	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
+		if v, ok := j.Value.([]byte); ok {
+			encryptedText := v
+			if cfg.SecureData.IsEncrypted(string(encryptedText)) != 1 {
+				data, err := cfg.SecureData.EncryptString(string(encryptedText), n.passphrase)
+				if err != nil {
+					return nil, err
+				}
+				encryptedText = []byte(data)
+			} else {
+				log.Info("Text is already encrypted")
+			}
+
+			err = n.factory.WriteOutputWithoutPropertyGuess(encryptedText, cmdutil.OutputContext{})
+		}
+		return "", nil
+	})
 }

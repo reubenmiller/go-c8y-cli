@@ -17,6 +17,7 @@ import (
 
 var (
 	ErrDecryptFailed = errors.New("decryption failed")
+	ErrNotEncrypted  = errors.New("text is not encrypted")
 )
 
 // Source:
@@ -79,8 +80,19 @@ func (s *SecureData) FromHex(data []byte) ([]byte, error) {
 	_, err := hex.Decode(decoded, data)
 	return decoded, err
 }
+
 func (s *SecureData) FromHexString(data string) ([]byte, error) {
 	decoded, err := hex.DecodeString(data)
+
+	if errors.Is(err, hex.ErrLength) {
+		return []byte(data), errors.Join(ErrNotEncrypted, err)
+	}
+
+	var byteError hex.InvalidByteError
+	if errors.As(err, &byteError) {
+		return []byte(data), errors.Join(ErrNotEncrypted, err)
+	}
+
 	return decoded, err
 }
 
@@ -145,7 +157,8 @@ func (s *SecureData) DecryptString(data string, passphrase string) (string, erro
 	decodedData, err := s.FromHexString(data)
 
 	if err != nil {
-		return "", err
+		// return input data as the data might not be encrypted
+		return data, err
 	}
 
 	v, err := s.Decrypt(decodedData, passphrase)
