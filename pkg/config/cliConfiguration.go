@@ -590,6 +590,19 @@ func (c *Config) CheckEncryption(encryptedText ...string) (string, error) {
 	return pass, err
 }
 
+// PromptPassphrase prompts the user for the passphrase if it is not already set
+func (c *Config) PromptPassphrase() (string, error) {
+	if c.Passphrase != "" {
+		return c.Passphrase, nil
+	}
+	prompter, err := c.prompter.GetPassphrasePrompter(EnvPassphrase)
+	if err != nil {
+		return "", err
+	}
+	pass, err := prompter.Prompt(0, 1)
+	return pass, err
+}
+
 // BindAuthorization binds environment variables related to the authorization to the configuration
 func (c *Config) BindAuthorization() error {
 	c.viper.SetEnvPrefix(EnvSettingsPrefix)

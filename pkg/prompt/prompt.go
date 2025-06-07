@@ -189,9 +189,16 @@ func NewPrompt(l *logger.Logger) *Prompt {
 // EncryptionPassphrase prompt for the encryption passphrase, and test the
 // passphrase against the encrypted content to see if it is valid
 func (p *Prompt) EncryptionPassphrase(encryptedData string, key string, initPassphrase string, message string) (string, error) {
-	var err error
-	secure := encrypt.NewSecureData("{encrypted}")
+	prompter, err := p.WithPrompters(
+		p.Logger,
+		WithExternalPrompt(p.PinEntry, key),
+		WithCommandLinePrompt("Session is encrypted"),
+	)
+	if err != nil {
+		return "", err
+	}
 
+	secure := encrypt.NewSecureData("{encrypted}")
 	validate := func(input string) error {
 		if secure.IsEncrypted(encryptedData) != 0 {
 			_, err = secure.DecryptString(encryptedData, input)
@@ -199,14 +206,68 @@ func (p *Prompt) EncryptionPassphrase(encryptedData string, key string, initPass
 		}
 		return nil
 	}
+	promptWrapper := NewPromptWithPostValidate(prompter, validate)
 
-	var prompter Prompter
+	// check if init passphrase is ok without prompting the user
+	if err := validate(initPassphrase); err == nil {
+		return initPassphrase, nil
+	}
+	if message != "" {
+		p.ShowMessage(message)
+	}
+	return promptWrapper.Run()
+}
 
-	// Check for custom pin entry, but don't fail if it does not exist, just warn the user that it isn't being used for a good reason
-	if p.PinEntry != "" {
-		pinEntryCommand, err := shellquote.Split(p.PinEntry)
+type UserPrompter func(*logger.Logger) Prompter
+
+func (p *Prompt) WithPrompters(l *logger.Logger, opts ...UserPrompter) (Prompter, error) {
+	for _, prompter := range opts {
+		curPrompter := prompter(l)
+		if curPrompter != nil {
+			return curPrompter, nil
+		}
+	}
+	return nil, fmt.Errorf("no prompter found")
+}
+
+func (p *Prompt) GetPassphrasePrompter(key string) (Prompter, error) {
+	return p.WithPrompters(
+		p.Logger,
+		WithExternalPrompt(p.PinEntry, key),
+		WithCommandLinePrompt(""),
+	)
+}
+
+func WithCommandLinePrompt(userPrompt string) UserPrompter {
+	return func(l *logger.Logger) Prompter {
+		label := "enter passphrase 🔒 [input is hidden]"
+		if userPrompt != "" {
+			label = strings.Join([]string{userPrompt, label}, ", ")
+		}
+		return &CommandLinePrompter{
+			prompt: &promptui.Prompt{
+				Stdin:       os.Stdin,
+				Stdout:      os.Stderr,
+				Default:     "",
+				Mask:        ' ',
+				HideEntered: true,
+				Label:       label,
+				Templates: &promptui.PromptTemplates{
+					Valid: "{{ . | bold }}: ",
+				},
+			},
+		}
+	}
+}
+
+func WithExternalPrompt(command string, key string) UserPrompter {
+	return func(l *logger.Logger) Prompter {
+		if command == "" {
+			return nil
+		}
+		pinEntryCommand, err := shellquote.Split(command)
 		if err != nil {
-			pinEntryCommand = []string{p.PinEntry}
+			pinEntryCommand = []string{command}
 		}
 
 		externalCommandArgs := []string{}
@@ -221,40 +282,12 @@ func (p *Prompt) EncryptionPassphrase(encryptedData string, key string, initPass
 			Args:    externalCommandArgs,
 		}
 		if _, promptErr := pinEntryPrompter.Exists(); promptErr != nil {
-			p.Logger.Warnf("user defined pin entry command (%s) does not exist. The default will be used instead. error=%s", p.PinEntry, promptErr)
-		} else {
-			p.Logger.Infof("Using external pin entry command. %s %s", pinEntryCommand[0], strings.Join(externalCommandArgs, " "))
-			prompter = pinEntryPrompter
+			l.Warnf("user defined pin entry command (%s) does not exist. The default will be used instead. error=%s", command, promptErr)
+			return nil
 		}
+		l.Infof("Using external pin entry command. %s %s", pinEntryCommand[0], strings.Join(externalCommandArgs, " "))
+		return pinEntryPrompter
 	}
-
-	// Fallback to the default cli prompter
-	if prompter == nil {
-		prompter = &CommandLinePrompter{
-			prompt: &promptui.Prompt{
-				Stdin:       os.Stdin,
-				Stdout:      os.Stderr,
-				Default:     "",
-				Mask:        ' ',
-				HideEntered: true,
-				Label:       "Session is encrypted, enter passphrase 🔒 [input is hidden]",
-				Templates: &promptui.PromptTemplates{
-					Valid: "{{ . | bold }}: ",
-				},
-			},
-		}
-	}
-
-	promptWrapper := NewPromptWithPostValidate(prompter, validate)
-
-	// check if init passphrase is ok without prompting the user
-	if err := validate(initPassphrase); err == nil {
-		return initPassphrase, nil
-	}
-	if message != "" {
-		p.ShowMessage(message)
-	}
-	return promptWrapper.Run()
 }
 
 func (p *Prompt) ShowMessage(m string) {
