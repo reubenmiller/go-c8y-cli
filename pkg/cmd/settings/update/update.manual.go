@@ -323,6 +323,8 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
+	"pinEntry": {"pinEntry", "string", config.SettingsPinEntry, []string{}, nil, cobra.ShellCompDirectiveDefault},
+
 	// cache
 	"defaults.cache": {"defaults.cache", "bool", config.SettingsDefaultsCacheEnabled, []string{
 		"true",

@@ -11,7 +11,6 @@ require (
 	github.com/google/go-jsonnet v0.20.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/gorilla/websocket v1.5.3
-	github.com/howeyc/gopass v0.0.0-20210920133722-c8aef6fb66ef
 	github.com/karrick/tparse/v2 v2.8.2
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-colorable v0.1.14
