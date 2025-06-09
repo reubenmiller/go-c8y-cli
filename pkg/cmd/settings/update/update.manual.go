@@ -323,6 +323,17 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
+	// Session provider
+	"session.provider.type": {"session.provider.type", "string", config.SettingsSessionProviderType, []string{
+		config.ProviderTypeAuto,
+		config.ProviderTypeEnv,
+		config.ProviderTypeExternal,
+		config.ProviderTypeFile,
+		config.ProviderTypeStdin,
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+	"session.provider.command": {"session.provider.command", "string", config.SettingsSessionProviderCommand, []string{}, nil, cobra.ShellCompDirectiveDefault},
+	"session.provider.secrets": {"session.provider.secrets", "string", config.SettingsSessionProviderSecrets, []string{}, nil, cobra.ShellCompDirectiveNoFileComp},
+
 	"pinEntry": {"pinEntry", "string", config.SettingsPinEntry, []string{}, nil, cobra.ShellCompDirectiveDefault},
 
 	// cache
