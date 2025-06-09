@@ -58,6 +58,14 @@ const (
 	SettingsGlobalName = "settings"
 )
 
+var (
+	ProviderTypeAuto     = "auto"
+	ProviderTypeFile     = "file"
+	ProviderTypeEnv      = "env"
+	ProviderTypeExternal = "external"
+	ProviderTypeStdin    = "stdin"
+)
+
 const (
 	// SettingsIncludeAllPageSize property name used to control the default page size when using includeAll parameter
 	SettingsIncludeAllPageSize = "settings.includeAll.pageSize"
@@ -304,6 +312,15 @@ const (
 	// SettingsAllowEmptyPipe allow empty piped data
 	SettingsAllowEmptyPipe = "settings.defaults.allowEmptyPipe"
 
+	// SettingsSessionProviderType provider to use when setting a session
+	SettingsSessionProviderType = "settings.session.provider.type"
+
+	// SettingsSessionProviderCommand sets the command to run when running set-session
+	SettingsSessionProviderCommand = "settings.session.provider.command"
+
+	// SettingsSessionProviderSecrets the secrets which should be included as environment variables when calling the external provider command
+	SettingsSessionProviderSecrets = "settings.session.provider.secrets"
+
 	// SettingsLoginType preferred login type, i.e. BASIC, OAUTH_INTERNAL etc.
 	SettingsLoginType = "settings.login.type"
 
@@ -539,6 +556,9 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsForceTTY, false),
 
 		// Session options
+		WithBindEnv(SettingsSessionProviderType, ""),
+		WithBindEnv(SettingsSessionProviderCommand, ""),
+		WithBindEnv(SettingsSessionProviderSecrets, ""),
 		WithBindEnv(SettingsPinEntry, ""),
 		WithBindEnv(SettingsSessionAlwaysIncludePassword, false),
 		WithBindEnv(SettingsSessionTokenValidFor, "8h"),
@@ -596,6 +616,16 @@ func (c *Config) PromptPassphrase() (string, error) {
 		return c.Passphrase, nil
 	}
 	prompter, err := c.prompter.GetPassphrasePrompter(EnvPassphrase)
+	if err != nil {
+		return "", err
+	}
+	pass, err := prompter.Prompt(0, 1)
+	return pass, err
+}
+
+// PromptSecret prompts the user for the passphrase if it is not already set
+func (c *Config) PromptSecret(key string) (string, error) {
+	prompter, err := c.prompter.GetExternalPrompter(key)
 	if err != nil {
 		return "", err
 	}
@@ -969,6 +999,21 @@ func (c *Config) GetStringSlice(key string) []string {
 // GetDefaultUsername returns the default username
 func (c *Config) GetDefaultUsername() string {
 	return c.viper.GetString("settings.session.defaultUsername")
+}
+
+// SessionCommand returns session provider
+func (c *Config) SessionProvider() string {
+	return c.viper.GetString(SettingsSessionProviderType)
+}
+
+// SessionProviderCommand returns the command to use when logging into a session
+func (c *Config) SessionProviderCommand() string {
+	return c.viper.GetString(SettingsSessionProviderCommand)
+}
+
+// SessionProviderSecrets returns the env variables to be included in the external command
+func (c *Config) SessionProviderSecrets() []string {
+	return c.viper.GetStringSlice(SettingsSessionProviderSecrets)
 }
 
 // AlwaysIncludePassword password when setting a session

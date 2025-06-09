@@ -27,6 +27,9 @@ var (
 // ErrNoRetry error where retries will not be attempted as the error is unrecoverable
 var ErrNoRetry = errors.New("no retry")
 
+// ErrNoPrompter no prompter found
+var ErrNoPrompter = errors.New("no prompter found")
+
 // NewPromptWithPostValidate create a new prompt with a lazy validation function which is only
 // run when the user hits enter.
 func NewPromptWithPostValidate(p Prompter, validate func(string) error) *PromptWithPostValidate {
@@ -227,7 +230,7 @@ func (p *Prompt) WithPrompters(l *logger.Logger, opts ...UserPrompter) (Prompter
 			return curPrompter, nil
 		}
 	}
-	return nil, fmt.Errorf("no prompter found")
+	return nil, ErrNoPrompter
 }
 
 func (p *Prompt) GetPassphrasePrompter(key string) (Prompter, error) {
@@ -235,6 +238,13 @@ func (p *Prompt) GetPassphrasePrompter(key string) (Prompter, error) {
 		p.Logger,
 		WithExternalPrompt(p.PinEntry, key),
 		WithCommandLinePrompt(""),
+	)
+}
+
+func (p *Prompt) GetExternalPrompter(key string) (Prompter, error) {
+	return p.WithPrompters(
+		p.Logger,
+		WithExternalPrompt(p.PinEntry, key),
 	)
 }
 

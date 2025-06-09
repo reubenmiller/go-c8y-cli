@@ -3,6 +3,7 @@ package login
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -20,6 +21,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -34,6 +36,7 @@ type CmdLogin struct {
 	Env      bool
 	Format   string
 	Provider string
+	Secrets  []string
 
 	// Login options
 	LoginType string
@@ -47,14 +50,6 @@ type CmdLogin struct {
 
 	factory *cmdutil.Factory
 }
-
-var (
-	ProviderTypeAuto     = "auto"
-	ProviderTypeFile     = "file"
-	ProviderTypeEnv      = "env"
-	ProviderTypeExternal = "external"
-	ProviderTypeStdin    = "stdin"
-)
 
 func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	ccmd := &CmdLogin{
@@ -78,7 +73,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 			$ eval "$( c8y sessions login --from-cmd "c8y sessions set --output json" )"
 			Set a session using the in-built "c8y sessions set"
 
-			$ eval "$( c8y sessions login --from-cmd "c8y-session-bitwarden list --folder c8y" --format json )"
+			$ eval "$( c8y sessions login --from-cmd "c8y-session-bitwarden list --folder c8y" --secrets BW_SESSION --format json )"
 			Set a session from an external command, where the external commands returns the selected session in json format on stdout
 		`),
 		RunE: ccmd.RunE,
@@ -96,12 +91,13 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().StringVar(&ccmd.OutputFormat, "output-format", "", "Output format")
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", "", "Shell type to return the environment variables")
 	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared")
+	cmd.Flags().StringSliceVar(&ccmd.Secrets, "secrets", []string{}, "List of secrets to include as env variables when running an external command. Only valid with from-cmd")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("shell", "auto", "bash", "zsh", "fish", "powershell"),
 		completion.WithValidateSet("output-format", "json", "dotenv"),
-		completion.WithValidateSet("provider", ProviderTypeFile, ProviderTypeStdin, ProviderTypeEnv, ProviderTypeExternal, ProviderTypeAuto),
+		completion.WithValidateSet("provider", config.ProviderTypeFile, config.ProviderTypeStdin, config.ProviderTypeEnv, config.ProviderTypeExternal, config.ProviderTypeAuto),
 		completion.WithValidateSet("format", "json", "yaml", "toml", "dotenv"),
 		completion.WithValidateSet("loginType", c8y.AuthMethodOAuth2Internal, c8y.AuthMethodBasic),
 	)
@@ -171,23 +167,38 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 		return nil, err
 	}
 
-	providerCmd := strings.TrimSpace(n.Exec)
-	if providerCmd == "" {
-		providerCmd = strings.TrimSpace(cfg.GetString("settings.session.providerCmd"))
-	}
-	if providerCmd == "" {
-		return nil, fmt.Errorf("provider is not set")
+	// add secrets when executing the environment in case
+	// if the external command requires extra authentication
+	env := os.Environ()
+	for _, key := range n.Secrets {
+		if v := os.Getenv(key); v == "" {
+			secret, secretErr := cfg.PromptSecret(key)
+			if secretErr != nil {
+				if !errors.Is(secretErr, prompt.ErrNoPrompter) {
+					cfg.Logger.Warnf("Could not get secret. key=%s, err=%s", key, secretErr)
+				}
+			} else {
+				cfg.Logger.Debugf("Setting env variable secret for external provider. %s", key)
+				env = append(env, fmt.Sprintf("%s=%s", key, secret))
+			}
+		}
 	}
 
-	cmdArgs, err := shellquote.Split(providerCmd)
+	providerCmd := strings.TrimSpace(n.Exec)
+	if providerCmd == "" {
+		return nil, fmt.Errorf("provider command is not set")
+	}
+
+	cmdArgs, err := shellquote.Split(strings.TrimSpace(providerCmd))
 	if err != nil {
 		return nil, err
 	}
 	if len(cmdArgs) == 0 {
-		return nil, fmt.Errorf("executable is empty")
+		return nil, fmt.Errorf("provider command could not be parsed")
 	}
 	cmdExec := cmdArgs[0]
 	cmd := exec.Command(cmdExec, slices.Concat(cmdArgs[1:], args)...)
+	cmd.Env = env
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 
@@ -281,51 +292,62 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Set defaults from config if values from flags aren't provided
+	if !cmd.Flags().Changed("provider") {
+		n.Provider = cfg.SessionProvider()
+		cfg.Logger.Debugf("Using session provider from configuration. type=%s", n.Provider)
+	}
+
+	if !cmd.Flags().Changed("from-cmd") {
+		n.Exec = cfg.SessionProviderCommand()
+	}
+
+	if !cmd.Flags().Changed("secrets") {
+		n.Secrets = cfg.SessionProviderSecrets()
+	}
+
 	if n.Provider == "" {
-		n.Provider = cfg.GetString("settings.session.provider")
-		if n.Provider == "" {
-			n.Provider = ProviderTypeAuto
-		}
+		n.Provider = config.ProviderTypeAuto
 	}
 
 	// Clear any existing session file.
 	// If the user wants to load from a file, then use the --from-file option
 	cfg.ClearSessionFile()
 
-	if strings.EqualFold(n.Provider, ProviderTypeAuto) {
+	if strings.EqualFold(n.Provider, config.ProviderTypeAuto) {
 		//
 		// Try guessing a sensible default
 		//
 		if n.File != "" {
-			n.Provider = ProviderTypeFile
+			n.Provider = config.ProviderTypeFile
 		} else if n.Stdin {
-			n.Provider = ProviderTypeStdin
+			n.Provider = config.ProviderTypeStdin
 		} else if n.Env {
-			n.Provider = ProviderTypeEnv
+			n.Provider = config.ProviderTypeEnv
 		} else if n.Exec != "" {
-			n.Provider = ProviderTypeExternal
+			n.Provider = config.ProviderTypeExternal
 		} else if os.Getenv("CI") != "" {
 			// CI environment and generally env variables are used here
-			n.Provider = ProviderTypeEnv
+			n.Provider = config.ProviderTypeEnv
 		} else if n.factory.IOStreams.HasStdin() {
-			n.Provider = ProviderTypeStdin
+			n.Provider = config.ProviderTypeStdin
 		}
 	}
 
 	var session *c8ysession.CumulocitySession
 
 	switch strings.ToLower(n.Provider) {
-	case ProviderTypeExternal:
+	case config.ProviderTypeExternal:
 		session, err = n.FromExternalProvider(args)
-	case ProviderTypeEnv:
+	case config.ProviderTypeEnv:
 		session, err = n.FromEnv()
-	case ProviderTypeStdin:
+	case config.ProviderTypeStdin:
 		if !n.factory.IOStreams.HasStdin() {
 			err = fmt.Errorf("no stdin detected")
 		} else {
 			session, err = n.FromStdin(n.Format, args)
 		}
-	case ProviderTypeFile:
+	case config.ProviderTypeFile:
 		session, err = n.FromFile(n.File, n.Format)
 	default:
 		return fmt.Errorf("unknown provider")
