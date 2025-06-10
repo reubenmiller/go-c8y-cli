@@ -282,6 +282,16 @@ func (n *CmdLogin) FromReader(r io.Reader, format string) (*c8ysession.Cumulocit
 	return n.FromViper(v)
 }
 
+func oneHasChanged(cmd *cobra.Command, names ...string) bool {
+	f := cmd.Flags()
+	for _, name := range names {
+		if f.Changed(name) {
+			return true
+		}
+	}
+	return false
+}
+
 func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
@@ -315,13 +325,14 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Set defaults from config if values from flags aren't provided
-	if !cmd.Flags().Changed("provider") {
-		n.Provider = cfg.SessionProvider()
-		cfg.Logger.Debugf("Using session provider from configuration. type=%s", n.Provider)
-	}
+	if !oneHasChanged(cmd, "from-cmd", "from-file", "from-env", "from-stdin") {
 
-	if !cmd.Flags().Changed("from-cmd") {
+		// Set defaults from config if values from flags aren't provided
+		if !cmd.Flags().Changed("provider") {
+			n.Provider = cfg.SessionProvider()
+			cfg.Logger.Debugf("Using session provider from configuration. type=%s", n.Provider)
+		}
+
 		n.Exec = cfg.SessionProviderCommand()
 	}
 
