@@ -29,7 +29,7 @@ session() {
 #   set-session
 #
 set_session() {
-    c8yenv=$( c8y sessions set --noColor=false $@ )
+    c8yenv=$( c8y sessions login --noColor=false $@ )
     code=$?
     if [ $code -ne 0 ]; then
         echo "Set session failed"

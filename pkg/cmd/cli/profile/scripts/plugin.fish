@@ -33,7 +33,7 @@ end
 #   set-session
 #
 function set-session --description "Switch Cumulocity session interactively"
-    set c8yenv ( c8y sessions set --noColor=false $argv )
+    set c8yenv ( c8y sessions login --noColor=false $argv )
     if test $status -ne 0
         echo "Set session failed"
         return 1
