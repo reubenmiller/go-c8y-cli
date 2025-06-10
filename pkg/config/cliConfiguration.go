@@ -198,14 +198,8 @@ const (
 	// SettingsTemplateCustomPaths custom template folder where the template files are located
 	SettingsTemplateCustomPaths = "settings.template.customPath"
 
-	// SettingsModeEnableCreate enables create (post) commands
-	SettingsModeEnableCreate = "settings.mode.enableCreate"
-
-	// SettingsModeEnableUpdate enables update commands
-	SettingsModeEnableUpdate = "settings.mode.enableUpdate"
-
-	// SettingsModeEnableDelete enables delete commands
-	SettingsModeEnableDelete = "settings.mode.enableDelete"
+	// SettingsMode controls which commands/actions are enabled, e.g. dev, qual, prod
+	SettingsMode = "settings.mode"
 
 	// SettingsPinEntry sets the command to run to get the user's passphrase
 	SettingsPinEntry = "settings.pinEntry"
@@ -518,9 +512,7 @@ func (c *Config) bindSettings() {
 
 		WithBindEnv(SettingsIncludeAllDelayMS, 50),
 		WithBindEnv(SettingsTemplatePath, ""),
-		WithBindEnv(SettingsModeEnableCreate, false),
-		WithBindEnv(SettingsModeEnableUpdate, false),
-		WithBindEnv(SettingsModeEnableDelete, false),
+		WithBindEnv(SettingsMode, SessionModeProduction.String()),
 
 		// Support CI env variable as it is commonly used in CI/CD environments
 		// The env variable "CI" is preferred if present/valid
@@ -1389,19 +1381,24 @@ func (c *Config) GetTemplatePaths() []string {
 	return paths
 }
 
+// SessionMode returns the current session mode which controls what the user can do
+func (c *Config) SessionMode() SessionMode {
+	return SessionModeProduction.FromString(c.viper.GetString(SettingsMode), c.IsCIMode())
+}
+
 // AllowModeCreate enables create (post) commands
 func (c *Config) AllowModeCreate() bool {
-	return c.viper.GetBool(SettingsModeEnableCreate) || c.IsCIMode()
+	return c.SessionMode().CanCreate()
 }
 
 // AllowModeUpdate enables update commands
 func (c *Config) AllowModeUpdate() bool {
-	return c.viper.GetBool(SettingsModeEnableUpdate) || c.IsCIMode()
+	return c.SessionMode().CanUpdate()
 }
 
 // AllowModeDelete enables delete commands
 func (c *Config) AllowModeDelete() bool {
-	return c.viper.GetBool(SettingsModeEnableDelete) || c.IsCIMode()
+	return c.SessionMode().CanDelete()
 }
 
 // Force don't prompt for confirmation

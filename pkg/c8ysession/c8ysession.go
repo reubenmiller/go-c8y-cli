@@ -29,6 +29,7 @@ type CumulocitySession struct {
 	Version         string `json:"version"`
 	Username        string `json:"username"`
 	Password        string `json:"password"`
+	Mode            string `json:"mode,omitempty"`
 	TOTP            string `json:"totp"`
 	Token           string `json:"token"`
 	Description     string `json:"description"`
@@ -195,6 +196,7 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 	c8yVersion := client.Version
 	username := session.Username
 	password := session.Password
+	mode := session.Mode
 	token := session.Token
 	authHeaderValue := ""
 	authHeader := ""
@@ -225,6 +227,10 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 		"C8Y_HEADER_AUTHORIZATION": authHeaderValue,
 		"C8Y_HEADER":               authHeader,
 		"C8Y_SETTINGS_LOGIN_TYPE":  loginType,
+	}
+
+	if mode != "" {
+		output[cfg.GetEnvKey(config.SettingsMode)] = mode
 	}
 
 	cache := cfg.CachePassphraseVariables()

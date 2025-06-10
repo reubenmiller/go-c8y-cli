@@ -71,28 +71,7 @@ func (h argumentHandler) GetValue(rawValue string) interface{} {
 
 var updateSettingsOptions = map[string]argumentHandler{
 	// mode
-	// mode (shortcut)
-	"mode": {"mode", "custom", "", []string{
-		"prod\tProduction mode (read only)",
-		"qual\tQA mode (delete disabled)",
-		"dev\tDevelopment mode (no restrictions)",
-		"ci\tCI mode (no restrictions)",
-	}, nil, cobra.ShellCompDirectiveNoFileComp},
-
-	"mode.enableCreate": {"mode.enableCreate", "bool", config.SettingsModeEnableCreate, []string{
-		"true",
-		"false",
-	}, nil, cobra.ShellCompDirectiveNoFileComp},
-
-	"mode.enableUpdate": {"mode.enableUpdate", "bool", config.SettingsModeEnableUpdate, []string{
-		"true",
-		"false",
-	}, nil, cobra.ShellCompDirectiveNoFileComp},
-
-	"mode.enableDelete": {"mode.enableDelete", "bool", config.SettingsModeEnableDelete, []string{
-		"true",
-		"false",
-	}, nil, cobra.ShellCompDirectiveNoFileComp},
+	"mode": {"mode", "custom", "", config.GetSessionModeCompletionHelp(), nil, cobra.ShellCompDirectiveNoFileComp},
 
 	"mode.confirmation": {"mode.confirmation", "string", config.SettingsModeConfirmation, []string{
 		"GET,PUT,POST,DELETE\tAll methods",
@@ -566,7 +545,7 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		switch name {
 		case "mode":
-			if err := config.SetMode(v, value); err != nil {
+			if err := config.SetMode(v, config.SessionModeProduction.FromString(value, false)); err != nil {
 				cfg.Logger.Warn(err)
 			}
 		default:
