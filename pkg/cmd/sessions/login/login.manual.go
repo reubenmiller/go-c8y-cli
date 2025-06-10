@@ -292,6 +292,29 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	canChangeActiveSession := true
+	// Warn users if they try to use this command directly
+	if n.factory.IOStreams != nil {
+		if n.factory.IOStreams.IsStdoutTTY() {
+			canChangeActiveSession = false
+			notice := heredoc.Docf(`
+				You shouldn't run 'c8y session set' directly as it will have no effect on your current session.
+
+				Instead, you will need to use the 'set-session' helper function, or if you can't use the helper function, then run:
+		
+				  # zsh/bash/sh
+				  eval "$(c8y sessions login)"
+
+				  # fish
+				  c8y sessions login | source
+
+				  # powershell
+				  c8y sessions login | Out-String | Invoke-Expression
+			`)
+			fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s %s\n\n", strings.Repeat(n.factory.IOStreams.ColorScheme().WarningIcon(), 3), notice)
+		}
+	}
+
 	// Set defaults from config if values from flags aren't provided
 	if !cmd.Flags().Changed("provider") {
 		n.Provider = cfg.SessionProvider()
@@ -393,7 +416,12 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 	// Write session details to stderr (for humans)
 	cs := n.factory.IOStreams.ColorScheme()
-	fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is now active\n", cs.SuccessIcon())
+
+	if canChangeActiveSession {
+		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is now active\n", cs.SuccessIcon())
+	} else {
+		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is not active (see previous warning)\n", cs.WarningIcon())
+	}
 	if !n.NoBanner {
 		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, *session)
 	}
