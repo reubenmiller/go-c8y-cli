@@ -76,7 +76,7 @@ commands:
 
   - name: logout
     description: Logout current user
-    descriptionLong: Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL
+    descriptionLong: Logout the current user. This will invalidate the token associated with the user when using OAUTH2_INTERNAL
     method: POST
     path: /user/logout
     accept: ''

@@ -73,7 +73,7 @@ type LoginHandler struct {
 	onSave func()
 }
 
-// NewLoginHandler creates a new login handler to process the full Cumulocity login process for different login types, i.e. OAUTH_INTERNAL, BASIC etc.
+// NewLoginHandler creates a new login handler to process the full Cumulocity login process for different login types, i.e. OAUTH2_INTERNAL, BASIC etc.
 func NewLoginHandler(c *c8y.Client, w io.Writer, onSave func()) *LoginHandler {
 	h := &LoginHandler{
 		C8Yclient:   c,

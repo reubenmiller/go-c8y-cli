@@ -92,7 +92,7 @@
                             "type": "string",
                             "enum": [
                                 "BASIC",
-                                "OAUTH_INTERNAL",
+                                "OAUTH2_INTERNAL",
                                 "NONE"
                             ]
                         }

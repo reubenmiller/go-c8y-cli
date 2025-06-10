@@ -44,7 +44,7 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
       --encrypt              Encrypt passwords and tokens (occurs when logging in)
   -h, --help                 help for create
       --host string          Host. .e.g. test.cumulocity.com. (required)
-      --loginType string     Login Type, e.g. BASIC, OAUTH_INTERNAL, NONE
+      --loginType string     Login Type, e.g. BASIC, OAUTH2_INTERNAL, NONE
       --name string          Name of the session
       --noStorage            Don't store any passwords or tokens in the session file
       --noTenantPrefix       Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false

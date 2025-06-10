@@ -72,7 +72,7 @@ Invoke-UserLogout
 
 ## DESCRIPTION
 Logout the current user.
-This will invalidate the token associated with the user when using OAUTH_INTERNAL
+This will invalidate the token associated with the user when using OAUTH2_INTERNAL
 
 ## EXAMPLES
 

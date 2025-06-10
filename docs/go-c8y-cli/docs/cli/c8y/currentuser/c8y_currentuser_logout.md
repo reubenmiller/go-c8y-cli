@@ -6,7 +6,7 @@ Logout current user
 
 ### Synopsis
 
-Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL
+Logout the current user. This will invalidate the token associated with the user when using OAUTH2_INTERNAL
 
 ```
 c8y currentuser logout [flags]

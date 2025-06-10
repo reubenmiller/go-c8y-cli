@@ -31,7 +31,7 @@ func NewLogoutCmd(f *cmdutil.Factory) *LogoutCmd {
 	cmd := &cobra.Command{
 		Use:   "logout",
 		Short: "Logout current user",
-		Long:  `Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL`,
+		Long:  `Logout the current user. This will invalidate the token associated with the user when using OAUTH2_INTERNAL`,
 		Example: heredoc.Doc(`
 $ c8y currentuser logout
 Log out the current user

@@ -5,7 +5,7 @@ Function Invoke-UserLogout {
 Logout current user
 
 .DESCRIPTION
-Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL
+Logout the current user. This will invalidate the token associated with the user when using OAUTH2_INTERNAL
 
 .LINK
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/currentuser_logout

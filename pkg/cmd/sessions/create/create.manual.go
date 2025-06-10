@@ -126,7 +126,7 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 	cmd.Flags().StringVar(&ccmd.description, "description", "", "Description about the session")
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of the session")
 	cmd.Flags().StringVar(&ccmd.sessionType, "type", "", "Session type. List of predefined session types")
-	cmd.Flags().StringVar(&ccmd.loginType, "loginType", "", "Login Type, e.g. BASIC, OAUTH_INTERNAL, NONE")
+	cmd.Flags().StringVar(&ccmd.loginType, "loginType", "", "Login Type, e.g. BASIC, OAUTH2_INTERNAL, NONE")
 	cmd.Flags().BoolVar(&ccmd.noTenantPrefix, "noTenantPrefix", false, "Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false")
 	cmd.Flags().BoolVar(&ccmd.noStorage, "noStorage", false, "Don't store any passwords or tokens in the session file")
 	cmd.Flags().BoolVar(&ccmd.encrypt, "encrypt", false, "Encrypt passwords and tokens (occurs when logging in)")
