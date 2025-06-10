@@ -106,9 +106,11 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	canChangeActiveSession := true
 	// Warn users if they try to use this command directly
 	if n.factory.IOStreams != nil {
 		if n.factory.IOStreams.IsStdoutTTY() {
+			canChangeActiveSession = false
 			notice := heredoc.Docf(`
 				You shouldn't run 'c8y session set' directly as it will have no effect on your current session.
 
@@ -283,7 +285,11 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	// Write session details to stderr (for humans)
 	if outputFormat != config.OutputJSON.String() {
 		cs := n.factory.IOStreams.ColorScheme()
-		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is now active\n", cs.SuccessIcon())
+		if canChangeActiveSession {
+			fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is now active\n", cs.SuccessIcon())
+		} else {
+			fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is not active (see previous warning)\n", cs.WarningIcon())
+		}
 		if !n.NoBanner {
 			c8ysession.PrintSessionInfo(n.factory.IOStreams.ErrOut, client, cfg, *session)
 		}

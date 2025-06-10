@@ -556,8 +556,8 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsForceTTY, false),
 
 		// Session options
-		WithBindEnv(SettingsSessionProviderType, ""),
-		WithBindEnv(SettingsSessionProviderCommand, ""),
+		WithBindEnv(SettingsSessionProviderType, ProviderTypeExternal),
+		WithBindEnv(SettingsSessionProviderCommand, "c8y sessions set --no-banner --output json"),
 		WithBindEnv(SettingsSessionProviderSecrets, ""),
 		WithBindEnv(SettingsPinEntry, ""),
 		WithBindEnv(SettingsSessionAlwaysIncludePassword, false),

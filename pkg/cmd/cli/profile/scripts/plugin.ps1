@@ -32,7 +32,7 @@ Set session and only show session matching "myhost"
 #>
     Param()
 
-    $c8yenv = c8y sessions set --noColor=false $args
+    $c8yenv = c8y sessions login --noColor=false $args
     if ($LASTEXITCODE -ne 0) {
         Write-Warning "Set session failed"
         return
