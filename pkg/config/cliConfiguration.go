@@ -321,7 +321,7 @@ const (
 	// SettingsSessionProviderSecrets the secrets which should be included as environment variables when calling the external provider command
 	SettingsSessionProviderSecrets = "settings.session.provider.secrets"
 
-	// SettingsLoginType preferred login type, i.e. BASIC, OAUTH_INTERNAL etc.
+	// SettingsLoginType preferred login type, i.e. BASIC, OAUTH2_INTERNAL etc.
 	SettingsLoginType = "settings.login.type"
 
 	// SettingsSessionAlwaysIncludePassword should the password always be included in the session variables or not
