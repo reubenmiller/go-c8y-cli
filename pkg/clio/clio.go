@@ -2,6 +2,7 @@ package clio
 
 import (
 	"os"
+	"runtime"
 )
 
 // HasPipedInput checks if os.Stdin is receiving piped input.
@@ -45,4 +46,22 @@ func IsInteractiveTerminal(f *os.File) bool {
 		return false
 	}
 	return (fileInfo.Mode() & os.ModeCharDevice) != 0
+}
+
+func GetTTYStdin() *os.File {
+	stdIn := os.Stdin
+	if !IsInteractiveTerminal(stdIn) {
+		// stdin is handling Piped input, so we have to prompt on a different input
+		if runtime.GOOS == "windows" {
+			if file, err := os.Open("CON"); err == nil {
+				stdIn = file
+			}
+		} else {
+			tty, err := os.Open("/dev/tty")
+			if err == nil {
+				stdIn = tty
+			}
+		}
+	}
+	return stdIn
 }

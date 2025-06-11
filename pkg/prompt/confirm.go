@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"runtime"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -125,21 +124,7 @@ func Confirm(prefix, label string, target, defaultValue string, force bool) (Con
 		message += label
 	}
 
-	stdIn := os.Stdin
-	if !clio.IsInteractiveTerminal(stdIn) {
-		// stdin is handling Piped input, so we have to prompt on a different input
-		if runtime.GOOS == "windows" {
-			if file, err := os.Open("CON"); err == nil {
-				stdIn = file
-			}
-		} else {
-			tty, err := os.Open("/dev/tty")
-			if err == nil {
-				stdIn = tty
-			}
-		}
-	}
-
+	stdIn := clio.GetTTYStdin()
 	value, err := PromptMultiLine(stdIn, os.Stderr, os.Stderr, prefix, message, defaultValue)
 
 	// detect control-c
@@ -173,6 +158,10 @@ func Confirm(prefix, label string, target, defaultValue string, force bool) (Con
 }
 
 func Select(message string, options []string, defaultOption string) (string, error) {
+	if !clio.IsInteractiveTerminal(os.Stderr) {
+		// Can't prompt user, so return the default option
+		return defaultOption, nil
+	}
 	descriptions := make(map[string]string, 0)
 	for _, opt := range options {
 		name, desc, _ := strings.Cut(opt, "\t")
@@ -192,7 +181,7 @@ func Select(message string, options []string, defaultOption string) (string, err
 	}
 
 	response := ""
-	err := survey.AskOne(prompter, &response, survey.WithValidator(survey.Required))
+	err := survey.AskOne(prompter, &response, survey.WithValidator(survey.Required), survey.WithStdio(clio.GetTTYStdin(), os.Stderr, os.Stderr))
 
 	if err != nil {
 		return "", err
