@@ -137,6 +137,11 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 	} else {
 		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(session.Path))
 	}
+
+	if session.Mode != "" {
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "mode")), value(config.SessionModeProduction.FromString(session.Mode, false).Description()))
+	}
+
 	if session.Description != "" {
 		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(maybeHideMessage(client, session.Host)))
 	}

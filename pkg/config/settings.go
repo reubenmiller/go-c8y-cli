@@ -6,7 +6,6 @@ type CommandSettings struct {
 	Encryption  *EncryptionSettings    `json:"encryption,omitempty"`
 	IncludeAll  *IncludeAllSettings    `json:"includeAll,omitempty"`
 	Session     *SessionSettings       `json:"session,omitempty"`
-	Mode        *ModeSettings          `json:"mode,omitempty"`
 	Storage     *StorageSettings       `json:"storage,omitempty"`
 	Template    *TemplateSettings      `json:"template,omitempty"`
 	View        *ViewSettings          `json:"views,omitempty"`
@@ -34,14 +33,6 @@ type EncryptionSettings struct {
 	Enabled         *bool `json:"enabled,omitempty"`
 }
 
-// ModeSettings controls which types of commands are disabled or not
-type ModeSettings struct {
-	Confirmation string `json:"confirmation,omitempty"`
-	EnableCreate *bool  `json:"enableCreate,omitempty"`
-	EnableUpdate *bool  `json:"enableUpdate,omitempty"`
-	EnableDelete *bool  `json:"enableDelete,omitempty"`
-}
-
 // StorageSettings storage settings whether passwords and tokens are stored
 type StorageSettings struct {
 	StoreToken    *bool `json:"storeToken,omitempty"`
@@ -67,6 +58,12 @@ type ViewSettings struct {
 
 type SessionSettings struct {
 	DefaultUsername string `json:"defaultUsername,omitempty"`
+
+	// Types of commands which require confirmation
+	Confirmation string `json:"confirmation,omitempty"`
+
+	// ModeSettings controls which types of commands are disabled or not
+	Mode string `json:"mode,omitempty"`
 }
 
 type LoginSettings struct {

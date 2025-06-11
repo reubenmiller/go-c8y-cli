@@ -70,10 +70,11 @@ func (h argumentHandler) GetValue(rawValue string) interface{} {
 }
 
 var updateSettingsOptions = map[string]argumentHandler{
-	// mode
-	"mode": {"mode", "custom", "", config.GetSessionModeCompletionHelp(), nil, cobra.ShellCompDirectiveNoFileComp},
+	// mode (provide an shorter alias since the option is used a lot)
+	"mode":         {"session.mode", "custom", "", config.GetSessionModeCompletionHelp(), nil, cobra.ShellCompDirectiveNoFileComp},
+	"session.mode": {"session.mode", "custom", "", config.GetSessionModeCompletionHelp(), nil, cobra.ShellCompDirectiveNoFileComp},
 
-	"mode.confirmation": {"mode.confirmation", "string", config.SettingsModeConfirmation, []string{
+	"session.confirmation": {"session.confirmation", "string", config.SettingsModeConfirmation, []string{
 		"GET,PUT,POST,DELETE\tAll methods",
 		"PUT,POST,DELETE\tAll methods but GET",
 	}, TransformReplaceAll(",", " "), cobra.ShellCompDirectiveNoFileComp},
@@ -455,16 +456,16 @@ func NewCmdUpdate(f *cmdutil.Factory) *UpdateSettingsCmd {
 			Change the default delay to 100ms (when sending more than 1 request)
 
 			Bash/zsh:
-			$ eval $( c8y settings update mode.enableCreate true --shell auto )
-			Enable create (POST) commands until the next session change
+			$ eval $( c8y settings update mode qual --shell auto )
+			Enable create and update commands until the next session change
 
 			Fish:
-			$ c8y settings update mode.enableCreate true --shell auto | source
-			Enable create (POST) commands until the next session change
+			$ c8y settings update mode qual --shell auto | source
+			Enable create and update commands until the next session change
 
 			PowerShell:
-			$ c8y settings update mode.enableCreate true --shell auto | Out-String | Invoke-Expression
-			Enable create (POST) commands until the next session change
+			$ c8y settings update mode qual --shell auto | Out-String | Invoke-Expression
+			Enable create and update commands until the next session change
 		`),
 		RunE: ccmd.RunE,
 		Args: flags.ExactArgsOrExample(2),

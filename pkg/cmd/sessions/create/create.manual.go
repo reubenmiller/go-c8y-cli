@@ -69,7 +69,7 @@ type CmdCreate struct {
 	description    string
 	name           string
 	tenant         string
-	sessionType    string
+	sessionMode    string
 	loginType      string
 	noTenantPrefix bool
 	noStorage      bool
@@ -125,7 +125,8 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 	cmd.Flags().StringVar(&ccmd.tenant, "tenant", "", "Tenant ID")
 	cmd.Flags().StringVar(&ccmd.description, "description", "", "Description about the session")
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of the session")
-	cmd.Flags().StringVar(&ccmd.sessionType, "type", "", "Session type. List of predefined session types")
+	cmd.Flags().StringVar(&ccmd.sessionMode, "type", "", "Session type. List of predefined session types (deprecated)")
+	cmd.Flags().StringVar(&ccmd.sessionMode, "mode", "", "Session mode which controls which commands are enabled by default")
 	cmd.Flags().StringVar(&ccmd.loginType, "loginType", "", "Login Type, e.g. BASIC, OAUTH2_INTERNAL, NONE")
 	cmd.Flags().BoolVar(&ccmd.noTenantPrefix, "noTenantPrefix", false, "Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false")
 	cmd.Flags().BoolVar(&ccmd.noStorage, "noStorage", false, "Don't store any passwords or tokens in the session file")
@@ -138,9 +139,7 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 		completion.WithLazyRequired("type"),
 		completion.WithValidateSet(
 			"type",
-			"prod\tProduction mode (read only)",
-			"qual\tQA mode (delete disabled)",
-			"dev\tDevelopment mode (no restrictions)",
+			config.GetSessionModeCompletionHelp()...,
 		),
 		completion.WithValidateSet(
 			"loginType",
@@ -149,6 +148,8 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 			c8y.AuthMethodNone,
 		),
 	)
+
+	flags.MarkDeprecated(cmd, "type", "please use 'mode' instead")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -208,7 +209,7 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		n.sessionType = mode
+		n.sessionMode = mode
 	}
 
 	return nil
@@ -270,27 +271,26 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	switch n.sessionType {
-	case "dev":
-		settings.Mode = &config.ModeSettings{
+	switch n.sessionMode {
+	case "ci":
+		settings.Session = &config.SessionSettings{
 			Confirmation: "PUT POST DELETE",
-			EnableCreate: settings.Bool(true),
-			EnableUpdate: settings.Bool(true),
-			EnableDelete: settings.Bool(true),
+			Mode:         config.SessionModeCI.String(),
+		}
+	case "dev":
+		settings.Session = &config.SessionSettings{
+			Confirmation: "PUT POST DELETE",
+			Mode:         config.SessionModeDev.String(),
 		}
 	case "qual":
-		settings.Mode = &config.ModeSettings{
+		settings.Session = &config.SessionSettings{
 			Confirmation: "PUT POST DELETE",
-			EnableCreate: settings.Bool(true),
-			EnableUpdate: settings.Bool(true),
-			EnableDelete: settings.Bool(false),
+			Mode:         config.SessionModeQual.String(),
 		}
 	case "prod":
-		settings.Mode = &config.ModeSettings{
+		settings.Session = &config.SessionSettings{
 			Confirmation: "PUT POST DELETE",
-			EnableCreate: settings.Bool(false),
-			EnableUpdate: settings.Bool(false),
-			EnableDelete: settings.Bool(false),
+			Mode:         config.SessionModeProduction.String(),
 		}
 	}
 

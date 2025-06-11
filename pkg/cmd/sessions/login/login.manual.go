@@ -434,6 +434,20 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	session.Host = handler.C8Yclient.BaseURL.Host
 	session.Path = cfg.GetSessionFile()
 
+	if n.Mode != "" {
+		session.Mode = n.Mode
+	}
+
+	if session.Mode == "" {
+		// prompt the user for a value
+		modeOptions := config.GetSessionModeCompletionHelp()
+		mode, selectErr := prompt.Select("Select session mode", modeOptions, modeOptions[0])
+		if selectErr != nil {
+			return selectErr
+		}
+		session.Mode = mode
+	}
+
 	// Write session details to stderr (for humans)
 	cs := n.factory.IOStreams.ColorScheme()
 
@@ -455,10 +469,6 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 			n.Shell = shell.DetectShell("bash")
 		}
 		outputFormat = n.Shell
-	}
-
-	if n.Mode != "" {
-		session.Mode = n.Mode
 	}
 
 	// Write session details to stdout (for machines)

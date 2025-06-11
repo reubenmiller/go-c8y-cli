@@ -199,7 +199,7 @@ const (
 	SettingsTemplateCustomPaths = "settings.template.customPath"
 
 	// SettingsMode controls which commands/actions are enabled, e.g. dev, qual, prod
-	SettingsMode = "settings.mode"
+	SettingsMode = "settings.session.mode"
 
 	// SettingsPinEntry sets the command to run to get the user's passphrase
 	SettingsPinEntry = "settings.pinEntry"
@@ -214,7 +214,7 @@ const (
 	SettingsForceConfirm = "settings.defaults.confirm"
 
 	// SettingsModeConfirmation sets the confirm mode
-	SettingsModeConfirmation = "settings.mode.confirmation"
+	SettingsModeConfirmation = "settings.session.confirmation"
 
 	// GetOutputFileRaw file path where the raw response will be saved to
 	SettingsOutputFileRaw = "settings.defaults.outputFileRaw"
@@ -474,6 +474,16 @@ func WithBoolEnvOverride(name string, envName string) func(*Config) error {
 	}
 }
 
+// WithStringEnvOverride supports optional overriding a string value from another env variable
+func WithStringEnvOverride(name string, envName string) func(*Config) error {
+	return func(c *Config) error {
+		if v := os.Getenv(envName); v != "" {
+			c.viper.Set(name, v)
+		}
+		return nil
+	}
+}
+
 func (c *Config) WithOptions(opts ...Option) error {
 	for _, opt := range opts {
 		err := opt(c)
@@ -518,6 +528,9 @@ func (c *Config) bindSettings() {
 		// The env variable "CI" is preferred if present/valid
 		WithBindEnv(SettingsModeCI, false),
 		WithBoolEnvOverride(SettingsModeCI, "CI"),
+
+		// Support overriding the settings.session.mode value with the C8Y_MODE env variable
+		WithStringEnvOverride(SettingsMode, "C8Y_MODE"),
 
 		WithBindEnv(SettingsConfigPath, ""),
 		WithBindEnv(SettingsViewsCommonPaths, ""),
@@ -804,6 +817,11 @@ func (c Config) DecryptAllProperties() (err error) {
 // GetEnvKey returns the environment key value associated
 func (c Config) GetEnvKey(key string) string {
 	return "C8Y_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+}
+
+// HasEnvSettingsPrefix check if a given env variable name is a settings variable
+func (c Config) HasEnvSettingsPrefix(envName string) bool {
+	return strings.HasPrefix(envName, "C8Y_SETTINGS_")
 }
 
 var SettingsToken = "token"
@@ -1381,9 +1399,18 @@ func (c *Config) GetTemplatePaths() []string {
 	return paths
 }
 
+// SetSessionMode set the session mode (it is not persisted)
+func (c *Config) SetSessionMode(mode SessionMode) {
+	c.Set(SettingsMode, mode.String())
+}
+
 // SessionMode returns the current session mode which controls what the user can do
-func (c *Config) SessionMode() SessionMode {
-	return SessionModeProduction.FromString(c.viper.GetString(SettingsMode), c.IsCIMode())
+func (c *Config) SessionMode(defaultMode ...SessionMode) SessionMode {
+	mode := SessionModeProduction
+	if len(defaultMode) > 0 {
+		mode = defaultMode[0]
+	}
+	return mode.FromString(c.viper.GetString(SettingsMode), c.IsCIMode())
 }
 
 // AllowModeCreate enables create (post) commands

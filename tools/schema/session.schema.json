@@ -80,6 +80,17 @@
                         "defaultUsername": {
                             "description": "Default username to use when creating a new c8y session",
                             "type": "string"
+                        },
+                        "mode": {
+                            "description": "Which commands should be enabled in the session (as a protection mechanism)",
+                            "type": "string",
+                            "enum": [
+                                "dev",
+                                "qual",
+                                "prod",
+                                "ci",
+                                ""
+                            ]
                         }
                     }
                 },

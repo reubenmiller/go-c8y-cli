@@ -10,9 +10,6 @@ import (
 // SetMode set the session mode to control which commands are enabled
 func SetMode(v *viper.Viper, mode SessionMode) error {
 	v.Set(SettingsMode, mode.String())
-	if mode != SessionModeCI {
-		v.Set(SettingsModeCI, false)
-	}
 	return nil
 }
 
@@ -31,6 +28,9 @@ const (
 
 	// SessionModeCI CI mode where everything is allowed
 	SessionModeCI
+
+	// SessionModeUnset no value defined by the user
+	SessionModeUnset
 )
 
 func (f SessionMode) String() string {
@@ -39,6 +39,7 @@ func (f SessionMode) String() string {
 		SessionModeQual:       "qual",
 		SessionModeDev:        "dev",
 		SessionModeCI:         "ci",
+		SessionModeUnset:      "",
 	}
 
 	if v, ok := values[f]; ok {
@@ -62,6 +63,26 @@ func (f SessionMode) FromString(name string, ci bool) SessionMode {
 		return v
 	}
 	return f
+}
+
+func (f SessionMode) Description() string {
+	allowedActions := []string{
+		"read",
+	}
+
+	if f.CanCreate() {
+		allowedActions = append(allowedActions, "create")
+	}
+
+	if f.CanUpdate() {
+		allowedActions = append(allowedActions, "update")
+	}
+
+	if f.CanDelete() {
+		allowedActions = append(allowedActions, "delete")
+	}
+
+	return fmt.Sprintf("%s (allowed commands: %s)", f.String(), strings.Join(allowedActions, ", "))
 }
 
 func (f SessionMode) CanCreate() bool {
