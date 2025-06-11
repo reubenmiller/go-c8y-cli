@@ -155,33 +155,6 @@
                         }
                     }
                 },
-                "mode": {
-                    "type": "object",
-                    "description": "Mode settings to restrict specific commands",
-                    "properties": {
-                        "enableCreate": {
-                            "title": "Enable create (POST) commands",
-                            "description": "Enable/disable create commands",
-                            "type": "boolean"
-                        },
-                        "enableUpdate": {
-                            "title": "Enable update (PUT) commands",
-                            "description": "Enable/disable update commands",
-                            "type": "boolean"
-                        },
-                        "enableDelete": {
-                            "title": "Enable delete (DELETE) commands",
-                            "description": "Enable/disable delete commands",
-                            "type": "boolean"
-                        },
-                        "confirmation": {
-                            "title": "Confirmation mode",
-                            "description": "ConfirmationSpace delimited values of REST Method types which should trigger a confirmation when not using force parameter",
-                            "type": "string",
-                            "default": "PUT POST DELETE"
-                        }
-                    }
-                },
                 "activityLog": {
                     "type": "object",
                     "description": "Activity log stores the commands and meta information about the response in a file so it can be used to keep track of your Cumulocity related activities.",

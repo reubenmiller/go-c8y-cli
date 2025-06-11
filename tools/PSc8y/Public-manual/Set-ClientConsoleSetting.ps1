@@ -14,7 +14,7 @@ Set-ClientConsoleSetting -HideSensitive
 Hide any sensitive session information on the console. Settings like (tenant, username, password, base64 credentials)
 
 .EXAMPLE
-Set-ClientConsoleSetting -EnableCreateCommands -EnableUpdateCommands
+Set-ClientConsoleSetting -Mode qual
 
 Enable all create and update commands until the session is changed
 #>
@@ -26,8 +26,8 @@ Enable all create and update commands until the session is changed
         # Show sensitive information (excepts clear-text passwords)
         [switch] $ShowSensitive,
 
-        # Enable create commands
-        [switch] $EnableCreateCommands,
+        # Session mode
+        [string] $Mode,
 
         # Enable update commands
         [switch] $EnableUpdateCommands,
@@ -54,24 +54,12 @@ Enable all create and update commands until the session is changed
 
     if ($DisableCommands) {
         Write-Host "Disabling create/update/delete commands" -ForegroundColor Gray
-        $env:C8Y_SETTINGS_MODE_ENABLECREATE = ""
-        $env:C8Y_SETTINGS_MODE_ENABLEUPDATE = ""
-        $env:C8Y_SETTINGS_MODE_ENABLEDELETE = ""
+        $env:C8Y_MODE = "prod"
     }
 
-    if ($EnableCreateCommands) {
-        Write-Host "Enabling create commands" -ForegroundColor Gray
-        $env:C8Y_SETTINGS_MODE_ENABLECREATE = $true
-    }
-
-    if ($EnableUpdateCommands) {
-        Write-Host "Enabling update commands" -ForegroundColor Gray
-        $env:C8Y_SETTINGS_MODE_ENABLEUPDATE = $true
-    }
-    
-    if ($EnableDeleteCommands) {
-        Write-Host "Enabling delete commands" -ForegroundColor Gray
-        $env:C8Y_SETTINGS_MODE_ENABLEDELETE = $true
+    if ($Mode) {
+        Write-Host "Setting session mode" -ForegroundColor Gray
+        $env:C8Y_MODE = $Mode
     }
 
     if ($PSBoundParameters.ContainsKey("DefaultPageSize")) {
