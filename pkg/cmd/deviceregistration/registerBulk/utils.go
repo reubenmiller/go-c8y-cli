@@ -142,7 +142,7 @@ func RunBulkRegistrationJob(cmd *cobra.Command, opts *RegistrationOptions, mappi
 		}
 
 		// dry run
-		if response == nil {
+		if response == nil || response.IsDryRun() {
 			return "", nil
 		}
 
