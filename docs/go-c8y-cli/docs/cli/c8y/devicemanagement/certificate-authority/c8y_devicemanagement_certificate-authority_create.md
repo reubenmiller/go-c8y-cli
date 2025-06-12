@@ -35,9 +35,13 @@ Create new certificate authority but disable it
 ### Options
 
 ```
-      --autoRegistrationEnabled   Enable auto registration (default true)
-  -h, --help                      help for create
-      --status string             Status. Can be either ENABLED or DISABLED
+      --autoRegistrationEnabled    Enable auto registration (default true)
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help                       help for create
+      --processingMode string      Cumulocity processing mode
+      --status string              Status. Can be either ENABLED or DISABLED
+      --template string            Body template
+      --templateVars stringArray   Body template variables
 ```
 
 ### Options inherited from parent commands
@@ -85,6 +89,7 @@ Create new certificate authority but disable it
       --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
+      --sessionMode string         Override default session mode to allow once-off commands which would normally be disabled
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code

@@ -25,16 +25,16 @@ $ c8y settings update defaults.delay 100ms
 Change the default delay to 100ms (when sending more than 1 request)
 
 Bash/zsh:
-$ eval $( c8y settings update mode.enableCreate true --shell auto )
-Enable create (POST) commands until the next session change
+$ eval $( c8y settings update mode qual --shell auto )
+Enable create and update commands until the next session change
 
 Fish:
-$ c8y settings update mode.enableCreate true --shell auto | source
-Enable create (POST) commands until the next session change
+$ c8y settings update mode qual --shell auto | source
+Enable create and update commands until the next session change
 
 PowerShell:
-$ c8y settings update mode.enableCreate true --shell auto | Out-String | Invoke-Expression
-Enable create (POST) commands until the next session change
+$ c8y settings update mode qual --shell auto | Out-String | Invoke-Expression
+Enable create and update commands until the next session change
 
 ```
 
@@ -90,6 +90,7 @@ Enable create (POST) commands until the next session change
       --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
+      --sessionMode string         Override default session mode to allow once-off commands which would normally be disabled
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code

@@ -19,13 +19,13 @@ c8y sessions encryptText [flags]
 Example 1: Encrypt the text "Hello World". You will be prompted for the passphrase to encrypt the data.
 
 > c8y sessions encryptText --text "Hello World"
-Enter password 🔒: [input is hidden] 
-Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189e504b6840bc027cece28b3f36717839d96af1c5dba8c850b9a9079846066ee1596cc8d26f4138f76ce3
+Enter passphrase 🔒: [input is hidden] 
+{encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189e504b6840bc027cece28b3f36717839d96af1c5dba8c850b9a9079846066ee1596cc8d26f4138f76ce3
 
 Example 2: Encrypt the text "Hello World", the text will be encrypted using the given passphrase (without being prompted)
 
 > c8y sessions encryptText --text "Hello World" --passphrase "so4methIng-7hat-Matters"
-Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189e504b6840bc027cece28b3f36717839d96af1c5dba8c850b9a9079846066ee1596cc8d26f4138f76ce3
+{encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189e504b6840bc027cece28b3f36717839d96af1c5dba8c850b9a9079846066ee1596cc8d26f4138f76ce3
 		
 ```
 
@@ -33,9 +33,8 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
 
 ```
   -h, --help                help for encryptText
-      --passphrase string   Passphrase use for encrypting the text
-      --raw                 Only return the encrypted text and nothing else
-      --text string         Text to be encrypted. (required)
+      --passphrase string   Passphrase to use for encrypting the text. Read from env C8Y_PASSPHRASE or prompted if missing
+      --text string         Text to be encrypted. (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
@@ -79,9 +78,11 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
   -p, --pageSize int               Maximum results per page (default 5)
       --progress                   Show progress bar. This will also disable any other verbose output
       --proxy string               Proxy setting, i.e. http://10.0.0.1:8080
+  -r, --raw                        Show raw response. This mode will force output=json and view=off
       --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
+      --sessionMode string         Override default session mode to allow once-off commands which would normally be disabled
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code

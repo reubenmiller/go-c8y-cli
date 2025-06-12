@@ -91,6 +91,7 @@ $ c8y inventory list --device 1111 | c8y operations fragments --status "FAILED" 
   -r, --raw                        Show raw response. This mode will force output=json and view=off
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
+      --sessionMode string         Override default session mode to allow once-off commands which would normally be disabled
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
