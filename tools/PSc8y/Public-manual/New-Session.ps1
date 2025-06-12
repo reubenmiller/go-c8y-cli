@@ -46,6 +46,11 @@ None
         [Parameter(Mandatory = $false)]
         [string]
         $Name,
+
+        # Mode. The mode controls which types of commands are enabled
+        [Parameter(Mandatory = $false)]
+        [string]
+        $Mode,
     
         # Description
         [Parameter(Mandatory = $false)]

@@ -7,31 +7,101 @@ import (
 	"github.com/spf13/viper"
 )
 
-// SetMode set the session mode to control which commands are enabled or not
-func SetMode(v *viper.Viper, mode string) error {
-	switch strings.ToLower(mode) {
-	case "prod":
-		v.Set(SettingsModeEnableCreate, false)
-		v.Set(SettingsModeEnableUpdate, false)
-		v.Set(SettingsModeEnableDelete, false)
-		v.Set(SettingsModeCI, false)
-
-	case "qual":
-		v.Set(SettingsModeEnableCreate, true)
-		v.Set(SettingsModeEnableUpdate, true)
-		v.Set(SettingsModeEnableDelete, false)
-		v.Set(SettingsModeCI, false)
-
-	case "dev":
-		v.Set(SettingsModeEnableCreate, true)
-		v.Set(SettingsModeEnableUpdate, true)
-		v.Set(SettingsModeEnableDelete, true)
-		v.Set(SettingsModeCI, false)
-
-	case "ci":
-		v.Set(SettingsModeCI, true)
-	default:
-		return fmt.Errorf("unsupported mode. %s. Supported modes are [dev, qual, prod, ci]", mode)
-	}
+// SetMode set the session mode to control which commands are enabled
+func SetMode(v *viper.Viper, mode SessionMode) error {
+	v.Set(SettingsMode, mode.String())
 	return nil
+}
+
+// SessionMode session mode to control which commands are enabled
+type SessionMode int
+
+const (
+	// SessionModeProduction production / read-only mode
+	SessionModeProduction SessionMode = iota
+
+	// SessionModeQual QA / create / update mode
+	SessionModeQual
+
+	// SessionModeDev QA / create / update / delete mode
+	SessionModeDev
+
+	// SessionModeCI CI mode where everything is allowed
+	SessionModeCI
+
+	// SessionModeUnset no value defined by the user
+	SessionModeUnset
+)
+
+func (f SessionMode) String() string {
+	values := map[SessionMode]string{
+		SessionModeProduction: "prod",
+		SessionModeQual:       "qual",
+		SessionModeDev:        "dev",
+		SessionModeCI:         "ci",
+		SessionModeUnset:      "",
+	}
+
+	if v, ok := values[f]; ok {
+		return v
+	}
+	return ""
+}
+
+func (f SessionMode) FromString(name string, ci bool) SessionMode {
+	if ci {
+		return SessionModeCI
+	}
+	values := map[string]SessionMode{
+		"prod": SessionModeProduction,
+		"qual": SessionModeQual,
+		"dev":  SessionModeDev,
+		"ci":   SessionModeCI,
+	}
+
+	if v, ok := values[strings.ToLower(name)]; ok {
+		return v
+	}
+	return f
+}
+
+func (f SessionMode) Description() string {
+	allowedActions := []string{
+		"read",
+	}
+
+	if f.CanCreate() {
+		allowedActions = append(allowedActions, "create")
+	}
+
+	if f.CanUpdate() {
+		allowedActions = append(allowedActions, "update")
+	}
+
+	if f.CanDelete() {
+		allowedActions = append(allowedActions, "delete")
+	}
+
+	return fmt.Sprintf("%s (allowed commands: %s)", f.String(), strings.Join(allowedActions, ", "))
+}
+
+func (f SessionMode) CanCreate() bool {
+	return f == SessionModeCI || f == SessionModeDev || f == SessionModeQual
+}
+
+func (f SessionMode) CanUpdate() bool {
+	return f == SessionModeCI || f == SessionModeDev || f == SessionModeQual
+}
+
+func (f SessionMode) CanDelete() bool {
+	return f == SessionModeCI || f == SessionModeDev
+}
+
+func GetSessionModeCompletionHelp() []string {
+	return []string{
+		fmt.Sprintf("%s\tProduction mode (read only)", SessionModeProduction.String()),
+		fmt.Sprintf("%s\tQA mode (delete disabled)", SessionModeQual.String()),
+		fmt.Sprintf("%s\tDevelopment mode (no restrictions)", SessionModeDev.String()),
+		fmt.Sprintf("%s\tCI mode (no restrictions)", SessionModeCI.String()),
+	}
 }

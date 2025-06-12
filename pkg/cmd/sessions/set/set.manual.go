@@ -155,14 +155,15 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 			config.EnvSessionHome,
 		}
 		unsetEnvSettings := []string{
-			"C8Y_SETTINGS_LOGIN_TYPE",
+			cfg.GetEnvKey(config.SettingsLoginType),
+			cfg.GetEnvKey(config.SettingsMode),
 		}
 		env_prefix := strings.ToUpper(config.EnvSettingsPrefix)
 		for _, env := range os.Environ() {
 			if strings.HasPrefix(env, env_prefix) {
 				parts := strings.SplitN(env, "=", 2)
 				if len(parts) == 2 {
-					if strings.HasPrefix(parts[0], "C8Y_SETTINGS_") && !slices.Contains(unsetEnvSettings, parts[0]) {
+					if cfg.HasEnvSettingsPrefix(parts[0]) && !slices.Contains(unsetEnvSettings, parts[0]) {
 						continue
 					}
 					if !slices.Contains(allowedEnvValues, parts[0]) {
@@ -278,6 +279,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		Tenant:     cfg.GetTenant(),
 		Version:    cfg.GetCumulocityVersion(),
 		Username:   handler.C8Yclient.Username,
+		Mode:       cfg.SessionMode(config.SessionModeUnset).String(),
 	}
 
 	outputFormat := cfg.GetOutputFormatWithDefault(cmd, config.OutputUnknown).String()

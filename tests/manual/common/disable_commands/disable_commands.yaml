@@ -7,18 +7,15 @@ config:
     C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
     C8Y_SETTINGS_CI: false
     CI: ""
-    C8Y_SETTINGS_MODE_ENABLECREATE: false
-    C8Y_SETTINGS_MODE_ENABLEUPDATE: false
-    C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    C8Y_MODE: "prod"
+    C8Y_SETTINGS_SESSION_MODE: ""
 
 tests:
   It disables create commands:
     config:
       env:
         C8Y_SETTINGS_CI: false
-        C8Y_SETTINGS_MODE_ENABLECREATE: false
-        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
-        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+        C8Y_MODE: prod
     command: |
       c8y inventory create --name "asset-data01"
     exit-code: 100
@@ -29,9 +26,7 @@ tests:
     config:
       env:
         C8Y_SETTINGS_CI: false
-        C8Y_SETTINGS_MODE_ENABLECREATE: true
-        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
-        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+        C8Y_MODE: qual
     command: |
       c8y inventory create --name "asset-data01" --dry |
         c8y util show --select body
@@ -44,9 +39,7 @@ tests:
     config:
       env:
         C8Y_SETTINGS_CI: false
-        C8Y_SETTINGS_MODE_ENABLECREATE: true
-        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
-        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+        C8Y_MODE: prod
     command: |
       c8y inventory update --id 0 --newName "asset-data01"
     exit-code: 100
@@ -57,9 +50,7 @@ tests:
     config:
       env:
         C8Y_SETTINGS_CI: false
-        C8Y_SETTINGS_MODE_ENABLECREATE: false
-        C8Y_SETTINGS_MODE_ENABLEUPDATE: true
-        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+        C8Y_MODE: qual
     command: |
       c8y inventory update --id 0 --newName "asset-data01" --dry |
         c8y util show --select body
@@ -72,9 +63,7 @@ tests:
     config:
       env:
         C8Y_SETTINGS_CI: false
-        C8Y_SETTINGS_MODE_ENABLECREATE: false
-        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
-        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+        C8Y_MODE: prod
     command: |
       c8y inventory delete --id 0
     exit-code: 100
@@ -85,9 +74,7 @@ tests:
     config:
       env:
         C8Y_SETTINGS_CI: false
-        C8Y_SETTINGS_MODE_ENABLECREATE: false
-        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
-        C8Y_SETTINGS_MODE_ENABLEDELETE: true
+        C8Y_MODE: dev
     command: |
       c8y inventory delete --id 0 --dry |
         c8y util show --select path
@@ -100,9 +87,7 @@ tests:
     config:
       env:
         C8Y_SETTINGS_CI: true
-        C8Y_SETTINGS_MODE_ENABLECREATE: false
-        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
-        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+        C8Y_MODE: dev
     command: |
       c8y inventory create --name "asset-data02" --dry | c8y util show --select body
       c8y inventory update --id 0 --newName "asset-data01" --dry | c8y util show --select body

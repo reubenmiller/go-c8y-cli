@@ -62,9 +62,7 @@ func NewCmdCloneSession(f *cmdutil.Factory) *CmdClone {
 		completion.WithLazyRequired("type"),
 		completion.WithValidateSet(
 			"type",
-			"prod\tProduction mode (read only)",
-			"qual\tQA mode (delete disabled)",
-			"dev\tDevelopment mode (no restrictions)",
+			config.GetSessionModeCompletionHelp()...,
 		),
 	)
 	cmd.SilenceUsage = true
@@ -85,7 +83,7 @@ func (n *CmdClone) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if n.modeType != "" {
-		if err := config.SetMode(cfg.Persistent, n.modeType); err != nil {
+		if err := config.SetMode(cfg.Persistent, config.SessionModeProduction.FromString(n.modeType, false)); err != nil {
 			return cmderrors.NewUserError(err)
 		}
 	}

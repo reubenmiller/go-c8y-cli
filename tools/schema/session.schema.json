@@ -80,6 +80,17 @@
                         "defaultUsername": {
                             "description": "Default username to use when creating a new c8y session",
                             "type": "string"
+                        },
+                        "mode": {
+                            "description": "Which commands should be enabled in the session (as a protection mechanism)",
+                            "type": "string",
+                            "enum": [
+                                "dev",
+                                "qual",
+                                "prod",
+                                "ci",
+                                ""
+                            ]
                         }
                     }
                 },
@@ -141,33 +152,6 @@
                             "title": "Store the session token to file. Enabled by default",
                             "type": "boolean",
                             "default": "true"
-                        }
-                    }
-                },
-                "mode": {
-                    "type": "object",
-                    "description": "Mode settings to restrict specific commands",
-                    "properties": {
-                        "enableCreate": {
-                            "title": "Enable create (POST) commands",
-                            "description": "Enable/disable create commands",
-                            "type": "boolean"
-                        },
-                        "enableUpdate": {
-                            "title": "Enable update (PUT) commands",
-                            "description": "Enable/disable update commands",
-                            "type": "boolean"
-                        },
-                        "enableDelete": {
-                            "title": "Enable delete (DELETE) commands",
-                            "description": "Enable/disable delete commands",
-                            "type": "boolean"
-                        },
-                        "confirmation": {
-                            "title": "Confirmation mode",
-                            "description": "ConfirmationSpace delimited values of REST Method types which should trigger a confirmation when not using force parameter",
-                            "type": "string",
-                            "default": "PUT POST DELETE"
                         }
                     }
                 },

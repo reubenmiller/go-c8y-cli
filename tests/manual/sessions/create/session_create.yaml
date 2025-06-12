@@ -13,7 +13,7 @@ tests:
     command: |
       export C8Y_SESSION_HOME=/tmp/session_create_test01/
       rm -Rf /tmp/session_create_test01/
-      c8y sessions create --type dev --host "https://mytenant.iot.cumulocity.com" --username "dummy" --password "test" --allowInsecure
+      c8y sessions create --mode dev --host "https://mytenant.iot.cumulocity.com" --username "dummy" --password "test" --allowInsecure
       cat /tmp/session_create_test01/*.json | jq -c | c8y util show --select username,password,host,settings.defaults -o json -c=false
       rm -rf /tmp/session_create_test01/
     exit-code: 0
@@ -35,7 +35,7 @@ tests:
     command: |
       export C8Y_SESSION_HOME=/tmp/session_create_test02/
       rm -Rf /tmp/session_create_test02/
-      c8y sessions create --type dev --host "https://mytenant.iot.cumulocity.com:9090" --username "dummy@me.com" --password "test"
+      c8y sessions create --mode dev --host "https://mytenant.iot.cumulocity.com:9090" --username "dummy@me.com" --password "test"
       cat /tmp/session_create_test02/*.json | jq -c | c8y util show --select username,password,host -o json -c=false
       rm -rf /tmp/session_create_test02/
     exit-code: 0
@@ -52,7 +52,7 @@ tests:
     command: |
       export C8Y_SESSION_HOME=/tmp/session_create_test03/
       rm -Rf /tmp/session_create_test03/
-      c8y sessions create --type dev --name 'some[]{}+*&?:/\_-(crazy)"!' --host "https://mytenant.iot.cumulocity.com:9090" --username "dummy@me.com" --password "test"
+      c8y sessions create --mode dev --name 'some[]{}+*&?:/\_-(crazy)"!' --host "https://mytenant.iot.cumulocity.com:9090" --username "dummy@me.com" --password "test"
       cat /tmp/session_create_test03/*.json | jq -c | c8y util show --select username,password,host -o json -c=false
       rm -rf /tmp/session_create_test03/
     exit-code: 0

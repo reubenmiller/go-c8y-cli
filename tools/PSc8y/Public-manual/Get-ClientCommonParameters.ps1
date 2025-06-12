@@ -90,6 +90,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name Session -Type "string" -DPDictionary $Dictionary -HelpMessage "Session configuration"
         New-DynamicParam -Name SessionUsername -Type "string" -DPDictionary $Dictionary -HelpMessage "Override session username. i.e. peter or t1234/peter (with tenant)"
         New-DynamicParam -Name SessionPassword -Type "string" -DPDictionary $Dictionary -HelpMessage "Override session password"
+        New-DynamicParam -Name SessionMode -Type "string" -DPDictionary $Dictionary -HelpMessage "Override default session mode to allow once-off commands which would normally be disabled"
         if ($ParentCommand) {
             Register-ArgumentCompleter -CommandName $ParentCommand -ParameterName Session -ScriptBlock $script:CompletionSession
         }

@@ -78,7 +78,7 @@ tests:
     config:
       env:
         C8Y_SETTINGS_CI: false
-        C8Y_SETTINGS_MODE_ENABLECREATE: false
+        C8Y_MODE: prod
     command: |
       c8y inventory create --dry --dryFormat json |
         c8y util show --select path --output csv
@@ -90,7 +90,7 @@ tests:
     config:
       env:
         C8Y_SETTINGS_CI: false
-        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+        C8Y_MODE: prod
     command: |
       c8y inventory update --id 1234 --dry --dryFormat json |
         c8y util show --select path --output csv
@@ -102,7 +102,7 @@ tests:
     config:
       env:
         C8Y_SETTINGS_CI: false
-        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+        C8Y_MODE: prod
     command: |
       c8y inventory delete --id 1234 --dry --dryFormat json |
         c8y util show --select path --output csv
@@ -116,7 +116,7 @@ tests:
         C8Y_SETTINGS_CI: false
         C8Y_SETTINGS_DEFAULTS_DRY: true
         C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
-        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+        C8Y_MODE: prod
     command: |
       c8y inventory delete --id 1234 |
         c8y util show --select path --output csv
@@ -131,7 +131,7 @@ tests:
         CI: ""
         C8Y_SETTINGS_DEFAULTS_DRY: true
         C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
-        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+        C8Y_MODE: prod
     command: |
       c8y inventory update --id 0 --dry=false --force
     exit-code: 100

@@ -5,18 +5,14 @@ Describe -Name "Disable create/update/delete commands" {
         $backupEnvSettings = @{
             CI = $env:CI
             C8Y_SETTINGS_CI = $env:C8Y_SETTINGS_CI
-            C8Y_SETTINGS_MODE_ENABLECREATE = $env:C8Y_SETTINGS_MODE_ENABLECREATE
-            C8Y_SETTINGS_MODE_ENABLEUPDATE = $env:C8Y_SETTINGS_MODE_ENABLEUPDATE
-            C8Y_SETTINGS_MODE_ENABLEDELETE = $env:C8Y_SETTINGS_MODE_ENABLEDELETE
+            C8Y_SETTINGS_SESSION_MODE = $env:C8Y_SETTINGS_SESSION_MODE
         }
     }
 
     BeforeEach {
         $env:CI = "false"
         $env:C8Y_SETTINGS_CI = "false"
-        $env:C8Y_SETTINGS_MODE_ENABLECREATE = "false"
-        $env:C8Y_SETTINGS_MODE_ENABLEUPDATE = "false"
-        $env:C8Y_SETTINGS_MODE_ENABLEDELETE = "false"
+        $env:C8Y_SETTINGS_SESSION_MODE = "prod"
 
         $items = New-Object System.Collections.ArrayList
     }
@@ -26,7 +22,7 @@ Describe -Name "Disable create/update/delete commands" {
         $null = New-TestDevice
         $LASTEXITCODE | Should -Not -Be 0
 
-        Set-ClientConsoleSetting -EnableCreateCommands
+        Set-ClientConsoleSetting -Mode dev
 
         $device = New-TestDevice
         $items.Add($device.id)
@@ -34,7 +30,7 @@ Describe -Name "Disable create/update/delete commands" {
     }
 
     It "Enables update commands" {
-        Set-ClientConsoleSetting -EnableCreateCommands
+        Set-ClientConsoleSetting -Mode prod
 
         $device = New-TestDevice
         $LASTEXITCODE | Should -Be 0
@@ -44,7 +40,7 @@ Describe -Name "Disable create/update/delete commands" {
         $device | PSc8y\Update-Device -NewName "My New Name"
         $LASTEXITCODE | Should -Not -Be 0
 
-        Set-ClientConsoleSetting -EnableUpdateCommands
+        Set-ClientConsoleSetting -Mode qual
 
         # updates should work
         $device | PSc8y\Update-Device -NewName "My New Name"
@@ -60,7 +56,7 @@ Describe -Name "Disable create/update/delete commands" {
     }
 
     It "Enables delete commands" {
-        Set-ClientConsoleSetting -EnableCreateCommands
+        Set-ClientConsoleSetting -Mode qual
 
         $device = New-TestDevice
         $LASTEXITCODE | Should -Be 0
@@ -70,7 +66,7 @@ Describe -Name "Disable create/update/delete commands" {
         $device | PSc8y\Remove-Device
         $LASTEXITCODE | Should -Not -Be 0
 
-        Set-ClientConsoleSetting -EnableDeleteCommands
+        Set-ClientConsoleSetting -Mode dev
 
         # delete should work
         $device | PSc8y\Remove-Device
@@ -78,10 +74,9 @@ Describe -Name "Disable create/update/delete commands" {
     }
 
     AfterEach {
-        Set-ClientConsoleSetting -EnableDeleteCommands
         foreach ($item in $items) {
             if ($item) {
-                PSc8y\Remove-ManagedObject -Id $item
+                PSc8y\Remove-ManagedObject -Id $item -SessionMode dev
             }
         }
     }

@@ -29,6 +29,7 @@ type CumulocitySession struct {
 	Version         string `json:"version"`
 	Username        string `json:"username"`
 	Password        string `json:"password"`
+	Mode            string `json:"mode,omitempty"`
 	TOTP            string `json:"totp"`
 	Token           string `json:"token"`
 	Description     string `json:"description"`
@@ -136,6 +137,11 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 	} else {
 		fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(session.Path))
 	}
+
+	if session.Mode != "" {
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "mode")), value(config.SessionModeProduction.FromString(session.Mode, false).Description()))
+	}
+
 	if session.Description != "" {
 		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(maybeHideMessage(client, session.Host)))
 	}
@@ -195,6 +201,7 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 	c8yVersion := client.Version
 	username := session.Username
 	password := session.Password
+	mode := session.Mode
 	token := session.Token
 	authHeaderValue := ""
 	authHeader := ""
@@ -225,6 +232,10 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 		"C8Y_HEADER_AUTHORIZATION": authHeaderValue,
 		"C8Y_HEADER":               authHeader,
 		"C8Y_SETTINGS_LOGIN_TYPE":  loginType,
+	}
+
+	if mode != "" {
+		output[cfg.GetEnvKey(config.SettingsMode)] = mode
 	}
 
 	cache := cfg.CachePassphraseVariables()
@@ -272,9 +283,7 @@ func GetSessionEnvKeys() []string {
 		"C8Y_HEADER",
 		"C8Y_HEADER_AUTHORIZATION",
 		"C8Y_SETTINGS_LOGIN_TYPE",
-		"C8Y_SETTINGS_MODE_ENABLECREATE",
-		"C8Y_SETTINGS_MODE_ENABLEUPDATE",
-		"C8Y_SETTINGS_MODE_ENABLEDELETE",
+		"C8Y_SETTINGS_SESSION_MODE",
 	}
 	return keys
 }

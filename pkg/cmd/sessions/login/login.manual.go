@@ -41,6 +41,8 @@ type CmdLogin struct {
 	// Login options
 	LoginType string
 
+	Mode string
+
 	// Output options
 	Shell        string
 	OutputFormat string
@@ -91,6 +93,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().StringVar(&ccmd.OutputFormat, "output-format", "", "Output format")
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", "", "Shell type to return the environment variables")
 	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared")
+	cmd.Flags().StringVar(&ccmd.Mode, "mode", "", "Session mode which controls which commands are allowed, e.g. dev, qual or prod")
 	cmd.Flags().StringSliceVar(&ccmd.Secrets, "secrets", []string{}, "List of secrets to include as env variables when running an external command. Only valid with from-cmd")
 
 	completion.WithOptions(
@@ -100,6 +103,10 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 		completion.WithValidateSet("provider", config.ProviderTypeFile, config.ProviderTypeStdin, config.ProviderTypeEnv, config.ProviderTypeExternal, config.ProviderTypeAuto),
 		completion.WithValidateSet("format", "json", "yaml", "toml", "dotenv"),
 		completion.WithValidateSet("loginType", c8y.AuthMethodOAuth2Internal, c8y.AuthMethodBasic),
+		completion.WithValidateSet(
+			"mode",
+			config.GetSessionModeCompletionHelp()...,
+		),
 	)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -123,6 +130,7 @@ func (n *CmdLogin) FromEnv() (*c8ysession.CumulocitySession, error) {
 		Tenant:   os.Getenv("C8Y_TENANT"),
 		Password: os.Getenv("C8Y_PASSWORD"),
 		Token:    os.Getenv("C8Y_TOKEN"),
+		Mode:     os.Getenv("C8Y_MODE"),
 	}
 
 	// Choose the first non-empty value
@@ -246,6 +254,7 @@ func (n *CmdLogin) FromViper(v *viper.Viper) (*c8ysession.CumulocitySession, err
 		Tenant:     getValue("tenant"),
 		Token:      getValue("token"),
 		TOTP:       getValue("totp"),
+		Mode:       getValue("mode"),
 	}
 	session.SetHost(getValue("host"))
 	return session, nil
@@ -424,6 +433,20 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	session.Username = handler.C8Yclient.Username
 	session.Host = handler.C8Yclient.BaseURL.Host
 	session.Path = cfg.GetSessionFile()
+
+	if n.Mode != "" {
+		session.Mode = n.Mode
+	}
+
+	if session.Mode == "" {
+		// prompt the user for a value
+		modeOptions := config.GetSessionModeCompletionHelp()
+		mode, selectErr := prompt.Select("Select session mode", modeOptions, modeOptions[0])
+		if selectErr != nil {
+			return selectErr
+		}
+		session.Mode = mode
+	}
 
 	// Write session details to stderr (for humans)
 	cs := n.factory.IOStreams.ColorScheme()

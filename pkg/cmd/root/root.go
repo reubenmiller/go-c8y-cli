@@ -141,6 +141,7 @@ type CmdRoot struct {
 	SessionFile        string
 	SessionUsername    string
 	SessionPassword    string
+	SessionMode        string
 	NoLog              bool
 	ActivityLogMessage string
 
@@ -225,6 +226,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().StringVar(&ccmd.SessionFile, "session", "", "Session configuration")
 	cmd.PersistentFlags().StringVarP(&ccmd.SessionUsername, "sessionUsername", "U", "", "Override session username. i.e. peter or t1234/peter (with tenant)")
 	cmd.PersistentFlags().StringVarP(&ccmd.SessionPassword, "sessionPassword", "P", "", "Override session password")
+	cmd.PersistentFlags().StringVar(&ccmd.SessionMode, "sessionMode", "", "Override default session mode to allow once-off commands which would normally be disabled")
 	cmd.PersistentFlags().BoolVarP(&ccmd.Verbose, "verbose", "v", false, "Verbose logging")
 	cmd.PersistentFlags().IntP(flags.FlagPageSize, "p", c8ydefaults.PageSize, "Maximum results per page")
 	cmd.PersistentFlags().Int64(flags.FlagCurrentPage, 0, "Current page which should be returned")
@@ -318,6 +320,10 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			}
 			return cfg.GetSessionHomeDir()
 		}),
+		completion.WithValidateSet(
+			"sessionMode",
+			config.GetSessionModeCompletionHelp()...,
+		),
 		cmdutil.WithViewCompletion("view", func() (*dataview.DataView, error) { return ccmd.Factory.DataView() }),
 		ccmd.Factory.WithTemplateCompletion(flags.FlagOutputTemplate),
 	)
@@ -714,6 +720,14 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 	if cfg.DisableProgress() {
 		log.Debugf("Disabling progress bars")
 		c.Factory.IOStreams.SetProgress(false)
+	}
+
+	if c.SessionMode != "" {
+		mode := config.SessionModeUnset.FromString(c.SessionMode, false)
+		if mode != config.SessionModeUnset {
+			log.Infof("Overriding session mode. default=%s, value=%s", cfg.SessionMode().String(), mode.String())
+			cfg.SetSessionMode(mode)
+		}
 	}
 
 	//
