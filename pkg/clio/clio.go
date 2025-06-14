@@ -3,6 +3,8 @@ package clio
 import (
 	"os"
 	"runtime"
+
+	"golang.org/x/term"
 )
 
 // HasPipedInput checks if os.Stdin is receiving piped input.
@@ -46,6 +48,14 @@ func IsInteractiveTerminal(f *os.File) bool {
 		return false
 	}
 	return (fileInfo.Mode() & os.ModeCharDevice) != 0
+}
+
+// IsTerminal checks if the output is a terminal or not
+func IsTerminal(f *os.File) bool {
+	if f == nil {
+		f = os.Stdout
+	}
+	return term.IsTerminal(int(f.Fd()))
 }
 
 func GetTTYStdin() *os.File {
