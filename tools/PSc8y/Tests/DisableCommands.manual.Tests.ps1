@@ -5,14 +5,14 @@ Describe -Name "Disable create/update/delete commands" {
         $backupEnvSettings = @{
             CI = $env:CI
             C8Y_SETTINGS_CI = $env:C8Y_SETTINGS_CI
-            C8Y_SETTINGS_SESSION_MODE = $env:C8Y_SETTINGS_SESSION_MODE
+            C8Y_MODE = $env:C8Y_MODE
         }
     }
 
     BeforeEach {
         $env:CI = "false"
         $env:C8Y_SETTINGS_CI = "false"
-        $env:C8Y_SETTINGS_SESSION_MODE = "prod"
+        $env:C8Y_MODE = "prod"
 
         $items = New-Object System.Collections.ArrayList
     }

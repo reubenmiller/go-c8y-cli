@@ -8,7 +8,6 @@ config:
     C8Y_SETTINGS_CI: false
     CI: ""
     C8Y_MODE: "prod"
-    C8Y_SETTINGS_SESSION_MODE: ""
 
 tests:
   It disables create commands:

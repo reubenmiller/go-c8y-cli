@@ -130,7 +130,7 @@ func (n *CmdLogin) FromEnv() (*c8ysession.CumulocitySession, error) {
 		Tenant:   os.Getenv("C8Y_TENANT"),
 		Password: os.Getenv("C8Y_PASSWORD"),
 		Token:    os.Getenv("C8Y_TOKEN"),
-		Mode:     os.Getenv("C8Y_MODE"),
+		Mode:     os.Getenv(config.EnvSessionMode),
 	}
 
 	// Choose the first non-empty value

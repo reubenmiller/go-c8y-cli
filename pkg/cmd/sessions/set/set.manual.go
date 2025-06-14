@@ -157,6 +157,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		unsetEnvSettings := []string{
 			cfg.GetEnvKey(config.SettingsLoginType),
 			cfg.GetEnvKey(config.SettingsMode),
+			cfg.GetEnvKey(config.EnvSessionMode),
 		}
 		env_prefix := strings.ToUpper(config.EnvSettingsPrefix)
 		for _, env := range os.Environ() {
