@@ -156,7 +156,9 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 	if session.Username != "" {
 		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(maybeHideMessage(client, session.Username)))
 	}
-	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "loginType")), value(client.AuthorizationMethod))
+	if client != nil {
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "loginType")), value(client.AuthorizationMethod))
+	}
 	fmt.Fprintf(w, "\n")
 }
 
