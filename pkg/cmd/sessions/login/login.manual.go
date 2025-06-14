@@ -317,7 +317,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		if n.factory.IOStreams.IsStdoutTTY() {
 			canChangeActiveSession = false
 			notice := heredoc.Docf(`
-				You shouldn't run 'c8y session set' directly as it will have no effect on your current session.
+				You shouldn't run 'c8y session login' directly as it will have no effect on your current session.
 
 				Instead, you will need to use the 'set-session' helper function, or if you can't use the helper function, then run:
 		
