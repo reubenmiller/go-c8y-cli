@@ -41,7 +41,7 @@ $ c8y alarms update --id 12345 --severity CRITICAL
 Update severity of an existing alarm to CRITICAL
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

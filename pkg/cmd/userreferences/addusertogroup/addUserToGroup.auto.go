@@ -44,7 +44,7 @@ $ c8y users list | c8y userreferences addUserToGroup --group business | c8y user
 Add a list of users to business and admins group (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

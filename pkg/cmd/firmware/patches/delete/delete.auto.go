@@ -41,7 +41,7 @@ $ c8y firmware patches delete --id 12345 --forceCascade=false
 Delete a firmware patch (but keep the related binary)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

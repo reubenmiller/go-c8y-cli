@@ -44,7 +44,7 @@ $ c8y devices list | c8y notification2 subscriptions create --name devicegroup -
 Create a subscription which groups all devices in a single subscription name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

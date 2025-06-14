@@ -41,7 +41,7 @@ $ c8y users get --id peterpi@example.com | c8y userreferences deleteUserFromGrou
 Delete a user from a user group (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

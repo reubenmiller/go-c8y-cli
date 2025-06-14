@@ -46,7 +46,7 @@ $ c8y applications createBinary --id 12345 --file ./helloworld.zip
 Upload application microservice binary
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

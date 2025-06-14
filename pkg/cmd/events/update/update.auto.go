@@ -41,7 +41,7 @@ $ c8y events update --id 12345 --data "{\"my_event\":{\"active\": true }}"
 Update custom properties of an existing event
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

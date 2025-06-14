@@ -37,7 +37,7 @@ $ c8y tenants update --id "mycompany" --contactName "John Smith"
 Update a tenant by name (from the management tenant)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

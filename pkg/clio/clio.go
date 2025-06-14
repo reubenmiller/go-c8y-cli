@@ -3,6 +3,8 @@ package clio
 import (
 	"os"
 	"runtime"
+
+	"golang.org/x/term"
 )
 
 // HasPipedInput checks if os.Stdin is receiving piped input.
@@ -48,6 +50,14 @@ func IsInteractiveTerminal(f *os.File) bool {
 	return (fileInfo.Mode() & os.ModeCharDevice) != 0
 }
 
+// IsTerminal checks if the output is a terminal or not
+func IsTerminal(f *os.File) bool {
+	if f == nil {
+		f = os.Stdout
+	}
+	return term.IsTerminal(int(f.Fd()))
+}
+
 func GetTTYStdin() *os.File {
 	stdIn := os.Stdin
 	if !IsInteractiveTerminal(stdIn) {
@@ -64,4 +74,11 @@ func GetTTYStdin() *os.File {
 		}
 	}
 	return stdIn
+}
+
+// IsLastInPipeline checks if a command is the last in the pipeline
+// The check isn't perfect, however it is a good enough check if data
+// is being written to the console or not
+func IsLastInPipeline() bool {
+	return IsInteractiveTerminal(os.Stdout)
 }

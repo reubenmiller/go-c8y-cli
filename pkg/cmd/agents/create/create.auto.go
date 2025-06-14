@@ -42,7 +42,7 @@ $ c8y agents create --name myAgent --data "custom_value1=1234"
 Create agent with custom properties
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

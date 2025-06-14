@@ -38,7 +38,7 @@ $ c8y userroles addRoleToUser --user "peterpi@example.com" --role "ROLE_ALARM_RE
 Add a role (ROLE_ALARM_READ) to a user
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

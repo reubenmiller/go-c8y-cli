@@ -37,7 +37,7 @@ $ c8y features enable --key example
 Enable a feature in the current tenant
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

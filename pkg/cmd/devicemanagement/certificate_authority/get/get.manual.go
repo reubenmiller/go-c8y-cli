@@ -36,7 +36,7 @@ $ c8y devicemanagement certificate-authority get
 Get certificate authority to allow auto registration
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

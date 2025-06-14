@@ -43,7 +43,7 @@ $ c8y remoteaccess configurations create-vnc --device device01 --password 'asd08
 Create a VNC configuration that requires a password
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

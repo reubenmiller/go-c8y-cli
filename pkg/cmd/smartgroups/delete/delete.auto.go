@@ -39,7 +39,7 @@ $ c8y smartgroups delete --id 12345
 Get smart group by id
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

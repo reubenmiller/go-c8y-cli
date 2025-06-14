@@ -40,7 +40,7 @@ $ c8y remoteaccess configurations create-telnet --device device01
 Create a telnet configuration
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

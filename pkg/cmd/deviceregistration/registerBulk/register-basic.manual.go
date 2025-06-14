@@ -40,7 +40,7 @@ func NewRegisterBasicCmd(f *cmdutil.Factory) *RegisterBasicCmd {
 			Register 2 devices, and set the names based on their external id (using basic auth)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

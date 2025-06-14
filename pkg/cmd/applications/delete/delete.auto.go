@@ -47,7 +47,7 @@ $ c8y applications delete --id 12345 --unsubscribeAll
 Unsubscribe and application then delete it
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

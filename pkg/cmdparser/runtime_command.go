@@ -34,11 +34,11 @@ func NewRuntimeCmd(f *cmdutil.Factory, options *CmdOptions) *RuntimeCmd {
 		// Mode checks
 		switch options.Spec.GetMethod() {
 		case "POST":
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		case "PUT":
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		case "DELETE":
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		}
 		return nil
 	}

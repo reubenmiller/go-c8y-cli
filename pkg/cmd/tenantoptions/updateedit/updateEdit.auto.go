@@ -39,7 +39,7 @@ $ c8y tenantoptions updateEdit --category "c8y_cli_tests" --key "option8" --edit
 Update editable property for an existing tenant option
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

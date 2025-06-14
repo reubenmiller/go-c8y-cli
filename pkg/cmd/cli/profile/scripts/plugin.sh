@@ -112,10 +112,7 @@ fi
 # Usage:
 #   session
 #
-unalias session 2>/dev/null ||:
-session() {
-    c8y sessions get "$@"
-}
+alias session='c8y sessions get'
 
 # -----------
 # set-session
@@ -145,32 +142,3 @@ clear-session() {
     c8yenv=$(c8y sessions clear)
     eval "$c8yenv"
 }
-
-# -------------------
-# clear-c8ypassphrase
-# -------------------
-# Description: Clear the encryption passphrase environment variables
-# Usage:
-#   clear-c8ypassphrase
-#
-clear-c8ypassphrase() {
-    unset C8Y_PASSPHRASE
-    unset C8Y_PASSPHRASE_TEXT
-}
-
-# ----------------
-# set-c8ymode-xxxx
-# ----------------
-# Description: Set temporary mode by setting the environment variables
-# Usage:
-#   set-c8ymode-dev     (enable PUT, POST and DELETE)
-#   set-c8ymode-qual    (enable PUT, POST)
-#   set-c8ymode-prod    (disable PUT, POST and DELETE)
-#
-set-c8ymode() {
-    eval "$(c8y settings update --shell auto mode "$1")"
-    printf "\e[32mEnabled %s mode (temporarily)\e[0m\n" "$1";
-}
-set-c8ymode-dev() { set-c8ymode dev; }
-set-c8ymode-qual() { set-c8ymode qual; }
-set-c8ymode-prod() { set-c8ymode prod; }

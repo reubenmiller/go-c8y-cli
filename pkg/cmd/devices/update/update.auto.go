@@ -47,7 +47,7 @@ $ c8y devices update --id 12345 --data "myFragment=null"
 Remove a property from a device by setting it to null
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

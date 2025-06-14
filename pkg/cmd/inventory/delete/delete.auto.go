@@ -47,7 +47,7 @@ $ c8y inventory delete --id 12345 --forceCascade
 Delete a device and any related child assets, additions and/or devices
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

@@ -37,7 +37,7 @@ $ c8y tenants enable --id "mycompany"
 Enable a tenant (from the management tenant)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

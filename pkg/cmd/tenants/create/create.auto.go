@@ -40,7 +40,7 @@ $ c8y tenants create --name "mycompany" --domain "mycompany" --adminEmail "admin
 Create a new tenant and send a password reset email (from the management tenant)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

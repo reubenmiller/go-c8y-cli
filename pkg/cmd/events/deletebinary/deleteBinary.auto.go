@@ -39,7 +39,7 @@ $ c8y events deleteBinary --id 12345
 Delete an binary attached to an event
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

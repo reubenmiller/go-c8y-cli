@@ -536,9 +536,9 @@
     }
 
     $PreRunFunction = switch ($FunctionalMethod) {
-        "POST" { "f.CreateModeEnabled()" }
-        "PUT" { "f.UpdateModeEnabled()" }
-        "DELETE" { "f.DeleteModeEnabled()" }
+        "POST" { "f.CreateModeEnabled(cmd)" }
+        "PUT" { "f.UpdateModeEnabled(cmd)" }
+        "DELETE" { "f.DeleteModeEnabled(cmd)" }
         default { "nil" }
     }
 

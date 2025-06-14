@@ -38,7 +38,7 @@ $ c8y tenants applications disable --tenant "t12345" --application "myMicroservi
 Disable an application of a tenant by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

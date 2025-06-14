@@ -38,7 +38,7 @@ $ c8y ui plugins versions update --plugin 1234 --version 1.0 --tag tag1,latest
 Replace tags assigned to a version of a plugin
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

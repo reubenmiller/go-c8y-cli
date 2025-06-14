@@ -38,7 +38,7 @@ $ c8y deviceprofiles delete --id 12345
 Delete a device profile
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

@@ -38,9 +38,7 @@ fi
 # Usage:
 #   session
 #
-session() {
-    c8y sessions get "$@"
-}
+alias session='c8y sessions get'
 
 # -----------
 # set-session
@@ -70,35 +68,6 @@ set-session () {
 clear-session () {
     source <(c8y sessions clear)
 }
-
-# -----------
-# clear-c8ypassphrase
-# -----------
-# Description: Clear the encryption passphrase environment variables
-# Usage:
-#   clear-c8ypassphrase
-#
-clear-c8ypassphrase () {
-    unset C8Y_PASSPHRASE
-    unset C8Y_PASSPHRASE_TEXT
-}
-
-# -----------
-# set-c8ymode-xxxx
-# -----------
-# Description: Set temporary mode by setting the environment variables
-# Usage:
-#   set-c8ymode-dev     (enable PUT, POST and DELETE)
-#   set-c8ymode-qual    (enable PUT, POST)
-#   set-c8ymode-prod    (disable PUT, POST and DELETE)
-#
-set-c8ymode () {
-    source <(c8y settings update --shell auto mode $1);
-    echo -e "\e[32mEnabled $1 mode (temporarily)\e[0m";
-}
-set-c8ymode-dev () { set-c8ymode dev; }
-set-c8ymode-qual () { set-c8ymode qual; }
-set-c8ymode-prod () { set-c8ymode prod; }
 
 # ----------
 # c8y-update

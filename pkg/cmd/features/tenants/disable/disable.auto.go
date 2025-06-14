@@ -40,7 +40,7 @@ $ c8y features tenants list --key ui.datapoint-graph.v2 | c8y features tenants d
 Disable the feature when it is active on subtenants
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

@@ -37,7 +37,7 @@ $ c8y auditrecords create --type "Inventory" --time "0s" --text "Managed Object 
 Create an audit record for a custom managed object update
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

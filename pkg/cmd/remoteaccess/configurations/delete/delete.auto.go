@@ -38,7 +38,7 @@ $ c8y remoteaccess configurations delete --device device01 --id 1
 Delete an existing remote access configuration
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

@@ -79,7 +79,7 @@ func NewCmdCreateHostedApplication(f *cmdutil.Factory) *CmdCreateHostedApplicati
 			Create/update hosted web application but don't activate it, so the current version (if any) will be untouched
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

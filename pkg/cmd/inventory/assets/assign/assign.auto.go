@@ -38,7 +38,7 @@ $ c8y inventory assets assign --id 12345 --childGroup 43234
 Create group hierarchy (parent group -> child group)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

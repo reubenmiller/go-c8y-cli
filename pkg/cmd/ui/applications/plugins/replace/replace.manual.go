@@ -27,7 +27,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 			Replace all existing plugins with a new list of plugins
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 	}
 

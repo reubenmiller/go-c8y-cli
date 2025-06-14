@@ -41,7 +41,7 @@ $ c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
 Remove an application binary related to a Hosted (web) application
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

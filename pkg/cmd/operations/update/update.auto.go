@@ -39,7 +39,7 @@ $ c8y operations update --id 12345 --status EXECUTING
 Update an operation
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

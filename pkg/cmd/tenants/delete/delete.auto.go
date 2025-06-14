@@ -37,7 +37,7 @@ $ c8y tenants delete --id "mycompany"
 Delete a tenant by name (from the management tenant)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

@@ -40,7 +40,7 @@ $ c8y tenants enableApplication --tenant "t12345" --application "myMicroservice"
 Enable an application of a tenant by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

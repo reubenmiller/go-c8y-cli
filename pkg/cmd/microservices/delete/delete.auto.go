@@ -41,7 +41,7 @@ $ c8y microservices delete --id report-agent
 Delete a microservice by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

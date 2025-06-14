@@ -41,6 +41,9 @@ var (
 	// EnvPassphraseText passphrase text environment variable name
 	EnvPassphraseText = "C8Y_PASSPHRASE_TEXT"
 
+	// EnvSessionMode session mode (short alias)
+	EnvSessionMode = "C8Y_MODE"
+
 	// PrefixEncrypted prefix used in encrypted string fields to identify when a string is encrypted or not
 	PrefixEncrypted = "{encrypted}"
 
@@ -530,7 +533,7 @@ func (c *Config) bindSettings() {
 		WithBoolEnvOverride(SettingsModeCI, "CI"),
 
 		// Support overriding the settings.session.mode value with the C8Y_MODE env variable
-		WithStringEnvOverride(SettingsMode, "C8Y_MODE"),
+		WithStringEnvOverride(SettingsMode, EnvSessionMode),
 
 		WithBindEnv(SettingsConfigPath, ""),
 		WithBindEnv(SettingsViewsCommonPaths, ""),

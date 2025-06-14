@@ -39,7 +39,7 @@ $ c8y retentionrules update --id 12345 --maximumAge 90
 Update a retention rule
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

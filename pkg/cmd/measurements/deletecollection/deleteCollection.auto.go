@@ -38,7 +38,7 @@ $ c8y measurements deleteCollection --device 12345
 Delete measurement collection for a device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

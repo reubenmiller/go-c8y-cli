@@ -45,7 +45,7 @@ $ c8y deviceregistration register --id "ASDF098SD1J10912UD92JDLCNCU8" --group "M
 Register a new device and assign to a group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

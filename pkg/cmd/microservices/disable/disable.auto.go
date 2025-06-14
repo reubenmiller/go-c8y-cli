@@ -42,7 +42,7 @@ $ c8y microservices disable --id report-agent
 Disable (unsubscribe) to a microservice
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

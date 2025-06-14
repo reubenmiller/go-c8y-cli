@@ -52,7 +52,7 @@ func NewCreateBulkCmd(f *cmdutil.Factory) *CreateBulkCmd {
 			Copy measurements from one device to another modifying the measurements slightly but adding 100 to the value
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

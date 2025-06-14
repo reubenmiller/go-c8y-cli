@@ -41,7 +41,7 @@ $ c8y configuration delete --id 12345 --forceCascade=false
 Delete a configuration package but keep any related binaries
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

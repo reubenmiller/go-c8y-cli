@@ -46,7 +46,7 @@ $ c8y software create --name "python3-requests" | c8y software versions create -
 Create a software package and create a new version
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

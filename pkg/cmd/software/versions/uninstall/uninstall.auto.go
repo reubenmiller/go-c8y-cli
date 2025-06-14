@@ -38,7 +38,7 @@ $ c8y software versions uninstall --device 1234 --software go-c8y-cli --version 
 Uninstall a software package version
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

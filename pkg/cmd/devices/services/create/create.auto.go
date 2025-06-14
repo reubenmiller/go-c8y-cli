@@ -38,7 +38,7 @@ $ c8y devices services create --device 12345 --name ntp --status up --serviceTyp
 Create a new service for a device (as a child addition)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

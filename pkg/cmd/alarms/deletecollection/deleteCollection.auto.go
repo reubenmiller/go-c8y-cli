@@ -41,7 +41,7 @@ $ c8y alarms deleteCollection --device 12345 --dateFrom "-10m" --status ACTIVE
 Remove alarms on the device which are active and created in the last 10 minutes
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

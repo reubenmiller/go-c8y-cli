@@ -38,7 +38,7 @@ $ c8y bulkoperations update --id 12345 --creationRampSec 15
 Update an bulk operation
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

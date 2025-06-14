@@ -38,7 +38,7 @@ $ c8y databroker update --id 12345 --status SUSPENDED
 Change the status of a specific data broker connector by given connector id
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

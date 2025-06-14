@@ -42,7 +42,7 @@ $ c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-
 Add a binary to an event using a custom name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

@@ -43,7 +43,7 @@ $ c8y notification2 subscriptions list --filter "subscription like mysub" -p 100
 Delete all subscriptions which share the same subscription name (using client side filtering)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

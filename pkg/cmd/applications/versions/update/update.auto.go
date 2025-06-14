@@ -38,7 +38,7 @@ $ c8y applications versions update --application 1234 --version 1.0 --tag tag1,l
 Replace application version's tags
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

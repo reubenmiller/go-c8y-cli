@@ -47,7 +47,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 			Create a new version with an empty version number and url
 			`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

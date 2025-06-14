@@ -44,7 +44,7 @@ $ c8y devices list | c8y devices availability set --interval 10
 Set the required availability for a list of devices using pipeline
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

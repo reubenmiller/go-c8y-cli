@@ -41,7 +41,7 @@ $ c8y devicemanagement certificates list | c8y devicemanagement certificates cre
 Copy device certificates from one Cumulocity tenant to another (tenants must not be hosted on the same instance!)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

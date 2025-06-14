@@ -41,7 +41,7 @@ $ c8y devices list | c8y identity create --type c8y_Serial --template "{ externa
 Create an external identity by using the .name property of the device (via the input template variable)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

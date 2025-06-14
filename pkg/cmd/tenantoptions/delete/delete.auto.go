@@ -37,7 +37,7 @@ $ c8y tenantoptions delete --category "c8y_cli_tests" --key "option3"
 Get a tenant option
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

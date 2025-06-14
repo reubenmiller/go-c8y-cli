@@ -41,7 +41,7 @@ $ c8y ui plugins versions delete --plugin 1234 --version 1.0
 Delete plugin version by version name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

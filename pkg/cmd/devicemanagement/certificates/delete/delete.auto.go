@@ -42,7 +42,7 @@ $ c8y devicemanagement certificates delete --id MyCert
 Remove trusted device certificate by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

@@ -130,7 +130,7 @@ func (n *CmdLogin) FromEnv() (*c8ysession.CumulocitySession, error) {
 		Tenant:   os.Getenv("C8Y_TENANT"),
 		Password: os.Getenv("C8Y_PASSWORD"),
 		Token:    os.Getenv("C8Y_TOKEN"),
-		Mode:     os.Getenv("C8Y_MODE"),
+		Mode:     os.Getenv(config.EnvSessionMode),
 	}
 
 	// Choose the first non-empty value
@@ -317,7 +317,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		if n.factory.IOStreams.IsStdoutTTY() {
 			canChangeActiveSession = false
 			notice := heredoc.Docf(`
-				You shouldn't run 'c8y session set' directly as it will have no effect on your current session.
+				You shouldn't run 'c8y session login' directly as it will have no effect on your current session.
 
 				Instead, you will need to use the 'set-session' helper function, or if you can't use the helper function, then run:
 		

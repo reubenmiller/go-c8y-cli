@@ -38,7 +38,7 @@ $ c8y userroles deleteRoleFromGroup --group 12345 --role "ROLE_MEASUREMENT_READ"
 Remove a role from the given user group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

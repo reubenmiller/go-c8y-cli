@@ -51,8 +51,7 @@ tasks:
         if [ ! -f /usr/bin/c8y ]; then \
           sudo ln -s "$(pwd)/tools/PSc8y/Dependencies/c8y.linux" /usr/bin/c8y; \
         fi
-        cp ./tools/shell/c8y.plugin.sh ~/
-        echo "source ~/c8y.plugin.sh"  >> ~/.bashrc
+        echo 'eval "$(c8y cli profile)"'  >> ~/.bashrc
 
         echo Installed c8y successfully
 

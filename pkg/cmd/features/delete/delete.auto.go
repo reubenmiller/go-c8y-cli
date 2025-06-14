@@ -37,7 +37,7 @@ $ c8y features delete --key example
 Remove the feature override for the current tenant
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

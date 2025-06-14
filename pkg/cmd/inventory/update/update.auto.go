@@ -41,7 +41,7 @@ $ c8y inventory update --id 12345 --data "my_Fragment=null"
 Remove a property (by setting it to null)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

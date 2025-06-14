@@ -38,7 +38,7 @@ $ c8y bulkoperations delete --id 12345
 Remove bulk operation by id
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

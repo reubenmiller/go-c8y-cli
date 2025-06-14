@@ -41,7 +41,7 @@ $ c8y devices services list --device 12345 --name ntp | c8y devices services upd
 Update service status
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

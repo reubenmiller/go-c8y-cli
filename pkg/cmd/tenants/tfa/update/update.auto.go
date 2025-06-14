@@ -40,7 +40,7 @@ $ c8y tenants tfa update --tenant t12345 --strategy TOTP
 Update the Tenant's TFA setting to use time based one-time-password
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

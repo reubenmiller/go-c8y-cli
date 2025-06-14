@@ -38,7 +38,7 @@ $ c8y users update --id "myuser" --firstName "Simon"
 Update a user
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

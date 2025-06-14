@@ -45,7 +45,7 @@ $ c8y devices delete --id 12345 --withDeviceUser
 Delete device and related device user/credentials
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

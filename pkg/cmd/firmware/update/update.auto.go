@@ -41,7 +41,7 @@ $ echo "12345" | c8y firmware update --newName "my_custom_name"
 Update a firmware package name (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

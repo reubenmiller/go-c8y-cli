@@ -39,7 +39,7 @@ $ c8y microservices update --id "report-agent" --availability MARKET
 Update microservice availability to MARKET
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

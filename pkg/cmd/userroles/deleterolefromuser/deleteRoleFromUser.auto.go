@@ -38,7 +38,7 @@ $ c8y userroles deleteRoleFromUser --user "peterpi@example.com" --role "ROLE_MEA
 Remove a role from the given user
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

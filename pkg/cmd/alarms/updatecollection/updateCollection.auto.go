@@ -38,7 +38,7 @@ $ c8y alarms updateCollection --device 12345 --status ACTIVE --newStatus ACKNOWL
 Update the status of all active alarms on a device to ACKNOWLEDGED
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}
