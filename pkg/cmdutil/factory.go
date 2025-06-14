@@ -7,11 +7,16 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/clio"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
@@ -27,6 +32,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mode"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -68,8 +74,74 @@ func (f *Factory) SetCommand(cmd *cobra.Command) *Factory {
 	return f
 }
 
+// confirmModeMismatch prompt the user for manual confirmation when a command that is not
+// enabled by default is used, and give the user a chance to confirm it.
+func confirmModeMismatch(cfg *config.Config, expectedMode string, command string) error {
+	if !clio.IsTerminal(os.Stderr) {
+		return fmt.Errorf("user did not confirm")
+	}
+
+	// add small delay so that other commands within the pipeline
+	// to try to avoid messages being mixed into the prompt
+	time.Sleep(100 * time.Millisecond)
+
+	bold := color.New(color.Bold, color.FgRed, color.Underline)
+	fmt.Fprint(os.Stderr, heredoc.Docf(`
+
+		%s This command (%s) is disabled in the session
+		
+		Check the following session information and then confirm the type of action.
+
+		`,
+		bold.Sprint("Session Mode Mismatch"),
+		command,
+	))
+
+	c8ysession.PrintSessionInfo(os.Stderr, nil, cfg, c8ysession.CumulocitySession{
+		SessionUri: cfg.GetSessionFile(),
+		Mode:       cfg.SessionMode().String(),
+		Host:       cfg.GetHost(),
+		Tenant:     cfg.GetTenant(),
+		Username:   cfg.GetUsername(),
+		Version:    cfg.GetCumulocityVersion(),
+	})
+
+	boldGreen := color.New(color.Bold, color.FgGreen)
+	fmt.Fprint(os.Stderr, heredoc.Docf(`
+		%s You can permanently change the session mode by using either:
+		  * set-session --mode dev (set the mode when selecting the session)
+		  * c8y settings update mode dev (set the default mode for the current session (requires reloading the session))
+		  * %s --sessionMode dev (set mode for a single command)
+
+		`,
+		boldGreen.Sprint("Tip"),
+		command,
+	))
+
+	mode, err := prompt.Select("Confirm the action to continue", []string{
+		"cancel",
+		expectedMode,
+	}, "cancel")
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			return fmt.Errorf("user did not confirm")
+		}
+		return err
+	}
+	if mode == expectedMode {
+		return nil
+	}
+	if mode == "cancel" {
+		return fmt.Errorf("user cancelled the command")
+	}
+	if mode != expectedMode {
+		return fmt.Errorf("user did not confirm")
+	}
+	return nil
+}
+
 // CreateModeEnabled create mode is enabled
-func (f *Factory) CreateModeEnabled() error {
+func (f *Factory) CreateModeEnabled(cmd *cobra.Command) error {
 	cfg, err := f.Config()
 	if err != nil {
 		return err
@@ -84,11 +156,23 @@ func (f *Factory) CreateModeEnabled() error {
 	if cfg.DryRun() {
 		return nil
 	}
-	return mode.ValidateCreateMode(cfg)
+
+	modeErr := mode.ValidateCreateMode(cfg)
+	if modeErr == nil {
+		return nil
+	}
+	if !clio.IsLastInPipeline() {
+		return modeErr
+	}
+
+	if err := confirmModeMismatch(cfg, "create", cmd.CommandPath()); err != nil {
+		return err
+	}
+	return nil
 }
 
 // ValidateUpdateMode update mode is enabled
-func (f *Factory) UpdateModeEnabled() error {
+func (f *Factory) UpdateModeEnabled(cmd *cobra.Command) error {
 	cfg, err := f.Config()
 	if err != nil {
 		return err
@@ -103,11 +187,23 @@ func (f *Factory) UpdateModeEnabled() error {
 	if cfg.DryRun() {
 		return nil
 	}
-	return mode.ValidateUpdateMode(cfg)
+
+	modeErr := mode.ValidateUpdateMode(cfg)
+	if modeErr == nil {
+		return nil
+	}
+	if !clio.IsLastInPipeline() {
+		return modeErr
+	}
+
+	if err := confirmModeMismatch(cfg, "update", cmd.CommandPath()); err != nil {
+		return err
+	}
+	return nil
 }
 
 // ValidateDeleteMode delete mode is enabled
-func (f *Factory) DeleteModeEnabled() error {
+func (f *Factory) DeleteModeEnabled(cmd *cobra.Command) error {
 	cfg, err := f.Config()
 	if err != nil {
 		return err
@@ -122,7 +218,19 @@ func (f *Factory) DeleteModeEnabled() error {
 	if cfg.DryRun() {
 		return nil
 	}
-	return mode.ValidateDeleteMode(cfg)
+
+	modeErr := mode.ValidateDeleteMode(cfg)
+	if modeErr == nil {
+		return nil
+	}
+	if !clio.IsLastInPipeline() {
+		return modeErr
+	}
+
+	if err := confirmModeMismatch(cfg, "delete", cmd.CommandPath()); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (f *Factory) GetRequestHandler() (*request.RequestHandler, error) {
