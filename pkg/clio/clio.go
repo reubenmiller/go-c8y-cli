@@ -65,3 +65,10 @@ func GetTTYStdin() *os.File {
 	}
 	return stdIn
 }
+
+// IsLastInPipeline checks if a command is the last in the pipeline
+// The check isn't perfect, however it is a good enough check if data
+// is being written to the console or not
+func IsLastInPipeline() bool {
+	return IsInteractiveTerminal(os.Stdout)
+}
