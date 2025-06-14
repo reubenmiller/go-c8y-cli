@@ -17,9 +17,7 @@ export LC_ALL=C.UTF-8
 # Usage:
 #   session
 #
-session() {
-    c8y sessions get "$@"
-}
+alias session='c8y sessions get'
 
 # -----------
 # set-session

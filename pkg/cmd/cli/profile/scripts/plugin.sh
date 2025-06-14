@@ -112,10 +112,7 @@ fi
 # Usage:
 #   session
 #
-unalias session 2>/dev/null ||:
-session() {
-    c8y sessions get "$@"
-}
+alias session='c8y sessions get'
 
 # -----------
 # set-session
