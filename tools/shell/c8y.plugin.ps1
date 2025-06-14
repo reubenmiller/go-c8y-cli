@@ -53,22 +53,6 @@ Clear session variables
     c8y sessions clear | Out-String | Invoke-Expression
 }
 
-Function clear-c8ypassphrase {
-<#
-.SYNOPSIS
-Clear the encryption passphrase environment variables
-
-.EXAMPLE
-clear-c8ypassphrase
-
-Clear encryption passphrase variables
-#>
-    [cmdletbinding()]
-    Param()
-    $env:C8Y_PASSPHRASE = $null
-    $env:C8Y_PASSPHRASE_TEXT = $null
-}
-
 Function set-c8ymode {
 <#
 .SYNOPSIS
