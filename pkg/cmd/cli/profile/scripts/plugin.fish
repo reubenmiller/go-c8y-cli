@@ -52,18 +52,6 @@ function clear-session --description "Clear all cumulocity session variables"
     c8y sessions clear | source
 end
 
-# -------------------
-# clear-c8ypassphrase
-# -------------------
-# Description: Clear the encryption passphrase environment variables
-# Usage:
-#   clear-c8ypassphrase
-#
-function clear-c8ypassphrase --description "Clear the encryption passphrase environment variables"
-    set -u C8Y_PASSPHRASE
-    set -u C8Y_PASSPHRASE_TEXT
-end
-
 # ----------------
 # set-c8ymode-xxxx
 # ----------------

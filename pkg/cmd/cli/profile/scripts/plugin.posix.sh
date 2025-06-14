@@ -52,19 +52,6 @@ clear_session() {
 }
 alias clear-session=clear_session
 
-# -------------------
-# clear-c8ypassphrase
-# -------------------
-# Description: Clear the encryption passphrase environment variables
-# Usage:
-#   clear-c8ypassphrase
-#
-clear_c8ypassphrase() {
-    unset C8Y_PASSPHRASE
-    unset C8Y_PASSPHRASE_TEXT
-}
-alias clear-c8ypassphrase=clear_c8ypassphrase
-
 # ----------------
 # set-c8ymode-xxxx
 # ----------------

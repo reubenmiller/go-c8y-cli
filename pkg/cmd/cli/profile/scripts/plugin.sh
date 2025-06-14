@@ -146,18 +146,6 @@ clear-session() {
     eval "$c8yenv"
 }
 
-# -------------------
-# clear-c8ypassphrase
-# -------------------
-# Description: Clear the encryption passphrase environment variables
-# Usage:
-#   clear-c8ypassphrase
-#
-clear-c8ypassphrase() {
-    unset C8Y_PASSPHRASE
-    unset C8Y_PASSPHRASE_TEXT
-}
-
 # ----------------
 # set-c8ymode-xxxx
 # ----------------
