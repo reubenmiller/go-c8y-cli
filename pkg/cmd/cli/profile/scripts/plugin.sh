@@ -142,20 +142,3 @@ clear-session() {
     c8yenv=$(c8y sessions clear)
     eval "$c8yenv"
 }
-
-# ----------------
-# set-c8ymode-xxxx
-# ----------------
-# Description: Set temporary mode by setting the environment variables
-# Usage:
-#   set-c8ymode-dev     (enable PUT, POST and DELETE)
-#   set-c8ymode-qual    (enable PUT, POST)
-#   set-c8ymode-prod    (disable PUT, POST and DELETE)
-#
-set-c8ymode() {
-    eval "$(c8y settings update --shell auto mode "$1")"
-    printf "\e[32mEnabled %s mode (temporarily)\e[0m\n" "$1";
-}
-set-c8ymode-dev() { set-c8ymode dev; }
-set-c8ymode-qual() { set-c8ymode qual; }
-set-c8ymode-prod() { set-c8ymode prod; }

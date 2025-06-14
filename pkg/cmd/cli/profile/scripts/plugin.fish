@@ -51,29 +51,3 @@ end
 function clear-session --description "Clear all cumulocity session variables"
     c8y sessions clear | source
 end
-
-# ----------------
-# set-c8ymode-xxxx
-# ----------------
-# Description: Set temporary mode by setting the environment variables
-# Usage:
-#   set-c8ymode-dev     (enable PUT, POST and DELETE)
-#   set-c8ymode-qual    (enable PUT, POST)
-#   set-c8ymode-prod    (disable PUT, POST and DELETE)
-#
-function set-c8ymode --description "Enable a c8y temporary mode by setting the environment variables"
-    c8y settings update --shell auto mode $argv[1] | source
-    echo (set_color green)"Enabled "$argv[1]" mode (temporarily)"(set_color normal)
-end
-
-function set-c8ymode-dev --description "Enable dev mode (All enabled)"
-    set-c8ymode dev
-end
-
-function set-c8ymode-qual --description "Enable qual mode (DELETE disabled)"
-    set-c8ymode qual
-end
-
-function set-c8ymode-prod --description "Enable prod mode (POST/PUT/DELETE disabled)"
-    set-c8ymode prod
-end

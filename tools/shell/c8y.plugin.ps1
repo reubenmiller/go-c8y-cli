@@ -52,31 +52,3 @@ Clear session variables
     Param()
     c8y sessions clear | Out-String | Invoke-Expression
 }
-
-Function set-c8ymode {
-<#
-.SYNOPSIS
-Enable a c8y temporary mode by setting the environment variables
-
-.EXAMPLE
-set-c8ymode dev
-
-Enable dev mode (enables POST, PUT and DELETE commands)
-#>
-    [cmdletbinding()]
-    Param(
-        # Mode
-        [Parameter(
-            Mandatory = $true,
-            Position = 0
-        )]
-        [ValidateSet("dev", "qual", "prod")]
-        [string]
-        $Mode,
-
-        [parameter(ValueFromRemainingArguments=$true)]
-        $Options
-    )
-    c8y settings update --shell auto mode $Mode $Options | Out-String | Invoke-Expression
-    Write-Host "Enabled "$Mode" mode (temporarily)" -ForegroundColor Green
-}
