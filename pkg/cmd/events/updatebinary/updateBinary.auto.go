@@ -40,7 +40,7 @@ $ c8y events updateBinary --id 12345 --file ./myfile.log
 Update a binary related to an event
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

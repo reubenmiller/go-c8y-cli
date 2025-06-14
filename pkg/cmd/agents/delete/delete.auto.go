@@ -46,7 +46,7 @@ $ c8y agents delete --id 12345 --withDeviceUser
 Delete agent and related device user/credentials
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

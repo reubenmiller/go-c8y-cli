@@ -40,7 +40,7 @@ $ c8y binaries update --id 12345 --file ./myfile.log
 Update an existing binary file
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

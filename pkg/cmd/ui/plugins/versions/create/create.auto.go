@@ -38,7 +38,7 @@ $ c8y ui plugins versions create --plugin 1234 --file "./testdata/myapp.zip" --v
 Create a new version for a plugin
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

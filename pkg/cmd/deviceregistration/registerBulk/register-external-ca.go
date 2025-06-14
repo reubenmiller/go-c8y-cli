@@ -43,7 +43,7 @@ func NewRegisterExternalCACmd(f *cmdutil.Factory) *RegisterExternalCACmd {
 			Register 2 devices, and set the names based on their external id (using CERTIFICATES auth)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

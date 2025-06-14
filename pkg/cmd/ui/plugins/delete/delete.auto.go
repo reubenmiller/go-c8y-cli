@@ -38,7 +38,7 @@ $ c8y ui plugins delete --id "my-example-app"
 Remove UI plugin
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

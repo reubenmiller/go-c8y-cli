@@ -43,7 +43,7 @@ $ c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0
 Install a firmware version with an explicit url
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

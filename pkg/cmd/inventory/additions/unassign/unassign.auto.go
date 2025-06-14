@@ -38,7 +38,7 @@ $ c8y inventory additions unassign --id 12345 --child 22553
 Unassign a child addition from its parent managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

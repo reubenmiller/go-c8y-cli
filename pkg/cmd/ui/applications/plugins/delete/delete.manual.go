@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 			Delete all UI plugins from an application
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 	}
 

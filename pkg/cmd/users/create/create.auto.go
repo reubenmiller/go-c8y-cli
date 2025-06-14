@@ -40,7 +40,7 @@ $ c8y users create --template "{email: 'test@me.com', userName: $.email, firstNa
 Create a user using a template
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

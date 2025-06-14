@@ -38,7 +38,7 @@ $ c8y software update --id 12345 --newName "my_custom_name" --data "{\"com_my_pr
 Update a software package
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

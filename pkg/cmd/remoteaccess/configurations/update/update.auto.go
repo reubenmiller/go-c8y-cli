@@ -40,7 +40,7 @@ $ c8y remoteaccess configurations update --device device01 --id 1 --newName hell
 Update an existing remote access configuration
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

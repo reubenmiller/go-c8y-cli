@@ -38,7 +38,7 @@ $ c8y notification2 subscriptions deleteBySource --device 12345
 Delete a subscription associated with a device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

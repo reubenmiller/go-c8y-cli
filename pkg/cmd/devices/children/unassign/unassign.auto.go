@@ -41,7 +41,7 @@ $ c8y devices children unassign --id 12345 --child 22553 --childType device
 Unassign a child device from a managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

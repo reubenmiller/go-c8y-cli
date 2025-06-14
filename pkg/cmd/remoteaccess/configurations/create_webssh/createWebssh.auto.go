@@ -43,7 +43,7 @@ $ c8y remoteaccess configurations create-webssh --device device01 --hostname 127
 Create a webssh configuration with a custom hostname and port (with ssh key authentication)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

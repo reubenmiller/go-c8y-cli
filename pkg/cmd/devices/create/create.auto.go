@@ -41,7 +41,7 @@ $ c8y devices create --name myDevice --data "custom_value1=1234"
 Create device with custom properties
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

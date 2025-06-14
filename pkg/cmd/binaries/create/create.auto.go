@@ -44,7 +44,7 @@ $ c8y binaries create --file "myConfig.json" --file "device01-myConfig.json" --t
 Upload a file with a custom name and custom meta information
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

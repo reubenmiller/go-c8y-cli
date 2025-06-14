@@ -37,7 +37,7 @@ $ c8y tenants disable --id "mycompany"
 Disable a tenant (from the management tenant)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

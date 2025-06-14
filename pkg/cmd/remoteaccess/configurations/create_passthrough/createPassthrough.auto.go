@@ -49,7 +49,7 @@ $ c8y remoteaccess configurations create-passthrough --device device01 --hostnam
 Create a SSH passthrough configuration with custom details
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

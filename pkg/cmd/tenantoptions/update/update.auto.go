@@ -37,7 +37,7 @@ $ c8y tenantoptions update --category "c8y_cli_tests" --key "option4" --value "0
 Update a tenant option
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

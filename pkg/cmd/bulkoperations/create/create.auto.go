@@ -41,7 +41,7 @@ $ c8y devicegroups get --id 12345 | c8y bulkoperations create --startDate "10s" 
 Create bulk operation for a group (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

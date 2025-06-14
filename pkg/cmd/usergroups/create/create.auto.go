@@ -37,7 +37,7 @@ $ c8y usergroups create --name customGroup1
 Create a user group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

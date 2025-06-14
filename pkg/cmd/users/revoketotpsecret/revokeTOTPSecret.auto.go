@@ -41,7 +41,7 @@ $ c8y users revokeTOTPSecret --id "myuser"
 Revoke a user's TOTP (TFA) secret
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

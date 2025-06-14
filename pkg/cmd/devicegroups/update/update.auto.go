@@ -39,7 +39,7 @@ $ c8y devicegroups update --id 12345
 Update device group by id
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

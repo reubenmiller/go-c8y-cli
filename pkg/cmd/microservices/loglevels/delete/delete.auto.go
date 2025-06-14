@@ -43,7 +43,7 @@ $ c8y microservices loglevels delete --name my-microservice --loggerName org.exa
 Delete configured log level of microservice for a specific class
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

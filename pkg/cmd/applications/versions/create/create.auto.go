@@ -38,7 +38,7 @@ $ c8y applications versions create --application 1234 --file "./testdata/myapp.z
 Create a new application version
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

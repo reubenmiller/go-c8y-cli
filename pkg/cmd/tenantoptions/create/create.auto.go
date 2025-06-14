@@ -37,7 +37,7 @@ $ c8y tenantoptions create --category "c8y_cli_tests" --key "option1" --value "1
 Create a tenant option
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

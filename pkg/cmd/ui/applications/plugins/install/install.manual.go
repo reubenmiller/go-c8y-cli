@@ -30,7 +30,7 @@ func NewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 			Install myplugin via a lookup and add manual configuration using templates (for power users only!)
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 	}
 

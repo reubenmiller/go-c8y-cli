@@ -53,7 +53,7 @@ $ c8y measurements list --device 12345 --select '!id,**' | c8y measurements crea
 Copy measurements from one device to another
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

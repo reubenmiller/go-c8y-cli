@@ -40,7 +40,7 @@ $ c8y devicegroups unassignDevice --group 12345 --childDevice 22553
 Unassign a child device from its parent device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

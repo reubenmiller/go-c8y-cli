@@ -41,7 +41,7 @@ $ c8y software delete --id 12345 --forceCascade=false
 Delete a software package but keep all related versions
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

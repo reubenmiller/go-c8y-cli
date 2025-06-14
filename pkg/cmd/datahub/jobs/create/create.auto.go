@@ -40,7 +40,7 @@ $ c8y datahub jobs create --sql "SELECT * FROM alarms" --context myTenantIdDataL
 Create a new datahub job using context
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

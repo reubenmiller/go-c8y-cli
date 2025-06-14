@@ -38,7 +38,7 @@ $ c8y inventory additions create --id 12345 --data "custom.value=test" --global
 Create a child addition and link it to an existing managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

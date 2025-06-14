@@ -37,7 +37,7 @@ $ c8y deviceprofiles create --name "python3-requests"
 Create a device profile
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

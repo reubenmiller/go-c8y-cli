@@ -38,7 +38,7 @@ $ c8y operations create --device 12345 --data "c8y_Restart={}"
 Create operation for a device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

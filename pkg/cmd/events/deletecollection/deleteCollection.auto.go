@@ -41,7 +41,7 @@ $ c8y events deleteCollection --device 12345
 Remove events from a device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

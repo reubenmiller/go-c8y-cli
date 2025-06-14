@@ -38,7 +38,7 @@ $ c8y inventory assets unassign --id 12345 --child 22553
 Unassign a child device from its parent device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

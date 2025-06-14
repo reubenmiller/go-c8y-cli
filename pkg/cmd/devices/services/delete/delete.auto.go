@@ -44,7 +44,7 @@ $ c8y devices services list --device 12345 | c8y devices services delete
 Get service status (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

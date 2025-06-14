@@ -41,7 +41,7 @@ $ c8y devices get --id 12345 | c8y events create --type c8y_TestEvent --text "Te
 Create a new event for a device (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

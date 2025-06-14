@@ -38,7 +38,7 @@ $ c8y userroles addRoleToGroup --group "12345" --role "*ALARM*"
 Add a role to the admin group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

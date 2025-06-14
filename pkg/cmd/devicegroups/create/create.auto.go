@@ -41,7 +41,7 @@ $ c8y devicegroups create --name mygroup --data "custom_value1=1234"
 Create device group with custom properties
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

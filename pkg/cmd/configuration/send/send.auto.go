@@ -54,7 +54,7 @@ $ c8y configuration send --device 12345 --configurationType apt-lists --url "htt
 Send a custom configuration by manually providing the type and url
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

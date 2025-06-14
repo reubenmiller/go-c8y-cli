@@ -36,7 +36,7 @@ $ c8y devicemanagement certificate-authority delete
 Delete certificate authority
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

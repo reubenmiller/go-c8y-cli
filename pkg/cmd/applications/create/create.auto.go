@@ -37,7 +37,7 @@ $ c8y applications create --name myapp --type HOSTED --key "myapp-key" --context
 Create a new hosted application
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

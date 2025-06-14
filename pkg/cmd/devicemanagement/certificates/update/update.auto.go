@@ -41,7 +41,7 @@ $ c8y devicemanagement certificates update --id MyCert --status DISABLED
 Update device certificate by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

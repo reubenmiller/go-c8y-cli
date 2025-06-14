@@ -40,7 +40,7 @@ $ c8y devices assignChild --device 12345 --newChild 44235
 Assign a device as a child device to an existing device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

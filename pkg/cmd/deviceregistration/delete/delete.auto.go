@@ -38,7 +38,7 @@ $ c8y deviceregistration delete --id "91019192078"
 Delete a new device request
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

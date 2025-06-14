@@ -40,7 +40,7 @@ $ echo -e "c8y_Linux\nc8y_MacOS" | c8y firmware create --name "iot-linux" --desc
 Create the same firmware package for multiple device types
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

@@ -40,7 +40,7 @@ $ c8y tenants list | c8y features tenants enable --key ui.datapoint-graph.v2
 Enable a specific feature on all subtenants
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

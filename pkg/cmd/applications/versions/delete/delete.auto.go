@@ -41,7 +41,7 @@ $ c8y applications versions delete --application 1234 --version 1.0
 Delete application version by version name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

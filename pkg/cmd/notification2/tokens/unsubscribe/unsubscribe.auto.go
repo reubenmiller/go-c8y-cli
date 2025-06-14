@@ -43,7 +43,7 @@ $ c8y notification2 tokens unsubscribe --token "eyJhbGciOiJSUzI1NiJ9"
 Unsubscribe a subscriber using its token
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

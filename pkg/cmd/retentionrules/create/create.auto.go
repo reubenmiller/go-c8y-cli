@@ -38,7 +38,7 @@ $ c8y retentionrules create --dataType ALARM --maximumAge 180
 Create a retention rule
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

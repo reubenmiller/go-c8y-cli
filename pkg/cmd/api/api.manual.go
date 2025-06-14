@@ -233,19 +233,19 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if strings.EqualFold(method, http.MethodPut) {
-		if err := n.factory.UpdateModeEnabled(); err != nil {
+		if err := n.factory.UpdateModeEnabled(cmd); err != nil {
 			return err
 		}
 	}
 
 	if strings.EqualFold(method, http.MethodPost) {
-		if err := n.factory.CreateModeEnabled(); err != nil {
+		if err := n.factory.CreateModeEnabled(cmd); err != nil {
 			return err
 		}
 	}
 
 	if strings.EqualFold(method, http.MethodDelete) {
-		if err := n.factory.DeleteModeEnabled(); err != nil {
+		if err := n.factory.DeleteModeEnabled(cmd); err != nil {
 			return err
 		}
 	}

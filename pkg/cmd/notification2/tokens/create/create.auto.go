@@ -40,7 +40,7 @@ $ c8y notification2 tokens create --name testSubscription --subscriber testSubsc
 Create a new token which is valid for 30 minutes
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

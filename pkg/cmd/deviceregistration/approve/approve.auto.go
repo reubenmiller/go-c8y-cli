@@ -41,7 +41,7 @@ $ c8y deviceregistration approve --id "1234010101s01ldk208" --securityToken "abc
 Approve a new device request and provide a security token
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

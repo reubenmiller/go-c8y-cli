@@ -38,7 +38,7 @@ $ c8y applications update --id "my-example-app" --availability MARKET
 Update application availability to MARKET
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

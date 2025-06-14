@@ -38,7 +38,7 @@ $ c8y alarms create --device 12345 --type c8y_TestAlarm --time "-0s" --text "Tes
 Create a new alarm for device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

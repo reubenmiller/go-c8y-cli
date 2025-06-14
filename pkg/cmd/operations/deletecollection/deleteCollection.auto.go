@@ -41,7 +41,7 @@ $ c8y operations deleteCollection --device 12345 --status PENDING
 Remove all pending operations for a given device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return f.DeleteModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

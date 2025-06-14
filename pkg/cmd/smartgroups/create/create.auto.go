@@ -44,7 +44,7 @@ $ c8y smartgroups create --name mySmartGroup --query "type eq 'IS*'" --invisible
 Create a smart group which is not visible in the UI
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

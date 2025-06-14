@@ -30,7 +30,7 @@ func NewCmdUpdate(f *cmdutil.Factory) *plugins.PluginCmd {
 			Update specific UI plugins in an application 
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 	}
 

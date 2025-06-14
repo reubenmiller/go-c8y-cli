@@ -50,7 +50,7 @@ $ c8y devicemanagement certificate-authority create --status DISABLED
 Create new certificate authority but disable it
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

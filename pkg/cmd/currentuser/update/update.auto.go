@@ -38,7 +38,7 @@ $ c8y currentuser update --lastName "Smith"
 Update the current user's last name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

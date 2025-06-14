@@ -38,7 +38,7 @@ $ c8y ui plugins update --id "my-example-app" --availability SHARED
 Update plugin availability to SHARED
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

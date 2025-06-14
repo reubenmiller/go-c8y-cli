@@ -37,7 +37,7 @@ $ c8y datahub jobs cancel --id "22feee74-875a-561c-5508-04114bdda000"
 Cancel a datahub job
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

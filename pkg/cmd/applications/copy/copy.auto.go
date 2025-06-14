@@ -47,7 +47,7 @@ $ c8y applications copy --id my-example-app
 Copy an existing application
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

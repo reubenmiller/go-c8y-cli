@@ -37,7 +37,7 @@ $ c8y currentapplication update --data "myCustomProp=1"
 Update custom properties of the current application (requires using application credentials)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.UpdateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}

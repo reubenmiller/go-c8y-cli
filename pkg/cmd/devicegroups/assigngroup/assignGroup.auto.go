@@ -43,7 +43,7 @@ $ c8y devicegroups assignGroup --group 12345 --newChildGroup 43234,99292,12222
 Add multiple groups to a group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.CreateModeEnabled(cmd)
 		},
 		RunE: ccmd.RunE,
 	}
