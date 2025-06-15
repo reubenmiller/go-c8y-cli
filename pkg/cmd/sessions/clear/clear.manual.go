@@ -47,11 +47,11 @@ $ c8y sessions clear | source
 	cmdutil.DisableEncryptionCheck(cmd)
 
 	cmd.SilenceUsage = true
-	cmd.Flags().StringVar(&ccmd.Shell, "shell", "auto", "Shell type. Defaults to auto if not printing to terminal")
+	cmd.Flags().StringVar(&ccmd.Shell, "shell", shell.ShellAuto, "Shell type. Defaults to auto if not printing to terminal")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("shell", "auto", "bash", "zsh", "fish", "powershell"),
+		completion.WithValidateSet("shell", shell.SupportedShells(shell.ShellAuto)...),
 	)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -60,8 +60,8 @@ $ c8y sessions clear | source
 
 func (n *CmdClearSession) RunE(cmd *cobra.Command, args []string) error {
 	shellType := utilities.ShellBash
-	if strings.EqualFold(n.Shell, "auto") {
-		n.Shell = shell.DetectShell("bash")
+	if strings.EqualFold(n.Shell, shell.ShellAuto) {
+		n.Shell = shell.DetectShell(shell.ShellBash)
 	}
 	c8ysession.ClearEnvironmentVariables(shellType.FromString(n.Shell))
 	return nil

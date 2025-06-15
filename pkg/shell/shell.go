@@ -1,6 +1,9 @@
 package shell
 
-import "os"
+import (
+	"os"
+	"slices"
+)
 
 // DetectShell detect the shell type, i.e. fish, bash, zsh or powershell
 func DetectShell(defaultValue string) string {
@@ -17,4 +20,33 @@ func DetectShell(defaultValue string) string {
 		return "powershell"
 	}
 	return defaultValue
+}
+
+var (
+	ShellFish       = "fish"
+	ShellBash       = "bash"
+	ShellZsh        = "zsh"
+	ShellPowershell = "powershell"
+	ShellPosixShell = "sh"
+	ShellAuto       = "auto"
+)
+
+func SupportedShells(additional ...string) []string {
+	values := []string{ShellFish, ShellBash, ShellZsh, ShellPosixShell, ShellPowershell}
+	for _, v := range additional {
+		if !slices.Contains(values, v) {
+			values = append(values, v)
+		}
+	}
+	return values
+}
+
+func SupportTabCompletionShells(additional ...string) []string {
+	values := []string{ShellFish, ShellBash, ShellZsh, ShellPowershell}
+	for _, v := range additional {
+		if !slices.Contains(values, v) {
+			values = append(values, v)
+		}
+	}
+	return values
 }

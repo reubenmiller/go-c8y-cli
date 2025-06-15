@@ -1,12 +1,14 @@
 package completion
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
 	"github.com/spf13/cobra"
 )
 
@@ -79,19 +81,21 @@ func NewCmdCompletion() *CmdCompletion {
 		Short:                 "Generate completion script",
 		Long:                  descriptionLong,
 		DisableFlagsInUseLine: true,
-		ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
+		ValidArgs:             shell.SupportTabCompletionShells(),
 		Args:                  flags.ExactArgsOrExample(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			switch args[0] {
-			case "bash":
+			case shell.ShellBash:
 				err = cmd.Root().GenBashCompletionV2(os.Stdout, true)
-			case "zsh":
+			case shell.ShellZsh:
 				err = cmd.Root().GenZshCompletion(os.Stdout)
-			case "fish":
+			case shell.ShellFish:
 				err = cmd.Root().GenFishCompletion(os.Stdout, true)
-			case "powershell":
+			case shell.ShellPowershell:
 				err = cmd.Root().GenPowerShellCompletionWithDesc(os.Stdout)
+			case shell.ShellPosixShell:
+				err = fmt.Errorf("posix shell (sh) does not support tab completion")
 			}
 			return err
 		},

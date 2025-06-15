@@ -98,7 +98,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("shell", "auto", "bash", "zsh", "fish", "powershell"),
+		completion.WithValidateSet("shell", shell.SupportedShells(shell.ShellAuto)...),
 		completion.WithValidateSet("output-format", "json", "dotenv"),
 		completion.WithValidateSet("provider", config.ProviderTypeFile, config.ProviderTypeStdin, config.ProviderTypeEnv, config.ProviderTypeExternal, config.ProviderTypeAuto),
 		completion.WithValidateSet("format", "json", "yaml", "toml", "dotenv"),
@@ -463,10 +463,10 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	outputFormat := n.OutputFormat
 	if outputFormat == "" {
 		if n.Shell == "" && !n.factory.IOStreams.IsStdoutTTY() {
-			n.Shell = "auto"
+			n.Shell = shell.ShellAuto
 		}
-		if strings.EqualFold(n.Shell, "auto") {
-			n.Shell = shell.DetectShell("bash")
+		if strings.EqualFold(n.Shell, shell.ShellAuto) {
+			n.Shell = shell.DetectShell(shell.ShellBash)
 		}
 		outputFormat = n.Shell
 	}
