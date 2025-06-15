@@ -61,13 +61,12 @@ String
     }
 
     Begin {
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "sessions set"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "sessions login"
     }
 
     Process {
         if ($SessionFilter -gt 0) {
-            $SearchTerms = $SessionFilter -join " "
-            $null = $c8yargs.AddRange(@("--sessionFilter", "$SearchTerms"))
+            $null = $c8yargs.AddRange($SessionFilter)
         }
 
         $null = $c8yargs.AddRange(@("--shell", "powershell"))
