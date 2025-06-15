@@ -35,6 +35,7 @@ Set a session from an external command, where the external commands returns the 
 ### Options
 
 ```
+      --clear                  Clear any existing tokens
       --format string          External command format, e.g. json, yaml, toml
       --from-cmd string        External command to execute to get the log in details
       --from-env               Read from environment variables
@@ -48,6 +49,7 @@ Set a session from an external command, where the external commands returns the 
       --provider string        Session provider which returns the session to use
       --secrets strings        List of secrets to include as env variables when running an external command. Only valid with from-cmd
       --shell string           Shell type to return the environment variables
+      --tfaCode string         Two Factor Authentication code
 ```
 
 ### Options inherited from parent commands

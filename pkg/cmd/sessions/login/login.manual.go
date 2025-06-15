@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/kballard/go-shellquote"
@@ -39,7 +40,9 @@ type CmdLogin struct {
 	Secrets  []string
 
 	// Login options
-	LoginType string
+	LoginType  string
+	TFACode    string
+	ClearToken bool
 
 	Mode string
 
@@ -89,6 +92,8 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().BoolVar(&ccmd.Env, "from-env", false, "Read from environment variables")
 	cmd.Flags().BoolVar(&ccmd.Stdin, "from-stdin", false, "Read from standard input")
 	cmd.Flags().BoolVar(&ccmd.NoBanner, "no-banner", false, "Don't show the session banner")
+	cmd.Flags().StringVar(&ccmd.TFACode, "tfaCode", "", "Two Factor Authentication code")
+	cmd.Flags().BoolVar(&ccmd.ClearToken, "clear", false, "Clear any existing tokens")
 	cmd.Flags().StringVar(&ccmd.Format, "format", "", "External command format, e.g. json, yaml, toml")
 	cmd.Flags().StringVar(&ccmd.OutputFormat, "output-format", "", "Output format")
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", "", "Shell type to return the environment variables")
@@ -406,7 +411,12 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	client := c8y.NewClient(nil, session.Host, session.Tenant, session.Username, session.Password, true)
-	client.SetToken(session.Token)
+
+	if !n.ClearToken && c8ysession.ShouldReuseToken(cfg, log, session.Token) {
+		client.SetToken(session.Token)
+	} else {
+		client.SetToken("")
+	}
 
 	c8ysession.ClearProcessEnvironment()
 
@@ -419,6 +429,13 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 	log.Infof("User preference for login type: %s", handler.LoginType)
 	handler.TFACode = session.TOTP
+	if n.TFACode == "" {
+		if code, err := cfg.GetTOTP(time.Now()); err == nil {
+			cfg.Logger.Infof("Setting totp code: %s", code)
+			n.TFACode = code
+		}
+	}
+
 	handler.SetLogger(log)
 	err = handler.Run()
 	if err != nil {
