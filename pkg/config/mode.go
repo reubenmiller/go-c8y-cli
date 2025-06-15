@@ -33,6 +33,11 @@ const (
 	SessionModeUnset
 )
 
+// IsSessionModeValid check if given mode name is valid
+func IsSessionModeValid(name string, ci bool) bool {
+	return SessionModeUnset.FromString(name, ci) != SessionModeUnset
+}
+
 func (f SessionMode) String() string {
 	values := map[SessionMode]string{
 		SessionModeProduction: "prod",

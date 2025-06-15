@@ -438,7 +438,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		session.Mode = n.Mode
 	}
 
-	if session.Mode == "" {
+	if session.Mode == "" || !config.IsSessionModeValid(session.Mode, cfg.IsCIMode()) {
 		// prompt the user for a value
 		modeOptions := config.GetSessionModeCompletionHelp()
 		mode, selectErr := prompt.Select("Select session mode", modeOptions, modeOptions[0])
