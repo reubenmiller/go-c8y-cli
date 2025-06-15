@@ -369,7 +369,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 			n.Provider = config.ProviderTypeEnv
 		} else if n.Exec != "" {
 			n.Provider = config.ProviderTypeExternal
-		} else if os.Getenv("CI") != "" {
+		} else if cfg.IsCIMode() {
 			// CI environment and generally env variables are used here
 			n.Provider = config.ProviderTypeEnv
 		} else if n.factory.IOStreams.HasStdin() {
