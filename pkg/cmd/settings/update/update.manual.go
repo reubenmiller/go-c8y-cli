@@ -498,7 +498,7 @@ func NewCmdUpdate(f *cmdutil.Factory) *UpdateSettingsCmd {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("shell", "auto", "bash", "fish", "powershell", "zsh"),
+		completion.WithValidateSet("shell", shell.SupportedShells(shell.ShellAuto)...),
 	)
 
 	cmd.SilenceUsage = true
@@ -528,8 +528,8 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	} else if n.shell != "" {
-		if strings.EqualFold(n.shell, "auto") {
-			n.shell = shell.DetectShell("bash")
+		if strings.EqualFold(n.shell, shell.ShellAuto) {
+			n.shell = shell.DetectShell(shell.ShellBash)
 		}
 		v = viper.New()
 		writeToFile = false

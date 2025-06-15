@@ -41,6 +41,7 @@ func (t ShellType) FromString(name string) ShellType {
 		"bash":       ShellBash,
 		"zsh":        ShellZSH,
 		"fish":       ShellFish,
+		"sh":         ShellPosixShell,
 	}
 
 	if v, ok := values[strings.ToLower(name)]; ok {
@@ -55,6 +56,7 @@ func (t ShellType) Parse(name string) (ShellType, bool) {
 		"bash":       ShellBash,
 		"zsh":        ShellZSH,
 		"fish":       ShellFish,
+		"sh":         ShellPosixShell,
 	}
 
 	v, ok := values[strings.ToLower(name)]
@@ -73,6 +75,9 @@ const (
 
 	// ShellFish fish
 	ShellFish
+
+	// ShellPosixShell sh
+	ShellPosixShell
 )
 
 func WriteShellVariables(w io.Writer, cfg map[string]interface{}, shell ShellType) {

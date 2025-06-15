@@ -64,7 +64,7 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 
 	defaultShell := ""
 	if !f.IOStreams.IsStdoutTTY() {
-		defaultShell = "auto"
+		defaultShell = shell.ShellAuto
 	}
 
 	cmd.Flags().StringVar(&ccmd.sessionFilter, "sessionFilter", "", "Filter to be applied to the list of sessions even before the values can be selected")
@@ -76,7 +76,7 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("shell", "auto", "bash", "zsh", "fish", "powershell"),
+		completion.WithValidateSet("shell", shell.SupportedShells(shell.ShellAuto)...),
 		completion.WithValidateSet("loginType", c8y.AuthMethodOAuth2Internal, c8y.AuthMethodBasic, c8y.AuthMethodNone),
 	)
 	// Disable the encryption check, as the login handler will take care
@@ -300,10 +300,10 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 
 	if outputFormat == config.OutputUnknown.String() {
 		if n.Shell == "" && !n.factory.IOStreams.IsStdoutTTY() {
-			n.Shell = "auto"
+			n.Shell = shell.ShellAuto
 		}
-		if strings.EqualFold(n.Shell, "auto") {
-			n.Shell = shell.DetectShell("bash")
+		if strings.EqualFold(n.Shell, shell.ShellAuto) {
+			n.Shell = shell.DetectShell(shell.ShellBash)
 		}
 		outputFormat = n.Shell
 	} else if outputFormat != config.OutputJSON.String() {

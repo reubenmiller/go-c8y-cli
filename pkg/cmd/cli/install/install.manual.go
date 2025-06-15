@@ -16,14 +16,15 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
 	"github.com/spf13/cobra"
 )
 
 var ErrInstallFailed = errors.New("failed to install one or more profiles")
-var validShells = []string{"bash", "fish", "powershell", "zsh", "sh"}
+var validShells = shell.SupportedShells()
 
 // Skip sh when installing all shells as it generally does not have a profile defined
-var defaultShells = []string{"bash", "fish", "powershell", "zsh"}
+var defaultShells = []string{shell.ShellBash, shell.ShellFish, shell.ShellPowershell, shell.ShellZsh}
 
 type CmdInstall struct {
 	*subcommand.SubCommand
@@ -81,11 +82,11 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	shells := map[string]Shell{
-		"bash":       {Name: "bash", Binary: "bash"},
-		"zsh":        {Name: "zsh", Binary: "zsh"},
-		"sh":         {Name: "sh", Binary: "sh"},
-		"powershell": {Name: "powershell", Binary: "pwsh"},
-		"fish":       {Name: "fish", Binary: "fish"},
+		shell.ShellBash:       {Name: "bash", Binary: "bash"},
+		shell.ShellZsh:        {Name: "zsh", Binary: "zsh"},
+		shell.ShellPosixShell: {Name: "sh", Binary: "sh"},
+		shell.ShellPowershell: {Name: "powershell", Binary: "pwsh"},
+		shell.ShellFish:       {Name: "fish", Binary: "fish"},
 	}
 
 	var Errs []error
@@ -150,7 +151,7 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 	return summaryErr
 }
 
-func (n *CmdInstall) InstallProfile(shell string) (bool, error) {
+func (n *CmdInstall) InstallProfile(shellType string) (bool, error) {
 	changed := false
 	cfg, err := n.factory.Config()
 	if err != nil {
@@ -159,8 +160,8 @@ func (n *CmdInstall) InstallProfile(shell string) (bool, error) {
 	profilePath := ""
 	profileSnippet := ""
 
-	switch shell {
-	case "sh":
+	switch shellType {
+	case shell.ShellPosixShell:
 		// sh/ash uses a special env variable called 'ENV' which controls whether a profile is auto loaded or not
 		profilePath = os.Getenv("ENV")
 		profileSnippet = `eval "$(c8y cli profile --shell sh)"`
@@ -176,17 +177,17 @@ func (n *CmdInstall) InstallProfile(shell string) (bool, error) {
 			return false, cmderrors.NewSilentError()
 		}
 
-	case "zsh":
+	case shell.ShellZsh:
 		profilePath = "~/.zshrc"
 		profileSnippet = "source <(c8y cli profile --shell zsh)"
-	case "bash":
+	case shell.ShellBash:
 		// use eval over source as process substitution was only added in bash >= v4
 		profilePath = "~/.bashrc"
 		profileSnippet = `eval "$(c8y cli profile --shell bash)"`
-	case "fish":
+	case shell.ShellFish:
 		profilePath = "~/.config/fish/config.fish"
 		profileSnippet = "c8y cli profile --shell fish | source"
-	case "powershell":
+	case shell.ShellPowershell:
 		profilePath = "~/.config/powershell/Microsoft.PowerShell_profile.ps1"
 		profileSnippet = "c8y cli profile --shell powershell | Out-String | Invoke-Expression"
 	}
@@ -230,7 +231,7 @@ func (n *CmdInstall) InstallProfile(shell string) (bool, error) {
 	message := ""
 
 	if appendToProfile {
-		message = fmt.Sprintf("Added snippet to %s profile. path: %s", shell, expandedV)
+		message = fmt.Sprintf("Added snippet to %s profile. path: %s", shellType, expandedV)
 		cfg.Logger.Debugf("Adding snippet to %s", expandedV)
 		err = AppendToFile(expandedV, profileSnippet)
 		if err != nil {
@@ -239,7 +240,7 @@ func (n *CmdInstall) InstallProfile(shell string) (bool, error) {
 		changed = true
 	} else {
 		cfg.Logger.Debugf("Snippet already found in profile. path=%s", expandedV)
-		message = fmt.Sprintf("Already added snippet to %s profile. path: %s", shell, expandedV)
+		message = fmt.Sprintf("Already added snippet to %s profile. path: %s", shellType, expandedV)
 	}
 
 	_, bErr := fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s %s\n", cs.SuccessIconWithColor(cs.Green), message)

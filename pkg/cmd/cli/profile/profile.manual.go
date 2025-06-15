@@ -7,6 +7,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
 	"github.com/spf13/cobra"
 )
 
@@ -76,7 +77,7 @@ func NewCmdProfile(f *cmdutil.Factory) *CmdProfile {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("shell", "bash", "zsh", "powershell", "fish", "sh"),
+		completion.WithValidateSet("shell", shell.SupportedShells(shell.ShellAuto)...),
 	)
 
 	cmdutil.DisableAuthCheck(cmd)
@@ -88,7 +89,7 @@ func NewCmdProfile(f *cmdutil.Factory) *CmdProfile {
 func (n *CmdProfile) RunE(cmd *cobra.Command, args []string) error {
 	activeShell := n.shell
 	if activeShell == "" {
-		activeShell = "sh"
+		activeShell = shell.ShellPosixShell
 	}
 	var script *string
 
@@ -101,7 +102,7 @@ func (n *CmdProfile) RunE(cmd *cobra.Command, args []string) error {
 	// the real shell type has been determined.
 	// This does not work for fish, or powershell as the syntax is too different
 	switch activeShell {
-	case "zsh", "bash", "sh", "auto":
+	case shell.ShellZsh, shell.ShellBash, shell.ShellPosixShell, shell.ShellAuto:
 		// generic entry point which will find the correct shell
 		script = &scriptLinuxAuto
 	case "__zsh":
@@ -110,9 +111,9 @@ func (n *CmdProfile) RunE(cmd *cobra.Command, args []string) error {
 		script = &scriptBash
 	case "__sh":
 		script = &scriptPosixShell
-	case "fish":
+	case shell.ShellFish:
 		script = &scriptFish
-	case "powershell":
+	case shell.ShellPowershell:
 		script = &scriptPowerShell
 	}
 
