@@ -24,21 +24,28 @@ If you are using a local Cumulocity user, it recommended that you use TFA (Two-F
 
 ### Creating a new session
 
+First, you'll need to create a new session which contains your credentials to interact with Cumulocity. However, creating a session does not activate it, so after the session is created, then activate it by following the instructions in the next session.
+
 <CodeExample>
 
 ```bash
-c8y sessions create --type dev
+c8y sessions create
 ```
 
 </CodeExample>
 
-You will be prompted the session information including url, username and password. Alternatively, you can provide any of the parameters via flags.
-
-You may also provide a more meaningful session name by using the `name` parameter.
-
-The `type` parameter indicates what kind of tenant you are using which controls which commands are enabled/disabled by default. `dev` will enable all commands, whereas `prod` only allows GET commands.
+You will be prompted the session information including url, username and password. Alternatively, you can provide any of the settings via flags.
 
 ### Activating a session (interactive)
+
+To use **go-c8y-cli** with Cumulocity, you'll need to activate a session which tells all subsequent **c8y** commands which Cumulocity tenant the API calls should be sent to, and what authorization should be used.
+
+:::info
+The `set-session` is a shell function included with **go-c8y-cli** which just sets the session information as environment variables which are accessed by other **c8y** commands which are executed in the same shell.
+
+If you get an unknown command error when running `set-session`, it means you probably didn't install [installation guide](/docs/installation/shell-installation). However if you're still having trouble, then try to [activate a session manually](#activate-a-session-without-set-session).
+:::
+
 
 <CodeExample>
 
@@ -48,26 +55,20 @@ set-session
 
 </CodeExample>
 
-:::info
-If you get an unknown command error when running `set-session`, it means you probably didn't install the the addons via the [installation guide](/docs/installation/shell-installation)
-:::
+Or you can also change the default session mode by using the `--mode` flag which allows you to override the session's default.
 
-```text title="Output"
-➜ set-session 
-Use arrow keys (holding shift) to navigate ↓ ↑ → ←  and / toggles search
-? Select a Cumulocity Session: 
-  ▶ #01 json dev-poc                                  http://my-dev-tenant.example.com (t1111/rmiller-dev01)
-    #02 json customer1-qual                           http://dev.customer-domain.com (t2222/myuser01)
-    #03 json customer1-prod                           http://qual.customer-domain.com (t3333/myuser01)
+<CodeExample>
 
---------- Details ----------
-File:            /workspaces/go-c8y-cli/.cumulocity/dev-poc.json
-Host:            http://my-dev-tenant.example.com
-Tenant:          t1111
-Username:        rmiller-dev01
+```bash
+set-session --mode dev
 ```
 
-The list of sessions can be filtered by adding additional filter terms when calling `set-session`.
+</CodeExample>
+
+
+#### set-session filtering
+
+The list of sessions can be filtered by adding additional filter terms when calling `set-session`, where the filter terms will be used to match against any of the session's properties, e.g. url, username, tenant etc.
 
 ```bash
 set-session eu example
@@ -77,28 +78,18 @@ set-session eu example
 If only 1 session is found, then it will be automatically selected without the user having to confirm the selection
 :::
 
-### Validating a session
+### Checking the active session
 
-Once a session has been activated, you can check if everything works as expected by getting your user's details associated to your session you configured.
+You can check which session is activated by using:
 
 <CodeExample>
 
 ```bash
-c8y currentuser get
-
-# or list devices
-c8y devices list
+c8y sessions get
 ```
 
 </CodeExample>
 
-:::note
-If your credentials are incorrect, then you can update the session file
-
-```sh
-c8y sessions get --select path
-```
-:::
 
 ## Advanced
 
@@ -111,6 +102,7 @@ A session can be activated without the shell helper function `set-session`. It i
   defaultValue="bash"
   values={[
     { label: 'Bash', value: 'bash', },
+    { label: 'Shell (posix)', value: 'sh', },
     { label: 'Zsh', value: 'zsh', },
     { label: 'Fish', value: 'fish', },
     { label: 'PowerShell', value: 'powershell', },
@@ -119,28 +111,35 @@ A session can be activated without the shell helper function `set-session`. It i
 <TabItem value="bash">
 
 ```bash
-eval $(c8y sessions set --shell bash)
+eval "$(c8y sessions login --shell bash)"
+```
+
+</TabItem>
+<TabItem value="sh">
+
+```bash
+eval "$(c8y sessions login --shell sh)"
 ```
 
 </TabItem>
 <TabItem value="zsh">
 
 ```bash
-eval $(c8y sessions set --shell zsh)
+eval "$(c8y sessions login --shell zsh)"
 ```
 
 </TabItem>
 <TabItem value="fish">
 
 ```bash
-c8y sessions set --shell fish | source
+c8y sessions login --shell fish | source
 ```
 
 </TabItem>
 <TabItem value="powershell">
 
 ```powershell
-c8y sessions set --shell powershell | out-string | Invoke-Expression
+c8y sessions login --shell powershell | out-string | Invoke-Expression
 ```
 
 </TabItem>

@@ -10,9 +10,17 @@ import CodeExample from '@site/src/components/CodeExample';
 
 A session holds the current Cumulocity settings and authentication to use for each command. For example, as session will contain the Cumulocity platform address, tenant, username and password. All of these settings are required in order to send REST requests to the platform.
 
-The active session is controlled via an environment variable `C8Y_SESSION`. The environment variable just points to a JSON file which contains the Cumulocity settings.
+To use a session, you must first "activate" it, which will then start the "login" process where it uses the given session details and checks what login actions are required. For instance, if you have Two-Factor-Authentication (TFA) enabled, then you'll be prompted for your TFA code.
 
-A user can add any number of session that that want. They are then free to switch sessions at any time they want. For users with only one session, you could set the `C8Y_SESSION` environment variable to a file, however for users with multiple sessions, it is recommended to always to set the session when starting out.
+The session activate process is fairly complex due to the number of different login options supported by Cumulocity, however **go-c8y-cli** tries to simply the process by performing the following steps automatically, and only prompting for information where required:
+
+* Check for missing session information (e.g. password), then prompt if necessary
+* Check if session data is encrypted, then prompt for encryption passphrase to decrypt it
+* Check preferred login method (e.g. BASIC_AUTH, OAUTH2_INTERNAL) and run the corresponding steps to then fetch a token if necessary
+* Check if Two-Factor-Authentication setup is required, and prompt the user to configure it via a QR code
+* Check if Two-Factor-Authentication code is requested, then prompt the user for it
+
+The output of a successfully activate session is a set of environment variables that need to be set on the shell. Due to OS security restrictions, no subprocess (**c8y** in this can) can modify environment variables of the parent process (the **shell**), so instead shell helper function is required to evaluate the output of the session activation which in turn sets the required environment variables. The main motivation for using environment variables is to also allow other Cumulocity tooling to be able to access the required session information to run their own requests without having to know anything about session files and decryption etc.
 
 :::caution
 SSO (Single Sign On) is not currently supported due to a security mechanism on the platform side which makes any cli implementation impossible.
@@ -27,16 +35,33 @@ If you are using a local Cumulocity user, it recommended that you use TFA (Two-F
 
 ## Create a new session
 
-<CodeExample>
+The following command can be used to create a new session where you'll be prompted for the required information.
 
-```bash
-c8y sessions create \
-    --host "mytenant.eu-latest.cumulocity.com"
-```
+1. Create a new session
 
-</CodeExample>
+    <CodeExample>
 
-You will be prompted for the username and password.
+    ```bash
+    c8y sessions create
+    ```
+
+    </CodeExample>
+
+    You will be prompted for the session details like the host, username and password.
+
+    :::tip
+    By default, go-c8y-cli will encrypt sensitive information such as passwords and tokens. The data is encrypted by using user-prompted passphrase and salt (in the form of a file under `$HOME/.cumulocity/.key` by default)
+    :::
+
+2. Activate the session (using the *set-session* shell helper)
+
+    <CodeExample>
+
+    ```bash
+    set-session
+    ```
+
+    </CodeExample>
 
 ### Create a session for a host with self-signed certificates
 
@@ -45,9 +70,7 @@ If your Cumulocity host is using a self-signed certificate (which is usually the
 <CodeExample>
 
 ```bash
-c8y sessions create \
-    --host "mytenant.eu-latest.cumulocity.com" \
-    --allowInsecure
+c8y sessions create --allowInsecure
 ```
 
 </CodeExample>
@@ -64,7 +87,7 @@ c8y devices list --insecure
 
 ## Activate a session (interactive)
 
-A helper is provided to set the session interactively by providing the user a list of configured sessions. The user will be prompted to select one of the listed sessions.
+A helper, called `set-session`, is provided to set the session interactively by providing the user a list of configured sessions. The user will be prompted to select one of the listed sessions (if there is more than one session, otherwise the single session will be automatically selected).
 
 :::note
 On some terminals, you need to hold `shift+ArrowKey` to navigate the list of sessions. 
@@ -72,9 +95,6 @@ On some terminals, you need to hold `shift+ArrowKey` to navigate the list of ses
 Alternatively, VIM style shortcuts "j" (down) and "k" (up) keys can be also used for navigation. Though this does not work when your using the interact search. 
 :::
 
-:::caution
-`set-session` is not provided by %%c8y%% itself, and it is installed automatically for you if you following the [installation guide](/docs/installation/shell-installation)
-:::
 
 <CodeExample>
 
@@ -85,30 +105,61 @@ set-session
 </CodeExample>
 
 :::tip
-You can also provide additional flags to set session, as these are passed directly to the underlying `c8y sessions set` command.
-
-`set-session --debug`
+You can also provide additional flags to set session, as these are passed directly to the underlying `c8y sessions login` command.
 :::
 
-## Activate a session (manual)
+## Activate a session (manually)
 
-If you wish to manage your sessions manually, then you can set the `C8Y_SESSION` environment variable to an existing json session file.
+If you can't use the `set-session` shell helper, then you can run the command directly along with the associated shell built-in functions which will set the required environment variables. Each shell has a slightly different way of doing this, so make sure you select the method appropriate to your shell
 
-<CodeExample transform="false">
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Bash', value: 'bash', },
+    { label: 'Zsh', value: 'zsh', },
+    { label: 'Shell (posix)', value: 'sh', },
+    { label: 'Fish', value: 'fish', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
-export C8Y_SESSION=~/.cumulocity/my-settings01.json
+eval "$(c8y session login)"
 ```
+
+</TabItem>
+<TabItem value="zsh">
+
+```bash
+eval "$(c8y session login)"
+```
+
+</TabItem>
+<TabItem value="sh">
+
+```bash
+eval "$(c8y session login)"
+```
+
+</TabItem>
+<TabItem value="fish">
+
+```bash
+c8y sessions login | source
+```
+
+</TabItem>
+<TabItem value="powershell">
 
 ```powershell
-$env:C8Y_SESSION = "~/.cumulocity/my-settings01.json"
+c8y sessions login | Out-String | Invoke-Expression
 ```
 
-```powershell
-$env:C8Y_SESSION = "~/.cumulocity/my-settings01.json"
-```
+</TabItem>
+</Tabs>
 
-</CodeExample>
 
 ### Session file format
 
@@ -153,11 +204,11 @@ Alternatively, the Cumulocity session can be controlled purely by environment va
 
 Then the Cumulocity settings can be set by the following environment variables.
 
-* C8Y_HOST (example "https://cumulocity.com")
-* C8Y_TENANT (example "myTenant")
-* C8Y_USER
-* C8Y_PASSWORD
-* C8Y_SETTINGS_CI or `CI`
+* `C8Y_HOST` (example "https://cumulocity.com")
+* `C8Y_TENANT` (example "myTenant")
+* `C8Y_USER`
+* `C8Y_PASSWORD`
+* `CI`
 
 
 ### Switching sessions for a single command
@@ -180,23 +231,37 @@ Get-DeviceCollection -Session myother.tenant
 
 ## Protection against accidental data loss
 
-The c8y cli tool provides a large number of commands which can be potentially destructive if used incorrectly. Therefore all commands which create, update and/or delete data are disabled by default, to protect against accidental usage.
+The **go-c8y-cli&** provides a large number of commands which can be potentially destructive if used incorrectly. Therefore all commands which create, update and/or delete data are disabled by default, to protect against accidental usage, this means by default only commands which just "read" information from the platform are enabled.
 
-The commands can be enabled per session or in global settings, however explicitly enabling it per session is the preferred method.
+Whilst this may seem like overkill to new users, especially if you're just starting out your journey with Cumulocity and are in exploration/development mode, the value of this feature will become apparent once you start dealing with more than one Cumulocity instance and start going into production. For example, once you have multiple sessions, it is easy for users to accidentally forget where they are, and run a destructive command like "delete all devices" where the user thought they were in a dev instance, however they forgot they had switched to a production instance. This feature is not meant to be a substitute for proper platform side role/permission control, however it can safe powerusers against innocent mistakes.
 
-Ideally for production sessions, the settings should be left disabled to protect yourself against accidental data loss, especially if you have a large number of tenants, and are constantly switching between them.
+The types of commands which are enabled or disabled is controlled by the **session mode**. The session mode can be controlled in the following ways:
 
-The following shows how the functions can be controlled via session settings:
+* Set the default session mode when creating a new session (e.g. if you know it is a production instance, then set it to "prod")
+* Override the default session mode when activating a session (e.g. if you know you need to do some additional actions on a session that is not normally allowed by default)
+* Change the mode for a single command
 
-```json title="mysession.json"
-{
-  "settings": {
-    "mode.enableCreate": false,
-    "mode.enableUpdate": false,
-    "mode.enableDelete": false
-  }
-}
+Below shows the examples of how the session mode can be controlled in difference situations.
+
+### Set the session mode when activating a session
+
+<CodeExample transform="true">
+
+```bash
+set-session --mode dev
 ```
+
+</CodeExample>
+
+If you don't know the exact values you want, then you can ask to be prompted to select from a list of modes using:
+
+<CodeExample transform="true">
+
+```bash
+set-session --mode prompt
+```
+
+</CodeExample>
 
 ### Enabling create/update/delete command temporarily
 
@@ -205,36 +270,47 @@ When the commands are disabled in the session settings, they can be temporarily 
 <CodeExample transform="false">
 
 ```bash
-eval $( c8y settings update mode dev --shell auto )
+export C8Y_MODE=dev
 ```
 
 ```powershell
-c8y settings update mode dev --shell auto | Out-String | Invoke-Expression
+$env:C8Y_MODE = "dev"
 ```
 
 ```powershell
-c8y settings update mode dev --shell auto | Out-String | Invoke-Expression
+$env:C8Y_MODE = "dev"
 ```
 
 </CodeExample>
 
-
 The commands will remain enabled until the next time you call `set-session`.
 
-Afterwards you can disable them again using:
 
-<CodeExample transform="false">
+### Change the default mode of an existing session
+
+Once you've activate a session, you can change it's default session mode by running the following command (though you will need to reload the environment to activate)
+
+<CodeExample transform="true">
 
 ```bash
-eval $( c8y settings update mode prod --shell auto )
+c8y settings update mode dev
 ```
 
-```powershell
-c8y settings update mode prod --shell auto | Out-String | Invoke-Expression
-```
+</CodeExample>
 
-```powershell
-c8y settings update mode prod --shell auto | Out-String | Invoke-Expression
+Then reload your session by running `set-session` again.
+
+
+### Change session mode for a single command
+
+If you try to run a command which is not enabled, you will be asked if this was intentional and be asked to confirm the action. You'll also be presented with the session's information to help you make that decision to show if you're in the correct environment or not.
+
+Alternatively, you can avoid the user prompt by using the `sessionMode` global flag.
+
+<CodeExample transform="true">
+
+```bash
+c8y inventory create --name hello --sessionMode dev
 ```
 
 </CodeExample>
@@ -289,7 +365,7 @@ Remove-Item ~/.cumulocity/.key
     "password": "{encrypted}65cd99f96f9fe681be286d6e573061053afac353faeb5b1220352ab57456f3ee852fa9078ead3846c982caad6c4dfd3be6fd0a9aba",
     "description": "",
     "settings": {
-        "mode.enableUpdate": true
+        "session.mode": "prod"
     }
 }
 ```
@@ -320,37 +396,37 @@ You need to switch sessions by calling the c8y binary directly and evaluating th
 <TabItem value="bash">
 
 ```bash
-eval $( c8y sessions set --shell=auto )
+eval "$( c8y sessions login --shell=auto )"
 
 # Set a session to an already known json path.
-eval $( c8y sessions set --shell=auto --session "/my/path/session.json" )
+eval "$( c8y sessions login --shell=auto --session "/my/path/session.json" )"
 ```
 
 </TabItem>
 <TabItem value="fish">
 
 ```bash
-c8y sessions set --shell=auto | source
+c8y sessions login --shell=auto | source
 
 # Set a session to an already known json path.
-c8y sessions set --shell=auto --session "/my/path/session.json" | source
+c8y sessions login --shell=auto --session "/my/path/session.json" | source
 ```
 
 </TabItem>
 <TabItem value="powershell">
 
 ```powershell
-c8y sessions set --shell=auto | Out-String | Invoke-Expression
+c8y sessions login --shell=auto | Out-String | Invoke-Expression
 
 # Set a session to an already known json path.
-c8y sessions set --shell=auto --session "/my/path/session.json" | Out-String | Invoke-Expression
+c8y sessions login --shell=auto --session "/my/path/session.json" | Out-String | Invoke-Expression
 ```
 
 </TabItem>
 </Tabs>
 
 :::info
-`set-session` is a small helper function (for each supported shell) which wraps the call to `c8y sessions set` and sets the returned environment variables which are then read by subsequent calls to %%c8y%%.
+`set-session` is a small helper function (for each supported shell) which wraps the call to `c8y sessions login` and sets the returned environment variables which are then read by subsequent calls to %%c8y%%.
 :::
 
 ### Switching session for a single command
@@ -458,31 +534,3 @@ Cloning an existing session is convenient when you a group of tenants (i.e. dev,
 Remember it is best practice to use different passwords for different sessions!
 :::
 
-### Changing mode of the existing session until next set-session
-
-The mode can be updated on the existing profile using
-#### Change mode until next set-session
-
-If you installed the addons then there are some helpers to set the mode temporarily until the session is changed.
-
-<CodeExample transform="false">
-
-```bash
-set-c8ymode-dev
-```
-
-```powershell
-set-c8ymode-dev
-```
-
-</CodeExample>
-
-#### Changing the mode permanently
-
-<CodeExample transform="false">
-
-```bash
-c8y settings update mode dev
-```
-
-</CodeExample>
