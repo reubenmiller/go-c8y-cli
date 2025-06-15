@@ -20,7 +20,7 @@ Set console settings to be used by the cli tool
 Set-ClientConsoleSetting
 	[-HideSensitive]
 	[-ShowSensitive]
-	[-EnableCreateCommands]
+	[[-Mode] <String>]
 	[-EnableUpdateCommands]
 	[-EnableDeleteCommands]
 	[-DisableCommands]
@@ -45,7 +45,7 @@ Settings like (tenant, username, password, base64 credentials)
 
 ### EXAMPLE 2
 ```
-Set-ClientConsoleSetting -EnableCreateCommands -EnableUpdateCommands
+Set-ClientConsoleSetting -Mode qual
 ```
 
 Enable all create and update commands until the session is changed
@@ -82,17 +82,17 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -EnableCreateCommands
-Enable create commands
+### -Mode
+Session mode
 
 ```yaml
-Type: SwitchParameter
+Type: String
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
-Default value: False
+Position: 1
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -151,7 +151,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 1
+Position: 2
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

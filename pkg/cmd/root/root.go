@@ -226,7 +226,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().StringVar(&ccmd.SessionFile, "session", "", "Session configuration")
 	cmd.PersistentFlags().StringVarP(&ccmd.SessionUsername, "sessionUsername", "U", "", "Override session username. i.e. peter or t1234/peter (with tenant)")
 	cmd.PersistentFlags().StringVarP(&ccmd.SessionPassword, "sessionPassword", "P", "", "Override session password")
-	cmd.PersistentFlags().StringVar(&ccmd.SessionMode, "sessionMode", "", "Override default session mode to allow once-off commands which would normally be disabled")
+	cmd.PersistentFlags().StringVar(&ccmd.SessionMode, "sessionMode", "", "Override default session mode for a single command which would normally be disabled")
 	cmd.PersistentFlags().BoolVarP(&ccmd.Verbose, "verbose", "v", false, "Verbose logging")
 	cmd.PersistentFlags().IntP(flags.FlagPageSize, "p", c8ydefaults.PageSize, "Maximum results per page")
 	cmd.PersistentFlags().Int64(flags.FlagCurrentPage, 0, "Current page which should be returned")

@@ -36,7 +36,7 @@ It is recommended that you run these commands from your home folder, so that the
 <TabItem value="bash">
 
 ```bash
-cd ~
+cd $HOME
 docker run -it -v $HOME/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell
 ```
 

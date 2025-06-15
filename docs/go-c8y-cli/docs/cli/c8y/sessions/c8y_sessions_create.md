@@ -45,6 +45,7 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
   -h, --help                 help for create
       --host string          Host. .e.g. test.cumulocity.com. (required)
       --loginType string     Login Type, e.g. BASIC, OAUTH2_INTERNAL, NONE
+      --mode string          Session mode which controls which commands are enabled by default
       --name string          Name of the session
       --noStorage            Don't store any passwords or tokens in the session file
       --noTenantPrefix       Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false
@@ -52,7 +53,6 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
       --prompt               Force prompting of missing information
       --tenant string        Tenant ID
       --token string         Token
-      --type string          Session type. List of predefined session types
       --username string      Username (without tenant). (required)
 ```
 
@@ -101,6 +101,7 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
       --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
+      --sessionMode string         Override default session mode for a single command which would normally be disabled
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code

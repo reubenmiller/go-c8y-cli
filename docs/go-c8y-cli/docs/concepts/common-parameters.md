@@ -980,7 +980,7 @@ Session configuration
 
 Session enables the use another c8y session for a single command without having to run `set-session`.
 
-This is useful if you want to quickly see what is going on in another tenant without permanently changing your current session, or you want to transfer some information from a staging environment to a dev as a once-off action.
+This is useful if you want to quickly see what is going on in another tenant without permanently changing your current session, or you want to transfer some information from a staging environment to a dev for a single command.
 
 **Example: Get a device name from the staging tenant, and create a new device with the same name in a dev tenant**
 

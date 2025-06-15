@@ -348,10 +348,6 @@ If go-c8y-cli is being by multiple users on the same computer/server and you nee
 
 Enable CI mode where all prompts will be disabled. If set to `true` it will override/ignore the following settings:
 
-* `mode.enablecreate`
-* `mode.enabledelete`
-* `mode.enableupdate`
-
 :::note
 From `v2.18.0`, `go-c8y-cli` will detect the `CI` environment variable which is set by most CI/CD environments.
 It can be enabled explicitly using:
@@ -401,17 +397,17 @@ c8y settings update mode.confirmation "PUT DELETE"
 </CodeExample>
 
 
-### mode.enablecreate: boolean
+### session.mode: string
 
 Enable `POST` commands. If set to `false` then all `POST` related commands will return an error.
 
-### mode.enabledelete: boolean
+|Value|Description|
+|-----|-----------|
+|ci|All commands are enabled (no restrictions)|
+|dev|All commands are enabled (no restrictions)|
+|qual|Delete commands are disabled|
+|prod|Create/Update/Delete commands are disabled, so essentially it is a read-only mode|
 
-Enable `DELETE` commands. If set to `false` then all `DELETE` related commands will return an error.
-
-### mode.enableupdate: boolean
-
-Enable `UPDATE` commands. If set to `false` then all `UPDATE` related commands will return an error.
 
 ### session.defaultusername: string
 

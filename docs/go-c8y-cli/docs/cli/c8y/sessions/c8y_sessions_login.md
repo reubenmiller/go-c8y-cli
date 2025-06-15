@@ -27,7 +27,7 @@ Set a session from an external command, accepting the selected session via stdin
 $ eval "$( c8y sessions login --from-cmd "c8y sessions set --output json" )"
 Set a session using the in-built "c8y sessions set"
 
-$ eval "$( c8y sessions login --from-cmd "c8y-session-bitwarden list --folder c8y" --format json )"
+$ eval "$( c8y sessions login --from-cmd "c8y-session-bitwarden list --folder c8y" --secrets BW_SESSION --format json )"
 Set a session from an external command, where the external commands returns the selected session in json format on stdout
 
 ```
@@ -42,9 +42,11 @@ Set a session from an external command, where the external commands returns the 
       --from-stdin             Read from standard input
   -h, --help                   help for login
       --loginType string       Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared
+      --mode string            Session mode which controls which commands are allowed, e.g. dev, qual or prod
       --no-banner              Don't show the session banner
       --output-format string   Output format
       --provider string        Session provider which returns the session to use
+      --secrets strings        List of secrets to include as env variables when running an external command. Only valid with from-cmd
       --shell string           Shell type to return the environment variables
 ```
 
@@ -93,6 +95,7 @@ Set a session from an external command, where the external commands returns the 
       --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
+      --sessionMode string         Override default session mode for a single command which would normally be disabled
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code

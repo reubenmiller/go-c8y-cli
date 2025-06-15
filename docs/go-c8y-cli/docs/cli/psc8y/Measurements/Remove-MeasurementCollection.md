@@ -36,6 +36,7 @@ Remove-MeasurementCollection
 	[-Session <String>]
 	[-SessionUsername <String>]
 	[-SessionPassword <String>]
+	[-SessionMode <String>]
 	[-Output <String>]
 	[-View <String>]
 	[-AsHashTable]
@@ -723,6 +724,21 @@ Accept wildcard characters: False
 
 ### -Session
 Session configuration
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SessionMode
+Override default session mode for a single command which would normally be disabled
 
 ```yaml
 Type: String

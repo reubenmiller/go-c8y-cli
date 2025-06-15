@@ -83,6 +83,7 @@ Update custom properties of the current application (requires using application 
       --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
+      --sessionMode string         Override default session mode for a single command which would normally be disabled
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
