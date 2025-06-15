@@ -23,6 +23,7 @@ New-Session
 	[[-Username] <Object>]
 	[[-Password] <Object>]
 	[[-Name] <String>]
+	[[-Mode] <String>]
 	[[-Description] <String>]
 	[-NoTenantPrefix]
 	[-AllowInsecure]
@@ -128,6 +129,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Mode
+Mode.
+The mode controls which types of commands are enabled
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Description
 Description
 
@@ -137,7 +154,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

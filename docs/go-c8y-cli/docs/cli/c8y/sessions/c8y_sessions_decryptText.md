@@ -32,8 +32,8 @@ Encrypt the text "Hello World", the text will be encrypted using the given passp
 
 ```
   -h, --help                help for decryptText
-      --passphrase string   Passphrase use for encoding your files
-      --text string         Encrypted text. (required)
+      --passphrase string   Passphrase to use for encrypting the text. Read from env C8Y_PASSPHRASE or prompted if missing
+      --text string         Encrypted text. (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
@@ -81,6 +81,7 @@ Encrypt the text "Hello World", the text will be encrypted using the given passp
       --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
+      --sessionMode string         Override default session mode for a single command which would normally be disabled
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code

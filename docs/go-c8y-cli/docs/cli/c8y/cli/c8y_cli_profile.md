@@ -18,17 +18,22 @@ c8y cli profile [flags]
 ### Examples
 
 ```
+## zsh/bash/sh
+	eval "$(c8y cli profile)"
+
 ## zsh
 	source <(c8y cli profile --shell zsh)
 
 ## bash
-	source <(c8y cli profile --shell bash)
+	eval "$(c8y cli profile --shell bash)"
+
+## sh (posix)
+	eval "$(c8y cli profile --shell sh)"
 
 ## fish
 	c8y cli profile --shell fish | source
 
 ## PowerShell
-
 	c8y cli profile --shell powershell | Out-String | Invoke-Expression
 
 ```
@@ -85,6 +90,7 @@ c8y cli profile [flags]
       --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
+      --sessionMode string         Override default session mode for a single command which would normally be disabled
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
       --silentExit                 Silent status codes do not affect the exit code
