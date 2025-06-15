@@ -709,6 +709,28 @@ func WithFloatValue(opts ...string) GetOption {
 	}
 }
 
+// WithDuration adds a time.Duration value from cli arguments
+func WithDuration(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		src, dst, format := UnpackGetterOptions("", opts...)
+
+		if inputIterators != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
+		// Note: only return if value has changed
+		if !cmd.Flags().Changed(src) {
+			return "", "", nil
+		}
+
+		value, err := cmd.Flags().GetDuration(src)
+		return dst, value, err
+	}
+}
+
 // WithRelativeTimestamp adds a timestamp (string) value from cli arguments
 func WithRelativeTimestamp(opts ...string) GetOption {
 	return NewTimestampFromRelative(false, false, opts...)

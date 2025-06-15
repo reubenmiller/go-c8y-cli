@@ -62,3 +62,8 @@ docker/c8y.linux
 
 # Linting
 typos*.txt
+
+# device certs
+*.crt
+*.key
+*.csr
