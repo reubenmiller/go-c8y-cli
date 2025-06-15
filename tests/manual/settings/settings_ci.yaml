@@ -3,9 +3,13 @@ tests:
   It supports CI env:
     config:
       inherit-env: false
+      env:
+        CI: ""
+        C8Y_SETTINGS_CI: false
     command: |
       CI=true C8Y_SETTINGS_CI=false c8y settings list --select ci --output csv
       CI=true C8Y_SETTINGS_CI=true c8y settings list --select ci --output csv
+
       CI=false C8Y_SETTINGS_CI=false c8y settings list --select ci --output csv
       CI=false C8Y_SETTINGS_CI=true c8y settings list --select ci --output csv
 
@@ -17,6 +21,66 @@ tests:
         true
         true
         false
-        false
+        true
         false
         true
+
+  It supports Jenkins/TeamCity env:
+    config:
+      inherit-env: false
+      env:
+        CI: ""
+        C8Y_SETTINGS_CI: false
+    command: |
+      BUILD_NUMBER=1 C8Y_SETTINGS_CI=false c8y settings list --select ci --output csv
+    exit-code: 0
+    stdout:
+      exactly: |
+        true
+
+  It supports TaskCluster/dsari env:
+    config:
+      inherit-env: false
+      env:
+        CI: ""
+        C8Y_SETTINGS_CI: false
+    command: |
+      RUN_ID=1234 C8Y_SETTINGS_CI=false c8y settings list --select ci --output csv
+    exit-code: 0
+    stdout:
+      exactly: |
+        true
+
+  It supports Appflow:
+    config:
+      inherit-env: false
+      env:
+        CI: ""
+        C8Y_SETTINGS_CI: false
+    command: |
+      CI_APP_ID=1 c8y settings list --select ci --output csv
+      CI_BUILD_ID=1 c8y settings list --select ci --output csv
+      CI_BUILD_NUMBER=1 c8y settings list --select ci --output csv
+      c8y settings list --select ci --output csv
+    exit-code: 0
+    stdout:
+      exactly: |
+        true
+        true
+        true
+        false
+
+  It supports Travis CI / Cirrus CI:
+    config:
+      inherit-env: false
+      env:
+        CI: ""
+        C8Y_SETTINGS_CI: false
+    command: |
+      CONTINUOUS_INTEGRATION=1 c8y settings list --select ci --output csv
+      CONTINUOUS_INTEGRATION= c8y settings list --select ci --output csv
+    exit-code: 0
+    stdout:
+      exactly: |
+        true
+        false

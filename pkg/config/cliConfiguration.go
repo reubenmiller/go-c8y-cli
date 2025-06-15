@@ -477,6 +477,20 @@ func WithBoolEnvOverride(name string, envName string) func(*Config) error {
 	}
 }
 
+// WithBoolEnvOverrides sets the configuration if the given env variable function returns true and no error
+func WithBoolEnvOverrides(name string, valueFunc func(k, v string) (bool, error), envNames ...string) func(*Config) error {
+	return func(c *Config) error {
+		for _, envName := range envNames {
+			if valueFunc != nil {
+				if v, err := valueFunc(envName, os.Getenv(envName)); v && err == nil {
+					c.viper.Set(name, v)
+				}
+			}
+		}
+		return nil
+	}
+}
+
 // WithStringEnvOverride supports optional overriding a string value from another env variable
 func WithStringEnvOverride(name string, envName string) func(*Config) error {
 	return func(c *Config) error {
@@ -527,10 +541,27 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsTemplatePath, ""),
 		WithBindEnv(SettingsMode, SessionModeProduction.String()),
 
-		// Support CI env variable as it is commonly used in CI/CD environments
-		// The env variable "CI" is preferred if present/valid
 		WithBindEnv(SettingsModeCI, false),
-		WithBoolEnvOverride(SettingsModeCI, "CI"),
+		// Determines if the current execution context is within a known CI/CD system.
+		// This is based on https://github.com/watson/ci-info/blob/HEAD/index.js.
+		WithBoolEnvOverrides(
+			SettingsModeCI,
+			func(k, v string) (bool, error) {
+				if k == "CI" {
+					return v != "false" && v != "", nil
+				}
+				return v != "", nil
+			},
+			"CI",                     // Travis CI, CircleCI, Cirrus CI, Gitlab CI, Appveyor, CodeShip, dsari, Cloudflare Pages
+			"BUILD_ID",               // Jenkins, TeamCity
+			"BUILD_NUMBER",           // Jenkins, TeamCity
+			"RUN_ID",                 // TaskCluster, dsari
+			"CI_APP_ID",              // Appflow
+			"CI_BUILD_ID",            // Appflow
+			"CI_BUILD_NUMBER",        // Appflow
+			"CI_NAME",                // Codeship and others
+			"CONTINUOUS_INTEGRATION", // Travis CI, Cirrus CI
+		),
 
 		// Support overriding the settings.session.mode value with the C8Y_MODE env variable
 		WithStringEnvOverride(SettingsMode, EnvSessionMode),
