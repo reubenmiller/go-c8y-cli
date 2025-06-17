@@ -231,7 +231,7 @@ Get-DeviceCollection -Session myother.tenant
 
 ## Protection against accidental data loss
 
-The **go-c8y-cli&** provides a large number of commands which can be potentially destructive if used incorrectly. Therefore all commands which create, update and/or delete data are disabled by default, to protect against accidental usage, this means by default only commands which just "read" information from the platform are enabled.
+The **go-c8y-cli** provides a large number of commands which can be potentially destructive if used incorrectly. Therefore all commands which create, update and/or delete data are disabled by default, to protect against accidental usage, this means by default only commands which just "read" information from the platform are enabled.
 
 Whilst this may seem like overkill to new users, especially if you're just starting out your journey with Cumulocity and are in exploration/development mode, the value of this feature will become apparent once you start dealing with more than one Cumulocity instance and start going into production. For example, once you have multiple sessions, it is easy for users to accidentally forget where they are, and run a destructive command like "delete all devices" where the user thought they were in a dev instance, however they forgot they had switched to a production instance. This feature is not meant to be a substitute for proper platform side role/permission control, however it can safe powerusers against innocent mistakes.
 
