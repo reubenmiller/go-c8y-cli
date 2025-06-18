@@ -25,17 +25,21 @@ type CumulocitySessions struct {
 type CumulocitySession struct {
 	Schema string `json:"$schema,omitempty"`
 
+	// authorized
+	Authorized *bool `json:"authorized,omitempty"`
+
 	// ID          string `json:"id"`
-	Host            string `json:"host"`
-	Tenant          string `json:"tenant"`
-	Version         string `json:"version"`
-	Username        string `json:"username"`
-	Password        string `json:"password"`
+	Host            string `json:"host,omitempty"`
+	Tenant          string `json:"tenant,omitempty"`
+	Version         string `json:"version,omitempty"`
+	Username        string `json:"username,omitempty"`
+	Password        string `json:"password,omitempty"`
 	Mode            string `json:"mode,omitempty"`
-	TOTP            string `json:"totp"`
-	Token           string `json:"token"`
-	Description     string `json:"description"`
+	TOTP            string `json:"totp,omitempty"`
+	Token           string `json:"token,omitempty"`
+	Description     string `json:"description,omitempty"`
 	UseTenantPrefix bool   `json:"useTenantPrefix"`
+	LoginType       string `json:"loginType,omitempty"`
 
 	Settings *config.CommandSettings `json:"settings,omitempty"`
 
@@ -47,7 +51,7 @@ type CumulocitySession struct {
 	Name      string `json:"-"`
 
 	// How to identify the session
-	SessionUri string `json:"sessionUri"`
+	SessionUri string `json:"sessionUri,omitempty"`
 
 	Logger *logger.Logger `json:"-"`
 	Config *config.Config `json:"-"`
@@ -67,6 +71,14 @@ func (s *CumulocitySession) SetToken(token string) {
 
 func (s *CumulocitySession) SetHost(host string) {
 	s.Host = FormatHost(host)
+}
+
+func (s *CumulocitySession) SetAuthorized(v bool) {
+	s.Authorized = &v
+}
+
+func (s CumulocitySession) IsAuthorized() bool {
+	return s.Authorized != nil && *s.Authorized
 }
 
 func FormatHost(host string) string {
@@ -159,7 +171,7 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(maybeHideMessage(client, session.Username)))
 	}
 	if client != nil {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "loginType")), value(client.AuthorizationMethod))
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "authType")), value(client.AuthorizationType.String()))
 	}
 	fmt.Fprintf(w, "\n")
 }
@@ -209,7 +221,7 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 	token := session.Token
 	authHeaderValue := ""
 	authHeader := ""
-	loginType := client.AuthorizationMethod
+	loginType := session.LoginType
 
 	if dummyReq, err := client.NewRequest("GET", "/", "", nil); err == nil {
 		authHeaderValue = dummyReq.Header.Get("Authorization")
@@ -253,7 +265,7 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 		}
 	}
 
-	if loginType != c8y.AuthMethodOAuth2Internal {
+	if client.AuthorizationType != c8y.AuthTypeBearer {
 		output["C8Y_TOKEN"] = ""
 	}
 
@@ -308,7 +320,7 @@ func IsSessionFilePath(path string) bool {
 	return !strings.Contains(path, "://")
 }
 
-func shouldRenewToken(t string, validFor time.Duration) (bool, *time.Time) {
+func shouldRenewToken(log *logger.Logger, t string, validFor time.Duration) (bool, *time.Time) {
 	claims := jwt.RegisteredClaims{}
 	parser := jwt.NewParser()
 	_, _, err := parser.ParseUnverified(t, &claims)
@@ -316,6 +328,16 @@ func shouldRenewToken(t string, validFor time.Duration) (bool, *time.Time) {
 	if err != nil {
 		// Invalid token
 		return true, nil
+	}
+
+	// Recently issued, so don't renew it
+	// Check if the token's validity period is too short
+	if claims.ExpiresAt != nil && claims.IssuedAt != nil {
+		tokenValidityPeriod := claims.ExpiresAt.Sub(claims.IssuedAt.Time)
+		if tokenValidityPeriod < validFor {
+			log.Warnf("SSO token validity period is less than the given token validFor, so the token will be used regardless. minimumValidFor=%v, tokenValidity=%v", validFor, tokenValidityPeriod)
+			return false, nil
+		}
 	}
 
 	if claims.ExpiresAt != nil {
@@ -335,7 +357,7 @@ func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string) bool
 
 	// Check if token is valid for the minimum period
 	shouldBeValidFor := cfg.TokenValidFor()
-	expiresSoon, expiresAt := shouldRenewToken(token, shouldBeValidFor)
+	expiresSoon, expiresAt := shouldRenewToken(log, token, shouldBeValidFor)
 
 	if expiresAt != nil {
 		if time.Now().After(*expiresAt) {

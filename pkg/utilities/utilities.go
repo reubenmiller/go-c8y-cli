@@ -143,7 +143,7 @@ func CheckEncryption(IO *iostreams.IOStreams, cfg *config.Config, client *c8y.Cl
 		cfg.Logger.Infof("Encryption has been disabled but detected a encrypted session")
 		decryptSession = true
 	}
-	if encryptionEnabled || cfg.IsPasswordEncrypted() {
+	if encryptionEnabled || (cfg.IsPasswordEncrypted(true) || cfg.IsTokenEncrypted(true)) {
 		if err := cfg.ReadKeyFile(); err != nil {
 			return err
 		}

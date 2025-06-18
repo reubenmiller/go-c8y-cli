@@ -3,12 +3,12 @@ package login
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
-	"slices"
 	"strings"
 	"time"
 
@@ -91,13 +91,14 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().StringVar(&ccmd.Exec, "from-cmd", "", "External command to execute to get the log in details")
 	cmd.Flags().BoolVar(&ccmd.Env, "from-env", false, "Read from environment variables")
 	cmd.Flags().BoolVar(&ccmd.Stdin, "from-stdin", false, "Read from standard input")
+	// cmd.Flags().BoolVar(&ccmd.Console, "from-console", false, "Read from user console")
 	cmd.Flags().BoolVar(&ccmd.NoBanner, "no-banner", false, "Don't show the session banner")
 	cmd.Flags().StringVar(&ccmd.TFACode, "tfaCode", "", "Two Factor Authentication code")
 	cmd.Flags().BoolVar(&ccmd.ClearToken, "clear", false, "Clear any existing tokens")
 	cmd.Flags().StringVar(&ccmd.Format, "format", "", "External command format, e.g. json, yaml, toml")
 	cmd.Flags().StringVar(&ccmd.OutputFormat, "output-format", "", "Output format")
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", "", "Shell type to return the environment variables")
-	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared")
+	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL, OAUTH2 (device flow) or BASIC. When set to BASIC, any existing token will be cleared")
 	cmd.Flags().StringVar(&ccmd.Mode, "mode", "", "Session mode which controls which commands are allowed, e.g. dev, qual or prod")
 	cmd.Flags().StringSliceVar(&ccmd.Secrets, "secrets", []string{}, "List of secrets to include as env variables when running an external command. Only valid with from-cmd")
 
@@ -107,7 +108,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 		completion.WithValidateSet("output-format", "json", "dotenv"),
 		completion.WithValidateSet("provider", config.ProviderTypeFile, config.ProviderTypeStdin, config.ProviderTypeEnv, config.ProviderTypeExternal, config.ProviderTypeAuto),
 		completion.WithValidateSet("format", "json", "yaml", "toml", "dotenv"),
-		completion.WithValidateSet("loginType", c8y.AuthMethodOAuth2Internal, c8y.AuthMethodBasic),
+		completion.WithValidateSet("loginType", c8y.LoginTypeOAuth2Internal, c8y.LoginTypeBasic, c8y.LoginTypeNone, c8y.LoginTypeOAuth2),
 		completion.WithValidateSet(
 			"mode",
 			config.GetSessionModeCompletionHelp()...,
@@ -209,13 +210,24 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 	if len(cmdArgs) == 0 {
 		return nil, fmt.Errorf("provider command could not be parsed")
 	}
-	cmdExec := cmdArgs[0]
-	cmd := exec.Command(cmdExec, slices.Concat(cmdArgs[1:], args)...)
+	providerCommand := make([]string, 0, len(cmdArgs))
+	providerCommand = append(providerCommand, cmdArgs...)
+
+	if n.ClearToken {
+		providerCommand = append(providerCommand, "--clear")
+	}
+
+	if n.LoginType != "" {
+		providerCommand = append(providerCommand, fmt.Sprintf("--loginType=%s", n.LoginType))
+	}
+
+	providerCommand = append(providerCommand, args...)
+	cmd := exec.Command(providerCommand[0], providerCommand[1:]...)
 	cmd.Env = env
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 
-	log.Infof("Executing session provider: %s", providerCmd)
+	log.Infof("Executing session provider: %s", shellquote.Join(providerCommand...))
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -232,7 +244,7 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 		}
 	}
 
-	log.Infof("Parsing session provider output: %s", output)
+	log.Infof("Parsing session provider output: %s, value=%s", output, output)
 	return n.FromReader(bytes.NewReader(output), n.Format)
 }
 
@@ -260,7 +272,10 @@ func (n *CmdLogin) FromViper(v *viper.Viper) (*c8ysession.CumulocitySession, err
 		Token:      getValue("token"),
 		TOTP:       getValue("totp"),
 		Mode:       getValue("mode"),
+		LoginType:  getValue("loginType"),
+		Version:    getValue("version"),
 	}
+	session.SetAuthorized(v.GetBool("authorized"))
 	session.SetHost(getValue("host"))
 	return session, nil
 }
@@ -410,45 +425,73 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewUserError("invalid session. host is empty")
 	}
 
+	if sessionContents, err := json.Marshal(session); err == nil {
+		cfg.Logger.Infof("Received session from external source:\n%s\n", sessionContents)
+	}
+
 	client := c8y.NewClient(nil, session.Host, session.Tenant, session.Username, session.Password, true)
 
-	if !n.ClearToken && c8ysession.ShouldReuseToken(cfg, log, session.Token) {
+	if session.Token != "" {
 		client.SetToken(session.Token)
-	} else {
-		client.SetToken("")
 	}
 
-	c8ysession.ClearProcessEnvironment()
-
-	handler := c8ylogin.NewLoginHandler(client, cmd.ErrOrStderr(), func() {})
-	handler.Interactive = true
-	handler.LoginType = strings.ToUpper(cfg.GetLoginTypeWithDefault())
-	if n.LoginType != "" {
-		handler.LoginType = strings.ToUpper(n.LoginType)
-	}
-
-	log.Infof("User preference for login type: %s", handler.LoginType)
-	handler.TFACode = session.TOTP
-	if n.TFACode == "" {
-		if code, err := cfg.GetTOTP(time.Now()); err == nil {
-			cfg.Logger.Infof("Setting totp code: %s", code)
-			n.TFACode = code
+	if session.Authorized == nil || !*session.Authorized {
+		loginType := strings.ToUpper(cfg.GetLoginTypeWithDefault())
+		if n.LoginType != "" {
+			loginType = strings.ToUpper(n.LoginType)
 		}
+		log.Infof("User flag login type: %s", loginType)
+
+		// Set default auth mode based on login type
+		switch loginType {
+		case c8y.LoginTypeOAuth2Internal, c8y.LoginTypeOAuth2:
+			client.SetAuthorizationType(c8y.AuthTypeBearer)
+		case c8y.LoginTypeBasic:
+			client.SetAuthorizationType(c8y.AuthTypeBasic)
+		case c8y.LoginTypeNone:
+			client.SetAuthorizationType(c8y.AuthTypeNone)
+		}
+
+		// SSO providers are in control of the token, so it should just be used as is
+		if !n.ClearToken && c8ysession.ShouldReuseToken(cfg, log, session.Token) {
+			client.SetToken(session.Token)
+		} else {
+			client.ClearToken()
+		}
+
+		c8ysession.ClearProcessEnvironment()
+
+		handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {})
+		handler.LoginType = loginType
+
+		log.Infof("User preference for login type: %s", handler.LoginType)
+		handler.TFACode = session.TOTP
+		if n.TFACode == "" {
+			if code, err := cfg.GetTOTP(time.Now()); err == nil {
+				cfg.Logger.Infof("Setting totp code: %s", code)
+				n.TFACode = code
+			}
+		}
+
+		handler.SetLogger(log)
+		err = handler.Run()
+		if err != nil {
+			return err
+		}
+
+		session.Username = handler.C8Yclient.Username
+		session.Host = handler.C8Yclient.BaseURL.Host
+
+		if client.Version != "" {
+			session.Version = client.Version
+		}
+
+		if client.TenantName != "" {
+			session.Tenant = client.TenantName
+		}
+		session.Token = client.Token
 	}
 
-	handler.SetLogger(log)
-	err = handler.Run()
-	if err != nil {
-		return err
-	}
-
-	session.Token = client.Token
-	if client.TenantName != "" {
-		session.Tenant = client.TenantName
-	}
-	session.Version = client.Version
-	session.Username = handler.C8Yclient.Username
-	session.Host = handler.C8Yclient.BaseURL.Host
 	session.Path = cfg.GetSessionFile()
 
 	if n.Mode != "" {
@@ -470,6 +513,10 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 	if canChangeActiveSession {
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is now active\n", cs.SuccessIcon())
+
+		if session.LoginType != "" {
+			fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is using %s\n", cs.SuccessIcon(), session.LoginType)
+		}
 	} else {
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is not active (see previous warning)\n", cs.WarningIcon())
 	}

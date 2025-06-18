@@ -220,7 +220,7 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 			authErrors = nil
 		}
 
-		log.Infof("Using client auth type: %s", client.AuthorizationMethod)
+		log.Infof("Using client auth type: %s", client.AuthorizationType.String())
 
 		if !disableEncryptionCheck && len(authErrors) > 0 {
 			log.Warnf("Could not load authentication. error=%v", authErrors[0])
@@ -244,7 +244,7 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		)
 
 		// Set realtime authorization
-		if client.AuthorizationMethod == c8y.AuthMethodOAuth2Internal {
+		if client.AuthorizationType == c8y.AuthTypeBearer {
 			if client.Token != "" {
 				client.Realtime.SetBearerToken(client.Token)
 			} else {
@@ -275,45 +275,46 @@ func loadAuthentication(conf *config.Config, client *c8y.Client) error {
 		token, err := conf.GetToken()
 		if err == nil && token != "" {
 			client.SetToken(token)
-			client.AuthorizationMethod = c8y.AuthMethodOAuth2Internal
 			return nil
 		}
 
 		// password
 		if p, err := conf.GetPassword(); err == nil && p != "" {
-			client.AuthorizationMethod = c8y.AuthMethodBasic
+			client.SetTenantUsernamePassword(conf.GetTenant(), conf.GetUsername(), p)
 			return nil
 		}
 
 		// none
-		client.AuthorizationMethod = c8y.AuthMethodNone
+		client.SetAuthorizationType(c8y.AuthTypeNone)
 		return nil
 	}
 
 	// Force the usage of an auth method regardless if the pre-requisites for
 	// such auth method are available (this allows users to also enforce it)
-	client.AuthorizationMethod = conf.GetLoginTypeWithDefault()
-	if strings.EqualFold(client.AuthorizationMethod, c8y.AuthMethodOAuth2Internal) {
+	loginType = conf.GetLoginTypeWithDefault()
+
+	// OAUTH2 (internal and external)
+	if strings.EqualFold(loginType, c8y.LoginTypeOAuth2Internal) || strings.EqualFold(loginType, c8y.LoginTypeOAuth2) {
 		token, err := conf.GetToken()
 		if err != nil {
 			return err
 		}
 		client.SetToken(token)
-		client.AuthorizationMethod = c8y.AuthMethodOAuth2Internal
 		return nil
 	}
 
-	if strings.EqualFold(client.AuthorizationMethod, c8y.AuthMethodBasic) {
-		// clear token as we want to force basic auth
-		client.SetToken("")
+	if strings.EqualFold(loginType, c8y.LoginTypeBasic) {
+		password, err := conf.GetPassword()
+		if err != nil {
+			return err
+		}
+		client.SetTenantUsernamePassword(conf.GetTenant(), conf.GetUsername(), password)
 		return nil
 	}
 
-	if strings.EqualFold(client.AuthorizationMethod, c8y.AuthMethodNone) {
+	if strings.EqualFold(loginType, c8y.LoginTypeNone) {
 		// clear token as we want to force basic auth
-		client.SetToken("")
-		client.Username = ""
-		client.Password = ""
+		client.SetAuthorizationType(c8y.AuthTypeNone)
 		return nil
 	}
 	return nil

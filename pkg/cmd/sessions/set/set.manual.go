@@ -69,14 +69,14 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 	cmd.Flags().StringVar(&ccmd.sessionFilter, "sessionFilter", "", "Filter to be applied to the list of sessions even before the values can be selected")
 	cmd.Flags().StringVar(&ccmd.TFACode, "tfaCode", "", "Two Factor Authentication code")
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", defaultShell, "Shell type to return the environment variables")
-	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared")
+	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL, OAUTH2 (device flow) or BASIC. When set to BASIC, any existing token will be cleared")
 	cmd.Flags().BoolVar(&ccmd.NoBanner, "no-banner", false, "Don't show the session banner")
 	cmd.Flags().BoolVar(&ccmd.ClearToken, "clear", false, "Clear any existing tokens")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("shell", shell.SupportedShells(shell.ShellAuto)...),
-		completion.WithValidateSet("loginType", c8y.AuthMethodOAuth2Internal, c8y.AuthMethodBasic, c8y.AuthMethodNone),
+		completion.WithValidateSet("loginType", c8y.LoginTypeOAuth2Internal, c8y.LoginTypeBasic, c8y.LoginTypeNone, c8y.LoginTypeOAuth2),
 	)
 	// Disable the encryption check, as the login handler will take care
 	// of checking the encryption
@@ -185,36 +185,41 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	n.factory.Config = func() (*config.Config, error) {
 		return cfg, nil
 	}
-	client, err := factory.CreateCumulocityClient(n.factory, "", "", "", true)()
-
-	if err != nil {
-		return err
-	}
 
 	if n.LoginType == "" {
 		n.LoginType = cfg.GetLoginTypeWithDefault()
 	} else {
-		if v, err := c8y.ParseAuthMethod(n.LoginType); err != nil {
-			n.LoginType = c8y.AuthMethodOAuth2Internal
+		if v, err := c8y.ParseLoginType(n.LoginType); err != nil {
+			log.Warnf("Could not parse auth method: value=%s", err)
 		} else {
 			n.LoginType = v
 		}
 	}
 
-	cfg.SetLoginType(n.LoginType)
-	client.AuthorizationMethod = n.LoginType
-
-	token := cfg.MustGetToken(true)
-	if !n.ClearToken && c8ysession.ShouldReuseToken(cfg, log, token) {
-		client.SetToken(token)
-	} else {
-		client.SetToken("")
+	if n.LoginType != "" {
+		cfg.SetLoginType(n.LoginType)
+	}
+	client, err := factory.CreateCumulocityClient(n.factory, "", "", "", true)()
+	if err != nil {
+		return err
 	}
 
-	if n.LoginType != c8y.AuthMethodNone {
+	if n.LoginType != c8y.LoginTypeNone {
 		if err := utilities.CheckEncryption(n.factory.IOStreams, cfg, client); err != nil {
 			return err
 		}
+	}
+
+	// Note: Decrypt after checking for encryption
+	token := cfg.MustGetToken(true)
+	if n.ClearToken {
+		client.ClearToken()
+		cfg.ClearToken()
+	} else if c8ysession.ShouldReuseToken(cfg, log, token) {
+		client.SetToken(token)
+	} else {
+		client.ClearToken()
+		cfg.ClearToken()
 	}
 
 	// If the password is not encrypted, then save it (which will apply the encryption)
@@ -225,11 +230,15 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	handler := c8ylogin.NewLoginHandler(client, cmd.ErrOrStderr(), func() {
+	handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {
 		n.onSave(client)
 	})
 	handler.LoginType = n.LoginType
-	log.Infof("User preference for login type: %s", handler.LoginType)
+	if handler.LoginType == "" {
+		log.Infof("User preference for login type: %s", "not-set")
+	} else {
+		log.Infof("User preference for login type: %s", handler.LoginType)
+	}
 
 	if n.TFACode == "" {
 		if code, err := cfg.GetTOTP(time.Now()); err == nil {
@@ -263,6 +272,8 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		Username:   handler.C8Yclient.Username,
 		Mode:       cfg.SessionMode(config.SessionModeUnset).String(),
 	}
+	// Don't trigger another login afterwards
+	session.SetAuthorized(true)
 
 	outputFormat := cfg.GetOutputFormatWithDefault(cmd, config.OutputUnknown).String()
 
@@ -293,6 +304,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// Write session details to stdout (for machines)
+	cfg.Logger.Infof("c8y sessions set: isAuthorized: %v", session.IsAuthorized())
 	return c8ysession.WriteOutput(n.GetCommand().OutOrStdout(), client, cfg, session, outputFormat)
 }
 

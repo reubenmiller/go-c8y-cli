@@ -848,9 +848,13 @@ func (c Config) DecryptAllProperties() (err error) {
 	return err
 }
 
+func GetEnvKey(key string) string {
+	return "C8Y_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+}
+
 // GetEnvKey returns the environment key value associated
 func (c Config) GetEnvKey(key string) string {
-	return "C8Y_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+	return GetEnvKey(key)
 }
 
 // HasEnvSettingsPrefix check if a given env variable name is a settings variable
@@ -949,7 +953,7 @@ func (c *Config) WritePersistentConfig() error {
 
 // GetPassword returns the decrypted password of the current session
 func (c *Config) GetPassword() (string, error) {
-	value := c.viper.GetString("password")
+	value := c.GetPasswordRaw()
 
 	if value == "" {
 		value = c.Persistent.GetString("password")
@@ -962,16 +966,25 @@ func (c *Config) GetPassword() (string, error) {
 	return decryptedValue, nil
 }
 
+func (c *Config) GetPasswordRaw() string {
+	return c.viper.GetString("password")
+}
+
 // IsPasswordEncrypted return true if the password is encrypted
 // If the password is empty then treat it as encrypted
-func (c *Config) IsPasswordEncrypted() bool {
-	password := c.viper.GetString("password")
-	// return password != "" && c.SecureData.IsEncrypted(password) == 1
+func (c *Config) IsPasswordEncrypted(ignoreEmptyValue ...bool) bool {
+	password := c.GetPasswordRaw()
+	if len(ignoreEmptyValue) > 0 && ignoreEmptyValue[0] {
+		return c.SecureData.IsEncrypted(password) == 1
+	}
 	return password == "" || c.SecureData.IsEncrypted(password) == 1
 }
 
-func (c *Config) IsTokenEncrypted() bool {
+func (c *Config) IsTokenEncrypted(ignoreEmptyValue ...bool) bool {
 	token := c.viper.GetString("token")
+	if len(ignoreEmptyValue) > 0 && ignoreEmptyValue[0] {
+		return c.SecureData.IsEncrypted(token) == 1
+	}
 	return token == "" || c.SecureData.IsEncrypted(token) == 1
 }
 
@@ -1013,6 +1026,12 @@ func (c *Config) SetPassword(p string) {
 // SetToken sets the token used for OAUTH authentication
 func (c *Config) SetToken(p string) {
 	c.Persistent.Set(SettingsToken, p)
+}
+
+// SetToken sets the token used for OAUTH authentication
+func (c *Config) ClearToken() {
+	c.viper.Set(SettingsToken, "")
+	c.Persistent.Set(SettingsToken, "")
 }
 
 // SetTenant sets the tenant name
@@ -1626,9 +1645,9 @@ func (c *Config) GetSilentExit() bool {
 }
 
 func ParseLoginTypeWithDefault(v string) string {
-	value, err := c8y.ParseAuthMethod(v)
+	value, err := c8y.ParseLoginType(v)
 	if err != nil {
-		value = c8y.AuthMethodOAuth2Internal
+		value = ""
 	}
 	return value
 }
@@ -1653,9 +1672,9 @@ func (c *Config) GetLoginTypeRaw() string {
 
 // SetLoginType sets the authorization method, e.g. BASIC, OAUTH2_INTERNAL, NONE
 func (c *Config) SetLoginType(v string) {
-	value, err := c8y.ParseAuthMethod(v)
+	value, err := c8y.ParseLoginType(v)
 	if err != nil {
-		value = c8y.AuthMethodOAuth2Internal
+		value = c8y.LoginTypeOAuth2Internal
 	}
 	c.Set(SettingsLoginType, value)
 }
