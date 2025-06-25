@@ -29,6 +29,7 @@ type CmdSSH struct {
 	user           string
 	configuration  string
 	portForwarding string
+	preferredAuth  string
 
 	*subcommand.SubCommand
 
@@ -86,12 +87,14 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 	cmd.Flags().StringVar(&ccmd.listen, "listen", "127.0.0.1:0", "Listener address. unix:///run/example.sock")
 	cmd.Flags().StringVar(&ccmd.user, "user", "", "Default ssh user")
 	cmd.Flags().StringVar(&ccmd.configuration, "configuration", "", "Remote Access Configuration")
+	cmd.Flags().StringVar(&ccmd.preferredAuth, "preferred-auth", "", "Set the preferred authentication for the ssh connection. This will add '-o PreferredAuthentications=<value>' to the ssh command")
 	cmd.Flags().StringVarP(&ccmd.portForwarding, "port-forward", "L", "", "SSH Port-Forwarding option in the format [bind_address:]port:host:hostport. It also accepts a custom short form, <local>[:<remote>]. The value is passed to the ssh -L option, so read the ssh man page for more info")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithRemoteAccessPassthroughConfiguration("configuration", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("preferred-auth", "password", "publickey"),
 	)
 
 	flags.WithOptions(
@@ -203,6 +206,10 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 			"-o", "ServerAliveInterval=120",
 			"-o", "StrictHostKeyChecking=no",
 			"-o", "UserKnownHostsFile=/dev/null",
+		}
+
+		if n.preferredAuth != "" {
+			sshArgs = append(sshArgs, "-o", fmt.Sprintf("PreferredAuthentications=%s", n.preferredAuth))
 		}
 
 		sshTarget := host
