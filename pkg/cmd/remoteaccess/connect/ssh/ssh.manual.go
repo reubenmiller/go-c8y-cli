@@ -64,6 +64,9 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 			$ c8y remoteaccess connect ssh --device 12345 --user admin
 			Start an interactive SSH session on the device with a given ssh user
 
+			$ c8y remoteaccess connect ssh --device 12345 --user admin --preferred-auth password
+			Start an interactive SSH session on the device with a given ssh user and force password authentication
+
 			$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1883:127.0.0.1:1883
 			Start an interactive SSH session and configure port-forward by mapping the remote's 127.0.0.1:1883 to your machine's port 1883
 
