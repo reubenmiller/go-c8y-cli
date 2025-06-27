@@ -24,6 +24,11 @@ func ZipFile(source, target string) error {
 	return zipit(source, target, false)
 }
 
+// Check if two paths are equal
+func pathsEqual(p1, p2 string) bool {
+	return filepath.Clean(p1) == filepath.Clean(p2)
+}
+
 // Zip zips the source and writes it to the given target.
 // If the source is a folder, then the folder will be zipped, but the excludeRoot option can be used
 // to specify if the root folder should be included within the zipped file.
@@ -52,12 +57,14 @@ func zipit(source, target string, excludeRoot bool) error {
 		}
 	}
 
+	sourceDir := filepath.Clean(source)
+
 	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if baseDir != "" && excludeRoot && source == path {
+		if baseDir != "" && excludeRoot && pathsEqual(source, path) {
 			// Skip the root folder
 			return nil
 		}
@@ -69,9 +76,9 @@ func zipit(source, target string, excludeRoot bool) error {
 
 		if baseDir != "" {
 			if excludeRoot {
-				header.Name = strings.TrimPrefix(path, source)
+				header.Name = strings.TrimPrefix(path, sourceDir)
 			} else {
-				header.Name = filepath.Join(baseDir, strings.TrimPrefix(path, source))
+				header.Name = filepath.Join(baseDir, strings.TrimPrefix(path, sourceDir))
 			}
 		}
 
