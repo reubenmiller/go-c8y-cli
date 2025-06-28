@@ -2126,7 +2126,9 @@ func (c *Config) HideSensitiveInformation(client *c8y.Client, message string) st
 		message = strings.ReplaceAll(message, client.Token, "{token}")
 	}
 	if client.BaseURL != nil {
-		message = strings.ReplaceAll(message, strings.TrimRight(client.BaseURL.Host, "/"), "{host}")
+		if host := client.BaseURL.Host; host != "" {
+			message = strings.ReplaceAll(message, strings.TrimRight(host, "/"), "{host}")
+		}
 	}
 
 	basicAuthMatcher := regexp.MustCompile(`(Basic)\s+[A-Za-z0-9=]+`)
