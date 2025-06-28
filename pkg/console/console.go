@@ -86,6 +86,12 @@ func NewConsole(w io.Writer, tableOptions *TableOptions, header func([]string) [
 	}
 }
 
+func (c *Console) SetOut(w io.Writer) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.out = w
+}
+
 // IsCSV return true if csv output is set
 func (c *Console) IsCSV() bool {
 	return c.Format == config.OutputCSV || c.Format == config.OutputCSVWithHeader
