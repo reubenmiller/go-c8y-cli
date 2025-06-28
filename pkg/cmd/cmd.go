@@ -12,19 +12,15 @@ import (
 
 	"github.com/cli/safeexec"
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/run"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alias/expand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/factory"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/root"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
@@ -51,7 +47,7 @@ func init() {
 
 // Execute runs the root command
 func MainRun() {
-	rootCmd, err := Initialize()
+	rootCmd, err := root.NewCommand(buildVersion, buildBranch)
 	if err != nil {
 		os.Exit(int(cmderrors.ExitError))
 	}
@@ -336,83 +332,4 @@ func GetInitLoggerOptions(args []string) logger.Options {
 		Debug: debug,
 		Color: color,
 	}
-}
-
-// Initialize initializes the configuration manager and c8y client
-func Initialize() (*root.CmdRoot, error) {
-
-	var client *c8y.Client
-	var dataView *dataview.DataView
-	var consoleHandler *console.Console
-	var logHandler *logger.Logger
-	var activityLoggerHandler *activitylogger.ActivityLogger
-	var configHandler = config.NewConfig(viper.GetViper())
-
-	// init logger
-	logHandler = logger.NewLogger(module, GetInitLoggerOptions(os.Args))
-
-	if _, err := configHandler.ReadConfigFiles(nil); err != nil {
-		logHandler.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
-	}
-
-	// cmd factory
-	configFunc := func() (*config.Config, error) {
-		if configHandler == nil {
-			return nil, fmt.Errorf("config is missing")
-		}
-		return configHandler, nil
-	}
-	clientFunc := func() (*c8y.Client, error) {
-		if client == nil {
-			return nil, fmt.Errorf("client is missing")
-		}
-		return client, nil
-	}
-	loggerFunc := func() (*logger.Logger, error) {
-		if logHandler == nil {
-			return nil, fmt.Errorf("logger is missing")
-		}
-		return logHandler, nil
-	}
-	activityLoggerFunc := func() (*activitylogger.ActivityLogger, error) {
-		if activityLoggerHandler == nil {
-			return nil, fmt.Errorf("activityLogger is missing")
-		}
-		return activityLoggerHandler, nil
-	}
-	dataViewFunc := func() (*dataview.DataView, error) {
-		if dataView == nil {
-			return nil, fmt.Errorf("dataView is missing")
-		}
-		return dataView, nil
-	}
-	consoleFunc := func() (*console.Console, error) {
-		if consoleHandler == nil {
-			return nil, fmt.Errorf("console is missing")
-		}
-		return consoleHandler, nil
-	}
-	cmdFactory := factory.New(buildVersion, buildBranch, configFunc, clientFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
-
-	// Register the template resolver so the configuration can lookup values as needed
-	configHandler.RegisterTemplateResolver(cmdutil.NewTemplateResolver(cmdFactory))
-
-	rootCmd := root.NewCmdRoot(cmdFactory, buildVersion, "")
-
-	// Add reference to root command
-	cmdFactory.SetCommand(rootCmd.Command)
-
-	tableOptions := &console.TableOptions{
-		MinColumnWidth:           configHandler.ViewColumnMinWidth(),
-		MaxColumnWidth:           configHandler.ViewColumnMaxWidth(),
-		MinEmptyValueColumnWidth: configHandler.ViewColumnEmptyValueMinWidth(),
-		ColumnPadding:            configHandler.ViewColumnPadding(),
-		RowMode:                  configHandler.ViewRowMode(),
-		NumberFormatter:          configHandler.GetTableViewNumberFormatter(),
-	}
-	consoleHandler = console.NewConsole(rootCmd.OutOrStdout(), tableOptions, func(s []string) []byte {
-		return getOutputHeaders(consoleHandler, configHandler, s)
-	})
-
-	return rootCmd, nil
 }

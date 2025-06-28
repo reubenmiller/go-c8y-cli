@@ -152,6 +152,14 @@ func (s *IOStreams) CanPrompt() bool {
 	return s.IsStdinTTY() && s.IsStdoutTTY()
 }
 
+func (s *IOStreams) CanPromptOnStdErr() bool {
+	if s.neverPrompt {
+		return false
+	}
+
+	return s.IsStdinTTY() && s.IsStderrTTY()
+}
+
 func (s *IOStreams) SetNeverPrompt(v bool) {
 	s.neverPrompt = v
 }
