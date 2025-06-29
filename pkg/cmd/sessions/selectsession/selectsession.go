@@ -141,16 +141,16 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	}
 
 	templates := &promptui.SelectTemplates{
-		Active:   `▶ {{ printf "#%02d %4.4s" .Index .Extension | highlight }} {{ printf "%-30.29s" .Name | highlight }} {{ .Host | hide | highlight }} {{ printf "(%s/" .Tenant | hide | highlight }}{{ printf "%s)" .Username | hide | highlight }}`,
-		Inactive: `  {{ printf "#%02d %4.4s" .Index .Extension | faint }} {{ printf "%-30.29s" .Name | cyan }} {{ .Host | hide | magenta }} {{ printf "(%s/" .Tenant | hide | red }}{{ printf "%s)" .Username | hide | red }}`,
+		Active:   `▶ {{ printf "#%02d %4.4s" .Index .Extension | highlight }} {{ printf "%-30.29s" .Name | highlight }} {{ .Host | hide | highlight }} {{ printf "(%s" .Tenant | hide | highlight }}{{ if .Username }}{{ "/" | highlight }}{{ end }}{{ printf "%s)" .Username | hide | highlight }}`,
+		Inactive: `  {{ printf "#%02d %4.4s" .Index .Extension | faint }} {{ printf "%-30.29s" .Name | cyan }} {{ .Host | hide | magenta }} {{ printf "(%s" .Tenant | hide | red }}{{ if .Username }}{{ "/" | red }}{{ end }}{{ printf "%s)" .Username | hide | red }}`,
 		Selected: "{{ .Path | hideUser }}",
 		FuncMap:  funcMap,
 		Details: `
 --------- Details ----------
 {{ printf "%10s" "File:" | faint }}  {{ .Path | hideUser }}
 {{ printf "%10s" "Host:" | faint }}  {{ .Host | hide }}
-{{ printf "%10s" "Tenant:" | faint }}  {{ .Tenant | hide }}
-{{ printf "%10s" "Username:" | faint }}  {{ .Username | hide }}
+{{ if .Tenant }}{{ printf "%10s" "Tenant:" | faint }}  {{ .Tenant | hide }}{{ else }}{{ printf "%10s" "Tenant:" | faint }}  {{ "not set" | faint }}{{ end }}
+{{ if .Username }}{{ printf "%10s" "Username:" | faint }}  {{ .Username | hide }}{{ else }}{{ printf "%10s" "Username:" | faint }}  {{ "not set" | faint }}{{ end }}
 `,
 	}
 	templates.Help = `{{ "Use arrow keys (holding shift) to navigate" | faint }} {{ .NextKey | faint }} ` +
