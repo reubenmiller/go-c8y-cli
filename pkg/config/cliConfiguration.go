@@ -362,6 +362,9 @@ const (
 	// SettingsBrowser default browser
 	SettingsBrowser = "settings.browser"
 
+	// SettingsSSODiscoveryUrl Open ID Connect URL aka. Discovery URL
+	SettingsSSODiscoveryUrl = "settings.sso.discoveryUrl"
+
 	//
 	// Remote Access preferences
 	//
@@ -1450,6 +1453,11 @@ func (c *Config) GetTemplatePaths() []string {
 	paths = append(paths, c.GetPathSlice(SettingsTemplateCustomPaths)...)
 	paths = append(paths, c.GetPathSlice(SettingsTemplatePath)...)
 	return paths
+}
+
+// SSODiscoveryUrl SSO discovery URL (OpenID Connect Configuration URL)
+func (c *Config) SSODiscoveryUrl() string {
+	return c.viper.GetString(SettingsSSODiscoveryUrl)
 }
 
 // SetSessionMode set the session mode (it is not persisted)

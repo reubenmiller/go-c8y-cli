@@ -234,6 +234,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		n.onSave(client)
 	})
 	handler.LoginType = n.LoginType
+	handler.SSODiscoveryURL = cfg.SSODiscoveryUrl()
 	if handler.LoginType == "" {
 		log.Infof("User preference for login type: %s", "not-set")
 	} else {

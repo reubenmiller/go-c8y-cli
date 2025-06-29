@@ -10,6 +10,7 @@ type CommandSettings struct {
 	Template    *TemplateSettings      `json:"template,omitempty"`
 	View        *ViewSettings          `json:"views,omitempty"`
 	Login       *LoginSettings         `json:"login,omitempty"`
+	SSO         *SSOSettings           `json:"sso,omitempty"`
 	Defaults    map[string]interface{} `json:"defaults,omitempty"`
 }
 
@@ -25,6 +26,11 @@ type ActivityLogSettings struct {
 	Enabled      *bool  `json:"enabled,omitempty"`
 	MethodFilter string `json:"methodFilter,omitempty"`
 	Path         string `json:"path,omitempty"`
+}
+
+// SSOSettings SSO settings
+type SSOSettings struct {
+	DiscoveryURL string `json:"discoveryUrl,omitempty"`
 }
 
 // EncryptionSettings encryption settings

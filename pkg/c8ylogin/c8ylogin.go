@@ -100,6 +100,9 @@ type LoginHandler struct {
 	Logger          *logger.Logger
 	LoginType       string
 
+	// SSO specific settings
+	SSODiscoveryURL string
+
 	onSave func()
 }
 
@@ -407,12 +410,12 @@ func (lh *LoginHandler) login() {
 				}
 
 				accessToken, loginErr := lh.C8Yclient.Tenant.AuthorizeWithDeviceFlow(context.Background(), option.InitRequest, api.AuthEndpoints{
-					// TODO: Make URL configurable if the user knows better
-					// OpenIDConfigurationURL: "",
+					// Allow users to provide their own discovery URL
+					OpenIDConfigurationURL: lh.SSODiscoveryURL,
 				}, displayDeviceCode)
 				if loginErr != nil {
 					lh.state <- LoginStateAbort
-					lh.Err = fmt.Errorf("OAuth2 device authorization flow failed")
+					lh.Err = fmt.Errorf("OAuth2 device authorization flow failed. %w", loginErr)
 					return lh.Err
 				}
 

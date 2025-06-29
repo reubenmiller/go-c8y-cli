@@ -463,6 +463,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 		handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {})
 		handler.LoginType = loginType
+		handler.SSODiscoveryURL = cfg.SSODiscoveryUrl()
 
 		log.Infof("User preference for login type: %s", handler.LoginType)
 		handler.TFACode = session.TOTP
