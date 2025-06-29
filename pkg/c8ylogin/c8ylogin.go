@@ -26,7 +26,28 @@ import (
 type LoginState int
 
 func (l LoginState) String() string {
-	return [...]string{"Unknown", "Authorized", "NotAuthorized", "TFASetup", "TFAConfirm", "Verify", "Abort", "PromptForPassword"}[l]
+	switch l {
+	case LoginStateAuth:
+		return "Authorized"
+	case LoginStateNoAuth:
+		return "NotAuthorized"
+	case LoginStateTFASetup:
+		return "TFASetup"
+	case LoginStateTFAConfirm:
+		return "TFAConfirm"
+	case LoginStateLogin:
+		return "Login"
+	case LoginStateVerify:
+		return "Verify"
+	case LoginStateAbort:
+		return "Abort"
+	case LoginStatePromptPassword:
+		return "PromptForPassword"
+	case LoginStateUnknown:
+		fallthrough
+	default:
+		return "Unknown"
+	}
 }
 
 const (
