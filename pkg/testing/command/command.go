@@ -2,6 +2,7 @@ package command
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/google/shlex"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/root"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fakestdin"
 )
 
@@ -119,6 +121,23 @@ func WithEnv(t *testing.T, env map[string]string) ExecuteOptions {
 				if k, v, ok := strings.Cut(item, "="); ok {
 					os.Setenv(k, v)
 				}
+			}
+		})
+		return nil
+	}
+}
+
+// WithSensitiveLogging controls the hiding of sensitive information in the logs and dry run output
+func WithSensitiveLogging(t *testing.T, v bool) ExecuteOptions {
+	return func(cmd *root.CmdRoot) error {
+		key := config.GetEnvKey(config.SettingsLoggerHideSensitive)
+		originalValue, found := os.LookupEnv(key)
+		os.Setenv(key, fmt.Sprintf("%v", v))
+		t.Cleanup(func() {
+			if found {
+				os.Setenv(key, originalValue)
+			} else {
+				os.Unsetenv(key)
 			}
 		})
 		return nil
