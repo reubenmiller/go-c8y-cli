@@ -17,6 +17,7 @@ import (
 	"github.com/mdp/qrterminal/v3"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/pkg/oauth/api"
 	"github.com/reubenmiller/go-c8y/pkg/oauth/device"
@@ -310,9 +311,14 @@ func (lh *LoginHandler) promptForPassword() error {
 	}
 
 	if lh.C8Yclient.Username == "" {
-		lh.state <- LoginStateAbort
-		lh.Err = fmt.Errorf("Username is empty")
-		return lh.Err
+		prompter := prompt.NewPrompt(lh.Logger)
+		username, err := prompter.Username("Enter username", " ")
+		if err != nil {
+			lh.state <- LoginStateAbort
+			lh.Err = fmt.Errorf("user cancelled prompt")
+			return lh.Err
+		}
+		lh.C8Yclient.Username = username
 	}
 
 	reason := ""
@@ -458,7 +464,7 @@ func (lh *LoginHandler) login() {
 						} else {
 							lh.state <- LoginStateAbort
 							lh.Err = fmt.Errorf("User cancelled login")
-							return nil
+							return lh.Err
 						}
 					}
 					lh.C8Yclient.TFACode = lh.TFACode
@@ -481,8 +487,6 @@ func (lh *LoginHandler) login() {
 					}
 
 					if err := lh.C8Yclient.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
-						lh.Attempts++
-
 						if v, ok := err.(*c8y.ErrorResponse); ok {
 							lh.Logger.Errorf("OAuth2 failed. %s", v.Message)
 						} else {
@@ -492,12 +496,6 @@ func (lh *LoginHandler) login() {
 						if strings.Contains(err.Error(), "There was a change in authentication strategy for your tenant or user account") {
 							// trigger unknown to recheck if TFA is required or not
 							lh.state <- LoginStateUnknown
-							return nil
-						}
-
-						if lh.Attempts > 2 {
-							lh.Err = fmt.Errorf("Max log attempts reached: %w", err)
-							lh.state <- LoginStateAbort
 							return nil
 						}
 
@@ -514,15 +512,25 @@ func (lh *LoginHandler) login() {
 				lh.state <- LoginStateVerify
 
 			case c8y.LoginTypeBasic:
-				if lh.C8Yclient.Username == "" && lh.C8Yclient.Password == "" {
-					lh.Logger.Warnf("Skipping login type (%s) as a username and password are not defined", option.Type)
-					continue
+				if lh.C8Yclient.Username == "" || lh.C8Yclient.Password == "" {
+					if lh.IO.CanPromptOnStdErr() {
+						lh.state <- LoginStatePromptPassword
+						return nil
+					} else {
+						lh.Err = fmt.Errorf("username or password is empty and the interactive prompt is disabled")
+						lh.state <- LoginStateAbort
+						return lh.Err
+					}
 				}
 				lh.state <- LoginStateVerify
 				return nil
 			}
 		}
-		return nil
+
+		// return an error by default
+		lh.state <- LoginStateAbort
+		lh.Err = fmt.Errorf("no valid login type found")
+		return lh.Err
 	})
 }
 
@@ -532,6 +540,14 @@ func (lh *LoginHandler) errorContains(message, pattern string) bool {
 
 func (lh *LoginHandler) verify() {
 	lh.do(func() error {
+		lh.Attempts++
+
+		if lh.Attempts > 2 {
+			lh.Err = fmt.Errorf("max log attempts reached")
+			lh.state <- LoginStateAbort
+			return lh.Err
+		}
+
 		tenant, resp, err := lh.C8Yclient.Tenant.GetCurrentTenant(context.Background())
 
 		if resp != nil && resp.StatusCode() == http.StatusUnauthorized {
