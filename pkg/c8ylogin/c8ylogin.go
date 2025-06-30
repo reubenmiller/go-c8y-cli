@@ -590,6 +590,18 @@ func (lh *LoginHandler) verify() {
 					lh.Logger.Warnf("Could not get Cumulocity System version. %s", err)
 				}
 			}
+
+			// Get user information if not set (e.g. external SSO tokens don't generally include the username in a known field)
+			if lh.C8Yclient.Username == "" {
+				lh.Logger.Infof("Getting the current user's information as the username is not set")
+				currentUser, _, err := lh.C8Yclient.User.GetCurrentUser(context.Background())
+				if err != nil {
+					lh.Logger.Warnf("Could not get username. %s", err)
+				} else {
+					lh.Logger.Infof("Found current username. %s", currentUser.Username)
+					lh.C8Yclient.Username = currentUser.Username
+				}
+			}
 		}
 		return err
 	})

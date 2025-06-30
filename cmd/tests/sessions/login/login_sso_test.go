@@ -53,6 +53,7 @@ func Test_SSOLoginFromSessionFile(t *testing.T) {
 	assert.Contains(t, outputEnv, "C8Y_TENANT")
 	assert.Contains(t, outputEnv, "C8Y_VERSION")
 	assert.Contains(t, outputEnv, "C8Y_TOKEN")
+	assert.Contains(t, outputEnv, "C8Y_USER")
 	assert.NotContains(t, outputEnv, "C8Y_PASSWORD")
 
 	// Session information should be persisted

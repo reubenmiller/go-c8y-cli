@@ -325,5 +325,9 @@ func hasChanged(client *c8y.Client, cfg *config.Config) bool {
 	if client.Password != "" && client.Password != cfg.MustGetPassword() && cfg.StorePassword() {
 		return true
 	}
+
+	if client.Username != "" && client.Username != cfg.GetUsername() {
+		return true
+	}
 	return false
 }

@@ -1021,6 +1021,11 @@ func (c *Config) GetCumulocityVersion() string {
 	return c.Persistent.GetString("version")
 }
 
+// SetUsername sets the username
+func (c *Config) SetUsername(v string) {
+	c.Persistent.Set("username", v)
+}
+
 // SetPassword sets the password
 func (c *Config) SetPassword(p string) {
 	c.Persistent.Set("password", p)
@@ -1867,6 +1872,10 @@ func (c *Config) SaveClientConfig(client *c8y.Client) error {
 
 		if client.Version != "" {
 			c.SetCumulocityVersion(client.Version)
+		}
+
+		if client.Username != "" {
+			c.SetUsername(client.Username)
 		}
 	}
 	return c.WritePersistentConfig()
