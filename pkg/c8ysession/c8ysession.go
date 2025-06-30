@@ -191,7 +191,7 @@ func WriteOutput(w io.Writer, client *c8y.Client, cfg *config.Config, session *C
 
 	switch format {
 	case "json":
-		out, err := json.Marshal(session)
+		out, err := MarshalSession(session, cfg)
 		if err != nil {
 			return err
 		}
@@ -302,6 +302,16 @@ func GetSessionEnvKeys() []string {
 		config.EnvSessionMode,
 	}
 	return keys
+}
+
+func MarshalSession(session *CumulocitySession, cfg *config.Config) ([]byte, error) {
+	// Don't include password if a token is provided
+	if !cfg.AlwaysIncludePassword() {
+		if session.Token != "" {
+			session.Password = ""
+		}
+	}
+	return json.Marshal(session)
 }
 
 func ClearEnvironmentVariables(shell utilities.ShellType) {

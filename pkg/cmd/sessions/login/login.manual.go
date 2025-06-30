@@ -275,7 +275,12 @@ func (n *CmdLogin) FromViper(v *viper.Viper) (*c8ysession.CumulocitySession, err
 		LoginType:  getValue("loginType"),
 		Version:    getValue("version"),
 	}
-	session.SetAuthorized(v.GetBool("authorized"))
+
+	// Get if value is defined before accessing it
+	if v.GetString("authorized") != "" {
+		session.SetAuthorized(v.GetBool("authorized"))
+	}
+
 	session.SetHost(getValue("host"))
 	return session, nil
 }
@@ -435,7 +440,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		client.SetToken(session.Token)
 	}
 
-	if session.Authorized == nil || !*session.Authorized {
+	if !session.IsAuthorized() {
 		loginType := strings.ToUpper(cfg.GetLoginTypeWithDefault())
 		if n.LoginType != "" {
 			loginType = strings.ToUpper(n.LoginType)
