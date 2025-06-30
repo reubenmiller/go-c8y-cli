@@ -458,7 +458,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		// SSO providers are in control of the token, so it should just be used as is
-		if !n.ClearToken && c8ysession.ShouldReuseToken(cfg, log, session.Token) {
+		if !n.ClearToken && c8ysession.ShouldReuseToken(cfg, log, session.Token, loginType) {
 			client.SetToken(session.Token)
 		} else {
 			client.ClearToken()

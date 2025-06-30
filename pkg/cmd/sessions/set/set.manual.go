@@ -215,7 +215,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	if n.ClearToken {
 		client.ClearToken()
 		cfg.ClearToken()
-	} else if c8ysession.ShouldReuseToken(cfg, log, token) {
+	} else if c8ysession.ShouldReuseToken(cfg, log, token, n.LoginType) {
 		client.SetToken(token)
 	} else {
 		client.ClearToken()
@@ -275,6 +275,9 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	}
 	// Don't trigger another login afterwards
 	session.SetAuthorized(true)
+
+	// Store the chosen login type for display to the user
+	session.LoginType = handler.LoginType
 
 	outputFormat := cfg.GetOutputFormatWithDefault(cmd, config.OutputUnknown).String()
 

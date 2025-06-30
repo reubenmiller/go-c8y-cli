@@ -25,6 +25,51 @@ func createBasicSession(t *testing.T) (string, string) {
 	return tmpDir, filepath.Join(tmpDir, sessionName)
 }
 
+func createBasicWithTokenSession(t *testing.T) (string, string) {
+	session, err := mocksession.CreateSessionWithOAuth2Internal()
+	assert.NoError(t, err)
+	sessionName := "test-simple.json"
+	tmpDir := mocksession.CreateCumulocitySessionDir(
+		t,
+		mocksession.WithSession(sessionName, &c8ysession.CumulocitySession{
+			Host:     session.Host,
+			Username: session.Username,
+			Password: session.Password,
+			Token:    session.Token,
+		}),
+	)
+	return tmpDir, filepath.Join(tmpDir, sessionName)
+}
+
+func Test_LoginSwithFromTokenToBasicWithTokenPresent(t *testing.T) {
+	homeDir, sessionFile := createBasicWithTokenSession(t)
+	stdout, cmdErr := command.ExecuteCmdWithStandardOutput(
+		command.NewMockCommand(),
+		`c8y sessions set -v --shell bash --loginType BASIC`,
+		command.WithStdinTTY(true),
+		command.WithStderrTTY(true),
+		command.WithEnv(t, map[string]string{
+			config.EnvSessionHome: homeDir,
+		}),
+		command.WithSessionEncryption(t, false),
+	)
+	assert.Nil(t, cmdErr)
+	outputEnv := command.ParseShellEnv(stdout)
+	assert.Contains(t, outputEnv, "C8Y_HOST")
+	assert.Contains(t, outputEnv, "C8Y_TENANT")
+	assert.Contains(t, outputEnv, "C8Y_VERSION")
+	assert.Contains(t, outputEnv, "C8Y_PASSWORD")
+	assert.NotContains(t, outputEnv, "C8Y_TOKEN")
+
+	// Session information should be persisted
+	session := mocksession.ParseSession(sessionFile)
+	assert.NotEmpty(t, session.Get("host").String())
+	assert.NotEmpty(t, session.Get("tenant").String())
+	assert.NotEmpty(t, session.Get("password").String())
+	assert.Empty(t, session.Get("token").String())
+	assert.NotEmpty(t, session.Get("version").String())
+}
+
 func Test_LoginWithUserGivenLoginType_Default(t *testing.T) {
 	homeDir, sessionFile := createBasicSession(t)
 	stdout, cmdErr := command.ExecuteCmdWithStandardOutput(
@@ -34,9 +79,9 @@ func Test_LoginWithUserGivenLoginType_Default(t *testing.T) {
 		command.WithStdinTTY(true),
 		command.WithStderrTTY(true),
 		command.WithEnv(t, map[string]string{
-			config.EnvSessionHome:                              homeDir,
-			config.GetEnvKey(config.SettingsEncryptionEnabled): "false",
+			config.EnvSessionHome: homeDir,
 		}),
+		command.WithSessionEncryption(t, false),
 	)
 	assert.Nil(t, cmdErr)
 	outputEnv := command.ParseShellEnv(stdout)
@@ -64,9 +109,9 @@ func Test_LoginWithUserGivenLoginType_OAuth2Internal(t *testing.T) {
 		command.WithStdinTTY(true),
 		command.WithStderrTTY(true),
 		command.WithEnv(t, map[string]string{
-			config.EnvSessionHome:                              homeDir,
-			config.GetEnvKey(config.SettingsEncryptionEnabled): "false",
+			config.EnvSessionHome: homeDir,
 		}),
+		command.WithSessionEncryption(t, false),
 	)
 	assert.Nil(t, cmdErr)
 	outputEnv := command.ParseShellEnv(stdout)
@@ -94,9 +139,9 @@ func Test_LoginWithUserGivenLoginTypeBasic(t *testing.T) {
 		command.WithStdinTTY(true),
 		command.WithStderrTTY(true),
 		command.WithEnv(t, map[string]string{
-			config.EnvSessionHome:                              homeDir,
-			config.GetEnvKey(config.SettingsEncryptionEnabled): "false",
+			config.EnvSessionHome: homeDir,
 		}),
+		command.WithSessionEncryption(t, false),
 	)
 	assert.Nil(t, cmdErr)
 	outputEnv := command.ParseShellEnv(stdout)
@@ -135,13 +180,12 @@ func Test_LoginWithUserGivenLoginTypeNone(t *testing.T) {
 	stdout, cmdErr := command.ExecuteCmdWithStandardOutput(
 		command.NewMockCommand(),
 		`c8y sessions set -v --shell bash --loginType NONE`,
-		command.WithStdIn("\n"),
 		command.WithStdinTTY(true),
 		command.WithStderrTTY(true),
 		command.WithEnv(t, map[string]string{
-			config.EnvSessionHome:                              homeDir,
-			config.GetEnvKey(config.SettingsEncryptionEnabled): "false",
+			config.EnvSessionHome: homeDir,
 		}),
+		command.WithSessionEncryption(t, false),
 	)
 	assert.Nil(t, cmdErr)
 	outputEnv := command.ParseShellEnv(stdout)

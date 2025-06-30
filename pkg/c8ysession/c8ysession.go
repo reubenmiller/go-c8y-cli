@@ -171,7 +171,13 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(maybeHideMessage(client, session.Username)))
 	}
 	if client != nil {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "authType")), value(client.AuthorizationType.String()))
+		var authTypeLogin string
+		if session.LoginType != "" {
+			authTypeLogin = fmt.Sprintf("%s (loginType=%s)", client.AuthorizationType.String(), session.LoginType)
+		} else {
+			authTypeLogin = client.AuthorizationType.String()
+		}
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "authType")), value(authTypeLogin))
 	}
 	fmt.Fprintf(w, "\n")
 }
@@ -359,7 +365,10 @@ func shouldRenewToken(log *logger.Logger, t string, validFor time.Duration) (boo
 }
 
 // ShouldReuseToken checks if the token should be reused or not
-func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string) bool {
+func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string, loginType string) bool {
+	if loginType != "" && !LoginTypeRequiresToken(loginType) {
+		return false
+	}
 	if token == "" {
 		return false
 	}
@@ -384,4 +393,9 @@ func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string) bool
 		reuse = false
 	}
 	return reuse
+}
+
+// LoginTypeRequiresToken check if the given loginType requires a token for authorization
+func LoginTypeRequiresToken(loginType string) bool {
+	return strings.EqualFold(loginType, c8y.LoginTypeOAuth2) || strings.EqualFold(loginType, c8y.LoginTypeOAuth2Internal)
 }
