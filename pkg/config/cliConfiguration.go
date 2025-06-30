@@ -62,11 +62,12 @@ const (
 )
 
 var (
-	ProviderTypeAuto     = "auto"
-	ProviderTypeFile     = "file"
-	ProviderTypeEnv      = "env"
-	ProviderTypeExternal = "external"
-	ProviderTypeStdin    = "stdin"
+	ProviderTypeAuto        = "auto"
+	ProviderTypeFile        = "file"
+	ProviderTypeEnv         = "env"
+	ProviderTypeExternal    = "external"
+	ProviderTypeStdin       = "stdin"
+	ProviderTypeInteractive = "interactive"
 )
 
 const (

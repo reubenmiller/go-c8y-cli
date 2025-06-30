@@ -35,6 +35,7 @@ type CmdLogin struct {
 	Exec     string
 	Stdin    bool
 	Env      bool
+	Prompt   bool
 	Format   string
 	Provider string
 	Secrets  []string
@@ -45,6 +46,7 @@ type CmdLogin struct {
 	ClearToken bool
 
 	Mode string
+	Host string
 
 	// Output options
 	Shell        string
@@ -80,6 +82,8 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 
 			$ eval "$( c8y sessions login --from-cmd "c8y-session-bitwarden list --folder c8y" --secrets BW_SESSION --format json )"
 			Set a session from an external command, where the external commands returns the selected session in json format on stdout
+
+			$ eval "$( c8y sessions login --from-prompt --host example.cumulocity.com)"
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -91,6 +95,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().StringVar(&ccmd.Exec, "from-cmd", "", "External command to execute to get the log in details")
 	cmd.Flags().BoolVar(&ccmd.Env, "from-env", false, "Read from environment variables")
 	cmd.Flags().BoolVar(&ccmd.Stdin, "from-stdin", false, "Read from standard input")
+	cmd.Flags().BoolVar(&ccmd.Prompt, "from-prompt", false, "Read from user prompted input")
 	// cmd.Flags().BoolVar(&ccmd.Console, "from-console", false, "Read from user console")
 	cmd.Flags().BoolVar(&ccmd.NoBanner, "no-banner", false, "Don't show the session banner")
 	cmd.Flags().StringVar(&ccmd.TFACode, "tfaCode", "", "Two Factor Authentication code")
@@ -101,12 +106,21 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL, OAUTH2 (device flow) or BASIC. When set to BASIC, any existing token will be cleared")
 	cmd.Flags().StringVar(&ccmd.Mode, "mode", "", "Session mode which controls which commands are allowed, e.g. dev, qual or prod")
 	cmd.Flags().StringSliceVar(&ccmd.Secrets, "secrets", []string{}, "List of secrets to include as env variables when running an external command. Only valid with from-cmd")
+	cmd.Flags().StringVar(&ccmd.Host, "host", "", "Cumulocity host. Only used with the 'interactive' provider")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("shell", shell.SupportedShells(shell.ShellAuto)...),
 		completion.WithValidateSet("output-format", "json", "dotenv"),
-		completion.WithValidateSet("provider", config.ProviderTypeFile, config.ProviderTypeStdin, config.ProviderTypeEnv, config.ProviderTypeExternal, config.ProviderTypeAuto),
+		completion.WithValidateSet(
+			"provider",
+			config.ProviderTypeFile,
+			config.ProviderTypeStdin,
+			config.ProviderTypeEnv,
+			config.ProviderTypeExternal,
+			config.ProviderTypeAuto,
+			config.ProviderTypeInteractive,
+		),
 		completion.WithValidateSet("format", "json", "yaml", "toml", "dotenv"),
 		completion.WithValidateSet("loginType", c8y.LoginTypeOAuth2Internal, c8y.LoginTypeBasic, c8y.LoginTypeNone, c8y.LoginTypeOAuth2),
 		completion.WithValidateSet(
@@ -116,7 +130,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
-	cmd.MarkFlagsMutuallyExclusive("from-file", "from-cmd", "from-stdin", "from-env")
+	cmd.MarkFlagsMutuallyExclusive("from-file", "from-cmd", "from-stdin", "from-env", "from-prompt")
 	cmd.MarkFlagsMutuallyExclusive("output-format", "shell")
 
 	return ccmd
@@ -168,6 +182,55 @@ func (n *CmdLogin) FromEnv() (*c8ysession.CumulocitySession, error) {
 		session.SessionUri = "env://host"
 	}
 
+	return session, nil
+}
+
+func (n *CmdLogin) FromInteractive(cmd *cobra.Command) (*c8ysession.CumulocitySession, error) {
+	// cfg, err := n.factory.Config()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	log, err := n.factory.Logger()
+	if err != nil {
+		return nil, err
+	}
+
+	prompter := prompt.NewPrompt(log)
+
+	session := &c8ysession.CumulocitySession{
+		Host: n.Host,
+		Mode: n.Mode,
+	}
+	if v, err := cmd.Root().PersistentFlags().GetString("sessionUsername"); err == nil {
+		session.Username = v
+	}
+	if v, err := cmd.Root().PersistentFlags().GetString("sessionPassword"); err == nil {
+		session.Password = v
+	}
+
+	if session.Host == "" {
+		v, err := prompter.Input("Enter host", "", true, false)
+		if err != nil {
+			return nil, err
+		}
+		session.Host = strings.TrimSpace(v)
+	}
+
+	if session.Mode == "" {
+		mode, err := prompt.Select("Select mode", []string{
+			"dev\tDevelopment mode (no restrictions)",
+			"qual\tQA mode (delete disabled)",
+			"prod\tProduction mode (read only)",
+		}, "dev\tDevelopment mode (no restrictions)")
+		if err != nil {
+			return nil, err
+		}
+		session.Mode = mode
+	}
+
+	if session.SessionUri == "" {
+		session.SessionUri = "interactive://host"
+	}
 	return session, nil
 }
 
@@ -359,7 +422,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if !oneHasChanged(cmd, "from-cmd", "from-file", "from-env", "from-stdin") {
+	if !oneHasChanged(cmd, "from-cmd", "from-file", "from-env", "from-stdin", "from-prompt") {
 
 		// Set defaults from config if values from flags aren't provided
 		if !cmd.Flags().Changed("provider") {
@@ -386,7 +449,9 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		//
 		// Try guessing a sensible default
 		//
-		if n.File != "" {
+		if n.Prompt {
+			n.Provider = config.ProviderTypeInteractive
+		} else if n.File != "" {
 			n.Provider = config.ProviderTypeFile
 		} else if n.Stdin {
 			n.Provider = config.ProviderTypeStdin
@@ -405,6 +470,8 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	var session *c8ysession.CumulocitySession
 
 	switch strings.ToLower(n.Provider) {
+	case config.ProviderTypeInteractive:
+		session, err = n.FromInteractive(cmd)
 	case config.ProviderTypeExternal:
 		session, err = n.FromExternalProvider(args)
 	case config.ProviderTypeEnv:
