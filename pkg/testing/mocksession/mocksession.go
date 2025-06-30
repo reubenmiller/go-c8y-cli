@@ -11,6 +11,15 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+func getFirstNonEmptyEnv(keys ...string) string {
+	for _, k := range keys {
+		if v := os.Getenv(k); v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
 func CreateCumulocitySessionDir(t *testing.T, opts ...SessionFunc) string {
 	tmpDir, err := os.MkdirTemp("", "go-c8y-cli-sessionXXXXXX")
 	assert.Nil(t, err)
@@ -45,4 +54,12 @@ func ParseSession(path string) gjson.Result {
 		panic(err)
 	}
 	return gjson.ParseBytes(b)
+}
+
+func GetSessionEnvironmentVariables() map[string]string {
+	return map[string]string{
+		"C8Y_HOST":     os.Getenv("C8Y_HOST"),
+		"C8Y_USERNAME": getFirstNonEmptyEnv("C8Y_USER", "C8Y_USERNAME"),
+		"C8Y_PASSWORD": os.Getenv("C8Y_PASSWORD"),
+	}
 }
