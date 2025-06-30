@@ -103,6 +103,7 @@ type LoginHandler struct {
 
 	// SSO specific settings
 	SSODiscoveryURL string
+	SSOScopes       []string
 
 	onSave func()
 }
@@ -409,15 +410,16 @@ func (lh *LoginHandler) login() {
 					fmt.Fprintf(lh.IO.ErrOut, "%s to open %s in your browser...", bold.Sprintf("Press Enter"), verificationURI)
 					bufio.NewReader(lh.IO.In).ReadBytes('\n')
 
-					if browserErr := browser.OpenURL(code.VerificationURIComplete); browserErr != nil {
+					if browserErr := browser.OpenURL(verificationURI); browserErr != nil {
 						lh.writeMessage("Failed to open browser, please open the URL in your browser manually")
 					}
 					return nil
 				}
 
 				accessToken, loginErr := lh.C8Yclient.Tenant.AuthorizeWithDeviceFlow(context.Background(), option.InitRequest, api.AuthEndpoints{
-					// Allow users to provide their own discovery URL
+					// Allow users to provide their own discovery URL and scopes
 					OpenIDConfigurationURL: lh.SSODiscoveryURL,
+					Scopes:                 lh.SSOScopes,
 				}, displayDeviceCode)
 				if loginErr != nil {
 					lh.state <- LoginStateAbort

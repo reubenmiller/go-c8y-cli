@@ -366,6 +366,9 @@ const (
 	// SettingsSSODiscoveryUrl Open ID Connect URL aka. Discovery URL
 	SettingsSSODiscoveryUrl = "settings.sso.discoveryUrl"
 
+	// SettingsSSOScopes SSO scopes used to request a device code
+	SettingsSSOScopes = "settings.sso.scopes"
+
 	//
 	// Remote Access preferences
 	//
@@ -1464,6 +1467,11 @@ func (c *Config) GetTemplatePaths() []string {
 // SSODiscoveryUrl SSO discovery URL (OpenID Connect Configuration URL)
 func (c *Config) SSODiscoveryUrl() string {
 	return c.viper.GetString(SettingsSSODiscoveryUrl)
+}
+
+// SSOScopes scopes to use in the device code request when using SSO
+func (c *Config) SSOScopes() []string {
+	return c.viper.GetStringSlice(SettingsSSOScopes)
 }
 
 // SetSessionMode set the session mode (it is not persisted)

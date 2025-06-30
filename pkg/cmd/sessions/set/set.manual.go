@@ -235,6 +235,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	})
 	handler.LoginType = n.LoginType
 	handler.SSODiscoveryURL = cfg.SSODiscoveryUrl()
+	handler.SSOScopes = cfg.SSOScopes()
 	if handler.LoginType == "" {
 		log.Infof("User preference for login type: %s", "not-set")
 	} else {

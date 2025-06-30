@@ -186,10 +186,6 @@ func (n *CmdLogin) FromEnv() (*c8ysession.CumulocitySession, error) {
 }
 
 func (n *CmdLogin) FromInteractive(cmd *cobra.Command) (*c8ysession.CumulocitySession, error) {
-	// cfg, err := n.factory.Config()
-	// if err != nil {
-	// 	return nil, err
-	// }
 	log, err := n.factory.Logger()
 	if err != nil {
 		return nil, err
@@ -228,9 +224,7 @@ func (n *CmdLogin) FromInteractive(cmd *cobra.Command) (*c8ysession.CumulocitySe
 		session.Mode = mode
 	}
 
-	if session.SessionUri == "" {
-		session.SessionUri = "interactive://host"
-	}
+	session.SessionUri = "interactive://host"
 	return session, nil
 }
 
@@ -536,6 +530,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {})
 		handler.LoginType = loginType
 		handler.SSODiscoveryURL = cfg.SSODiscoveryUrl()
+		handler.SSOScopes = cfg.SSOScopes()
 
 		log.Infof("User preference for login type: %s", handler.LoginType)
 		handler.TFACode = session.TOTP

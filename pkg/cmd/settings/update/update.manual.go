@@ -95,6 +95,7 @@ var updateSettingsOptions = map[string]argumentHandler{
 
 	// sso
 	"sso.discoveryUrl": {"sso.discoveryUrl", "string", config.SettingsSSODiscoveryUrl, []string{}, nil, cobra.ShellCompDirectiveNoFileComp},
+	"sso.scopes":       {"sso.scopes", "string", config.SettingsSSOScopes, []string{}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// settings path
 	"settings.path": {"settings.path", "string", config.SettingsConfigPath, []string{"json"}, nil, cobra.ShellCompDirectiveFilterFileExt},
