@@ -1692,19 +1692,13 @@ func ParseLoginTypeWithDefault(v string) string {
 
 // GetLoginTypeWithDefault get the preferred login type
 func (c *Config) GetLoginTypeWithDefault() string {
-	v := c.Persistent.GetString(SettingsLoginType)
-	if v == "" {
-		v = c.viper.GetString(SettingsLoginType)
-	}
+	v := c.viper.GetString(SettingsLoginType)
 	return ParseLoginTypeWithDefault(v)
 }
 
 // GetLoginTypeRaw get the raw value, where it could also be an empty value
 func (c *Config) GetLoginTypeRaw() string {
-	v := c.Persistent.GetString(SettingsLoginType)
-	if v == "" {
-		v = c.viper.GetString(SettingsLoginType)
-	}
+	v := c.viper.GetString(SettingsLoginType)
 	return strings.ToUpper(v)
 }
 

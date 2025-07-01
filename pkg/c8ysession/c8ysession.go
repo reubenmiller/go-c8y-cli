@@ -254,6 +254,10 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 		"C8Y_HEADER":               authHeader,
 	}
 
+	if session.LoginType != "" {
+		output["C8Y_SETTINGS_LOGIN_TYPE"] = session.LoginType
+	}
+
 	if mode != "" {
 		output[config.EnvSessionMode] = mode
 	}
@@ -302,6 +306,7 @@ func GetSessionEnvKeys() []string {
 		"C8Y_SESSION",
 		"C8Y_HEADER",
 		"C8Y_HEADER_AUTHORIZATION",
+		"C8Y_SETTINGS_LOGIN_TYPE",
 		config.EnvSessionMode,
 	}
 	return keys
