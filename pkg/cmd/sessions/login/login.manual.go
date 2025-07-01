@@ -48,6 +48,9 @@ type CmdLogin struct {
 	Mode string
 	Host string
 
+	// SSO options
+	SSOScopes string
+
 	// Output options
 	Shell        string
 	OutputFormat string
@@ -107,6 +110,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().StringVar(&ccmd.Mode, "mode", "", "Session mode which controls which commands are allowed, e.g. dev, qual or prod")
 	cmd.Flags().StringSliceVar(&ccmd.Secrets, "secrets", []string{}, "List of secrets to include as env variables when running an external command. Only valid with from-cmd")
 	cmd.Flags().StringVar(&ccmd.Host, "host", "", "Cumulocity host. Only used with the 'interactive' provider")
+	cmd.Flags().StringVar(&ccmd.SSOScopes, "sso-scopes", "", "SSO Scopes")
 
 	completion.WithOptions(
 		cmd,
@@ -540,7 +544,12 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {})
 		handler.LoginType = loginType
 		handler.SSODiscoveryURL = cfg.SSODiscoveryUrl()
-		handler.SSOScopes = cfg.SSOScopes()
+
+		if len(n.SSOScopes) > 0 {
+			handler.SSOScopes = strings.Split(n.SSOScopes, " ")
+		} else {
+			handler.SSOScopes = cfg.SSOScopes()
+		}
 
 		log.Infof("User preference for login type: %s", handler.LoginType)
 		handler.TFACode = session.TOTP
