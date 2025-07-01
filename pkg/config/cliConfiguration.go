@@ -2092,13 +2092,11 @@ func (c *Config) GetSessionFile(overrideSession ...string) string {
 // 1. load settings (from C8Y_SESSION_HOME path)
 // 2. load session file (by path)
 // 3. load session file (by name)
-func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
+func (c *Config) ReadConfigFiles(client *c8y.Client, ignoreSessionFile ...bool) (path string, err error) {
 	c.Logger.Debugf("Reading configuration files")
 	v := c.viper
 	v.AddConfigPath(".")
 	v.AddConfigPath(c.GetHomeDir())
-
-	sessionFile := c.GetSessionFile("")
 
 	// Load (non-session) preferences
 	v.SetConfigName(SettingsGlobalName)
@@ -2109,22 +2107,26 @@ func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
 	}
 
 	// Load session
-	if _, err := os.Stat(sessionFile); err == nil {
-		// Load config by file path
-		v.SetConfigFile(sessionFile)
+	if len(ignoreSessionFile) == 0 || !ignoreSessionFile[0] {
+		sessionFile := c.GetSessionFile("")
 
-		if err := c.ReadConfig(sessionFile); err != nil {
-			c.Logger.Warnf("Could not read global settings file. file=%s, err=%s", sessionFile, err)
-		}
-	} else {
-		// Load config by name
-		sessionName := "session"
-		if sessionFile != "" {
-			sessionName = sessionFile
-		}
+		if _, err := os.Stat(sessionFile); err == nil {
+			// Load config by file path
+			v.SetConfigFile(sessionFile)
 
-		if sessionName != "" {
-			v.SetConfigName(sessionName)
+			if err := c.ReadConfig(sessionFile); err != nil {
+				c.Logger.Warnf("Could not read global settings file. file=%s, err=%s", sessionFile, err)
+			}
+		} else {
+			// Load config by name
+			sessionName := "session"
+			if sessionFile != "" {
+				sessionName = sessionFile
+			}
+
+			if sessionName != "" {
+				v.SetConfigName(sessionName)
+			}
 		}
 	}
 
