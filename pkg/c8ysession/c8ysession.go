@@ -227,7 +227,6 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 	token := session.Token
 	authHeaderValue := ""
 	authHeader := ""
-	loginType := session.LoginType
 
 	if dummyReq, err := client.NewRequest("GET", "/", "", nil); err == nil {
 		authHeaderValue = dummyReq.Header.Get("Authorization")
@@ -253,7 +252,6 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 		"C8Y_PASSWORD":             password,
 		"C8Y_HEADER_AUTHORIZATION": authHeaderValue,
 		"C8Y_HEADER":               authHeader,
-		"C8Y_SETTINGS_LOGIN_TYPE":  loginType,
 	}
 
 	if mode != "" {
@@ -304,7 +302,6 @@ func GetSessionEnvKeys() []string {
 		"C8Y_SESSION",
 		"C8Y_HEADER",
 		"C8Y_HEADER_AUTHORIZATION",
-		"C8Y_SETTINGS_LOGIN_TYPE",
 		config.EnvSessionMode,
 	}
 	return keys
@@ -398,4 +395,19 @@ func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string, logi
 // LoginTypeRequiresToken check if the given loginType requires a token for authorization
 func LoginTypeRequiresToken(loginType string) bool {
 	return strings.EqualFold(loginType, c8y.LoginTypeOAuth2) || strings.EqualFold(loginType, c8y.LoginTypeOAuth2Internal)
+}
+
+func GetTokenSubject(value string) (string, error) {
+	claims := jwt.RegisteredClaims{}
+	parser := jwt.NewParser()
+	token, _, err := parser.ParseUnverified(value, &claims)
+	if err != nil {
+		// Invalid token
+		return "", fmt.Errorf("invalid token")
+	}
+	subject, err := token.Claims.GetSubject()
+	if err != nil {
+		return "", err
+	}
+	return subject, nil
 }

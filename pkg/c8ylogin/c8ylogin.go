@@ -3,6 +3,7 @@ package c8ylogin
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/mdp/qrterminal/v3"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
@@ -100,6 +102,7 @@ type LoginHandler struct {
 	Writer          io.Writer
 	Logger          *logger.Logger
 	LoginType       string
+	LoginAttempted  bool
 
 	// SSO specific settings
 	SSODiscoveryURL string
@@ -209,6 +212,22 @@ func (lh *LoginHandler) Run() error {
 		}
 
 		time.Sleep(500 * time.Millisecond)
+	}
+
+	//
+	// When reusing an existing token, the default login type might be wrong so
+	// try and detect the type by parsing the token
+	if !lh.LoginAttempted {
+		if lh.C8Yclient.Token != "" {
+			if subject, err := c8ysession.GetTokenSubject(lh.C8Yclient.Token); err == nil {
+				// with c8y issued tokens, the subject is the username
+				if lh.C8Yclient.Username == subject {
+					lh.LoginType = c8y.LoginTypeOAuth2Internal
+				} else {
+					lh.LoginType = c8y.LoginTypeOAuth2
+				}
+			}
+		}
 	}
 
 	return lh.Err
@@ -377,6 +396,8 @@ func (lh *LoginHandler) login() {
 			return nil
 		}
 
+		lh.LoginAttempted = true
+
 		order := []string{}
 		for _, option := range lh.LoginOptions.LoginOptions {
 			order = append(order, option.Type)
@@ -422,6 +443,15 @@ func (lh *LoginHandler) login() {
 					Scopes:                 lh.SSOScopes,
 				}, displayDeviceCode)
 				if loginErr != nil {
+					// Ignore SSO if invalid configuration is found
+					if errors.Is(loginErr, c8y.ErrSSOInvalidConfiguration) {
+						lh.Logger.Warnf("Skipping login type (%s) as SSO configuration is invalid. err=%s", option.Type, loginErr)
+						continue
+					}
+
+					// Check error type, and if the configuration can't be found, then skip SSO
+					// add a new formal type to cover this scenario
+					// could not get OpenID Connect configuration
 					lh.state <- LoginStateAbort
 					lh.Err = fmt.Errorf("OAuth2 device authorization flow failed. %w", loginErr)
 					return lh.Err

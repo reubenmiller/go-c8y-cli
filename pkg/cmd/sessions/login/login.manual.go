@@ -278,6 +278,10 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 		providerCommand = append(providerCommand, fmt.Sprintf("--loginType=%s", n.LoginType))
 	}
 
+	if cfg.Verbose() {
+		providerCommand = append(providerCommand, "-v")
+	}
+
 	providerCommand = append(providerCommand, args...)
 	cmd := exec.Command(providerCommand[0], providerCommand[1:]...)
 	cmd.Env = env
@@ -495,6 +499,12 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		cfg.Logger.Infof("Received session from external source:\n%s\n", sessionContents)
 	}
 
+	if session.SessionUri != "" {
+		cfg.SetSessionFile(session.SessionUri)
+	} else {
+		cfg.SetSessionFile(session.Path)
+	}
+
 	client := c8y.NewClient(nil, session.Host, session.Tenant, session.Username, session.Password, true)
 
 	if session.Token != "" {
@@ -550,6 +560,9 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		session.Username = handler.C8Yclient.Username
 		session.Host = handler.C8Yclient.BaseURL.Host
 
+		// Use the handler selected login type
+		session.LoginType = handler.LoginType
+
 		if client.Version != "" {
 			session.Version = client.Version
 		}
@@ -559,8 +572,6 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		}
 		session.Token = client.Token
 	}
-
-	session.Path = cfg.GetSessionFile()
 
 	if n.Mode != "" {
 		session.Mode = n.Mode
@@ -581,10 +592,6 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 	if canChangeActiveSession {
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is now active\n", cs.SuccessIcon())
-
-		if session.LoginType != "" {
-			fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is using %s\n", cs.SuccessIcon(), session.LoginType)
-		}
 	} else {
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is not active (see previous warning)\n", cs.WarningIcon())
 	}
