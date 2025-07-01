@@ -100,7 +100,6 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().BoolVar(&ccmd.Env, "from-env", false, "Read from environment variables")
 	cmd.Flags().BoolVar(&ccmd.Stdin, "from-stdin", false, "Read from standard input")
 	cmd.Flags().BoolVar(&ccmd.Prompt, "from-prompt", false, "Read from user prompted input")
-	// cmd.Flags().BoolVar(&ccmd.Console, "from-console", false, "Read from user console")
 	cmd.Flags().BoolVar(&ccmd.NoBanner, "no-banner", false, "Don't show the session banner")
 	cmd.Flags().StringVar(&ccmd.TFACode, "tfaCode", "", "Two Factor Authentication code")
 	cmd.Flags().BoolVar(&ccmd.ClearToken, "clear", false, "Clear any existing tokens")
@@ -545,15 +544,15 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 		handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {})
 		handler.LoginType = loginType
-		handler.SSODiscoveryURL = cfg.SSODiscoveryUrl()
+		handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
 
 		if len(n.SSOScopes) > 0 {
-			handler.SSOScopes = strings.Split(n.SSOScopes, " ")
+			handler.SSO.Scopes = strings.Split(n.SSOScopes, " ")
 		} else {
-			handler.SSOScopes = cfg.SSOScopes()
+			handler.SSO.Scopes = cfg.SSOScopes()
 		}
 
-		handler.SSOAudience = n.SSOAudience
+		handler.SSO.Audience = n.SSOAudience
 
 		log.Infof("User preference for login type: %s", handler.LoginType)
 		handler.TFACode = session.TOTP

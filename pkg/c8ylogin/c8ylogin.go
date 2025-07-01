@@ -17,6 +17,7 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/mdp/qrterminal/v3"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
@@ -105,9 +106,7 @@ type LoginHandler struct {
 	LoginAttempted  bool
 
 	// SSO specific settings
-	SSODiscoveryURL string
-	SSOAudience     string
-	SSOScopes       []string
+	SSO config.SSOSettings
 
 	onSave func()
 }
@@ -120,6 +119,7 @@ func NewLoginHandler(IO *iostreams.IOStreams, c *c8y.Client, w io.Writer, onSave
 		Writer:    w,
 		onSave:    onSave,
 		Logger:    logger.NewDummyLogger("c8ylogin"),
+		SSO:       config.SSOSettings{},
 	}
 	h.state = make(chan LoginState, 1)
 	return h
@@ -440,9 +440,11 @@ func (lh *LoginHandler) login() {
 
 				accessToken, loginErr := lh.C8Yclient.Tenant.AuthorizeWithDeviceFlow(context.Background(), option.InitRequest, api.AuthEndpoints{
 					// Allow users to provide their own discovery URL and scopes
-					OpenIDConfigurationURL: lh.SSODiscoveryURL,
-					Scopes:                 lh.SSOScopes,
-					Audience:               lh.SSOAudience,
+					OpenIDConfigurationURL: lh.SSO.DiscoveryURL,
+					Scopes:                 lh.SSO.Scopes,
+					AuthRequestOptions: []api.AuthRequestEditorFn{
+						api.WithAudience(lh.SSO.Audience),
+					},
 				}, displayDeviceCode)
 				if loginErr != nil {
 					// Ignore SSO if invalid configuration is found
