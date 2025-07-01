@@ -1471,7 +1471,23 @@ func (c *Config) SSODiscoveryUrl() string {
 
 // SSOScopes scopes to use in the device code request when using SSO
 func (c *Config) SSOScopes() []string {
-	return c.viper.GetStringSlice(SettingsSSOScopes)
+	// Be flexible with the format, accept either a "," or " " separator
+	// * "openid offline_access"
+	// * "openid,offline_access"
+	// * "openid,offline_access"
+	// * "openid, offline_access"
+	// * ["openid, "offline_access"]
+	// * ["openid,offline_access"]
+	rawValues := c.viper.GetStringSlice(SettingsSSOScopes)
+	values := make([]string, 0, len(rawValues))
+	for _, value := range rawValues {
+		for _, item := range strings.FieldsFunc(value, func(r rune) bool {
+			return r == ',' || r == ' '
+		}) {
+			values = append(values, strings.TrimSpace(item))
+		}
+	}
+	return values
 }
 
 // SetSessionMode set the session mode (it is not persisted)

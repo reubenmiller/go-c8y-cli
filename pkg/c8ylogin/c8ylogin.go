@@ -457,7 +457,7 @@ func (lh *LoginHandler) login() {
 					return lh.Err
 				}
 
-				lh.Logger.Infof("Received access token via device flow. type=%s, scope=%s", accessToken.Type, accessToken.Scope)
+				lh.Logger.Infof("Received access token via device flow. type=%s, scope=%s, tokenPresent=%v, refreshTokenPresent=%v", accessToken.Type, accessToken.Scope, accessToken.Token != "", accessToken.RefreshToken != "")
 				lh.onSave()
 				lh.state <- LoginStateVerify
 				return nil
