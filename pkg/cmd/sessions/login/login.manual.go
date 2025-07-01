@@ -49,7 +49,8 @@ type CmdLogin struct {
 	Host string
 
 	// SSO options
-	SSOScopes string
+	SSOScopes   string
+	SSOAudience string
 
 	// Output options
 	Shell        string
@@ -111,6 +112,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().StringSliceVar(&ccmd.Secrets, "secrets", []string{}, "List of secrets to include as env variables when running an external command. Only valid with from-cmd")
 	cmd.Flags().StringVar(&ccmd.Host, "host", "", "Cumulocity host. Only used with the 'interactive' provider")
 	cmd.Flags().StringVar(&ccmd.SSOScopes, "sso-scopes", "", "SSO Scopes")
+	cmd.Flags().StringVar(&ccmd.SSOAudience, "sso-audience", "", "SSO Audience")
 
 	completion.WithOptions(
 		cmd,
@@ -550,6 +552,8 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		} else {
 			handler.SSOScopes = cfg.SSOScopes()
 		}
+
+		handler.SSOAudience = n.SSOAudience
 
 		log.Infof("User preference for login type: %s", handler.LoginType)
 		handler.TFACode = session.TOTP

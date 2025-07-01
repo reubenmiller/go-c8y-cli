@@ -106,6 +106,7 @@ type LoginHandler struct {
 
 	// SSO specific settings
 	SSODiscoveryURL string
+	SSOAudience     string
 	SSOScopes       []string
 
 	onSave func()
@@ -441,6 +442,7 @@ func (lh *LoginHandler) login() {
 					// Allow users to provide their own discovery URL and scopes
 					OpenIDConfigurationURL: lh.SSODiscoveryURL,
 					Scopes:                 lh.SSOScopes,
+					Audience:               lh.SSOAudience,
 				}, displayDeviceCode)
 				if loginErr != nil {
 					// Ignore SSO if invalid configuration is found
