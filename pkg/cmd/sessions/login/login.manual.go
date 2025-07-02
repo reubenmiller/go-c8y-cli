@@ -310,7 +310,7 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 		}
 	}
 
-	log.Infof("Parsing session provider output: %s, value=%s", output, output)
+	log.Infof("Parsing session provider output: %s", output)
 	return n.FromReader(bytes.NewReader(output), n.Format)
 }
 
@@ -518,6 +518,9 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 	if !session.IsAuthorized() {
 		loginType := strings.ToUpper(cfg.GetLoginTypeWithDefault())
+		if session.LoginType != "" {
+			loginType = session.LoginType
+		}
 		if n.LoginType != "" {
 			loginType = strings.ToUpper(n.LoginType)
 		}
