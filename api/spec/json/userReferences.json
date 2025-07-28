@@ -37,7 +37,7 @@
             "command": "c8y userreferences addUserToGroup --group 1 --user peterpi@example.com",
             "assertStdOut": {
               "json": {
-                "body.user.self": "r//user/$C8Y_TENANT/users/peterpi@example.com$"
+                "body.user.self": "r//user/$C8Y_TENANT/users/peterpi%40example.com$"
               }
             }
           },

@@ -202,7 +202,7 @@ tests:
       c8y kitchensink body_complex userself --user "peterpi@example.com"
     stdout:
       json:
-        body.user: r/^https://.*/user/$C8Y_TENANT/users/peterpi@example.com$
+        body.user: r/^https://.*/user/$C8Y_TENANT/users/peterpi%40example.com$
 
   lookup usergroup:
     command: |
