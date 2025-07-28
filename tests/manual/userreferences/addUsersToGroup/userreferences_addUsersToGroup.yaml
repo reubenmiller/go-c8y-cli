@@ -14,6 +14,6 @@ tests:
     exit-code: 0
     stdout:
       json:
-        body.user.self: r/https://.+/user/$C8Y_TENANT/users/peterpi@example.com
+        body.user.self: r/https://.+/user/$C8Y_TENANT/users/peterpi%40example.com
         method: POST
         pathEncoded: r//user/$C8Y_TENANT/groups/22222/users

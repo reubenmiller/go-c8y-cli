@@ -19,6 +19,6 @@ tests:
         exit-code: 0
         stdout:
             json:
-                body.user.self: r//user/$C8Y_TENANT/users/peterpi@example.com$
+                body.user.self: r//user/$C8Y_TENANT/users/peterpi%40example.com$
                 method: POST
                 path: /user/$C8Y_TENANT/groups/1/users

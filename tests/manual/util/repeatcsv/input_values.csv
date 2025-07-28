@@ -1,0 +1,4 @@
+time,state,active
+1000,0,true
+1000,1,false
+1000,2,other

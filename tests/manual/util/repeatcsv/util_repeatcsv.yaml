@@ -9,7 +9,7 @@ tests:
                 {"disabled":false,"other":null,"text":"hello \"world","threshold":12.123,"time":1000}
                 {"disabled":false,"other":null,"text":"hello world","threshold":12.123,"time":1000}
                 {"disabled":null,"other":null,"text":"hello world","threshold":null,"time":1000}
-                {"disabled":12.123,"other":null,"text":"hello world false","threshold":null,"time":true}
+                {"disabled":12.123,"other":null,"text":"hello world false","threshold":null,"time":1}
                 {"disabled":null,"other":null,"text":"hello world","threshold":null,"time":2}
                 {"disabled":12.123,"other":null,"text":"hello world false","threshold":null,"time":3}
     
@@ -19,7 +19,7 @@ tests:
         exit-code: 0
         stdout:
             exactly: |
-                {"disabled":12.123,"other":null,"text":"hello world false","threshold":null,"time":true}
+                {"disabled":12.123,"other":null,"text":"hello world false","threshold":null,"time":1}
                 {"disabled":null,"other":null,"text":"hello world","threshold":null,"time":2}
                 {"disabled":12.123,"other":null,"text":"hello world false","threshold":null,"time":3}
 
@@ -41,6 +41,16 @@ tests:
             exactly: |
                 {"disabled":false,"other":null,"text":"hello \"world","threshold":12.123,"time":1000}
                 {"disabled":false,"other":null,"text":"hello world","threshold":12.123,"time":1000}
+
+    It does not convert integers to boolean:
+        command: |
+            c8y util repeatcsv ./manual/util/repeatcsv/input_values.csv
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"active":true,"state":0,"time":1000}
+                {"active":false,"state":1,"time":1000}
+                {"active":"other","state":2,"time":1000}
 
     It iterates over file contents randomly skipping lines:
         command: |

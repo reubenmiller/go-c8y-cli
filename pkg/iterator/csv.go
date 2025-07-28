@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -58,6 +59,15 @@ func (i *CSVFileContentsIterator) SetColumns(total int) {
 	i.columns = columns
 }
 
+func parseBool(v string) (bool, error) {
+	if strings.EqualFold(v, "true") {
+		return true, nil
+	} else if strings.EqualFold(v, "false") {
+		return false, nil
+	}
+	return false, fmt.Errorf("value is not a boolean")
+}
+
 // GetNext returns the next line in the buffer
 func (i *CSVFileContentsIterator) GetNext() (line []byte, input interface{}, err error) {
 	i.mu.Lock()
@@ -77,7 +87,7 @@ func (i *CSVFileContentsIterator) GetNext() (line []byte, input interface{}, err
 	for j := len(i.columns) - 1; j >= 0; j-- {
 		if j > lastRecordIdx || records[j] == "null" {
 			i.row[i.columns[j]] = nil
-		} else if v, err := strconv.ParseBool(records[j]); err == nil {
+		} else if v, err := parseBool(records[j]); err == nil {
 			i.row[i.columns[j]] = v
 		} else if v, err := strconv.ParseFloat(records[j], 64); err == nil {
 			i.row[i.columns[j]] = v
