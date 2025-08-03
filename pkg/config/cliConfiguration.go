@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -1447,6 +1448,33 @@ func (c *Config) SessionMode(defaultMode ...SessionMode) SessionMode {
 	return mode.FromString(c.viper.GetString(SettingsMode), c.IsCIMode())
 }
 
+func HasLegacySessionMode(v *viper.Viper) (SessionMode, bool) {
+	// Prefer newer session value
+	if v.IsSet("settings.session.mode") {
+		return SessionModeUnset, false
+	}
+
+	// Check for legacy settings
+	if !(v.IsSet("settings.mode.enablecreate") || v.IsSet("settings.mode.enableupdate") || v.IsSet("settings.mode.enabledelete")) {
+		return SessionModeUnset, false
+	}
+
+	// Map legacy mode settings to session mode
+	enableCreate := v.GetBool("settings.mode.enablecreate")
+	enableUpdate := v.GetBool("settings.mode.enableupdate")
+	enableDelete := v.GetBool("settings.mode.enabledelete")
+
+	mode := SessionModeUnset
+	if !enableCreate && !enableUpdate && !enableDelete {
+		mode = SessionModeProduction
+	} else if enableCreate && enableUpdate && !enableDelete {
+		mode = SessionModeQual
+	} else if enableCreate && enableUpdate && enableDelete {
+		mode = SessionModeDev
+	}
+	return mode, true
+}
+
 // AllowModeCreate enables create (post) commands
 func (c *Config) AllowModeCreate() bool {
 	return c.SessionMode().CanCreate()
@@ -1824,6 +1852,18 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 // AllSettings get all the settings as a map
 func (c *Config) AllSettings() map[string]interface{} {
 	return c.viper.AllSettings()
+}
+
+// MarshalSettings marshals all of the settings into json for debugging purposes
+func (c *Config) MarshalSettings() ([]byte, error) {
+	values := map[string]any{}
+	if c.Persistent != nil {
+		values["all"] = c.viper.AllSettings()
+	}
+	if c.Persistent != nil {
+		values["persistent"] = c.Persistent.AllSettings()
+	}
+	return json.Marshal(values)
 }
 
 // SaveClientConfig save client settings to the session configuration
