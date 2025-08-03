@@ -105,6 +105,9 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Ensure session values from previously read configuration is not transferred
+	cfg.Set("settings.session.mode", nil)
+
 	canChangeActiveSession := true
 	// Warn users if they try to use this command directly
 	if n.factory.IOStreams != nil {
@@ -245,6 +248,13 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	mode := cfg.SessionMode(config.SessionModeUnset).String()
+	// Respect session mode using the legacy format (e.g. set via individual create,update,delete values)
+	if legacyMode, legacyValueExists := config.HasLegacySessionMode(cfg.Persistent); legacyValueExists {
+		mode = legacyMode.String()
+		cfg.Logger.Debugf("Detected legacy mode. mode=%s", mode)
+	}
+
 	if hasChanged(handler.C8Yclient, cfg) {
 		log.Infof("Saving tenant name")
 		n.onSave(handler.C8Yclient)
@@ -261,7 +271,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		Tenant:     cfg.GetTenant(),
 		Version:    cfg.GetCumulocityVersion(),
 		Username:   handler.C8Yclient.Username,
-		Mode:       cfg.SessionMode(config.SessionModeUnset).String(),
+		Mode:       mode,
 	}
 
 	outputFormat := cfg.GetOutputFormatWithDefault(cmd, config.OutputUnknown).String()
