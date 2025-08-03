@@ -2,6 +2,7 @@ package util
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	cmdDiscover "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/util/discover"
 	cmdRepeat "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/util/repeat"
 	cmdRepeatCsvFile "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/util/repeatcsv"
 	cmdRepeatFile "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/util/repeatfile"
@@ -28,6 +29,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdUtil {
 	cmd.AddCommand(cmdRepeatFile.NewCmdRepeatFile(f).GetCommand())
 	cmd.AddCommand(cmdShow.NewCmdShow(f).GetCommand())
 	cmd.AddCommand(cmdRepeatCsvFile.NewCmdFromCsv(f).GetCommand())
+	cmd.AddCommand(cmdDiscover.NewCmdDiscover(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
