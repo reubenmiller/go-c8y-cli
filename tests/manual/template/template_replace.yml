@@ -16,3 +16,53 @@ tests:
             }
           }
         }
+
+  RecurseReplace replaces null values:
+    command: |
+      c8y template execute --template '{"value":{"item":null}}' |
+        c8y template execute --template "_.RecurseReplace(input.value, null, 0)" -o json -c=false
+    stdout:
+      exactly: |
+        {
+          "value": {
+            "item": 0
+          }
+        }
+
+  RecurseReplace replaces boolean values:
+    command: |
+      c8y template execute --template '{"value":{"item":false}}' |
+        c8y template execute --template "_.RecurseReplace(input.value, false, true)" -o json -c=false
+    stdout:
+      exactly: |
+        {
+          "value": {
+            "item": true
+          }
+        }
+
+  Recurse object and replace values matching a function:
+    command: |
+      c8y template execute --template '{"value":{"item":false,"item2":2}}' |
+        c8y template execute --template "_.Recurse(input.value, std.isBoolean, function(x) if x == true then 1 else 0)" -o json -c=false
+    stdout:
+      exactly: |
+        {
+          "value": {
+            "item": 0,
+            "item2": 2
+          }
+        }
+
+  Recurse object and add 1 to all numbers:
+    command: |
+      c8y template execute --template '{"value":{"item":false,"item2":2}}' |
+        c8y template execute --template "_.Recurse(input.value, std.isNumber, function(x) x + 1)" -o json -c=false
+    stdout:
+      exactly: |
+        {
+          "value": {
+            "item": false,
+            "item2": 3
+          }
+        }

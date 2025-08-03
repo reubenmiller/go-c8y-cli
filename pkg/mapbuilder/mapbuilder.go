@@ -521,16 +521,32 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 					has_(o[ks[0]], ks[1:]);
 			has_(o, std.split(f, '.')),
 		RecurseReplace(any, from, to)::
+			local apply_(maybeFunc, current) = if std.isFunction(maybeFunc) then maybeFunc(current) else maybeFunc;
+			local is_match_(maybeFunc, current) = if std.isFunction(maybeFunc) then maybeFunc(current) else maybeFunc == current;
 			local recurseReplace_(any, from, to) = (
 				{
-				object: function(x) { [k]: recurseReplace_(x[k], from, to) for k in std.objectFields(x) },
-				array: function(x) [recurseReplace_(e, from, to) for e in x],
-				string: function(x) std.native('ReplacePattern')(x, from, to),
-				#string: function(x) std.strReplace(x, from, to),
-				number: function(x) x,
-				boolean: function(x) x,
-				'function': function(x) x,
-				'null': function(x) x,
+					object: function(x) { [k]: recurseReplace_(x[k], from, to) for k in std.objectFields(x) },
+					array: function(x) [recurseReplace_(e, from, to) for e in x],
+					string: function(x) std.native('ReplacePattern')(x, from, to),
+					number: function(x) if is_match_(from, x) then apply_(to, x) else x,
+					boolean: function(x) if is_match_(from, x) then apply_(to, x) else x,
+					'function': function(x) if is_match_(from, x) then apply_(to, x) else x,
+					'null': function(x) if is_match_(from, x) then apply_(to, x) else x,
+				}[std.type(any)](any)
+			);
+			recurseReplace_(any, from, to),
+		Recurse(any, from, to)::
+			local apply_(maybeFunc, current) = if std.isFunction(maybeFunc) then maybeFunc(current) else maybeFunc;
+			local is_match_(maybeFunc, current) = if std.isFunction(maybeFunc) then maybeFunc(current) else maybeFunc == current;
+			local recurseReplace_(any, from, to) = (
+				{
+					object: function(x) { [k]: recurseReplace_(x[k], from, to) for k in std.objectFields(x) },
+					array: function(x) [recurseReplace_(e, from, to) for e in x],
+					string: function(x) if is_match_(from, x) then apply_(to, x) else x,
+					number: function(x) if is_match_(from, x) then apply_(to, x) else x,
+					boolean: function(x) if is_match_(from, x) then apply_(to, x) else x,
+					'function': function(x) if is_match_(from, x) then apply_(to, x) else x,
+					'null': function(x) if is_match_(from, x) then apply_(to, x) else x,
 				}[std.type(any)](any)
 			);
 			recurseReplace_(any, from, to),
