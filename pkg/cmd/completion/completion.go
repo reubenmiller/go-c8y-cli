@@ -92,7 +92,7 @@ func NewCmdCompletion() *CmdCompletion {
 				err = cmd.Root().GenZshCompletion(os.Stdout)
 			case shell.ShellFish:
 				err = cmd.Root().GenFishCompletion(os.Stdout, true)
-			case shell.ShellPowershell:
+			case shell.ShellPowershell, shell.ShellPwsh:
 				err = cmd.Root().GenPowerShellCompletionWithDesc(os.Stdout)
 			case shell.ShellPosixShell:
 				err = fmt.Errorf("posix shell (sh) does not support tab completion")

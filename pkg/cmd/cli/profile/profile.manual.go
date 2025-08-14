@@ -113,7 +113,7 @@ func (n *CmdProfile) RunE(cmd *cobra.Command, args []string) error {
 		script = &scriptPosixShell
 	case shell.ShellFish:
 		script = &scriptFish
-	case shell.ShellPowershell:
+	case shell.ShellPowershell, shell.ShellPwsh:
 		script = &scriptPowerShell
 	}
 

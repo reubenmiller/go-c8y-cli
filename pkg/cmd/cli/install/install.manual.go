@@ -24,7 +24,7 @@ var ErrInstallFailed = errors.New("failed to install one or more profiles")
 var validShells = shell.SupportedShells()
 
 // Skip sh when installing all shells as it generally does not have a profile defined
-var defaultShells = []string{shell.ShellBash, shell.ShellFish, shell.ShellPowershell, shell.ShellZsh}
+var defaultShells = []string{shell.ShellBash, shell.ShellFish, shell.ShellPowershell, shell.ShellPwsh, shell.ShellZsh}
 
 type CmdInstall struct {
 	*subcommand.SubCommand
@@ -85,7 +85,8 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 		shell.ShellBash:       {Name: "bash", Binary: "bash"},
 		shell.ShellZsh:        {Name: "zsh", Binary: "zsh"},
 		shell.ShellPosixShell: {Name: "sh", Binary: "sh"},
-		shell.ShellPowershell: {Name: "powershell", Binary: "pwsh"},
+		shell.ShellPwsh:       {Name: "pwsh", Binary: "pwsh"},
+		shell.ShellPowershell: {Name: "powershell", Binary: "powershell"},
 		shell.ShellFish:       {Name: "fish", Binary: "fish"},
 	}
 
@@ -187,7 +188,7 @@ func (n *CmdInstall) InstallProfile(shellType string) (bool, error) {
 	case shell.ShellFish:
 		profilePath = "~/.config/fish/config.fish"
 		profileSnippet = "c8y cli profile --shell fish | source"
-	case shell.ShellPowershell:
+	case shell.ShellPowershell, shell.ShellPwsh:
 		profilePath = "~/.config/powershell/Microsoft.PowerShell_profile.ps1"
 		profileSnippet = "c8y cli profile --shell powershell | Out-String | Invoke-Expression"
 	}

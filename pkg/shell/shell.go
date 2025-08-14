@@ -27,6 +27,7 @@ var (
 	ShellBash       = "bash"
 	ShellZsh        = "zsh"
 	ShellPowershell = "powershell"
+	ShellPwsh       = "pwsh"
 	ShellPosixShell = "sh"
 	ShellAuto       = "auto"
 )
@@ -42,7 +43,7 @@ func SupportedShells(additional ...string) []string {
 }
 
 func SupportTabCompletionShells(additional ...string) []string {
-	values := []string{ShellFish, ShellBash, ShellZsh, ShellPowershell}
+	values := []string{ShellFish, ShellBash, ShellZsh, ShellPowershell, ShellPwsh}
 	for _, v := range additional {
 		if !slices.Contains(values, v) {
 			values = append(values, v)
