@@ -24,7 +24,7 @@ var ErrInstallFailed = errors.New("failed to install one or more profiles")
 var validShells = shell.SupportedShells()
 
 // Skip sh when installing all shells as it generally does not have a profile defined
-var defaultShells = []string{shell.ShellBash, shell.ShellFish, shell.ShellPowershell, shell.ShellZsh}
+var defaultShells = []string{shell.ShellBash, shell.ShellFish, shell.ShellPowershell, shell.ShellPwsh, shell.ShellZsh}
 
 type CmdInstall struct {
 	*subcommand.SubCommand
@@ -85,7 +85,8 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 		shell.ShellBash:       {Name: "bash", Binary: "bash"},
 		shell.ShellZsh:        {Name: "zsh", Binary: "zsh"},
 		shell.ShellPosixShell: {Name: "sh", Binary: "sh"},
-		shell.ShellPowershell: {Name: "powershell", Binary: "pwsh"},
+		shell.ShellPwsh:       {Name: "pwsh", Binary: "pwsh"},
+		shell.ShellPowershell: {Name: "powershell", Binary: "powershell"},
 		shell.ShellFish:       {Name: "fish", Binary: "fish"},
 	}
 
@@ -151,6 +152,17 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 	return summaryErr
 }
 
+func addExecutableBinaryToPowerShellPath(existingSnippet string) (string, error) {
+	exePath, err := os.Executable()
+	if err != nil {
+		return existingSnippet, err
+	}
+	exeDir := filepath.Dir(exePath)
+
+	snippet := fmt.Sprintf("$env:PATH += '%c%s'; ", filepath.ListSeparator, exeDir) + existingSnippet
+	return snippet, nil
+}
+
 func (n *CmdInstall) InstallProfile(shellType string) (bool, error) {
 	changed := false
 	cfg, err := n.factory.Config()
@@ -188,8 +200,19 @@ func (n *CmdInstall) InstallProfile(shellType string) (bool, error) {
 		profilePath = "~/.config/fish/config.fish"
 		profileSnippet = "c8y cli profile --shell fish | source"
 	case shell.ShellPowershell:
+		profilePath = "~/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1"
+		if snippet, err := addExecutableBinaryToPowerShellPath("c8y cli profile --shell powershell | Out-String | Invoke-Expression"); err == nil {
+			profileSnippet = snippet
+		} else {
+			cfg.Logger.Warnf("Failed to detect binary path. %s", err)
+		}
+	case shell.ShellPwsh:
 		profilePath = "~/.config/powershell/Microsoft.PowerShell_profile.ps1"
-		profileSnippet = "c8y cli profile --shell powershell | Out-String | Invoke-Expression"
+		if snippet, err := addExecutableBinaryToPowerShellPath("c8y cli profile --shell powershell | Out-String | Invoke-Expression"); err == nil {
+			profileSnippet = snippet
+		} else {
+			cfg.Logger.Warnf("Failed to detect binary path. %s", err)
+		}
 	}
 
 	if profilePath == "" {
