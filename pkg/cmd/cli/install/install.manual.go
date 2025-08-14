@@ -188,7 +188,10 @@ func (n *CmdInstall) InstallProfile(shellType string) (bool, error) {
 	case shell.ShellFish:
 		profilePath = "~/.config/fish/config.fish"
 		profileSnippet = "c8y cli profile --shell fish | source"
-	case shell.ShellPowershell, shell.ShellPwsh:
+	case shell.ShellPowershell:
+		profilePath = "~/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1"
+		profileSnippet = "c8y cli profile --shell powershell | Out-String | Invoke-Expression"
+	case shell.ShellPwsh:
 		profilePath = "~/.config/powershell/Microsoft.PowerShell_profile.ps1"
 		profileSnippet = "c8y cli profile --shell powershell | Out-String | Invoke-Expression"
 	}
