@@ -85,6 +85,11 @@ func getOutputHeaders(c *console.Console, cfg *config.Config, input []string) (h
 	return append(bytes.Join(columns, []byte(",")), []byte("\n")...)
 }
 
+func ShouldIgnoreSessionFile(args []string) bool {
+	cmdStr := strings.Join(args, " ")
+	return strings.Contains(cmdStr, "c8y sessions login") || strings.Contains(cmdStr, "c8y sessions set")
+}
+
 // Initialize initializes the configuration manager and c8y client
 func NewCommand(buildVersion, buildBranch string) (*CmdRoot, error) {
 	if buildVersion == "" {
@@ -104,7 +109,8 @@ func NewCommand(buildVersion, buildBranch string) (*CmdRoot, error) {
 	// init logger
 	logHandler = logger.NewLogger(module, GetInitLoggerOptions(os.Args))
 
-	if _, err := configHandler.ReadConfigFiles(nil); err != nil {
+	// Note: Loading of the session should be deferred until the commands are loaded
+	if _, err := configHandler.ReadConfigFiles(nil, ShouldIgnoreSessionFile(os.Args)); err != nil {
 		logHandler.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
 	}
 

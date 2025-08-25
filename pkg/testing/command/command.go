@@ -2,6 +2,7 @@ package command
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/google/shlex"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/root"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fakestdin"
 )
 
@@ -123,6 +125,34 @@ func WithEnv(t *testing.T, env map[string]string) ExecuteOptions {
 		})
 		return nil
 	}
+}
+
+// WithSetting sets a configuration setting of a given key, and translates it to the equivalent environment variable
+// The env variable value is restored at the end of the test
+func WithSetting(t *testing.T, key string, value any) ExecuteOptions {
+	return func(cr *root.CmdRoot) error {
+		key := config.GetEnvKey(key)
+		originalValue, found := os.LookupEnv(key)
+		os.Setenv(key, fmt.Sprintf("%v", value))
+		t.Cleanup(func() {
+			if found {
+				os.Setenv(key, originalValue)
+			} else {
+				os.Unsetenv(key)
+			}
+		})
+		return nil
+	}
+}
+
+// WithSensitiveLogging controls the hiding of sensitive information in the logs and dry run output
+func WithSensitiveLogging(t *testing.T, v bool) ExecuteOptions {
+	return WithSetting(t, config.SettingsLoggerHideSensitive, v)
+}
+
+// WithSessionEncryption sets whether session data should be encrypted or not
+func WithSessionEncryption(t *testing.T, v bool) ExecuteOptions {
+	return WithSetting(t, config.SettingsEncryptionEnabled, v)
 }
 
 func WithOSStdIn(t *testing.T, v string) ExecuteOptions {

@@ -819,7 +819,7 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 		client, err := factory.CreateCumulocityClient(c.Factory, c.SessionFile, c.SessionUsername, c.SessionPassword, disableEncryptionCheck)()
 		if client != nil {
 			if c.SessionUsername != "" || c.SessionPassword != "" {
-				client.AuthorizationMethod = c8y.AuthMethodBasic
+				client.SetUsernamePassword(c.SessionUsername, c.SessionPassword)
 				c.log.Debug("Forcing basic authentication as user provided username/password")
 			}
 		}

@@ -25,17 +25,21 @@ type CumulocitySessions struct {
 type CumulocitySession struct {
 	Schema string `json:"$schema,omitempty"`
 
+	// authorized
+	Authorized *bool `json:"authorized,omitempty"`
+
 	// ID          string `json:"id"`
-	Host            string `json:"host"`
-	Tenant          string `json:"tenant"`
-	Version         string `json:"version"`
-	Username        string `json:"username"`
-	Password        string `json:"password"`
+	Host            string `json:"host,omitempty"`
+	Tenant          string `json:"tenant,omitempty"`
+	Version         string `json:"version,omitempty"`
+	Username        string `json:"username,omitempty"`
+	Password        string `json:"password,omitempty"`
 	Mode            string `json:"mode,omitempty"`
-	TOTP            string `json:"totp"`
-	Token           string `json:"token"`
-	Description     string `json:"description"`
+	TOTP            string `json:"totp,omitempty"`
+	Token           string `json:"token,omitempty"`
+	Description     string `json:"description,omitempty"`
 	UseTenantPrefix bool   `json:"useTenantPrefix"`
+	LoginType       string `json:"loginType,omitempty"`
 
 	Settings *config.CommandSettings `json:"settings,omitempty"`
 
@@ -47,7 +51,7 @@ type CumulocitySession struct {
 	Name      string `json:"-"`
 
 	// How to identify the session
-	SessionUri string `json:"sessionUri"`
+	SessionUri string `json:"sessionUri,omitempty"`
 
 	Logger *logger.Logger `json:"-"`
 	Config *config.Config `json:"-"`
@@ -67,6 +71,14 @@ func (s *CumulocitySession) SetToken(token string) {
 
 func (s *CumulocitySession) SetHost(host string) {
 	s.Host = FormatHost(host)
+}
+
+func (s *CumulocitySession) SetAuthorized(v bool) {
+	s.Authorized = &v
+}
+
+func (s CumulocitySession) IsAuthorized() bool {
+	return s.Authorized != nil && *s.Authorized
 }
 
 func FormatHost(host string) string {
@@ -159,7 +171,13 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(maybeHideMessage(client, session.Username)))
 	}
 	if client != nil {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "loginType")), value(client.AuthorizationMethod))
+		var authTypeLogin string
+		if session.LoginType != "" {
+			authTypeLogin = fmt.Sprintf("%s (loginType=%s)", client.AuthorizationType.String(), session.LoginType)
+		} else {
+			authTypeLogin = client.AuthorizationType.String()
+		}
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "authType")), value(authTypeLogin))
 	}
 	fmt.Fprintf(w, "\n")
 }
@@ -179,7 +197,7 @@ func WriteOutput(w io.Writer, client *c8y.Client, cfg *config.Config, session *C
 
 	switch format {
 	case "json":
-		out, err := json.Marshal(session)
+		out, err := MarshalSession(session, cfg)
 		if err != nil {
 			return err
 		}
@@ -209,7 +227,6 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 	token := session.Token
 	authHeaderValue := ""
 	authHeader := ""
-	loginType := client.AuthorizationMethod
 
 	if dummyReq, err := client.NewRequest("GET", "/", "", nil); err == nil {
 		authHeaderValue = dummyReq.Header.Get("Authorization")
@@ -235,7 +252,10 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 		"C8Y_PASSWORD":             password,
 		"C8Y_HEADER_AUTHORIZATION": authHeaderValue,
 		"C8Y_HEADER":               authHeader,
-		"C8Y_SETTINGS_LOGIN_TYPE":  loginType,
+	}
+
+	if session.LoginType != "" {
+		output["C8Y_SETTINGS_LOGIN_TYPE"] = session.LoginType
 	}
 
 	if mode != "" {
@@ -253,7 +273,7 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 		}
 	}
 
-	if loginType != c8y.AuthMethodOAuth2Internal {
+	if client.AuthorizationType != c8y.AuthTypeBearer {
 		output["C8Y_TOKEN"] = ""
 	}
 
@@ -292,6 +312,16 @@ func GetSessionEnvKeys() []string {
 	return keys
 }
 
+func MarshalSession(session *CumulocitySession, cfg *config.Config) ([]byte, error) {
+	// Don't include password if a token is provided
+	if !cfg.AlwaysIncludePassword() {
+		if session.Token != "" {
+			session.Password = ""
+		}
+	}
+	return json.Marshal(session)
+}
+
 func ClearEnvironmentVariables(shell utilities.ShellType) {
 	utilities.ClearEnvironmentVariables(GetSessionEnvKeys(), shell)
 }
@@ -308,7 +338,7 @@ func IsSessionFilePath(path string) bool {
 	return !strings.Contains(path, "://")
 }
 
-func shouldRenewToken(t string, validFor time.Duration) (bool, *time.Time) {
+func shouldRenewToken(log *logger.Logger, t string, validFor time.Duration) (bool, *time.Time) {
 	claims := jwt.RegisteredClaims{}
 	parser := jwt.NewParser()
 	_, _, err := parser.ParseUnverified(t, &claims)
@@ -316,6 +346,16 @@ func shouldRenewToken(t string, validFor time.Duration) (bool, *time.Time) {
 	if err != nil {
 		// Invalid token
 		return true, nil
+	}
+
+	// Recently issued, so don't renew it
+	// Check if the token's validity period is too short
+	if claims.ExpiresAt != nil && claims.IssuedAt != nil {
+		tokenValidityPeriod := claims.ExpiresAt.Sub(claims.IssuedAt.Time)
+		if tokenValidityPeriod < validFor {
+			log.Warnf("SSO token validity period is less than the given token validFor, so the token will be used regardless. minimumValidFor=%v, tokenValidity=%v", validFor, tokenValidityPeriod)
+			return false, nil
+		}
 	}
 
 	if claims.ExpiresAt != nil {
@@ -327,7 +367,10 @@ func shouldRenewToken(t string, validFor time.Duration) (bool, *time.Time) {
 }
 
 // ShouldReuseToken checks if the token should be reused or not
-func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string) bool {
+func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string, loginType string) bool {
+	if loginType != "" && !LoginTypeRequiresToken(loginType) {
+		return false
+	}
 	if token == "" {
 		return false
 	}
@@ -335,7 +378,7 @@ func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string) bool
 
 	// Check if token is valid for the minimum period
 	shouldBeValidFor := cfg.TokenValidFor()
-	expiresSoon, expiresAt := shouldRenewToken(token, shouldBeValidFor)
+	expiresSoon, expiresAt := shouldRenewToken(log, token, shouldBeValidFor)
 
 	if expiresAt != nil {
 		if time.Now().After(*expiresAt) {
@@ -352,4 +395,24 @@ func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string) bool
 		reuse = false
 	}
 	return reuse
+}
+
+// LoginTypeRequiresToken check if the given loginType requires a token for authorization
+func LoginTypeRequiresToken(loginType string) bool {
+	return strings.EqualFold(loginType, c8y.LoginTypeOAuth2) || strings.EqualFold(loginType, c8y.LoginTypeOAuth2Internal)
+}
+
+func GetTokenSubject(value string) (string, error) {
+	claims := jwt.RegisteredClaims{}
+	parser := jwt.NewParser()
+	token, _, err := parser.ParseUnverified(value, &claims)
+	if err != nil {
+		// Invalid token
+		return "", fmt.Errorf("invalid token")
+	}
+	subject, err := token.Claims.GetSubject()
+	if err != nil {
+		return "", err
+	}
+	return subject, nil
 }

@@ -1,7 +1,9 @@
 package c8ylogin
 
 import (
+	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,17 +12,46 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cli/browser"
+	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/mdp/qrterminal/v3"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/pkg/oauth/api"
+	"github.com/reubenmiller/go-c8y/pkg/oauth/device"
 )
 
 // LoginState current state of the login flow
 type LoginState int
 
 func (l LoginState) String() string {
-	return [...]string{"Unknown", "Authorized", "NotAuthorized", "TFASetup", "TFAConfirm", "Verify", "Abort", "PromptForPassword"}[l]
+	switch l {
+	case LoginStateAuth:
+		return "Authorized"
+	case LoginStateNoAuth:
+		return "NotAuthorized"
+	case LoginStateTFASetup:
+		return "TFASetup"
+	case LoginStateTFAConfirm:
+		return "TFAConfirm"
+	case LoginStateLogin:
+		return "Login"
+	case LoginStateVerify:
+		return "Verify"
+	case LoginStateAbort:
+		return "Abort"
+	case LoginStatePromptPassword:
+		return "PromptForPassword"
+	case LoginStateUnknown:
+		fallthrough
+	default:
+		return "Unknown"
+	}
 }
 
 const (
@@ -38,6 +69,9 @@ const (
 
 	// LoginStateTFAConfirm user requires TFA setup to be confirmed
 	LoginStateTFAConfirm
+
+	// LoginStateLogin login (mostly used for OAUTH2 / SSO)
+	LoginStateLogin
 
 	// LoginStateVerify verify authorization state by sending a request to Cumulocity
 	LoginStateVerify
@@ -57,9 +91,9 @@ var (
 // LoginHandler handler to process all login / authorization tasks for Cumulocity.
 // Two-Factor authentication, TFA setup, OAUTH etc.
 type LoginHandler struct {
+	IO              *iostreams.IOStreams
 	TFACodeRequired bool
 	Authorized      bool
-	Interactive     bool
 	Err             error
 	TFACode         string
 	C8Yclient       *c8y.Client
@@ -69,18 +103,23 @@ type LoginHandler struct {
 	Writer          io.Writer
 	Logger          *logger.Logger
 	LoginType       string
+	LoginAttempted  bool
+
+	// SSO specific settings
+	SSO config.SSOSettings
 
 	onSave func()
 }
 
 // NewLoginHandler creates a new login handler to process the full Cumulocity login process for different login types, i.e. OAUTH2_INTERNAL, BASIC etc.
-func NewLoginHandler(c *c8y.Client, w io.Writer, onSave func()) *LoginHandler {
+func NewLoginHandler(IO *iostreams.IOStreams, c *c8y.Client, w io.Writer, onSave func()) *LoginHandler {
 	h := &LoginHandler{
-		C8Yclient:   c,
-		Interactive: true,
-		Writer:      w,
-		onSave:      onSave,
-		Logger:      logger.NewDummyLogger("c8ylogin"),
+		IO:        IO,
+		C8Yclient: c,
+		Writer:    w,
+		onSave:    onSave,
+		Logger:    logger.NewDummyLogger("c8ylogin"),
+		SSO:       config.SSOSettings{},
 	}
 	h.state = make(chan LoginState, 1)
 	return h
@@ -105,9 +144,9 @@ func (lh *LoginHandler) Clear() {
 	}
 	lh.Authorized = false
 	// lh.TFACodeRequired = false
-	lh.C8Yclient.SetToken("")
+	lh.C8Yclient.ClearToken()
 	lh.onSave()
-	lh.C8Yclient.AuthorizationMethod = c8y.AuthMethodBasic
+	lh.C8Yclient.SetAuthorizationType(c8y.AuthTypeBasic)
 	lh.Err = nil
 }
 
@@ -117,8 +156,23 @@ func (lh *LoginHandler) Run() error {
 	lh.init()
 
 	// Check if any authentication is set
-	if lh.C8Yclient.Token != "" || lh.C8Yclient.Password != "" || lh.LoginType == c8y.AuthMethodNone {
+	if lh.LoginType == c8y.LoginTypeNone {
 		lh.state <- LoginStateVerify
+	} else if lh.LoginType == c8y.LoginTypeOAuth2Internal {
+		if lh.C8Yclient.Token != "" {
+			lh.state <- LoginStateVerify
+		} else {
+			lh.state <- LoginStateLogin
+		}
+	} else if lh.C8Yclient.Token != "" {
+		lh.state <- LoginStateVerify
+	} else if lh.LoginType == c8y.LoginTypeOAuth2 {
+		lh.state <- LoginStateLogin
+	} else if lh.C8Yclient.Password != "" {
+		lh.state <- LoginStateVerify
+	} else if lh.C8Yclient.Username == "" {
+		// OAUTH2 doesn't provide a username
+		lh.state <- LoginStateLogin
 	} else {
 		lh.state <- LoginStatePromptPassword
 	}
@@ -134,6 +188,8 @@ func (lh *LoginHandler) Run() error {
 		} else if c == LoginStateVerify {
 			lh.verify()
 		} else if c == LoginStateTFAConfirm {
+			lh.login()
+		} else if c == LoginStateLogin {
 			lh.login()
 		} else if c == LoginStateNoAuth {
 			lh.Clear()
@@ -159,6 +215,22 @@ func (lh *LoginHandler) Run() error {
 		time.Sleep(500 * time.Millisecond)
 	}
 
+	//
+	// When reusing an existing token, the default login type might be wrong so
+	// try and detect the type by parsing the token
+	if !lh.LoginAttempted {
+		if lh.C8Yclient.Token != "" {
+			if subject, err := c8ysession.GetTokenSubject(lh.C8Yclient.Token); err == nil {
+				// with c8y issued tokens, the subject is the username
+				if lh.C8Yclient.Username == subject {
+					lh.LoginType = c8y.LoginTypeOAuth2Internal
+				} else {
+					lh.LoginType = c8y.LoginTypeOAuth2
+				}
+			}
+		}
+	}
+
 	return lh.Err
 }
 
@@ -168,22 +240,23 @@ func (lh *LoginHandler) sortLoginOptions() {
 	}
 
 	optionOrder := map[string]int{
-		c8y.AuthMethodNone:           3,
-		c8y.AuthMethodBasic:          2,
-		c8y.AuthMethodOAuth2Internal: 1,
+		c8y.LoginTypeNone:           40,
+		c8y.LoginTypeBasic:          30,
+		c8y.LoginTypeOAuth2Internal: 20,
+		c8y.LoginTypeOAuth2:         10,
 	}
 
 	if lh.LoginType != "" {
 		if _, ok := optionOrder[lh.LoginType]; ok {
 			lh.Logger.Infof("Setting preferred login method. %s", lh.LoginType)
-			optionOrder[lh.LoginType] = 0
+			optionOrder[lh.LoginType] = -999 // Try preferred method first
 		} else {
 			lh.Logger.Infof("Unsupported login method. The given option will be ignored. %s", lh.LoginType)
 		}
 	}
 
 	// sort login options
-	sort.SliceStable(lh.LoginOptions.LoginOptions[:], func(i, j int) bool {
+	sort.SliceStable(lh.LoginOptions.LoginOptions, func(i, j int) bool {
 		iWeight := 100
 		jWeight := 200
 
@@ -201,7 +274,7 @@ func (lh *LoginHandler) sortLoginOptions() {
 func (lh *LoginHandler) init() {
 	lh.do(func() error {
 		// Special case where no auth is required
-		if lh.LoginType == c8y.AuthMethodNone {
+		if lh.LoginType == c8y.LoginTypeNone {
 			return nil
 		}
 		loginOptions, _, err := lh.C8Yclient.Tenant.GetLoginOptions(context.Background())
@@ -237,10 +310,10 @@ func (lh *LoginHandler) init() {
 		lh.sortLoginOptions()
 
 		if len(lh.LoginOptions.LoginOptions) > 0 {
-			lh.C8Yclient.AuthorizationMethod = lh.LoginOptions.LoginOptions[0].Type
+			lh.LoginType = lh.LoginOptions.LoginOptions[0].Type
 
 			// Setting preferred login method
-			lh.Logger.Debugf("Preferred login method. type=%s", lh.C8Yclient.AuthorizationMethod)
+			lh.Logger.Debugf("Preferred login method. type=%s", lh.LoginType)
 		}
 		return err
 	})
@@ -258,8 +331,19 @@ func (lh *LoginHandler) promptForPassword() error {
 		return nil
 	}
 
+	if lh.C8Yclient.Username == "" {
+		prompter := prompt.NewPrompt(lh.Logger)
+		username, err := prompter.Username("Enter username", " ")
+		if err != nil {
+			lh.state <- LoginStateAbort
+			lh.Err = fmt.Errorf("user cancelled prompt")
+			return lh.Err
+		}
+		lh.C8Yclient.Username = username
+	}
+
 	reason := ""
-	label := "Enter c8y password"
+	label := fmt.Sprintf("Enter c8y password for user (%s)", lh.C8Yclient.Username)
 
 	// Provide additional information to user what happened
 	// invalid encryption key? or missing password
@@ -267,7 +351,7 @@ func (lh *LoginHandler) promptForPassword() error {
 		reason = "password is empty"
 	} else {
 		reason = "password is invalid"
-		label = "Re-enter c8y password"
+		label = fmt.Sprintf("Re-enter c8y password for user (%s)", lh.C8Yclient.Username)
 	}
 
 	prompt := promptui.Prompt{
@@ -302,7 +386,7 @@ func (lh *LoginHandler) login() {
 			if lh.Authorized {
 				lh.state <- LoginStateAuth
 			} else {
-				lh.LoginType = c8y.AuthMethodBasic
+				lh.LoginType = c8y.LoginTypeBasic
 				lh.state <- LoginStateVerify
 			}
 			return nil
@@ -313,9 +397,75 @@ func (lh *LoginHandler) login() {
 			return nil
 		}
 
+		lh.LoginAttempted = true
+
+		order := []string{}
 		for _, option := range lh.LoginOptions.LoginOptions {
+			order = append(order, option.Type)
+		}
+		lh.Logger.Infof("Login type order: %v", order)
+
+		for _, option := range lh.LoginOptions.LoginOptions {
+			lh.Logger.Infof("Trying login option. %s", option.Type)
 			switch option.Type {
-			case c8y.AuthMethodOAuth2Internal:
+			case c8y.LoginTypeOAuth2:
+				// Device Authorization Flow (for external providers)
+				if !lh.IO.CanPromptOnStdErr() {
+					lh.state <- LoginStateAbort
+					lh.Err = fmt.Errorf("OAuth2 device flow requires an interactive console")
+					return lh.Err
+				}
+
+				displayDeviceCode := func(code *device.CodeResponse) error {
+					verificationURI := code.VerificationURIComplete
+
+					lh.writeMessage("\nLogging in using the device flow (OAUTH2)\n\n")
+
+					bold := color.New(color.Bold)
+					bold.EnableColor()
+
+					if verificationURI == "" {
+						verificationURI = code.VerificationURI
+						fmt.Fprintf(os.Stderr, " First copy your one-time code: %s\n", bold.Sprint(code.UserCode))
+					}
+
+					fmt.Fprintf(lh.IO.ErrOut, "%s to open %s in your browser...", bold.Sprintf("Press Enter"), verificationURI)
+					bufio.NewReader(lh.IO.In).ReadBytes('\n')
+
+					if browserErr := browser.OpenURL(verificationURI); browserErr != nil {
+						lh.writeMessage("Failed to open browser, please open the URL in your browser manually")
+					}
+					return nil
+				}
+
+				accessToken, loginErr := lh.C8Yclient.Tenant.AuthorizeWithDeviceFlow(context.Background(), option.InitRequest, api.AuthEndpoints{
+					// Allow users to provide their own discovery URL and scopes
+					OpenIDConfigurationURL: lh.SSO.DiscoveryURL,
+					Scopes:                 lh.SSO.Scopes,
+					AuthRequestOptions: []api.AuthRequestEditorFn{
+						api.WithAudience(lh.SSO.Audience),
+					},
+				}, displayDeviceCode)
+				if loginErr != nil {
+					// Ignore SSO if invalid configuration is found
+					if errors.Is(loginErr, c8y.ErrSSOInvalidConfiguration) {
+						lh.Logger.Warnf("Skipping login type (%s) as SSO configuration is invalid. err=%s", option.Type, loginErr)
+						continue
+					}
+
+					// Check error type, and if the configuration can't be found, then skip SSO
+					// add a new formal type to cover this scenario
+					// could not get OpenID Connect configuration
+					lh.state <- LoginStateAbort
+					lh.Err = fmt.Errorf("OAuth2 device authorization flow failed. %w", loginErr)
+					return lh.Err
+				}
+
+				lh.Logger.Infof("Received access token via device flow. type=%s, scope=%s, tokenPresent=%v, refreshTokenPresent=%v", accessToken.Type, accessToken.Scope, accessToken.Token != "", accessToken.RefreshToken != "")
+				lh.onSave()
+				lh.state <- LoginStateVerify
+				return nil
+			case c8y.LoginTypeOAuth2Internal:
 
 				if lh.TFACodeRequired && option.TFAStrategy == "TOTP" {
 					os.Stderr.WriteString(fmt.Sprintf("Session details:\nHost=%s, username=%s\n", lh.C8Yclient.BaseURL.Host, lh.C8Yclient.Username))
@@ -350,7 +500,7 @@ func (lh *LoginHandler) login() {
 						} else {
 							lh.state <- LoginStateAbort
 							lh.Err = fmt.Errorf("User cancelled login")
-							return nil
+							return lh.Err
 						}
 					}
 					lh.C8Yclient.TFACode = lh.TFACode
@@ -360,10 +510,19 @@ func (lh *LoginHandler) login() {
 					ctx, cancel := context.WithTimeout(context.Background(), time.Duration(Timeout)*time.Millisecond)
 					defer cancel()
 
-					lh.Logger.Debugf("Logging in using %s", c8y.AuthMethodOAuth2Internal)
-					if err := lh.C8Yclient.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
-						lh.Attempts++
+					lh.Logger.Debugf("Logging in using %s", c8y.LoginTypeOAuth2Internal)
 
+					// Check if username/password are provided
+					if lh.C8Yclient.Username == "" {
+						lh.Logger.Warnf("Skipping login type (%s) as a username is empty", option.Type)
+						continue
+					}
+					if lh.C8Yclient.Password == "" {
+						lh.Logger.Warnf("Skipping login type (%s) as password is empty", option.Type)
+						continue
+					}
+
+					if err := lh.C8Yclient.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
 						if v, ok := err.(*c8y.ErrorResponse); ok {
 							lh.Logger.Errorf("OAuth2 failed. %s", v.Message)
 						} else {
@@ -373,12 +532,6 @@ func (lh *LoginHandler) login() {
 						if strings.Contains(err.Error(), "There was a change in authentication strategy for your tenant or user account") {
 							// trigger unknown to recheck if TFA is required or not
 							lh.state <- LoginStateUnknown
-							return nil
-						}
-
-						if lh.Attempts > 2 {
-							lh.Err = fmt.Errorf("Max log attempts reached: %w", err)
-							lh.state <- LoginStateAbort
 							return nil
 						}
 
@@ -394,11 +547,26 @@ func (lh *LoginHandler) login() {
 				lh.onSave()
 				lh.state <- LoginStateVerify
 
-			case c8y.AuthMethodBasic:
-				// do nothing
+			case c8y.LoginTypeBasic:
+				if lh.C8Yclient.Username == "" || lh.C8Yclient.Password == "" {
+					if lh.IO.CanPromptOnStdErr() {
+						lh.state <- LoginStatePromptPassword
+						return nil
+					} else {
+						lh.Err = fmt.Errorf("username or password is empty and the interactive prompt is disabled")
+						lh.state <- LoginStateAbort
+						return lh.Err
+					}
+				}
+				lh.state <- LoginStateVerify
+				return nil
 			}
 		}
-		return nil
+
+		// return an error by default
+		lh.state <- LoginStateAbort
+		lh.Err = fmt.Errorf("no valid login type found")
+		return lh.Err
 	})
 }
 
@@ -408,6 +576,14 @@ func (lh *LoginHandler) errorContains(message, pattern string) bool {
 
 func (lh *LoginHandler) verify() {
 	lh.do(func() error {
+		lh.Attempts++
+
+		if lh.Attempts > 2 {
+			lh.Err = fmt.Errorf("max log attempts reached")
+			lh.state <- LoginStateAbort
+			return lh.Err
+		}
+
 		tenant, resp, err := lh.C8Yclient.Tenant.GetCurrentTenant(context.Background())
 
 		if resp != nil && resp.StatusCode() == http.StatusUnauthorized {
@@ -425,20 +601,20 @@ func (lh *LoginHandler) verify() {
 				} else if lh.errorContains(v.Message, "User has been logged out") {
 					lh.Logger.Warning("User had been logged out. Clearing token and trying again")
 					lh.state <- LoginStateNoAuth
-					lh.C8Yclient.SetToken("")
+					lh.C8Yclient.ClearToken()
 					lh.onSave()
 				} else if lh.errorContains(v.Message, "Tenant has no access from outside the platform") {
 					// Decide what to do here
-					lh.LoginType = c8y.AuthMethodBasic
+					lh.LoginType = c8y.LoginTypeBasic
 					lh.state <- LoginStateVerify
 				} else if lh.errorContains(v.Message, "Bad credentials") || lh.errorContains(v.Message, "Invalid credentials") {
-					lh.Logger.Infof("Bad credentials, using auth method: %s", lh.C8Yclient.AuthorizationMethod)
+					lh.Logger.Infof("Bad credentials, using auth method: %s", lh.C8Yclient.AuthorizationType)
 
 					// try resetting the tenant (in case if it is incorrect)
 					lh.C8Yclient.TenantName = ""
 
-					if lh.C8Yclient.AuthorizationMethod != c8y.AuthMethodOAuth2Internal {
-						if lh.Interactive {
+					if lh.C8Yclient.AuthorizationType != c8y.AuthTypeBearer {
+						if lh.IO.CanPromptOnStdErr() {
 							lh.state <- LoginStatePromptPassword
 						} else {
 							lh.state <- LoginStateAbort
@@ -466,6 +642,18 @@ func (lh *LoginHandler) verify() {
 					lh.Logger.Warnf("Could not get Cumulocity System version. %s", err)
 				}
 			}
+
+			// Get user information if not set (e.g. external SSO tokens don't generally include the username in a known field)
+			if lh.C8Yclient.Username == "" {
+				lh.Logger.Infof("Getting the current user's information as the username is not set")
+				currentUser, _, err := lh.C8Yclient.User.GetCurrentUser(context.Background())
+				if err != nil {
+					lh.Logger.Warnf("Could not get username. %s", err)
+				} else {
+					lh.Logger.Infof("Found current username. %s", currentUser.Username)
+					lh.C8Yclient.Username = currentUser.Username
+				}
+			}
 		}
 		return err
 	})
@@ -486,13 +674,17 @@ func (lh LoginHandler) writeMessageF(format string, a interface{}) {
 func (lh *LoginHandler) setupTFA() error {
 
 	// Request TFA secret
-	backupAuthMethod := lh.C8Yclient.AuthorizationMethod
-	lh.C8Yclient.AuthorizationMethod = c8y.AuthMethodBasic
+	authFunc := c8y.WithTenantUsernamePassword(
+		lh.C8Yclient.TenantName,
+		lh.C8Yclient.Username,
+		lh.C8Yclient.Password,
+	)
 	resp, err := lh.C8Yclient.SendRequest(
 		context.Background(),
 		c8y.RequestOptions{
-			Method: http.MethodPost,
-			Path:   "/user/currentUser/totpSecret",
+			Method:   http.MethodPost,
+			Path:     "/user/currentUser/totpSecret",
+			AuthFunc: authFunc,
 		})
 
 	if err != nil {
@@ -544,9 +736,10 @@ func (lh *LoginHandler) setupTFA() error {
 	_, err = lh.C8Yclient.SendRequest(
 		context.Background(),
 		c8y.RequestOptions{
-			Method: http.MethodPost,
-			Path:   "/user/currentUser/totpSecret/activity",
-			Body:   map[string]interface{}{"isActive": true},
+			Method:   http.MethodPost,
+			Path:     "/user/currentUser/totpSecret/activity",
+			Body:     map[string]interface{}{"isActive": true},
+			AuthFunc: authFunc,
 		},
 	)
 
@@ -555,8 +748,6 @@ func (lh *LoginHandler) setupTFA() error {
 	}
 
 	time.Sleep(1000 * time.Millisecond)
-
-	lh.C8Yclient.AuthorizationMethod = backupAuthMethod
 	return nil
 }
 

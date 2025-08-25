@@ -69,7 +69,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		Accept:                 r.Request.Accept,
 		Header:                 r.Request.Header,
 		ResponseData:           r.Request.ResponseData,
-		NoAuthentication:       r.Request.NoAuthentication,
+		AuthFunc:               r.Request.AuthFunc,
 		IgnoreAccept:           r.Request.IgnoreAccept,
 		DryRun:                 r.Request.DryRun,
 		PrepareRequest:         r.Request.PrepareRequest,

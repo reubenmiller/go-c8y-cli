@@ -93,8 +93,9 @@ var updateSettingsOptions = map[string]argumentHandler{
 	// "template.path":        {"template.path", "string", config.SettingsTemplatePath, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
 	"template.customPaths": {"template.customPaths", "string", config.SettingsTemplateCustomPaths, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
 
-	// views
-	"views.customPaths": {"views.customPaths", "string", config.SettingsViewsCustomPaths, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
+	// sso
+	"sso.discoveryUrl": {"sso.discoveryUrl", "string", config.SettingsSSODiscoveryUrl, []string{}, nil, cobra.ShellCompDirectiveNoFileComp},
+	"sso.scopes":       {"sso.scopes", "string", config.SettingsSSOScopes, []string{}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// settings path
 	"settings.path": {"settings.path", "string", config.SettingsConfigPath, []string{"json"}, nil, cobra.ShellCompDirectiveFilterFileExt},
@@ -273,9 +274,10 @@ var updateSettingsOptions = map[string]argumentHandler{
 
 	// login type
 	"login.type": {"login.type", "string", config.SettingsLoginType, []string{
-		c8y.AuthMethodBasic + "\tBasic Auth (not recommended)",
-		c8y.AuthMethodOAuth2Internal + "\tInternal OAUTH2 (tokens)",
-		c8y.AuthMethodNone + "\tNone",
+		c8y.LoginTypeBasic + "\tBasic Auth (not recommended)",
+		c8y.LoginTypeOAuth2Internal + "\tInternal OAUTH2 (tokens)",
+		c8y.LoginTypeOAuth2 + "\tExternal OAUTH2 (tokens)",
+		c8y.LoginTypeNone + "\tNone",
 		"",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 

@@ -63,11 +63,12 @@ const (
 )
 
 var (
-	ProviderTypeAuto     = "auto"
-	ProviderTypeFile     = "file"
-	ProviderTypeEnv      = "env"
-	ProviderTypeExternal = "external"
-	ProviderTypeStdin    = "stdin"
+	ProviderTypeAuto        = "auto"
+	ProviderTypeFile        = "file"
+	ProviderTypeEnv         = "env"
+	ProviderTypeExternal    = "external"
+	ProviderTypeStdin       = "stdin"
+	ProviderTypeInteractive = "interactive"
 )
 
 const (
@@ -362,6 +363,12 @@ const (
 
 	// SettingsBrowser default browser
 	SettingsBrowser = "settings.browser"
+
+	// SettingsSSODiscoveryUrl Open ID Connect URL aka. Discovery URL
+	SettingsSSODiscoveryUrl = "settings.sso.discoveryUrl"
+
+	// SettingsSSOScopes SSO scopes used to request a device code
+	SettingsSSOScopes = "settings.sso.scopes"
 
 	//
 	// Remote Access preferences
@@ -849,9 +856,13 @@ func (c Config) DecryptAllProperties() (err error) {
 	return err
 }
 
+func GetEnvKey(key string) string {
+	return "C8Y_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+}
+
 // GetEnvKey returns the environment key value associated
 func (c Config) GetEnvKey(key string) string {
-	return "C8Y_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+	return GetEnvKey(key)
 }
 
 // HasEnvSettingsPrefix check if a given env variable name is a settings variable
@@ -950,7 +961,7 @@ func (c *Config) WritePersistentConfig() error {
 
 // GetPassword returns the decrypted password of the current session
 func (c *Config) GetPassword() (string, error) {
-	value := c.viper.GetString("password")
+	value := c.GetPasswordRaw()
 
 	if value == "" {
 		value = c.Persistent.GetString("password")
@@ -963,16 +974,25 @@ func (c *Config) GetPassword() (string, error) {
 	return decryptedValue, nil
 }
 
+func (c *Config) GetPasswordRaw() string {
+	return c.viper.GetString("password")
+}
+
 // IsPasswordEncrypted return true if the password is encrypted
 // If the password is empty then treat it as encrypted
-func (c *Config) IsPasswordEncrypted() bool {
-	password := c.viper.GetString("password")
-	// return password != "" && c.SecureData.IsEncrypted(password) == 1
+func (c *Config) IsPasswordEncrypted(ignoreEmptyValue ...bool) bool {
+	password := c.GetPasswordRaw()
+	if len(ignoreEmptyValue) > 0 && ignoreEmptyValue[0] {
+		return c.SecureData.IsEncrypted(password) == 1
+	}
 	return password == "" || c.SecureData.IsEncrypted(password) == 1
 }
 
-func (c *Config) IsTokenEncrypted() bool {
+func (c *Config) IsTokenEncrypted(ignoreEmptyValue ...bool) bool {
 	token := c.viper.GetString("token")
+	if len(ignoreEmptyValue) > 0 && ignoreEmptyValue[0] {
+		return c.SecureData.IsEncrypted(token) == 1
+	}
 	return token == "" || c.SecureData.IsEncrypted(token) == 1
 }
 
@@ -1006,6 +1026,11 @@ func (c *Config) GetCumulocityVersion() string {
 	return c.Persistent.GetString("version")
 }
 
+// SetUsername sets the username
+func (c *Config) SetUsername(v string) {
+	c.Persistent.Set("username", v)
+}
+
 // SetPassword sets the password
 func (c *Config) SetPassword(p string) {
 	c.Persistent.Set("password", p)
@@ -1014,6 +1039,12 @@ func (c *Config) SetPassword(p string) {
 // SetToken sets the token used for OAUTH authentication
 func (c *Config) SetToken(p string) {
 	c.Persistent.Set(SettingsToken, p)
+}
+
+// SetToken sets the token used for OAUTH authentication
+func (c *Config) ClearToken() {
+	c.viper.Set(SettingsToken, "")
+	c.Persistent.Set(SettingsToken, "")
 }
 
 // SetTenant sets the tenant name
@@ -1434,6 +1465,32 @@ func (c *Config) GetTemplatePaths() []string {
 	return paths
 }
 
+// SSODiscoveryUrl SSO discovery URL (OpenID Connect Configuration URL)
+func (c *Config) SSODiscoveryUrl() string {
+	return c.viper.GetString(SettingsSSODiscoveryUrl)
+}
+
+// SSOScopes scopes to use in the device code request when using SSO
+func (c *Config) SSOScopes() []string {
+	// Be flexible with the format, accept either a "," or " " separator
+	// * "openid offline_access"
+	// * "openid,offline_access"
+	// * "openid,offline_access"
+	// * "openid, offline_access"
+	// * ["openid, "offline_access"]
+	// * ["openid,offline_access"]
+	rawValues := c.viper.GetStringSlice(SettingsSSOScopes)
+	values := make([]string, 0, len(rawValues))
+	for _, value := range rawValues {
+		for _, item := range strings.FieldsFunc(value, func(r rune) bool {
+			return r == ',' || r == ' '
+		}) {
+			values = append(values, strings.TrimSpace(item))
+		}
+	}
+	return values
+}
+
 // SetSessionMode set the session mode (it is not persisted)
 func (c *Config) SetSessionMode(mode SessionMode) {
 	c.Set(SettingsMode, mode.String())
@@ -1654,36 +1711,30 @@ func (c *Config) GetSilentExit() bool {
 }
 
 func ParseLoginTypeWithDefault(v string) string {
-	value, err := c8y.ParseAuthMethod(v)
+	value, err := c8y.ParseLoginType(v)
 	if err != nil {
-		value = c8y.AuthMethodOAuth2Internal
+		value = ""
 	}
 	return value
 }
 
 // GetLoginTypeWithDefault get the preferred login type
 func (c *Config) GetLoginTypeWithDefault() string {
-	v := c.Persistent.GetString(SettingsLoginType)
-	if v == "" {
-		v = c.viper.GetString(SettingsLoginType)
-	}
+	v := c.viper.GetString(SettingsLoginType)
 	return ParseLoginTypeWithDefault(v)
 }
 
 // GetLoginTypeRaw get the raw value, where it could also be an empty value
 func (c *Config) GetLoginTypeRaw() string {
-	v := c.Persistent.GetString(SettingsLoginType)
-	if v == "" {
-		v = c.viper.GetString(SettingsLoginType)
-	}
+	v := c.viper.GetString(SettingsLoginType)
 	return strings.ToUpper(v)
 }
 
 // SetLoginType sets the authorization method, e.g. BASIC, OAUTH2_INTERNAL, NONE
 func (c *Config) SetLoginType(v string) {
-	value, err := c8y.ParseAuthMethod(v)
+	value, err := c8y.ParseLoginType(v)
 	if err != nil {
-		value = c8y.AuthMethodOAuth2Internal
+		value = c8y.LoginTypeOAuth2Internal
 	}
 	c.Set(SettingsLoginType, value)
 }
@@ -1881,6 +1932,10 @@ func (c *Config) SaveClientConfig(client *c8y.Client) error {
 		if client.Version != "" {
 			c.SetCumulocityVersion(client.Version)
 		}
+
+		if client.Username != "" {
+			c.SetUsername(client.Username)
+		}
 	}
 	return c.WritePersistentConfig()
 }
@@ -2071,13 +2126,11 @@ func (c *Config) GetSessionFile(overrideSession ...string) string {
 // 1. load settings (from C8Y_SESSION_HOME path)
 // 2. load session file (by path)
 // 3. load session file (by name)
-func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
+func (c *Config) ReadConfigFiles(client *c8y.Client, ignoreSessionFile ...bool) (path string, err error) {
 	c.Logger.Debugf("Reading configuration files")
 	v := c.viper
 	v.AddConfigPath(".")
 	v.AddConfigPath(c.GetHomeDir())
-
-	sessionFile := c.GetSessionFile("")
 
 	// Load (non-session) preferences
 	v.SetConfigName(SettingsGlobalName)
@@ -2088,22 +2141,26 @@ func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
 	}
 
 	// Load session
-	if _, err := os.Stat(sessionFile); err == nil {
-		// Load config by file path
-		v.SetConfigFile(sessionFile)
+	if len(ignoreSessionFile) == 0 || !ignoreSessionFile[0] {
+		sessionFile := c.GetSessionFile("")
 
-		if err := c.ReadConfig(sessionFile); err != nil {
-			c.Logger.Warnf("Could not read global settings file. file=%s, err=%s", sessionFile, err)
-		}
-	} else {
-		// Load config by name
-		sessionName := "session"
-		if sessionFile != "" {
-			sessionName = sessionFile
-		}
+		if _, err := os.Stat(sessionFile); err == nil {
+			// Load config by file path
+			v.SetConfigFile(sessionFile)
 
-		if sessionName != "" {
-			v.SetConfigName(sessionName)
+			if err := c.ReadConfig(sessionFile); err != nil {
+				c.Logger.Warnf("Could not read global settings file. file=%s, err=%s", sessionFile, err)
+			}
+		} else {
+			// Load config by name
+			sessionName := "session"
+			if sessionFile != "" {
+				sessionName = sessionFile
+			}
+
+			if sessionName != "" {
+				v.SetConfigName(sessionName)
+			}
 		}
 	}
 
@@ -2147,7 +2204,9 @@ func (c *Config) HideSensitiveInformation(client *c8y.Client, message string) st
 		message = strings.ReplaceAll(message, client.Token, "{token}")
 	}
 	if client.BaseURL != nil {
-		message = strings.ReplaceAll(message, strings.TrimRight(client.BaseURL.Host, "/"), "{host}")
+		if host := client.BaseURL.Host; host != "" {
+			message = strings.ReplaceAll(message, strings.TrimRight(host, "/"), "{host}")
+		}
 	}
 
 	basicAuthMatcher := regexp.MustCompile(`(Basic)\s+[A-Za-z0-9=]+`)

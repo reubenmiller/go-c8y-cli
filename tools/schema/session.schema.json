@@ -50,6 +50,7 @@
                     "enum": [
                         "BASIC",
                         "OAUTH2_INTERNAL",
+                        "OAUTH2",
                         "NONE"
                     ]
                 }

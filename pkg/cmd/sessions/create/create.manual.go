@@ -1,6 +1,7 @@
 package create
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -143,9 +144,10 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 		),
 		completion.WithValidateSet(
 			"loginType",
-			c8y.AuthMethodBasic,
-			c8y.AuthMethodOAuth2Internal,
-			c8y.AuthMethodNone,
+			c8y.LoginTypeBasic,
+			c8y.LoginTypeOAuth2Internal,
+			c8y.LoginTypeOAuth2,
+			c8y.LoginTypeNone,
 		),
 	)
 
@@ -183,7 +185,34 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 		n.host = strings.TrimSpace(v)
 	}
 
-	if !cmd.Flags().Changed("username") && n.loginType != c8y.AuthMethodNone {
+	if !cmd.Flags().Changed("loginType") {
+		localClient := c8y.NewClientFromOptions(nil, c8y.ClientOptions{
+			BaseURL: n.host,
+		})
+		loginOptions, _, loginOptionsErr := localClient.Tenant.GetLoginOptions(context.Background())
+		if loginOptionsErr != nil {
+			return loginOptionsErr
+		}
+
+		loginOptionsForUsers := make([]string, 0, len(loginOptions.LoginOptions))
+		loginOptionsForUsers = append(loginOptionsForUsers, "auto")
+		for _, option := range loginOptions.LoginOptions {
+			loginOptionsForUsers = append(loginOptionsForUsers, option.Type)
+		}
+
+		selectedLoginOption, err := prompt.Select("Select login type", loginOptionsForUsers, loginOptionsForUsers[0])
+		if err != nil {
+			return err
+		}
+		// TODO: Add formal type for auto
+		if selectedLoginOption != "auto" {
+			n.loginType = selectedLoginOption
+		}
+	}
+
+	loginTypeRequiresPasswords := requiresUsername(n.loginType)
+
+	if !cmd.Flags().Changed("username") && loginTypeRequiresPasswords {
 		v, err := prompter.Username("Enter username", " "+cfg.GetDefaultUsername())
 
 		if err != nil {
@@ -192,7 +221,7 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 		n.username = strings.TrimSpace(v)
 	}
 
-	if !n.noStorage && !cmd.Flags().Changed("password") && n.loginType != c8y.AuthMethodNone {
+	if !n.noStorage && !cmd.Flags().Changed("password") && loginTypeRequiresPasswords {
 		password, err := prompter.Password("Enter c8y password", "")
 		if err != nil {
 			return err
@@ -215,6 +244,10 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+func requiresUsername(loginType string) bool {
+	return loginType != c8y.LoginTypeNone && loginType != c8y.LoginTypeOAuth2
+}
+
 func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	// Validate required parameters here as the user could have entered them
 	// via the prompt
@@ -225,7 +258,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if n.username == "" && n.loginType != c8y.AuthMethodNone {
+	if n.username == "" && requiresUsername(n.loginType) {
 		return &flags.ParameterError{
 			Name: "username",
 			Err:  flags.ErrParameterMissing,
