@@ -196,14 +196,14 @@ func (n *CmdInstall) InstallProfile(shellType string) (bool, error) {
 		if snippet, err := addExecutableBinaryToPowerShellPath("c8y cli profile --shell powershell | Out-String | Invoke-Expression"); err == nil {
 			profileSnippet = snippet
 		} else {
-			cfg.Logger.Warnf("Failed to detect binary path. %s", err)
+			slog.Warn("Failed to detect binary path", "err", err)
 		}
 	case shell.ShellPwsh:
 		profilePath = "~/.config/powershell/Microsoft.PowerShell_profile.ps1"
 		if snippet, err := addExecutableBinaryToPowerShellPath("c8y cli profile --shell powershell | Out-String | Invoke-Expression"); err == nil {
 			profileSnippet = snippet
 		} else {
-			cfg.Logger.Warnf("Failed to detect binary path. %s", err)
+			slog.Warn("Failed to detect binary path", "err", err)
 		}
 	}
 

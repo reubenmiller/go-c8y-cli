@@ -257,7 +257,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	// Respect session mode using the legacy format (e.g. set via individual create,update,delete values)
 	if legacyMode, legacyValueExists := config.HasLegacySessionMode(cfg.Persistent); legacyValueExists {
 		mode = legacyMode.String()
-		cfg.Logger.Debugf("Detected legacy mode. mode=%s", mode)
+		slog.Debug("Detected legacy mode", "mode", mode)
 	}
 
 	if hasChanged(handler.C8Yclient, cfg) {
