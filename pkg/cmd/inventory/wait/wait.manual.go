@@ -3,6 +3,7 @@ package wait
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -136,7 +137,7 @@ func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
 
 		if err != nil {
 			totalErrors++
-			cfg.Logger.Infof("%s", err)
+			slog.Info(err.Error())
 			lastErr = err
 		}
 	}

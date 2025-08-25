@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
@@ -23,11 +24,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.uber.org/zap/zapcore"
 )
-
-// Logger is used to record the log messages which should be visible to the user when using the verbose flag
-var Logger *logger.Logger
 
 // Build data
 // These variables should be set using the -ldflags "-X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.version=1.0.0" when running go build
@@ -39,8 +36,6 @@ const (
 )
 
 func init() {
-	Logger = logger.NewLogger(module, logger.Options{})
-
 	// Enable case insensitive matches
 	cobra.EnableCaseInsensitive = true
 }
@@ -55,7 +50,7 @@ func MainRun() {
 	// Expand any aliases
 	expandedArgs, err := setArgs(rootCmd.Command, rootCmd.Factory)
 	if err != nil {
-		Logger.Errorf("Could not expand aliases. %s", err)
+		slog.Error("Could not expand aliases", "err", err)
 		os.Exit(int(cmderrors.ExitInvalidAlias))
 	}
 
@@ -114,7 +109,7 @@ func MainRun() {
 		return results, cobra.ShellCompDirectiveNoFileComp
 	}
 
-	Logger.Debugf("Expanded args: %v", expandedArgs)
+	slog.Debug("Expanded args", "value", expandedArgs)
 	rootCmd.SetArgs(expandedArgs)
 
 	if err := rootCmd.Execute(); err != nil {
@@ -141,10 +136,6 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 	if configErr != nil {
 		log.Fatalf("Could not load configuration. %s", configErr)
 	}
-	logg, logErr := f.Logger()
-	if logErr != nil {
-		log.Fatalf("Could not configure logger. %s", logErr)
-	}
 	w := io.Discard
 
 	if errors.Is(err, cmderrors.ErrHelp) {
@@ -153,7 +144,7 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 
 	if iterator.IsEmptyPipeInputError(err) && !cfg.AllowEmptyPipe() {
 		// Ignore empty pipe errors
-		logg.Debug("detected empty piped data")
+		slog.Debug("detected empty piped data")
 		return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitOK)
 	}
 
@@ -179,7 +170,7 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 
 	if cErr, ok := err.(cmderrors.CommandError); ok {
 		if cErr.StatusCode == 403 || cErr.StatusCode == 401 {
-			logg.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.StatusCode))
+			slog.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.StatusCode))
 		}
 
 		// format errors as json messages
@@ -191,16 +182,16 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 		if !cErr.IsSilent() && !strings.Contains(silentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
 
 			if !cErr.Processed {
-				logg.Errorf("%s", cErr)
+				slog.Error(cErr.Error())
 				fmt.Fprintf(w, "%s\n", cErr.JSONString())
 			} else {
-				logg.Debugf("Error has already been logged. %s", cErr)
+				slog.Debug("Error has already been logged", "err", cErr)
 			}
 		}
 	} else {
 		// unexpected error
 		cErr := cmderrors.NewSystemErrorF("%s", err)
-		logg.Errorf("%s", cErr)
+		slog.Error(cErr.Error())
 		fmt.Fprintf(w, "%s\n", cErr.JSONString())
 	}
 	return err
@@ -241,7 +232,7 @@ func setArgs(cmd *cobra.Command, cmdFactory *cmdutil.Factory) ([]string, error) 
 			return nil, err
 		}
 
-		Logger.Debugf("%v -> %v", originalArgs, expandedArgs)
+		slog.Debug("Command arguments", "before", originalArgs, "after", expandedArgs)
 
 		if isShell {
 			exe, err := safeexec.LookPath(expandedArgs[0])
@@ -284,7 +275,7 @@ func setArgs(cmd *cobra.Command, cmdFactory *cmdutil.Factory) ([]string, error) 
 
 func getOutputHeaders(c *console.Console, cfg *config.Config, input []string) (headers []byte) {
 	if !c.IsCSV() || !c.WithCSVHeader() || len(input) == 0 {
-		Logger.Debugf("Ignoring csv headers: isCSV=%v, WithHeader=%v", c.IsCSV(), c.WithCSVHeader())
+		slog.Debug("Ignoring csv headers", "isCSV", c.IsCSV(), "withHeader", c.WithCSVHeader())
 		return
 	}
 	if len(input) > 0 {
@@ -312,16 +303,16 @@ func getOutputHeaders(c *console.Console, cfg *config.Config, input []string) (h
 // the configuration and extensions etc.
 func GetInitLoggerOptions(args []string) logger.Options {
 	color := true
-	level := zapcore.WarnLevel
+	level := slog.LevelWarn
 	debug := false
 
 	for _, item := range args {
 		switch item {
 		case "--debug", "--debug=true":
-			level = zapcore.DebugLevel
+			level = slog.LevelDebug
 			debug = true
 		case "--verbose", "-v", "--verbose=true":
-			level = zapcore.InfoLevel
+			level = slog.LevelInfo
 		case "--noColor", "--noColor=true", "-M", "-M=true":
 			color = false
 		}

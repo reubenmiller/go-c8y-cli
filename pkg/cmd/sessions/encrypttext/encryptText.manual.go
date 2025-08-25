@@ -2,6 +2,7 @@ package encrypttext
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -59,10 +60,6 @@ func (n *CmdEncryptText) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 	if n.passphrase == "" {
 		inputPassphrase, err := cfg.PromptPassphrase()
 		if err != nil {
@@ -108,7 +105,7 @@ func (n *CmdEncryptText) RunE(cmd *cobra.Command, args []string) error {
 				}
 				encryptedText = []byte(data)
 			} else {
-				log.Info("Text is already encrypted")
+				slog.Info("Text is already encrypted")
 			}
 
 			err = n.factory.WriteOutputWithoutPropertyGuess(encryptedText, cmdutil.OutputContext{})

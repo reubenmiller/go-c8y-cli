@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"math/rand"
 	"net/url"
 	"os"
@@ -22,27 +23,15 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/randdata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"go.uber.org/zap/zapcore"
 )
 
 const (
 	timeFormatRFC3339Micro = "2006-01-02T15:04:05.999Z07:00"
 )
-
-var Logger *logger.Logger
-
-func init() {
-	Logger = logger.NewLogger("mapbuilder", logger.Options{
-		Level:  zapcore.DebugLevel,
-		Color:  true,
-		Silent: true,
-	})
-}
 
 func registerNativeFunctions(vm *jsonnet.VM) {
 	vm.NativeFunction(&jsonnet.NativeFunction{
@@ -904,7 +893,7 @@ func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []by
 			externalInput = fmt.Sprintf("{value: \"%s\" }", escapeDoubleQuotes(string(input)))
 		}
 	}
-	Logger.Debugf("externalInput: %s", externalInput)
+	slog.Debug(fmt.Sprintf("externalInput: %s", externalInput))
 
 	inputHelper := fmt.Sprintf(`local input = {index: %d} + %s + %s;`,
 		indexInt,
@@ -945,7 +934,7 @@ func (b *MapBuilder) ClearMap() {
 func (b *MapBuilder) ApplyMap(body map[string]interface{}) {
 	out, err := json.Marshal(body)
 	if err != nil {
-		Logger.Warningf("Failed to convert map to json. %s", err)
+		slog.Warn("Failed to convert map to json", "err", err)
 	} else {
 		b.BodyRaw = out
 	}
@@ -972,7 +961,7 @@ func (b *MapBuilder) GetMap() map[string]interface{} {
 func (b *MapBuilder) GetFileContents() *os.File {
 	file, err := os.Open(b.file)
 	if err != nil {
-		Logger.Errorf("failed to open file. %s", err)
+		slog.Error("failed to open file", "path", b.file, "err", err)
 		return nil
 	}
 	return file
@@ -1107,7 +1096,7 @@ func (b *MapBuilder) MarshalJSONObject() (body []byte, err error) {
 	for _, it := range b.bodyIterators {
 		value, input, itErr := it.Value.GetNext()
 
-		Logger.Debugf("body iterator. path=%s, value=%s", it.Path, value)
+		slog.Debug("body iterator", "path", it.Path, "value", value)
 
 		if itErr != nil {
 			err = itErr
@@ -1117,7 +1106,7 @@ func (b *MapBuilder) MarshalJSONObject() (body []byte, err error) {
 			case []byte:
 				b.externalInput = extInput
 			}
-			Logger.Debugf("setting externalInput: %s", b.externalInput)
+			slog.Debug("setting externalInput", "value", b.externalInput)
 
 			// NOTE: Do not overwrite existing values if non empty
 			if len(value) > 0 {
@@ -1128,7 +1117,7 @@ func (b *MapBuilder) MarshalJSONObject() (body []byte, err error) {
 					if !(valueObj.IsObject() || valueObj.IsArray()) {
 						bodyTemp, bErr := sjson.SetBytes(body, it.Path, value)
 						if bErr != nil {
-							Logger.Warningf("Could not set bytes. Ignoring value: path=%s, value=%s, err=%", it.Path, value, bErr)
+							slog.Warn("Could not set bytes. Ignoring value", "path", it.Path, "value", value, "err", bErr)
 							continue
 						}
 						body = bodyTemp
@@ -1148,7 +1137,7 @@ func (b *MapBuilder) MarshalJSONObject() (body []byte, err error) {
 		body = bodyTemp
 	}
 
-	Logger.Debugf("Body (pre templating)\nbody:\t%s\n\texternalInput:\t%s", body, b.externalInput)
+	slog.Debug(fmt.Sprintf("Body (pre templating)\nbody:\t%s\n\texternalInput:\t%s", body, b.externalInput))
 
 	if b.autoApplyTemplate && len(b.templates) > 0 {
 		body, err = b.ApplyTemplates(body, b.externalInput, b.appendTemplate)
@@ -1197,7 +1186,7 @@ func (b *MapBuilder) Set(path string, value interface{}) error {
 	// store iterators separately so we can intercept the raw value which is otherwise lost during json marshalling
 	if it, ok := value.(iterator.Iterator); ok {
 		b.bodyIterators = append(b.bodyIterators, IteratorReference{path, it})
-		Logger.Debugf("DEBUG: Found iterator. path=%s", path)
+		slog.Debug("Found iterator", "path", path)
 		return nil
 	}
 
@@ -1213,7 +1202,7 @@ func (b *MapBuilder) SetTuple(path string, values ...interface{}) error {
 		// store iterators separately so we can intercept the raw value which is otherwise lost during json marshalling
 		if it, ok := value.(iterator.Iterator); ok {
 			b.bodyIterators = append(b.bodyIterators, IteratorReference{path, it})
-			Logger.Debugf("DEBUG: Found iterator. path=%s", path)
+			slog.Debug("Found iterator", "path", path)
 			return nil
 		}
 

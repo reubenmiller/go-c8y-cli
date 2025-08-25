@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/url"
 	"os"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
@@ -53,7 +53,6 @@ type CumulocitySession struct {
 	// How to identify the session
 	SessionUri string `json:"sessionUri,omitempty"`
 
-	Logger *logger.Logger `json:"-"`
 	Config *config.Config `json:"-"`
 }
 
@@ -96,9 +95,7 @@ func (s CumulocitySession) GetPassword() string {
 	pass, err := s.Config.SecureData.TryDecryptString(s.Password, s.GetSessionPassphrase())
 
 	if err != nil {
-		if s.Logger != nil {
-			s.Logger.Errorf("Could not decrypt password. %s", err)
-		}
+		slog.Error("Could not decrypt password", "err", err)
 		return ""
 	}
 
@@ -263,7 +260,7 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 	}
 
 	cache := cfg.CachePassphraseVariables()
-	cfg.Logger.Debugf("Cache passphrase: %v", cache)
+	slog.Debug("Cache passphrase", "value", cache)
 	if cache {
 		if cfg.Passphrase != "" {
 			output[config.EnvPassphrase] = cfg.Passphrase
@@ -338,7 +335,7 @@ func IsSessionFilePath(path string) bool {
 	return !strings.Contains(path, "://")
 }
 
-func shouldRenewToken(log *logger.Logger, t string, validFor time.Duration) (bool, *time.Time) {
+func shouldRenewToken(t string, validFor time.Duration) (bool, *time.Time) {
 	claims := jwt.RegisteredClaims{}
 	parser := jwt.NewParser()
 	_, _, err := parser.ParseUnverified(t, &claims)
@@ -353,7 +350,7 @@ func shouldRenewToken(log *logger.Logger, t string, validFor time.Duration) (boo
 	if claims.ExpiresAt != nil && claims.IssuedAt != nil {
 		tokenValidityPeriod := claims.ExpiresAt.Sub(claims.IssuedAt.Time)
 		if tokenValidityPeriod < validFor {
-			log.Warnf("SSO token validity period is less than the given token validFor, so the token will be used regardless. minimumValidFor=%v, tokenValidity=%v", validFor, tokenValidityPeriod)
+			slog.Warn("SSO token validity period is less than the given token validFor, so the token will be used regardless", "minimumValidFor", validFor, "tokenValidity", tokenValidityPeriod)
 			return false, nil
 		}
 	}
@@ -367,7 +364,7 @@ func shouldRenewToken(log *logger.Logger, t string, validFor time.Duration) (boo
 }
 
 // ShouldReuseToken checks if the token should be reused or not
-func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string, loginType string) bool {
+func ShouldReuseToken(cfg *config.Config, token string, loginType string) bool {
 	if loginType != "" && !LoginTypeRequiresToken(loginType) {
 		return false
 	}
@@ -378,20 +375,20 @@ func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string, logi
 
 	// Check if token is valid for the minimum period
 	shouldBeValidFor := cfg.TokenValidFor()
-	expiresSoon, expiresAt := shouldRenewToken(log, token, shouldBeValidFor)
+	expiresSoon, expiresAt := shouldRenewToken(token, shouldBeValidFor)
 
 	if expiresAt != nil {
 		if time.Now().After(*expiresAt) {
-			log.Infof("Token has expired. tokenExpiresAt=%s", expiresAt.Format(time.RFC3339))
+			slog.Info("Token has expired", "tokenExpiresAt", expiresAt.Format(time.RFC3339))
 			reuse = false
 		} else if expiresSoon {
-			log.Warnf("Ignoring existing token as it will expire soon. minimumValidFor=%s, tokenExpiresAt=%s", shouldBeValidFor, expiresAt.Format(time.RFC3339))
+			slog.Warn("Ignoring existing token as it will expire soon", "minimumValidFor", shouldBeValidFor, "tokenExpiresAt", expiresAt.Format(time.RFC3339))
 			reuse = false
 		} else {
-			log.Infof("Token expiresAt: %s", expiresAt.Format(time.RFC3339))
+			slog.Info(fmt.Sprintf("Token expiresAt: %s", expiresAt.Format(time.RFC3339)))
 		}
 	} else {
-		log.Infof("Ignoring invalid token")
+		slog.Info("Ignoring invalid token")
 		reuse = false
 	}
 	return reuse

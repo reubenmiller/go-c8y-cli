@@ -2,6 +2,7 @@ package login
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"slices"
 	"strings"
@@ -88,19 +89,13 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 
 func (n *CmdSet) onSave(client *c8y.Client) {
 	cfg, _ := n.factory.Config()
-	log, _ := n.factory.Logger()
-
 	if err := cfg.SaveClientConfig(client); err != nil {
-		log.Errorf("Saving file error. %s", err)
+		slog.Error("Saving file error", "err", err)
 	}
 }
 
 func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	log, err := n.factory.Logger()
 	if err != nil {
 		return err
 	}
@@ -137,13 +132,13 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if sessionFile == "" {
-		sessionFile, err = selectsession.SelectSession(n.factory.IOStreams, cfg, log, strings.Join(append(args, n.sessionFilter), " "))
+		sessionFile, err = selectsession.SelectSession(n.factory.IOStreams, cfg, strings.Join(append(args, n.sessionFilter), " "))
 
 		if err != nil {
 			return err
 		}
 	}
-	cfg.Logger.Debugf("selected session file: %s", sessionFile)
+	slog.Debug("selected session file", "file", sessionFile)
 	if sessionFile != "" {
 		// Note: Ignore any environment variables as the session should take precedence because
 		// the user is most likely switching session so does not want to inherit any environment variables
@@ -193,7 +188,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		n.LoginType = cfg.GetLoginTypeWithDefault()
 	} else {
 		if v, err := c8y.ParseLoginType(n.LoginType); err != nil {
-			log.Warnf("Could not parse auth method: value=%s", err)
+			slog.Warn("Could not parse auth method", "err", err)
 		} else {
 			n.LoginType = v
 		}
@@ -218,7 +213,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	if n.ClearToken {
 		client.ClearToken()
 		cfg.ClearToken()
-	} else if c8ysession.ShouldReuseToken(cfg, log, token, n.LoginType) {
+	} else if c8ysession.ShouldReuseToken(cfg, token, n.LoginType) {
 		client.SetToken(token)
 	} else {
 		client.ClearToken()
@@ -228,7 +223,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	// If the password is not encrypted, then save it (which will apply the encryption)
 	if !cfg.IsPasswordEncrypted() {
 		if cfg.EncryptionEnabled() {
-			log.Infof("Password is unencrypted. enforcing encryption")
+			slog.Info("Password is unencrypted. enforcing encryption")
 			n.onSave(nil)
 		}
 	}
@@ -240,19 +235,18 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
 	handler.SSO.Scopes = cfg.SSOScopes()
 	if handler.LoginType == "" {
-		log.Infof("User preference for login type: %s", "not-set")
+		slog.Info("User preference for login type", "value", "not-set")
 	} else {
-		log.Infof("User preference for login type: %s", handler.LoginType)
+		slog.Info("User preference for login type", "value", handler.LoginType)
 	}
 
 	if n.TFACode == "" {
 		if code, err := cfg.GetTOTP(time.Now()); err == nil {
-			cfg.Logger.Infof("Setting totp code: %s", code)
+			slog.Info("Setting totp code", "value", code)
 			n.TFACode = code
 		}
 	}
 	handler.TFACode = n.TFACode
-	handler.SetLogger(log)
 	err = handler.Run()
 
 	if err != nil {
@@ -267,7 +261,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if hasChanged(handler.C8Yclient, cfg) {
-		log.Infof("Saving tenant name")
+		slog.Info("Saving tenant name")
 		n.onSave(handler.C8Yclient)
 	}
 
@@ -319,7 +313,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// Write session details to stdout (for machines)
-	cfg.Logger.Infof("c8y sessions set: isAuthorized: %v", session.IsAuthorized())
+	slog.Info("c8y sessions set", "isAuthorized", session.IsAuthorized())
 	return c8ysession.WriteOutput(n.GetCommand().OutOrStdout(), client, cfg, session, outputFormat)
 }
 

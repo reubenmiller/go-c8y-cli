@@ -3,6 +3,7 @@ package open
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"net/url"
 	"strings"
 
@@ -186,7 +187,7 @@ func (n *OpenCmd) RunE(cmd *cobra.Command, args []string) error {
 		} else if cfg.DryRun() {
 			fmt.Fprintf(n.factory.IOStreams.Out, "WHATIF: open %s in default browser\n", currentURL.String())
 		} else {
-			cfg.Logger.Infof("Opening web app: %s", currentURL.String())
+			slog.Info("Opening web app", "name", currentURL.String())
 			if err := n.factory.Browser.Browse(currentURL.String()); err != nil {
 				return err
 			}

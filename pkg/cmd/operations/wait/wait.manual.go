@@ -3,6 +3,7 @@ package wait
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -124,7 +125,7 @@ func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
 
 		if v, ok := result.(*c8y.Operation); ok {
 			if v.FailureReason != "" {
-				cfg.Logger.Warnf("Failure reason: %s", v.FailureReason)
+				slog.Warn(fmt.Sprintf("Failure reason: %s", v.FailureReason))
 			}
 
 			_ = n.factory.WriteOutputWithoutPropertyGuess([]byte(v.Item.Raw), cmdutil.OutputContext{})
@@ -132,7 +133,7 @@ func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
 
 		if err != nil {
 			totalErrors++
-			cfg.Logger.Infof("%s", err)
+			slog.Info(err.Error())
 			lastErr = err
 		}
 	}

@@ -3,6 +3,7 @@ package ssh
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os/exec"
 	"strings"
 	"time"
@@ -138,10 +139,6 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 
 	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
 	if err != nil {
@@ -182,7 +179,7 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 
-		log.Debugf("Using remote access configuration: id=%s, name=%s", craConfig.ID, craConfig.Name)
+		slog.Debug("Using remote access configuration", "id", craConfig.ID, "name", craConfig.Name)
 
 		// Lookup configuration
 		craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
@@ -240,7 +237,7 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		sshCmd.Stdout = n.factory.IOStreams.Out
 		sshCmd.Stdin = n.factory.IOStreams.In
 		sshCmd.Stderr = n.factory.IOStreams.ErrOut
-		log.Infof("Executing command: ssh %s\n", strings.Join(sshArgs, " "))
+		slog.Info("Executing command", "command", fmt.Sprintf("ssh %s", strings.Join(sshArgs, " ")))
 
 		cs := n.factory.IOStreams.ColorScheme()
 		if portForwarding != "" {

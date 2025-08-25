@@ -2,6 +2,7 @@ package subscribe
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"os/signal"
 	"time"
@@ -106,7 +107,6 @@ func (n *SubscribeCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	notification2.SetLogger(cfg.Logger)
 	realtime, err := client.Notification2.CreateClient(context.Background(), c8y.Notification2ClientOptions{
 		Consumer: n.Consumer,
 		Token:    n.Token,
@@ -152,7 +152,7 @@ func (n *SubscribeCmd) RunE(cmd *cobra.Command, args []string) error {
 	for {
 		select {
 		case msg := <-messagesCh:
-			cfg.Logger.Infof("Received message: (id=%s, action=%s, description=%s) %s", msg.Identifier, msg.Action, msg.Description, msg.Payload)
+			slog.Info("Received message", "id", msg.Identifier, "action", msg.Action, "description", msg.Description, "payload", msg.Payload)
 
 			if len(n.ActionTypes) == 0 {
 				isMatch = true
@@ -169,12 +169,12 @@ func (n *SubscribeCmd) RunE(cmd *cobra.Command, args []string) error {
 
 			if isMatch {
 				if err := n.factory.WriteOutputWithoutPropertyGuess(msg.Payload, cmdutil.OutputContext{}); err != nil {
-					cfg.Logger.Warnf("Could not process line. only json lines are accepted. %s", err)
+					slog.Warn("Could not process line. only json lines are accepted", "err", err)
 				}
 			}
 
 			if err := realtime.SendMessageAck(msg.Identifier); err != nil {
-				cfg.Logger.Warnf("Failed to send ack. %s", err)
+				slog.Warn("Failed to send ack", "err", err)
 			}
 		case <-signalCh:
 			realtime.Close()

@@ -3,6 +3,7 @@ package root
 import (
 	"bytes"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -16,19 +17,13 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.uber.org/zap/zapcore"
 )
-
-// Logger is used to record the log messages which should be visible to the user when using the verbose flag
-var Logger *logger.Logger
 
 const (
 	module = "c8yapi"
 )
 
 func init() {
-	Logger = logger.NewLogger(module, logger.Options{})
-
 	// Enable case insensitive matches
 	cobra.EnableCaseInsensitive = true
 }
@@ -39,16 +34,16 @@ func init() {
 // the configuration and extensions etc.
 func GetInitLoggerOptions(args []string) logger.Options {
 	color := true
-	level := zapcore.WarnLevel
+	level := slog.LevelWarn
 	debug := false
 
 	for _, item := range args {
 		switch item {
 		case "--debug", "--debug=true":
-			level = zapcore.DebugLevel
+			level = slog.LevelDebug
 			debug = true
 		case "--verbose", "-v", "--verbose=true":
-			level = zapcore.InfoLevel
+			level = slog.LevelInfo
 		case "--noColor", "--noColor=true", "-M", "-M=true":
 			color = false
 		}
@@ -63,7 +58,7 @@ func GetInitLoggerOptions(args []string) logger.Options {
 
 func getOutputHeaders(c *console.Console, cfg *config.Config, input []string) (headers []byte) {
 	if !c.IsCSV() || !c.WithCSVHeader() || len(input) == 0 {
-		Logger.Debugf("Ignoring csv headers: isCSV=%v, WithHeader=%v", c.IsCSV(), c.WithCSVHeader())
+		slog.Debug("Ignoring csv headers", "isCSV", c.IsCSV(), "withHeader", c.WithCSVHeader())
 		return
 	}
 	if len(input) > 0 {
@@ -102,16 +97,12 @@ func NewCommand(buildVersion, buildBranch string) (*CmdRoot, error) {
 	var client *c8y.Client
 	var dataView *dataview.DataView
 	var consoleHandler *console.Console
-	var logHandler *logger.Logger
 	var activityLoggerHandler *activitylogger.ActivityLogger
 	var configHandler = config.NewConfig(viper.GetViper())
 
-	// init logger
-	logHandler = logger.NewLogger(module, GetInitLoggerOptions(os.Args))
-
 	// Note: Loading of the session should be deferred until the commands are loaded
 	if _, err := configHandler.ReadConfigFiles(nil, ShouldIgnoreSessionFile(os.Args)); err != nil {
-		logHandler.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
+		slog.Info("Failed to read configuration. Trying to proceed anyway", "err", err)
 	}
 
 	// cmd factory
@@ -126,12 +117,6 @@ func NewCommand(buildVersion, buildBranch string) (*CmdRoot, error) {
 			return nil, fmt.Errorf("client is missing")
 		}
 		return client, nil
-	}
-	loggerFunc := func() (*logger.Logger, error) {
-		if logHandler == nil {
-			return nil, fmt.Errorf("logger is missing")
-		}
-		return logHandler, nil
 	}
 	activityLoggerFunc := func() (*activitylogger.ActivityLogger, error) {
 		if activityLoggerHandler == nil {
@@ -152,7 +137,7 @@ func NewCommand(buildVersion, buildBranch string) (*CmdRoot, error) {
 		}
 		return consoleHandler, nil
 	}
-	cmdFactory := factory.New(buildVersion, buildBranch, configFunc, clientFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
+	cmdFactory := factory.New(buildVersion, buildBranch, configFunc, clientFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
 
 	// Register the template resolver so the configuration can lookup values as needed
 	configHandler.RegisterTemplateResolver(cmdutil.NewTemplateResolver(cmdFactory))

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,7 +20,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/zipUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -114,7 +114,7 @@ func NewCmdCreateHostedApplication(f *cmdutil.Factory) *CmdCreateHostedApplicati
 	return ccmd
 }
 
-func (n *CmdCreateHostedApplication) getApplicationDetails(log *logger.Logger) (*Application, error) {
+func (n *CmdCreateHostedApplication) getApplicationDetails() (*Application, error) {
 
 	app := Application{}
 
@@ -125,14 +125,14 @@ func (n *CmdCreateHostedApplication) getApplicationDetails(log *logger.Logger) (
 
 	if strings.EqualFold(filepath.Ext(n.file), ".zip") {
 		// Try loading manifest file directly from the zip (without unzipping it)
-		log.Infof("Trying to detect manifest from a zip file. path=%s", n.file)
+		slog.Info("Trying to detect manifest from a zip file", "path", n.file)
 		if err := GetManifestContents(n.file, &app.Manifest); err != nil {
-			log.Infof("Could not find manifest file. Expected %s to contain %s. %s", n.file, CumulocityManifestFile, err)
+			slog.Info(fmt.Sprintf("Could not find manifest file. Expected %s to contain %s. %s", n.file, CumulocityManifestFile, err))
 		}
 	} else if n.file != "" {
 		// Assume json (regardless of file type)
 		manifestPath := filepath.Join(n.file, CumulocityManifestFile)
-		log.Infof("Assuming file is json (regardless of file extension). path=%s", manifestPath)
+		slog.Info("Assuming file is json (regardless of file extension)", "path", manifestPath)
 
 		if _, err := os.Stat(manifestPath); err == nil {
 			jsonFile, err := os.Open(manifestPath)
@@ -142,7 +142,7 @@ func (n *CmdCreateHostedApplication) getApplicationDetails(log *logger.Logger) (
 			byteValue, _ := io.ReadAll(jsonFile)
 
 			if err := json.Unmarshal(byteValue, &app.Manifest); err != nil {
-				log.Warnf("invalid manifest file. Only json or zip files are accepted. %s", strings.TrimSpace(err.Error()))
+				slog.Warn("invalid manifest file. Only json or zip files are accepted", "err", strings.TrimSpace(err.Error()))
 			}
 		}
 	}
@@ -219,9 +219,7 @@ func (n *CmdCreateHostedApplication) packageAppIfRequired(src string) (zipFile s
 		return
 	}
 
-	if log, err := n.factory.Logger(); log != nil && err == nil {
-		log.Infof("zipping folder %s", src)
-	}
+	slog.Info("zipping folder", "path", src)
 	zipFile, err = n.packageWebApplication(src)
 
 	if err != nil {
@@ -239,24 +237,20 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 	var application *c8y.Application
 	var response *c8y.Response
 	var applicationID string
 
 	// note: use POST when checking if it should use try run or not, even though it could actually be PUT as well
 	dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
-	appDetails, err := n.getApplicationDetails(log)
+	appDetails, err := n.getApplicationDetails()
 
 	if err != nil {
 		return err
 	}
 
 	// TODO: Use the default name value from n.Name rather then reading it from the args again.
-	log.Infof("application name: %s", appDetails.Name)
+	slog.Info(fmt.Sprintf("application name: %s", appDetails.Name))
 	if appDetails.Name != "" {
 		refs, err := c8yfetcher.FindHostedApplications(n.factory, []string{appDetails.Name}, true, "", true)
 
@@ -271,7 +265,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 
 	if applicationID == "" {
 		// Create the application
-		log.Info("Creating new application")
+		slog.Info("Creating new application")
 		application, response, err = client.Application.Create(context.Background(), &appDetails.Application)
 
 		if err != nil {
@@ -280,7 +274,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 		applicationID = application.ID
 	} else {
 		// Get existing application
-		log.Infof("Getting existing application. id=%s", applicationID)
+		slog.Info("Getting existing application", "id", applicationID)
 		application, response, err = client.Application.GetApplication(
 			c8y.WithDisabledDryRunContext(context.Background()),
 			applicationID,
@@ -299,11 +293,11 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 		if !dryRun {
 			zipfile, err := n.packageAppIfRequired(n.file)
 			if err != nil {
-				log.Errorf("Failed to package file. %s", err)
+				slog.Error("Failed to package file", "err", err)
 				return fmt.Errorf("failed to package app. %s", err)
 			}
 
-			log.Infof("uploading binary [app=%s]", application.ID)
+			slog.Info("uploading binary", "appId", application.ID)
 			progress := n.factory.IOStreams.ProgressIndicator()
 			resp, err := c8ybinary.CreateBinaryWithProgress(
 				context.Background(),
@@ -326,7 +320,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 	// App activation (only if a new version was uploaded)
 	if !skipUpload && !n.skipActivation {
 		if !dryRun {
-			log.Infof("Activating application")
+			slog.Info("Activating application")
 
 			if applicationBinaryID == "" {
 				return fmt.Errorf("failed to activate new application version because binary id is empty")
@@ -342,7 +336,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 
 			if err != nil {
 				if resp != nil && resp.StatusCode() == 409 {
-					log.Infof("application is already enabled")
+					slog.Info("application is already enabled")
 				} else {
 					return fmt.Errorf("failed to activate application. %s", err)
 				}

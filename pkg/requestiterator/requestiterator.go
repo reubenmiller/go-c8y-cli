@@ -3,6 +3,7 @@ package requestiterator
 import (
 	"bytes"
 	"errors"
+	"log/slog"
 	"net/url"
 	"os"
 	"reflect"
@@ -13,19 +14,14 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 // NewRequestIterator returns an iterator that can be used to send multiple requests until the give iterators in the path/body are exhausted
-func NewRequestIterator(customLogger *logger.Logger, r c8y.RequestOptions, path iterator.Iterator, query iterator.Iterator, body interface{}) *RequestIterator {
-	if customLogger == nil {
-		customLogger = logger.NewDummyLogger("requestiterator")
-	}
+func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, query iterator.Iterator, body interface{}) *RequestIterator {
 	reqIter := &RequestIterator{
-		Logger:  customLogger,
 		Request: r,
 		Path:    path,
 		Query:   query,
@@ -36,7 +32,6 @@ func NewRequestIterator(customLogger *logger.Logger, r c8y.RequestOptions, path 
 
 // RequestIterator iterates through a c8y rest request with given request options and path iterators
 type RequestIterator struct {
-	Logger         *logger.Logger
 	Request        c8y.RequestOptions
 	Path           iterator.Iterator
 	Query          iterator.Iterator
@@ -107,7 +102,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 
 		if u, err := parseUrl(req.Path); err == nil {
 			if u.Host != "" {
-				r.Logger.Warningf("Parsing url in request. %s", u.Host)
+				slog.Warn("Parsing url in request", "host", u.Host)
 				// TODO: Check if this will break anything else
 				req.Host = u.Scheme + "://" + u.Host
 			}
@@ -137,7 +132,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		req.Query = strings.Join(queryParts, "&")
 	}
 
-	r.Logger.Debugf("Input line: %s", inputLine)
+	slog.Debug("Input", "line", inputLine)
 
 	// apply body iterator
 	if r.Body != nil && !reflect.ValueOf(r.Body).IsNil() && request.RequestSupportsBody(req.Method) {

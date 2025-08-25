@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -214,7 +215,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 
 	// path.
 	if err != nil {
-		cfg.Logger.Warn("something is not being detected")
+		slog.Warn("something is not being detected")
 		return err
 	}
 

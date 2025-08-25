@@ -2,6 +2,7 @@ package fromcsv
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"time"
 
@@ -105,7 +106,7 @@ func (n *CmdRepeatCsvFile) newTemplate(cmd *cobra.Command, args []string) error 
 	hasInvalidPaths := false
 	for _, file := range args {
 		if _, err := os.Stat(file); err != nil {
-			cfg.Logger.Errorf("file does not exist. path=%s. error=%s", file, err)
+			slog.Error("file does not exist", "path", file, "err", err)
 			hasInvalidPaths = true
 		}
 	}
@@ -120,7 +121,7 @@ func (n *CmdRepeatCsvFile) newTemplate(cmd *cobra.Command, args []string) error 
 
 	outputHandler := func(output []byte) error {
 		if err := n.factory.WriteOutputWithoutPropertyGuess(output, cmdutil.OutputContext{}); err != nil {
-			cfg.Logger.Warnf("Could not process line. only json lines are accepted. %s", err)
+			slog.Warn("Could not process line. only json lines are accepted", "err", err)
 		}
 		return nil
 	}
@@ -135,7 +136,7 @@ func (n *CmdRepeatCsvFile) newTemplate(cmd *cobra.Command, args []string) error 
 		repeatRange.Max = &n.times_max
 	}
 
-	return cmdutil.ExecuteFileIterator(n.GetCommand().OutOrStdout(), cfg.Logger, files, iterFactory, cmdutil.FileIteratorOptions{
+	return cmdutil.ExecuteFileIterator(n.GetCommand().OutOrStdout(), files, iterFactory, cmdutil.FileIteratorOptions{
 		Infinite:        n.infinite,
 		Times:           repeatRange,
 		FirstNRows:      n.first,

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"runtime"
@@ -140,7 +141,7 @@ func CheckEncryption(IO *iostreams.IOStreams, cfg *config.Config, client *c8y.Cl
 	encryptionEnabled := cfg.IsEncryptionEnabled()
 	decryptSession := false
 	if !encryptionEnabled && cfg.IsPasswordEncrypted() {
-		cfg.Logger.Infof("Encryption has been disabled but detected a encrypted session")
+		slog.Info("Encryption has been disabled but detected a encrypted session")
 		decryptSession = true
 	}
 	if encryptionEnabled || (cfg.IsPasswordEncrypted(true) || cfg.IsTokenEncrypted(true)) {

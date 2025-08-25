@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -128,7 +129,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap/zapcore"
 )
 
 type CmdRoot struct {
@@ -148,7 +148,6 @@ type CmdRoot struct {
 	Factory *cmdutil.Factory
 
 	client      *c8y.Client
-	log         *logger.Logger
 	activitylog *activitylogger.ActivityLogger
 	dataview    *dataview.DataView
 	mu          sync.RWMutex
@@ -200,11 +199,8 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			cmdErr := ccmd.checkSessionExists(cmd, args)
 
 			if cmdErr != nil {
-				logg, logErr := f.Logger()
-				if logg != nil && logErr == nil {
-					if !errors.Is(cmderrors.ErrHelp, cmdErr) {
-						logg.Warnf("Check existing session failed. %s", cmdErr)
-					}
+				if !errors.Is(cmderrors.ErrHelp, cmdErr) {
+					slog.Warn("Check existing session failed", "err", cmdErr)
 				}
 			}
 			return cmdErr
@@ -516,9 +512,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// Add sub commands for the extensions
 	extensions := f.ExtensionManager().List()
 	if err := ConvertToCobraCommands(f, cmd, extensions); err != nil {
-		if log, logErr := f.Logger(); logErr == nil {
-			log.Warnf("Errors while loading some extensions. Functionality may be reduced. %s", err)
-		}
+		slog.Warn("Errors while loading some extensions. Functionality may be reduced", "err", err)
 	}
 
 	// Handle errors (not in cobra library)
@@ -537,11 +531,6 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 	// Enable flag parsing when using tab completion, otherwise disable it
 	// as it affects passing the arguments to the extension binary
 	disableFlagParsing := !isTabCompletionCommand()
-
-	log, err := f.Logger()
-	if err != nil {
-		return err
-	}
 
 	var extError error
 	for _, ext := range extensions {
@@ -577,7 +566,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 					return nil
 				}
 
-				log.Debugf("Reading extension file: %s", path)
+				slog.Debug("Reading extension file", "path", path)
 				spec, err := os.Open(path)
 				if err != nil {
 					return err
@@ -586,7 +575,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 				extCommand, err := cmdparser.ParseCommand(spec, f, cmd.Root())
 				if err != nil {
 					// Only log a warning for the user, don't prevent the whole cli from working
-					log.Warnf("Invalid extension file. reason=%s. file=%s", err, path)
+					slog.Warn("Invalid extension file", "err", err, "file", path)
 					// return fmt.Errorf("%w. file=%s", err, path)
 				} else {
 					if extCommand != nil {
@@ -639,11 +628,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 					DisableFlagParsing: disableFlagParsing,
 					RunE: func(name, exe string) func(*cobra.Command, []string) error {
 						return func(cmd *cobra.Command, args []string) error {
-							log, err := f.Logger()
-							if err != nil {
-								return err
-							}
-							log.Infof("Executing extension. name: %s, command: %s, args: %v", name, exe, args)
+							slog.Info("Executing extension. name", "name", name, "command", exe, "args", args)
 							_, err = f.ExtensionManager().Execute(exe, args, false, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
 							return err
 						}
@@ -661,11 +646,7 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 					DisableFlagParsing: disableFlagParsing,
 					RunE: func(name, exe string) func(*cobra.Command, []string) error {
 						return func(cmd *cobra.Command, args []string) error {
-							log, err := f.Logger()
-							if err != nil {
-								return err
-							}
-							log.Infof("Executing extension. name: %s, command: %s, args: %v", name, exe, args)
+							slog.Info("Executing extension", "name", name, "command", exe, "args", args)
 							_, err = f.ExtensionManager().Execute(exe, args, false, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
 							return err
 						}
@@ -688,11 +669,7 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 	if err != nil {
 		return err
 	}
-	log, err := c.Factory.Logger()
-	if err != nil {
-		return err
-	}
-	log.Debugf("Configuring core modules")
+	slog.Debug("Configuring core modules")
 	consoleHandler, err := c.Factory.Console()
 	if err != nil {
 		return err
@@ -701,7 +678,7 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 	// config/env binding
 	previousSession := cfg.GetSessionFile()
 	if err := cfg.BindPFlag(c.Command.PersistentFlags()); err != nil {
-		log.Warningf("Some configuration binding failed. %s", err)
+		slog.Warn("Some configuration binding failed", "err", err)
 	}
 
 	if c.SessionFile != "" {
@@ -711,21 +688,21 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 	// re-load config if they are using the session argument
 	currentSession := cfg.GetSessionFile()
 	if previousSession != currentSession {
-		log.Infof("Session file has changed from %s to %s. Reading new session", previousSession, currentSession)
+		slog.Info(fmt.Sprintf("Session file has changed from %s to %s. Reading new session", previousSession, currentSession))
 		if _, err := cfg.ReadConfigFiles(nil); err != nil {
-			log.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
+			slog.Info("Failed to read configuration. Trying to proceed anyway", "err", err)
 		}
 	}
 
 	if cfg.DisableProgress() {
-		log.Debugf("Disabling progress bars")
+		slog.Debug("Disabling progress bars")
 		c.Factory.IOStreams.SetProgress(false)
 	}
 
 	if c.SessionMode != "" {
 		mode := config.SessionModeUnset.FromString(c.SessionMode, false)
 		if mode != config.SessionModeUnset {
-			log.Infof("Overriding session mode. default=%s, value=%s", cfg.SessionMode().String(), mode.String())
+			slog.Info("Overriding session mode", "default", cfg.SessionMode().String(), "value", mode.String())
 			cfg.SetSessionMode(mode)
 		}
 	}
@@ -733,38 +710,25 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 	//
 	// Update cmd factory before passing it along
 	//
-
 	// Update logger
-	c.Factory.Logger = func() (*logger.Logger, error) {
-		c.muLog.Lock()
-		defer c.muLog.Unlock()
-		if c.log != nil {
-			return c.log, nil
-		}
-		logOptions := logger.Options{
-			Level: zapcore.WarnLevel,
-			Color: !cfg.DisableColor(),
-			Debug: cfg.Debug(),
-		}
-		if cfg.ShowProgress() {
-			// Don't silence log levels completely in case of errors
-			// mode errors
-			logOptions.Silent = false
-		} else {
-			if cfg.Verbose() || forceVerbose {
-				logOptions.Level = zapcore.InfoLevel
-			}
-			if cfg.Debug() || forceDebug {
-				logOptions.Level = zapcore.DebugLevel
-			}
-		}
-
-		customLogger := logger.NewLogger("c8y", logOptions)
-		c8y.Logger = customLogger
-		cfg.SetLogger(customLogger)
-		c.log = customLogger
-		return customLogger, nil
+	logOptions := logger.Options{
+		Level: slog.LevelWarn,
+		Color: !cfg.DisableColor(),
+		Debug: cfg.Debug(),
 	}
+	if cfg.ShowProgress() {
+		// Don't silence log levels completely in case of errors
+		// mode errors
+		logOptions.Silent = false
+	} else {
+		if cfg.Verbose() || forceVerbose {
+			logOptions.Level = slog.LevelInfo
+		}
+		if cfg.Debug() || forceDebug {
+			logOptions.Level = slog.LevelDebug
+		}
+	}
+	_ = logger.NewLogger("go-c8y-cli", logOptions)
 
 	// Update activity logger
 	c.Factory.ActivityLogger = func() (*activitylogger.ActivityLogger, error) {
@@ -786,7 +750,6 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 			return c.dataview, nil
 		}
 
-		l, _ := c.Factory.Logger()
 		viewPaths := cfg.GetViewPaths()
 
 		// Add extensions
@@ -797,7 +760,7 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 			}
 		}
 
-		dv, err := dataview.NewDataView(".*", ".json", l, viewPaths...)
+		dv, err := dataview.NewDataView(".*", ".json", viewPaths...)
 		c.dataview = dv
 		return dv, err
 	}
@@ -820,14 +783,8 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 		if client != nil {
 			if c.SessionUsername != "" || c.SessionPassword != "" {
 				client.SetUsernamePassword(c.SessionUsername, c.SessionPassword)
-				c.log.Debug("Forcing basic authentication as user provided username/password")
+				slog.Debug("Forcing basic authentication as user provided username/password")
 			}
-		}
-
-		if c.log != nil {
-			c8y.Logger = c.log
-		} else {
-			c8y.Logger = logger.NewDummyLogger("c8y")
 		}
 		c.client = client
 		return client, err
@@ -836,10 +793,6 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 }
 
 func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
-	log, err := c.Factory.Logger()
-	if err != nil {
-		return err
-	}
 	cfg, err := c.Factory.Config()
 	if err != nil {
 		return err
@@ -860,22 +813,22 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	// print log information
 	sessionFile := cfg.GetSessionFile()
 	if sessionFile != "" {
-		log.Infof("Loaded session: %s", cfg.HideSensitiveInformationIfActive(client, sessionFile))
+		slog.Info("Loaded session", "file", cfg.HideSensitiveInformationIfActive(client, sessionFile))
 		if _, err := os.Stat(sessionFile); err != nil {
 			if c8ysession.IsSessionFilePath(sessionFile) {
-				log.Warnf("Failed to verify session file. %s", err)
+				slog.Warn("Failed to verify session file", "err", err)
 			}
 		}
 	}
 
 	if cfg.DisableStdin() {
 		// Note: Stdin is disabled elsewhere
-		log.Info("Disabling reading from stdin (does not accept piped data)")
+		slog.Info("Disabling reading from stdin (does not accept piped data)")
 	}
 
-	log.Debugf("command str: %s", cmdStr)
-	log.Infof("command: c8y %s", utilities.GetCommandLineArgs())
-	log.Debugf("output format: %s", cfg.GetOutputFormat().String())
+	slog.Debug("command str", "value", cmdStr)
+	slog.Info(fmt.Sprintf("command: c8y %s", utilities.GetCommandLineArgs()))
+	slog.Debug("output format", "value", cfg.GetOutputFormat().String())
 
 	// print examples
 	if cmd.Flags().Changed("examples") {
@@ -931,14 +884,14 @@ func (c *CmdRoot) configureActivityLog(cfg *config.Config) (*activitylogger.Acti
 
 	activitylog, err := activitylogger.NewActivityLogger(options)
 	if err != nil {
-		cfg.Logger.Errorf("Failed to load activity logger. %s", err)
+		slog.Error("Failed to load activity logger", "err", err)
 		return nil, err
 	}
 
 	if disabled {
-		cfg.Logger.Info("activityLog is disabled")
+		slog.Info("activityLog is disabled")
 	} else {
-		cfg.Logger.Infof("activityLog path: %s", activitylog.GetPath())
+		slog.Info("activityLog", "path", activitylog.GetPath())
 	}
 	return activitylog, nil
 }

@@ -66,10 +66,6 @@ func (n *CmdSubscribeAll) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
 	if err != nil {
 		return err
@@ -113,5 +109,5 @@ func (n *CmdSubscribeAll) RunE(cmd *cobra.Command, args []string) error {
 			return n.factory.WriteOutputWithoutPropertyGuess([]byte(msg), cmdutil.OutputContext{})
 		},
 	}
-	return c8ysubscribe.SubscribeMultiple(client, log, patterns, opts)
+	return c8ysubscribe.SubscribeMultiple(client, patterns, opts)
 }

@@ -3,6 +3,7 @@ package cmdparser
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"strconv"
 
@@ -28,11 +29,6 @@ type Command struct {
 }
 
 func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command) (*cobra.Command, error) {
-
-	log, err := factory.Logger()
-	if err != nil {
-		return nil, err
-	}
 
 	spec := &models.Specification{}
 	b, err := io.ReadAll(r)
@@ -60,7 +56,7 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command)
 			continue
 		}
 
-		log.Debugf("Adding command. name=%s", item.Name)
+		slog.Debug("Adding command", "name", item.Name)
 		subcmd := NewCommandWithOptions(&cobra.Command{
 			Use:     item.Name,
 			Short:   item.Description,
@@ -84,9 +80,9 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command)
 
 			if err := AddFlag(subcmd, &param, factory); err != nil {
 				if file, ok := r.(*os.File); ok {
-					log.Warnf("Extension: Ignoring invalid flag. details=%s, command=%s, file=%s", err, item.Name, file.Name())
+					slog.Warn("Extension: Ignoring invalid flag", "err", err, "command", item.Name, "file", file.Name())
 				} else {
-					log.Warnf("Extension: Ignoring invalid flag. details=%s, command=%s", err, item.Name)
+					slog.Warn("Extension: Ignoring invalid flag", "err", err, "command", item.Name)
 				}
 				// TODO: Is it better to be more forgiving or should it fail hard?
 				// return nil, err
@@ -235,15 +231,11 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 }
 
 func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) error {
-	log, err := factory.Logger()
-	if err != nil {
-		return err
-	}
 	existingFlag := cmd.Command.Flags().Lookup(p.Name)
 	if existingFlag != nil {
 		// TODO: Update the existing flag rather than ignoring it
 		// TODO: Should an error be returned?
-		log.Debugf("Ignoring duplicated flag. name=%s", p.Name)
+		slog.Debug("Ignoring duplicated flag", "name", p.Name)
 		return nil
 	}
 	switch p.Type {

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -30,8 +31,8 @@ func (c *Config) GetSessionHomeDir() string {
 		outputDir = v
 		if err == nil {
 			outputDir = expandedV
-		} else if c.Logger != nil {
-			c.Logger.Warnf("Could not expand path. %s", err)
+		} else {
+			slog.Warn("Could not expand path", "err", err)
 		}
 	} else {
 		// Use session directory ~/.cumulocity (separate from c8y home, as it can store sensitive information)
@@ -39,16 +40,14 @@ func (c *Config) GetSessionHomeDir() string {
 		if v, err := homedir.Dir(); err == nil {
 			outputDir = v
 		} else {
-			if c.Logger != nil {
-				c.Logger.Warnf("Could not find user's home directory. %s", err)
-			}
+			slog.Warn("Could not find user's home directory", "err", err)
 		}
 		outputDir = filepath.Join(outputDir, DefaultSessionDir)
 	}
 
 	err := fileutilities.CreateDirs(outputDir)
-	if err != nil && c.Logger != nil {
-		c.Logger.Errorf("Sessions directory check failed. path=%s, err=%s", outputDir, err)
+	if err != nil {
+		slog.Error("Sessions directory check failed", "path", outputDir, "err", err)
 	}
 	return outputDir
 }
@@ -72,13 +71,13 @@ func (c *Config) GetHomeDir() string {
 	}
 
 	outputDir, err := homedir.Expand(os.ExpandEnv(outputDir))
-	if err != nil && c.Logger != nil {
-		c.Logger.Warnf("Could not expand path. %s", err)
+	if err != nil {
+		slog.Warn("Could not expand path", "err", err)
 	}
 
 	err = fileutilities.CreateDirs(outputDir)
-	if err != nil && c.Logger != nil {
-		c.Logger.Errorf("Sessions directory check failed. path=%s, err=%s", outputDir, err)
+	if err != nil {
+		slog.Error("Sessions directory check failed", "path", outputDir, "err", err)
 	}
 	return outputDir
 }

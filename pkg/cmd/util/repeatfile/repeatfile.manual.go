@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log/slog"
 	"math/rand"
 	"os"
 	"strconv"
@@ -142,7 +143,7 @@ func (n *CmdRepeatFile) newTemplate(cmd *cobra.Command, args []string) error {
 	hasInvalidPaths := false
 	for _, file := range args {
 		if _, err := os.Stat(file); err != nil {
-			cfg.Logger.Errorf("file does not exist. path=%s. error=%s", file, err)
+			slog.Error("file does not exist", "path", file, "error", err)
 			hasInvalidPaths = true
 		}
 	}
@@ -163,7 +164,7 @@ func (n *CmdRepeatFile) newTemplate(cmd *cobra.Command, args []string) error {
 		includeRowNum = true
 	}
 
-	cfg.Logger.Infof("repeat format string: %s", formatString)
+	slog.Info("repeat format string", "value", formatString)
 
 	totalRows := int64(0)
 	if n.first > 0 {
@@ -196,7 +197,7 @@ func (n *CmdRepeatFile) newTemplate(cmd *cobra.Command, args []string) error {
 				}
 
 				if totalRows != 0 && rowCount >= totalRows {
-					cfg.Logger.Debugf("Found first %d rows", rowCount)
+					slog.Debug("Found first rows", "count", rowCount)
 					return nil
 				}
 
@@ -204,7 +205,7 @@ func (n *CmdRepeatFile) newTemplate(cmd *cobra.Command, args []string) error {
 					// randomly skip a row. 1 = always skip, 0 = never skip
 					randValue := rand.Float32()
 					if randValue <= n.randomSkip {
-						cfg.Logger.Debugf("Skipping random row: %d. value=%f, limit=%f", row, randValue, n.randomSkip)
+						slog.Debug("Skipping random row", "row", row, "value", randValue, "limit", n.randomSkip)
 						continue
 					}
 				}
@@ -227,7 +228,7 @@ func (n *CmdRepeatFile) newTemplate(cmd *cobra.Command, args []string) error {
 
 				currentDelay := randomDelayFunc(delay)
 				if currentDelay > 0 {
-					cfg.Logger.Infof("Waiting %v before printing next value", currentDelay)
+					slog.Info(fmt.Sprintf("Waiting %v before printing next value", currentDelay))
 					time.Sleep(currentDelay)
 				}
 				outputCount++

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,7 +20,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -105,7 +105,7 @@ Create or update an existing microservice using it's manifest file. This will se
 	return ccmd
 }
 
-func (n *CmdCreate) getApplicationDetails(log *logger.Logger) (*Application, error) {
+func (n *CmdCreate) getApplicationDetails() (*Application, error) {
 
 	app := Application{}
 
@@ -117,13 +117,13 @@ func (n *CmdCreate) getApplicationDetails(log *logger.Logger) (*Application, err
 
 	if strings.HasSuffix(n.file, ".zip") {
 		// Try loading manifest file directly from the zip (without unzipping it)
-		log.Infof("Trying to detect manifest from a zip file. path=%s", n.file)
+		slog.Info("Trying to detect manifest from a zip file", "path", n.file)
 		if err := GetManifestContents(n.file, &app.Manifest); err != nil {
-			log.Infof("Could not find manifest file. Expected %s to contain %s. %s", n.file, CumulocityManifestFile, err)
+			slog.Info(fmt.Sprintf("Could not find manifest file. Expected %s to contain %s. %s", n.file, CumulocityManifestFile, err))
 		}
 	} else if n.file != "" {
 		// Assume json (regardless of file type)
-		log.Infof("Assuming file is json (regardless of file extension). path=%s", n.file)
+		slog.Info("Assuming file is json (regardless of file extension)", "path", n.file)
 		jsonFile, err := os.Open(n.file)
 		if err != nil {
 			return nil, err
@@ -131,7 +131,7 @@ func (n *CmdCreate) getApplicationDetails(log *logger.Logger) (*Application, err
 		byteValue, _ := io.ReadAll(jsonFile)
 
 		if err := json.Unmarshal(byteValue, &app.Manifest); err != nil {
-			log.Warnf("invalid manifest file. Only json or zip files are accepted. %s", strings.TrimSpace(err.Error()))
+			slog.Warn("invalid manifest file. Only json or zip files are accepted", "err", strings.TrimSpace(err.Error()))
 		}
 	}
 
@@ -184,17 +184,14 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
+
 	var application *c8y.Application
 	var response *c8y.Response
 	var applicationID string
 	var applicationName string
 
 	dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
-	applicationDetails, err := n.getApplicationDetails(log)
+	applicationDetails, err := n.getApplicationDetails()
 
 	if err != nil {
 		return err
@@ -236,7 +233,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 
 	if applicationID == "" {
 		// Create the application
-		log.Info("Creating new application")
+		slog.Info("Creating new application")
 		application, response, err = client.Application.Create(context.Background(), &applicationDetails.Application)
 
 		if err != nil {
@@ -244,7 +241,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		// Get existing application
-		log.Infof("Getting existing application. id=%s", applicationID)
+		slog.Info("Getting existing application", "id", applicationID)
 		application, response, err = client.Application.GetApplication(context.Background(), applicationID)
 
 		if err != nil {
@@ -260,13 +257,13 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 
 	// Only upload zip files
 	if !strings.HasSuffix(n.file, ".zip") {
-		log.Info("Skipping microservice binary upload")
+		slog.Info("Skipping microservice binary upload")
 		skipUpload = true
 	}
 
 	// Upload binary
 	if !skipUpload {
-		log.Infof("uploading binary [id=%s]", application.ID)
+		slog.Info("uploading binary", "id", application.ID)
 		if !dryRun {
 
 			progress := n.factory.IOStreams.ProgressIndicator()
@@ -291,10 +288,13 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		// will be hosted outside of the platform
 		//
 		// Read the Cumulocity.json file, and upload
-		log.Infof(
-			"updating application details [id=%s], requiredRoles=%s, roles=%s",
+		slog.Info(
+			"updating application details",
+			"id",
 			application.ID,
+			"requiredRoles",
 			strings.Join(applicationDetails.Manifest.RequiredRoles, ","),
+			"roles",
 			strings.Join(applicationDetails.Manifest.Roles, ","),
 		)
 		if !dryRun {
@@ -310,15 +310,15 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 
 	// App subscription
 	if !n.skipSubscription {
-		log.Infof("Subscribing to application")
+		slog.Info("Subscribing to application")
 		if !dryRun {
 			_, resp, err := client.Tenant.AddApplicationReference(context.Background(), client.TenantName, application.Self)
 
 			if err != nil {
 				if resp != nil && resp.StatusCode() == 409 {
-					log.Infof("microservice is already enabled")
+					slog.Info("microservice is already enabled")
 				} else {
-					return fmt.Errorf("Failed to subscribe to application. %s", err)
+					return fmt.Errorf("failed to subscribe to application. %s", err)
 				}
 			}
 		}

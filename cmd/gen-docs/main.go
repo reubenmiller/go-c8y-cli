@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -12,11 +13,9 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"go.uber.org/zap/zapcore"
 )
 
 func main() {
@@ -102,18 +101,11 @@ func createCmdRoot() *root.CmdRoot {
 	var client *c8y.Client
 	var dataView *dataview.DataView
 	var consoleHandler *console.Console
-	var logHandler *logger.Logger
 	var activityLoggerHandler *activitylogger.ActivityLogger
 	var configHandler = config.NewConfig(viper.GetViper())
 
-	// init logger
-	logHandler = logger.NewLogger("", logger.Options{
-		Level: zapcore.WarnLevel,
-		Debug: false,
-	})
-
 	if _, err := configHandler.ReadConfigFiles(nil); err != nil {
-		logHandler.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
+		slog.Info("Failed to read configuration. Trying to proceed anyway", "err", err)
 	}
 
 	// cmd factory
@@ -128,12 +120,6 @@ func createCmdRoot() *root.CmdRoot {
 			return nil, fmt.Errorf("client is missing")
 		}
 		return client, nil
-	}
-	loggerFunc := func() (*logger.Logger, error) {
-		if logHandler == nil {
-			return nil, fmt.Errorf("logger is missing")
-		}
-		return logHandler, nil
 	}
 	activityLoggerFunc := func() (*activitylogger.ActivityLogger, error) {
 		if activityLoggerHandler == nil {
@@ -153,7 +139,7 @@ func createCmdRoot() *root.CmdRoot {
 		}
 		return consoleHandler, nil
 	}
-	cmdFactory := factory.New("", "", configFunc, clientFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
+	cmdFactory := factory.New("", "", configFunc, clientFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
 
 	return root.NewCmdRoot(cmdFactory, "", "")
 }

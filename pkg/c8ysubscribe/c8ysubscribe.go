@@ -2,6 +2,7 @@ package c8ysubscribe
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"strings"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -29,7 +29,7 @@ type Options struct {
 }
 
 // Subscribe subscribe to a single channel
-func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, opts Options) (err error) {
+func Subscribe(client *c8y.Client, channelPattern string, opts Options) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("could not create realtime client. %s", r)
@@ -37,7 +37,7 @@ func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, op
 	}()
 
 	if err := client.Realtime.Connect(); err != nil {
-		log.Errorf("Could not connect to /cep/realtime. %s", err)
+		slog.Error("Could not connect to /cep/realtime", "err", err)
 		return err
 	}
 
@@ -47,7 +47,7 @@ func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, op
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, os.Interrupt)
 
-	log.Infof("Listening to subscriptions: %s", channelPattern)
+	slog.Info("Listening to subscriptions", "value", channelPattern)
 
 	client.Realtime.Subscribe(channelPattern, msgCh)
 
@@ -65,7 +65,7 @@ func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, op
 	for {
 		select {
 		case <-timeoutCh:
-			log.Info("Duration has expired. Stopping realtime client")
+			slog.Info("Duration has expired. Stopping realtime client")
 			return nil
 		case msg := <-msgCh:
 			if actionTypes == "" || strings.Contains(actionTypes, strings.ToLower(msg.Payload.RealtimeAction)) {
@@ -82,14 +82,14 @@ func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, op
 
 		case <-signalCh:
 			// Enable ctrl-c to stop
-			log.Info("Stopping realtime client")
+			slog.Info("Stopping realtime client")
 			return nil
 		}
 	}
 }
 
 // SubscribeMultiple subscribe to multiple channels
-func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns []string, opts Options) (err error) {
+func SubscribeMultiple(client *c8y.Client, channelPatterns []string, opts Options) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("could not create realtime client. %s", r)
@@ -97,7 +97,7 @@ func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns [
 	}()
 
 	if err := client.Realtime.Connect(); err != nil {
-		log.Errorf("Could not connect to /cep/realtime. %s", err)
+		slog.Error("Could not connect to /cep/realtime", "err", err)
 		return nil
 	}
 
@@ -108,7 +108,7 @@ func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns [
 	signal.Notify(signalCh, os.Interrupt)
 
 	for _, pattern := range channelPatterns {
-		log.Infof("Listening to subscriptions: %s", pattern)
+		slog.Info("Listening to subscriptions", "value", pattern)
 
 		client.Realtime.Subscribe(pattern, msgCh)
 	}
@@ -125,7 +125,7 @@ func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns [
 	for {
 		select {
 		case <-timeoutCh:
-			log.Info("Duration has expired. Stopping realtime client")
+			slog.Info("Duration has expired. Stopping realtime client")
 			return nil
 		case msg := <-msgCh:
 
@@ -144,7 +144,7 @@ func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns [
 
 		case <-signalCh:
 			// Enable ctrl-c to stop
-			log.Info("Stopping realtime client")
+			slog.Info("Stopping realtime client")
 			return nil
 		}
 	}

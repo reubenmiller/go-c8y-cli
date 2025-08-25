@@ -88,11 +88,6 @@ func (n *RegisterExternalCACmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	llog, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
-
 	c8yclient, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -155,7 +150,6 @@ func (n *RegisterExternalCACmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, RunBulkRegistrationJob(cmd, &RegistrationOptions{
 		Config:        cfg,
-		Log:           llog,
 		Client:        c8yclient,
 		Factory:       n.factory,
 		CommonOptions: commonOptions,

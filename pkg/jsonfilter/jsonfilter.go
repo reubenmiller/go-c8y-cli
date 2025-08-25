@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"sort"
 	"strconv"
 	"strings"
@@ -11,28 +12,15 @@ import (
 	"github.com/hashicorp/go-version"
 	glob "github.com/obeattie/ohmyglob"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flatten"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/matcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/sortorder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/gojsonq/v2"
 	"github.com/tidwall/gjson"
-	"go.uber.org/zap/zapcore"
 )
 
-var Logger *logger.Logger
-
-func init() {
-	Logger = logger.NewLogger("jsonfilter", logger.Options{
-		Level:  zapcore.DebugLevel,
-		Color:  true,
-		Silent: true,
-	})
-}
-
 type JSONFilters struct {
-	Logger             *logger.Logger
 	Filters            []JSONFilter
 	Selectors          []string
 	Pluck              []string
@@ -164,9 +152,9 @@ func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string
 	if err != nil {
 		return nil, nil, err
 	}
-	Logger.Debugf("flattening json")
+	slog.Debug("flattening json")
 	flatMap, err := flatten.Flatten(rawMap, prefix, flatten.DotStyle)
-	Logger.Debugf("finished flattening json")
+	slog.Debug("finished flattening json")
 
 	if err != nil {
 		return nil, nil, err
@@ -197,9 +185,9 @@ func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string
 		}
 	}
 
-	Logger.Debugf("running filterFlatMap")
+	slog.Debug("running filterFlatMap")
 	resolvedProperties, _ := filterFlatMap(flatMap, filteredMap, compiledPatterns, aliases)
-	Logger.Debugf("finished filterFlatMap")
+	slog.Debug("finished filterFlatMap")
 	return filteredMap, resolvedProperties, err
 }
 
@@ -223,7 +211,7 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 
 	for i, pattern := range patterns {
 		found := false
-		Logger.Debugf("filtering keys by pattern: total=%d, pattern=%s", len(sourceKeys), pattern.String())
+		slog.Debug("filtering keys by pattern", "total", len(sourceKeys), "pattern", pattern.String())
 		for _, key := range sourceKeys {
 			value := src[key]
 
@@ -301,9 +289,8 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 }
 
 // NewJSONFilters create a json filter
-func NewJSONFilters(l *logger.Logger) *JSONFilters {
+func NewJSONFilters() *JSONFilters {
 	return &JSONFilters{
-		Logger:    l,
 		Filters:   make([]JSONFilter, 0),
 		Selectors: make([]string, 0),
 	}
@@ -359,7 +346,7 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 	}
 
 	if v.IsObject() {
-		Logger.Info("Converting json object to array")
+		slog.Info("Converting json object to array")
 		jq = gojsonq.New().FromString("[" + v.String() + "]")
 		convertBackFromArray = true
 	} else if v.IsArray() {
@@ -395,18 +382,18 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 	jq.Macro("version", matchVersionConstraint)
 
 	for _, query := range f.Filters {
-		Logger.Debugf("filtering data: %s %s %s", query.Property, query.Operation, query.Value)
+		slog.Debug(fmt.Sprintf("filtering data: %s %s %s", query.Property, query.Operation, query.Value))
 		jq.Where(query.Property, query.Operation, query.Value)
 	}
 
 	if errs := jq.Errors(); len(errs) > 0 {
-		Logger.Warnf("filter errors. %v", errs)
+		slog.Warn("filter errors", "err", errs)
 	}
 
 	if len(f.Selectors) > 0 {
 		jq.Select(f.Selectors...)
 	}
-	Logger.Debugf("Pluck values: %v", f.Pluck)
+	slog.Debug("Pluck", "values", f.Pluck)
 	// format values (using gjson)
 	// skip flatten and select if a only a globstar is provided
 	// selectAllProperties := len(f.Pluck) == 1 && f.Pluck[0] == "**"
@@ -442,7 +429,7 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 			return []byte(line), formatErrors(jq.Errors())
 		}
 
-		Logger.Debugf("ERROR: gjson path does not exist. %v", f.Pluck)
+		slog.Debug("ERROR: gjson path does not exist", "err", f.Pluck)
 		return []byte(""), formatErrors(jq.Errors())
 	}
 
@@ -529,9 +516,9 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string) (s
 		v, err = json.Marshal(flatMap)
 	} else {
 		// unflatten
-		Logger.Debugf("running unflatten. %v", pathPatterns)
+		slog.Debug("running unflatten", "patterns", pathPatterns)
 		if len(pathPatterns) == 1 && pathPatterns[0] == "**" {
-			Logger.Debugf("Returning all keys because globstar is being used")
+			slog.Debug("Returning all keys because globstar is being used")
 			return item.Raw, flatKeys
 		}
 
@@ -539,22 +526,20 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string) (s
 		maxKeyCount := int64(10000)
 		keyCount := int64(len(flatMap))
 		if keyCount > maxKeyCount {
-			if f.Logger != nil {
-				itemID := ""
-				if v := item.Get("id"); v.Exists() {
-					itemID = v.Str
-				}
-				f.Logger.Warnf("Detected json with a large number of keys, returning all data by default. Use jq for further filtering. total_keys=%d, id=%s", keyCount, itemID)
+			itemID := ""
+			if v := item.Get("id"); v.Exists() {
+				itemID = v.Str
 			}
+			slog.Warn("Detected json with a large number of keys, returning all data by default. Use jq for further filtering", "total_keys", keyCount, "id", itemID)
 
 			return item.Raw, flatKeys
 		}
 
 		v, err = flatten.UnflattenOrdered(flatMap, flatKeys)
-		Logger.Debugf("Finished unflatten")
+		slog.Debug("Finished unflatten")
 	}
 	if err != nil {
-		Logger.Warningf("failed to marshal value. err=%s", err)
+		slog.Warn("failed to marshal value", "err", err)
 	} else {
 		if v != nil {
 			output.Write(v)
@@ -580,7 +565,7 @@ func convertToCSV(flatMap map[string]interface{}, keys []string, separator strin
 		}
 		if value, ok := flatMap[key]; ok {
 			if marshalledValue, err := json.Marshal(value); err != nil {
-				Logger.Warningf("failed to marshal value. value=%v, err=%s", value, err)
+				slog.Warn("failed to marshal value", "value", value, "err", err)
 			} else {
 				if !bytes.Contains(marshalledValue, []byte(",")) {
 					buf.Write(bytes.Trim(marshalledValue, "\""))
@@ -606,7 +591,7 @@ func convertToLine(flatMap map[string]interface{}, keys []string) string {
 		}
 		if value, ok := flatMap[key]; ok {
 			if marshalledValue, err := json.Marshal(value); err != nil {
-				Logger.Warningf("failed to marshal value. value=%v, err=%s", value, err)
+				slog.Warn("Could not marshal value", "value", value, "err", err)
 			} else {
 				if i != 0 {
 					buf.WriteString(key)

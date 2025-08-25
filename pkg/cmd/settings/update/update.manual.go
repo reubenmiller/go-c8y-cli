@@ -2,6 +2,7 @@ package update
 
 import (
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -549,7 +550,7 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 		switch name {
 		case "mode":
 			if err := config.SetMode(v, config.SessionModeProduction.FromString(value, false)); err != nil {
-				cfg.Logger.Warn(err)
+				slog.Warn("Could not set session mode", "err", err)
 			}
 		default:
 			if handler, ok := updateSettingsOptions[name]; ok {

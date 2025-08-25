@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/url"
 	"os"
 	"path"
@@ -20,7 +21,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/numbers"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
@@ -419,8 +419,6 @@ type Config struct {
 	// SecretText used to test the encryption passphrase
 	SecretText string
 
-	Logger *logger.Logger
-
 	sessionFile string
 
 	// private caching to improve performance
@@ -443,9 +441,7 @@ func NewConfig(v *viper.Viper) *Config {
 		SecureData: encrypt.NewSecureData("{encrypted}"),
 		Persistent: viper.New(),
 		prompter:   prompt.Prompt{},
-		Logger:     logger.NewDummyLogger("SecureData"),
 	}
-	c.prompter.Logger = c.Logger
 	c.bindSettings()
 	return c
 }
@@ -620,17 +616,11 @@ func (c *Config) bindSettings() {
 	)
 
 	if err != nil {
-		c.Logger.Warnf("Could not bind settings. %s", err)
+		slog.Warn("Could not bind settings", "err", err)
 	}
 
 	// Set pin entry command
 	c.prompter.PinEntry = c.PinEntry()
-}
-
-// SetLogger sets the logger
-func (c *Config) SetLogger(l *logger.Logger) {
-	c.Logger = l
-	c.prompter.Logger = l
 }
 
 // ReadConfig reads the given file and loads it into the persistent session config
@@ -651,7 +641,7 @@ func (c *Config) CheckEncryption(encryptedText ...string) (string, error) {
 		secretText = encryptedText[0]
 	}
 
-	c.Logger.Infof("Checking encryption passphrase against secret text: %s", secretText)
+	slog.Info("Checking encryption passphrase against secret text", "value", secretText)
 	pass, err := c.prompter.EncryptionPassphrase(secretText, EnvPassphrase, c.Passphrase, "")
 	c.Passphrase = pass
 	return pass, err
@@ -758,7 +748,7 @@ func (c *Config) GetTOTP(t time.Time) (string, error) {
 // CreateKeyFile creates a file used as reference to validate encryption
 func (c *Config) CreateKeyFile(keyText string) error {
 	if _, err := os.Stat(c.KeyFile()); os.IsExist(err) {
-		c.Logger.Infof("Key file already exists. file=%s", c.KeyFile)
+		slog.Info("Key file already exists", "file", c.KeyFile)
 		return nil
 	}
 	key, err := os.Create(c.KeyFile())
@@ -782,7 +772,7 @@ func (c *Config) ReadKeyFile() error {
 
 	// read from env variable
 	if v := os.Getenv(EnvPassphraseText); v != "" && c.SecureData.IsEncrypted(v) == 1 {
-		c.Logger.Infof("Using env variable '%s' as example encryption text", EnvPassphraseText)
+		slog.Info("Using env variable as example encryption text", "env", EnvPassphraseText)
 		c.SecretText = v
 		return c.CreateKeyFile(v)
 	}
@@ -795,7 +785,7 @@ func (c *Config) ReadKeyFile() error {
 			c.SecretText = string(contents)
 			return nil
 		}
-		c.Logger.Warningf("Key file is invalid or contains decrypted information")
+		slog.Warn("Key file is invalid or contains decrypted information")
 	}
 
 	// init key file
@@ -895,7 +885,7 @@ func (c Config) DebugViper() {
 // DecryptString returns the decrypted string if the string is encrypted
 func (c *Config) DecryptString(value string) (string, error) {
 	if c.SecureData.IsEncrypted(value) > 0 {
-		c.Logger.Infof("Decrypting data. %s", value)
+		slog.Info("Decrypting data", "value", value)
 	}
 	value, err := c.SecureData.TryDecryptString(value, c.Passphrase)
 	return value, err
@@ -921,7 +911,7 @@ func (c *Config) SetEncryptedString(key, value string) error {
 	}
 
 	if value == "" {
-		c.Logger.Info("Password is not set so nothing to encrypt")
+		slog.Info("Password is not set so nothing to encrypt")
 		return nil
 	}
 
@@ -1000,7 +990,7 @@ func (c *Config) IsTokenEncrypted(ignoreEmptyValue ...bool) bool {
 func (c *Config) MustGetPassword() string {
 	decryptedValue, err := c.GetPassword()
 	if err != nil {
-		c.Logger.Warningf("Could not decrypt password. %s", err)
+		slog.Warn("Could not decrypt password", "err", err)
 	}
 	return decryptedValue
 }
@@ -1010,7 +1000,7 @@ func (c *Config) MustGetToken(silent bool) string {
 	decryptedValue, err := c.GetToken()
 	if err != nil {
 		if !silent {
-			c.Logger.Warningf("Could not decrypt token. %s", err)
+			slog.Warn("Could not decrypt token", "err", err)
 		}
 	}
 	return decryptedValue
@@ -1102,7 +1092,7 @@ func (c *Config) TokenValidFor() time.Duration {
 	value := c.viper.GetString(SettingsSessionTokenValidFor)
 	duration, err := flags.GetDuration(value, true, time.Second)
 	if err != nil {
-		c.Logger.Warnf("Invalid duration. value=%s, err=%s", duration, err)
+		slog.Warn("Invalid duration", "value", duration, "err", err)
 		return 0
 	}
 	return duration
@@ -1156,7 +1146,7 @@ func (c *Config) GetWorkers() int {
 	maxWorkers := c.GetMaxWorkers()
 	if workers > maxWorkers {
 		workers = maxWorkers
-		c.Logger.Warningf("number of workers exceeds the maximum workers limit of %d. Using maximum value (%d) instead", maxWorkers, maxWorkers)
+		slog.Warn(fmt.Sprintf("number of workers exceeds the maximum workers limit of %d. Using maximum value (%d) instead", maxWorkers, maxWorkers))
 	}
 	return workers
 }
@@ -1255,7 +1245,7 @@ func (c *Config) HTTPRetryWaitMax() time.Duration {
 	value := c.viper.GetString(SettingsHTTPRetryWaitMax)
 	duration, err := flags.GetDuration(value, true, time.Second)
 	if err != nil {
-		c.Logger.Warnf("Invalid duration. value=%s, err=%s", duration, err)
+		slog.Warn("Invalid duration", "value", duration, "err", err)
 		return 0
 	}
 	return duration
@@ -1266,7 +1256,7 @@ func (c *Config) HTTPRetryWaitMin() time.Duration {
 	value := c.viper.GetString(SettingsHTTPRetryWaitMin)
 	duration, err := flags.GetDuration(value, true, time.Second)
 	if err != nil {
-		c.Logger.Warnf("Invalid duration. value=%s, err=%s", duration, err)
+		slog.Warn("Invalid duration", "value", duration, "err", err)
 		return 0
 	}
 	return duration
@@ -1285,16 +1275,14 @@ func (c *Config) ShouldUseDryRun(commandLine string) bool {
 			pattern = pattern[1:]
 		}
 		if m, err := regexp.MatchString(pattern, commandLine); err != nil {
-			if c.Logger != nil {
-				c.Logger.Warnf("Invalid dry run pattern. pattern=%s, err=%s", commandLine, err)
-			}
+			slog.Warn("Invalid dry run pattern", "pattern", commandLine, "err", err)
 		} else {
 
 			if shouldInvert {
-				c.Logger.Infof("Should use dry run: pattern=%s, result=%v", pattern, !m)
+				slog.Info("Should use dry run", "pattern", pattern, "result", !m)
 				return !m
 			}
-			c.Logger.Infof("Should use dry run: pattern=%s, result=%v", pattern, m)
+			slog.Info("Should use dry run", "pattern", pattern, "result", m)
 			return m
 		}
 	}
@@ -1374,7 +1362,7 @@ func (c *Config) getDuration(name string) time.Duration {
 	v := c.viper.GetString(name)
 	duration, err := flags.GetDuration(v, true, time.Millisecond)
 	if err != nil {
-		c.Logger.Warnf("Invalid duration. value=%s, err=%s", v, err)
+		slog.Warn("Invalid duration", "value", v, "err", err)
 		return 0
 	}
 	return duration
@@ -1430,7 +1418,7 @@ func (c *Config) RequestTimeout() time.Duration {
 	value := c.viper.GetString(SettingsTimeout)
 	duration, err := flags.GetDuration(value, true, time.Second)
 	if err != nil {
-		c.Logger.Warnf("Invalid duration. value=%s, err=%s", duration, err)
+		slog.Warn("Invalid duration", "value", duration, "err", err)
 		return 0
 	}
 	return duration
@@ -1596,7 +1584,6 @@ func (c *Config) GetOutputFormat() OutputFormat {
 	}
 	format := c.viper.GetString(SettingsOutputFormat)
 	outputFormat := OutputJSON.FromString(format)
-	// c.Logger.Debugf("output format: %s", outputFormat.String())
 	return outputFormat
 }
 
@@ -1828,7 +1815,6 @@ func (c *Config) GetJSONSelect() []string {
 		}
 	}
 
-	// c.Logger.Debugf("json select: len=%d, values=%v", len(allitems), allitems)
 	return allitems
 }
 
@@ -1862,7 +1848,7 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 	options.ResultProperty = flags.GetCollectionPropertyFromAnnotation(cmd)
 
 	// Filters and selectors
-	filters := jsonfilter.NewJSONFilters(c.Logger)
+	filters := jsonfilter.NewJSONFilters()
 	filters.AsCSV = c.IsCSVOutput()
 	filters.AsTSV = c.IsTSVOutput()
 	filters.AsCompletionFormat = c.IsCompletionOutput()
@@ -1885,7 +1871,6 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 
 	if options.IncludeAll {
 		options.PageSize = c.GetIncludeAllPageSize()
-		// c.Logger.Debugf("Setting pageSize to maximum value to limit number of requests. value=%d", options.PageSize)
 	}
 
 	options.CurrentPage = c.GetCurrentPage()
@@ -1947,7 +1932,7 @@ func (c *Config) ShouldConfirm(methods ...string) bool {
 
 	useDryRun := c.ShouldUseDryRun("")
 	if c.IsCIMode() || c.Force() || useDryRun {
-		c.Logger.Debugf("no confirmation required. ci_mode=%v, force=%v, dry=%v", c.IsCIMode(), c.Force(), useDryRun)
+		slog.Debug("no confirmation required", "ci_mode", c.IsCIMode(), "force", c.Force(), "dry", useDryRun)
 		return false
 	}
 
@@ -1958,7 +1943,7 @@ func (c *Config) ShouldConfirm(methods ...string) bool {
 	confirmMethods := strings.ToUpper(c.GetConfirmationMethods())
 	for _, method := range methods {
 		if strings.Contains(confirmMethods, strings.ToUpper(method)) {
-			c.Logger.Debugf("confirmation required due to method=%s", method)
+			slog.Debug("method requires confirmation", "method", method)
 			return true
 		}
 	}
@@ -2001,12 +1986,12 @@ func (c *Config) BindPFlag(flags *pflag.FlagSet) error {
 		settingsName := GetSettingsName(f.Name)
 
 		if err := c.viper.BindEnv(settingsName); err != nil {
-			c.Logger.Warnf("Could not bind to environment variable. name=%s, err=%s", settingsName, err)
+			slog.Warn("Could not bind to environment variable", "name", settingsName, "err", err)
 			lastError = err
 		}
 
 		if err := c.viper.BindPFlag(settingsName, flags.Lookup(f.Name)); err != nil {
-			c.Logger.Warnf("Could not set flag. name=%s, err=%s", settingsName, err)
+			slog.Warn("Could not set flag", "name", settingsName, "err", err)
 			lastError = err
 		}
 	})
@@ -2017,9 +2002,7 @@ func (c *Config) BindPFlag(flags *pflag.FlagSet) error {
 func (c *Config) ExpandHomePath(path string) string {
 	expanded, err := homedir.Expand(path)
 	if err != nil {
-		if c.Logger != nil {
-			c.Logger.Warnf("Could not expand path to home directory. %s", err)
-		}
+		slog.Warn("Could not expand path to home directory", "err", err)
 		expanded = path
 	}
 	// replace special variables
@@ -2030,22 +2013,22 @@ func (c *Config) ExpandHomePath(path string) string {
 
 // LogErrorF dynamically changes where the error is logged based on the users Silent Status Codes preferences
 // Silent errors are only logged on the INFO level, where as non-silent errors are logged on the ERROR level
-func (c *Config) LogErrorF(err error, format string, args ...interface{}) {
-	errorLogger := c.Logger.Infof
+func (c *Config) LogErrorF(err error, msg string, args ...interface{}) {
+	errorLogger := slog.Info
 	silentStatusCodes := c.GetSilentStatusCodes()
 	if errors.Is(err, cmderrors.ErrNoMatchesFound) {
 		if strings.Contains(silentStatusCodes, "404") {
-			errorLogger = c.Logger.Infof
+			errorLogger = slog.Info
 		}
 	} else if cErr, ok := err.(cmderrors.CommandError); ok {
 
 		// format errors as json messages
 		// only log users errors
 		if strings.Contains(silentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
-			errorLogger = c.Logger.Infof
+			errorLogger = slog.Info
 		}
 	}
-	errorLogger(format, args...)
+	errorLogger(msg, args...)
 }
 
 var ConfigExtensions = []string{"json", "yaml", "yml", "env", "toml", "properties"}
@@ -2068,14 +2051,14 @@ func (c *Config) ClearSessionFile() {
 func (c *Config) SetSessionFile(path string) {
 	if _, fileErr := os.Stat(path); fileErr != nil {
 		home := c.GetSessionHomeDir()
-		c.Logger.Debugf("Resolving session %s in %s", path, home)
+		slog.Debug(fmt.Sprintf("Resolving session %s in %s", path, home))
 		matches, err := pathresolver.ResolvePaths([]string{home}, path, ConfigExtensions, "ignore")
 		if err != nil {
-			c.Logger.Warnf("Failed to find session. %s", err)
+			slog.Warn("Failed to find session", "err", err)
 		}
 		if len(matches) > 0 {
 			path = matches[0]
-			c.Logger.Debugf("Resolved session. %s", path)
+			slog.Debug("Resolved session", "path", path)
 		}
 	}
 	c.sessionFile = c.ExpandHomePath(path)
@@ -2105,14 +2088,14 @@ func (c *Config) GetSessionFile(overrideSession ...string) string {
 	sessionFile = strings.TrimPrefix(sessionFile, "file://")
 	if _, fileErr := os.Stat(sessionFile); fileErr != nil {
 		home := c.GetSessionHomeDir()
-		c.Logger.Debugf("Resolving session %s in %s", sessionFile, home)
+		slog.Debug(fmt.Sprintf("Resolving session %s in %s", sessionFile, home))
 		matches, err := pathresolver.ResolvePaths([]string{home}, sessionFile, ConfigExtensions, "ignore")
 		if err != nil {
-			c.Logger.Warnf("Failed to find session. %s", err)
+			slog.Warn("Failed to find session", "err", err)
 		}
 		if len(matches) > 0 {
 			sessionFile = matches[0]
-			c.Logger.Debugf("Resolved session. %s", sessionFile)
+			slog.Debug("Resolved session", "file", sessionFile)
 		}
 	}
 
@@ -2127,7 +2110,7 @@ func (c *Config) GetSessionFile(overrideSession ...string) string {
 // 2. load session file (by path)
 // 3. load session file (by name)
 func (c *Config) ReadConfigFiles(client *c8y.Client, ignoreSessionFile ...bool) (path string, err error) {
-	c.Logger.Debugf("Reading configuration files")
+	slog.Debug("Reading configuration files")
 	v := c.viper
 	v.AddConfigPath(".")
 	v.AddConfigPath(c.GetHomeDir())
@@ -2137,7 +2120,7 @@ func (c *Config) ReadConfigFiles(client *c8y.Client, ignoreSessionFile ...bool) 
 
 	if err := v.ReadInConfig(); err == nil {
 		path = v.ConfigFileUsed()
-		c.Logger.Infof("Loaded settings: %s", c.HideSensitiveInformationIfActive(client, path))
+		slog.Debug("Loaded settings", "file", c.HideSensitiveInformationIfActive(client, path))
 	}
 
 	// Load session
@@ -2149,7 +2132,7 @@ func (c *Config) ReadConfigFiles(client *c8y.Client, ignoreSessionFile ...bool) 
 			v.SetConfigFile(sessionFile)
 
 			if err := c.ReadConfig(sessionFile); err != nil {
-				c.Logger.Warnf("Could not read global settings file. file=%s, err=%s", sessionFile, err)
+				slog.Warn("Could not read global settings file", "file", sessionFile, "err", err)
 			}
 		} else {
 			// Load config by name
@@ -2168,7 +2151,7 @@ func (c *Config) ReadConfigFiles(client *c8y.Client, ignoreSessionFile ...bool) 
 	path = v.ConfigFileUsed()
 
 	if err != nil {
-		c.Logger.Debugf("Failed to merge config. %s", err)
+		slog.Debug("Failed to merge config. %s", "err", err)
 	}
 
 	return path, err

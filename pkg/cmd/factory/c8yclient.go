@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -14,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/viper"
@@ -48,22 +48,16 @@ func WithCompression(enable bool) c8y.ClientOption {
 }
 
 // RetryLogger to customize the log messages produced by the http retry client
-type RetryLogger struct {
-	l *logger.Logger
-}
+type RetryLogger struct{}
 
-func (l RetryLogger) Printf(format string, args ...interface{}) {
-	format = strings.TrimPrefix(format, "[DEBUG] ")
-	l.l.Infof(format, args...)
+func (l RetryLogger) Printf(msg string, args ...interface{}) {
+	msg = strings.TrimPrefix(msg, "[DEBUG] ")
+	slog.Info(msg, args...)
 }
 
 func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password string, disableEncryptionCheck bool) func() (*c8y.Client, error) {
 	return func() (*c8y.Client, error) {
 		cfg, err := f.Config()
-		if err != nil {
-			return nil, err
-		}
-		log, err := f.Logger()
 		if err != nil {
 			return nil, err
 		}
@@ -76,8 +70,8 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 			os.Setenv(c8y.EnvVarLoggerHideSensitive, "true")
 		}
 
-		log.Debug("Creating c8y client")
-		configureProxySettings(cfg, log)
+		slog.Debug("Creating c8y client")
+		configureProxySettings(cfg)
 
 		internalHttpClient := c8y.NewHTTPClient(
 			WithProxyDisabled(cfg.IgnoreProxy()),
@@ -94,10 +88,10 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 			retryClient.RetryMax = cfg.HTTPRetryMax()
 			retryClient.RetryWaitMin = cfg.HTTPRetryWaitMin()
 			retryClient.RetryWaitMax = cfg.HTTPRetryWaitMax()
-			retryClient.Logger = RetryLogger{l: log}
+			retryClient.Logger = RetryLogger{}
 			retryClient.ErrorHandler = func(resp *http.Response, err error, numTries int) (*http.Response, error) {
 				// Pass error back so that the activity log is processed
-				log.Warnf("Giving up after %d attempt/s. err=%s", numTries, err)
+				slog.Warn(fmt.Sprintf("Giving up after %d attempt/s", numTries), "err", err)
 				if resp != nil && resp.Body != nil {
 					defer resp.Body.Close()
 				}
@@ -111,7 +105,7 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 
 		cacheBodyPaths := cfg.CacheBodyKeys()
 		if len(cacheBodyPaths) > 0 {
-			log.Infof("Caching of body only includes paths: %s", strings.Join(cacheBodyPaths, ", "))
+			slog.Info("Caching of body only includes paths", "paths", strings.Join(cacheBodyPaths, ", "))
 		}
 
 		if cfg.CacheEnabled() && cfg.CacheTTL() > 0 {
@@ -135,9 +129,9 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		if sessionFile != "" {
 			// Do nothing
 		} else {
-			log.Info("Binding authorization environment variables")
+			slog.Info("Binding authorization environment variables")
 			if err := cfg.BindAuthorization(); err != nil {
-				log.Warnf("Failed to bind to authorization variables. %s", err)
+				slog.Warn("Failed to bind to authorization variables", "err", err)
 			}
 		}
 
@@ -170,7 +164,7 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		c8yURLFromEnv := GetHostFromEnvironment()
 		if c8yURL == "" && c8yURLFromEnv != "" {
 			// Get url from env variable if it is empty
-			log.Debugf("Using URL from env variable. %s", c8yURLFromEnv)
+			slog.Debug("Using URL from env variable", "value", c8yURLFromEnv)
 			c8yURL = c8yURLFromEnv
 		}
 
@@ -203,7 +197,6 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 					IO:            f.IOStreams,
 					Client:        client,
 					Config:        cfg,
-					Logger:        log,
 					Console:       consol,
 					HideSensitive: cfg.HideSensitiveInformationIfActive,
 				}
@@ -220,14 +213,14 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 			authErrors = nil
 		}
 
-		log.Infof("Using client auth type: %s", client.AuthorizationType.String())
+		slog.Info("Using client auth type", "value", client.AuthorizationType.String())
 
 		if !disableEncryptionCheck && len(authErrors) > 0 {
-			log.Warnf("Could not load authentication. error=%v", authErrors[0])
+			slog.Warn("Could not load authentication", "err", authErrors[0])
 		}
 
 		timeout := cfg.RequestTimeout()
-		log.Debugf("timeout: %v", timeout)
+		slog.Debug("Request timeout setting", "value", timeout)
 
 		// Should we use the tenant in the name or not
 		if viper.IsSet("useTenantPrefix") {
@@ -254,11 +247,11 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 
 		if client.TenantName == "" {
 			// Set the tenant either from token, or by looking it up as the tenant is required for a lot of API calls
-			log.Debug("Looking up tenant name as it is not set (it is required by some API)")
+			slog.Debug("Looking up tenant name as it is not set (it is required by some API)")
 			client.TenantName = client.GetTenantName(c8y.WithDisabledDryRunContext(context.Background()))
 
 			if client.TenantName == "" {
-				log.Info("Failed to lookup tenant name. API calls which require the tenant name will not work!")
+				slog.Info("Failed to lookup tenant name. API calls which require the tenant name will not work!")
 			}
 		}
 
@@ -346,7 +339,7 @@ func WithProxyDisabled(disable bool) c8y.ClientOption {
 	}
 }
 
-func configureProxySettings(cfg *config.Config, log *logger.Logger) {
+func configureProxySettings(cfg *config.Config) {
 
 	// Proxy settings
 	// Either use explicit proxy, ignore proxy, or use existing env variables
@@ -357,14 +350,14 @@ func configureProxySettings(cfg *config.Config, log *logger.Logger) {
 	proxy := cfg.Proxy()
 	noProxy := cfg.IgnoreProxy()
 	if noProxy {
-		log.Debug("using explicit noProxy setting")
+		slog.Debug("using explicit noProxy setting")
 		os.Setenv("HTTP_PROXY", "")
 		os.Setenv("HTTPS_PROXY", "")
 		os.Setenv("http_proxy", "")
 		os.Setenv("https_proxy", "")
 	} else {
 		if proxy != "" {
-			log.Debugf("using explicit proxy [%s]", proxy)
+			slog.Debug("using explicit proxy", "value", proxy)
 
 			os.Setenv("HTTP_PROXY", proxy)
 			os.Setenv("HTTPS_PROXY", proxy)
@@ -382,7 +375,7 @@ func configureProxySettings(cfg *config.Config, log *logger.Logger) {
 				}
 			}
 			if proxySettings.Len() > 0 {
-				log.Debugf("Using existing env variables.%s", proxySettings.String())
+				slog.Debug("Using existing env variables", "value", proxySettings.String())
 			}
 		}
 	}

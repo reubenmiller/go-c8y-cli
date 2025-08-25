@@ -3,6 +3,7 @@ package run
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
@@ -104,10 +105,6 @@ func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 
 	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
 	if err != nil {
@@ -148,7 +145,7 @@ func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 
-		log.Debugf("Using remote access configuration: id=%s, name=%s", craConfig.ID, craConfig.Name)
+		slog.Debug("Using remote access configuration", "id", craConfig.ID, "name", craConfig.Name)
 
 		// Lookup configuration
 		craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
@@ -208,7 +205,7 @@ func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 		runCmd.Stdin = n.factory.IOStreams.In
 		runCmd.Stderr = n.factory.IOStreams.ErrOut
 
-		log.Infof("Executing command: %s %s\n", run, strings.Join(runArgs, " "))
+		slog.Info("Executing command", "command", fmt.Sprintf("%s %s", run, strings.Join(runArgs, " ")))
 
 		cs := n.factory.IOStreams.ColorScheme()
 		fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting external command on %s (%s)\n", device, strings.TrimRight(client.BaseURL.String(), "/"))))

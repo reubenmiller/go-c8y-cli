@@ -2,6 +2,7 @@ package selectsession
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	createCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/create"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities/bellskipper"
 )
 
@@ -54,7 +54,7 @@ func matchSession(session c8ysession.CumulocitySession, input string) bool {
 }
 
 // SelectSession select a Cumulocity session interactively
-func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logger, filter string) (sessionFile string, err error) {
+func SelectSession(io *iostreams.IOStreams, cfg *config.Config, filter string) (sessionFile string, err error) {
 	sessions := &c8ysession.CumulocitySessions{}
 	sessions.Sessions = make([]c8ysession.CumulocitySession, 0)
 
@@ -63,29 +63,29 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	files := make([]string, 0)
 
 	srcdir := cfg.GetSessionHomeDir()
-	log.Infof("using c8y session folder: %s", srcdir)
+	slog.Info("using c8y session folder", "path", srcdir)
 
 	err = filepath.Walk(srcdir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			log.Printf("Prevent panic by handling failure accessing a path %q: %v", path, err)
+			slog.Info("Prevent panic by handling failure accessing a path", "path", path, "err", err)
 			return err
 		}
 		if info.IsDir() && strings.Contains(subDirToSkip, ":"+strings.ToLower(info.Name())+":") {
-			log.Printf("Ignoring dir: %+v", info.Name())
+			slog.Info("Ignoring dir", "path", info.Name())
 			return filepath.SkipDir
 		}
 		if info.IsDir() && info.Name() == ".git" {
-			log.Printf("Ignoring dir: %+v", info.Name())
+			slog.Info("Ignoring dir", "path", info.Name())
 			return filepath.SkipDir
 		}
 
 		if info.IsDir() && path == cfg.ExtensionsDataDir() {
-			log.Printf("Ignoring extensions dir: %+v", info.Name())
+			slog.Info("Ignoring extensions dir", "path", info.Name())
 			return filepath.SkipDir
 		}
 		// extensions is a reserved word (in case the user has older extensions folder which is not the current setting, but left overs from a previous location)
 		if info.IsDir() && strings.EqualFold(info.Name(), "extensions") {
-			log.Printf("Ignoring reserved dir names: %+v", info.Name())
+			slog.Info("Ignoring reserved dir names", "path", info.Name())
 			return filepath.SkipDir
 		}
 
@@ -98,13 +98,13 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 			return nil
 		}
 
-		log.Infof("Walking folder/file: %s", path)
+		slog.Info("Walking folder/file", "path", path)
 		files = append(files, path)
 
-		if session, err := createCmd.NewCumulocitySessionFromFile(path, log, cfg); err == nil {
+		if session, err := createCmd.NewCumulocitySessionFromFile(path, cfg); err == nil {
 			sessions.Sessions = append(sessions.Sessions, *session)
 		} else {
-			log.Infof("Failed to read file: file=%s, err=%s", path, err)
+			slog.Info("Failed to read file", "path", path, "err", err)
 		}
 		return nil
 	})
@@ -205,7 +205,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	case 0:
 		return "", fmt.Errorf("no sessions found")
 	case 1:
-		log.Info("Only 1 session found. Selecting it automatically")
+		slog.Info("Only 1 session found. Selecting it automatically")
 		idx = 0
 		result = filteredSessions[0].Path
 		err = nil
@@ -219,7 +219,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	}
 
 	if err != nil {
-		log.Warnf("Prompt failed %v\n", err)
+		slog.Warn("Prompt failed", "err", err)
 		return "", err
 	}
 

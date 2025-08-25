@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
@@ -191,12 +192,7 @@ func (n *CmdLogin) FromEnv() (*c8ysession.CumulocitySession, error) {
 }
 
 func (n *CmdLogin) FromInteractive(cmd *cobra.Command) (*c8ysession.CumulocitySession, error) {
-	log, err := n.factory.Logger()
-	if err != nil {
-		return nil, err
-	}
-
-	prompter := prompt.NewPrompt(log)
+	prompter := prompt.NewPrompt()
 
 	session := &c8ysession.CumulocitySession{
 		Host: n.Host,
@@ -238,10 +234,6 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 	if err != nil {
 		return nil, err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return nil, err
-	}
 
 	// add secrets when executing the environment in case
 	// if the external command requires extra authentication
@@ -251,10 +243,10 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 			secret, secretErr := cfg.PromptSecret(key)
 			if secretErr != nil {
 				if !errors.Is(secretErr, prompt.ErrNoPrompter) {
-					cfg.Logger.Warnf("Could not get secret. key=%s, err=%s", key, secretErr)
+					slog.Warn("Could not get secret", "key", key, "err", secretErr)
 				}
 			} else {
-				cfg.Logger.Debugf("Setting env variable secret for external provider. %s", key)
+				slog.Debug("Setting env variable secret for external provider", "key", key)
 				env = append(env, fmt.Sprintf("%s=%s", key, secret))
 			}
 		}
@@ -293,7 +285,7 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 
-	log.Infof("Executing session provider: %s", shellquote.Join(providerCommand...))
+	slog.Info("Executing session provider", "value", shellquote.Join(providerCommand...))
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -303,14 +295,14 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 		// Try to detect the format
 		if jsonUtilities.IsJSONObject(output) {
 			n.Format = "json"
-			log.Infof("Detected input format: %s", n.Format)
+			slog.Info("Detected input format", "value", n.Format)
 		} else {
 			n.Format = "dotenv"
-			log.Infof("Guessing input format: %s", n.Format)
+			slog.Info("Guessing input format", "value", n.Format)
 		}
 	}
 
-	log.Infof("Parsing session provider output: %s", output)
+	slog.Info("Parsing session provider output", "value", output)
 	return n.FromReader(bytes.NewReader(output), n.Format)
 }
 
@@ -397,10 +389,6 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 
 	canChangeActiveSession := true
 	// Warn users if they try to use this command directly
@@ -430,7 +418,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		// Set defaults from config if values from flags aren't provided
 		if !cmd.Flags().Changed("provider") {
 			n.Provider = cfg.SessionProvider()
-			cfg.Logger.Debugf("Using session provider from configuration. type=%s", n.Provider)
+			slog.Debug("Using session provider from configuration", "type", n.Provider)
 		}
 
 		n.Exec = cfg.SessionProviderCommand()
@@ -501,7 +489,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if sessionContents, err := json.Marshal(session); err == nil {
-		cfg.Logger.Infof("Received session from external source:\n%s\n", sessionContents)
+		slog.Info("Received session from external source", "value", sessionContents)
 	}
 
 	if session.SessionUri != "" {
@@ -524,7 +512,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		if n.LoginType != "" {
 			loginType = strings.ToUpper(n.LoginType)
 		}
-		log.Infof("User flag login type: %s", loginType)
+		slog.Info("User flag login type", "value", loginType)
 
 		// Set default auth mode based on login type
 		switch loginType {
@@ -537,7 +525,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		// SSO providers are in control of the token, so it should just be used as is
-		if !n.ClearToken && c8ysession.ShouldReuseToken(cfg, log, session.Token, loginType) {
+		if !n.ClearToken && c8ysession.ShouldReuseToken(cfg, session.Token, loginType) {
 			client.SetToken(session.Token)
 		} else {
 			client.ClearToken()
@@ -557,16 +545,15 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 		handler.SSO.Audience = n.SSOAudience
 
-		log.Infof("User preference for login type: %s", handler.LoginType)
+		slog.Info("User preference for login type", "value", handler.LoginType)
 		handler.TFACode = session.TOTP
 		if n.TFACode == "" {
 			if code, err := cfg.GetTOTP(time.Now()); err == nil {
-				cfg.Logger.Infof("Setting totp code: %s", code)
+				slog.Info("Setting totp code", "value", code)
 				n.TFACode = code
 			}
 		}
 
-		handler.SetLogger(log)
 		err = handler.Run()
 		if err != nil {
 			return err

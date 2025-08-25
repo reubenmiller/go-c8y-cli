@@ -3,6 +3,7 @@ package create
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
@@ -84,10 +85,6 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 	var application *c8y.Application
 	var response *c8y.Response
 
@@ -97,7 +94,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewUserError("Could not detect application name for the given input")
 	}
 
-	log.Info("Creating new application")
+	slog.Info("Creating new application")
 	application, response, err = client.Application.Create(context.Background(), applicationDetails)
 
 	if err != nil {
@@ -107,14 +104,14 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	// App subscription
 	if len(n.tenants) > 0 {
 		for _, tenant := range n.tenants {
-			log.Infof("Subscribing to application in tenant %s", tenant)
+			slog.Info("Subscribing to application in tenant", "tenant", tenant)
 			_, resp, err := client.Tenant.AddApplicationReference(context.Background(), tenant, application.Self)
 
 			if err != nil {
 				if resp != nil && resp.StatusCode() == 409 {
-					log.Infof("microservice is already enabled")
+					slog.Info("microservice is already enabled")
 				} else {
-					return fmt.Errorf("Failed to subscribe to application. %s", err)
+					return fmt.Errorf("failed to subscribe to application. %s", err)
 				}
 			}
 		}

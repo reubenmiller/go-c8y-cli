@@ -62,16 +62,11 @@ func (n *CmdDecryptText) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 
 	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
 	if err != nil {
 		return err
 	}
-	_ = log
 
 	var iter iterator.Iterator
 	_, input, err := flags.WithPipelineIterator(&flags.PipelineOptions{

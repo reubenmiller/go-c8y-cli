@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"strings"
 	"sync"
@@ -16,7 +17,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/progressbar"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -25,10 +25,9 @@ import (
 
 type Runner func(Job) (any, error)
 
-func NewGenericWorker(log *logger.Logger, cfg *config.Config, iostream *iostreams.IOStreams, client *c8y.Client, activityLog *activitylogger.ActivityLogger, runFunc Runner, checkError func(error) error) (*GenericWorker, error) {
+func NewGenericWorker(cfg *config.Config, iostream *iostreams.IOStreams, client *c8y.Client, activityLog *activitylogger.ActivityLogger, runFunc Runner, checkError func(error) error) (*GenericWorker, error) {
 	return &GenericWorker{
 		Config:         cfg,
-		Logger:         log,
 		IO:             iostream,
 		ActivityLogger: activityLog,
 		Client:         client,
@@ -40,7 +39,6 @@ func NewGenericWorker(log *logger.Logger, cfg *config.Config, iostream *iostream
 type GenericWorker struct {
 	Config         *config.Config
 	IO             *iostreams.IOStreams
-	Logger         *logger.Logger
 	Client         *c8y.Client
 	ActivityLogger *activitylogger.ActivityLogger
 	CheckError     func(error) error
@@ -161,7 +159,7 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 	progbar := progressbar.NewMultiProgressBar(w.IO.ErrOut, 1, batchOptions.TotalWorkers, "requests", w.Config.ShowProgress())
 
 	for iWork := 1; iWork <= batchOptions.TotalWorkers; iWork++ {
-		w.Logger.Debugf("starting worker: %d", iWork)
+		slog.Debug("starting worker", "id", iWork)
 		workers.Add(1)
 		go w.StartWorker(iWork, jobs, results, progbar, &workers)
 	}
@@ -184,7 +182,7 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 			targetInfo = fmt.Sprintf("tenant %s", tenantName)
 		}
 	}
-	w.Logger.Infof("Max jobs: %d", maxJobs)
+	slog.Info("Max jobs", "value", maxJobs)
 
 	// add jobs async
 	go func() {
@@ -192,7 +190,7 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 		jobInputErrors := int64(0)
 		for {
 			jobID++
-			w.Logger.Debugf("checking job iterator: %d", jobID)
+			slog.Debug("checking job iterator", "id", jobID)
 
 			// check if iterator is exhausted
 			value, input, err := iter.GetNext()
@@ -204,7 +202,7 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 			}
 
 			if maxJobs != 0 && jobID > maxJobs {
-				w.Logger.Infof("maximum jobs reached: limit=%d", maxJobs)
+				slog.Info("maximum jobs reached", "limit", maxJobs)
 				break
 			}
 
@@ -222,7 +220,7 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 					rootCauseErr = parentErr
 				}
 
-				w.Config.LogErrorF(rootCauseErr, "skipping job: %d. %s", jobID, rootCauseErr)
+				w.Config.LogErrorF(rootCauseErr, "skipping job", "id", jobID, "err", rootCauseErr)
 				results <- err
 
 				// Note: stop adding jobs if total errors are exceeded
@@ -235,7 +233,7 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 				// move to next job
 				continue
 			}
-			w.Logger.Debugf("adding job: %d", jobID)
+			slog.Debug("adding job", "id", jobID)
 
 			if value != nil {
 				if batchOptions.SemanticMethod != "" {
@@ -268,7 +266,7 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 				case prompt.ConfirmYes:
 					// confirmed
 				case prompt.ConfirmNo:
-					w.Logger.Warningf("skipping job: %d. %s", jobID, err)
+					slog.Warn("skipping job", "id", jobID, "err", err)
 					if w.ActivityLogger != nil {
 						// TODO: Let batching control custom log message
 						// w.ActivityLogger.LogCustom(err.Error() + ". " + request.Path)
@@ -276,12 +274,12 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 					results <- err
 					continue
 				case prompt.ConfirmNoToAll:
-					w.Logger.Infof("skipping job: %d. %s", jobID, err)
+					slog.Info("skipping job", "id", jobID, "err", err)
 					if w.ActivityLogger != nil {
 						// TODO: Let batching control custom log message
 						// w.ActivityLogger.LogCustom(err.Error() + ". " + request.Path)
 					}
-					w.Logger.Infof("cancelling all remaining jobs")
+					slog.Info("cancelling all remaining jobs")
 					results <- err
 				}
 				if confirmResult == prompt.ConfirmNoToAll {
@@ -305,7 +303,7 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 			}
 		}
 
-		w.Logger.Debugf("finished adding jobs. lastJobID=%d", jobID)
+		slog.Debug("finished adding jobs", "lastJobID", jobID)
 	}()
 
 	// collect all the results of the work.
@@ -325,9 +323,9 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 
 	for err := range results {
 		if err == nil {
-			w.Logger.Debugf("job successful")
+			slog.Debug("job successful")
 		} else {
-			w.Logger.Infof("job error. %s", err)
+			slog.Info("job error", "err", err)
 		}
 
 		if err != nil && err != io.EOF {
@@ -390,19 +388,19 @@ func (w *GenericWorker) StartWorker(id int, jobs <-chan Job, results chan<- erro
 		workerStart := prog.StartJob(id, total)
 
 		if job.Options.DelayBefore > 0 {
-			w.Logger.Infof("worker %d: sleeping %s before starting job", id, job.Options.DelayBefore)
+			slog.Info(fmt.Sprintf("worker %d: sleeping %s before starting job", id, job.Options.DelayBefore))
 			time.Sleep(job.Options.DelayBefore)
 		}
 
 		if !onStartup {
 			if !errors.Is(err, io.EOF) && job.Options.Delay > 0 {
-				w.Logger.Infof("worker %d: sleeping %s before fetching next job", id, job.Options.Delay)
+				slog.Info(fmt.Sprintf("worker %d: sleeping %s before fetching next job", id, job.Options.Delay))
 				time.Sleep(job.Options.Delay)
 			}
 		}
 		onStartup = false
 
-		w.Logger.Infof("worker %d: started job %d", id, job.ID)
+		slog.Info(fmt.Sprintf("worker %d: started job %d", id, job.ID))
 		startTime := time.Now().UnixNano()
 
 		result, resultErr := w.Execute(job)
@@ -410,11 +408,11 @@ func (w *GenericWorker) StartWorker(id int, jobs <-chan Job, results chan<- erro
 		// and stop actions if an error is encountered
 		if resultErr == nil {
 			for i, action := range job.Options.PostActions {
-				w.Logger.Debugf("Executing action: %d", i)
+				slog.Debug("Executing action", "index", i)
 				runOutput, runErr := action.Run(result)
 				if runErr != nil {
 					resultErr = runErr
-					w.Logger.Warningf("Action failed. output=%#v, err=%s", runOutput, runErr)
+					slog.Warn("Action failed", "output", runOutput, "err", runErr)
 					break
 				}
 			}
@@ -422,7 +420,7 @@ func (w *GenericWorker) StartWorker(id int, jobs <-chan Job, results chan<- erro
 
 		elapsedMS := (time.Now().UnixNano() - startTime) / 1000.0 / 1000.0
 
-		w.Logger.Infof("worker %d: finished job %d in %dms", id, job.ID, elapsedMS)
+		slog.Info(fmt.Sprintf("worker %d: finished job %d in %dms", id, job.ID, elapsedMS))
 		prog.FinishedJob(id, workerStart)
 
 		// return result before delay, so errors can be handled before the sleep
