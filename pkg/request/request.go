@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"mime"
 	"net/http"
 	"net/http/httputil"
@@ -30,7 +31,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonformatter"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/tidwall/gjson"
@@ -49,7 +49,6 @@ type RequestHandler struct {
 	IO             *iostreams.IOStreams
 	Client         *c8y.Client
 	Config         *config.Config
-	Logger         *logger.Logger
 	DataView       *dataview.DataView
 	ActivityLogger *activitylogger.ActivityLogger
 	HideSensitive  func(*c8y.Client, string) string
@@ -77,7 +76,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 			tempURL, _ := url.Parse("https://dummy.com?" + req.Query.(string))
 			tempURL = optimizeManagedObjectsURL(tempURL, "0")
 			req.Query = tempURL.RawQuery
-			r.Logger.Infof("Optimizing inventory query. %v", req.Query)
+			slog.Info("Optimizing inventory query", "value", req.Query)
 		}
 	}
 
@@ -119,7 +118,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 
 	if !isDryRun && resp != nil {
 		durationMS := resp.Duration().Milliseconds()
-		r.Logger.Infof("Response time: %dms", durationMS)
+		slog.Info(fmt.Sprintf("Response time: %dms", durationMS))
 
 		if r.ActivityLogger != nil && resp != nil {
 			r.ActivityLogger.LogRequest(resp.Response, resp.JSON(), durationMS)
@@ -127,13 +126,13 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 	}
 
 	if ctx.Err() != nil {
-		r.Logger.Errorf("request timed out after %s", r.Config.RequestTimeout())
+		slog.Error("request timed out", "timeout", r.Config.RequestTimeout())
 	}
 
 	if commonOptions.IncludeAll || commonOptions.TotalPages > 1 {
 		if isInventoryQuery(&req) {
 			// TODO: Optimize implementation for inventory managed object queries to use the following
-			r.Logger.Info("Using inventory optimized query")
+			slog.Info("Using inventory optimized query")
 			if err := r.fetchAllInventoryQueryResults(req, resp, input, commonOptions); err != nil {
 				return nil, err
 			}
@@ -192,7 +191,7 @@ func (r *RequestHandler) DryRunHandler(iostream *iostreams.IOStreams, options *c
 		return
 	}
 	if req == nil {
-		r.Logger.Warn("Response is nil")
+		slog.Warn("Response is nil")
 		return
 	}
 	r.PrintRequestDetails(iostream.Out, options, req)
@@ -242,7 +241,7 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 		body, err = io.ReadAll(peekBody)
 
 		if err != nil {
-			r.Logger.Warnf("Could not read body. %s", err)
+			slog.Warn("Could not read body", "err", err)
 			return
 		}
 
@@ -261,12 +260,12 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 			if err := jsonUtilities.ParseJSON(string(body), bodyMap); err == nil {
 				requestBody = bodyMap
 			} else {
-				r.Logger.Debugf("Error parsing json object in dry run. %s", err)
+				slog.Debug("Error parsing json object in dry run", "err", err)
 				requestBody = string(body)
 				isJSON = false
 			}
 		} else {
-			r.Logger.Debugf("Using non-json body. %s", err)
+			slog.Debug("Using non-json body. %s", "err", err)
 			requestBody = string(body)
 			isJSON = false
 		}
@@ -388,7 +387,7 @@ func (r *RequestHandler) GetCurlCommands(requestOptions *c8y.RequestOptions, req
 
 	curlCmd, dummyFiles, err := curly.ToCurl(req)
 	if err != nil {
-		r.Logger.Warningf("failed to get curl command. %s", err)
+		slog.Warn("failed to get curl command", "err", err)
 		return
 	}
 	curlCmd = strings.ReplaceAll(curlCmd, "\n", "")
@@ -459,7 +458,7 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 
 		baseURL, _ := url.Parse(nextURI)
 
-		r.Logger.Infof("Fetching next page (%d): %s?%s", currentPage, baseURL.Path, baseURL.RawQuery)
+		slog.Info(fmt.Sprintf("Fetching next page (%d): %s?%s", currentPage, baseURL.Path, baseURL.RawQuery))
 
 		curReq := c8y.RequestOptions{
 			Method: "GET",
@@ -478,7 +477,7 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 		// save result
 		if resp != nil {
 			durationMS := int64(time.Since(start) / time.Millisecond)
-			r.Logger.Infof("Response time: %dms", durationMS)
+			slog.Info(fmt.Sprintf("Response time: %dms", durationMS))
 			r.ActivityLogger.LogRequest(resp.Response, resp.JSON(), durationMS)
 			totalItems, processErr = r.ProcessResponse(resp, err, input, commonOptions)
 
@@ -491,17 +490,17 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 
 		// Check if total results is less than the pagesize, as this saves one request
 		if totalItems < commonOptions.PageSize {
-			r.Logger.Info("Found last page")
+			slog.Info("Found last page")
 			break
 		}
 
 		if totalPages != 0 && currentPage >= totalPages {
-			r.Logger.Infof("Max pagination reached. max pages=%d", totalPages)
+			slog.Info("Max pagination reached", "max_pages", totalPages)
 			break
 		}
 
 		if delayMS > 0 {
-			r.Logger.Infof("Pausing %d ms before next request.", delayMS)
+			slog.Info(fmt.Sprintf("Pausing %d ms before next request.", delayMS))
 			time.Sleep(time.Duration(delayMS) * time.Millisecond)
 		}
 	}
@@ -580,7 +579,7 @@ func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, r
 		baseURL, _ := url.Parse(originalURI)
 		baseURL = optimizeManagedObjectsURL(baseURL, lastID)
 
-		r.Logger.Infof("Fetching next page (%d): %s?%s", currentPage, baseURL.Path, baseURL.RawQuery)
+		slog.Info(fmt.Sprintf("Fetching next page (%d): %s?%s", currentPage, baseURL.Path, baseURL.RawQuery))
 
 		curReq := c8y.RequestOptions{
 			Method: "GET",
@@ -599,7 +598,7 @@ func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, r
 		// save result
 		if resp != nil {
 			durationMS := int64(time.Since(start) / time.Millisecond)
-			r.Logger.Infof("Response time: %dms", durationMS)
+			slog.Info(fmt.Sprintf("Response time: %dms", durationMS))
 			r.ActivityLogger.LogRequest(resp.Response, resp.JSON(), durationMS)
 
 			totalItems, processErr = r.ProcessResponse(resp, err, input, commonOptions)
@@ -613,17 +612,17 @@ func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, r
 
 		// Check if total results is less than the pagesize, as this saves one request
 		if totalItems < commonOptions.PageSize {
-			r.Logger.Info("Found last page")
+			slog.Info("Found last page")
 			break
 		}
 
 		if totalPages != 0 && currentPage >= totalPages {
-			r.Logger.Infof("Max pagination reached. max pages=%d", totalPages)
+			slog.Info("Max pagination reached", "max_pages", totalPages)
 			break
 		}
 
 		if delayMS > 0 {
-			r.Logger.Infof("Pausing %d ms before next request.", delayMS)
+			slog.Info(fmt.Sprintf("Pausing %d ms before next request.", delayMS))
 			time.Sleep(time.Duration(delayMS) * time.Millisecond)
 		}
 	}
@@ -734,22 +733,22 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 	return out, nil
 }
 
-func printResponseSize(l *logger.Logger, resp *c8y.Response) {
+func printResponseSize(resp *c8y.Response) {
 	if resp.Response.ContentLength > -1 {
-		l.Infof("Response Length: %0.1fKB", float64(resp.Response.ContentLength)/1024)
+		slog.Info(fmt.Sprintf("Response Length: %0.1fKB", float64(resp.Response.ContentLength)/1024))
 	} else {
 		if resp.Response.Uncompressed {
-			l.Infof("Response Length: %0.1fKB (uncompressed)", float64(len(resp.Body()))/1024)
+			slog.Info(fmt.Sprintf("Response Length: %0.1fKB (uncompressed)", float64(len(resp.Body()))/1024))
 		} else {
-			l.Infof("Response Length: %0.1fKB", float64(len(resp.Body()))/1024)
+			slog.Info(fmt.Sprintf("Response Length: %0.1fKB", float64(len(resp.Body()))/1024))
 		}
 	}
 }
 
 func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, input any, commonOptions config.CommonCommandOptions) (int, error) {
 	if resp != nil && resp.StatusCode() != 0 {
-		r.Logger.Infof("Response Content-Type: %s", resp.Response.Header.Get("Content-Type"))
-		r.Logger.Debugf("Response Headers: %v", resp.Header())
+		slog.Info(fmt.Sprintf("Response Content-Type: %s", resp.Response.Header.Get("Content-Type")))
+		slog.Debug(fmt.Sprintf("Response Headers: %v", resp.Header()))
 	}
 
 	// Note: An output template will affect the handling of the response
@@ -804,15 +803,15 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 				return 0, cmderrors.NewSystemError("write to file failed", err)
 			}
 
-			r.Logger.Infof("Saved response: %s", fullFilePath)
+			slog.Info("Saved response", "file", fullFilePath)
 		}
 	}
 
 	if resp != nil && respError == nil && !hasOutputTemplate && (r.Config.IsResponseOutput() || resp.Response.Header.Get("Content-Type") == "application/octet-stream") && len(resp.Body()) > 0 {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
-		r.Logger.Debugf("Writing https response output")
+		slog.Debug("Writing https response output")
 
-		printResponseSize(r.Logger, resp)
+		printResponseSize(resp)
 
 		outputEOL := ""
 		if r.IsTerminal {
@@ -845,7 +844,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 
 	if resp != nil && (len(resp.Body()) > 0 || hasOutputTemplate) {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
-		printResponseSize(r.Logger, resp)
+		printResponseSize(resp)
 
 		var responseText []byte
 		isJSONResponse := jsonUtilities.IsValidJSON(resp.Body())
@@ -862,7 +861,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 
 		if v := resp.JSON(dataProperty); v.Exists() && v.IsArray() {
 			unfilteredSize = len(v.Array())
-			r.Logger.Infof("Unfiltered array size. len=%d", unfilteredSize)
+			slog.Info("Unfiltered array size", "len", unfilteredSize)
 		}
 
 		// Apply output template (before the data is processed as the template can transform text to json or other way around)
@@ -906,10 +905,10 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 			}
 
 			if r.Config.RawOutput() {
-				r.Logger.Infof("Raw mode active. In raw mode the following settings are forced, view=off, output=json")
+				slog.Info("Raw mode active. In raw mode the following settings are forced, view=off, output=json")
 			}
 			view := r.Config.ViewOption()
-			r.Logger.Infof("View mode: %s", view)
+			slog.Info(fmt.Sprintf("View mode: %s", view))
 
 			// Detect view (if no filters are given)
 			if len(commonOptions.Filters.Pluck) == 0 {
@@ -938,36 +937,36 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 
 						if err != nil || len(props) == 0 {
 							if err != nil {
-								r.Logger.Infof("No matching view detected. defaulting to '**'. %s", err)
+								slog.Info("No matching view detected. defaulting to '**'", "err", err)
 							} else {
-								r.Logger.Info("No matching view detected. defaulting to '**'")
+								slog.Info("No matching view detected. defaulting to '**'")
 							}
 							commonOptions.Filters.Pluck = []string{"**"}
 						} else {
-							r.Logger.Infof("Detected view: %s", strings.Join(props, ", "))
+							slog.Info("Detected view", "value", strings.Join(props, ","))
 							commonOptions.Filters.Pluck = props
 						}
 					default:
 						props, err := r.DataView.GetViewByName(view)
 						if err != nil || len(props) == 0 {
 							if err != nil {
-								r.Logger.Warnf("no matching view found. %s, name=%s", err, view)
+								slog.Warn("no matching view found", "err", err, "name", view)
 							} else {
-								r.Logger.Warnf("no matching view found. name=%s", view)
+								slog.Warn("no matching view found", "name", view)
 							}
 							commonOptions.Filters.Pluck = []string{"**"}
 						} else {
-							r.Logger.Infof("Detected view: %s", strings.Join(props, ", "))
+							slog.Info("Detected view", "value", strings.Join(props, ","))
 							commonOptions.Filters.Pluck = props
 						}
 					}
 				}
 			} else {
-				r.Logger.Debugf("using existing pluck values. %v", commonOptions.Filters.Pluck)
+				slog.Debug("using existing pluck values", "values", commonOptions.Filters.Pluck)
 			}
 
 			if filterOutput, filterErr := commonOptions.Filters.Apply(string(resp.Body()), dataProperty, false, r.Console.SetHeaderFromInput); filterErr != nil {
-				r.Logger.Warnf("filter error. %s", filterErr)
+				slog.Warn("filter error", "err", filterErr)
 				responseText = filterOutput
 			} else {
 				responseText = filterOutput
@@ -977,7 +976,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 
 			if !showRaw {
 				if len(responseText) == len(emptyArray) && bytes.Equal(responseText, emptyArray) {
-					r.Logger.Info("No matching results found. Empty response will be omitted")
+					slog.Info("No matching results found. Empty response will be omitted")
 					responseText = []byte{}
 				}
 			}
@@ -1041,10 +1040,10 @@ func (r *RequestHandler) guessDataProperty(resp *c8y.Response) string {
 	}
 
 	if len(arrayProperties) > 1 {
-		r.Logger.Debugf("Could not detect property as more than 1 array like property detected: %v", arrayProperties)
+		slog.Debug("Could not detect property as more than 1 array like property detected", "values", arrayProperties)
 		return ""
 	}
-	r.Logger.Debugf("Array properties: %v", arrayProperties)
+	slog.Debug("Array properties", "values", arrayProperties)
 
 	if len(arrayProperties) == 0 {
 		return ""
@@ -1059,7 +1058,7 @@ func (r *RequestHandler) guessDataProperty(resp *c8y.Response) string {
 	}
 
 	if property != "" && totalKeys < 10 {
-		r.Logger.Debugf("Data property: %s", property)
+		slog.Debug("Data property", "value", property)
 	}
 	return property
 }
@@ -1088,18 +1087,18 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 
 		if strings.Contains(filename, "{id}") {
 			if resp.Response.Request != nil {
-				r.Logger.Infof("Request: %s", resp.Response.Request.URL.Path)
+				slog.Info("Request", "path", resp.Response.Request.URL.Path)
 
 				urlParts := strings.Split(resp.Response.Request.URL.Path, "/")
 				for _, part := range urlParts {
 					if part != "" && c8y.IsID(part) {
-						r.Logger.Debugf("Found id like value. Substituting {id} for %s", part)
+						slog.Debug(fmt.Sprintf("Found id like value. Substituting {id} for %s", part))
 						filename = strings.ReplaceAll(filename, "{id}", part)
 						break
 					}
 				}
 			} else {
-				r.Logger.Infof("Request is nill")
+				slog.Info("Request is nill")
 			}
 		}
 	}
@@ -1117,7 +1116,7 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 	}
 
 	if err != nil {
-		return "", fmt.Errorf("Could not create file. %s", err)
+		return "", fmt.Errorf("could not create file. %s", err)
 	}
 	defer out.Close()
 
@@ -1131,7 +1130,7 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 	}
 
 	// Writer the body to file
-	r.Logger.Printf("header: %v", resp.Header())
+	slog.Info(fmt.Sprintf("header: %v", resp.Header()))
 	fmt.Fprintf(out, "%s", resp.Body())
 
 	if err != nil {

@@ -27,7 +27,7 @@ var ExtPrefix = "c8y-"
 func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 	m := f.ExtensionManager
 	io := f.IOStreams
-	prompter := prompt.NewPrompt(nil)
+	prompter := prompt.NewPrompt()
 
 	extCmd := cobra.Command{
 		Use:   "extensions",

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"reflect"
 	"strings"
@@ -19,7 +20,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/progressbar"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/requestiterator"
@@ -78,10 +78,9 @@ func (b *BatchOptions) useInputData() bool {
 	return b.InputData != nil && len(b.InputData) > 0
 }
 
-func NewWorker(log *logger.Logger, cfg *config.Config, iostream *iostreams.IOStreams, client *c8y.Client, activityLog *activitylogger.ActivityLogger, reqHandlerFunc RequestHandler, checkError func(error) error) (*Worker, error) {
+func NewWorker(cfg *config.Config, iostream *iostreams.IOStreams, client *c8y.Client, activityLog *activitylogger.ActivityLogger, reqHandlerFunc RequestHandler, checkError func(error) error) (*Worker, error) {
 	return &Worker{
 		config:         cfg,
-		logger:         log,
 		io:             iostream,
 		activityLogger: activityLog,
 		client:         client,
@@ -95,7 +94,6 @@ type RequestHandler func(requests []c8y.RequestOptions, input any, commonOptions
 type Worker struct {
 	config         *config.Config
 	io             *iostreams.IOStreams
-	logger         *logger.Logger
 	client         *c8y.Client
 	activityLogger *activitylogger.ActivityLogger
 	checkError     func(error) error
@@ -170,7 +168,7 @@ func (w *Worker) ProcessRequestAndResponse(cmd *cobra.Command, r *c8y.RequestOpt
 		pathIter = iterator.NewRepeatIterator(r.Path, 1)
 	}
 	// Note: Body accepts iterator types, so no need for special handling here
-	requestIter := requestiterator.NewRequestIterator(w.logger, *r, pathIter, inputIterators.Query, r.Body)
+	requestIter := requestiterator.NewRequestIterator(*r, pathIter, inputIterators.Query, r.Body)
 
 	// get common options and batch settings
 	commonOptions, err := w.config.GetOutputCommonOptions(cmd)
@@ -206,7 +204,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 	progbar := progressbar.NewMultiProgressBar(w.io.ErrOut, 1, batchOptions.TotalWorkers, "requests", w.config.ShowProgress())
 
 	for iWork := 1; iWork <= batchOptions.TotalWorkers; iWork++ {
-		w.logger.Debugf("starting worker: %d", iWork)
+		slog.Debug("starting worker", "id", iWork)
 		workers.Add(1)
 		go w.batchWorker(iWork, jobs, results, progbar, &workers)
 	}
@@ -229,7 +227,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			targetInfo = fmt.Sprintf("tenant %s", tenantName)
 		}
 	}
-	w.logger.Infof("Max jobs: %d", maxJobs)
+	slog.Info(fmt.Sprintf("Max jobs: %d", maxJobs))
 
 	// add jobs async
 	go func() {
@@ -237,7 +235,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 		jobInputErrors := int64(0)
 		for {
 			jobID++
-			w.logger.Debugf("checking job iterator: %d", jobID)
+			slog.Debug("checking job iterator", "id", jobID)
 
 			// check if iterator is exhausted
 			request, input, err := requestIterator.GetNext()
@@ -249,7 +247,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			}
 
 			if maxJobs != 0 && jobID > maxJobs {
-				w.logger.Infof("maximum jobs reached: limit=%d", maxJobs)
+				slog.Info("maximum jobs reached", "limit", maxJobs)
 				break
 			}
 
@@ -267,7 +265,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 					rootCauseErr = parentErr
 				}
 
-				w.config.LogErrorF(rootCauseErr, "skipping job: %d. %s", jobID, rootCauseErr)
+				w.config.LogErrorF(rootCauseErr, "skipping job", "id", jobID, "err", rootCauseErr)
 				results <- err
 
 				// Note: stop adding jobs if total errors are exceeded
@@ -280,7 +278,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 				// move to next job
 				continue
 			}
-			w.logger.Debugf("adding job: %d", jobID)
+			slog.Debug("adding job", "id", jobID)
 
 			if request != nil {
 				if batchOptions.SemanticMethod != "" {
@@ -312,18 +310,18 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 				case prompt.ConfirmYes:
 					// confirmed
 				case prompt.ConfirmNo:
-					w.logger.Warningf("skipping job: %d. %s", jobID, err)
+					slog.Warn("skipping job", "id", jobID, "err", err)
 					if w.activityLogger != nil {
 						w.activityLogger.LogCustom(err.Error() + ". " + request.Path)
 					}
 					results <- err
 					continue
 				case prompt.ConfirmNoToAll:
-					w.logger.Infof("skipping job: %d. %s", jobID, err)
+					slog.Info("skipping job", "id", jobID, "err", err)
 					if w.activityLogger != nil {
 						w.activityLogger.LogCustom(err.Error() + ". " + request.Path)
 					}
-					w.logger.Infof("cancelling all remaining jobs")
+					slog.Info("cancelling all remaining jobs")
 					results <- err
 				}
 				if confirmResult == prompt.ConfirmNoToAll {
@@ -347,7 +345,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			}
 		}
 
-		w.logger.Debugf("finished adding jobs. lastJobID=%d", jobID)
+		slog.Debug("finished adding jobs", "lastJobID", jobID)
 	}()
 
 	// collect all the results of the work.
@@ -367,9 +365,9 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 
 	for err := range results {
 		if err == nil {
-			w.logger.Debugf("job successful")
+			slog.Debug("job successful")
 		} else {
-			w.logger.Infof("job error. %s", err)
+			slog.Info("job error", "err", err)
 		}
 
 		if err != nil && err != io.EOF {
@@ -433,19 +431,19 @@ func (w *Worker) batchWorker(id int, jobs <-chan batchArgument, results chan<- e
 		var resp *c8y.Response
 
 		if job.batchOptions.DelayBefore > 0 {
-			w.logger.Infof("worker %d: sleeping %s before starting job", id, job.batchOptions.DelayBefore)
+			slog.Info(fmt.Sprintf("worker %d: sleeping %s before starting job", id, job.batchOptions.DelayBefore))
 			time.Sleep(job.batchOptions.DelayBefore)
 		}
 
 		if !onStartup {
 			if !errors.Is(err, io.EOF) && job.batchOptions.Delay > 0 {
-				w.logger.Infof("worker %d: sleeping %s before fetching next job", id, job.batchOptions.Delay)
+				slog.Info(fmt.Sprintf("worker %d: sleeping %s before fetching next job", id, job.batchOptions.Delay))
 				time.Sleep(job.batchOptions.Delay)
 			}
 		}
 		onStartup = false
 
-		w.logger.Infof("worker %d: started job %d", id, job.id)
+		slog.Info(fmt.Sprintf("worker %d: started job %d", id, job.id))
 		startTime := time.Now().UnixNano()
 
 		resp, err = w.requestHandler([]c8y.RequestOptions{job.request}, job.input, job.commonOptions)
@@ -454,11 +452,11 @@ func (w *Worker) batchWorker(id int, jobs <-chan batchArgument, results chan<- e
 		// and stop actions if an error is encountered
 		if err == nil {
 			for i, action := range job.batchOptions.PostActions {
-				w.logger.Debugf("Executing action: %d", i)
+				slog.Debug("Executing action: %d", "index", i)
 				runOutput, runErr := action.Run(resp)
 				if runErr != nil {
 					err = runErr
-					w.logger.Warningf("Action failed. output=%#v, err=%s", runOutput, runErr)
+					slog.Warn("Action failed", "output", runOutput, "err", runErr)
 					break
 				}
 			}
@@ -466,7 +464,7 @@ func (w *Worker) batchWorker(id int, jobs <-chan batchArgument, results chan<- e
 
 		elapsedMS := (time.Now().UnixNano() - startTime) / 1000.0 / 1000.0
 
-		w.logger.Infof("worker %d: finished job %d in %dms", id, job.id, elapsedMS)
+		slog.Info(fmt.Sprintf("worker %d: finished job %d in %dms", id, job.id, elapsedMS))
 		prog.FinishedJob(id, workerStart)
 
 		// return result before delay, so errors can be handled before the sleep
@@ -479,8 +477,8 @@ func (w *Worker) getConfirmationMessage(prefix string, request *c8y.RequestOptio
 	name := ""
 	id := ""
 	if input != nil {
-		w.logger.Infof("input: %s", input)
-		w.logger.Infof("input type: %s", reflect.TypeOf(input))
+		slog.Info(fmt.Sprintf("input: %s", input))
+		slog.Info(fmt.Sprintf("input type: %s", reflect.TypeOf(input)))
 
 		switch v := input.(type) {
 		case []byte:
@@ -519,13 +517,13 @@ func (w *Worker) getConfirmationMessage(prefix string, request *c8y.RequestOptio
 				devicePaths := []string{"source.id", "deviceId", "id"}
 				for _, path := range devicePaths {
 					if device := gjson.ParseBytes(jsonText).Get(path); device.Exists() {
-						w.logger.Infof("device: %s", device.Str)
+						slog.Info(fmt.Sprintf("device: %s", device.Str))
 						id = device.Str
 						break
 					}
 				}
 			} else {
-				w.logger.Debugf("json error: %s", err)
+				slog.Debug("json error", "err", err)
 			}
 		}
 	}
@@ -539,7 +537,7 @@ func (w *Worker) getConfirmationMessage(prefix string, request *c8y.RequestOptio
 		target += ", name=" + name
 	}
 
-	w.logger.Infof("target: [%s]", target)
+	slog.Info(fmt.Sprintf("target: [%s]", target))
 
 	if target != "" {
 		return fmt.Sprintf("%s [%s]", prefix, target), nil

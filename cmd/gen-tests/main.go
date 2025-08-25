@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
+	"log/slog"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,56 +13,23 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 
 	"github.com/google/shlex"
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/integration/models"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flatten"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"gopkg.in/yaml.v3"
 )
-
-var logger *zap.Logger
-var loggerS *zap.SugaredLogger
 
 func init() {
 	createLogger()
 }
 
 func createLogger() {
-	consoleEncCfg := zapcore.EncoderConfig{
-		// Keys can be anything except the empty string.
-		TimeKey:        "T",
-		LevelKey:       "L",
-		NameKey:        "N",
-		CallerKey:      "C",
-		FunctionKey:    zapcore.OmitKey,
-		MessageKey:     "M",
-		StacktraceKey:  "S",
-		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.CapitalColorLevelEncoder,
-		EncodeTime:     zapcore.ISO8601TimeEncoder,
-		EncodeDuration: zapcore.StringDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
-	}
-
-	consoleLevel := zapcore.InfoLevel
-	consoleLevelEnabler := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return lvl >= consoleLevel
+	logger.NewLogger("gen-test", logger.Options{
+		Level: slog.LevelInfo,
 	})
-	var cores []zapcore.Core
-	cores = append(cores, zapcore.NewCore(
-		zapcore.NewConsoleEncoder(consoleEncCfg),
-		zapcore.Lock(zapcore.AddSync(os.Stderr)),
-		consoleLevelEnabler,
-	))
-	core := zapcore.NewTee(cores...)
-	logger = zap.New(core)
-	defer func() {
-		_ = logger.Sync()
-	}()
-	loggerS = logger.Sugar()
 }
 
 type Generator struct {
@@ -75,13 +44,13 @@ func NewGenerator(name string, mockConfig *models.MockConfiguration) (gen *Gener
 	}
 	contents, err := io.ReadAll(f)
 	if err != nil {
-		loggerS.Fatalf("Failed to read spec file. file=%s err=%s", name, err)
+		log.Fatalf("Failed to read spec file. file=%s err=%s", name, err)
 		return
 	}
 	spec := &models.Specification{}
 	err = yaml.Unmarshal(contents, spec)
 	if err != nil {
-		loggerS.Fatalf("Failed to marshal spec file. file=%s err=%s", name, err)
+		log.Fatalf("Failed to marshal spec file. file=%s err=%s", name, err)
 		return
 	}
 
@@ -120,7 +89,7 @@ func (g *Generator) CreateTests(outDir string) error {
 				testcase.Command = fmt.Sprintf("$TEST_SHELL -c '%s'", command)
 			}
 
-			loggerS.Debugf("Processing endpoint: %s", testcase.Command)
+			slog.Debug("Processing endpoint", "command", testcase.Command)
 			testcase.StdOut = buildAssertions(g.Spec.Group.Name, &endpoint, i)
 
 			testsuite.Tests[key] = *testcase
@@ -129,7 +98,7 @@ func (g *Generator) CreateTests(outDir string) error {
 		suitekey := CreateSuiteKey(g.Spec, &endpoint)
 
 		if err := WriteTestSuite(testsuite, suitekey, outDir); err != nil {
-			loggerS.Fatalf("Failed to write test suite to file. %s", err)
+			log.Fatalf("Failed to write test suite to file. %s", err)
 		}
 	}
 
@@ -164,7 +133,7 @@ func CreateFakeCommand(parentCmd string, endpoint *models.Command) *cobra.Comman
 	cmd.PersistentFlags().String("output", "o", "Output format i.e. table, json, csv, csvheader")
 
 	for _, parameter := range endpoint.GetAllParameters() {
-		loggerS.Debugf("Adding parameter. name=%s", parameter.Name)
+		slog.Debug("Adding parameter", "name", parameter.Name)
 		if strings.Contains(parameter.Type, "[]") {
 			cmd.Flags().StringSlice(parameter.Name, nil, "")
 		} else if parameter.Type == "boolean" || parameter.Type == "optional_fragment" || parameter.Type == "booleanDefault" {
@@ -199,7 +168,7 @@ func CreateFakeCommand(parentCmd string, endpoint *models.Command) *cobra.Comman
 func parseFakeCommand(parentCmd string, command string, endpoint *models.Command) *cobra.Command {
 	cmd := CreateFakeCommand(parentCmd, endpoint)
 	if err := cmd.ParseFlags(parseCommand(parentCmd, command, endpoint)); err != nil {
-		loggerS.Fatalf("Failed to parse command. command=%s, err=%s", command, err)
+		log.Fatalf("Failed to parse command. command=%s, err=%s", command, err)
 	}
 
 	return cmd
@@ -272,7 +241,7 @@ func buildAssertions(parentCmd string, endpoint *models.Command, exampleIdx int)
 	} else {
 		for _, parameter := range endpoint.Body {
 			value := getParameterValue(cmd, &parameter)
-			loggerS.Debugf("Adding body property. name=%s, value=%s", parameter.Name, value)
+			slog.Debug("Adding body property", "name", parameter.Name, "value", value)
 			if value != "" {
 				switch parameter.Type {
 				case "attachment", "file", "fileContents":
@@ -301,7 +270,7 @@ func formatJsonAssertion(jsonAssertion map[string]string, propType string, prop 
 		if strings.HasSuffix(prop, ".data") || strings.EqualFold(propType, "json_custom") {
 			data := make(map[string]interface{})
 			if err := jsonUtilities.ParseJSON(values[0], data); err != nil {
-				loggerS.Warnf("Could not parse shorthand json. error=%s, data=%s", err, values[0])
+				slog.Warn("Could not parse shorthand json", "err", err, "data", values[0])
 				return
 			}
 
@@ -311,7 +280,7 @@ func formatJsonAssertion(jsonAssertion map[string]string, propType string, prop 
 			}
 			flatData, err := flatten.Flatten(data, prefix, flatten.DotStyle)
 			if err != nil {
-				loggerS.Fatalf("Could not flatten map. %s", err)
+				log.Fatalf("Could not flatten map. %s", err)
 			}
 			for k, v := range flatData {
 				switch tv := v.(type) {
@@ -416,7 +385,7 @@ func substituteVariables(cmd *cobra.Command, endpoint *models.Command) (out stri
 			}
 		}
 
-		loggerS.Debugf("Detected variables: %v", variableNames)
+		slog.Debug("Detected variables", "variables", variableNames)
 		// replace variable values from fake command
 
 		for _, parameter := range endpoint.PathParameters {
@@ -446,7 +415,7 @@ func WriteTestSuite(t *models.TestSuite, id string, outDir string) (err error) {
 	}
 
 	if err := os.MkdirAll(filepath.Dir(outFile), 0755); err != nil {
-		loggerS.Fatal(err)
+		log.Fatal(err)
 	}
 
 	f, err := os.OpenFile(outFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
@@ -504,7 +473,7 @@ func main() {
 
 	// Ignore skipped specs
 	if gen.Spec.Group.Skip {
-		loggerS.Warnf("Specification is marked as skipped. Ignoring. file=%s", os.Args[2])
+		slog.Warn("Specification is marked as skipped. Ignoring file", "file", os.Args[2])
 		os.Exit(0)
 	}
 

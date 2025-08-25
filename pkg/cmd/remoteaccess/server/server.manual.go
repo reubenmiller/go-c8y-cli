@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 	"text/template"
 
@@ -121,14 +122,9 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
-
 	// Disable if stdio mode is being used
 	if n.listen == "-" {
-		log.Debug("Disabling pipeline stdin parsing when in stdio mode")
+		slog.Debug("Disabling pipeline stdin parsing when in stdio mode")
 		cfg.SetDisableStdin(true)
 	}
 
@@ -171,7 +167,7 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 
-		log.Debugf("Using remote access configuration: id=%s, name=%s", craConfig.ID, craConfig.Name)
+		slog.Debug("Using remote access configuration", "id", craConfig.ID, "name", craConfig.Name)
 
 		// Lookup configuration
 		craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
@@ -180,7 +176,7 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 		})
 
 		if n.listen == "-" {
-			log.Debugf("Listening to request from stdin")
+			slog.Debug("Listening to request from stdin")
 			serverErr := craClient.ListenServe(n.factory.IOStreams.In, n.factory.IOStreams.Out)
 			return nil, serverErr
 		}
@@ -248,7 +244,7 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 			go func() {
 				targetURL := fmt.Sprintf("%s://%s:%s", n.browserScheme, host, port)
 				if err := n.factory.Browser.Browse(targetURL); err != nil {
-					cfg.Logger.Warnf("%s", err)
+					slog.Warn("Could not open browser", "err", err)
 				}
 			}()
 		}

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"regexp"
 	"strings"
@@ -231,11 +232,6 @@ func buildBody(f *cmdutil.Factory, applicationID string, managerOptions *PluginC
 		return nil, err
 	}
 
-	log, err := f.Logger()
-	if err != nil {
-		return nil, err
-	}
-
 	// Lookup application where the extension will be applied to
 	// TODO: Check if the user is trying to update an extension that is owned by another tenant
 	refs, err := c8yfetcher.FindHostedApplications(f, []string{applicationID}, true, "", true)
@@ -311,7 +307,7 @@ func buildBody(f *cmdutil.Factory, applicationID string, managerOptions *PluginC
 					if err := buildUIRemotes(remotes, ext, versionOrTag); err != nil {
 						if managerOptions.RemoveInvalid {
 							// ignore error
-							log.Warnf("Removing reference to revoked plugin version: name=%s, version=%s, remote=%s", ext.Get("name").String(), versionOrTag, nameVersion)
+							slog.Warn("Removing reference to revoked plugin version", "name", ext.Get("name").String(), "version", versionOrTag, "remote", nameVersion)
 							continue
 						}
 						return nil, err
@@ -320,7 +316,7 @@ func buildBody(f *cmdutil.Factory, applicationID string, managerOptions *PluginC
 			}
 		} else if managerOptions.RemoveInvalid {
 			// ignore error
-			log.Warnf("Removing reference to orphaned plugin: remote=%s", nameVersion)
+			slog.Warn("Removing reference to orphaned plugin", "remote", nameVersion)
 			continue
 		} else {
 			bodyErrors = append(bodyErrors, fmt.Errorf("plugin does not exist. name=%s, tag/version=%s, remote=%s", name, versionOrTag, nameVersion))

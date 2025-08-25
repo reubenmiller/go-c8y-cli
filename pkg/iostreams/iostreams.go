@@ -15,7 +15,6 @@ import (
 	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/clio"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/vbauerster/mpb/v6"
 	"golang.org/x/term"
 )
@@ -39,8 +38,6 @@ type IOStreams struct {
 	stdoutIsTTY       bool
 	stderrTTYOverride bool
 	stderrIsTTY       bool
-
-	Logger *logger.Logger
 
 	neverPrompt bool
 

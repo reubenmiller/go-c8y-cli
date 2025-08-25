@@ -7,13 +7,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/randdata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -110,7 +110,6 @@ func CreateCSVPayload(b io.ReadWriter, input gjson.Result, mappings []PayloadMap
 
 type RegistrationOptions struct {
 	Config        *config.Config
-	Log           *logger.Logger
 	Client        *c8y.Client
 	Factory       *cmdutil.Factory
 	CommonOptions config.CommonCommandOptions
@@ -149,7 +148,7 @@ func RunBulkRegistrationJob(cmd *cobra.Command, opts *RegistrationOptions, mappi
 		body := response.Body()
 		totalFailed := gjson.GetBytes(body, "numberOfFailed").Int()
 		if totalFailed != 0 {
-			opts.Log.Infof("Response: %v", response)
+			slog.Info(fmt.Sprintf("Response: %v", response))
 			failuresReasons := make([]string, 0)
 			response.JSON("failedCreationList").ForEach(func(key, value gjson.Result) bool {
 				if v := value.Get("failureReason"); v.Exists() {
@@ -161,7 +160,7 @@ func RunBulkRegistrationJob(cmd *cobra.Command, opts *RegistrationOptions, mappi
 			})
 			return response, cmderrors.NewUserError(fmt.Sprintf("bulk registration has some failures. failed=%d, reasons=%v", totalFailed, failuresReasons))
 		}
-		opts.Log.Infof("Bulk registration was successful. %v", response)
+		slog.Info(fmt.Sprintf("Bulk registration was successful. %v", response))
 
 		// Lookup device id so that the command can be piped to downstream items
 		identity, _, identityErr := opts.Client.Identity.GetExternalID(context.Background(), options.Get("external-type").String(), options.Get("id").String())
@@ -184,7 +183,7 @@ func RunBulkRegistrationJob(cmd *cobra.Command, opts *RegistrationOptions, mappi
 		}
 
 		contentType := response.Response.Header.Get("Content-Type")
-		opts.Log.Infof("API Content-Type: %s", contentType)
+		slog.Info(fmt.Sprintf("API Content-Type: %s", contentType))
 
 		err := opts.Factory.WriteOutput(outB, cmdutil.OutputContext{
 			Input:    j.Input,

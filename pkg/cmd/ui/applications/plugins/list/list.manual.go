@@ -3,6 +3,7 @@ package list
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -103,10 +104,6 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 
 	matches, err := c8yfetcher.FindHostedApplications(n.factory, []string{n.Application}, true, "", false)
 	if err != nil {
@@ -182,7 +179,7 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 				reference, referenceErr = NewPluginReference(sharedPlugins.Items[i], version, pluginModules[contextVersion])
 			} else {
 				if !dryRun {
-					log.Warnf("could not find plugin. contextPath=%s, version=%s", contextPath, version)
+					slog.Warn("could not find plugin", "contextPath", contextPath, "version", version)
 				}
 			}
 

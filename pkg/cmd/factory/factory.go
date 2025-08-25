@@ -14,11 +14,10 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
-func New(appVersion string, buildBranch string, configFunc func() (*config.Config, error), clientFunc func() (*c8y.Client, error), loggerFunc func() (*logger.Logger, error), activityLoggerFunc func() (*activitylogger.ActivityLogger, error), dataViewFunc func() (*dataview.DataView, error), consoleFunc func() (*console.Console, error)) *cmdutil.Factory {
+func New(appVersion string, buildBranch string, configFunc func() (*config.Config, error), clientFunc func() (*c8y.Client, error), activityLoggerFunc func() (*activitylogger.ActivityLogger, error), dataViewFunc func() (*dataview.DataView, error), consoleFunc func() (*console.Console, error)) *cmdutil.Factory {
 	io := iostreams.System(false, true)
 
 	c8yExecutable := "c8y"
@@ -31,7 +30,6 @@ func New(appVersion string, buildBranch string, configFunc func() (*config.Confi
 		Config:         configFunc,
 		Client:         clientFunc,
 		Executable:     c8yExecutable,
-		Logger:         loggerFunc,
 		ActivityLogger: activityLoggerFunc,
 		DataView:       dataViewFunc,
 		Console:        consoleFunc,

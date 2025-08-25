@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
@@ -14,7 +15,6 @@ import (
 	"github.com/kballard/go-shellquote"
 	"github.com/manifoldco/promptui"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -176,24 +176,20 @@ type Validate func(string) error
 // Prompt used to provide various interactive prompts which can be used
 // within the cli
 type Prompt struct {
-	Logger         *logger.Logger
 	ShowValueAfter bool
 	PinEntry       string
 }
 
 // NewPrompt returns a new Prompt which can be used to prompt the user for
 // different information
-func NewPrompt(l *logger.Logger) *Prompt {
-	return &Prompt{
-		Logger: l,
-	}
+func NewPrompt() *Prompt {
+	return &Prompt{}
 }
 
 // EncryptionPassphrase prompt for the encryption passphrase, and test the
 // passphrase against the encrypted content to see if it is valid
 func (p *Prompt) EncryptionPassphrase(encryptedData string, key string, initPassphrase string, message string) (string, error) {
 	prompter, err := p.WithPrompters(
-		p.Logger,
 		WithExternalPrompt(p.PinEntry, key),
 		WithCommandLinePrompt("Session is encrypted"),
 	)
@@ -221,11 +217,11 @@ func (p *Prompt) EncryptionPassphrase(encryptedData string, key string, initPass
 	return promptWrapper.Run()
 }
 
-type UserPrompter func(*logger.Logger) Prompter
+type UserPrompter func() Prompter
 
-func (p *Prompt) WithPrompters(l *logger.Logger, opts ...UserPrompter) (Prompter, error) {
+func (p *Prompt) WithPrompters(opts ...UserPrompter) (Prompter, error) {
 	for _, prompter := range opts {
-		curPrompter := prompter(l)
+		curPrompter := prompter()
 		if curPrompter != nil {
 			return curPrompter, nil
 		}
@@ -235,7 +231,6 @@ func (p *Prompt) WithPrompters(l *logger.Logger, opts ...UserPrompter) (Prompter
 
 func (p *Prompt) GetPassphrasePrompter(key string) (Prompter, error) {
 	return p.WithPrompters(
-		p.Logger,
 		WithExternalPrompt(p.PinEntry, key),
 		WithCommandLinePrompt(""),
 	)
@@ -243,13 +238,12 @@ func (p *Prompt) GetPassphrasePrompter(key string) (Prompter, error) {
 
 func (p *Prompt) GetExternalPrompter(key string) (Prompter, error) {
 	return p.WithPrompters(
-		p.Logger,
 		WithExternalPrompt(p.PinEntry, key),
 	)
 }
 
 func WithCommandLinePrompt(userPrompt string) UserPrompter {
-	return func(l *logger.Logger) Prompter {
+	return func() Prompter {
 		label := "enter passphrase 🔒 [input is hidden]"
 		if userPrompt != "" {
 			label = strings.Join([]string{userPrompt, label}, ", ")
@@ -271,7 +265,7 @@ func WithCommandLinePrompt(userPrompt string) UserPrompter {
 }
 
 func WithExternalPrompt(command string, key string) UserPrompter {
-	return func(l *logger.Logger) Prompter {
+	return func() Prompter {
 		if command == "" {
 			return nil
 		}
@@ -292,10 +286,10 @@ func WithExternalPrompt(command string, key string) UserPrompter {
 			Args:    externalCommandArgs,
 		}
 		if _, promptErr := pinEntryPrompter.Exists(); promptErr != nil {
-			l.Warnf("user defined pin entry command (%s) does not exist. The default will be used instead. error=%s", command, promptErr)
+			slog.Warn(fmt.Sprintf("user defined pin entry command (%s) does not exist. The default will be used instead. error=%s", command, promptErr))
 			return nil
 		}
-		l.Infof("Using external pin entry command. %s %s", pinEntryCommand[0], strings.Join(externalCommandArgs, " "))
+		slog.Info("Using external pin entry command", "command", fmt.Sprintf("%s %s", pinEntryCommand[0], strings.Join(externalCommandArgs, " ")))
 		return pinEntryPrompter
 	}
 }
@@ -389,7 +383,7 @@ func (p *Prompt) TOTPCode(host, username string, code string, client *c8y.Client
 		code = input
 
 		if err := client.LoginUsingOAuth2(ctx, initRequest); err != nil {
-			p.Logger.Errorf("OAuth2 failed. %s", err)
+			slog.Error("OAuth2 failed", "err", err)
 			return err
 		}
 		return nil

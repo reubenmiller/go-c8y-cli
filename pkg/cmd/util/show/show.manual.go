@@ -3,6 +3,7 @@ package repeat
 import (
 	"fmt"
 	"io"
+	"log/slog"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
@@ -100,12 +101,12 @@ func (n *CmdShow) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		if !jsonUtilities.IsJSONObject(responseText) {
-			cfg.Logger.Warnf("Could not process line. only json lines are accepted")
+			slog.Warn("Could not process line. only json lines are accepted")
 			continue
 		}
 
 		if err := n.factory.WriteOutputWithoutPropertyGuess(responseText, cmdutil.OutputContext{}); err != nil {
-			cfg.Logger.Warnf("Could not process line. only json lines are accepted. %s", err)
+			slog.Warn("Could not process line. only json lines are accepted", "err", err)
 		}
 
 		if !bounded {

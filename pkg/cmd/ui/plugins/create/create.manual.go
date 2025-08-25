@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -18,7 +19,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -104,7 +104,7 @@ func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 	return ccmd
 }
 
-func (n *CmdCreate) getApplicationDetails(client *c8y.Client, log *logger.Logger) (*c8y.UIExtension, error) {
+func (n *CmdCreate) getApplicationDetails(client *c8y.Client) (*c8y.UIExtension, error) {
 
 	// set default name to the file name
 	appNameFromFile := artifact.ParseName(n.file)
@@ -172,7 +172,7 @@ func ShouldDownload(v string) bool {
 	return strings.HasPrefix(v, "http://") || strings.HasPrefix(v, "https://")
 }
 
-func DownloadFile(u string, log *logger.Logger) (string, error) {
+func DownloadFile(u string) (string, error) {
 	fileURL, urlErr := url.Parse(u)
 	if urlErr != nil {
 		return "", fmt.Errorf("invalid url format. %w", urlErr)
@@ -182,7 +182,7 @@ func DownloadFile(u string, log *logger.Logger) (string, error) {
 		tmpFilename = tmpFilename + ".zip"
 	}
 	tmpFile := filepath.Join(os.TempDir(), tmpFilename)
-	log.Debugf("Downloading %s to %s", fileURL.String(), tmpFile)
+	slog.Debug("Downloading file", "url", fileURL.String(), "path", tmpFile)
 	fTmpFile, fileErr := os.OpenFile(tmpFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if fileErr != nil {
 		return "", fileErr
@@ -203,10 +203,6 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 
 	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
 	if err != nil {
@@ -223,16 +219,16 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		if cfg.DryRun() {
 			fmt.Fprintf(n.factory.IOStreams.ErrOut, "DRY: Downloading plugin from url: %s\n", n.file)
 		} else {
-			localFile, downloadErr := DownloadFile(n.file, log)
+			localFile, downloadErr := DownloadFile(n.file)
 			if downloadErr != nil {
 				return fmt.Errorf("could not download plugin. %w", downloadErr)
 			}
-			log.Infof("Downloaded plugin to %s", localFile)
+			slog.Info("Downloaded plugin", "path", localFile)
 			n.file = localFile
 
 			defer func() {
 				if err := os.Remove(localFile); err != nil {
-					log.Warnf("could not delete downloaded file. %w", err)
+					slog.Warn("could not delete downloaded file", "err", err)
 				}
 			}()
 		}
@@ -240,7 +236,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
-	application, err := n.getApplicationDetails(client, log)
+	application, err := n.getApplicationDetails(client)
 	if err != nil {
 		return err
 	}
@@ -251,7 +247,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	filename := filepath.Base(n.file)
 	if !IsValidFilename(filename) {
 		tmpFile := filepath.Join(os.TempDir(), strings.ReplaceAll(filename, " ", "_"))
-		log.Warnf("Plugin file contains a space, so creating a temp file without a space to avoid being rejected by the server. tmpfile=%s", tmpFile)
+		slog.Warn("Plugin file contains a space, so creating a temp file without a space to avoid being rejected by the server", "tmpfile", tmpFile)
 
 		if err := fileutilities.CopyFile(tmpFile, n.file); err != nil {
 			return fmt.Errorf("could not copy file to tmp directory. %w", err)

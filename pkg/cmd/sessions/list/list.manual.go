@@ -53,12 +53,8 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 
-	sessionFile, err := selectsession.SelectSession(n.factory.IOStreams, cfg, log, n.sessionFilter)
+	sessionFile, err := selectsession.SelectSession(n.factory.IOStreams, cfg, n.sessionFilter)
 
 	if err != nil {
 		return err

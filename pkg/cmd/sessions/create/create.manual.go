@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
 	"path"
@@ -20,17 +21,15 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-func NewCumulocitySessionFromFile(filePath string, log *logger.Logger, cfg *config.Config) (*c8ysession.CumulocitySession, error) {
+func NewCumulocitySessionFromFile(filePath string, cfg *config.Config) (*c8ysession.CumulocitySession, error) {
 	session := &c8ysession.CumulocitySession{
 		Config: cfg,
-		Logger: log,
 	}
 
 	sessionConfig := viper.New()
@@ -170,11 +169,7 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
-	prompter := prompt.NewPrompt(log)
+	prompter := prompt.NewPrompt()
 
 	if !cmd.Flags().Changed("host") {
 		v, err := prompter.Input("Enter host", "", true, false)
@@ -269,10 +264,6 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 	session := &c8ysession.CumulocitySession{
 		Schema:          "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/session.schema.json",
 		Host:            n.host,
@@ -281,7 +272,6 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		Description:     n.description,
 		UseTenantPrefix: !n.noTenantPrefix,
 		Config:          cfg,
-		Logger:          log,
 	}
 
 	session.MicroserviceAliases = make(map[string]string)
@@ -390,10 +380,6 @@ func (n *CmdCreate) formatFilename(name string) string {
 }
 
 func (n *CmdCreate) writeSessionFile(outputDir, outputFile string, session c8ysession.CumulocitySession) error {
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 	data, err := json.MarshalIndent(session, "", "  ")
 
 	if err != nil {
@@ -404,11 +390,11 @@ func (n *CmdCreate) writeSessionFile(outputDir, outputFile string, session c8yse
 
 	if outputDir != "" {
 		if err := fileutilities.CreateDirs(outputDir); err != nil {
-			log.Errorf("failed to create folder. folder=%s, err=%s", outputDir, err)
+			slog.Error("failed to create folder", "folder", outputDir, "err", err)
 			return err
 		}
 	}
-	log.Debugf("output file: %s", outputPath)
+	slog.Debug("output file", "value", outputPath)
 
 	if err := os.WriteFile(path.Join(outputDir, outputFile), data, 0600); err != nil {
 		return errors.Wrap(err, "failed to write to file")

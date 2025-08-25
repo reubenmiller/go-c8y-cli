@@ -3,12 +3,12 @@ package jsonUtilities
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -16,13 +16,6 @@ const (
 	// Separator character which is used when setting the path via a dot notation
 	Separator = "."
 )
-
-// Logger is the package logger
-var Logger *logger.Logger
-
-func init() {
-	Logger = logger.NewDummyLogger("jsonUtilities")
-}
 
 // MustParseJSON parses a string and returns the map structure
 func MustParseJSON(value string) map[string]interface{} {
@@ -112,7 +105,7 @@ func parseValue(value string) interface{} {
 
 		jsonMap := make(map[string]interface{})
 		if err := json.Unmarshal([]byte(propValue), &jsonMap); err != nil {
-			Logger.Warningf("Invalid json. %s", err)
+			slog.Warn("Invalid json", "err", err)
 
 			// Try parsing
 			return parseValue(propValue[1 : len(propValue)-1])
@@ -122,7 +115,7 @@ func parseValue(value string) interface{} {
 		// parse array values
 		valueArray := []interface{}{}
 		for _, item := range values {
-			Logger.Debugf("item: %s", item)
+			slog.Debug("item", "value", item)
 			valueArray = append(valueArray, parseValue(item))
 		}
 		return valueArray
@@ -155,7 +148,7 @@ func parseShorthandJSONStructure(value string, data map[string]interface{}) erro
 	valuePairs := strings.Split(value, "=")
 
 	if len(value) > 0 {
-		Logger.Debugf("Input: %s", value)
+		slog.Debug(fmt.Sprintf("Input: %s", value))
 	}
 
 	outputValues := []string{}
@@ -194,7 +187,7 @@ func parseShorthandJSONStructure(value string, data map[string]interface{}) erro
 		validItems++
 	}
 
-	Logger.Debugf("Output: %v", outputValues)
+	slog.Debug(fmt.Sprintf("Output: %v", outputValues))
 
 	if validItems == 0 {
 		return fmt.Errorf("Input contains no valid shorthand data")

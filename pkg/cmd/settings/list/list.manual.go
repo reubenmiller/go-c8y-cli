@@ -2,6 +2,7 @@ package list
 
 import (
 	"encoding/json"
+	"log/slog"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
@@ -71,19 +72,19 @@ func (n *CmdList) listSettings(cmd *cobra.Command, args []string) error {
 	// add additional settings
 	err = allSettings.Set("settings.session.home", cfg.GetSessionHomeDir())
 	if err != nil {
-		cfg.Logger.Warnf("Could not get home session directory. %s", err)
+		slog.Warn("Could not get home session directory", "err", err)
 	}
 
 	if activitylog != nil {
 		err := allSettings.Set("settings.activitylog.currentPath", activitylog.GetPath())
 		if err != nil {
-			cfg.Logger.Warnf("Could not get activity logger path. %s", err)
+			slog.Warn("Could not get activity logger path", "err", err)
 		}
 	}
 
 	err = allSettings.Set("settings.session.file", cfg.GetSessionFile())
 	if err != nil {
-		cfg.Logger.Warnf("Could not get session file. %s", err)
+		slog.Warn("Could not get session file", "err", err)
 	}
 
 	responseText, err = json.Marshal(allSettings)

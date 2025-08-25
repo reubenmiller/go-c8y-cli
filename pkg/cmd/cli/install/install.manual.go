@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -76,11 +77,6 @@ type Shell struct {
 }
 
 func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-
 	shells := map[string]Shell{
 		shell.ShellBash:       {Name: "bash", Binary: "bash"},
 		shell.ShellZsh:        {Name: "zsh", Binary: "zsh"},
@@ -98,15 +94,15 @@ func (n *CmdInstall) RunE(cmd *cobra.Command, args []string) error {
 	for _, name := range n.shell {
 		shell, ok := shells[name]
 		if !ok {
-			cfg.Logger.Warningf("Skipping invalid shell type. name=%s", name)
+			slog.Warn("Skipping invalid shell type", "name", name)
 			continue
 		}
 
-		cfg.Logger.Debugf("Checking shell. name=%s, shell=%s", shell.Name, shell.Binary)
+		slog.Debug("Checking shell", "name", shell.Name, "shell", shell.Binary)
 		if _, err := safeexec.LookPath(shell.Binary); err == nil {
 			detectedShells = append(detectedShells, shell)
 		} else {
-			cfg.Logger.Debugf("Shell was not found. name=%s, shell=%s", shell.Name, shell.Binary)
+			slog.Debug("Shell was not found", "name", shell.Name, "shell", shell.Binary)
 		}
 	}
 
@@ -165,10 +161,6 @@ func addExecutableBinaryToPowerShellPath(existingSnippet string) (string, error)
 
 func (n *CmdInstall) InstallProfile(shellType string) (bool, error) {
 	changed := false
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return changed, err
-	}
 	profilePath := ""
 	profileSnippet := ""
 
@@ -204,14 +196,14 @@ func (n *CmdInstall) InstallProfile(shellType string) (bool, error) {
 		if snippet, err := addExecutableBinaryToPowerShellPath("c8y cli profile --shell powershell | Out-String | Invoke-Expression"); err == nil {
 			profileSnippet = snippet
 		} else {
-			cfg.Logger.Warnf("Failed to detect binary path. %s", err)
+			slog.Warn("Failed to detect binary path", "err", err)
 		}
 	case shell.ShellPwsh:
 		profilePath = "~/.config/powershell/Microsoft.PowerShell_profile.ps1"
 		if snippet, err := addExecutableBinaryToPowerShellPath("c8y cli profile --shell powershell | Out-String | Invoke-Expression"); err == nil {
 			profileSnippet = snippet
 		} else {
-			cfg.Logger.Warnf("Failed to detect binary path. %s", err)
+			slog.Warn("Failed to detect binary path", "err", err)
 		}
 	}
 
@@ -247,7 +239,7 @@ func (n *CmdInstall) InstallProfile(shellType string) (bool, error) {
 			}
 		}
 	} else {
-		cfg.Logger.Debugf("Profile file does not exist. path=%s", expandedV)
+		slog.Debug("Profile file does not exist", "path", expandedV)
 	}
 
 	cs := n.factory.IOStreams.ColorScheme()
@@ -255,14 +247,14 @@ func (n *CmdInstall) InstallProfile(shellType string) (bool, error) {
 
 	if appendToProfile {
 		message = fmt.Sprintf("Added snippet to %s profile. path: %s", shellType, expandedV)
-		cfg.Logger.Debugf("Adding snippet to %s", expandedV)
+		slog.Debug("Adding snippet to profile", "path", expandedV)
 		err = AppendToFile(expandedV, profileSnippet)
 		if err != nil {
 			return changed, err
 		}
 		changed = true
 	} else {
-		cfg.Logger.Debugf("Snippet already found in profile. path=%s", expandedV)
+		slog.Debug("Snippet already found in profile", "path", expandedV)
 		message = fmt.Sprintf("Already added snippet to %s profile. path: %s", shellType, expandedV)
 	}
 

@@ -1,6 +1,7 @@
 package list
 
 import (
+	"log/slog"
 	"net/url"
 	"strings"
 
@@ -105,7 +106,7 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	} else {
 		filter.Host = u.Host
 	}
-	cfg.Logger.Debugf("activity log filter: path=%s, host=%s, datefrom=%s, dateto=%s", activitylog.GetPath(), filter.Host, filter.DateFrom, filter.DateTo)
+	slog.Debug("activity log filter", "path", activitylog.GetPath(), "host", filter.Host, "datefrom", filter.DateFrom, "dateto", filter.DateTo)
 
 	err = activitylog.GetLogEntries(filter, func(line []byte) error {
 		return n.factory.WriteOutputWithoutPropertyGuess(line, cmdutil.OutputContext{})

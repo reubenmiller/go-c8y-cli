@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -28,7 +29,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonformatter"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mode"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
@@ -50,7 +50,6 @@ type Factory struct {
 	Browser        Browser
 	Client         func() (*c8y.Client, error)
 	Config         func() (*config.Config, error)
-	Logger         func() (*logger.Logger, error)
 	ActivityLogger func() (*activitylogger.ActivityLogger, error)
 	Console        func() (*console.Console, error)
 	DataView       func() (*dataview.DataView, error)
@@ -238,10 +237,6 @@ func (f *Factory) GetRequestHandler() (*request.RequestHandler, error) {
 	if err != nil {
 		return nil, err
 	}
-	log, err := f.Logger()
-	if err != nil {
-		return nil, err
-	}
 
 	activityLogger, err := f.ActivityLogger()
 	if err != nil {
@@ -265,7 +260,6 @@ func (f *Factory) GetRequestHandler() (*request.RequestHandler, error) {
 		IO:             f.IOStreams,
 		Client:         client,
 		Config:         cfg,
-		Logger:         log,
 		DataView:       dataview,
 		Console:        consol,
 		ActivityLogger: activityLogger,
@@ -279,10 +273,6 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 	if err != nil {
 		return err
 	}
-	log, err := f.Logger()
-	if err != nil {
-		return err
-	}
 
 	activityLogger, err := f.ActivityLogger()
 	if err != nil {
@@ -302,13 +292,12 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 		IO:             f.IOStreams,
 		Client:         client,
 		Config:         cfg,
-		Logger:         log,
 		DataView:       dataview,
 		Console:        consol,
 		ActivityLogger: activityLogger,
 		HideSensitive:  cfg.HideSensitiveInformationIfActive,
 	}
-	w, err := worker.NewWorker(log, cfg, f.IOStreams, client, activityLogger, handler.ProcessRequestAndResponse, f.CheckPostCommandError)
+	w, err := worker.NewWorker(cfg, f.IOStreams, client, activityLogger, handler.ProcessRequestAndResponse, f.CheckPostCommandError)
 
 	if err != nil {
 		return err
@@ -322,10 +311,6 @@ func (f *Factory) RunWithGenericWorkers(cmd *cobra.Command, inputIterators *flag
 		return err
 	}
 	cfg, err := f.Config()
-	if err != nil {
-		return err
-	}
-	log, err := f.Logger()
 	if err != nil {
 		return err
 	}
@@ -348,7 +333,7 @@ func (f *Factory) RunWithGenericWorkers(cmd *cobra.Command, inputIterators *flag
 	// 	return err
 	// }
 
-	w, err := worker.NewGenericWorker(log, cfg, f.IOStreams, client, activityLogger, runFunc, f.CheckPostCommandError)
+	w, err := worker.NewGenericWorker(cfg, f.IOStreams, client, activityLogger, runFunc, f.CheckPostCommandError)
 
 	if err != nil {
 		return err
@@ -365,10 +350,6 @@ func (f *Factory) RunSequentiallyWithGenericWorkers(cmd *cobra.Command, iter ite
 	if err != nil {
 		return err
 	}
-	log, err := f.Logger()
-	if err != nil {
-		return err
-	}
 
 	activityLogger, err := f.ActivityLogger()
 	if err != nil {
@@ -380,7 +361,7 @@ func (f *Factory) RunSequentiallyWithGenericWorkers(cmd *cobra.Command, iter ite
 		iter = iterator.NewRunOnceIterator()
 	}
 
-	w, err := worker.NewGenericWorker(log, cfg, f.IOStreams, client, activityLogger, runFunc, f.CheckPostCommandError)
+	w, err := worker.NewGenericWorker(cfg, f.IOStreams, client, activityLogger, runFunc, f.CheckPostCommandError)
 
 	if err != nil {
 		return err
@@ -391,10 +372,6 @@ func (f *Factory) RunSequentiallyWithGenericWorkers(cmd *cobra.Command, iter ite
 // GetViewProperties Look up the view properties to display
 func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, output []byte) ([]string, error) {
 	dataView, err := f.DataView()
-	if err != nil {
-		return nil, err
-	}
-	log, err := f.Logger()
 	if err != nil {
 		return nil, err
 	}
@@ -418,13 +395,13 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 
 		if err != nil || len(props) == 0 {
 			if err != nil {
-				log.Infof("No matching view detected. defaulting to '**'. %s", err)
+				slog.Info("No matching view detected. defaulting to '**'", "err", err)
 			} else {
-				log.Info("No matching view detected. defaulting to '**'")
+				slog.Info("No matching view detected. defaulting to '**'")
 			}
 			viewProperties = append(viewProperties, "**")
 		} else {
-			log.Infof("Detected view: %s", strings.Join(props, ", "))
+			slog.Info("Detected view", "value", strings.Join(props, ","))
 			viewProperties = append(viewProperties, props...)
 		}
 	default:
@@ -432,13 +409,13 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 		props, err := dataView.GetViewByName(view)
 		if err != nil || len(props) == 0 {
 			if err != nil {
-				cfg.Logger.Warnf("no matching view found. %s, name=%s", err, view)
+				slog.Warn("no matching view found", "err", err, "name", view)
 			} else {
-				cfg.Logger.Warnf("no matching view found. name=%s", view)
+				slog.Warn("no matching view found", "name", view)
 			}
 			viewProperties = append(viewProperties, "**")
 		} else {
-			cfg.Logger.Infof("Detected view: %s", strings.Join(props, ", "))
+			slog.Info("Detected view", "value", strings.Join(props, ","))
 			viewProperties = append(viewProperties, props...)
 		}
 	}
@@ -449,10 +426,6 @@ func (f *Factory) CheckPostCommandError(err error) error {
 	cfg, configErr := f.Config()
 	if configErr != nil {
 		log.Fatalf("Could not load configuration. %s", configErr)
-	}
-	logg, logErr := f.Logger()
-	if logErr != nil {
-		log.Fatalf("Could not configure logger. %s", logErr)
 	}
 	w := io.Discard
 
@@ -491,7 +464,7 @@ func (f *Factory) CheckPostCommandError(err error) error {
 
 	if cErr, ok := err.(cmderrors.CommandError); ok {
 		if cErr.StatusCode == 403 || cErr.StatusCode == 401 {
-			logg.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.StatusCode))
+			slog.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.StatusCode))
 		}
 
 		// format errors as json messages
@@ -502,7 +475,7 @@ func (f *Factory) CheckPostCommandError(err error) error {
 		}
 		if !cErr.IsSilent() && !strings.Contains(silentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
 			if printLogEntries {
-				logg.Errorf("%s", cErr)
+				slog.Error(cErr.Error())
 			}
 			fmt.Fprintf(w, "%s\n", cErr.JSONString())
 
@@ -514,9 +487,9 @@ func (f *Factory) CheckPostCommandError(err error) error {
 		cErr := cmderrors.NewSystemErrorF("%s", err)
 		cErr.ExitCode = cmderrors.ExitUserError
 		if printLogEntries {
-			logg.Errorf("%s", cErr)
+			slog.Error(cErr.Error())
 		}
-		logg.Debugf("Processing unexpected error. %s, exitCode=%d", err, cErr.ExitCode)
+		slog.Debug("Processing unexpected error", "err", err, "exitCode", cErr.ExitCode)
 		fmt.Fprintf(w, "%s\n", cErr.JSONString())
 		cErr.Processed = true
 		outErr = cErr
@@ -708,11 +681,6 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 		return 0, err
 	}
 
-	logg, err := f.Logger()
-	if err != nil {
-		return 0, err
-	}
-
 	if commonOptions == nil {
 		if f.Command == nil {
 			return 0, fmt.Errorf("command output options are mandatory")
@@ -726,7 +694,7 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 	if len(output) > 0 || commonOptions.HasOutputTemplate() {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
 		if params.Response != nil {
-			PrintResponseSize(logg, params.Response, output)
+			PrintResponseSize(params.Response, output)
 		}
 
 		var responseText []byte
@@ -744,7 +712,7 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 
 		if v := outputJSON.Get(dataProperty); v.Exists() && v.IsArray() {
 			unfilteredSize = len(v.Array())
-			logg.Infof("Unfiltered array size. len=%d", unfilteredSize)
+			slog.Info("Unfiltered array size", "len", unfilteredSize)
 		}
 
 		// Trim space from json object/array output
@@ -789,10 +757,10 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 			}
 
 			if cfg.RawOutput() {
-				logg.Infof("Raw mode active. In raw mode the following settings are forced, view=off, output=json")
+				slog.Info("Raw mode active. In raw mode the following settings are forced, view=off, output=json")
 			}
 			view := cfg.ViewOption()
-			logg.Infof("View mode: %s", view)
+			slog.Info(fmt.Sprintf("View mode: %s", view))
 
 			// Detect view (if no filters are given)
 			if len(commonOptions.Filters.Pluck) == 0 {
@@ -822,36 +790,36 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 
 						if err != nil || len(props) == 0 {
 							if err != nil {
-								logg.Infof("No matching view detected. defaulting to '**'. %s", err)
+								slog.Info("No matching view detected. defaulting to '**'", "err", err)
 							} else {
-								logg.Info("No matching view detected. defaulting to '**'")
+								slog.Info("No matching view detected. defaulting to '**'")
 							}
 							commonOptions.Filters.Pluck = []string{"**"}
 						} else {
-							logg.Infof("Detected view: %s", strings.Join(props, ", "))
+							slog.Info("Detected view", "value", strings.Join(props, ","))
 							commonOptions.Filters.Pluck = props
 						}
 					default:
 						props, err := dataView.GetViewByName(view)
 						if err != nil || len(props) == 0 {
 							if err != nil {
-								logg.Warnf("no matching view found. %s, name=%s", err, view)
+								slog.Warn("no matching view found", "err", err, "name", view)
 							} else {
-								logg.Warnf("no matching view found. name=%s", view)
+								slog.Warn("no matching view found", "name", view)
 							}
 							commonOptions.Filters.Pluck = []string{"**"}
 						} else {
-							logg.Infof("Detected view: %s", strings.Join(props, ", "))
+							slog.Info("Detected view", "value", strings.Join(props, ","))
 							commonOptions.Filters.Pluck = props
 						}
 					}
 				}
 			} else {
-				logg.Debugf("using existing pluck values. %v", commonOptions.Filters.Pluck)
+				slog.Debug("using existing pluck values", "values", commonOptions.Filters.Pluck)
 			}
 
 			if filterOutput, filterErr := commonOptions.Filters.Apply(string(output), dataProperty, false, consol.SetHeaderFromInput); filterErr != nil {
-				logg.Warnf("filter error. %s", filterErr)
+				slog.Warn("filter error", "err", filterErr)
 				responseText = filterOutput
 			} else {
 				responseText = filterOutput
@@ -861,7 +829,7 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 
 			if !showRaw {
 				if len(responseText) == len(emptyArray) && bytes.Equal(responseText, emptyArray) {
-					logg.Info("No matching results found. Empty response will be omitted")
+					slog.Info("No matching results found. Empty response will be omitted")
 					responseText = []byte{}
 				}
 			}
@@ -897,11 +865,6 @@ func (f *Factory) GuessDataProperty(output gjson.Result) string {
 	arrayProperties := []string{}
 	totalKeys := 0
 
-	logg, err := f.Logger()
-	if err != nil {
-		panic(err)
-	}
-
 	if v := output.Get("id"); !v.Exists() {
 		// Find the property which is an array
 		output.ForEach(func(key, value gjson.Result) bool {
@@ -914,10 +877,10 @@ func (f *Factory) GuessDataProperty(output gjson.Result) string {
 	}
 
 	if len(arrayProperties) > 1 {
-		logg.Debugf("Could not detect property as more than 1 array like property detected: %v", arrayProperties)
+		slog.Debug("Could not detect property as more than 1 array like property detected", "properties", arrayProperties)
 		return ""
 	}
-	logg.Debugf("Array properties: %v", arrayProperties)
+	slog.Debug("Array properties", "values", arrayProperties)
 
 	if len(arrayProperties) == 0 {
 		return ""
@@ -932,19 +895,19 @@ func (f *Factory) GuessDataProperty(output gjson.Result) string {
 	}
 
 	if property != "" && totalKeys < 10 {
-		logg.Debugf("Data property: %s", property)
+		slog.Debug("Data", "property", property)
 	}
 	return property
 }
 
-func PrintResponseSize(l *logger.Logger, resp *http.Response, output []byte) {
+func PrintResponseSize(resp *http.Response, output []byte) {
 	if resp.ContentLength > -1 {
-		l.Infof("Response Length: %0.1fKB", float64(resp.ContentLength)/1024)
+		slog.Info(fmt.Sprintf("Response Length: %0.1fKB", float64(resp.ContentLength)/1024))
 	} else {
 		if resp.Uncompressed {
-			l.Infof("Response Length: %0.1fKB (uncompressed)", float64(len(output))/1024)
+			slog.Info(fmt.Sprintf("Response Length: %0.1fKB (uncompressed)", float64(len(output))/1024))
 		} else {
-			l.Infof("Response Length: %0.1fKB", float64(len(output))/1024)
+			slog.Info(fmt.Sprintf("Response Length: %0.1fKB", float64(len(output))/1024))
 		}
 	}
 }

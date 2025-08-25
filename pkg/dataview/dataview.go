@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,7 +13,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/matcher"
 	"github.com/tidwall/gjson"
 )
@@ -54,21 +54,16 @@ type DataView struct {
 	Extension   string
 	Pattern     string
 	Definitions []Definition
-	Logger      *logger.Logger
 	ActiveView  *Definition
 }
 
 // NewDataView creates a new data view which selected a view based in json data
-func NewDataView(pattern string, extension string, log *logger.Logger, paths ...string) (*DataView, error) {
-	if log == nil {
-		log = logger.NewDummyLogger("dataview")
-	}
+func NewDataView(pattern string, extension string, paths ...string) (*DataView, error) {
 	view := &DataView{
 		mu:        sync.RWMutex{},
 		Paths:     paths,
 		Pattern:   pattern,
 		Extension: extension,
-		Logger:    log,
 	}
 	return view, nil
 }
@@ -77,7 +72,7 @@ func NewDataView(pattern string, extension string, log *logger.Logger, paths ...
 func (v *DataView) LoadDefinitions() error {
 
 	if len(v.GetDefinitions()) > 0 {
-		v.Logger.Debugf("Views already loaded")
+		slog.Debug("Views already loaded")
 		return nil
 	}
 
@@ -85,9 +80,9 @@ func (v *DataView) LoadDefinitions() error {
 	defer v.mu.Unlock()
 
 	definitions := make([]Definition, 0)
-	v.Logger.Debugf("Looking for definitions in: %v", v.Paths)
+	slog.Debug("Looking for definitions", "paths", v.Paths)
 	for _, path := range v.Paths {
-		v.Logger.Debugf("Current view path: %s", path)
+		slog.Debug("Current view", "path", path)
 
 		extName := ""
 		if strings.Contains(path, NamespaceSeparator) {
@@ -99,18 +94,18 @@ func (v *DataView) LoadDefinitions() error {
 
 		if stat, err := os.Stat(path); err != nil {
 			if extName == "" {
-				v.Logger.Debugf("Skipping view path because it does not exist. path=%s, error=%s", path, err)
+				slog.Debug("Skipping view path because it does not exist", "path", path, "err", err)
 			}
 			continue
 		} else if !stat.IsDir() {
-			v.Logger.Debugf("Skipping view path because it is not a folder. path=%s", path)
+			slog.Debug("Skipping view path because it is not a folder", "path", path)
 			continue
 		}
 
 		err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				// do not block walking folder
-				v.Logger.Warnf("Failed to walk path: %s, err=%s. file will be ignored", path, err)
+				slog.Warn("Failed to walk path. file will be ignored", "path", path, "err", err)
 				return nil
 			}
 			if !d.IsDir() {
@@ -127,13 +122,13 @@ func (v *DataView) LoadDefinitions() error {
 				}
 
 				if extName != "" {
-					v.Logger.Debugf("Found view definition: %s | extension: %s", d.Name(), extName)
+					slog.Debug(fmt.Sprintf("Found view definition: %s | extension: %s", d.Name(), extName))
 				} else {
-					v.Logger.Debugf("Found view definition: %s", d.Name())
+					slog.Debug(fmt.Sprintf("Found view definition: %s", d.Name()))
 				}
 				viewDefinition := &DefinitionCollection{}
 				if err := json.Unmarshal(contents, &viewDefinition); err != nil {
-					v.Logger.Warnf("Could not load view definitions. %s", err)
+					slog.Warn("Could not load view definitions", "err", err)
 					// do not prevent walking other folders
 					return nil
 				}
@@ -147,10 +142,10 @@ func (v *DataView) LoadDefinitions() error {
 			return nil
 		})
 		if err != nil {
-			v.Logger.Warnf("View discovery has errors. %s", err)
+			slog.Warn("View discovery has errors", "err", err)
 			return err
 		}
-		v.Logger.Debugf("Loaded definitions: %d", len(definitions))
+		slog.Debug("Loaded definitions", "total", len(definitions))
 
 	}
 	// sort by priority
@@ -232,7 +227,7 @@ type ViewData struct {
 
 func (v *DataView) GetView(r *ViewData) ([]string, error) {
 	if view := v.GetActiveView(); view != nil {
-		v.Logger.Debugf("Using already active view")
+		slog.Debug("Using already active view")
 		return view.Columns, nil
 	}
 
@@ -257,7 +252,6 @@ func (v *DataView) GetView(r *ViewData) ([]string, error) {
 
 		for _, fragment := range definition.Fragments {
 			if result := data.Get(fragment); !result.Exists() {
-				// v.Logger.Debugf("Data did not contain fragment. view=%s, fragment=%s, input=%s", definition.FileName, fragment, data.Raw)
 				isMatch = false
 				break
 			}
@@ -314,13 +308,13 @@ func (v *DataView) GetView(r *ViewData) ([]string, error) {
 	}
 	if matchingDefinition != nil {
 		if matchingDefinition.Extension != "" {
-			v.Logger.Debugf("Found matching view: name=%s, extension=%s, file: %s", matchingDefinition.Name, matchingDefinition.Extension, matchingDefinition.Path)
+			slog.Debug("Found matching view", "name", matchingDefinition.Name, "extension", matchingDefinition.Extension, "file", matchingDefinition.Path)
 		} else {
-			v.Logger.Debugf("Found matching view: name=%s, file: %s", matchingDefinition.Name, matchingDefinition.Path)
+			slog.Debug("Found matching view", "name", matchingDefinition.Name, "file", matchingDefinition.Path)
 		}
 		v.ActiveView = matchingDefinition
 		return matchingDefinition.Columns, nil
 	}
-	v.Logger.Debug("No matching view found")
+	slog.Debug("No matching view found")
 	return nil, nil
 }
