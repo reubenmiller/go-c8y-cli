@@ -190,7 +190,18 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 			err = body.Set(name, v)
 
 		case Template:
-			body.AppendTemplate(string(v))
+			body.AppendTemplate(mapbuilder.TemplateDef{
+				Template: string(v),
+			})
+			if body.TemplateIterator == nil {
+				body.TemplateIterator = iterator.NewRangeIterator(1, 100000000, 1)
+			}
+
+		case TemplateSnippet:
+			body.AppendTemplate(mapbuilder.TemplateDef{
+				TargetProperty: name,
+				Template:       string(v),
+			})
 			if body.TemplateIterator == nil {
 				body.TemplateIterator = iterator.NewRangeIterator(1, 100000000, 1)
 			}
@@ -200,11 +211,15 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 
 		case DefaultTemplateString:
 			// the body will build on this template (it can override it)
-			body.PrependTemplate(string(v))
+			body.PrependTemplate(mapbuilder.TemplateDef{
+				Template: string(v),
+			})
 
 		case RequiredTemplateString:
 			// the template will override values in the body
-			body.AppendTemplate(string(v))
+			body.AppendTemplate(mapbuilder.TemplateDef{
+				Template: string(v),
+			})
 
 		case RequiredKeys:
 			body.SetRequiredKeys(v...)

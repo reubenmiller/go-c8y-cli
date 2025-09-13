@@ -263,7 +263,8 @@
         "roleself[]",
         "role[]",
         "user[]",
-        "smartgroup[]"
+        "smartgroup[]",
+        "template"
       ]
     },
     "pipelineAliases": {

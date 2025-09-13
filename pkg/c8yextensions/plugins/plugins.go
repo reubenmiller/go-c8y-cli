@@ -358,7 +358,9 @@ func buildBody(f *cmdutil.Factory, applicationID string, managerOptions *PluginC
 	// HACK: Perform a deep merge by using the jsonnet "+:" operator
 	// This is required because the original template has already be converted to json
 	// thus losing information
-	body.AppendTemplate(string(convertToJsonnetDeepMerge(currentBody)))
+	body.AppendTemplate(mapbuilder.TemplateDef{
+		Template: string(convertToJsonnetDeepMerge(currentBody)),
+	})
 	body.SetAppendTemplatePreference(true)
 
 	body.Set("id", app.Get("id").String())

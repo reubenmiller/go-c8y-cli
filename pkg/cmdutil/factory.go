@@ -664,7 +664,9 @@ func (f *Factory) ExecuteOutputTemplate(output []byte, params OutputContext, com
 		}
 	}
 
-	outputBuilder.AppendTemplate(commonOptions.OutputTemplate)
+	outputBuilder.AppendTemplate(mapbuilder.TemplateDef{
+		Template: commonOptions.OutputTemplate,
+	})
 	out, outErr := outputBuilder.MarshalJSONWithInput(params.Input)
 
 	if outErr != nil {

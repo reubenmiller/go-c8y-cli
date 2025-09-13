@@ -55,7 +55,9 @@ func WithFormDataOptions(cmd *cobra.Command, form map[string]io.Reader, inputIte
 			err = objectInfo.MergeMaps(v)
 
 		case Template:
-			objectInfo.AppendTemplate(string(v))
+			objectInfo.AppendTemplate(mapbuilder.TemplateDef{
+				Template: string(v),
+			})
 			if objectInfo.TemplateIterator == nil {
 				objectInfo.TemplateIterator = iterator.NewRangeIterator(1, 100000000, 1)
 			}
@@ -65,11 +67,15 @@ func WithFormDataOptions(cmd *cobra.Command, form map[string]io.Reader, inputIte
 
 		case DefaultTemplateString:
 			// the body will build on this template (it can override it)
-			objectInfo.PrependTemplate(string(v))
+			objectInfo.PrependTemplate(mapbuilder.TemplateDef{
+				Template: string(v),
+			})
 
 		case RequiredTemplateString:
 			// the template will override values in the body
-			objectInfo.AppendTemplate(string(v))
+			objectInfo.AppendTemplate(mapbuilder.TemplateDef{
+				Template: string(v),
+			})
 
 		case RequiredKeys:
 			objectInfo.SetRequiredKeys(v...)
