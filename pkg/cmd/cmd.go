@@ -178,7 +178,7 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 	}
 
 	if cErr, ok := err.(cmderrors.CommandError); ok {
-		if cErr.StatusCode == 403 || cErr.StatusCode == 401 {
+		if cErr.StatusCode == 401 {
 			logg.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.StatusCode))
 		}
 
