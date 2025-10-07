@@ -2,6 +2,7 @@ package pathresolver
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -28,7 +29,7 @@ func ResolvePaths(sourceDirs []string, pattern string, extensions []string, igno
 			continue
 		}
 
-		err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
+		err := filepath.WalkDir(sourceDir, func(path string, info fs.DirEntry, err error) error {
 			if err != nil {
 				log.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
 				return err

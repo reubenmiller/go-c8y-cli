@@ -110,7 +110,7 @@ func (e *Extension) Commands() ([]extensions.Command, error) {
 	path := filepath.Join(e.path, commandsName)
 	commands := make([]extensions.Command, 0)
 
-	err := filepath.Walk(path, func(ipath string, info fs.FileInfo, err error) error {
+	err := filepath.WalkDir(path, func(ipath string, info fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
