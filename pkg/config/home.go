@@ -46,6 +46,13 @@ func (c *Config) GetSessionHomeDir() string {
 		outputDir = filepath.Join(outputDir, DefaultSessionDir)
 	}
 
+	// Resolve symbolic link if outputDir is a symlink
+	if v, err := fileutilities.ResolvePath(outputDir); err == nil {
+		outputDir = v
+	} else {
+		c.Logger.Warnf("Could not resolve path. path=%s, err=%s", outputDir, err)
+	}
+
 	err := fileutilities.CreateDirs(outputDir)
 	if err != nil && c.Logger != nil {
 		c.Logger.Errorf("Sessions directory check failed. path=%s, err=%s", outputDir, err)

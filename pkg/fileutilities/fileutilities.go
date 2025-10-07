@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 )
 
@@ -89,4 +90,13 @@ func DownloadFile(u string, out io.WriteCloser) error {
 	defer resp.Body.Close()
 	_, err = io.Copy(out, resp.Body)
 	return err
+}
+
+// Resolve path if it is a symbolic link, otherwise leave the path untouched
+func ResolvePath(v string) (string, error) {
+	if info, err := os.Lstat(v); err == nil && info.Mode()&os.ModeSymlink != 0 {
+		resolved, err := filepath.EvalSymlinks(v)
+		return resolved, err
+	}
+	return v, nil
 }
