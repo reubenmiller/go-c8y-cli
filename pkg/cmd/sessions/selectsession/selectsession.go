@@ -2,6 +2,7 @@ package selectsession
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -65,7 +66,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	srcdir := cfg.GetSessionHomeDir()
 	log.Infof("using c8y session folder: %s", srcdir)
 
-	err = filepath.Walk(srcdir, func(path string, info os.FileInfo, err error) error {
+	err = filepath.WalkDir(srcdir, func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
 			log.Printf("Prevent panic by handling failure accessing a path %q: %v", path, err)
 			return err

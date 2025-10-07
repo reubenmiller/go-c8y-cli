@@ -2,10 +2,13 @@ package pathresolver
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 )
 
 // ResolvePaths find matching files within a directory. The filenames can be filtered by pattern and extension
@@ -14,12 +17,19 @@ func ResolvePaths(sourceDirs []string, pattern string, extensions []string, igno
 	totalErrors := []error{}
 
 	for _, sourceDir := range sourceDirs {
+		// Resolve symlink if sourceDir is a symlink
+		if v, err := fileutilities.ResolvePath(sourceDir); err == nil {
+			sourceDir = v
+		} else {
+			totalErrors = append(totalErrors, err)
+			continue
+		}
 
 		if stat, err := os.Stat(sourceDir); err != nil || !stat.IsDir() {
 			continue
 		}
 
-		err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
+		err := filepath.WalkDir(sourceDir, func(path string, info fs.DirEntry, err error) error {
 			if err != nil {
 				log.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
 				return err

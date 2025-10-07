@@ -59,7 +59,7 @@ func zipit(source, target string, excludeRoot bool) error {
 
 	sourceDir := filepath.Clean(source)
 
-	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
+	err = filepath.WalkDir(source, func(path string, info os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -69,7 +69,11 @@ func zipit(source, target string, excludeRoot bool) error {
 			return nil
 		}
 
-		header, err := zip.FileInfoHeader(info)
+		fsInfo, fsInfoErr := info.Info()
+		if fsInfoErr != nil {
+			return fsInfoErr
+		}
+		header, err := zip.FileInfoHeader(fsInfo)
 		if err != nil {
 			return err
 		}
