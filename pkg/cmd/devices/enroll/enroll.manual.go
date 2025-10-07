@@ -69,6 +69,12 @@ func NewDeviceEnrollCmd(f *cmdutil.Factory) *DeviceEnrollCmd {
 
 			$ c8y util repeat 3 | c8y devices enroll --template "{id: 'device' + input.index}"
 			Enroll 2 devices and create unique private key and certificate per device
+
+			$ DEVICE_ID=example
+			$ c8y devices enroll --id "$DEVICE_ID"
+			$ mosquitto_sub --key "${DEVICE_ID}.key" --cert "${DEVICE_ID}.crt" -t 's/ds' -i "$DEVICE_ID" -h $C8Y_DOMAIN -p 8883 --cafile "$(brew --prefix)/etc/ca-certificates/cert.pem" --debug
+			$ mosquitto_sub --key "${DEVICE_ID}.key" --cert "${DEVICE_ID}.crt" --cafile "$(brew --prefix)/etc/ca-certificates/cert.pem" -i "$DEVICE_ID" -h $C8Y_DOMAIN -p 9883 -t 'custom/topic' --debug
+			Enroll a device and use the certificate to connect to Cumulocity via MQTT (with mosquitto_sub)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
