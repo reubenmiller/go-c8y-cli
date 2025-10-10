@@ -51,7 +51,7 @@ Create a VNC configuration that requires a password
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device (accepts pipeline)")
-	cmd.Flags().String("name", "webssh", "Connection name")
+	cmd.Flags().String("name", "webvnc", "Connection name")
 	cmd.Flags().String("hostname", "127.0.0.1", "Hostname")
 	cmd.Flags().Int("port", 5900, "Port")
 	cmd.Flags().String("password", "", "VNC Password")
