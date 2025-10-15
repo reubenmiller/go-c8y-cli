@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"os"
 	"time"
@@ -223,7 +224,8 @@ func (n *DeviceEnrollCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		if oneTimePassword == "" {
 			if v, err := c8yclient.DeviceEnrollment.GenerateOneTimePassword(); err == nil {
-				oneTimePassword = v
+				// URL's with "." may not be clickable on some consoles so avoid it
+				oneTimePassword = strings.ReplaceAll(v, ".", "_")
 			}
 		}
 
