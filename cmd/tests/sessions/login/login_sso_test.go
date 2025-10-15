@@ -188,7 +188,7 @@ func Test_SetSessionUsingOAuth2InternalWhenSSOIsActive(t *testing.T) {
 		t.Skipf("SSO_C8Y_HOST env variable is not set")
 	}
 	cmd := command.NewMockCommand()
-	cmdtext := fmt.Sprintf(`c8y sessions set --shell bash -v --loginType OAUTH2_INTERNAL %s`, "iot.latest.stage.c8y.io-reuben.d.miller@gmail.com.json")
+	cmdtext := fmt.Sprintf(`c8y sessions set --shell bash -v --loginType OAUTH2_INTERNAL %s`, "example.json")
 	stdout, cmdErr := command.ExecuteCmdWithStandardOutput(
 		cmd,
 		cmdtext,
