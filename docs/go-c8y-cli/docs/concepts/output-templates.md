@@ -131,7 +131,7 @@ c8y devices list \
 The output template is very similar to the template engine, however it has a few extra variables which can be referenced when building the output. The following tables details which variables can be used.
 
 |Name|Description|
-|---|----|----|
+|---|----|
 |`output`|Output of the response (type depends on the response)|
 |`request`|Object containing information about the request|
 |`response`|Object with information about the response included header, url, response time etc.|
