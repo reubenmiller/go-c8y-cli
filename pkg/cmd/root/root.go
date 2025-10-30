@@ -534,6 +534,15 @@ func isTabCompletionCommand() bool {
 	return strings.HasPrefix(strings.Join(os.Args[1:], ""), "__complete")
 }
 
+func containsFlag(args []string, flag string) bool {
+	for _, arg := range args {
+		if arg == flag {
+			return true
+		}
+	}
+	return false
+}
+
 func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions []extensions.Extension) error {
 	extCommandTree := make(map[string]*cobra.Command)
 	// Enable flag parsing when using tab completion, otherwise disable it
@@ -878,6 +887,16 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	log.Debugf("command str: %s", cmdStr)
 	log.Infof("command: c8y %s", utilities.GetCommandLineArgs())
 	log.Debugf("output format: %s", cfg.GetOutputFormat().String())
+
+	// Extension commands need to receive --help flag themselves
+	if cmd.Flags().Changed("help") || (cmd.DisableFlagParsing && (containsFlag(args, "-h") || containsFlag(args, "--help"))) {
+		if cmd.DisableFlagParsing {
+			// Extension command - skip session check and let script handle help
+			log.Debugf("Help requested for extension command, skipping session check")
+			return nil
+		}
+		return cmderrors.ErrHelp
+	}
 
 	// print examples
 	if cmd.Flags().Changed("examples") {
