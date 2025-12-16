@@ -31,18 +31,18 @@ jobs:
     env:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
-    - name: Set up Go 1.22
+    - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: "1.22"
+        go-version-file:  go.mod
 
     - name: install tooling
       run: go install golang.org/x/tools/cmd/goimports@latest
 
     - name: Install GoReleaser
-      uses: goreleaser/goreleaser-action@v5
+      uses: goreleaser/goreleaser-action@v6
       with:
         version: '~> v2'
         install-only: true
@@ -55,7 +55,7 @@ jobs:
     - name: Build Powershell Module
       run: task generate build
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: ReleaseArtifacts
         path: |

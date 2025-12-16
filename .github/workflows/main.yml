@@ -19,22 +19,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    # free disk space due to avoid runner errors when it runs out of space
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
+        android: true
+        dotnet: false
+        haskell: true
+        large-packages: false
+        docker-images: false
+        swap-storage: true
+    - uses: actions/checkout@v6
 
-    - name: Set up Go 1.22
-      uses: actions/setup-go@v5
+    - name: Set up Go
+      uses: actions/setup-go@v6
       with:
-        go-version: "1.22"
+        go-version-file:  go.mod
     - name: Use Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
-        node-version: '20'
+        node-version: '24'
 
     - name: install tooling
       run: go install golang.org/x/tools/cmd/goimports@latest
 
     - name: Install GoReleaser
-      uses: goreleaser/goreleaser-action@v5
+      uses: goreleaser/goreleaser-action@v6
       with:
         version: '~> v2'
         install-only: true
@@ -48,25 +59,25 @@ jobs:
       run: task build-powershell build-snapshot
       shell: bash
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: c8y.windows.amd64
         path: dist/windows_windows_amd64_v1/bin/c8y*
         if-no-files-found: error
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: c8y.linux.amd64
         path: dist/linux_linux_amd64_v1/bin/c8y*
         if-no-files-found: error
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: c8y.macos.amd64
         path: dist/macOS_darwin_amd64_v1/bin/c8y*
         if-no-files-found: error
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: PSc8y Module
         path: output_pwsh/PSc8y/
@@ -94,19 +105,19 @@ jobs:
         os: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
-    - name: Set up Go 1.22
-      uses: actions/setup-go@v5
+    - name: Set up Go
+      uses: actions/setup-go@v6
       with:
-        go-version: "1.22"
+        go-version-file:  go.mod
 
     - name: Install Task
       uses: arduino/setup-task@v2
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v7
       id: download
       with:
         name: c8y.linux.amd64
@@ -145,12 +156,12 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
-    - name: Set up Go 1.22
+    - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: "1.22"
+        go-version-file:  go.mod
     
     - name: Install Task
       uses: arduino/setup-task@v2
@@ -167,7 +178,7 @@ jobs:
       shell: bash
       timeout-minutes: 30
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       if: always()
       with:
         name: test-results-${{ matrix.os }}
@@ -184,7 +195,7 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
     steps:
       - name: Get test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: test-results-${{ matrix.os }}
           path: test-results-${{ matrix.os }}
