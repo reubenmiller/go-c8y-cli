@@ -92,6 +92,8 @@ func NewDeviceEnrollCmd(f *cmdutil.Factory) *DeviceEnrollCmd {
 	cmd.Flags().Duration("retry-every", 5*time.Second, "Polling interval to try to download the device certificate")
 
 	cmd.Flags().Bool("overwrite", false, "Overwrite any existing device key and certificate")
+	cmd.Flags().Bool("show-qr", false, "Show QR Code with the registration url")
+	cmd.Flags().Bool("show-url", true, "Show URL with the registration url")
 	cmd.Flags().String("mode", "", "Registration mode")
 	cmd.Flags().String("key", "", "Device's private certificate. If it does not exist it will be created")
 	cmd.Flags().String("cert", "", "Path to write the downloaded certificate to")
@@ -164,6 +166,8 @@ func (n *DeviceEnrollCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("type"),
 		flags.WithStringValue("mode"),
 		flags.WithBoolValue("overwrite"),
+		flags.WithDefaultBoolValue("show-qr"),
+		flags.WithDefaultBoolValue("show-url"),
 		flags.WithStringValue("one-time-password"),
 		flags.WithDuration("retry-every"),
 		cmdutil.WithTemplateValue(n.factory),
@@ -210,6 +214,8 @@ func (n *DeviceEnrollCmd) RunE(cmd *cobra.Command, args []string) error {
 			mode = "auto"
 		}
 		overwrite := options.Get("overwrite").Bool()
+		showQRCode := options.Get("show-qr").Bool()
+		showURL := options.Get("show-url").Bool()
 		keyFile := options.Get("key").String()
 		csrFile := options.Get("csr").String()
 		certFile := options.Get("cert").String()
@@ -382,8 +388,8 @@ func (n *DeviceEnrollCmd) RunE(cmd *cobra.Command, args []string) error {
 				// Print enrollment information
 				Banner: &c8y.DeviceEnrollmentBannerOptions{
 					Enable:     !preRegister,
-					ShowQRCode: true,
-					ShowURL:    true,
+					ShowQRCode: showQRCode,
+					ShowURL:    showURL,
 				},
 
 				CertificateSigningRequest: csr,

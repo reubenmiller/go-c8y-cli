@@ -203,7 +203,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			if cmdErr != nil {
 				logg, logErr := f.Logger()
 				if logg != nil && logErr == nil {
-					if !errors.Is(cmderrors.ErrHelp, cmdErr) {
+					if !errors.Is(cmdErr, cmderrors.ErrHelp) {
 						logg.Warnf("Check existing session failed. %s", cmdErr)
 					}
 				}
