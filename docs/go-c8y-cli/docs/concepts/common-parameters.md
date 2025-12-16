@@ -790,7 +790,19 @@ Save raw response to file
 
 The raw response (as returned by Cumulocity) can also be written to file in addition to displaying it on the console.
 
-No view logic or select statements on the response will be applied. This can be useful if you want to tee the output
+No view logic or select statements on the response will be applied. This can be useful if you want to tee the output.
+
+This flag will also expand the following variables if they are referenced:
+
+* `{filename}` - Filename found in the Content-Disposition response header
+* `{id}` - An id like value found in the request path (/inventory/binaries/12345 => 12345)
+* `{basename}` - The last path section of the request path (/some/nested/url/withafilename.json => withafilename.json)
+
+For JSON payloads the following additional fields are also available:
+
+* `{name}` - Object name (e.g. `.name`)
+* `{type}` - Object type (e.g. `.type`)
+* `{owner}` - Object owner (e.g. `.owner`)
 
 <CodeExample>
 
@@ -799,6 +811,9 @@ c8y alarms list -p 1 --outputFileRaw test.json
 
 # Or if you don't want any console output, just use redirection, but be sure to use raw!
 c8y alarms list -p 1 --raw > test.json
+
+# Save inventory items in individual files and use the managed object's type and name in the filename.
+c8y inventory list -p 2 | c8y inventory get --outputFileRaw "{type}__{name}.json"
 ```
 
 </CodeExample>
