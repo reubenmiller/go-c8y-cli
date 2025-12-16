@@ -798,7 +798,12 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 		if resp.StatusCode() != 0 {
 			// check if it is a dummy response (i.e. no status code)
 			newline := strings.Contains(strings.ToLower(resp.Response.Header.Get("Content-Type")), "json")
-			fullFilePath, err := r.saveResponseToFile(resp, commonOptions.OutputFileRaw, false, newline)
+			fields := make(map[string]string)
+			// Only works if it is json, otherwise these values will be empty
+			fields["name"] = resp.JSON("name").String()
+			fields["type"] = resp.JSON("type").String()
+			fields["owner"] = resp.JSON("owner").String()
+			fullFilePath, err := r.saveResponseToFile(resp, commonOptions.OutputFileRaw, false, newline, fields)
 
 			if err != nil {
 				return 0, cmderrors.NewSystemError("write to file failed", err)
@@ -1068,7 +1073,7 @@ func (r *RequestHandler) guessDataProperty(resp *c8y.Response) string {
 // @filename	filename
 // @directory	output directory. If empty, then a temp directory will be used
 // if filename
-func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string, append bool, newline bool) (string, error) {
+func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string, append bool, newline bool, fields map[string]string) (string, error) {
 
 	// Support simple variable substitution to be able to set the output file name dynamically to download a collection of files
 	if strings.Contains(filename, "{") && strings.Contains(filename, "}") {
@@ -1100,6 +1105,15 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 				}
 			} else {
 				r.Logger.Infof("Request is nill")
+			}
+		}
+
+		// Replace any additional fields
+		for k, v := range fields {
+			fieldName := fmt.Sprintf("{%s}", k)
+			if strings.Contains(filename, fieldName) {
+				r.Logger.Debugf("Replacing %s with %s", fieldName, v)
+				filename = strings.ReplaceAll(filename, fieldName, v)
 			}
 		}
 	}
