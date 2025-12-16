@@ -84,8 +84,9 @@ func filePrepender(filename string, opts ...string) string {
 	header := fmt.Sprintf(`---
 category: %s
 title: %s
+sidebar_key: %s
 ---
-`, category, fullCommand)
+`, category, fullCommand, strings.ReplaceAll(fullCommand, " ", "_"))
 	return header
 }
 

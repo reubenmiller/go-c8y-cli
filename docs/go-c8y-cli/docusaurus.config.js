@@ -33,13 +33,15 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
   url: 'https://reubenmiller.github.io',
   baseUrl,
   onBrokenLinks: isDev ? 'warn' : 'throw',
-  onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'reubenmiller',
   projectName: 'go-c8y-cli',
   trailingSlash: true,
   markdown: {
     mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
     preprocessor: ({ filePath, fileContent }) => {
       return substitutePlaceholders(fileContent, { bold: true });
     },
@@ -208,7 +210,7 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
     //   anonymizeIP: true,
     // },
     announcementBar: {
-      id: 'extensions',
+      id: 'announcements',
       content:
         '📦 go-c8y-cli now supports extensions. Install the latest version (>=2.30.0) and check out the concepts page 🚀',
     },
