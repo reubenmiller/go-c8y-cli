@@ -9,6 +9,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
+	testify_assert "github.com/stretchr/testify/assert"
 	"github.com/tidwall/gjson"
 )
 
@@ -139,4 +140,46 @@ func Test_QueryParameters(t *testing.T) {
 	assert.True(t, queryValue.Get("editable") == "true")
 	assert.True(t, queryValue.Get("type") == "myType")
 	assert.True(t, queryValue.Get("typeMapping") == "text/myType")
+}
+
+func Test_PathEscaping(t *testing.T) {
+	cmd := buildDummyCommand()
+
+	cmd.Flags().String("category", "", "String type")
+	cmd.Flags().String("name", "", "String type")
+
+	cases := []struct {
+		Args     []string
+		Expected string
+	}{
+		{
+			Args:     []string{"--category", "foo#bar", "--name", "bar"},
+			Expected: "foo%23bar/bar",
+		},
+		{
+			Args:     []string{"--category", "foo%23bar", "--name", "bar"},
+			Expected: "foo%23bar/bar",
+		},
+	}
+
+	for _, testcase := range cases {
+		cmd.SetArgs(testcase.Args)
+		cmdErr := cmd.Execute()
+		testify_assert.NoError(t, cmdErr)
+
+		inputIterators, _ := NewRequestInputIterators(cmd, nil)
+		path := flags.NewStringTemplate("{category}/{name}")
+		err := flags.WithPathParameters(
+			cmd,
+			path,
+			inputIterators,
+			flags.WithStringValue("category"),
+			flags.WithStringValue("name"),
+		)
+		testify_assert.NoError(t, err)
+
+		pathValue, _, err := path.Execute(false)
+		testify_assert.NoError(t, err)
+		testify_assert.Equal(t, testcase.Expected, pathValue)
+	}
 }

@@ -34,3 +34,28 @@ func Test_RequestIteratorWithBodyIterator(t *testing.T) {
 	assert.True(t, req.Path == "root/subpath")
 	assert.EqualMarshalJSON(t, req.Body, `{"nested":{"value":"2"}}`)
 }
+
+func Test_RequestIteratorWithEscapedPathVariables(t *testing.T) {
+	var err error
+	pathIter := iterator.NewRepeatIterator("foo#bar/sub#other", 0)
+	valueIter := iterator.NewSliceIterator([]string{"1", "2"})
+	body := mapbuilder.NewInitializedMapBuilder(true)
+	err = body.Set("nested.value", valueIter)
+	assert.OK(t, err)
+	options := &c8y.RequestOptions{
+		Body: body,
+	}
+	requestIter := NewRequestIterator(nil, *options, pathIter, nil, body)
+
+	var req *c8y.RequestOptions
+
+	req, _, err = requestIter.GetNext()
+	assert.OK(t, err)
+	assert.True(t, req.Path == "foo#bar/sub#other")
+	assert.EqualMarshalJSON(t, req.Body, `{"nested":{"value":"1"}}`)
+
+	req, _, err = requestIter.GetNext()
+	assert.OK(t, err)
+	assert.True(t, req.Path == "foo#bar/sub#other")
+	assert.EqualMarshalJSON(t, req.Body, `{"nested":{"value":"2"}}`)
+}

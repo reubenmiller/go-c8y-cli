@@ -16,6 +16,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
+	pkgurl "github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -103,7 +104,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		}
 
 		inputLine = input
-		req.Path = string(path)
+		req.Path = pkgurl.PathEscapePreserveQueryParameters(string(path))
 
 		if u, err := parseUrl(req.Path); err == nil {
 			if u.Host != "" {
@@ -111,7 +112,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 				// TODO: Check if this will break anything else
 				req.Host = u.Scheme + "://" + u.Host
 			}
-			req.Path = u.Path
+			req.Path = pkgurl.PathEscapePreserveQueryParameters(u.Path)
 			if u.RawQuery != "" {
 				queryParts = append(queryParts, u.RawQuery)
 			}

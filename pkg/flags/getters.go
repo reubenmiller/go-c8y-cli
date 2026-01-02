@@ -96,7 +96,56 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 			switch v := value.(type) {
 			case []string:
 				if len(v) > 0 {
-					path.SetVariable(name, url.EscapeQueryString(strings.Join(v, ",")))
+					path.SetVariable(name, url.PathEscape(strings.Join(v, ",")))
+				}
+
+			case []int:
+				if len(v) > 0 {
+					path.SetVariable(name, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v)), ","), "[]"))
+				}
+
+			case iterator.Iterator:
+				v1 := iterator.NewStringIterator(v, func(s string) string {
+					return url.PathEscape(s)
+				})
+				path.SetVariable(name, v1)
+				if v1.IsBound() {
+					totalIterators++
+				}
+
+			default:
+				strValue := fmt.Sprintf("%v", value)
+				if strValue != "" {
+					path.SetVariable(name, url.PathEscape(strValue))
+				}
+			}
+		}
+	}
+
+	if err := path.CheckRequired(); err != nil {
+		return err
+	}
+
+	if totalIterators > 0 {
+		inputIterators.Total += totalIterators
+		inputIterators.Path = path
+	}
+	return
+}
+
+// WithParameters returns a string from command line arguments
+func WithParameters(cmd *cobra.Command, path *StringTemplate, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
+	totalIterators := 0
+	for _, opt := range opts {
+		name, value, err := opt(cmd, inputIterators)
+		if err != nil {
+			return err
+		}
+		if name != "" {
+			switch v := value.(type) {
+			case []string:
+				if len(v) > 0 {
+					path.SetVariable(name, strings.Join(v, ","))
 				}
 
 			case []int:
@@ -113,7 +162,7 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 			default:
 				strValue := fmt.Sprintf("%v", value)
 				if strValue != "" {
-					path.SetVariable(name, url.EscapeQueryString(strValue))
+					path.SetVariable(name, strValue)
 				}
 			}
 		}
