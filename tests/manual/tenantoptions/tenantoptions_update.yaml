@@ -22,3 +22,25 @@ tests:
                 {
                   "body": {}
                 }
+
+    It encodes the path using url encoding:
+        command: >
+            c8y tenantoptions update --category measurement.series.latestvalue --key 'M#123.*' --dry --dryFormat json |
+            c8y util show --select pathEncoded -c=false --output json
+        exit-code: 0
+        stdout:
+            exactly: |
+                {
+                  "pathEncoded": "/tenant/options/measurement.series.latestvalue/M%23123.%2A"
+                }
+
+    It accepts url encoded values:
+        command: >
+            c8y tenantoptions update --category measurement.series.latestvalue --key 'M%23123.%2A' --dry --dryFormat json |
+            c8y util show --select pathEncoded -c=false --output json
+        exit-code: 0
+        stdout:
+            exactly: |
+                {
+                  "pathEncoded": "/tenant/options/measurement.series.latestvalue/M%23123.%2A"
+                }
