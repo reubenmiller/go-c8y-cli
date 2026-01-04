@@ -90,7 +90,7 @@ func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
 
 	// path parameters
 	path := flags.NewStringTemplate("{device}")
-	err = flags.WithPathParameters(
+	err = flags.WithParameters(
 		cmd,
 		path,
 		inputIterators,

@@ -75,7 +75,7 @@ func NewAssertCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker)
 
 		// path parameters
 		path := flags.NewStringTemplate("{id}")
-		err = flags.WithPathParameters(
+		err = flags.WithParameters(
 			cmd,
 			path,
 			inputIterators,
@@ -185,7 +185,7 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 
 		// path parameters
 		path := flags.NewStringTemplate("{device}")
-		err = flags.WithPathParameters(
+		err = flags.WithParameters(
 			cmd,
 			path,
 			inputIterators,

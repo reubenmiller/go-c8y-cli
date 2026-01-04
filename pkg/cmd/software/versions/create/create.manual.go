@@ -154,7 +154,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// path parameters
 	path := flags.NewStringTemplate("{software}")
-	err = flags.WithPathParameters(
+	err = flags.WithParameters(
 		cmd,
 		path,
 		inputIterators,
