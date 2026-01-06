@@ -2,6 +2,7 @@ package completion
 
 import (
 	"path/filepath"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -22,7 +23,18 @@ func WithOptions(cmd *cobra.Command, opts ...Option) *cobra.Command {
 func WithValidateSet(flagName string, values ...string) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return values, cobra.ShellCompDirectiveDefault
+			formattedValues := make([]string, 0, len(values))
+			// Unescape values such as \t to allow users to provide descriptions
+			// to each of the completion items rather than using a literal tab as this can be
+			// difficult to insert depending on the IDE and the document's tab indentation setting (e.g. spaces vs. tabs)
+			for _, v := range values {
+				if v1, err := strconv.Unquote("\"" + v + "\""); err == nil {
+					formattedValues = append(formattedValues, v1)
+				} else {
+					formattedValues = append(formattedValues, v)
+				}
+			}
+			return formattedValues, cobra.ShellCompDirectiveDefault
 		})
 		return cmd
 	}
