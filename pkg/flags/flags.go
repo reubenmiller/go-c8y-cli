@@ -149,6 +149,11 @@ func WithExtendedPipelineSupport(name string, property string, required bool, al
 	}
 }
 
+// Check if the given string is using the pipeline syntax, "-" or "-.myProperty"
+func IsRuntimePipelineProperty(v string) bool {
+	return v == "-" || strings.HasPrefix(v, "-.")
+}
+
 func WithRuntimePipelineProperty() Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		name := ""

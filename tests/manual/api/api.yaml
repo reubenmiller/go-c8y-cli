@@ -25,6 +25,15 @@ tests:
         path: /test/12345/endpoint
         body.value: "12345"
 
+  It supports pipeline input references:
+    command: >
+      echo "{\"myUrl\": \"/hello/world\"}" | c8y api GET --url -.myUrl --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /hello/world
+
   It sends a POST request using explicit url parameter:
     command: >
       echo "12345" | c8y api POST --url "/test/{url}/endpoint" --template "{value: input.value}" --dry

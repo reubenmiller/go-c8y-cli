@@ -123,6 +123,13 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
+
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -188,7 +195,9 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	}
 	if cmd.Flags().Changed("url") {
 		if v, err := cmd.Flags().GetString("url"); err == nil {
-			urlTemplate = v
+			if !flags.IsRuntimePipelineProperty(v) {
+				urlTemplate = v
+			}
 		}
 	}
 	if !strings.Contains(urlTemplate, "{url}") && strings.Contains(urlTemplate, "%s") {
