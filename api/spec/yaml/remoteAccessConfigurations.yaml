@@ -355,7 +355,7 @@ commands:
       - name: name
         type: string
         description: Connection name
-        default: webssh
+        default: webvnc
       
       - name: hostname
         type: string
