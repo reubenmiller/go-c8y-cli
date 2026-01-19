@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=../schema.json
+---
+
+group:
+  name: microservices/logs
+  description: Cumulocity microservices
+  descriptionLong: 'REST endpoint to interact with Cumulocity microservices'
+  link: https://cumulocity.com/guides/reference/applications/
+
+commands:
+  - name: list
+    # Currently a bug when parsing the output
+    skip: false
+    description: Get microservice logs
+    descriptionLong: |
+      Get logs of a microservice in the current tenant
+    method: GET
+    path: /application/applications/{id}/logs/{instance}
+    addAccept: true
+    accept: text/plain
+    # accept: application/vnd.com.nsn.cumulocity.applicationLogs+json
+    # collectionType: application/vnd.com.nsn.cumulocity.application+json
+    # collectionProperty: logs
+    collectionProperty: '-'
+    alias:
+        go: list
+        powershell: Get-MicroserviceLog
+    examples: 
+      powershell:
+        - description: Get microservice log entries
+          command: Get-MicroserviceLog -Id 1234 -Instance app1-scope-t12345-deployment-54dcf96599-rtn5d
+      go:
+        - description: Get microservice log entries
+          command: c8y microservices logs list --id 1234 --instance app1-scope-t12345-deployment-54dcf96599-rtn5d
+    pathParameters:
+      - name: id
+        type: microservice
+        pipeline: true
+        required: true
+        description: Microservice id
+        pipelineAliases:
+          - application.id
+          - id
+      
+      - name: instance
+        type: microserviceinstance
+        required: true
+        description: Microservice instance
+
+    queryParameters:
+      - name: dateFrom
+        type: datetime
+        default: "-1h"
+        description: Start date or date and time of log entries.
+
+      - name: dateTo
+        type: datetime
+        description: End date or date and time of log entries.
