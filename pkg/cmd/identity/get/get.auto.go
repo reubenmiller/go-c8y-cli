@@ -47,7 +47,7 @@ Get external identity
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("type", "c8y_Serial", "External identity type")
-	cmd.Flags().String("name", "", "External identity id/name (required) (accepts pipeline)")
+	cmd.Flags().String("name", "", "External identity name (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,

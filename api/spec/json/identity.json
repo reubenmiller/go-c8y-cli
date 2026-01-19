@@ -110,7 +110,7 @@
           "type": "string",
           "required": true,
           "pipeline": true,
-          "description": "External identity id/name",
+          "description": "External identity name",
           "pipelineAliases": [
             "externalId",
             "name",
@@ -174,7 +174,7 @@
           "type": "string",
           "required": true,
           "pipeline": true,
-          "description": "External identity id/name",
+          "description": "External identity name",
           "pipelineAliases": [
             "externalId",
             "name",
