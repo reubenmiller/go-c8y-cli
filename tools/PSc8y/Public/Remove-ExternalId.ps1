@@ -32,7 +32,7 @@ Delete a specific external identity type (via pipeline)
         [string]
         $Type,
 
-        # External identity id/name (required)
+        # External identity name (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]

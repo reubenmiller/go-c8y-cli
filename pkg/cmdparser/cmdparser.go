@@ -531,7 +531,7 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 
 		if identityType := cmd.Spec.Preset.GetOption("value"); identityType != "" {
 			cmd.Spec.Path = fmt.Sprintf("/identity/externalIds/%s/{name}", identityType)
-			cmd.Command.Flags().String("name", "", "External identity id/name (required) (accepts pipeline)")
+			cmd.Command.Flags().String("name", "", "External identity name (required) (accepts pipeline)")
 			cmd.Path.Options = append(
 				cmd.Path.Options,
 				[]flags.GetOption{
@@ -541,7 +541,7 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 		} else {
 			cmd.Spec.Path = "/identity/externalIds/{type}/{name}"
 			cmd.Command.Flags().String("type", "c8y_Serial", "External identity type")
-			cmd.Command.Flags().String("name", "", "External identity id/name (required) (accepts pipeline)")
+			cmd.Command.Flags().String("name", "", "External identity name (required) (accepts pipeline)")
 			cmd.Path.Options = append(
 				cmd.Path.Options,
 				[]flags.GetOption{

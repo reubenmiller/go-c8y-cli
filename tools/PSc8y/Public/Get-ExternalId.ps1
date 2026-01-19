@@ -28,7 +28,7 @@ Get external identity
         [string]
         $Type,
 
-        # External identity id/name (required)
+        # External identity name (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
