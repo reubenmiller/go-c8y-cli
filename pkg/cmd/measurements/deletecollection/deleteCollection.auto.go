@@ -35,7 +35,13 @@ func NewDeleteCollectionCmd(f *cmdutil.Factory) *DeleteCollectionCmd {
 		Long:  `Delete measurements using a filter`,
 		Example: heredoc.Doc(`
 $ c8y measurements deleteCollection --device 12345
-Delete measurement collection for a device
+Delete measurements for a device
+
+$ c8y measurements deleteCollection --device 12345 --dateTo "-10d"
+Delete measurements older than 10 days for a device
+
+$ c8y measurements deleteCollection --device 12345 --dateTo "-10d" --fragmentType lmp
+Delete measurements with a given fragment and older than 10 days for a device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.DeleteModeEnabled(cmd)
@@ -47,7 +53,7 @@ Delete measurement collection for a device
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
 	cmd.Flags().String("type", "", "Measurement type.")
-	cmd.Flags().String("fragmentType", "", "Fragment name from measurement (deprecated).")
+	cmd.Flags().String("fragmentType", "", "Fragment name from measurement")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of measurement occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of measurement occurrence.")
 
@@ -67,8 +73,6 @@ Delete measurement collection for a device
 	)
 
 	// Required flags
-
-	flags.MarkDeprecated(cmd, "fragmentType", "")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

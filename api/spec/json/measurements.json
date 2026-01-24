@@ -471,7 +471,7 @@
       "examples": {
         "powershell": [
           {
-            "description": "Delete measurement collection for a device",
+            "description": "Delete measurements for a device",
             "beforeEach": [
               "$Measurement = New-TestDevice | New-Measurement -Template \"test.measurement.jsonnet\""
             ],
@@ -479,12 +479,30 @@
             "afterEach": [
               "PSc8y\\Remove-ManagedObject -Id $Measurement.source.id"
             ]
+          },
+          {
+            "description": "Delete measurements older than 10 days for a device",
+            "command": "Remove-MeasurementCollection -Device $Measurement.source.id -DateTo \"-10d\"",
+            "skipTest": true
+          },
+          {
+            "description": "Delete measurements with a given fragment and older than 10 days for a device",
+            "command": "Remove-MeasurementCollection -Device $Measurement.source.id -DateTo \"-10d\" -FragmentType lmp",
+            "skipTest": true
           }
         ],
         "go": [
           {
-            "description": "Delete measurement collection for a device",
+            "description": "Delete measurements for a device",
             "command": "c8y measurements deleteCollection --device 12345"
+          },
+          {
+            "description": "Delete measurements older than 10 days for a device",
+            "command": "c8y measurements deleteCollection --device 12345 --dateTo \"-10d\""
+          },
+          {
+            "description": "Delete measurements with a given fragment and older than 10 days for a device",
+            "command": "c8y measurements deleteCollection --device 12345 --dateTo \"-10d\" --fragmentType lmp"
           }
         ]
       },
@@ -516,8 +534,7 @@
         {
           "name": "fragmentType",
           "type": "string",
-          "deprecated": true,
-          "description": "Fragment name from measurement (deprecated)."
+          "description": "Fragment name from measurement"
         },
         {
           "name": "dateFrom",

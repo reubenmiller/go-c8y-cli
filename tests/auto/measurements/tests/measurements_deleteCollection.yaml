@@ -1,5 +1,5 @@
 tests:
-    measurements_deleteCollection_Delete measurement collection for a device:
+    measurements_deleteCollection_Delete measurements for a device:
         command: c8y measurements deleteCollection --device 12345
         exit-code: 0
         stdout:
@@ -8,3 +8,24 @@ tests:
                 path: /measurement/measurements
             contains:
                 - source=12345
+    measurements_deleteCollection_Delete measurements older than 10 days for a device:
+        command: c8y measurements deleteCollection --device 12345 --dateTo "-10d"
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /measurement/measurements
+            contains:
+                - source=12345
+                - dateTo=
+    measurements_deleteCollection_Delete measurements with a given fragment and older than 10 days for a device:
+        command: c8y measurements deleteCollection --device 12345 --dateTo "-10d" --fragmentType lmp
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /measurement/measurements
+            contains:
+                - source=12345
+                - fragmentType=lmp
+                - dateTo=
