@@ -578,6 +578,7 @@
       "method": "PUT",
       "path": "event/events/{id}/binaries",
       "accept": "application/vnd.com.nsn.cumulocity.event+json",
+      "contentType": "application/octet-stream",
       "alias": {
         "go": "updateBinary",
         "powershell": "Update-EventBinary"
