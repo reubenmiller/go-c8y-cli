@@ -211,7 +211,7 @@
               "$Device = PSc8y\\New-TestDevice",
               "$Measurement = New-Measurement -Template \"{c8y_Temperature:{T:{value:_.Int(),unit:'°C'}}}\" -Device $Device.id -Type \"TempReading\""
             ],
-            "command": "Get-MeasurementSeries -Device $Device.id -Series \"c8y_Temperature.T\" -DateFrom \"1970-01-01\" -DateTo \"0s\"",
+            "command": "Get-MeasurementSeries -Device $Device.id -Series \"c8y_Temperature.T\" -DateFrom \"1970-01-01\"",
             "afterEach": [
               "PSc8y\\Remove-ManagedObject -Id $Device.id"
             ]
@@ -221,7 +221,7 @@
             "beforeEach": [
               "$Measurement2 = New-Measurement -Template \"{c8y_Temperature:{T:{value:_.Int(),unit:'°C'}}}\" -Device $Device.id -Type \"TempReading\""
             ],
-            "command": "Get-MeasurementSeries -Device $Measurement2.source.id -Series \"c8y_Temperature.T\" -DateFrom \"1970-01-01\" -DateTo \"0s\"",
+            "command": "Get-MeasurementSeries -Device $Measurement2.source.id -Series \"c8y_Temperature.T\" -DateFrom \"1970-01-01\"",
             "afterEach": [
               "PSc8y\\Remove-ManagedObject -Id $Measurement2.source.id"
             ]
@@ -236,12 +236,30 @@
             "afterEach": [
               "PSc8y\\Remove-ManagedObject -Id $Device.id"
             ]
+          },
+          {
+            "description": "Get a list of series and calculate the average and use 1 week intervals",
+            "command": "Get-MeasurementSeries -Device 12345 -Series app_Weather.barometer -AggregationFunction avg -AggregationInterval 1w",
+            "skipTest": true
+          },
+          {
+            "description": "Get a list of series and calculate the average, count and sum and use 1 hour intervals",
+            "command": "Get-MeasurementSeries -Device 12345 -Series app_Weather.temperature -AggregationFunction avg,count,sum -AggregationInterval 1h",
+            "skipTest": true
           }
         ],
         "go": [
           {
             "description": "Get a list of series [app_Weather.temperature] and [app_Weather.barometer] for device 12345",
-            "command": "c8y measurements getSeries --device 12345 --series app_Weather.temperature --series app_Weather.barometer --dateFrom \"-10min\" --dateTo \"0s\""
+            "command": "c8y measurements getSeries --device 12345 --series app_Weather.temperature --series app_Weather.barometer --dateFrom \"-10min\""
+          },
+          {
+            "description": "Get a list of series and calculate the average and use 1 week intervals",
+            "command": "c8y measurements getSeries --device 12345 --series app_Weather.barometer --aggregationFunction avg --aggregationInterval 1w"
+          },
+          {
+            "description": "Get a list of series and calculate the average, count and sum and use 1 hour intervals",
+            "command": "c8y measurements getSeries --device 12345 --series app_Weather.temperature --aggregationFunction avg,count,sum --aggregationInterval 1h"
           }
         ]
       },
@@ -257,6 +275,25 @@
           "name": "series",
           "type": "string[]",
           "description": "measurement type and series name, e.g. c8y_AccelerationMeasurement.acceleration"
+        },
+        {
+          "name": "aggregationFunction",
+          "type": "string[]",
+          "description": "(time series only) Selects aggregation functions that are calculated for each selected aggregation interval",
+          "validationSet": [
+            "min",
+            "max",
+            "avg",
+            "sum",
+            "count",
+            "stdDevPop",
+            "stdDevSamp"
+          ]
+        },
+        {
+          "name": "aggregationInterval",
+          "type": "string[]",
+          "description": "(time series only) Fetch results are aggregated using a time interval specified by an integer followed by a unit. Available units of (s)econd, (m)inute, (h)our, (d)ay, week, (M)onth, (q)uarter and (y)ear"
         },
         {
           "name": "aggregationType",
