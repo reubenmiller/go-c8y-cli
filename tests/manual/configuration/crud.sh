@@ -33,7 +33,7 @@ echo "$CONFIG1" | c8y util show --select description -o csv | grep "My custom co
 #
 # create from file
 #
-package_file="$TEMP_DIR/package-1.json"
+package_file="$TEMP_DIR/package-1.txt"
 echo "dummy file" > "$package_file"
 
 CONFIG2=$( c8y configuration create --name "${NAME}_2" --file "$package_file" --configurationType dummytype --select "id,url" --output csv )
@@ -60,7 +60,7 @@ c8y configuration send --device 1234 --configuration "${NAME}_2" --dry --dryForm
 
 
 # Update configuration binary
-package_file2="$TEMP_DIR/package-2.json"
+package_file2="$TEMP_DIR/package-2.txt"
 echo "dummy file 2" > "$package_file2"
 CONFIG2_ID=$( echo "$CONFIG2" | cut -d, -f1 )
 echo "$CONFIG2" | c8y configuration update --file "$package_file2" --select id --output csv | grep "^$CONFIG2_ID$"

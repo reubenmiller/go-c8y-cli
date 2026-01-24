@@ -114,6 +114,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
+		flags.WithStaticStringValue("Content-Type", "text/plain"),
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {

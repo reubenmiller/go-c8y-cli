@@ -245,6 +245,7 @@
       "method": "PUT",
       "path": "/inventory/binaries/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "contentType": "text/plain",
       "alias": {
         "go": "update",
         "powershell": "Update-Binary"
