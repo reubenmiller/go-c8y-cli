@@ -13,7 +13,17 @@ https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/measurements_deleteCollec
 .EXAMPLE
 PS> Remove-MeasurementCollection -Device $Measurement.source.id
 
-Delete measurement collection for a device
+Delete measurements for a device
+
+.EXAMPLE
+PS> Remove-MeasurementCollection -Device $Measurement.source.id -DateTo "-10d"
+
+Delete measurements older than 10 days for a device
+
+.EXAMPLE
+PS> Remove-MeasurementCollection -Device $Measurement.source.id -DateTo "-10d" -FragmentType lmp
+
+Delete measurements with a given fragment and older than 10 days for a device
 
 
 #>
@@ -32,6 +42,11 @@ Delete measurement collection for a device
         [Parameter()]
         [string]
         $Type,
+
+        # Fragment name from measurement
+        [Parameter()]
+        [string]
+        $FragmentType,
 
         # Start date or date and time of measurement occurrence.
         [Parameter()]
