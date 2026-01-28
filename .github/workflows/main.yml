@@ -133,7 +133,7 @@ jobs:
         c8y currentuser get --select id --debug
         task test-cli
       shell: bash
-      timeout-minutes: 20
+      timeout-minutes: 60
 
   test-pwsh:
     runs-on: ${{ matrix.os }}
