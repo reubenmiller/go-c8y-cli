@@ -27,6 +27,18 @@ func EscapeQueryString(v string) string {
 	return v
 }
 
+func IsURLEncoded(v string) bool {
+	q, _ := url.QueryUnescape(v)
+	return url.QueryEscape(q) == v
+}
+
+func EscapeQueryStringStrict(v string) string {
+	if IsURLEncoded(v) {
+		return v
+	}
+	return url.QueryEscape(v)
+}
+
 func PathEscape(v string) string {
 	raw, err := url.PathUnescape(v)
 	if err == nil {

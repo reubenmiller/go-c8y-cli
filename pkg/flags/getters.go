@@ -55,7 +55,7 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 		case map[string]string:
 			for key, val := range v {
 				if val != "" {
-					query.SetVariable(key, url.EscapeQueryString(val))
+					query.SetVariable(key, url.EscapeQueryStringStrict(val))
 				}
 			}
 		case map[string][]string:
@@ -63,7 +63,7 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 			for key, values := range v {
 				encodedValues := make([]string, 0, len(values))
 				for _, value := range values {
-					encodedValues = append(encodedValues, url.EscapeQueryString(value))
+					encodedValues = append(encodedValues, url.EscapeQueryStringStrict(value))
 				}
 				query.SetVariable(key, encodedValues)
 			}

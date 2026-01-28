@@ -9,3 +9,12 @@ tests:
       json:
         method: GET
         pathEncoded: /inventory/managedObjects?myValue=1
+
+  It encodes spaces correctly:
+    command: |
+      c8y inventory list --customQueryParam "foo: string with space" --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /inventory/managedObjects?foo=string+with+space
