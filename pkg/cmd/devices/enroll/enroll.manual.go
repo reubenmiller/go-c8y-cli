@@ -53,7 +53,7 @@ func NewDeviceEnrollCmd(f *cmdutil.Factory) *DeviceEnrollCmd {
 			The registration url and QR code is printed on the console to enable users to register the device
 			via a web browser.
 
-			This feature requires the private preview feature toggle, "certificate-authority"
+			This feature requires the feature toggle, "certificate-authority"
 		`),
 		Example: heredoc.Doc(`
 			$ c8y devices enroll --id "ASDF098SD1J10912UD92JDLCNCU8"

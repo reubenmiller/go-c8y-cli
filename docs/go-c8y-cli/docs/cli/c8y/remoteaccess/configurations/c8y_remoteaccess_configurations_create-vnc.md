@@ -31,7 +31,7 @@ Create a VNC configuration that requires a password
       --device strings          Device (accepts pipeline)
   -h, --help                    help for create-vnc
       --hostname string         Hostname (default "127.0.0.1")
-      --name string             Connection name (default "webssh")
+      --name string             Connection name (default "webvnc")
       --password string         VNC Password
       --port int                Port (default 5900)
       --processingMode string   Cumulocity processing mode

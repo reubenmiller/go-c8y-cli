@@ -30,6 +30,8 @@ Set a session using the in-built "c8y sessions set"
 $ eval "$( c8y sessions login --from-cmd "c8y-session-bitwarden list --folder c8y" --secrets BW_SESSION --format json )"
 Set a session from an external command, where the external commands returns the selected session in json format on stdout
 
+$ eval "$( c8y sessions login --from-prompt --host example.cumulocity.com)"
+
 ```
 
 ### Options
@@ -40,15 +42,19 @@ Set a session from an external command, where the external commands returns the 
       --from-cmd string        External command to execute to get the log in details
       --from-env               Read from environment variables
       --from-file string       Read session from a file
+      --from-prompt            Read from user prompted input
       --from-stdin             Read from standard input
   -h, --help                   help for login
-      --loginType string       Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared
+      --host string            Cumulocity host. Only used with the 'interactive' provider
+      --loginType string       Login type preference, e.g. OAUTH2_INTERNAL, OAUTH2 (device flow) or BASIC. When set to BASIC, any existing token will be cleared
       --mode string            Session mode which controls which commands are allowed, e.g. dev, qual or prod
       --no-banner              Don't show the session banner
       --output-format string   Output format
       --provider string        Session provider which returns the session to use
       --secrets strings        List of secrets to include as env variables when running an external command. Only valid with from-cmd
       --shell string           Shell type to return the environment variables
+      --sso-audience string    SSO Audience
+      --sso-scopes string      SSO Scopes
       --tfaCode string         Two Factor Authentication code
 ```
 

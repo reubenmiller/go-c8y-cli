@@ -16,7 +16,13 @@ c8y measurements deleteCollection [flags]
 
 ```
 $ c8y measurements deleteCollection --device 12345
-Delete measurement collection for a device
+Delete measurements for a device
+
+$ c8y measurements deleteCollection --device 12345 --dateTo "-10d"
+Delete measurements older than 10 days for a device
+
+$ c8y measurements deleteCollection --device 12345 --dateTo "-10d" --fragmentType lmp
+Delete measurements with a given fragment and older than 10 days for a device
         
 ```
 
@@ -26,6 +32,7 @@ Delete measurement collection for a device
       --dateFrom string         Start date or date and time of measurement occurrence.
       --dateTo string           End date or date and time of measurement occurrence.
       --device strings          Device ID (accepts pipeline)
+      --fragmentType string     Fragment name from measurement
   -h, --help                    help for deleteCollection
       --processingMode string   Cumulocity processing mode
       --type string             Measurement type.

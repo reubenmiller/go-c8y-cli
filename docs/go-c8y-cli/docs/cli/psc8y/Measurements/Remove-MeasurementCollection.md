@@ -20,6 +20,7 @@ Delete measurement collection
 Remove-MeasurementCollection
 	[[-Device] <Object[]>]
 	[[-Type] <String>]
+	[[-FragmentType] <String>]
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
 	[-NoAccept]
@@ -82,7 +83,21 @@ Delete measurements using a filter
 Remove-MeasurementCollection -Device $Measurement.source.id
 ```
 
-Delete measurement collection for a device
+Delete measurements for a device
+
+### EXAMPLE 2
+```
+Remove-MeasurementCollection -Device $Measurement.source.id -DateTo "-10d"
+```
+
+Delete measurements older than 10 days for a device
+
+### EXAMPLE 3
+```
+Remove-MeasurementCollection -Device $Measurement.source.id -DateTo "-10d" -FragmentType lmp
+```
+
+Delete measurements with a given fragment and older than 10 days for a device
 
 ## PARAMETERS
 
@@ -116,6 +131,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -FragmentType
+Fragment name from measurement
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -DateFrom
 Start date or date and time of measurement occurrence.
 
@@ -125,7 +155,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -140,7 +170,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

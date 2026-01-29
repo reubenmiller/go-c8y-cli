@@ -1,67 +1,70 @@
 ---
-category: connect
-title: c8y remoteaccess connect ssh
+category: devices
+title: c8y devices enroll
 ---
-Connect to a device via ssh
+Enroll a device using the Cumulocity Certificate Authority
 
 ### Synopsis
 
-Connect to a device via ssh
+Register a device using the Cumulocity Certificate Authority which repeatedly tries to download the
+device's certificate by submitting a Certificate Signing Request via the EST protocol.
 
-Additional arguments can be passed to the ssh shell by using the "--" convention where everything
-after the "--" will be passed untouched to the ssh shell. In this mode, the shell will not be
-interactive, and it will return upon completion of the command.
+The registration url and QR code is printed on the console to enable users to register the device
+via a web browser.
 
-You can set the default ssh user to use for all ssh connections for your current c8y session file
-using:
-
-	c8y settings update remoteaccess.sshuser root
-
+This feature requires the feature toggle, "certificate-authority"
 
 
 ```
-c8y remoteaccess connect ssh [flags]
+c8y devices enroll [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y remoteaccess connect ssh --device 12345
-Start an interactive SSH session on the device
+$ c8y devices enroll --id "ASDF098SD1J10912UD92JDLCNCU8"
+Enroll a new device with a randomized one-time password
 
-$ c8y remoteaccess connect ssh --device 12345 --user admin
-Start an interactive SSH session on the device with a given ssh user
+$ c8y devices enroll --id "ASDF098SD1J10912UD92JDLCNCU8" --one-time-password "RqzwJeTusABlk4)KmtIc"
+Enroll a new device and provide the one-time-password to be used for enrollment
 
-$ c8y remoteaccess connect ssh --device 12345 --user admin --preferred-auth password
-Start an interactive SSH session on the device with a given ssh user and force password authentication
+$ c8y devices enroll --id "ASDF098SD1J10912UD92JDLCNCU8" --host example.cumulocity.com
+Enroll a new device and specify a host name so a session does not need to be set
 
-$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1883:127.0.0.1:1883
-Start an interactive SSH session and configure port-forward by mapping the remote's 127.0.0.1:1883 to your machine's port 1883
+$ c8y devices enroll --id "ASDF098SD1J10912UD92JDLCNCU8" --key myname.key --cert myname.crt
+Enroll a new device and specify the names of the private key and public certificate to use
 
-$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1883
-Start an interactive SSH session and configure port-forward: 127.0.0.11883 (remote) => 1883 (local)
+$ c8y util repeat 3 | c8y devices enroll --template "{id: 'device' + input.index}"
+Enroll 2 devices and create unique private key and certificate per device
 
-$ c8y remoteaccess connect ssh --device 12345 --user admin -L 1884:1883
-Start an interactive SSH session and configure port-forward: 127.0.0.11883 (remote) => 1884 (local)
-
-$ c8y remoteaccess connect ssh --device 12345 --user admin -- systemctl status
-Use a non-interactive session to execute a single command and print the result
-
-$ c8y remoteaccess connect ssh --device 12345 --user admin -- "sh -c 'cat /etc/os-release'"
-use a non-interactive session to execute a custom shell command (notice the surrounding double quotes on the command!)
-
+$ DEVICE_ID=example
+$ c8y devices enroll --id "$DEVICE_ID"
+$ mosquitto_sub --key "${DEVICE_ID}.key" --cert "${DEVICE_ID}.crt" -t 's/ds' -i "$DEVICE_ID" -h $C8Y_DOMAIN -p 8883 --cafile "$(brew --prefix)/etc/ca-certificates/cert.pem" --debug
+$ mosquitto_sub --key "${DEVICE_ID}.key" --cert "${DEVICE_ID}.crt" --cafile "$(brew --prefix)/etc/ca-certificates/cert.pem" -i "$DEVICE_ID" -h $C8Y_DOMAIN -p 9883 -t 'custom/topic' --debug
+Enroll a device and use the certificate to connect to Cumulocity via MQTT (with mosquitto_sub)
+     
 ```
 
 ### Options
 
 ```
-      --configuration string    Remote Access Configuration
-      --device strings          Device
-  -h, --help                    help for ssh
-      --listen string           Listener address. unix:///run/example.sock (default "127.0.0.1:0")
-  -L, --port-forward string     SSH Port-Forwarding option in the format [bind_address:]port:host:hostport. It also accepts a custom short form, <local>[:<remote>]. The value is passed to the ssh -L option, so read the ssh man page for more info
-      --preferred-auth string   Set the preferred authentication for the ssh connection. This will add '-o PreferredAuthentications=<value>' to the ssh command
-      --user string             Default ssh user
+      --cert string                Path to write the downloaded certificate to
+      --csr string                 Use the given certificate signing request instead generating one
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+  -h, --help                       help for enroll
+      --host string                Custom Cumulocity host
+      --id string                  Device identifier. Max: 1000 characters. E.g. IMEI (required) (accepts pipeline)
+      --key string                 Device's private certificate. If it does not exist it will be created
+      --mode string                Registration mode
+      --one-time-password string   One Time Password used for initial enrollment. Leave blank for a randomly generated password
+      --overwrite                  Overwrite any existing device key and certificate
+      --processingMode string      Cumulocity processing mode
+      --retry-every duration       Polling interval to try to download the device certificate (default 5s)
+      --show-qr                    Show QR Code with the registration url
+      --show-url                   Show URL with the registration url (default true)
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --type string                Device type to register (only works when pre-registering the device)
 ```
 
 ### Options inherited from parent commands
