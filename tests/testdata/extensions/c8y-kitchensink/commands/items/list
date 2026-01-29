@@ -24,3 +24,17 @@ EOF
 
 # Print log messages on stderr so it does not mix with results which is generally printed on stdout
 echo "Running custom services list command" >&2
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --help|-h)
+      help
+      exit 0
+      ;;
+    --examples)
+      examples
+      exit 0
+      ;;
+  esac
+  shift
+done

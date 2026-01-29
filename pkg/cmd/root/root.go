@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 
@@ -837,6 +838,15 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 	return nil
 }
 
+// check if an extension (i.e. flag parsing is disabled) is being used
+// and manually check if any of the help related flags are given
+func isExtensionWithHelpFlags(cmd *cobra.Command, args []string) bool {
+	if !cmd.DisableFlagParsing {
+		return false
+	}
+	return slices.Contains(args, "--help") || slices.Contains(args, "-h") || slices.Contains(args, "--examples")
+}
+
 func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	log, err := c.Factory.Logger()
 	if err != nil {
@@ -887,6 +897,12 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 		// mdContent, _ := markdown.Render(examples, style)
 		fmt.Fprint(c.Factory.IOStreams.Out, examples)
 		return cmderrors.ErrHelp
+	}
+
+	if isExtensionWithHelpFlags(cmd, args) {
+		// Extension command - skip session check to allow the script to display the help/usage
+		log.Debugf("Skipping auth check and letting the extension handle the help/example flags")
+		return nil
 	}
 
 	// TODO: Find more efficient/extensible way of ignoring specific commands in the activity log
