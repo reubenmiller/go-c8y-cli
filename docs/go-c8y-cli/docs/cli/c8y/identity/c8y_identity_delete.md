@@ -27,7 +27,7 @@ Delete a specific external identity type (via pipeline)
 
 ```
   -h, --help                    help for delete
-      --name string             External identity id/name (required) (accepts pipeline)
+      --name string             External identity name (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
       --type string             External identity type (default "c8y_Serial")
 ```

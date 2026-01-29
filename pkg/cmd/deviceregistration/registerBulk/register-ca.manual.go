@@ -27,12 +27,12 @@ func NewRegisterCumulocityCACmd(f *cmdutil.Factory) *RegisterCumulocityCACmd {
 	}
 	cmd := &cobra.Command{
 		Use:   "register-ca",
-		Short: "Register device with an x509 certificate from the Cumulocity Certificate Authority (private preview feature)",
+		Short: "Register device with an x509 certificate from the Cumulocity Certificate Authority",
 		Long: heredoc.Doc(`
 			Register a device using the Cumulocity Certificate Authority to enable the device to request a device certificate
 			securely using EST. This will be supported by thin-edge.io out-of-the-box.
 
-			This feature requires the private preview feature toggle, "certificate-authority"
+			This feature requires the feature toggle, "certificate-authority"
 		`),
 		Example: heredoc.Doc(`
 			$ c8y deviceregistration register-ca --id "ASDF098SD1J10912UD92JDLCNCU8"

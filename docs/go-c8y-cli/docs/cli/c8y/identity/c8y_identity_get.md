@@ -25,7 +25,7 @@ Get external identity
 
 ```
   -h, --help          help for get
-      --name string   External identity id/name (required) (accepts pipeline)
+      --name string   External identity name (required) (accepts pipeline)
       --type string   External identity type (default "c8y_Serial")
 ```
 

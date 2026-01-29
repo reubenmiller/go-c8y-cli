@@ -30,7 +30,7 @@ Install zsh and bash helpers
 
 ```
   -h, --help            help for install
-      --shell strings   Type of shell (default [bash,fish,powershell,zsh])
+      --shell strings   Type of shell (default [bash,fish,powershell,pwsh,zsh])
 ```
 
 ### Options inherited from parent commands

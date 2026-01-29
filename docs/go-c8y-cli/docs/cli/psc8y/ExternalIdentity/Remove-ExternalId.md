@@ -108,7 +108,7 @@ Accept wildcard characters: False
 ```
 
 ### -Name
-External identity id/name (required)
+External identity name (required)
 
 ```yaml
 Type: Object[]

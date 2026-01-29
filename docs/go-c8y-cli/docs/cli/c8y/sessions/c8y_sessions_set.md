@@ -31,7 +31,7 @@ Set a session using a given file (non-interactively)
 ```
       --clear                  Clear any existing tokens
   -h, --help                   help for set
-      --loginType string       Login type preference, e.g. OAUTH2_INTERNAL or BASIC. When set to BASIC, any existing token will be cleared
+      --loginType string       Login type preference, e.g. OAUTH2_INTERNAL, OAUTH2 (device flow) or BASIC. When set to BASIC, any existing token will be cleared
       --no-banner              Don't show the session banner
       --sessionFilter string   Filter to be applied to the list of sessions even before the values can be selected
       --shell string           Shell type to return the environment variables

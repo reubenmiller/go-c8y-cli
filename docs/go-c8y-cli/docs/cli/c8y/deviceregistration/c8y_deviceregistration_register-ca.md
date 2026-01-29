@@ -2,14 +2,14 @@
 category: deviceregistration
 title: c8y deviceregistration register-ca
 ---
-Register device with an x509 certificate from the Cumulocity Certificate Authority (private preview feature)
+Register device with an x509 certificate from the Cumulocity Certificate Authority
 
 ### Synopsis
 
 Register a device using the Cumulocity Certificate Authority to enable the device to request a device certificate
 securely using EST. This will be supported by thin-edge.io out-of-the-box.
 
-This feature requires the private preview feature toggle, "certificate-authority"
+This feature requires the feature toggle, "certificate-authority"
 
 
 ```
