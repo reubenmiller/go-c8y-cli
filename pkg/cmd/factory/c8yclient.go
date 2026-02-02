@@ -266,6 +266,14 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 	}
 }
 
+func parseBasicAuthCredentials(client *c8y.Client, tenant, username, password string) {
+	if t, u, found := strings.Cut(username, "/"); found {
+		tenant = t
+		username = u
+	}
+	client.SetTenantUsernamePassword(tenant, username, password)
+}
+
 func loadAuthentication(conf *config.Config, client *c8y.Client) error {
 	loginType := conf.GetLoginTypeRaw()
 	if loginType == "" {
@@ -280,7 +288,7 @@ func loadAuthentication(conf *config.Config, client *c8y.Client) error {
 
 		// password
 		if p, err := conf.GetPassword(); err == nil && p != "" {
-			client.SetTenantUsernamePassword(conf.GetTenant(), conf.GetUsername(), p)
+			parseBasicAuthCredentials(client, conf.GetTenant(), conf.GetUsername(), p)
 			return nil
 		}
 
@@ -308,7 +316,7 @@ func loadAuthentication(conf *config.Config, client *c8y.Client) error {
 		if err != nil {
 			return err
 		}
-		client.SetTenantUsernamePassword(conf.GetTenant(), conf.GetUsername(), password)
+		parseBasicAuthCredentials(client, conf.GetTenant(), conf.GetUsername(), password)
 		return nil
 	}
 

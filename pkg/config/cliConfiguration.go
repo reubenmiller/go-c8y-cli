@@ -701,6 +701,10 @@ func (c *Config) BindAuthorization() error {
 
 // GetUsername returns the Cumulocity username for the session
 func (c *Config) GetUsername() string {
+	if v := c.GetSessionUsername(); v != "" {
+		c.Logger.Infof("Using session username override")
+		return v
+	}
 	v := c.viper.GetString("username")
 
 	if v != "" {
@@ -961,6 +965,11 @@ func (c *Config) WritePersistentConfig() error {
 
 // GetPassword returns the decrypted password of the current session
 func (c *Config) GetPassword() (string, error) {
+	if v := c.GetSessionPassword(); v != "" {
+		c.Logger.Infof("Using session password override")
+		return v, nil
+	}
+
 	value := c.GetPasswordRaw()
 
 	if value == "" {
@@ -1720,14 +1729,30 @@ func ParseLoginTypeWithDefault(v string) string {
 
 // GetLoginTypeWithDefault get the preferred login type
 func (c *Config) GetLoginTypeWithDefault() string {
-	v := c.viper.GetString(SettingsLoginType)
+	v := c.GetLoginTypeRaw()
 	return ParseLoginTypeWithDefault(v)
 }
 
 // GetLoginTypeRaw get the raw value, where it could also be an empty value
 func (c *Config) GetLoginTypeRaw() string {
+	if c.HasSessionUsernameOrPassword() {
+		// Force BASIC AUTH
+		return c8y.LoginTypeBasic
+	}
 	v := c.viper.GetString(SettingsLoginType)
 	return strings.ToUpper(v)
+}
+
+func (c *Config) HasSessionUsernameOrPassword() bool {
+	return c.GetSessionUsername() != "" || c.GetSessionPassword() != ""
+}
+
+func (c *Config) GetSessionUsername() string {
+	return c.viper.GetString("settings.defaults.sessionUsername")
+}
+
+func (c *Config) GetSessionPassword() string {
+	return c.viper.GetString("settings.defaults.sessionPassword")
 }
 
 // SetLoginType sets the authorization method, e.g. BASIC, OAUTH2_INTERNAL, NONE
