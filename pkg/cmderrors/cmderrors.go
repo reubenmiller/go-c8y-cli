@@ -87,6 +87,14 @@ func (c CommandError) Unwrap() error {
 }
 
 func (c CommandError) Error() string {
+	return c.formatError(true)
+}
+
+func (c CommandError) ErrorPretty() string {
+	return c.formatError(false)
+}
+
+func (c CommandError) formatError(disableRawMessage bool) string {
 	details := ""
 	if c.StatusCode > 0 {
 		details = fmt.Sprintf(" ::StatusCode=%d", c.StatusCode)
@@ -106,7 +114,7 @@ func (c CommandError) Error() string {
 	}
 
 	// Print raw response as microservices add additional information in the response
-	if c.WithRawMessage && len(c.CumulocityError) > 0 && c.IO != nil {
+	if !disableRawMessage && c.WithRawMessage && len(c.CumulocityError) > 0 && c.IO != nil {
 		message.WriteString(c.IO.ColorScheme().Red("\n\nError Response\n\n"))
 		if json.Valid(c.CumulocityError) {
 			b := pretty.PrettyOptions(c.CumulocityError, &pretty.Options{
