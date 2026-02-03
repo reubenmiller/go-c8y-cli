@@ -820,12 +820,6 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 			return c.client, nil
 		}
 		client, err := factory.CreateCumulocityClient(c.Factory, c.SessionFile, c.SessionUsername, c.SessionPassword, disableEncryptionCheck)()
-		if client != nil {
-			if c.SessionUsername != "" || c.SessionPassword != "" {
-				client.SetUsernamePassword(c.SessionUsername, c.SessionPassword)
-				c.log.Debug("Forcing basic authentication as user provided username/password")
-			}
-		}
 
 		if c.log != nil {
 			c8y.Logger = c.log
@@ -872,11 +866,15 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	// print log information
 	sessionFile := cfg.GetSessionFile()
 	if sessionFile != "" {
-		log.Infof("Loaded session: %s", cfg.HideSensitiveInformationIfActive(client, sessionFile))
+		log.Infof("Loading session from file: %s", cfg.HideSensitiveInformationIfActive(client, sessionFile))
 		if _, err := os.Stat(sessionFile); err != nil {
 			if c8ysession.IsSessionFilePath(sessionFile) {
 				log.Warnf("Failed to verify session file. %s", err)
+			} else {
+				log.Warnf("Given file is not a session file. %s", err)
 			}
+		} else {
+			log.Infof("Loaded session: %s", cfg.HideSensitiveInformationIfActive(client, sessionFile))
 		}
 	}
 

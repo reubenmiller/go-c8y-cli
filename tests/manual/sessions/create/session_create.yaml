@@ -64,3 +64,8 @@ tests:
           "password": "test",
           "username": "dummy@me.com"
         }
+
+  It supports creating a session and referering it using the session global flag:
+    command: |
+      ./manual/sessions/create/create-session.sh
+    exit-code: 0
