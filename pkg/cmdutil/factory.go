@@ -502,7 +502,7 @@ func (f *Factory) CheckPostCommandError(err error) error {
 		}
 		if !cErr.IsSilent() && !strings.Contains(silentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
 			if printLogEntries {
-				logg.Errorf("%s", cErr)
+				logg.Errorf("%s", cErr.ErrorPretty())
 			}
 			fmt.Fprintf(w, "%s\n", cErr.JSONString())
 
