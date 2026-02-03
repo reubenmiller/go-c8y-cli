@@ -401,6 +401,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	c8y.Logger = log
 
 	canChangeActiveSession := true
 	// Warn users if they try to use this command directly

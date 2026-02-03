@@ -135,7 +135,7 @@ func (n *DeviceEnrollCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	_ = llog
+	c8y.Logger = llog
 
 	c8yclient, err := n.factory.Client()
 	if err != nil {

@@ -174,6 +174,7 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	c8y.Logger = log
 	prompter := prompt.NewPrompt(log)
 
 	if !cmd.Flags().Changed("host") {
