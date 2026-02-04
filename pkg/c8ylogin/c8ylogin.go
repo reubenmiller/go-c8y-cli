@@ -453,12 +453,8 @@ func (lh *LoginHandler) login() {
 						continue
 					}
 
-					// Check error type, and if the configuration can't be found, then skip SSO
-					// add a new formal type to cover this scenario
-					// could not get OpenID Connect configuration
-					lh.state <- LoginStateAbort
-					lh.Err = fmt.Errorf("OAuth2 device authorization flow failed. %w", loginErr)
-					return lh.Err
+					lh.Logger.Infof("Skipping login type (%s) as SSO login failed. err=%s", option.Type, loginErr)
+					continue
 				}
 
 				lh.Logger.Infof("Received access token via device flow. type=%s, scope=%s, tokenPresent=%v, refreshTokenPresent=%v", accessToken.Type, accessToken.Scope, accessToken.Token != "", accessToken.RefreshToken != "")
