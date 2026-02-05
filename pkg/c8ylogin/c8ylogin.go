@@ -488,7 +488,7 @@ func (lh *LoginHandler) login() {
 						continue
 					}
 
-					lh.Logger.Infof("Skipping login type (%s) as SSO login failed. err=%s", option.Type, loginErr)
+					lh.Logger.Warnf("Skipping login type (%s) as SSO login failed. err=%s", option.Type, loginErr)
 					continue
 				}
 
