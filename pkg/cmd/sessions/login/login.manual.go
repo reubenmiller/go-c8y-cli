@@ -287,6 +287,10 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 		providerCommand = append(providerCommand, "-v")
 	}
 
+	if cfg.Debug() {
+		providerCommand = append(providerCommand, "--debug")
+	}
+
 	providerCommand = append(providerCommand, args...)
 	cmd := exec.Command(providerCommand[0], providerCommand[1:]...)
 	cmd.Env = env
