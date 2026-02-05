@@ -871,7 +871,7 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 			if c8ysession.IsSessionFilePath(sessionFile) {
 				log.Warnf("Failed to verify session file. %s", err)
 			} else {
-				log.Warnf("Given file is not a session file. %s", err)
+				log.Infof("Given file is not a session file. %s", err)
 			}
 		} else {
 			log.Infof("Loaded session: %s", cfg.HideSensitiveInformationIfActive(client, sessionFile))
