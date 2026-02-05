@@ -237,6 +237,9 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		n.onSave(client)
 	})
 	handler.LoginType = n.LoginType
+	if n.LoginType != "" {
+		handler.AllowedLoginTypes = strings.Split(n.LoginType, ",")
+	}
 	handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
 	handler.SSO.Scopes = cfg.SSOScopes()
 	if handler.LoginType == "" {

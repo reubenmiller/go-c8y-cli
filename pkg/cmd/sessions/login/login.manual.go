@@ -552,6 +552,9 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 		handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {})
 		handler.LoginType = loginType
+		if loginType != "" {
+			handler.AllowedLoginTypes = strings.Split(loginType, ",")
+		}
 		handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
 
 		if len(n.SSOScopes) > 0 {

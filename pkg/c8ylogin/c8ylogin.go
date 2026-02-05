@@ -105,6 +105,9 @@ type LoginHandler struct {
 	LoginType       string
 	LoginAttempted  bool
 
+	// User defined list of the allowed login types (from their perspective)
+	AllowedLoginTypes []string
+
 	// SSO specific settings
 	SSO config.SSOSettings
 
@@ -258,6 +261,27 @@ func (lh *LoginHandler) sortLoginOptions() {
 		}
 	}
 
+	// Optionally limit the login types based on user settings
+	if len(lh.AllowedLoginTypes) > 0 {
+		// only include the user-given login type
+		lh.Logger.Debugf("Filtering the login options based on a user-defined list. types=%v", lh.AllowedLoginTypes)
+		allowedLoginOptions := make([]c8y.TenantLoginOption, 0, 1)
+		allLoginTypes := make([]string, 0, len(lh.LoginOptions.LoginOptions))
+		matchingTypes := make([]string, 0)
+		for _, loginOption := range lh.LoginOptions.LoginOptions {
+			for _, allowed := range lh.AllowedLoginTypes {
+				allLoginTypes = append(allLoginTypes, loginOption.Type)
+				if strings.EqualFold(loginOption.Type, strings.TrimSpace(allowed)) {
+					allowedLoginOptions = append(allowedLoginOptions, loginOption)
+					matchingTypes = append(matchingTypes, loginOption.Type)
+				}
+			}
+		}
+
+		lh.LoginOptions.LoginOptions = allowedLoginOptions
+		lh.Logger.Infof("Filtered login types. matches=%v. availableOnTenant=%v", matchingTypes, allLoginTypes)
+	}
+
 	// sort login options
 	sort.SliceStable(lh.LoginOptions.LoginOptions, func(i, j int) bool {
 		iWeight := 100
@@ -272,6 +296,14 @@ func (lh *LoginHandler) sortLoginOptions() {
 		}
 		return iWeight < jWeight
 	})
+
+	// log the preference of login types
+	preferenceLoginTypes := make([]string, len(lh.LoginOptions.LoginOptions))
+	for _, option := range lh.LoginOptions.LoginOptions {
+		preferenceLoginTypes = append(preferenceLoginTypes, option.Type)
+	}
+
+	lh.Logger.Infof("Login type preference: %v", preferenceLoginTypes)
 }
 
 func (lh *LoginHandler) init() {
@@ -528,7 +560,7 @@ func (lh *LoginHandler) login() {
 							if strings.Contains(v.Message, `For input string: "undefined"`) {
 								lh.Logger.Infof("OAuth2 most likely requires TFA. %s", v.Message)
 							} else {
-							lh.Logger.Errorf("OAuth2 failed. %s", v.Message)
+								lh.Logger.Errorf("OAuth2 failed. %s", v.Message)
 							}
 						} else {
 							lh.Logger.Errorf("OAuth2 failed. %s", err)
