@@ -93,6 +93,20 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 		if info.IsDir() {
 			return nil
 		}
+
+		// check for nested symlinks and only support nested symlinks to files (not folders)
+		if info.Type()&fs.ModeSymlink != 0 {
+			targetInfo, err := os.Stat(path)
+			if err != nil {
+				log.Infof("Ignoring symlink to non-existent path: %+v", path)
+				return nil
+			}
+			if targetInfo.IsDir() {
+				log.Infof("Ignoring nested symlink to a folder (to prevent potential infinite loops): %+v", path)
+				return nil
+			}
+		}
+
 		// skip settings file
 		if strings.HasPrefix(info.Name(), config.SettingsGlobalName+".") ||
 			strings.HasPrefix(info.Name(), ".") {
