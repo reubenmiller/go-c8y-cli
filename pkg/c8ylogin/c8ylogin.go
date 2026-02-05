@@ -520,7 +520,13 @@ func (lh *LoginHandler) login() {
 
 					if err := lh.C8Yclient.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
 						if v, ok := err.(*c8y.ErrorResponse); ok {
+							// Check for known message that the server responds with
+							// when TFA is required, so don't log it on the ERROR level as it is annoying for users
+							if strings.Contains(v.Message, `For input string: "undefined"`) {
+								lh.Logger.Infof("OAuth2 most likely requires TFA. %s", v.Message)
+							} else {
 							lh.Logger.Errorf("OAuth2 failed. %s", v.Message)
+							}
 						} else {
 							lh.Logger.Errorf("OAuth2 failed. %s", err)
 						}
