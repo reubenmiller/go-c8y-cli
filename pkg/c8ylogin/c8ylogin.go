@@ -702,8 +702,6 @@ func (lh *LoginHandler) setupTFA() error {
 			Level:      qrterminal.M,
 			Writer:     lh.Writer,
 			HalfBlocks: true,
-			BlackChar:  qrterminal.BLACK,
-			WhiteChar:  qrterminal.WHITE,
 			QuietZone:  1,
 		})
 
