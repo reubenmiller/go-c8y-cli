@@ -509,7 +509,7 @@ func (lh *LoginHandler) login() {
 					ctx, cancel := context.WithTimeout(context.Background(), time.Duration(Timeout)*time.Millisecond)
 					defer cancel()
 
-					lh.Logger.Debugf("Logging in using %s", c8y.LoginTypeOAuth2Internal)
+					lh.Logger.Infof("Logging in using %s", c8y.LoginTypeOAuth2Internal)
 
 					// Check if username/password are provided
 					if lh.C8Yclient.Username == "" {
@@ -600,7 +600,7 @@ func (lh *LoginHandler) verify() {
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateTFASetup
 				} else if lh.errorContains(v.Message, "TFA TOTP code required") {
-					lh.Logger.Debugf("TFA code is required. server response: %s", v.Message)
+					lh.Logger.Infof("TFA code is required. server response: %s", v.Message)
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateNoAuth
 				} else if lh.errorContains(v.Message, "User has been logged out") {
