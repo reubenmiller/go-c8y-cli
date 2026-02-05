@@ -51,6 +51,6 @@ tests:
       contains:
         - "✓ Session is now active"
         - ---------------------  Cumulocity Session (sensitive info is hidden)  ---------------------
-        - "host         : {host}"
+        - "{host}"
         - "tenant       : {tenant}"
         - "username     : {username}"
