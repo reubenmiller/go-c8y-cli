@@ -551,6 +551,7 @@ func (lh *LoginHandler) login() {
 				}
 				lh.onSave()
 				lh.state <- LoginStateVerify
+				return nil
 
 			case c8y.LoginTypeBasic:
 				if lh.C8Yclient.Username == "" || lh.C8Yclient.Password == "" {
