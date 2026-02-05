@@ -243,7 +243,10 @@ func (lh *LoginHandler) sortLoginOptions() {
 		c8y.LoginTypeNone:           40,
 		c8y.LoginTypeBasic:          30,
 		c8y.LoginTypeOAuth2Internal: 20,
-		c8y.LoginTypeOAuth2:         10,
+
+		// reduce priority due to common misconfiguration and
+		// currently only the OAUTH2 Device Flow works and not many users have this setup correctly
+		c8y.LoginTypeOAuth2: 50,
 	}
 
 	if lh.LoginType != "" {
