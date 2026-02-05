@@ -581,7 +581,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		session.Username = handler.C8Yclient.Username
-		session.Host = handler.C8Yclient.BaseURL.Host
+		session.Host = handler.C8Yclient.BaseURL.String()
 
 		// Use the handler selected login type
 		session.LoginType = handler.LoginType
