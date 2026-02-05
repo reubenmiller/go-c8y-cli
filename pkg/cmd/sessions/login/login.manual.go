@@ -287,6 +287,10 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 		providerCommand = append(providerCommand, "-v")
 	}
 
+	if cfg.Debug() {
+		providerCommand = append(providerCommand, "--debug")
+	}
+
 	providerCommand = append(providerCommand, args...)
 	cmd := exec.Command(providerCommand[0], providerCommand[1:]...)
 	cmd.Env = env
@@ -548,6 +552,9 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 		handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {})
 		handler.LoginType = loginType
+		if loginType != "" {
+			handler.AllowedLoginTypes = strings.Split(loginType, ",")
+		}
 		handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
 
 		if len(n.SSOScopes) > 0 {

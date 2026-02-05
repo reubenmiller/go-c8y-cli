@@ -105,6 +105,9 @@ type LoginHandler struct {
 	LoginType       string
 	LoginAttempted  bool
 
+	// User defined list of the allowed login types (from their perspective)
+	AllowedLoginTypes []string
+
 	// SSO specific settings
 	SSO config.SSOSettings
 
@@ -243,7 +246,10 @@ func (lh *LoginHandler) sortLoginOptions() {
 		c8y.LoginTypeNone:           40,
 		c8y.LoginTypeBasic:          30,
 		c8y.LoginTypeOAuth2Internal: 20,
-		c8y.LoginTypeOAuth2:         10,
+
+		// reduce priority due to common misconfiguration and
+		// currently only the OAUTH2 Device Flow works and not many users have this setup correctly
+		c8y.LoginTypeOAuth2: 50,
 	}
 
 	if lh.LoginType != "" {
@@ -253,6 +259,27 @@ func (lh *LoginHandler) sortLoginOptions() {
 		} else {
 			lh.Logger.Infof("Unsupported login method. The given option will be ignored. %s", lh.LoginType)
 		}
+	}
+
+	// Optionally limit the login types based on user settings
+	if len(lh.AllowedLoginTypes) > 0 {
+		// only include the user-given login type
+		lh.Logger.Debugf("Filtering the login options based on a user-defined list. types=%v", lh.AllowedLoginTypes)
+		allowedLoginOptions := make([]c8y.TenantLoginOption, 0, 1)
+		allLoginTypes := make([]string, 0, len(lh.LoginOptions.LoginOptions))
+		matchingTypes := make([]string, 0)
+		for _, loginOption := range lh.LoginOptions.LoginOptions {
+			for _, allowed := range lh.AllowedLoginTypes {
+				allLoginTypes = append(allLoginTypes, loginOption.Type)
+				if strings.EqualFold(loginOption.Type, strings.TrimSpace(allowed)) {
+					allowedLoginOptions = append(allowedLoginOptions, loginOption)
+					matchingTypes = append(matchingTypes, loginOption.Type)
+				}
+			}
+		}
+
+		lh.LoginOptions.LoginOptions = allowedLoginOptions
+		lh.Logger.Infof("Filtered login types. matches=%v. availableOnTenant=%v", matchingTypes, allLoginTypes)
 	}
 
 	// sort login options
@@ -269,6 +296,14 @@ func (lh *LoginHandler) sortLoginOptions() {
 		}
 		return iWeight < jWeight
 	})
+
+	// log the preference of login types
+	preferenceLoginTypes := make([]string, len(lh.LoginOptions.LoginOptions))
+	for _, option := range lh.LoginOptions.LoginOptions {
+		preferenceLoginTypes = append(preferenceLoginTypes, option.Type)
+	}
+
+	lh.Logger.Infof("Login type preference: %v", preferenceLoginTypes)
 }
 
 func (lh *LoginHandler) init() {
@@ -453,7 +488,7 @@ func (lh *LoginHandler) login() {
 						continue
 					}
 
-					lh.Logger.Infof("Skipping login type (%s) as SSO login failed. err=%s", option.Type, loginErr)
+					lh.Logger.Warnf("Skipping login type (%s) as SSO login failed. err=%s", option.Type, loginErr)
 					continue
 				}
 
@@ -506,7 +541,7 @@ func (lh *LoginHandler) login() {
 					ctx, cancel := context.WithTimeout(context.Background(), time.Duration(Timeout)*time.Millisecond)
 					defer cancel()
 
-					lh.Logger.Debugf("Logging in using %s", c8y.LoginTypeOAuth2Internal)
+					lh.Logger.Infof("Logging in using %s", c8y.LoginTypeOAuth2Internal)
 
 					// Check if username/password are provided
 					if lh.C8Yclient.Username == "" {
@@ -520,7 +555,13 @@ func (lh *LoginHandler) login() {
 
 					if err := lh.C8Yclient.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
 						if v, ok := err.(*c8y.ErrorResponse); ok {
-							lh.Logger.Errorf("OAuth2 failed. %s", v.Message)
+							// Check for known message that the server responds with
+							// when TFA is required, so don't log it on the ERROR level as it is annoying for users
+							if strings.Contains(v.Message, `For input string: "undefined"`) {
+								lh.Logger.Infof("OAuth2 most likely requires TFA. %s", v.Message)
+							} else {
+								lh.Logger.Errorf("OAuth2 failed. %s", v.Message)
+							}
 						} else {
 							lh.Logger.Errorf("OAuth2 failed. %s", err)
 						}
@@ -542,6 +583,7 @@ func (lh *LoginHandler) login() {
 				}
 				lh.onSave()
 				lh.state <- LoginStateVerify
+				return nil
 
 			case c8y.LoginTypeBasic:
 				if lh.C8Yclient.Username == "" || lh.C8Yclient.Password == "" {
@@ -591,7 +633,7 @@ func (lh *LoginHandler) verify() {
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateTFASetup
 				} else if lh.errorContains(v.Message, "TFA TOTP code required") {
-					lh.Logger.Debugf("TFA code is required. server response: %s", v.Message)
+					lh.Logger.Infof("TFA code is required. server response: %s", v.Message)
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateNoAuth
 				} else if lh.errorContains(v.Message, "User has been logged out") {
@@ -702,8 +744,6 @@ func (lh *LoginHandler) setupTFA() error {
 			Level:      qrterminal.M,
 			Writer:     lh.Writer,
 			HalfBlocks: true,
-			BlackChar:  qrterminal.BLACK,
-			WhiteChar:  qrterminal.WHITE,
 			QuietZone:  1,
 		})
 
