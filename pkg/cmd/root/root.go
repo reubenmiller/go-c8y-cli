@@ -94,6 +94,7 @@ import (
 	realtimeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/realtime"
 	remoteaccessCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/remoteaccess"
 	retentionrulesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/retentionrules"
+	scriptsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/scripts"
 	sessionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions"
 	settingsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/settings"
 	smartgroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/smartgroups"
@@ -353,6 +354,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		completionCmd.NewCmdCompletion().GetCommand(),
 		templateCmd.NewSubCommand(f).GetCommand(),
 		utilCmd.NewSubCommand(f).GetCommand(),
+		scriptsCmd.NewSubCommand(f).GetCommand(),
 		cacheCmd.NewSubCommand(f).GetCommand(),
 		settingsCmd.NewSubCommand(f).GetCommand(),
 		realtimeCmd.NewSubCommand(f).GetCommand(),
