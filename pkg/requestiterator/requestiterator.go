@@ -3,6 +3,7 @@ package requestiterator
 import (
 	"bytes"
 	"errors"
+	"net/http"
 	"net/url"
 	"os"
 	"reflect"
@@ -194,7 +195,68 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 			req.Body = v
 		}
 	}
+
+	ensureMultipartQueryPreserved(req)
+
 	return req, inputLine, nil
+}
+
+func ensureMultipartQueryPreserved(req *c8y.RequestOptions) {
+	if req == nil || len(req.FormData) == 0 {
+		return
+	}
+
+	query, ok := req.Query.(string)
+	if !ok || query == "" {
+		return
+	}
+
+	existingPrepareRequest := req.PrepareRequest
+	req.PrepareRequest = func(httpReq *http.Request) (*http.Request, error) {
+		if existingPrepareRequest != nil {
+			var err error
+			httpReq, err = existingPrepareRequest(httpReq)
+			if err != nil {
+				return httpReq, err
+			}
+		}
+
+		if httpReq == nil || httpReq.URL == nil {
+			return httpReq, nil
+		}
+
+		if httpReq.URL.RawQuery == "" {
+			httpReq.URL.RawQuery = query
+			return httpReq, nil
+		}
+
+		baseValues, baseErr := url.ParseQuery(httpReq.URL.RawQuery)
+		addValues, addErr := url.ParseQuery(query)
+		if baseErr != nil || addErr != nil {
+			httpReq.URL.RawQuery = strings.TrimPrefix(httpReq.URL.RawQuery+"&"+query, "&")
+			return httpReq, nil
+		}
+
+		for key, values := range addValues {
+			for _, value := range values {
+				if !valueExists(baseValues[key], value) {
+					baseValues.Add(key, value)
+				}
+			}
+		}
+
+		httpReq.URL.RawQuery = baseValues.Encode()
+		return httpReq, nil
+	}
+}
+
+func valueExists(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
 }
 
 func hasUnresolvedVariables(v []byte) bool {
