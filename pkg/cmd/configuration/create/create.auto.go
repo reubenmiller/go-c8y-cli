@@ -68,7 +68,7 @@ available for multiple device types
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("deviceType", "deviceType", false, "c8y_Filter.type", "deviceType", "type"),
+		flags.WithExtendedPipelineSupport("deviceType", "deviceType", false, "deviceType", "c8y_Filter.type", "type"),
 	)
 
 	// Required flags

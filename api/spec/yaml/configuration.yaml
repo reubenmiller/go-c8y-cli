@@ -71,7 +71,7 @@ commands:
           - name: deviceType
             type: string
             description: Filter by deviceType
-            format: (c8y_Filter.type eq '%s')
+            format: (deviceType eq '%s')
 
           - name: description
             type: string
@@ -154,8 +154,8 @@ commands:
         description: Device type filter. Only allow configuration to be applied to devices of this type
         pipeline: true
         pipelineAliases:
-          - "c8y_Filter.type"
           - "deviceType"
+          - "c8y_Filter.type"
           - "type"
 
       - name: file
