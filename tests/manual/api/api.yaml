@@ -284,3 +284,14 @@ tests:
     stderr:
       contains:
         - <html>
+
+  It supports custom query parameters on multipart formdata uploads:
+    command: |
+      c8y api -n POST '/path/to/myapi?id=supercoolid' --customQueryParam other=1 --formdata foo=bar --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: POST
+        pathEncoded: '/path/to/myapi?id=supercoolid&other=1'
+        headers.Content-Type: r/multipart/form-data
+        body: r/{"foo":"bar"}
