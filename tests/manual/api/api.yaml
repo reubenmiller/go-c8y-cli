@@ -276,3 +276,11 @@ tests:
               method: GET
               path: /service/inventory
               host: https://localhost:8080
+
+  It supports returning errors that aren't in json:
+    command: |
+      c8y api -n GET '/path/to/myapi?id=supercoolid' --accept text/html --dry=false
+    exit-code: 4
+    stderr:
+      contains:
+        - <html>
