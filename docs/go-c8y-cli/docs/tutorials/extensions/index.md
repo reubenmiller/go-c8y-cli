@@ -1,6 +1,7 @@
 ---
 category: Tutorials - Extensions
 title: Extensions
+sidebar_key: tutorials-extensions
 ---
 
 import DocCardList from '@theme/DocCardList';
