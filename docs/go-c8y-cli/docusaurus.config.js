@@ -33,13 +33,15 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
   url: 'https://reubenmiller.github.io',
   baseUrl,
   onBrokenLinks: isDev ? 'warn' : 'throw',
-  onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'reubenmiller',
   projectName: 'go-c8y-cli',
   trailingSlash: true,
   markdown: {
     mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
     preprocessor: ({ filePath, fileContent }) => {
       return substitutePlaceholders(fileContent, { bold: true });
     },
@@ -194,14 +196,12 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
       additionalLanguages: ['powershell', 'bash', 'markdown'],
     },
     algolia: {
+      appId: 'SKDHZQ8T6H',
       apiKey: 'f4645553f294c1bacaef04baf61633f0',
       indexName: 'goc8ycli',
       contextualSearch: false,
-      searchParameters: {
-        facetFilters: [],
-        // facetFilters: ["type:lvl1","type:lvl0"],
-      },
-      appId: 'SKDHZQ8T6H',
+      // DocSearch v4: opt-in to Algolia Insights (click/conversion analytics)
+      insights: false,
     },
     // googleAnalytics: {
     //   trackingID: 'UA-155263011-1',
