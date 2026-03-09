@@ -274,9 +274,11 @@ func NewServerError(r *c8y.Response, err error, iostream *iostreams.IOStreams, w
 		if v.Response != nil {
 			if json.Valid(v.Response.Body()) {
 				cmdError.CumulocityError = json.RawMessage(v.Response.Body())
-			} else if b, jsonErr := json.Marshal(v.Response.Body()); jsonErr == nil {
-				// handle non json response
-				cmdError.CumulocityError = json.RawMessage(b)
+			} else if strings.Contains(v.Response.Header().Get("Content-Type"), "text") {
+				cmdError.CumulocityError = json.RawMessage(v.Response.Body())
+			} else {
+				// handle non json/non-text response into base64 (which is the default behaviour of json.Marshal for a []byte)
+				cmdError.CumulocityError = json.RawMessage(v.Response.Body())
 			}
 		}
 		cmdError.Message = v.Message

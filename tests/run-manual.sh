@@ -11,6 +11,9 @@ pushd "$SCRIPT_DIR"
 C8Y_SETTINGS_EXTENSIONS_DATADIR="$(pwd)/testdata"
 export C8Y_SETTINGS_EXTENSIONS_DATADIR
 
+# Override any defaults which are set
+export C8Y_SETTINGS_DEFAULTS_PAGESIZE=" "
+
 folder=
 if [ $# -gt 0 ]; then
     folder=$1
