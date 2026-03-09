@@ -23,12 +23,14 @@ The demo scripts are used to run multiple command and simulate typing before the
 3. Reference the video from a markdown file
 
     ```markdown
-    import Video from '@site/src/components/video';
+    import AsciinemaPlayer from '@site/src/components/AsciinemaPlayer';
 
-    <Video
-    videoSrcURL="https://asciinema.org/a/414235/iframe?speed=1.0&autoplay=false&size=small&rows=30"
-    videoTitle="Activitylog example"
-    width="90%"
-    height="600px"
-    ></Video>
+    <AsciinemaPlayer
+    src="https://asciinema.org/a/414235.cast"
+    rows={30}
+    preload
+    fit="width"
+    theme="monokai"
+    poster="npt:0:03"
+    />
     ```
