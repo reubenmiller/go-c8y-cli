@@ -4,16 +4,18 @@ title: Select Parameter
 
 import CodeExample from '@site/src/components/CodeExample';
 
-import Video from '@site/src/components/video';
+import AsciinemaPlayer from '@site/src/components/AsciinemaPlayer';
 
 ## Demo
 
-<Video
-  videoSrcURL="https://asciinema.org/a/414288/iframe?speed=1.0&autoplay=false&size=small&rows=25"
-  videoTitle="Select example"
-  width="90%"
-  height="500px"
-  ></Video>
+<AsciinemaPlayer
+  src="https://asciinema.org/a/414288.cast"
+  rows={25}
+  preload
+  fit="width"
+  theme="monokai"
+  poster="npt:0:06"
+/>
 
 ## Overview
 

@@ -4,13 +4,15 @@ layout: default
 title: Demo
 slug: /
 ---
-import Video from '@site/src/components/video';
+import AsciinemaPlayer from '@site/src/components/AsciinemaPlayer';
 
 Welcome to the Cumulocity CLI Tool.
 
-<Video
-  videoSrcURL="https://asciinema.org/a/413796/iframe?speed=1.0&autoplay=false&size=small&rows=30"
-  videoTitle="go-c8y-cli demo"
-  width="90%"
-  height="600px"
-  ></Video>
+<AsciinemaPlayer
+  src="https://asciinema.org/a/413796.cast"
+  rows={30}
+  preload
+  fit="width"
+  theme="monokai"
+  poster="npt:0:03"
+/>

@@ -3,16 +3,18 @@ title: Views
 ---
 
 import CodeExample from '@site/src/components/CodeExample';
-import Video from '@site/src/components/video';
+import AsciinemaPlayer from '@site/src/components/AsciinemaPlayer';
 
 ## Demo
 
-<Video
-  videoSrcURL="https://asciinema.org/a/416566/iframe?speed=1.0&autoplay=false&size=small&rows=30"
-  videoTitle="Views example"
-  width="90%"
-  height="550px"
-  ></Video>
+<AsciinemaPlayer
+  src="https://asciinema.org/a/416566.cast"
+  rows={30}
+  preload
+  fit="width"
+  theme="monokai"
+  poster="npt:0:04"
+/>
 
 ## Overview
 
