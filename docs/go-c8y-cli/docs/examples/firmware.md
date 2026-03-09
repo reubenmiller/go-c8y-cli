@@ -3,7 +3,6 @@ title: Firmware
 ---
 
 import CodeExample from '@site/src/components/CodeExample';
-import Video from '@site/src/components/video';
 
 ## Bash/zsh only
 

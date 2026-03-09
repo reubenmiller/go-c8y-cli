@@ -3,7 +3,6 @@ title: Caching
 ---
 
 import CodeExample from '@site/src/components/CodeExample';
-import Video from '@site/src/components/video';
 
 ## Overview
 
