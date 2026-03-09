@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Docs site dependencies are build-time only and do not affect the CLI binary.
+  # Security alerts for these packages are suppressed intentionally.
+  - package-ecosystem: "npm"
+    directory: "/docs/go-c8y-cli"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-patch"
+          - "version-update:semver-minor"
+          - "version-update:semver-major"
