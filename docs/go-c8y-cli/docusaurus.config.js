@@ -29,7 +29,7 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 (module.exports = {
   title: 'Cumulocity CLI',
-  tagline: 'Cumulocity Command Line Interface',
+  tagline: 'Command Line Interface',
   url: 'https://reubenmiller.github.io',
   baseUrl,
   onBrokenLinks: isDev ? 'warn' : 'throw',
