@@ -116,7 +116,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 				flags.WithStaticStringValue("configuration", "(type eq 'c8y_ConfigurationDump')"),
 				flags.WithStringValue("configurationType", "configurationType", "(configurationType eq '%s')"),
 				flags.WithStringValue("name", "name", "(name eq '%s')"),
-				flags.WithStringValue("deviceType", "deviceType", "(c8y_Filter.type eq '%s')"),
+				flags.WithStringValue("deviceType", "deviceType", "(deviceType eq '%s')"),
 				flags.WithStringValue("description", "description", "(description eq '%s')"),
 			},
 			"query",
