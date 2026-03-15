@@ -302,7 +302,9 @@ func loadAuthentication(conf *config.Config, client *c8y.Client) error {
 	loginType = conf.GetLoginTypeWithDefault()
 
 	// OAUTH2 (internal and external)
-	if strings.EqualFold(loginType, c8y.LoginTypeOAuth2Internal) || strings.EqualFold(loginType, c8y.LoginTypeOAuth2) {
+	if strings.EqualFold(loginType, c8y.LoginTypeOAuth2Internal) || strings.EqualFold(loginType, c8y.LoginTypeOAuth2) ||
+		strings.EqualFold(loginType, "BROWSER") || strings.EqualFold(loginType, "CERTIFICATE") ||
+		strings.EqualFold(loginType, "DEVICE") {
 		token, err := conf.GetToken()
 		if err != nil {
 			return err

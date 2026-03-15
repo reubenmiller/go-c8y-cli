@@ -16,6 +16,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -23,14 +24,15 @@ import (
 )
 
 type CmdSet struct {
-	TFACode       string
-	LoginErr      error
-	LoginOK       bool
-	LoginType     string
-	Shell         string
-	ClearToken    bool
-	NoBanner      bool
-	sessionFilter string
+	TFACode            string
+	LoginErr           error
+	LoginOK            bool
+	LoginType          string
+	Shell              string
+	ClearToken         bool
+	NoBanner           bool
+	BrowserCallbackURL string
+	sessionFilter      string
 
 	*subcommand.SubCommand
 
@@ -55,6 +57,18 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 
 			$ eval $( c8y sessions set --session myfile.json --tfaCode 123456 )
 			Set a session using a given file (non-interactively)
+
+			$ eval $( c8y sessions set --session myfile.json --loginType DEVICE )
+			Login using the OAuth2 device flow (polls for approval after visiting the URL shown in the terminal)
+
+			$ eval $( c8y sessions set --session myfile.json --loginType BROWSER )
+			Login using Authorization Code flow – opens the system browser and waits for the callback
+
+			$ eval $( c8y sessions set --session myfile.json --loginType BROWSER --browserCallback http://127.0.0.1:8080/callback )
+			Login via browser with a custom callback URL registered in the SSO provider
+
+			$ eval $( c8y sessions set --session myfile.json --loginType CERTIFICATE )
+			Login using a device certificate (mTLS); reads cert paths from the session file or C8Y_CERTIFICATE / C8Y_CERTIFICATE_KEY env vars
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -69,14 +83,15 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 	cmd.Flags().StringVar(&ccmd.sessionFilter, "sessionFilter", "", "Filter to be applied to the list of sessions even before the values can be selected")
 	cmd.Flags().StringVar(&ccmd.TFACode, "tfaCode", "", "Two Factor Authentication code")
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", defaultShell, "Shell type to return the environment variables")
-	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL, OAUTH2 (device flow) or BASIC. When set to BASIC, any existing token will be cleared")
+	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL, DEVICE (device flow), BROWSER (Authorization Code via browser), BASIC or CERTIFICATE (mTLS). OAUTH2 is a legacy alias for DEVICE. When set to BASIC, any existing token will be cleared")
 	cmd.Flags().BoolVar(&ccmd.NoBanner, "no-banner", false, "Don't show the session banner")
 	cmd.Flags().BoolVar(&ccmd.ClearToken, "clear", false, "Clear any existing tokens")
+	cmd.Flags().StringVar(&ccmd.BrowserCallbackURL, "browserCallback", "", "Custom redirect URI for the browser flow local callback server, e.g. http://127.0.0.1:8080/callback. Must match a URI registered in the SSO provider. Defaults to http://127.0.0.1:5001/callback")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("shell", shell.SupportedShells(shell.ShellAuto)...),
-		completion.WithValidateSet("loginType", c8y.LoginTypeOAuth2Internal, c8y.LoginTypeBasic, c8y.LoginTypeNone, c8y.LoginTypeOAuth2),
+		completion.WithValidateSet("loginType", c8y.LoginTypeOAuth2Internal, c8y.LoginTypeBasic, c8y.LoginTypeNone, c8y.LoginTypeOAuth2, logintype.Device, logintype.Browser, logintype.Certificate),
 	)
 	// Disable the encryption check, as the login handler will take care
 	// of checking the encryption
@@ -192,6 +207,10 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	if n.LoginType == "" {
 		n.LoginType = cfg.GetLoginTypeWithDefault()
 	} else {
+		n.LoginType = strings.ToUpper(n.LoginType)
+	}
+	if n.LoginType != "" && n.LoginType != logintype.Browser && n.LoginType != logintype.Certificate && n.LoginType != logintype.Device {
+		// ParseLoginType only knows v1 types; skip it for v2-only values.
 		if v, err := c8y.ParseLoginType(n.LoginType); err != nil {
 			log.Warnf("Could not parse auth method: value=%s", err)
 		} else {
@@ -233,33 +252,65 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {
-		n.onSave(client)
-	})
-	handler.LoginType = n.LoginType
-	if n.LoginType != "" {
-		handler.AllowedLoginTypes = strings.Split(n.LoginType, ",")
-	}
-	handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
-	handler.SSO.Scopes = cfg.SSOScopes()
-	if handler.LoginType == "" {
-		log.Infof("User preference for login type: %s", "not-set")
-	} else {
-		log.Infof("User preference for login type: %s", handler.LoginType)
-	}
-
-	if n.TFACode == "" {
-		if code, err := cfg.GetTOTP(time.Now()); err == nil {
-			cfg.Logger.Infof("Setting totp code: %s", code)
-			n.TFACode = code
+	var (
+		handlerLoginType string
+		handlerC8Yclient *c8y.Client
+	)
+	if n.LoginType == logintype.Browser || n.LoginType == logintype.Certificate || n.LoginType == logintype.Device {
+		v2handler := c8ylogin.NewLoginHandlerV2(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {
+			n.onSave(client)
+		})
+		v2handler.LoginType = n.LoginType
+		v2handler.CertificatePath = cfg.GetCertificate()
+		v2handler.CertificateKeyPath = cfg.GetCertificateKey()
+		v2handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
+		v2handler.SSO.Scopes = cfg.SSOScopes()
+		v2handler.TOTPSecret = n.TFACode
+		v2handler.BrowserCallbackURL = n.BrowserCallbackURL
+		if v2handler.BrowserCallbackURL == "" {
+			v2handler.BrowserCallbackURL = cfg.BrowserCallbackURL()
 		}
-	}
-	handler.TFACode = n.TFACode
-	handler.SetLogger(log)
-	err = handler.Run()
-
-	if err != nil {
-		return err
+		v2handler.SetLogger(log)
+		if v2handler.LoginType == "" {
+			log.Infof("User preference for login type: %s", "not-set")
+		} else {
+			log.Infof("User preference for login type: %s", v2handler.LoginType)
+		}
+		err = v2handler.Run()
+		if err != nil {
+			return err
+		}
+		handlerLoginType = v2handler.LoginType
+		handlerC8Yclient = v2handler.C8Yclient
+	} else {
+		handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {
+			n.onSave(client)
+		})
+		handler.LoginType = n.LoginType
+		if n.LoginType != "" {
+			handler.AllowedLoginTypes = strings.Split(n.LoginType, ",")
+		}
+		handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
+		handler.SSO.Scopes = cfg.SSOScopes()
+		if handler.LoginType == "" {
+			log.Infof("User preference for login type: %s", "not-set")
+		} else {
+			log.Infof("User preference for login type: %s", handler.LoginType)
+		}
+		if n.TFACode == "" {
+			if code, err := cfg.GetTOTP(time.Now()); err == nil {
+				cfg.Logger.Infof("Setting totp code: %s", code)
+				n.TFACode = code
+			}
+		}
+		handler.TFACode = n.TFACode
+		handler.SetLogger(log)
+		err = handler.Run()
+		if err != nil {
+			return err
+		}
+		handlerLoginType = handler.LoginType
+		handlerC8Yclient = handler.C8Yclient
 	}
 
 	mode := cfg.SessionMode(config.SessionModeUnset).String()
@@ -269,29 +320,29 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		cfg.Logger.Debugf("Detected legacy mode. mode=%s", mode)
 	}
 
-	if hasChanged(handler.C8Yclient, cfg) {
+	if hasChanged(handlerC8Yclient, cfg) {
 		log.Infof("Saving tenant name")
-		n.onSave(handler.C8Yclient)
+		n.onSave(handlerC8Yclient)
 	}
 
 	// include scheme so the user is aware if they are using http or https
-	formatURL := strings.TrimSuffix(c8y.FormatBaseURL(handler.C8Yclient.BaseURL.String()), "/")
+	formatURL := strings.TrimSuffix(c8y.FormatBaseURL(handlerC8Yclient.BaseURL.String()), "/")
 	session := &c8ysession.CumulocitySession{
 		Path:       cfg.GetSessionFile(),
 		SessionUri: "file://" + cfg.GetSessionFile(),
 		Host:       formatURL,
-		Password:   handler.C8Yclient.Password,
-		Token:      handler.C8Yclient.Token,
+		Password:   handlerC8Yclient.Password,
+		Token:      handlerC8Yclient.Token,
 		Tenant:     cfg.GetTenant(),
 		Version:    cfg.GetCumulocityVersion(),
-		Username:   handler.C8Yclient.Username,
+		Username:   handlerC8Yclient.Username,
 		Mode:       mode,
 	}
 	// Don't trigger another login afterwards
 	session.SetAuthorized(true)
 
 	// Store the chosen login type for display to the user
-	session.LoginType = handler.LoginType
+	session.LoginType = handlerLoginType
 
 	outputFormat := cfg.GetOutputFormatWithDefault(cmd, config.OutputUnknown).String()
 

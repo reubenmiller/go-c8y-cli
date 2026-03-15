@@ -13,6 +13,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/tableviewer"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
@@ -276,7 +277,10 @@ var updateSettingsOptions = map[string]argumentHandler{
 	"login.type": {"login.type", "string", config.SettingsLoginType, []string{
 		c8y.LoginTypeBasic + "\tBasic Auth (not recommended)",
 		c8y.LoginTypeOAuth2Internal + "\tInternal OAUTH2 (tokens)",
-		c8y.LoginTypeOAuth2 + "\tExternal OAUTH2 (tokens)",
+		c8y.LoginTypeOAuth2 + "\tExternal OAUTH2/SSO (tokens)",
+		logintype.Browser + "\tSSO via browser (authorization code flow)",
+		logintype.Device + "\tOAuth2 device flow",
+		logintype.Certificate + "\tCertificate-based authentication",
 		c8y.LoginTypeNone + "\tNone",
 		"",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},

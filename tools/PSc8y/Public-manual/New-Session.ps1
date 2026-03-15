@@ -56,6 +56,11 @@ None
         [Parameter(Mandatory = $false)]
         [string]
         $Description,
+
+        # Custom redirect URI for the browser authorization code flow, e.g. http://127.0.0.1:8080/callback
+        [Parameter(Mandatory = $false)]
+        [string]
+        $BrowserCallback,
     
         # Don't use tenant name as a prefix to the user name when using Basic Authentication
         [Parameter(Mandatory = $false)]

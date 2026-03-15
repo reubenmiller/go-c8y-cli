@@ -30,9 +30,10 @@ type ActivityLogSettings struct {
 
 // SSOSettings SSO settings
 type SSOSettings struct {
-	DiscoveryURL string   `json:"discoveryUrl,omitempty"`
-	Scopes       []string `json:"scopes,omitempty"`
-	Audience     string   `json:"audience,omitempty"`
+	DiscoveryURL       string   `json:"discoveryUrl,omitempty"`
+	Scopes             []string `json:"scopes,omitempty"`
+	Audience           string   `json:"audience,omitempty"`
+	BrowserCallbackURL string   `json:"browserCallbackUrl,omitempty"`
 }
 
 // EncryptionSettings encryption settings
