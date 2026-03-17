@@ -1,0 +1,25 @@
+name: Slash Command Dispatch
+
+# Runs on the BASE branch (safe) — no PR code is executed here.
+# A maintainer comments "/test" on a PR to approve running
+# integration tests with secrets for that PR's code.
+#
+# Requires a fine-grained PAT stored as GH_DISPATCH_TOKEN with:
+#   Actions: Read and write, Contents: Read, Pull requests: Read
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  dispatch:
+    # Only act on comments on pull requests (not plain issues)
+    if: github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: peter-evans/slash-command-dispatch@v4
+        with:
+          token: ${{ secrets.GH_DISPATCH_TOKEN }}
+          commands: test
+          # Only allow users with write access (maintainers/owners) to trigger
+          permission: write
+          issue-type: pull-request
