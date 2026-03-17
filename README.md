@@ -24,6 +24,56 @@ See the following installation instructions
 * [PowerShell](https://goc8ycli.netlify.app/docs/installation/powershell-installation)
 
 
+## Testing an unreleased version
+
+These instructions are for testing a version that has not yet been officially released, for example directly from a pull request or a specific commit. Go >= 1.25 must be installed on your machine.
+
+### Install
+
+1. Install `c8y` from a specific commit (replace the commit hash with the one you want to test)
+
+    ```sh
+    go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@<commit-or-branch>
+    ```
+
+    For example, to install from a specific commit:
+
+    ```sh
+    go install github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@7aace7646dfcb7c2a632da85e869daf99c749b90
+    ```
+
+2. Make sure the Go binary path is on your `PATH` and takes precedence over any existing `c8y` installation
+
+    ```sh
+    export PATH="$(go env GOPATH)/bin:$PATH"
+    hash -r
+    ```
+
+3. Verify the binary is the expected version
+
+    ```sh
+    c8y version
+    ```
+
+4. Try it out (note: tab completion won't work when using the `set-session` helper)
+
+    ```sh
+    # Option 1: Use an explicit host (no session file required)
+    eval "$(c8y sessions login --from-prompt --host example.cumulocity.com)"
+
+    # To enable verbose/debug output, add the -v flag
+    c8y currentuser get -v
+    ```
+
+### Uninstall
+
+To remove the dev binary and restore the previously installed version:
+
+```sh
+rm "$(go env GOPATH)/bin/c8y"
+hash -r
+```
+
 ## Documentation
 
 See the [documentation website](https://goc8ycli.netlify.app/) for instructions on how to install and use it.
