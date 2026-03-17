@@ -51,6 +51,11 @@ None
         [Parameter(Mandatory = $false)]
         [string]
         $Mode,
+
+        # LoginType. Login Type, e.g. BASIC, OAUTH2_INTERNAL, OAUTH2, BROWSER, DEVICE, CERTIFICATE, NONE
+        [Parameter(Mandatory = $false)]
+        [string]
+        $LoginType,
     
         # Description
         [Parameter(Mandatory = $false)]
