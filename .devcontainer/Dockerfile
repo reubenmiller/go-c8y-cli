@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See https://go.microsoft.com/fwlink/?linkid=2090316 for license information.
 #-------------------------------------------------------------------------------------------------------------
 
-FROM golang:1.22
+FROM golang:1.25
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -20,7 +20,7 @@ COPY .devcontainer/install-powershell.sh /tmp/install/
 
 # Configure apt, install packages and tools
 RUN /tmp/install/install-powershell.sh \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     #
     # Update and install packages
     #
@@ -41,23 +41,11 @@ RUN /tmp/install/install-powershell.sh \
     && cd /tmp/gotools \
     && GOPATH=/tmp/gotools go install -v golang.org/x/tools/gopls@latest 2>&1 \
     && GOPATH=/tmp/gotools go install -v honnef.co/go/tools/cmd/staticcheck@latest \
-    && GOPATH=/tmp/gotools go install -v golang.org/x/tools/cmd/gorename@latest \
     && GOPATH=/tmp/gotools go install -v golang.org/x/tools/cmd/goimports@latest \
-    && GOPATH=/tmp/gotools go install -v golang.org/x/tools/cmd/guru@latest \
-    && GOPATH=/tmp/gotools go install -v golang.org/x/lint/golint@latest \
-    && GOPATH=/tmp/gotools go install -v github.com/mdempsky/gocode@latest \
     && GOPATH=/tmp/gotools go install -v github.com/haya14busa/goplay/cmd/goplay@latest \
-    && GOPATH=/tmp/gotools go install -v github.com/sqs/goreturns@latest \
     && GOPATH=/tmp/gotools go install -v github.com/josharian/impl@latest \
-    && GOPATH=/tmp/gotools go install -v github.com/davidrjenni/reftools/cmd/fillstruct@latest \
-    && GOPATH=/tmp/gotools go install -v github.com/uudashr/gopkgs/v2/cmd/gopkgs@latest  \
-    && GOPATH=/tmp/gotools go install -v github.com/ramya-rao-a/go-outline@latest  \
-    && GOPATH=/tmp/gotools go install -v github.com/acroca/go-symbols@latest  \
-    && GOPATH=/tmp/gotools go install -v github.com/godoctor/godoctor@latest  \
-    && GOPATH=/tmp/gotools go install -v github.com/rogpeppe/godef@latest  \
-    && GOPATH=/tmp/gotools go install -v github.com/zmb3/gogetdoc@latest \
-    && GOPATH=/tmp/gotools go install -v github.com/fatih/gomodifytags@latest  \
-    && GOPATH=/tmp/gotools go install -v github.com/mgechev/revive@latest  \
+    && GOPATH=/tmp/gotools go install -v github.com/fatih/gomodifytags@latest \
+    && GOPATH=/tmp/gotools go install -v github.com/mgechev/revive@latest \
     && GOPATH=/tmp/gotools go install -v github.com/go-delve/delve/cmd/dlv@latest 2>&1 \
     #
     # Install Go tools
@@ -75,43 +63,35 @@ RUN /tmp/install/install-powershell.sh \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
     #
     # Install Docker CE cli
-    && apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common lsb-release \
-    && curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg | apt-key add - 2>/dev/null \
-    && add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') $(lsb_release -cs) stable" \
+    && apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release \
+    && install -m 0755 -d /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg \
+        | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+    && chmod a+r /etc/apt/keyrings/docker.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') $(lsb_release -cs) stable" \
+        > /etc/apt/sources.list.d/docker.list \
     && apt-get update \
-    && apt-get install -y docker-ce-cli \
-    #
-    # Install Docker Compose
-    && curl -sSL "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
-    && chmod +x /usr/local/bin/docker-compose \
+    && apt-get install -y docker-ce-cli docker-compose-plugin \
     #
     # Install bash tools
     # https://github.com/bats-core/bats-core
-    && npm install -g bats \
+    # password manager/s: bitwarden
+    && npm install -g bats @bitwarden/cli \
     && apt-get install -y vim jq bash-completion asciinema \
     #
     # Fish shell
     && apt-get install -y fish zsh \
     #
+    # CI/CD tools
+    && curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | bash \
+    && echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' > /etc/apt/sources.list.d/goreleaser.list \
+    && apt-get update \
+    && apt-get install -y task goreleaser \
+    #
     # Clean up
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* /tmp/gotools
-
-#
-# Install password manager/s
-#
-RUN curl -sSfL "https://vault.bitwarden.com/download/?app=cli&platform=linux" -o /tmp/bw.zip \
-    && unzip /tmp/bw.zip -d /usr/local/bin/ \
-    && chmod a+x /usr/local/bin/bw \
-    && rm -f /tmp/bw.zip
-
-#
-# Shells
-#
-RUN echo "Installing shells" \
-    # Fish shell
-    && apt-get install -y fish zsh
 
 
 # AsciiCinema configuration
@@ -137,18 +117,10 @@ RUN echo "autoload -U compinit; compinit -i" | sudo tee -a /home/$USERNAME/.zshr
     # fish config
     && sudo mkdir -p /home/$USERNAME/.config/fish/
 
-# CI/CD tools
-RUN cd /tmp \
-    && command -v task || sudo /usr/local/go/bin/go install github.com/go-task/task/v3/cmd/task@latest \
-    && sudo cp /root/go/bin/task /usr/local/bin/ \
-    && sudo /usr/local/go/bin/go install github.com/goreleaser/goreleaser@latest \
-    && sudo cp /root/go/bin/goreleaser /usr/local/bin/
 
 # Fix gopath permissions for non-root user
-RUN sudo chown -R "$USERNAME:$USERNAME" /go
+RUN sudo chown -R "$USERNAME:$USERNAME" /go /home/$USERNAME/
 
-# Update this to "on" or "off" as appropriate
-ENV GO111MODULE=auto
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
