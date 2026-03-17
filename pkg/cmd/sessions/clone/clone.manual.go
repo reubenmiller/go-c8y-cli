@@ -11,6 +11,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/spf13/cobra"
 )
 
@@ -50,7 +51,8 @@ func NewCmdCloneSession(f *cmdutil.Factory) *CmdClone {
 
 	cmd.Flags().StringVar(&ccmd.name, "newName", "", "Name of the new session file which will be created (required)")
 	cmd.Flags().StringVar(&ccmd.fileType, "fileType", "json", "Session file type to save as. i.e. json, yaml, toml etc.")
-	cmd.Flags().StringVar(&ccmd.modeType, "type", "", "Session type of the cloned session, i.e. dev, qual, prod")
+	cmd.Flags().StringVar(&ccmd.modeType, "type", "", "Session type of the cloned session, i.e. dev, qual, prod (deprecated)")
+	cmd.Flags().StringVar(&ccmd.modeType, "mode", "", "Session mode which controls which commands are enabled by default")
 
 	completion.WithOptions(cmd,
 		completion.WithLazyRequired("newName"),
@@ -64,8 +66,15 @@ func NewCmdCloneSession(f *cmdutil.Factory) *CmdClone {
 			"type",
 			config.GetSessionModeCompletionHelp()...,
 		),
+		completion.WithLazyRequired("mode"),
+		completion.WithValidateSet(
+			"mode",
+			config.GetSessionModeCompletionHelp()...,
+		),
 	)
 	cmd.SilenceUsage = true
+
+	flags.MarkDeprecated(cmd, "type", "please use 'mode' instead")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("newName")
 
