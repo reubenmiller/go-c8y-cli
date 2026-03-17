@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set PR status to pending
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GH_DISPATCH_TOKEN }}
           script: |
@@ -99,7 +99,7 @@ jobs:
     if: always()
     steps:
       - name: Update PR commit status
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GH_DISPATCH_TOKEN }}
           script: |

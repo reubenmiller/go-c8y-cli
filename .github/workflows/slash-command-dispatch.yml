@@ -5,7 +5,9 @@ name: Slash Command Dispatch
 # integration tests with secrets for that PR's code.
 #
 # Requires a fine-grained PAT stored as GH_DISPATCH_TOKEN with:
-#   Actions: Read and write, Contents: Read, Pull requests: Read
+#   Contents: Read and write  (required to send repository_dispatch events)
+#   Commit statuses: Read and write  (required to set PR commit statuses)
+#   Pull requests: Read
 on:
   issue_comment:
     types: [created]
