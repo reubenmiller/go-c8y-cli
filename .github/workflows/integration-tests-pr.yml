@@ -1,0 +1,115 @@
+name: Integration Tests (PR)
+
+# Triggered by slash-command-dispatch.yml when a maintainer comments
+# "/test" on a PR.
+#
+# IMPORTANT: this workflow has access to secrets because it is triggered
+# via repository_dispatch (not pull_request). It always runs on the base
+# branch, but checks out the specific PR commit SHA for the actual tests.
+on:
+  repository_dispatch:
+    types: [test-command]
+
+jobs:
+  # Reflect the approval back on the PR as a pending status so reviewers
+  # can see when tests start and finish.
+  set-pending-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set PR status to pending
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_DISPATCH_TOKEN }}
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.client_payload.pull_request.head.sha }}',
+              state: 'pending',
+              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              description: 'Integration tests running...',
+              context: 'integration-tests / test',
+            });
+
+  test-examples:
+    runs-on: ubuntu-latest
+    needs: [set-pending-status]
+    env:
+      C8Y_HOST: ${{ secrets.C8Y_HOST }}
+      C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
+      C8Y_USER: ${{ secrets.C8Y_USER }}
+      C8Y_USERNAME: ${{ secrets.C8Y_USER }}
+      C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
+      DEVICE_BOOTSTRAP_USER: ${{ secrets.DEVICE_BOOTSTRAP_USER }}
+      DEVICE_BOOTSTRAP_PASSWORD: ${{ secrets.DEVICE_BOOTSTRAP_PASSWORD }}
+      C8Y_SETTINGS_DEFAULTS_TIMEOUT: 30000
+
+    steps:
+      # Check out the exact PR commit — safe here because this workflow
+      # runs in the base branch context and secrets are already loaded.
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.client_payload.pull_request.head.sha }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: false
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: true
+
+      - name: Build snapshot
+        run: task build-snapshot
+        shell: bash
+
+      - name: Install c8y binary
+        run: |
+          mkdir -p /home/runner/.local/bin
+          cp dist/linux_linux_amd64_v1/bin/c8y /home/runner/.local/bin/c8y
+          chmod +x /home/runner/.local/bin/c8y
+          echo "/home/runner/.local/bin" >> $GITHUB_PATH
+        shell: bash
+
+      - name: Run integration tests
+        run: |
+          c8y version
+          c8y currentuser get --select id --debug
+          task test-cli
+        shell: bash
+        timeout-minutes: 60
+
+  # Update the commit status on the PR once tests complete
+  update-status:
+    runs-on: ubuntu-latest
+    needs: [test-examples]
+    if: always()
+    steps:
+      - name: Update PR commit status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_DISPATCH_TOKEN }}
+          script: |
+            const success = '${{ needs.test-examples.result }}' === 'success';
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.client_payload.pull_request.head.sha }}',
+              state: success ? 'success' : 'failure',
+              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              description: success ? 'Integration tests passed' : 'Integration tests failed',
+              context: 'integration-tests / test',
+            });
