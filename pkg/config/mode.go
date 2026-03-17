@@ -104,9 +104,9 @@ func (f SessionMode) CanDelete() bool {
 
 func GetSessionModeCompletionHelp() []string {
 	return []string{
-		fmt.Sprintf("%s\tProduction mode (read only)", SessionModeProduction.String()),
-		fmt.Sprintf("%s\tQA mode (delete disabled)", SessionModeQual.String()),
 		fmt.Sprintf("%s\tDevelopment mode (no restrictions)", SessionModeDev.String()),
+		fmt.Sprintf("%s\tQA mode (delete disabled)", SessionModeQual.String()),
+		fmt.Sprintf("%s\tProduction mode (read only)", SessionModeProduction.String()),
 		fmt.Sprintf("%s\tCI mode (no restrictions)", SessionModeCI.String()),
 	}
 }

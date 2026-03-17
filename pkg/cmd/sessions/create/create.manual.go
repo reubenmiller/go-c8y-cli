@@ -21,6 +21,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -63,20 +64,21 @@ func NewCumulocitySessionFromFile(filePath string, log *logger.Logger, cfg *conf
 }
 
 type CmdCreate struct {
-	host           string
-	username       string
-	password       string
-	token          string
-	description    string
-	name           string
-	tenant         string
-	sessionMode    string
-	loginType      string
-	noTenantPrefix bool
-	noStorage      bool
-	encrypt        bool
-	allowInsecure  bool
-	prompt         bool
+	host               string
+	username           string
+	password           string
+	token              string
+	description        string
+	name               string
+	tenant             string
+	sessionMode        string
+	loginType          string
+	noTenantPrefix     bool
+	noStorage          bool
+	encrypt            bool
+	browserCallbackURL string
+	allowInsecure      bool
+	prompt             bool
 
 	*subcommand.SubCommand
 
@@ -93,28 +95,41 @@ func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 		Short: "Create session",
 		Long:  `Create a new Cumulocity session`,
 		Example: heredoc.Doc(`
-### Example 1: Create a DEV new session. Prompt for username and password
-
-$ c8y sessions create --type dev --host "https://mytenant.eu-latest.cumulocity.com"
-
-### Example 2: Create a new QA (QUAL) session prompting for password
+$ c8y sessions create --mode dev --host "https://mytenant.eu-latest.cumulocity.com"
+Example 1: Create a DEV new session. Prompt for username and password
 
 $ c8y sessions create \
-    --type qual \
+    --mode qual \
 	--host "https://mytenant.eu-latest.cumulocity.com"
 	--username "myUser@me.com"
+Create a new QA (QUAL) session prompting for password
 
-### Example 3: Create a new production session where only only GET commands are enabled (with no password storage)
+$ c8y sessions create --mode prod --host "https://mytenant.eu-latest.cumulocity.com" --noStorage
+Create a new production session where only only GET commands are enabled (with no password storage)
 
-$ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.com" --noStorage
+$ c8y sessions create --mode prod --host "https://localhost:443" --insecure
+Create a session which points to a local api endpoint (most like an Cumulocity Edge instance)
 
-### Example 4: Create a session which points to a local api endpoint (most like an Cumulocity Edge instance)
+$ c8y sessions create --mode dev --host example.cumulocity.com --loginType BROWSER
+Create a session which uses SSO / OAUTH2 using Authorization Flow (via a local web browser)
+Note: Requires the "Redirect to the user interface application" to be enabled in Cumulocity
 
-$ c8y sessions create --type prod --host "https://localhost:443" --insecure
+c8y sessions create --mode dev --host example.cumulocity.com --loginType BROWSER --browserCallback localhost:8008/mycallback
+Create a session which uses SSO / OAUTH2 using Authorization Flow (via a local web browser)
+and define an explicit redirect/callback URI which is whitelisted in the SSO providers configuration
+Note: Requires the "Redirect to the user interface application" to be enabled in Cumulocity
+
+$ c8y sessions create --mode dev --host example.cumulocity.com --loginType DEVICE
+Create a session with SSO / OAUTH2 Device Flow (RFC 8628)
 		`),
-		PersistentPreRunE: ccmd.promptArgs,
-		Args:              cobra.NoArgs,
-		RunE:              ccmd.RunE,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if cmd.InheritedFlags().Changed("examples") {
+				return cmd.Root().PersistentPreRunE(cmd, args)
+			}
+			return ccmd.promptArgs(cmd, args)
+		},
+		Args: cobra.NoArgs,
+		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -128,12 +143,13 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of the session")
 	cmd.Flags().StringVar(&ccmd.sessionMode, "type", "", "Session type. List of predefined session types (deprecated)")
 	cmd.Flags().StringVar(&ccmd.sessionMode, "mode", "", "Session mode which controls which commands are enabled by default")
-	cmd.Flags().StringVar(&ccmd.loginType, "loginType", "", "Login Type, e.g. BASIC, OAUTH2_INTERNAL, NONE")
+	cmd.Flags().StringVar(&ccmd.loginType, "loginType", "", "Login Type, e.g. BASIC, OAUTH2_INTERNAL, OAUTH2, BROWSER, DEVICE, CERTIFICATE, NONE")
 	cmd.Flags().BoolVar(&ccmd.noTenantPrefix, "noTenantPrefix", false, "Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false")
 	cmd.Flags().BoolVar(&ccmd.noStorage, "noStorage", false, "Don't store any passwords or tokens in the session file")
 	cmd.Flags().BoolVar(&ccmd.encrypt, "encrypt", false, "Encrypt passwords and tokens (occurs when logging in)")
 	cmd.Flags().BoolVar(&ccmd.allowInsecure, "allowInsecure", false, "Allow insecure connection (e.g. when using self-signed certificates)")
 	cmd.Flags().BoolVar(&ccmd.prompt, "prompt", false, "Force prompting of missing information")
+	cmd.Flags().StringVar(&ccmd.browserCallbackURL, "browserCallback", "", "Custom redirect URI for the browser authorization code flow, e.g. http://127.0.0.1:8080/callback")
 
 	// Required flags
 	completion.WithOptions(cmd,
@@ -143,10 +159,17 @@ $ c8y sessions create --type prod --host "https://localhost:443" --insecure
 			config.GetSessionModeCompletionHelp()...,
 		),
 		completion.WithValidateSet(
+			"mode",
+			config.GetSessionModeCompletionHelp()...,
+		),
+		completion.WithValidateSet(
 			"loginType",
 			c8y.LoginTypeBasic,
 			c8y.LoginTypeOAuth2Internal,
 			c8y.LoginTypeOAuth2,
+			logintype.Browser,
+			logintype.Device,
+			logintype.Certificate,
 			c8y.LoginTypeNone,
 		),
 	)
@@ -196,10 +219,24 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 		}
 
 		loginOptionsForUsers := make([]string, 0, len(loginOptions.LoginOptions))
-		loginOptionsForUsers = append(loginOptionsForUsers, "auto")
+		loginOptionsForUsers = append(loginOptionsForUsers, "auto\tUse tenant default")
+		hasOAuth2 := false
 		for _, option := range loginOptions.LoginOptions {
 			loginOptionsForUsers = append(loginOptionsForUsers, option.Type)
+			if strings.EqualFold(option.Type, logintype.OAuth2) {
+				hasOAuth2 = true
+			}
 		}
+		// BROWSER and DEVICE are CLI-side flows built on top of an external
+		// OAUTH2 provider; add them whenever the tenant supports OAUTH2.
+		if hasOAuth2 {
+			loginOptionsForUsers = append(loginOptionsForUsers,
+				logintype.Browser+"\tOAUTH2 via local browser (authorization code flow)",
+				logintype.Device+"\tOAUTH2 device flow",
+			)
+		}
+		// CERTIFICATE is always available as it uses mTLS, not a tenant login option.
+		loginOptionsForUsers = append(loginOptionsForUsers, logintype.Certificate+"\tCertificate-based (mTLS)")
 
 		selectedLoginOption, err := prompt.Select("Select login type", loginOptionsForUsers, loginOptionsForUsers[0])
 		if err != nil {
@@ -230,12 +267,9 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 		n.password = password
 	}
 
-	if !cmd.Flags().Changed("type") {
-		mode, err := prompt.Select("Select mode", []string{
-			"dev\tDevelopment mode (no restrictions)",
-			"qual\tQA mode (delete disabled)",
-			"prod\tProduction mode (read only)",
-		}, "dev\tDevelopment mode (no restrictions)")
+	if !cmd.Flags().Changed("type") && !cmd.Flags().Changed("mode") {
+		modeOptions := config.GetSessionModeCompletionHelp()
+		mode, err := prompt.Select("Select mode", modeOptions, modeOptions[0])
 		if err != nil {
 			return err
 		}
@@ -246,7 +280,11 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 }
 
 func requiresUsername(loginType string) bool {
-	return loginType != c8y.LoginTypeNone && loginType != c8y.LoginTypeOAuth2
+	switch strings.ToUpper(loginType) {
+	case c8y.LoginTypeNone, c8y.LoginTypeOAuth2, logintype.Browser, logintype.Device, logintype.Certificate:
+		return false
+	}
+	return true
 }
 
 func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
@@ -299,10 +337,20 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if n.loginType != "" {
-		settings.Login = &config.LoginSettings{
-			Type: n.loginType,
+	if n.loginType != "" || n.browserCallbackURL != "" {
+		if settings.Login == nil {
+			settings.Login = &config.LoginSettings{}
 		}
+		if n.loginType != "" {
+			settings.Login.Type = n.loginType
+		}
+	}
+
+	if n.browserCallbackURL != "" {
+		if settings.SSO == nil {
+			settings.SSO = &config.SSOSettings{}
+		}
+		settings.SSO.BrowserCallbackURL = n.browserCallbackURL
 	}
 
 	switch n.sessionMode {

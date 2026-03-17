@@ -21,6 +21,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/numbers"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
@@ -370,6 +371,9 @@ const (
 	// SettingsSSOScopes SSO scopes used to request a device code
 	SettingsSSOScopes = "settings.sso.scopes"
 
+	// SettingsBrowserCallbackURL custom redirect URI for the browser flow callback server
+	SettingsBrowserCallbackURL = "settings.sso.browserCallbackUrl"
+
 	//
 	// Remote Access preferences
 	//
@@ -613,6 +617,7 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsLoginType, ""),
 
 		WithBindEnv(SettingsBrowser, ""),
+		WithBindEnv(SettingsBrowserCallbackURL, ""),
 
 		// Extensions
 		WithBindEnv(SettingsExtensionDataDir, ""),
@@ -690,6 +695,8 @@ func (c *Config) BindAuthorization() error {
 		"password",
 		"token",
 		"credential.totp.secret",
+		"certificate",
+		"certificate_key",
 	}
 	for _, name := range auth_variables {
 		if err := c.viper.BindEnv(name); err != nil {
@@ -1479,6 +1486,25 @@ func (c *Config) SSODiscoveryUrl() string {
 	return c.viper.GetString(SettingsSSODiscoveryUrl)
 }
 
+// GetCertificate returns the path to the PEM-encoded client certificate file for mTLS auth (C8Y_CERTIFICATE)
+func (c *Config) GetCertificate() string {
+	return c.viper.GetString("certificate")
+}
+
+// GetCertificateKey returns the path to the PEM-encoded private key file for mTLS auth (C8Y_CERTIFICATE_KEY)
+func (c *Config) GetCertificateKey() string {
+	if v := c.viper.GetString("certificate_key"); v != "" {
+		return v
+	}
+	// Fallback for session files that store the key as camelCase certificateKey
+	return c.viper.GetString("certificatekey")
+}
+
+// BrowserCallbackURL custom redirect URI for the browser flow local callback server
+func (c *Config) BrowserCallbackURL() string {
+	return c.viper.GetString(SettingsBrowserCallbackURL)
+}
+
 // SSOScopes scopes to use in the device code request when using SSO
 func (c *Config) SSOScopes() []string {
 	// Be flexible with the format, accept either a "," or " " separator
@@ -1720,6 +1746,11 @@ func (c *Config) GetSilentExit() bool {
 }
 
 func ParseLoginTypeWithDefault(v string) string {
+	// Pass v2-only types through unchanged – c8y.ParseLoginType doesn't know them.
+	switch strings.ToUpper(v) {
+	case logintype.Browser, logintype.Certificate, logintype.Device:
+		return strings.ToUpper(v)
+	}
 	value, err := c8y.ParseLoginType(v)
 	if err != nil {
 		value = ""
@@ -1757,6 +1788,12 @@ func (c *Config) GetSessionPassword() string {
 
 // SetLoginType sets the authorization method, e.g. BASIC, OAUTH2_INTERNAL, NONE
 func (c *Config) SetLoginType(v string) {
+	// Pass v2-only types through unchanged.
+	switch strings.ToUpper(v) {
+	case logintype.Browser, logintype.Certificate, logintype.Device:
+		c.Set(SettingsLoginType, strings.ToUpper(v))
+		return
+	}
 	value, err := c8y.ParseLoginType(v)
 	if err != nil {
 		value = c8y.LoginTypeOAuth2Internal

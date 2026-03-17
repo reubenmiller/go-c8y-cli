@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
@@ -40,6 +41,14 @@ type CumulocitySession struct {
 	Description     string `json:"description,omitempty"`
 	UseTenantPrefix bool   `json:"useTenantPrefix"`
 	LoginType       string `json:"loginType,omitempty"`
+
+	// Certificate-based (mTLS) auth paths — stored in session file and/or C8Y_CERTIFICATE / C8Y_CERTIFICATE_KEY env vars.
+	Certificate    string `json:"certificate,omitempty"`
+	CertificateKey string `json:"certificateKey,omitempty"`
+
+	// BrowserCallbackURL is the preferred redirect URI for the browser authorization code flow.
+	// Stored at top-level for env-file compatibility; also written into settings.sso.browserCallbackUrl.
+	BrowserCallbackURL string `json:"browserCallbackUrl,omitempty"`
 
 	Settings *config.CommandSettings `json:"settings,omitempty"`
 
@@ -252,10 +261,9 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 		"C8Y_PASSWORD":             password,
 		"C8Y_HEADER_AUTHORIZATION": authHeaderValue,
 		"C8Y_HEADER":               authHeader,
-	}
-
-	if session.LoginType != "" {
-		output["C8Y_SETTINGS_LOGIN_TYPE"] = session.LoginType
+		"C8Y_SETTINGS_LOGIN_TYPE":  session.LoginType,
+		"C8Y_CERTIFICATE":          session.Certificate,
+		"C8Y_CERTIFICATE_KEY":      session.CertificateKey,
 	}
 
 	if mode != "" {
@@ -307,6 +315,8 @@ func GetSessionEnvKeys() []string {
 		"C8Y_HEADER",
 		"C8Y_HEADER_AUTHORIZATION",
 		"C8Y_SETTINGS_LOGIN_TYPE",
+		"C8Y_CERTIFICATE",
+		"C8Y_CERTIFICATE_KEY",
 		config.EnvSessionMode,
 	}
 	return keys
@@ -399,7 +409,11 @@ func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string, logi
 
 // LoginTypeRequiresToken check if the given loginType requires a token for authorization
 func LoginTypeRequiresToken(loginType string) bool {
-	return strings.EqualFold(loginType, c8y.LoginTypeOAuth2) || strings.EqualFold(loginType, c8y.LoginTypeOAuth2Internal)
+	return strings.EqualFold(loginType, c8y.LoginTypeOAuth2) ||
+		strings.EqualFold(loginType, c8y.LoginTypeOAuth2Internal) ||
+		strings.EqualFold(loginType, logintype.Browser) ||
+		strings.EqualFold(loginType, logintype.Certificate) ||
+		strings.EqualFold(loginType, logintype.Device)
 }
 
 func GetTokenSubject(value string) (string, error) {
