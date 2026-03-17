@@ -86,10 +86,10 @@ jobs:
   test-examples:
     runs-on: ${{ matrix.os }}
     needs: [build]
-    # Skip on pull_request events — integration tests requiring secrets are
-    # triggered manually via "/ok-to-test" comment (see slash-command-dispatch.yml
-    # and integration-tests-pr.yml).
-    if: github.event_name != 'pull_request'
+    # Skip for fork PRs — those lack secrets access and must use the "/test"
+    # slash command instead (see slash-command-dispatch.yml).
+    # PRs from branches within this repo run normally with secrets.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false
     env:
       C8Y_HOST: ${{ secrets.C8Y_HOST }}
       C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
