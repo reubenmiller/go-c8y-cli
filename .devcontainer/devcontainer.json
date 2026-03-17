@@ -1,71 +1,74 @@
 {
 	"name": "go-c8y-cli",
-	"dockerFile": "Dockerfile",
-	"context": "..",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": ".."
+	},
 	"runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [9000],
 
-	// Use 'settings' to set *default* container specific settings.json values on container create. 
-	// You can edit these settings after create using File > Preferences > Settings > Remote.
-	"settings": {
-		"terminal.integrated.profiles.linux": {
-			"bash": {
-				"path": "bash"
-			},
-			"zsh": {
-				"path": "zsh"
-			},
-			"fish": {
-				"path": "fish"
-			},
-			"tmux": {
-				"path": "tmux",
-				"icon": "terminal-tmux"
-			},
-			"pwsh": {
-				"path": "pwsh",
-				"icon": "terminal-powershell"
-			}
-		},
-		"go.gopath": "/go",
-		"go.goroot": "/usr/local/go",
-		"go.lintTool": "golangci-lint",
-		// "go.inferGopath": true,
-		"go.useLanguageServer": true,
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"terminal.integrated.profiles.linux": {
+					"bash": {
+						"path": "bash"
+					},
+					"zsh": {
+						"path": "zsh"
+					},
+					"fish": {
+						"path": "fish"
+					},
+					"tmux": {
+						"path": "tmux",
+						"icon": "terminal-tmux"
+					},
+					"pwsh": {
+						"path": "pwsh",
+						"icon": "terminal-powershell"
+					}
+				},
+				"go.lintTool": "golangci-lint",
+				"go.lintFlags": ["--fast"],
 
-		// Yaml code completion
-		"yaml.completion": true,
-		"yaml.schemas": {
-			"./api/spec/schema.json": "api/spec/yaml/*.yaml",
-			"./tools/schema/session.schema.json": ".cumulocity/*.y*ml"
-		},
-		"powershell.pester.useLegacyCodeLens": false,
-		"extensions.ignoreRecommendations": true,
-		"go.testEnvFile": "${workspaceFolder}/.env",
-		"go.delveConfig": {
-			"dlvLoadConfig": {
-				"maxStringLen": 1024,
-				"maxArrayValues": 1000,
+				// Yaml code completion
+				"yaml.completion": true,
+				"yaml.schemas": {
+					"./api/spec/schema.json": "api/spec/yaml/*.yaml",
+					"./tools/schema/session.schema.json": ".cumulocity/*.y*ml"
+				},
+				"powershell.pester.useLegacyCodeLens": false,
+				"extensions.ignoreRecommendations": true,
+				"go.testEnvFile": "${workspaceFolder}/.env",
+				"go.delveConfig": {
+					"dlvLoadConfig": {
+						"maxStringLen": 1024,
+						"maxArrayValues": 1000
+					},
+					"apiVersion": 2
+				}
 			},
-			"apiVersion": 2,
-		},
+
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"golang.go",
+				"ms-vscode.PowerShell",
+				"redhat.vscode-yaml",
+				"eamodio.gitlens",
+				"task.vscode-task"
+			]
+		}
 	},
 
-	// Add the IDs of extensions you want installed when the container is created in the array below.
-	"extensions": [
-		"golang.go",
-		"ms-vscode.powershell-preview",
-		"redhat.vscode-yaml",
-		"eamodio.gitlens"
-	],
-
-	// Uncomment to use the Docker CLI from inside the container. See https://aka.ms/vscode-remote/samples/docker-in-docker.
+	// Bind-mount the host Docker socket so the CLI inside the container can talk to Docker.
 	"mounts": [
 		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
 	],
-	
+
 	// Install powershell module dependencies for tests etc.
 	"postCreateCommand": "task checkout-addons",
 

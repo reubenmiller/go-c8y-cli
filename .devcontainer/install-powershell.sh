@@ -15,8 +15,13 @@ case $arch in
 
 esac
 
+PWSH_VERSION="7.4.6"
+
+# pre-requisites
+apt-get update && apt-get install -y libicu-dev
+
 # Download the powershell '.tar.gz' archive
-curl -L -o /tmp/powershell.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.2.2/powershell-7.2.2-linux-$arch.tar.gz
+curl -L -o /tmp/powershell.tar.gz "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-${arch}.tar.gz"
 
 # Create the target folder where powershell will be placed
 mkdir -p /opt/microsoft/powershell/7
