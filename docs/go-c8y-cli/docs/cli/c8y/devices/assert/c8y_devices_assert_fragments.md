@@ -38,12 +38,12 @@ $ c8y devices list --device 1111 | c8y operations fragments --status "FAILED" --
 ### Options
 
 ```
+      --attempts int        Number of attempts before giving up per id (-1 = unlimited) (default -1)
       --device strings      The ManagedObject which is the source of this event. (accepts pipeline)
       --duration string     Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
       --fragments strings   Fragments to fragments for. If multiple values are given, then it will be applied as an OR operation
   -h, --help                help for fragments
       --interval string     Interval to check on the status, i.e. 10s or 1min (default "5s")
-      --retries int         Number of retries before giving up per id
       --strict              Strict mode, fail if no match is found
 ```
 
@@ -89,6 +89,7 @@ $ c8y devices list --device 1111 | c8y operations fragments --status "FAILED" --
       --progress                   Show progress bar. This will also disable any other verbose output
       --proxy string               Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw                        Show raw response. This mode will force output=json and view=off
+      --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
       --sessionMode string         Override default session mode for a single command which would normally be disabled

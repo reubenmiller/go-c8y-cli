@@ -40,6 +40,7 @@ $ c8y devices list | c8y alarms assert count --maximum 0 --dateFrom -7d
 ### Options
 
 ```
+      --attempts int          Number of attempts before giving up per id (-1 = unlimited) (default -1)
       --dateFrom string       Start date or date and time of alarm occurrence.
       --dateTo string         End date or date and time of alarm occurrence.
       --device strings        The ManagedObject which is the source of this event. (accepts pipeline)
@@ -50,7 +51,6 @@ $ c8y devices list | c8y alarms assert count --maximum 0 --dateFrom -7d
       --maximum int           Maximum alarm count (inclusive). A value of -1 will disable this check (default -1)
       --minimum int           Minimum alarm count (inclusive). A value of -1 will disable this check (default -1)
       --resolved              When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
-      --retries int           Number of retries before giving up per id
       --severity string       Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
       --status string         Comma separated alarm statuses, for example ACTIVE,CLEARED.
       --strict                Strict mode, fail if no match is found
@@ -99,6 +99,7 @@ $ c8y devices list | c8y alarms assert count --maximum 0 --dateFrom -7d
       --progress                   Show progress bar. This will also disable any other verbose output
       --proxy string               Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw                        Show raw response. This mode will force output=json and view=off
+      --retries int                Max number of attempts when a failed http call is encountered (default 3)
       --select stringArray         Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string             Session configuration
       --sessionMode string         Override default session mode for a single command which would normally be disabled

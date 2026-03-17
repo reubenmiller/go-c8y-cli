@@ -32,8 +32,8 @@ Clone the existing session and rename it to "dev-otheruser" and change the sessi
 ```
       --fileType string   Session file type to save as. i.e. json, yaml, toml etc. (default "json")
   -h, --help              help for clone
+      --mode string       Session mode which controls which commands are enabled by default
       --newName string    Name of the new session file which will be created (required)
-      --type string       Session type of the cloned session, i.e. dev, qual, prod
 ```
 
 ### Options inherited from parent commands

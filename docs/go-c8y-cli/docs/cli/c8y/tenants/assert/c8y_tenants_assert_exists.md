@@ -1,15 +1,15 @@
 ---
 category: assert
-title: c8y events assert count
+title: c8y tenants assert exists
 ---
-Assert event count
+Assert existence of a tenant
 
 ### Synopsis
 
-Assert that a device has a specific amount of events and pass the input untouched
+Assert that a tenant exists or not and pass input untouched
 
 If the assertion is true, then the input value (stdin or an explicit argument value) will be passed untouched to stdout.
-This is useful if you want to filter a list of devices by whether by a specific entity count, and use the results
+This is useful if you want to filter a list of tenants by whether they exist or not in the platform, and use the results
 in some downstream command (in the pipeline)
 
 By default, a failed assertion will not set the exit code to a non-zero value. If you want a non-zero exit code
@@ -17,41 +17,38 @@ in such as case then use the --strict option.
 
 
 ```
-c8y events assert count [flags]
+c8y tenants assert exists [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y events assert count --device 1234 --minimum 1
-# => 1234 (if the ID exists)
-# => <no response> (if the ID does not exist)
-# Assert that a device exists, and has at least 1 event
+$ c8y tenants assert exists --tenant t12345
+# => t12345 (if the tenant exists)
+# => <no response> (if the tenant does not exist)
+# Assert the tenant exists
 
-$ c8y events assert count --device 1234 --minimum 5 --maximum 10 --dateFrom -1d --strict
-# Assert that the device with id=1111 should have between 5 and 10 events (inclusive) in the last day
-# Return an error if not
+$ echo "t12345" | c8y tenants assert exists
+# Pass the piped input only on if the tenant exists
 
-$ c8y devices list | c8y events assert count --maximum 0 --dateFrom -7d
-# Find a list of devices which have not created any events in the last 7 days
+$ echo -e "t11111\nt22222" | c8y tenants assert exists --not
+# Only select the tenant ids which do not exist
+
+$ echo t12345 | c8y tenants assert exists --strict
+# Return non-zero exit code if tenant t12345 does not exist
 
 ```
 
 ### Options
 
 ```
-      --attempts int          Number of attempts before giving up per id (-1 = unlimited) (default -1)
-      --dateFrom string       Start date or date and time of event occurrence.
-      --dateTo string         End date or date and time of event occurrence.
-      --device strings        The ManagedObject which is the source of this event. (accepts pipeline)
-      --duration string       Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
-      --fragmentType string   Fragment name from event.
-  -h, --help                  help for count
-      --interval string       Interval to check on the status, i.e. 10s or 1min (default "5s")
-      --maximum int           Maximum event count (inclusive). A value of -1 will disable this check (default -1)
-      --minimum int           Minimum event count (inclusive). A value of -1 will disable this check (default -1)
-      --strict                Strict mode, fail if no match is found
-      --type string           Event type.
+      --attempts int      Number of attempts before giving up per id (-1 = unlimited) (default -1)
+      --duration string   Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
+  -h, --help              help for exists
+      --interval string   Interval to check on the status, i.e. 10s or 1min (default "5s")
+      --not               Negate the match
+      --strict            Strict mode, fail if no match is found
+      --tenant strings    Tenant id (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
