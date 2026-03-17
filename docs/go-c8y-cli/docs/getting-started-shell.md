@@ -9,15 +9,10 @@ import CodeExample from '@site/src/components/CodeExample';
 
 Before you can send any requests to Cumulocity you need to configure the Cumulocity session which has the details which Cumulocity platform and authentication should be used for each of the commands/requests. This process only needs to be done once.
 
-:::caution
-SSO (Single Sign On) is not currently supported due to a security mechanism on the platform side which makes any cli implementation impossible.
+:::tip
+SSO users can authenticate via the browser-based **Authorization Code** flow (`--loginType BROWSER`) or the headless **Device Authorization** flow (`--loginType DEVICE`). See [Creating a session with SSO](#creating-a-session-with-sso) below.
 
-If you are an SSO user, then you will have to do one of the following before you can use go-c8y-cli:
-
-* Create a dedicated local user in Cumulocity (via the Administration -> Users page)
-* Create a service user via the Application User interface (though only for advanced users whom already have a username/password, see the [example](../cli/c8y/microservices/serviceusers/c8y_microservices_serviceusers_create/#examples))
-
-If you are using a local Cumulocity user, it recommended that you use TFA (Two-Factor Authentication) and use the "OAI-Secure" preferred login mode, which enables the usage of tokens (e.g. Bearer Authorization header), all of which is supported out of the box by go-c8y-cli.
+If you need a non-SSO account, you can create a dedicated local user in Cumulocity (Administration → Users) or a [service user](../cli/c8y/microservices/serviceusers/c8y_microservices_serviceusers_create/#examples).
 :::
 
 ## Basics
@@ -35,6 +30,40 @@ c8y sessions create
 </CodeExample>
 
 You will be prompted the session information including url, username and password. Alternatively, you can provide any of the settings via flags.
+
+### Creating a session with SSO
+
+go-c8y-cli supports two OAuth2-based SSO flows that don't require a username or password to be stored in the session file. The login type is saved in the session file so subsequent `set-session` calls use the same flow automatically.
+
+**Browser Authorization Code Flow** — opens a browser at the tenant's SSO URL and waits for the redirect. Best for desktop use.
+
+:::tip
+The following is required for the Browser flow:
+* The Cumulocity tenant must have **"Redirect to the user interface application"** enabled in its SSO configuration.
+* Your SSO provider must allow the redirect URI `http://localhost:5001/callback` (customizable via `--browserCallback`).
+:::
+
+<CodeExample>
+
+```bash
+c8y sessions create \
+  --host "https://example.cumulocity.com" \
+  --loginType BROWSER
+```
+
+</CodeExample>
+
+**Device Authorization Flow** — suited for headless environments. The CLI prints a URL and a short code; visit the URL in any browser to approve the login while the CLI polls for the result.
+
+<CodeExample>
+
+```bash
+c8y sessions create \
+  --host "https://example.cumulocity.com" \
+  --loginType DEVICE
+```
+
+</CodeExample>
 
 ### Activating a session (interactive)
 

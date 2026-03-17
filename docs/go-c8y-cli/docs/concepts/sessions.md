@@ -8,7 +8,7 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import CodeExample from '@site/src/components/CodeExample';
 
-A session holds the current Cumulocity settings and authentication to use for each command. For example, as session will contain the Cumulocity platform address, tenant, username and password. All of these settings are required in order to send REST requests to the platform.
+A session holds the current Cumulocity settings and authentication to use for each command. For example, as session will contain the Cumulocity platform address, tenant, and authorization (which depends on the login type). All of these settings are required in order to send REST requests to the platform.
 
 To use a session, you must first "activate" it, which will then start the "login" process where it uses the given session details and checks what login actions are required. For instance, if you have Two-Factor-Authentication (TFA) enabled, then you'll be prompted for your TFA code.
 
@@ -22,15 +22,10 @@ The session activate process is fairly complex due to the number of different lo
 
 The output of a successfully activate session is a set of environment variables that need to be set on the shell. Due to OS security restrictions, no subprocess (**c8y** in this can) can modify environment variables of the parent process (the **shell**), so instead shell helper function is required to evaluate the output of the session activation which in turn sets the required environment variables. The main motivation for using environment variables is to also allow other Cumulocity tooling to be able to access the required session information to run their own requests without having to know anything about session files and decryption etc.
 
-:::caution
-SSO (Single Sign On) is not currently supported due to a security mechanism on the platform side which makes any cli implementation impossible.
+:::tip
+SSO users can authenticate via the browser-based **Authorization Code** flow (`--loginType BROWSER`) or the headless **Device Authorization** flow (`--loginType DEVICE`). See [Create a session with SSO](#create-a-session-with-sso) below.
 
-If you are an SSO user, then you will have to do one of the following before you can use go-c8y-cli:
-
-* Create a dedicated local user in Cumulocity (via the Administration -> Users page)
-* Create a service user via the Application User interface (though only for advanced users whom already have a username/password, see the [example](../../cli/c8y/microservices/serviceusers/c8y_microservices_serviceusers_create/#examples))
-
-If you are using a local Cumulocity user, it recommended that you use TFA (Two-Factor Authentication) and use the "OAI-Secure" preferred login mode, which enables the usage of tokens (e.g. Bearer Authorization header), all of which is supported out of the box by go-c8y-cli.
+If you need a non-SSO account, you can create a dedicated local user in Cumulocity (Administration → Users) or a [service user](../../cli/c8y/microservices/serviceusers/c8y_microservices_serviceusers_create/#examples).
 :::
 
 ## Create a new session
@@ -81,6 +76,78 @@ Alternatively you can allow insecure mode (i.e. disable SSL verification) for a 
 
 ```bash
 c8y devices list --insecure
+```
+
+</CodeExample>
+
+## Create a session - SSO (Single Sign On) / OAUTH2 {#create-a-session-with-sso}
+
+go-c8y-cli supports two OAuth2-based SSO flows that don't require a username or password to be stored in the session file. The login type is selected with the `--loginType` flag and is saved in the session file so that subsequent `set-session` calls use the same flow automatically.
+
+### Browser Authorization Code Flow
+
+The **BROWSER** login type opens the system browser at the tenant's SSO authorization URL, starts a local callback server, and waits for the redirect. This is the most user-friendly option on a desktop.
+
+:::tip
+For the Browser Authorization Code Flow to work, the following is **required**:
+
+* The Cumulocity tenant must have **"Redirect to the user interface application"** enabled in its SSO configuration.
+* Your SSO provider (Keycloak, Azure AD, Auth0 etc.) must allow a redirect uri which matches the server that go-c8y-cli will create. By default this is `http://localhost:5001/callback` (but it can be customized via the **browserCallback** flag.)
+:::
+
+<CodeExample>
+
+```bash
+c8y sessions create \
+  --host "https://example.cumulocity.com" \
+  --loginType BROWSER
+```
+
+</CodeExample>
+
+If your SSO provider can't whitelist the default HTTP callback address, then you can customize the browser callback path when creating the session:
+
+<CodeExample>
+
+```bash
+c8y sessions create \
+  --host "https://example.cumulocity.com" \
+  --loginType BROWSER \
+  --browserCallback "http://127.0.0.1:8080/callback"
+```
+
+</CodeExample>
+
+### Device Authorization Flow
+
+The **DEVICE** login type (RFC 8628) is suited for headless environments or cases where a browser cannot open automatically. The CLI prints a URL and a short code; the user visits the URL in any browser to approve the login while the CLI polls for the result.
+
+<CodeExample>
+
+```bash
+c8y sessions create \
+  --host "https://example.cumulocity.com" \
+  --loginType DEVICE
+```
+
+</CodeExample>
+
+Once the session file is created, activating it will trigger the device flow automatically:
+
+<CodeExample transform="true">
+
+```bash
+set-session example.cumulocity.com
+```
+
+</CodeExample>
+
+You can also force the device flow at activation time for any existing session:
+
+<CodeExample transform="true">
+
+```bash
+set-session example.cumulocity.com --loginType DEVICE
 ```
 
 </CodeExample>
@@ -200,15 +267,33 @@ All of the values in the sessions file, can also be overridden using environment
 
 ### Continuous Integration usage (environment variables)
 
-Alternatively, the Cumulocity session can be controlled purely by environment variables.
+Alternatively, the Cumulocity session can be controlled purely by environment variables. This is the recommended approach for CI pipelines (GitHub Actions, GitLab CI, etc.).
 
-Then the Cumulocity settings can be set by the following environment variables.
+The Cumulocity settings can be set by the following environment variables.
 
-* `C8Y_HOST` (example "https://cumulocity.com")
-* `C8Y_TENANT` (example "myTenant")
-* `C8Y_USER`
-* `C8Y_PASSWORD`
-* `CI`
+| Variable | Description |
+|---|---|
+| `C8Y_HOST` | Host URL (e.g. `https://cumulocity.com`); also accepted as `C8Y_URL` or `C8Y_BASEURL` |
+| `C8Y_TENANT` | Tenant ID (e.g. `myTenant`) |
+| `C8Y_USER` | Username; also accepted as `C8Y_USERNAME` |
+| `C8Y_PASSWORD` | Password |
+| `C8Y_TOKEN` | Pre-obtained bearer token (skips the login step) |
+| `C8Y_SETTINGS_LOGIN_TYPE` | Override the login type (e.g. `BASIC`, `OAUTH2_INTERNAL`, `DEVICE`, `BROWSER`, `CERTIFICATE`) |
+| `C8Y_CERTIFICATE` | Path to a PEM-encoded client certificate for mTLS authentication |
+| `C8Y_CERTIFICATE_KEY` | Path to the corresponding PEM-encoded private key |
+| `C8Y_MODE` | Session mode (`dev`, `qual`, `prod`, `ci`) |
+
+Then load the session from the environment:
+
+<CodeExample>
+
+```bash
+eval "$( c8y sessions login --from-env )"
+```
+
+</CodeExample>
+
+If `C8Y_CERTIFICATE` is set and no `C8Y_SETTINGS_LOGIN_TYPE` is provided, the CLI automatically selects the `CERTIFICATE` login type.
 
 
 ### Switching sessions for a single command
@@ -317,7 +402,7 @@ c8y inventory create --name hello --sessionMode dev
 
 ## Using encryption in Cumulocity session files
 
-Encrypted password and cookies fields can be activated by adding the following fragment into the session file or your global `settings.json` file.
+By default, **go-c8y-cli** encrypts sensitive information when writing it to file. You can control whether encryption is used by either setting the following setting in the session file, or in the or the global `settings.json` file.
 
 ```json
 {
@@ -329,7 +414,7 @@ Encrypted password and cookies fields can be activated by adding the following f
 }
 ```
 
-When enabled the "password", and "authorization.cookies" fields will be encrypted using a passphrase chosen by the user.
+When enabled the sensitive information will be encrypted using a passphrase chosen by the user.
 The passphrase should be something that is sufficiently complex and should not be stored on disk.
 
 When the user sets the passphrase, a key file will be created within the Cumulocity session home folder, `.key`. This file will be used as a reference when comparing your passphrase to keep the passphrase constant across different sessions.
