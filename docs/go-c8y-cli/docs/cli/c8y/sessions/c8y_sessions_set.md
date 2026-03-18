@@ -24,18 +24,31 @@ Set a session but only include session matching company AND dev
 $ eval $( c8y sessions set --session myfile.json --tfaCode 123456 )
 Set a session using a given file (non-interactively)
 
+$ eval $( c8y sessions set --session myfile.json --loginType DEVICE )
+Login using the OAuth2 device flow (polls for approval after visiting the URL shown in the terminal)
+
+$ eval $( c8y sessions set --session myfile.json --loginType BROWSER )
+Login using Authorization Code flow – opens the system browser and waits for the callback
+
+$ eval $( c8y sessions set --session myfile.json --loginType BROWSER --browserCallback http://127.0.0.1:8080/callback )
+Login via browser with a custom callback URL registered in the SSO provider
+
+$ eval $( c8y sessions set --session myfile.json --loginType CERTIFICATE )
+Login using a device certificate (mTLS); reads cert paths from the session file or C8Y_CERTIFICATE / C8Y_CERTIFICATE_KEY env vars
+
 ```
 
 ### Options
 
 ```
-      --clear                  Clear any existing tokens
-  -h, --help                   help for set
-      --loginType string       Login type preference, e.g. OAUTH2_INTERNAL, OAUTH2 (device flow) or BASIC. When set to BASIC, any existing token will be cleared
-      --no-banner              Don't show the session banner
-      --sessionFilter string   Filter to be applied to the list of sessions even before the values can be selected
-      --shell string           Shell type to return the environment variables
-      --tfaCode string         Two Factor Authentication code
+      --browserCallback string   Custom redirect URI for the browser flow local callback server, e.g. http://127.0.0.1:8080/callback. Must match a URI registered in the SSO provider. Defaults to http://127.0.0.1:5001/callback
+      --clear                    Clear any existing tokens
+  -h, --help                     help for set
+      --loginType string         Login type preference, e.g. OAUTH2_INTERNAL, DEVICE (device flow), BROWSER (Authorization Code via browser), BASIC or CERTIFICATE (mTLS). OAUTH2 is a legacy alias for DEVICE. When set to BASIC, any existing token will be cleared
+      --no-banner                Don't show the session banner
+      --sessionFilter string     Filter to be applied to the list of sessions even before the values can be selected
+      --shell string             Shell type to return the environment variables
+      --tfaCode string           Two Factor Authentication code
 ```
 
 ### Options inherited from parent commands

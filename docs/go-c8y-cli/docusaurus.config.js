@@ -210,7 +210,7 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
     announcementBar: {
       id: 'extensions',
       content:
-        '📦 go-c8y-cli now supports extensions. Install the latest version (>=2.30.0) and check out the concepts page 🚀',
+        '📦 go-c8y-cli now supports SSO via Authorization Code and Device Flows. Install the latest version (>=2.54.0) and have a read of the sessions concept page 🚀',
     },
     navbar: {
       title: 'go-c8y-cli',

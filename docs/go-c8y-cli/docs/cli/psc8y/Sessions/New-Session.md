@@ -24,7 +24,9 @@ New-Session
 	[[-Password] <Object>]
 	[[-Name] <String>]
 	[[-Mode] <String>]
+	[[-LoginType] <String>]
 	[[-Description] <String>]
+	[[-BrowserCallback] <String>]
 	[-NoTenantPrefix]
 	[-AllowInsecure]
 	[<CommonParameters>]
@@ -145,6 +147,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -LoginType
+LoginType.
+Login Type, e.g.
+BASIC, OAUTH2_INTERNAL, OAUTH2, BROWSER, DEVICE, CERTIFICATE, NONE
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Description
 Description
 
@@ -154,7 +173,23 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -BrowserCallback
+Custom redirect URI for the browser authorization code flow, e.g.
+http://127.0.0.1:8080/callback
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 9
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

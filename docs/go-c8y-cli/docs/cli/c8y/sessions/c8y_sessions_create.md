@@ -15,45 +15,54 @@ c8y sessions create [flags]
 ### Examples
 
 ```
-### Example 1: Create a DEV new session. Prompt for username and password
-
-$ c8y sessions create --type dev --host "https://mytenant.eu-latest.cumulocity.com"
-
-### Example 2: Create a new QA (QUAL) session prompting for password
+$ c8y sessions create --mode dev --host "https://mytenant.eu-latest.cumulocity.com"
+Example 1: Create a DEV new session. Prompt for username and password
 
 $ c8y sessions create \
-    --type qual \
+    --mode qual \
 	--host "https://mytenant.eu-latest.cumulocity.com"
 	--username "myUser@me.com"
+Create a new QA (QUAL) session prompting for password
 
-### Example 3: Create a new production session where only only GET commands are enabled (with no password storage)
+$ c8y sessions create --mode prod --host "https://mytenant.eu-latest.cumulocity.com" --noStorage
+Create a new production session where only only GET commands are enabled (with no password storage)
 
-$ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.com" --noStorage
+$ c8y sessions create --mode prod --host "https://localhost:443" --insecure
+Create a session which points to a local api endpoint (most like an Cumulocity Edge instance)
 
-### Example 4: Create a session which points to a local api endpoint (most like an Cumulocity Edge instance)
+$ c8y sessions create --mode dev --host example.cumulocity.com --loginType BROWSER
+Create a session which uses SSO / OAUTH2 using Authorization Flow (via a local web browser)
+Note: Requires the "Redirect to the user interface application" to be enabled in Cumulocity
 
-$ c8y sessions create --type prod --host "https://localhost:443" --insecure
+c8y sessions create --mode dev --host example.cumulocity.com --loginType BROWSER --browserCallback localhost:8008/mycallback
+Create a session which uses SSO / OAUTH2 using Authorization Flow (via a local web browser)
+and define an explicit redirect/callback URI which is whitelisted in the SSO providers configuration
+Note: Requires the "Redirect to the user interface application" to be enabled in Cumulocity
+
+$ c8y sessions create --mode dev --host example.cumulocity.com --loginType DEVICE
+Create a session with SSO / OAUTH2 Device Flow (RFC 8628)
 		
 ```
 
 ### Options
 
 ```
-      --allowInsecure        Allow insecure connection (e.g. when using self-signed certificates)
-      --description string   Description about the session
-      --encrypt              Encrypt passwords and tokens (occurs when logging in)
-  -h, --help                 help for create
-      --host string          Host. .e.g. test.cumulocity.com. (required)
-      --loginType string     Login Type, e.g. BASIC, OAUTH2_INTERNAL, NONE
-      --mode string          Session mode which controls which commands are enabled by default
-      --name string          Name of the session
-      --noStorage            Don't store any passwords or tokens in the session file
-      --noTenantPrefix       Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false
-      --password string      Password. If left blank then you will be prompted for the password
-      --prompt               Force prompting of missing information
-      --tenant string        Tenant ID
-      --token string         Token
-      --username string      Username (without tenant). (required)
+      --allowInsecure            Allow insecure connection (e.g. when using self-signed certificates)
+      --browserCallback string   Custom redirect URI for the browser authorization code flow, e.g. http://127.0.0.1:8080/callback
+      --description string       Description about the session
+      --encrypt                  Encrypt passwords and tokens (occurs when logging in)
+  -h, --help                     help for create
+      --host string              Host. .e.g. test.cumulocity.com. (required)
+      --loginType string         Login Type, e.g. BASIC, OAUTH2_INTERNAL, OAUTH2, BROWSER, DEVICE, CERTIFICATE, NONE
+      --mode string              Session mode which controls which commands are enabled by default
+      --name string              Name of the session
+      --noStorage                Don't store any passwords or tokens in the session file
+      --noTenantPrefix           Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false
+      --password string          Password. If left blank then you will be prompted for the password
+      --prompt                   Force prompting of missing information
+      --tenant string            Tenant ID
+      --token string             Token
+      --username string          Username (without tenant). (required)
 ```
 
 ### Options inherited from parent commands
