@@ -63,7 +63,7 @@ jobs:
           install-only: true
 
       - name: Install Task
-        uses: arduino/setup-task@v2
+        uses: go-task/setup-task@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
