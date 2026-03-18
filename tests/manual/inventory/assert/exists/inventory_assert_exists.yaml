@@ -6,16 +6,16 @@ tests:
             exactly: '1'
     
     It fails the negated assertion when using dry mode:
-        command:  c8y inventory assert exists --not --id 1 --strict --dry
+        command:  c8y inventory assert exists --not --id 1 --strict --dry --duration 1s
         exit-code: 112
     
     It fails the assertion when using dry mode:
-        command:  c8y inventory assert exists --id 1 --strict --dry
+        command:  c8y inventory assert exists --id 1 --strict --dry --attempts 1 --interval 1s
         exit-code: 112
 
     It accepts multiple ids using comma separated values:
         command: |
-            c8y inventory assert exists --id 1,2 --strict --dry --dryFormat json \
+            c8y inventory assert exists --id 1,2 --strict --dry --dryFormat json --attempts 1 --duration 1s \
             | c8y util show --select path
         exit-code: 0
         stderr:
@@ -36,7 +36,7 @@ tests:
             exactly: '1'
     
     It returns an error when a single id does not exist (single entry):
-        command: echo "1" | c8y inventory assert exists --strict
+        command: echo "1" | c8y inventory assert exists --strict --attempts 1 --duration 2s
         exit-code: 112
     
     It filters multiple ids given in a list:
@@ -66,27 +66,34 @@ tests:
     
     It checks if a managed object exists, and then uses a downstream command to safely get a value:
         command: >
-          echo "1" | c8y inventory assert exists | c8y inventory get
+          echo "1" | c8y inventory assert exists --attempts 1 --interval 1s | c8y inventory get
         exit-code: 0
 
     It fails if an object exists but was expecting to not exist:
         command: >
-          c8y inventory list --pageSize 1 | c8y inventory assert exists --not --strict
+          c8y inventory list --pageSize 1 | c8y inventory assert exists --not --strict --attempts 1
         exit-code: 112
 
     It does not write to stderr when not using strict mode:
         command: >
-          echo "0" | c8y inventory assert exists
+          echo "0" | c8y inventory assert exists --attempts 1 --attempts 1 --interval 1s
         exit-code: 0
         stderr:
             not-contains:
                 - assertionError
+
+    It waits for the full duration when using --not on an existing object:
+        command: manual/inventory/assert/exists/003_assert.sh
+        exit-code: 0
+        stderr:
+            contains:
+                - "Timeout after 5s: assertionError: managedObject"
     
     It writes errors to stderr when using strict mode:
         command: >
-          echo "0" | c8y inventory assert exists --strict
+          echo "0" | c8y inventory assert exists --strict --attempts 1 --interval 1s
         exit-code: 112
         stderr:
             line-count: 1
             contains:
-                - 'assertionError: managedObject - wanted: Found, got: NotFound, context'
+                - 'assertionError: managedObject - wanted: Found, got: NotFound'
