@@ -25,7 +25,7 @@ func NewAssertCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker)
 	cmd.Flags().StringSlice("id", []string{""}, "Inventory id (required) (accepts pipeline)")
 	cmd.Flags().String("duration", "30s", "Timeout duration. i.e. 30s or 1m (1 minute)")
 	cmd.Flags().String("interval", "5s", "Interval to check on the status, i.e. 10s or 1min")
-	cmd.Flags().Int64("retries", 0, "Number of retries before giving up per id")
+	cmd.Flags().Int64("attempts", -1, "Number of attempts before giving up per id (-1 = unlimited)")
 	cmd.Flags().Bool("strict", false, "Strict mode, fail if no match is found")
 	flags.WithOptions(
 		cmd,
@@ -62,7 +62,7 @@ func NewAssertCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker)
 			return err
 		}
 
-		retries, err := cmd.Flags().GetInt64("retries")
+		attempts, err := cmd.Flags().GetInt64("attempts")
 		if err != nil {
 			return err
 		}
@@ -105,7 +105,7 @@ func NewAssertCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker)
 			if inputErr == nil {
 				// Skip checking if the input has errors
 				_ = state.SetValue(itemID)
-				result, err = desiredstate.WaitForWithRetries(retries, interval, duration, state)
+				result, err = desiredstate.WaitForWithRetries(attempts, interval, duration, state)
 				if err == nil {
 					outValue := h.GetValue(result, input)
 					_ = f.WriteOutputWithoutPropertyGuess(outValue, cmdutil.OutputContext{})
@@ -138,7 +138,7 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this event. (accepts pipeline)")
 	cmd.Flags().String("duration", "30s", "Timeout duration. i.e. 30s or 1m (1 minute)")
 	cmd.Flags().String("interval", "5s", "Interval to check on the status, i.e. 10s or 1min")
-	cmd.Flags().Int64("retries", 0, "Number of retries before giving up per id")
+	cmd.Flags().Int64("attempts", -1, "Number of attempts before giving up per id (-1 = unlimited)")
 	cmd.Flags().Bool("strict", false, "Strict mode, fail if no match is found")
 	flags.WithOptions(
 		cmd,
@@ -182,7 +182,7 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 			return err
 		}
 
-		retries, err := cmd.Flags().GetInt64("retries")
+		attempts, err := cmd.Flags().GetInt64("attempts")
 		if err != nil {
 			return err
 		}
@@ -225,7 +225,7 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 			if inputErr == nil {
 				// Skip checking if the input has errors
 				_ = state.SetValue(itemID)
-				result, err = desiredstate.WaitForWithRetries(retries, interval, duration, state)
+				result, err = desiredstate.WaitForWithRetries(attempts, interval, duration, state)
 				if err == nil {
 					outValue := h.GetValue(result, input)
 					_ = f.WriteOutputWithoutPropertyGuess(outValue, cmdutil.OutputContext{})
