@@ -57,10 +57,15 @@ func wait(retries int64, interval time.Duration, timeout time.Duration, predicat
 	}()
 
 	var lastValue interface{}
+	var lastCheckErr error
 	for {
 		select {
 		case <-timeoutCh:
-			return lastValue, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitTimeout, fmt.Sprintf("Timeout after %v", timeout))
+			msg := fmt.Sprintf("Timeout after %v", timeout)
+			if lastCheckErr != nil {
+				msg = fmt.Sprintf("%s: %s", msg, lastCheckErr)
+			}
+			return lastValue, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitTimeout, msg)
 
 		case msg := <-valueCh:
 			attemptCounter++
@@ -71,11 +76,14 @@ func wait(retries int64, interval time.Duration, timeout time.Duration, predicat
 				lastValue = msg
 			}
 			done, err := predicate.Check(msg)
+			if err != nil {
+				lastCheckErr = err
+			}
 			if done {
 				return msg, err
 			}
 
-			if retries >= 0 && attemptCounter > retries {
+			if retries >= 0 && attemptCounter >= retries {
 				// wrappedErr := fmt.Errorf("Max retries exceeded")
 				// if err != nil {
 				// 	wrappedErr = fmt.Errorf("%s: %w", wrappedErr, err)
