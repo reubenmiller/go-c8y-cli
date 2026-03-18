@@ -361,11 +361,11 @@ func PreferenceFromLoginType(loginType string) []authv2.LoginMethod {
 // --------------------------------------------------------------------------
 
 func (h *LoginHandlerV2) browserFlowOptions() *apiv2.BrowserFlowOptions {
-	openBrowser := func(url string) error {
+	openBrowser := func(rawURL string) error {
 		bold := color.New(color.Bold)
 		bold.EnableColor()
-		fmt.Fprintf(h.IO.ErrOut, "Opening %s in your browser...\n", bold.Sprint(url))
-		return browser.OpenURL(url)
+		fmt.Fprintf(h.IO.ErrOut, "Opening the SSO login page in your browser so you can login...\n\n%s\n\n", bold.Sprint(rawURL))
+		return browser.OpenURL(rawURL)
 	}
 
 	if h.BrowserFlow != nil {
