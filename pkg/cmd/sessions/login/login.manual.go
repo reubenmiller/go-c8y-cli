@@ -353,7 +353,15 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 		}
 	}
 
-	log.Infof("Parsing session provider output: %s", output)
+	if client, err := n.factory.Client(); err == nil {
+		if cfg.HideSensitive() {
+			log.Infof("Parsing session provider output: %s", cfg.HideSensitiveInformation(client, strings.TrimSpace(string(output))))
+		} else {
+			log.Infof("Parsing session provider output: %s", strings.TrimSpace(string(output)))
+		}
+	} else {
+		log.Infof("Parsing session provider output")
+	}
 	return n.FromReader(bytes.NewReader(output), n.Format)
 }
 
@@ -554,7 +562,16 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if sessionContents, err := json.Marshal(session); err == nil {
-		cfg.Logger.Infof("Received session from external source:\n%s\n", sessionContents)
+
+		if client, err := n.factory.Client(); err == nil {
+			if cfg.HideSensitive() {
+				log.Infof("Received session from external source:\n%s\n", cfg.HideSensitiveInformation(client, string(sessionContents)))
+			} else {
+				cfg.Logger.Infof("Received session from external source:\n%s\n", sessionContents)
+			}
+		} else {
+			log.Infof("Received session from external source")
+		}
 	}
 
 	if session.SessionUri != "" {
