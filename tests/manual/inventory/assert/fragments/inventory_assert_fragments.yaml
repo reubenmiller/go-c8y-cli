@@ -14,7 +14,7 @@ tests:
 
     It accepts multiple ids using comma separated values:
         command: |
-            c8y inventory assert fragments --id 1,2 --fragments name --strict --dry --dryFormat json \
+            c8y inventory assert fragments --id 1,2 --fragments name --strict --attempts 1 --interval 1s --dry --dryFormat json \
             | c8y util show --select path
         exit-code: 0
         stderr:
