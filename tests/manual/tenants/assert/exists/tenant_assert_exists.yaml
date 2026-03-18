@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+tests:
+    It uses the current tenant by default:
+        command: c8y tenants assert exists
+        exit-code: 0
+        stdout:
+            match-pattern: ^t\d+$
+        stderr:
+            line-count: 0
+
+    It uses the accepts a tenant via a flag:
+        command: c8y tenants assert exists --tenant $C8Y_TENANT
+        exit-code: 0
+        stdout:
+            match-pattern: ^t\d+$
+        stderr:
+            line-count: 0
+
+    It uses the accepts a tenant via the pipeline:
+        command: echo $C8Y_TENANT | c8y tenants assert exists
+        exit-code: 0
+        stdout:
+            match-pattern: ^t\d+$
+        stderr:
+            line-count: 0
+
+    It fails the negated assertion when using dry mode:
+        command: c8y tenants assert exists --not --strict --dry --attempts 1 --interval 1s
+        exit-code: 112
+        stderr:
+            contains:
+                - "assertionError: tenant - wanted: NotFound, got: Found"
+
+    It fails the negated assertion:
+        command: c8y tenants assert exists --not --strict --attempts 1 --interval 1s
+        exit-code: 112
+        stderr:
+            match-pattern: "^.*assertionError: tenant - wanted: NotFound, got: Found, context: \\{ID:t\\d+\\}.*$"

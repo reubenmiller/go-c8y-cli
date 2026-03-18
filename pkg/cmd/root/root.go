@@ -106,6 +106,7 @@ import (
 	tenantoptionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions"
 	tenantsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants"
 	tenantsApplicationsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/applications"
+	tenantsAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/assert"
 	tenantsTFACmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/tfa"
 	tenantstatisticsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantstatistics"
 	uiCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/ui"
@@ -369,6 +370,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	tenants := tenantsCmd.NewSubCommand(f).GetCommand()
 	tenants.AddCommand(tenantsApplicationsCmd.NewSubCommand(f).GetCommand())
 	tenants.AddCommand(tenantsTFACmd.NewSubCommand(f).GetCommand())
+	tenants.AddCommand(tenantsAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(tenants)
 
 	features := featuresCmd.NewSubCommand(f).GetCommand()

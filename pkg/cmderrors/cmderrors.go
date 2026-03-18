@@ -161,6 +161,7 @@ type AssertionErrorContext string
 
 var (
 	ManagedObject          AssertionErrorContext = "managedObject"
+	Tenant                 AssertionErrorContext = "tenant"
 	ManagedObjectFragments AssertionErrorContext = "managedObjectFragments"
 	AlarmCount             AssertionErrorContext = "alarmCount"
 	EventCount             AssertionErrorContext = "eventCount"
