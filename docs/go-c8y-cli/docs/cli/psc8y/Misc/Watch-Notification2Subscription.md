@@ -3,7 +3,7 @@ category: Misc
 external help file: PSc8y-help.xml
 id: Watch-Notification2Subscription
 Module Name: PSc8y
-online version: https://goc8ycli.netlify.app/docs/cli/c8y/notification2/subscriptions/c8y_notification2_subscriptions_subscribe/
+online version: https://c8y.app/docs/cli/c8y/notification2/subscriptions/c8y_notification2_subscriptions_subscribe/
 schema: 2.0.0
 slug: /docs/cli/psc8y/Misc/watch-notification2subscription
 title: Watch-Notification2Subscription
@@ -914,5 +914,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://goc8ycli.netlify.app/docs/cli/c8y/notification2/subscriptions/c8y_notification2_subscriptions_subscribe/](https://goc8ycli.netlify.app/docs/cli/c8y/notification2/subscriptions/c8y_notification2_subscriptions_subscribe/)
+[https://c8y.app/docs/cli/c8y/notification2/subscriptions/c8y_notification2_subscriptions_subscribe/](https://c8y.app/docs/cli/c8y/notification2/subscriptions/c8y_notification2_subscriptions_subscribe/)
 

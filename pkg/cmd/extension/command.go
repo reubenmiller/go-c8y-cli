@@ -447,7 +447,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						- fill in script/build.sh with your compilation script for automated builds
 						- compile a %[1]s binary locally and run 'c8y %[2]s' to see changes`, fullName, extName)
 					}
-					link := "https://goc8ycli.netlify.app/docs/tutorials/extensions/"
+					link := "https://c8y.app/docs/tutorials/extensions/"
 					out := heredoc.Docf(`
 						%[1]s Created directory %[2]s
 						%[1]s Initialized git repository

@@ -95,7 +95,7 @@ nfpms:
     package_name: go-c8y-cli
     license: MIT
     maintainer: Reuben Miller <reuben.d.miller@gmail.com>
-    homepage: http://goc8ycli.netlify.app
+    homepage: https://c8y.app
     bindir: /usr
     description: Cumulocity command line tool
     section: utils
@@ -178,7 +178,7 @@ brews:
 
       Then reload your shell to see the effects.
 
-    homepage: "https://goc8ycli.netlify.app/"
+    homepage: "https://c8y.app/"
     description: "Cumulocity command line tool"
     license: "MIT"
 

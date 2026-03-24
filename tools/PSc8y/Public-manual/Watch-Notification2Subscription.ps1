@@ -7,7 +7,7 @@ Subscribe to a subscription
 Subscribe to an existing subscription. If no token is provided, a token will be created automatically before starting the realtime client
 
 .LINK
-https://goc8ycli.netlify.app/docs/cli/c8y/notification2/subscriptions/c8y_notification2_subscriptions_subscribe/
+https://c8y.app/docs/cli/c8y/notification2/subscriptions/c8y_notification2_subscriptions_subscribe/
 
 .EXAMPLE
 PS> Watch-Notification2Subscription -Name registration
