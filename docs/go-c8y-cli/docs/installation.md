@@ -28,14 +28,14 @@ Install %%c8y%% on Linux, macOS or WSL2 (Windows Subsystem for Linux) using the 
     <TabItem value="wget">
 
     ```bash
-    wget -qO - https://goc8ycli.netlify.app/install.sh | sh -s
+    wget -qO - https://get.c8y.app | sh -s
     ```
 
     </TabItem>
     <TabItem value="curl">
 
     ```bash
-    curl -fsSL https://goc8ycli.netlify.app/install.sh | sh -s
+    curl -fsSL https://get.c8y.app | sh -s
     ```
 
     </TabItem>
@@ -54,14 +54,14 @@ The convenience script can be customized, for example you can choose how it is i
     <TabItem value="wget">
 
     ```bash
-    wget -qO - https://goc8ycli.netlify.app/install.sh | sh -s -- --help
+    wget -qO - https://get.c8y.app | sh -s -- --help
     ```
 
     </TabItem>
     <TabItem value="curl">
 
     ```bash
-    curl -fsSL https://goc8ycli.netlify.app/install.sh | sh -s -- --help
+    curl -fsSL https://get.c8y.app | sh -s -- --help
     ```
 
     </TabItem>
@@ -72,7 +72,7 @@ The convenience script can be customized, for example you can choose how it is i
 %%c8y%% can be installed using PowerShell using the following one-liner.
 
 ```bash
-. { Invoke-WebRequest https://goc8ycli.netlify.app/install.ps1 } | Invoke-Expression; install-c8y
+. { Invoke-WebRequest https://c8y.app/install.ps1 } | Invoke-Expression; install-c8y
 ```
 
 ### Alternative Installation Methods

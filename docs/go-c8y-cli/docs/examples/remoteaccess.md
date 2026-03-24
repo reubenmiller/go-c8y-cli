@@ -34,7 +34,7 @@ There are a few moving parts in this scenario, as there needs to be a client on 
 
 The good news is that there are existing open source projects which can be used to take advantage of the Remote Access feature; these components are:
 
-* [go-c8y-cli](https://goc8ycli.netlify.app/docs/introduction/) (on your machine)
+* [go-c8y-cli](https://c8y.app/docs/introduction/) (on your machine)
 * [thin-edge.io](https://thin-edge.io) - a Rust based agent that has out-of-the-box support for the Cumulocity Cloud Remote Access feature (on the device)
 
 ### Prerequisites

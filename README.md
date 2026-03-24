@@ -19,9 +19,9 @@ Supported on
 
 See the following installation instructions
 
-* [Shell](https://goc8ycli.netlify.app/docs/installation/shell-installation)
-* [Docker](https://goc8ycli.netlify.app/docs/installation/docker-installation)
-* [PowerShell](https://goc8ycli.netlify.app/docs/installation/powershell-installation)
+* [Shell](https://c8y.app/docs/installation/shell-installation)
+* [Docker](https://c8y.app/docs/installation/docker-installation)
+* [PowerShell](https://c8y.app/docs/installation/powershell-installation)
 
 
 ## Testing an unreleased version
@@ -76,7 +76,7 @@ hash -r
 
 ## Documentation
 
-See the [documentation website](https://goc8ycli.netlify.app/) for instructions on how to install and use it.
+See the [documentation website](https://c8y.app/) for instructions on how to install and use it.
 
 ## Contributing
 
