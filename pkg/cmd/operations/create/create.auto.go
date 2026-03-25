@@ -46,11 +46,13 @@ Create operation for a device
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Identifies the target device on which this operation should be performed. (accepts pipeline)")
+	cmd.Flags().StringSlice("agent", []string{""}, "Agent ID or name")
 	cmd.Flags().String("description", "", "Text description of the operation.")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithAgent("agent", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -60,6 +62,7 @@ Create operation for a device
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("agent", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -139,6 +142,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "deviceId"),
+		c8yfetcher.WithAgentByNameFirstMatch(n.factory, args, "agent", "agentId"),
 		flags.WithStringValue("description", "description"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),

@@ -33,6 +33,11 @@ Create operation for a device (using pipeline)
         [object[]]
         $Device,
 
+        # Agent ID or name
+        [Parameter()]
+        [object[]]
+        $Agent,
+
         # Text description of the operation.
         [Parameter()]
         [string]
