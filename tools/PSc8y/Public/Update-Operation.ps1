@@ -44,7 +44,12 @@ Update multiple operations
         # Reason for the failure. Use when setting status to FAILED
         [Parameter()]
         [string]
-        $FailureReason
+        $FailureReason,
+
+        # Agent ID or name
+        [Parameter()]
+        [object[]]
+        $Agent
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Update", "Template"

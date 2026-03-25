@@ -49,10 +49,12 @@ Update an operation
 	cmd.Flags().StringSlice("id", []string{""}, "Operation id (required) (accepts pipeline)")
 	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
 	cmd.Flags().String("failureReason", "", "Reason for the failure. Use when setting status to FAILED")
+	cmd.Flags().StringSlice("agent", []string{""}, "Agent ID or name")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("status", "PENDING", "EXECUTING", "SUCCESSFUL", "FAILED"),
+		completion.WithAgent("agent", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -61,6 +63,7 @@ Update an operation
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("agent", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -141,6 +144,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("status", "status"),
 		flags.WithStringValue("failureReason", "failureReason"),
+		c8yfetcher.WithAgentByNameFirstMatch(n.factory, args, "agent", "agentId"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("status"),

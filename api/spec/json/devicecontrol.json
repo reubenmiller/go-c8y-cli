@@ -216,6 +216,13 @@
           "description": "Identifies the target device on which this operation should be performed."
         },
         {
+          "name": "agent",
+          "type": "agent[]",
+          "property": "agentId",
+          "description": "Agent ID or name",
+          "pipeline": false
+        },
+        {
           "name": "description",
           "type": "string",
           "required": false,
@@ -286,6 +293,13 @@
           "type": "string",
           "required": false,
           "description": "Reason for the failure. Use when setting status to FAILED"
+        },
+        {
+          "name": "agent",
+          "type": "agent[]",
+          "property": "agentId",
+          "description": "Agent ID or name",
+          "pipeline": false
         },
         {
           "name": "data",
