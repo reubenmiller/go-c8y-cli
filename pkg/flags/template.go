@@ -9,6 +9,7 @@ import (
 )
 
 type Template string
+type TemplateSnippet string
 type TemplateVariables map[string]interface{}
 
 type Resolver interface {
@@ -44,6 +45,22 @@ func WithTemplateValue(src string, pathResolver Resolver) GetOption {
 		}
 
 		return src, Template(ResolveTemplate(value, pathResolver)), nil
+	}
+}
+
+func WithCustomTemplateValue(src string, dst string, pathResolver Resolver) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		if !cmd.Flags().Changed(src) {
+			// ignore
+			return "", nil, nil
+		}
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil || strings.TrimSpace(value) == "" {
+			return "", nil, err
+		}
+
+		return dst, TemplateSnippet(ResolveTemplate(value, pathResolver)), nil
 	}
 }
 

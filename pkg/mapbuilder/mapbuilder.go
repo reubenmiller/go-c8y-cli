@@ -561,6 +561,8 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 `
 
 	if len(snippets) > 0 {
+		// jsonnetImport += "_.Merge([" + strings.Join(snippets, ", ") + "])\n"
+
 		jsonnetImport += strings.Join(snippets, " +\n")
 	} else {
 		jsonnetImport += "{}"
@@ -596,7 +598,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 // NewMapBuilder creates a new map builder with the map set to nil
 func NewMapBuilder() *MapBuilder {
 	return &MapBuilder{
-		templates:         []string{},
+		templates:         []TemplateDef{},
 		autoApplyTemplate: true,
 	}
 }
@@ -604,7 +606,7 @@ func NewMapBuilder() *MapBuilder {
 // NewInitializedMapBuilder creates a new map builder with the map set to an empty map
 func NewInitializedMapBuilder(initBody bool) *MapBuilder {
 	builder := NewMapBuilder()
-	builder.templates = make([]string, 0)
+	builder.templates = make([]TemplateDef, 0)
 	builder.autoApplyTemplate = true
 
 	if initBody {
@@ -673,9 +675,21 @@ type MapBuilder struct {
 	requiredKeys           []string
 	autoApplyTemplate      bool
 	appendTemplate         bool
-	templates              []string
+	templates              []TemplateDef
 	externalInput          []byte
 	localTemplateVariables []LocalVariable
+}
+
+type TemplateDef struct {
+	Template       string
+	TargetProperty string
+}
+
+func (t TemplateDef) GetTemplate() string {
+	if t.TargetProperty == "" {
+		return strings.TrimSpace(t.Template)
+	}
+	return fmt.Sprintf(`{%s+:%s}`, t.TargetProperty, strings.TrimSpace(t.Template))
 }
 
 func (b *MapBuilder) HasChanged() bool {
@@ -711,7 +725,7 @@ func (b *MapBuilder) HasChanged() bool {
 }
 
 // AppendTemplate appends a templates to be merged in with the body
-func (b *MapBuilder) AppendTemplate(template string) *MapBuilder {
+func (b *MapBuilder) AppendTemplate(template TemplateDef) *MapBuilder {
 	b.templates = append(b.templates, template)
 	return b
 }
@@ -765,8 +779,8 @@ func (b *MapBuilder) AddLocalTemplateVariable(name string, value any) error {
 }
 
 // PrependTemplate prepends a templates to be merged in with the body
-func (b *MapBuilder) PrependTemplate(template string) *MapBuilder {
-	b.templates = append([]string{template}, b.templates[:]...)
+func (b *MapBuilder) PrependTemplate(template TemplateDef) *MapBuilder {
+	b.templates = append([]TemplateDef{template}, b.templates[:]...)
 	return b
 }
 
@@ -805,13 +819,18 @@ func (b *MapBuilder) ApplyTemplates(existingJSON []byte, input []byte, appendTem
 	}
 	templates := []string{}
 	for _, template := range b.templates {
-		templates = append(templates, strings.TrimSpace(template))
+		templates = append(templates, template.GetTemplate())
 	}
 
 	// Only merge in existing JSON if it is not just an empty object
 	// as the other templates might not be objects which can be merged together in jsonnet
 	// e.g. "_.Int(1) + {}"  will cause an error
 	if !bytes.Equal(existingJSON, []byte("{}")) {
+
+		// TODO: Fix naive replacement
+		// existingJSON = bytes.ReplaceAll(existingJSON, []byte(":"), []byte("+:"))
+		existingJSON = setInheritance(existingJSON)
+
 		if appendTemplates {
 			templates = append([]string{string(existingJSON)}, templates...)
 		} else {
@@ -827,6 +846,38 @@ func (b *MapBuilder) ApplyTemplates(existingJSON []byte, input []byte, appendTem
 	}
 
 	return []byte(mergedJSON), nil
+}
+
+func setInheritance(b []byte) []byte {
+	out := make([]byte, 0, len(b))
+	inQuote := false
+	isObj := false
+	for _, c := range b {
+		if c == '"' {
+			inQuote = !inQuote
+		}
+		// if !inQuote && c == ':' {
+		// 	out = append(out, '+')
+		// }
+		if inQuote {
+			out = append(out, c)
+			continue
+		}
+		if c == '{' {
+			isObj = true
+		}
+		if c == '}' {
+			isObj = false
+		}
+		if isObj {
+
+		}
+		// if !inQuote && c == ':' {
+		// 	out = append(out, '+')
+		// }
+		out = append(out, c)
+	}
+	return out
 }
 
 // SetTemplateVariables stores the given variables that will be used in the template evaluation

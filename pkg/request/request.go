@@ -725,7 +725,9 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 		return nil, err
 	}
 
-	outputBuilder.AppendTemplate(commonOptions.OutputTemplate)
+	outputBuilder.AppendTemplate(mapbuilder.TemplateDef{
+		Template: commonOptions.OutputTemplate,
+	})
 	out, outErr := outputBuilder.MarshalJSONWithInput(input)
 
 	if outErr != nil {

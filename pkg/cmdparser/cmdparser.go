@@ -314,6 +314,9 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 		}
 		cmd.Command.Flags().Float32P(p.Name, p.ShortName, float32(defaultValue), p.GetDescription())
 
+	case "template":
+		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
+		factory.WithTemplateCompletion(p.Name)(cmd.Command)
 	case "booleanValue":
 		cmd.Command.Flags().StringP(p.Name, p.ShortName, p.Default, p.GetDescription())
 		cmd.Completion = append(
@@ -430,6 +433,8 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 
 	case "json_custom":
 		opts = append(opts, flags.WithDataValue(p.Name, targetProp, p.Format))
+	case "template":
+		opts = append(opts, flags.WithCustomTemplateValue(p.Name, targetProp, cmdutil.NewTemplateResolver(factory)))
 	case "binaryUploadURL":
 		opts = append(opts, c8ybinary.WithBinaryUploadURL(factory.Client, factory.IOStreams.ProgressIndicator(), p.Name, targetProp, p.Format))
 	case "json":
