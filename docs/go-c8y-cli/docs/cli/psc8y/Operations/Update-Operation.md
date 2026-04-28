@@ -21,6 +21,7 @@ Update-Operation
 	[-Id] <Object[]>
 	[[-Status] <String>]
 	[[-FailureReason] <String>]
+	[[-Agent] <Object[]>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -138,6 +139,21 @@ Aliases:
 
 Required: False
 Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Agent
+Agent ID or name
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
