@@ -19,6 +19,7 @@ Create operation
 ```
 New-Operation
 	[[-Device] <Object[]>]
+	[[-Agent] <Object[]>]
 	[[-Description] <String>]
 	[-Data <Object>]
 	[-NoAccept]
@@ -109,6 +110,21 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
+### -Agent
+Agent ID or name
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Description
 Text description of the operation.
 
@@ -118,7 +134,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

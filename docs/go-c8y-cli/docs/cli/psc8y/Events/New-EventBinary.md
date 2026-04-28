@@ -21,6 +21,7 @@ New-EventBinary
 	[-Id] <Object[]>
 	[-File] <String>
 	[[-Name] <String>]
+	[[-Type] <String>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -129,6 +130,22 @@ Aliases:
 
 Required: False
 Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Type
+Custom type.
+If left blank, the MIME type will be detected from the file extension
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
