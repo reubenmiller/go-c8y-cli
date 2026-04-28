@@ -39,7 +39,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/hashicorp/go-version v1.8.0
+require github.com/hashicorp/go-version v1.9.0
 
 require (
 	github.com/cli/browser v1.3.0
