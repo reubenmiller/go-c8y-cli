@@ -33,7 +33,7 @@ require (
 	github.com/tidwall/pretty v1.2.1
 	github.com/tidwall/sjson v1.2.5
 	github.com/vbauerster/mpb/v6 v6.0.4
-	go.uber.org/zap v1.27.1
+	go.uber.org/zap v1.28.0
 	golang.org/x/crypto v0.50.0
 	golang.org/x/term v0.42.0
 	gopkg.in/yaml.v3 v3.0.1
