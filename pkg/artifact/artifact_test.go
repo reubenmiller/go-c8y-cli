@@ -23,6 +23,10 @@ func Test_Filename(t *testing.T) {
 			Filename: "./helloworld3-0.0.1-SNAPSHOT (100).zip",
 			Expected: "helloworld3",
 		},
+		{
+			Filename: "./foo-bar-example-1.4-SNAPSHOT.zip",
+			Expected: "foo-bar-example",
+		},
 	}
 
 	for _, testcase := range cases {

@@ -17,6 +17,6 @@ func ParseName(file string) string {
 	suffixRegex := regexp.MustCompile(`\s+\(\d+\)$`)
 	baseFileName = suffixRegex.ReplaceAllString(baseFileName, "")
 
-	versionRegex := regexp.MustCompile(`([_-]v?\d+\.\d+\.\d+(-SNAPSHOT)?)?$`)
+	versionRegex := regexp.MustCompile(`([_-]v?\d+(\.\d+){1,}(-SNAPSHOT)?)?$`)
 	return versionRegex.ReplaceAllString(baseFileName, "")
 }
