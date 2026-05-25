@@ -34,8 +34,8 @@ require (
 	github.com/tidwall/sjson v1.2.5
 	github.com/vbauerster/mpb/v6 v6.0.4
 	go.uber.org/zap v1.28.0
-	golang.org/x/crypto v0.50.0
-	golang.org/x/term v0.42.0
+	golang.org/x/crypto v0.52.0
+	golang.org/x/term v0.43.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -103,9 +103,9 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b // indirect
-	golang.org/x/net v0.52.0 // indirect
-	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/net v0.54.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637 // indirect
 	resty.dev/v3 v3.0.0-beta.6.0.20260128173335-37296c9841e6 // indirect
 	rsc.io/qr v0.2.0 // indirect
