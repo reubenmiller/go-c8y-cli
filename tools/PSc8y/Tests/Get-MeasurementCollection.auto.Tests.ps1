@@ -13,6 +13,12 @@ Describe -Name "Get-MeasurementCollection" {
         $Response | Should -Not -BeNullOrEmpty
     }
 
+    It "Get a list of measurements from the last day, showing the oldest first" {
+        $Response = PSc8y\Get-MeasurementCollection -DateFrom -1d -Revert:$false
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+    }
+
     It "Get a list of measurements for a particular device" {
         $Response = PSc8y\Get-MeasurementCollection -Device $Device.id -Type "TempReading"
         $LASTEXITCODE | Should -Be 0

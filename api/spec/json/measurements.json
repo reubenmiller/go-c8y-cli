@@ -26,6 +26,11 @@
             "command": "Get-MeasurementCollection"
           },
           {
+            "description": "Get a list of measurements from the last day, showing the oldest first",
+            "command": "Get-MeasurementCollection -DateFrom -1d -Revert:$false",
+            "skipTest": true
+          },
+          {
             "description": "Get a list of measurements for a particular device",
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
@@ -52,6 +57,10 @@
           {
             "description": "Get a list of measurements",
             "command": "c8y measurements list"
+          },
+          {
+            "description": "Get a list of measurements from the last day, showing the oldest first",
+            "command": "c8y measurements list --dateFrom -1d --revert=false"
           }
         ]
       },
@@ -123,7 +132,7 @@
         {
           "name": "revert",
           "type": "boolean",
-          "description": "Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters"
+          "description": "Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters. By default, the results are sorted by the newest measurements first for time series and by the oldest first for legacy measurements"
         }
       ]
     },

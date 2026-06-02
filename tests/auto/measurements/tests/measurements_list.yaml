@@ -6,3 +6,13 @@ tests:
             json:
                 method: GET
                 path: /measurement/measurements
+    measurements_list_Get a list of measurements from the last day, showing the oldest first:
+        command: c8y measurements list --dateFrom -1d --revert=false
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /measurement/measurements
+            contains:
+                - dateFrom=
+                - revert=false
