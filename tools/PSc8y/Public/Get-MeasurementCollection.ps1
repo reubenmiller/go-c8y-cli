@@ -16,6 +16,11 @@ PS> Get-MeasurementCollection
 Get a list of measurements
 
 .EXAMPLE
+PS> Get-MeasurementCollection -DateFrom -1d -Revert:$false
+
+Get a list of measurements from the last day, showing the oldest first
+
+.EXAMPLE
 PS> Get-MeasurementCollection -Device $Device.id -Type "TempReading"
 
 Get a list of measurements for a particular device
@@ -63,7 +68,7 @@ Get measurements from a device (using pipeline)
         [string]
         $DateTo,
 
-        # Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters
+        # Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters. By default, the results are sorted by the newest measurements first for time series and by the oldest first for legacy measurements
         [Parameter()]
         [switch]
         $Revert,
