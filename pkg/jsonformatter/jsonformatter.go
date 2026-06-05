@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"os"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/tidwall/gjson"
 )
 
@@ -90,22 +90,17 @@ func WithOptionalFormatter(enabled bool, formatter ByteFormatter) OutputFormatte
 }
 
 func writeToFile(text []byte, filename string, append bool) error {
+	fields := make(map[string]string)
 
-	var out *os.File
-	var err error
-	if append {
-		out, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	} else {
-		out, err = os.Create(filename)
+	if bytes.Contains(text, []byte("{")) && bytes.Contains(text, []byte("}")) {
+		// Only works if it is json, otherwise these values will be empty
+		props := []string{"id", "name", "type", "owner"}
+		for i, result := range gjson.GetManyBytes(text, props...) {
+			fields[props[i]] = result.String()
+		}
 	}
 
-	if err != nil {
-		return fmt.Errorf("Could not create file. %s", err)
-	}
-	defer out.Close()
-
-	// Writer the body to file
-	fmt.Fprintf(out, "%s\n", text)
+	_, err := fileutilities.WriteToFile(bytes.NewReader(text), filename, append, true, fields)
 
 	if err != nil {
 		return fmt.Errorf("failed to copy file contents to file. %s", err)

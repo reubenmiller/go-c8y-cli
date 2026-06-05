@@ -23,6 +23,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
@@ -722,6 +723,23 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 
 	unfilteredSize := 0
 	outputJSON := gjson.ParseBytes(output)
+
+	// write response to file instead of to stdout
+	if commonOptions.OutputFileRaw != "" {
+		fields := make(map[string]string)
+		// Only works if it is json, otherwise these values will be empty
+		props := []string{"id", "name", "type", "owner"}
+		for _, prop := range props {
+			fields[prop] = outputJSON.Get(prop).String()
+		}
+
+		fullFilePath, err := fileutilities.WriteToFile(strings.NewReader(outputJSON.Raw), commonOptions.OutputFileRaw, false, false, fields)
+		if err != nil {
+			return 0, cmderrors.NewSystemError("write to file failed", err)
+		}
+
+		logg.Infof("Saved response: %s", fullFilePath)
+	}
 
 	if len(output) > 0 || commonOptions.HasOutputTemplate() {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
