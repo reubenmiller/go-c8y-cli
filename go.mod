@@ -13,7 +13,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/karrick/tparse/v2 v2.8.2
 	github.com/manifoldco/promptui v0.9.0
-	github.com/mattn/go-colorable v0.1.14
+	github.com/mattn/go-colorable v0.1.15
 	github.com/mattn/go-isatty v0.0.22
 	github.com/mdp/qrterminal/v3 v3.2.1
 	github.com/mitchellh/go-homedir v1.1.0
