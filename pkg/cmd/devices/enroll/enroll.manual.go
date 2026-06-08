@@ -437,7 +437,7 @@ func (n *DeviceEnrollCmd) RunE(cmd *cobra.Command, args []string) error {
 		}, &commonOptions)
 
 		return nil, nil
-	})
+	}, nil)
 }
 
 type EnrollmentResult struct {

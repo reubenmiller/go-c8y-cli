@@ -164,5 +164,5 @@ func (n *RegisterCumulocityCACmd) RunE(cmd *cobra.Command, args []string) error 
 		Client:        c8yclient,
 		Factory:       n.factory,
 		CommonOptions: commonOptions,
-	}, mappings))
+	}, mappings), nil)
 }

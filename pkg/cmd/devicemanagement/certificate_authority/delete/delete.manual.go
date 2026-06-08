@@ -80,5 +80,5 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		_, err = fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Deleted certificate-authority for tenant %s\n", cs.SuccessIconWithColor(cs.Red), client.GetTenantName(context.Background()))
 		return nil, err
-	})
+	}, nil)
 }

@@ -368,7 +368,11 @@ func (w *GenericWorker) run(iter iterator.Iterator, commonOptions config.CommonC
 		if maxJobsReached {
 			message += fmt.Sprintf(". job limit exceeded=%v", maxJobsReached)
 		}
-		return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCompletedWithErrors, message)
+		aggregateErr := cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCompletedWithErrors, message)
+		// the individual errors have already been processed (logged) via CheckError,
+		// so flag the aggregate as processed to avoid emitting a redundant summary line
+		aggregateErr.Processed = true
+		return aggregateErr
 	}
 	if maxJobsReached {
 		return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitJobLimitExceeded, fmt.Sprintf("max job limit exceeded. limit=%d", maxJobs))

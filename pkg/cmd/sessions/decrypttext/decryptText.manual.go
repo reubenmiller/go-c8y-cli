@@ -128,5 +128,5 @@ func (n *CmdDecryptText) RunE(cmd *cobra.Command, args []string) error {
 			return "", err
 		}
 		return "", nil
-	})
+	}, nil)
 }

@@ -1,18 +1,15 @@
 package exists
 
 import (
-	"errors"
-	"fmt"
-	"io"
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/desiredstate"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -93,59 +90,28 @@ func NewAssertTenantCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 			return err
 		}
 
-		state := h.GetStateHandler(cmd, client)
+		return f.RunWithGenericWorkers(cmd, inputIterators, path, func(j worker.Job) (any, error) {
+			state := h.GetStateHandler(cmd, client)
 
-		totalErrors := 0
-		var lastErr error
-		var result interface{}
+			itemID := string(j.Value.([]byte))
+			input := j.Input
 
-		for {
-			tenantID, input, inputErr := path.Execute(false)
-
-			if tenantID != "" && input == nil {
-				// set the input manually when the value is not provided
-				// from the pipeline, and using the default value.
-				input = []byte(tenantID)
+			// when the value is not provided from the pipeline (e.g. using the
+			// default value or an explicit flag), use the resolved id as the input
+			// so it can be passed untouched to the output
+			if _, ok := input.([]byte); !ok {
+				input = j.Value
 			}
 
-			if inputErr == io.EOF {
-				break
+			// Skip checking if the input has errors
+			_ = state.SetValue(itemID)
+			result, err := desiredstate.WaitForWithRetries(attempts, interval, duration, state)
+			if err == nil {
+				outValue := h.GetValue(result, input)
+				_ = f.WriteOutputWithoutPropertyGuess(outValue, cmdutil.OutputContext{})
 			}
-
-			if totalErrors >= cfg.AbortOnErrorCount() {
-				msg := fmt.Sprintf("Too many errors. total=%d, max=%d. lastError=%s", totalErrors, cfg.AbortOnErrorCount(), lastErr)
-				return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAbortedWithErrors, msg)
-			}
-
-			if inputErr == nil {
-				// Skip checking if the input has errors
-				_ = state.SetValue(tenantID)
-				result, err = desiredstate.WaitForWithRetries(attempts, interval, duration, state)
-				if err == nil {
-					outValue := h.GetValue(result, input)
-					_ = f.WriteOutputWithoutPropertyGuess(outValue, cmdutil.OutputContext{})
-				}
-			} else {
-				err = inputErr
-			}
-
-			if err != nil {
-				if !errors.Is(err, cmderrors.ErrAssertion) || strictMode {
-					totalErrors++
-					lastErr = f.CheckPostCommandError(err)
-
-					// wrap error so it is not printed twice, and is still an assertion error
-					cErr := cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAssertionError, lastErr)
-					cErr.Processed = true
-					lastErr = cErr
-				}
-			}
-		}
-
-		if totalErrors > 0 {
-			return lastErr
-		}
-		return nil
+			return nil, err
+		}, cmdutil.ProcessAssertError(f, strictMode))
 	}
 	return cmd
 }

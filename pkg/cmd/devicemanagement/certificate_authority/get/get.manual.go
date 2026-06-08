@@ -85,5 +85,5 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		err = n.factory.WriteOutputWithoutPropertyGuess(b, cmdutil.OutputContext{})
 		return nil, err
-	})
+	}, nil)
 }
