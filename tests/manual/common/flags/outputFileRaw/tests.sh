@@ -36,8 +36,17 @@ create_inventory_binary () {
 
 test01 () {
     binary_id=$(create_inventory_binary "mycustomfilename.py")
-    c8y binaries get --id "$binary_id" --outputFileRaw "$TEMP_DIR/output/prefix-{id}.{filename}" > /dev/null
+    c8y binaries get --id "$binary_id" --outputFileRaw "$TEMP_DIR/output/prefix-{id}.{filename}" --verbose
     test -f "$TEMP_DIR/output/prefix-$binary_id.mycustomfilename.py"
 }
 
+test02_non_api_commands () {
+    printf '{"name":"foo1","type":"type1","owner":"owner1"}' | c8y util show --outputFileRaw "$TEMP_DIR/output/prefix-{name}-{type}-{owner}.json" > /dev/null
+    test -f "$TEMP_DIR/output/prefix-foo1-type1-owner1.json"
+
+    printf '{"name":"foo2","type":"type2","owner":"owner2"}' | c8y template execute --template 'input.value' --outputFileRaw "$TEMP_DIR/output/prefix-{name}-{type}-{owner}.json" > /dev/null
+    test -f "$TEMP_DIR/output/prefix-foo2-type2-owner2.json"
+}
+
 test01
+test02_non_api_commands

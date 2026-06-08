@@ -10,9 +10,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"path"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -27,6 +25,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/curly"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encoding"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonformatter"
@@ -800,10 +799,33 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 			newline := strings.Contains(strings.ToLower(resp.Response.Header.Get("Content-Type")), "json")
 			fields := make(map[string]string)
 			// Only works if it is json, otherwise these values will be empty
-			fields["name"] = resp.JSON("name").String()
-			fields["type"] = resp.JSON("type").String()
-			fields["owner"] = resp.JSON("owner").String()
-			fullFilePath, err := r.saveResponseToFile(resp, commonOptions.OutputFileRaw, false, newline, fields)
+			props := []string{"id", "name", "type", "owner"}
+			for _, prop := range props {
+				fields[prop] = resp.JSON(prop).String()
+			}
+
+			if _, params, err := mime.ParseMediaType(resp.Response.Header.Get("Content-Disposition")); err == nil {
+				if name, ok := params["filename"]; ok {
+					fields["filename"] = name
+				}
+			}
+			if resp.Response.Request != nil {
+				fields["basename"] = path.Base(resp.Response.Request.URL.Path)
+			}
+
+			if resp.Response.Request != nil {
+				r.Logger.Infof("Request: %s", resp.Response.Request.URL.Path)
+
+				for part := range strings.SplitSeq(resp.Response.Request.URL.Path, "/") {
+					if part != "" && c8y.IsID(part) {
+						r.Logger.Debugf("Found id like value. value=%s", part)
+						fields["id"] = part
+						break
+					}
+				}
+			}
+
+			fullFilePath, err := fileutilities.WriteToFile(bytes.NewReader(resp.Body()), commonOptions.OutputFileRaw, false, newline, fields)
 
 			if err != nil {
 				return 0, cmderrors.NewSystemError("write to file failed", err)
@@ -1067,95 +1089,6 @@ func (r *RequestHandler) guessDataProperty(resp *c8y.Response) string {
 		r.Logger.Debugf("Data property: %s", property)
 	}
 	return property
-}
-
-// saveResponseToFile saves a response to file
-// @filename	filename
-// @directory	output directory. If empty, then a temp directory will be used
-// if filename
-func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string, append bool, newline bool, fields map[string]string) (string, error) {
-
-	// Support simple variable substitution to be able to set the output file name dynamically to download a collection of files
-	if strings.Contains(filename, "{") && strings.Contains(filename, "}") {
-		if strings.Contains(filename, "{filename}") {
-			if _, params, err := mime.ParseMediaType(resp.Response.Header.Get("Content-Disposition")); err == nil {
-				if name, ok := params["filename"]; ok {
-					filename = strings.ReplaceAll(filename, "{filename}", name)
-				}
-			}
-		}
-
-		if strings.Contains(filename, "{basename}") {
-			if resp.Response.Request != nil {
-				filename = strings.ReplaceAll(filename, "{basename}", path.Base(resp.Response.Request.URL.Path))
-			}
-		}
-
-		if strings.Contains(filename, "{id}") {
-			if resp.Response.Request != nil {
-				r.Logger.Infof("Request: %s", resp.Response.Request.URL.Path)
-
-				urlParts := strings.Split(resp.Response.Request.URL.Path, "/")
-				for _, part := range urlParts {
-					if part != "" && c8y.IsID(part) {
-						r.Logger.Debugf("Found id like value. Substituting {id} for %s", part)
-						filename = strings.ReplaceAll(filename, "{id}", part)
-						break
-					}
-				}
-			} else {
-				r.Logger.Infof("Request is nill")
-			}
-		}
-
-		// Replace any additional fields
-		for k, v := range fields {
-			fieldName := fmt.Sprintf("{%s}", k)
-			if strings.Contains(filename, fieldName) {
-				r.Logger.Debugf("Replacing %s with %s", fieldName, v)
-				filename = strings.ReplaceAll(filename, fieldName, v)
-			}
-		}
-	}
-
-	var out *os.File
-	var err error
-	dirPath := path.Dir(filename)
-	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
-		return "", fmt.Errorf("could not create directory. dir=%s,  err=%w", dirPath, err)
-	}
-	if append {
-		out, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	} else {
-		out, err = os.Create(filename)
-	}
-
-	if err != nil {
-		return "", fmt.Errorf("Could not create file. %s", err)
-	}
-	defer out.Close()
-
-	if append && newline {
-		if fs, err := out.Stat(); err == nil {
-			if fs.Size() > 0 {
-				// add newline when appending so that content is separated (only if file is not empty)
-				fmt.Fprintf(out, "\n")
-			}
-		}
-	}
-
-	// Writer the body to file
-	r.Logger.Printf("header: %v", resp.Header())
-	fmt.Fprintf(out, "%s", resp.Body())
-
-	if err != nil {
-		return "", fmt.Errorf("failed to copy file contents to file. %s", err)
-	}
-
-	if fullpath, err := filepath.Abs(filename); err == nil {
-		return fullpath, nil
-	}
-	return filename, nil
 }
 
 // HasJSONHeader returns true if the header contains a json content type
