@@ -136,5 +136,5 @@ func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
 			Input: j.Input,
 		}, &commonOptions)
 		return nil, err
-	})
+	}, nil)
 }

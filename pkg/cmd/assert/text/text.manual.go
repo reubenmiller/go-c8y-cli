@@ -3,9 +3,7 @@ package json
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
 	"regexp"
 	"strings"
 
@@ -15,6 +13,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	"github.com/spf13/cobra"
 )
@@ -130,20 +129,9 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 		_ = n.factory.WriteOutputWithoutPropertyGuess(output, cmdutil.OutputContext{})
 	}
 
-	totalErrors := 0
-	var lastErr error
-	for {
-		err = nil
-		input, _, inputErr := iter.GetNext()
-
-		if inputErr == io.EOF {
-			break
-		}
-
-		if totalErrors >= cfg.AbortOnErrorCount() {
-			msg := fmt.Sprintf("Too many errors. total=%d, max=%d. lastError=%s", totalErrors, cfg.AbortOnErrorCount(), lastErr)
-			return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAbortedWithErrors, msg)
-		}
+	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
+		var err error
+		input := j.Value.([]byte)
 
 		// schema match
 		if schema != nil {
@@ -179,22 +167,7 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 				}
 			}
 		}
-
-		if err != nil {
-			if !errors.Is(err, cmderrors.ErrAssertion) || n.strictMode {
-				totalErrors++
-				lastErr = n.factory.CheckPostCommandError(err)
-
-				// wrap error so it is not printed twice, and is still an assertion error
-				cErr := cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAssertionError, lastErr)
-				cErr.Processed = true
-				lastErr = cErr
-			}
-		}
-	}
-	if totalErrors > 0 {
-		return lastErr
-	}
-	return nil
+		return nil, err
+	}, cmdutil.ProcessAssertError(n.factory, n.strictMode))
 
 }

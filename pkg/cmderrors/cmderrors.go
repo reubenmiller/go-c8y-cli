@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	nativeErrors "errors"
+
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -321,4 +323,13 @@ func NewErrorSummary(message string, errorsCh <-chan error) error {
 		return nil
 	}
 	return errorSummary
+}
+
+func IsNotFound(err error) bool {
+	if errResponse, ok := err.(*c8y.ErrorResponse); ok && errResponse != nil {
+		if errResponse.Response.StatusCode() == 404 {
+			return true
+		}
+	}
+	return nativeErrors.Is(err, ErrNoMatchesFound)
 }

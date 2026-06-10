@@ -255,5 +255,5 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 
 		serverErr := craClient.Serve()
 		return nil, serverErr
-	})
+	}, nil)
 }

@@ -317,7 +317,7 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 	return w.ProcessRequestAndResponse(cmd, req, inputIterators)
 }
 
-func (f *Factory) RunWithGenericWorkers(cmd *cobra.Command, inputIterators *flags.RequestInputIterators, iter iterator.Iterator, runFunc worker.Runner) error {
+func (f *Factory) RunWithGenericWorkers(cmd *cobra.Command, inputIterators *flags.RequestInputIterators, iter iterator.Iterator, runFunc worker.Runner, checkError func(error) error) error {
 	client, err := f.Client()
 	if err != nil {
 		return err
@@ -349,7 +349,11 @@ func (f *Factory) RunWithGenericWorkers(cmd *cobra.Command, inputIterators *flag
 	// 	return err
 	// }
 
-	w, err := worker.NewGenericWorker(log, cfg, f.IOStreams, client, activityLogger, runFunc, f.CheckPostCommandError)
+	if checkError == nil {
+		checkError = f.CheckPostCommandError
+	}
+
+	w, err := worker.NewGenericWorker(log, cfg, f.IOStreams, client, activityLogger, runFunc, checkError)
 
 	if err != nil {
 		return err
@@ -502,12 +506,14 @@ func (f *Factory) CheckPostCommandError(err error) error {
 			silentStatusCodes = cfg.GetSilentStatusCodes()
 		}
 		if !cErr.IsSilent() && !strings.Contains(silentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
-			if printLogEntries {
-				logg.Errorf("%s", cErr.ErrorPretty())
-			}
-			fmt.Fprintf(w, "%s\n", cErr.JSONString())
+			if !cErr.Processed {
+				if printLogEntries {
+					logg.Errorf("%s", cErr.ErrorPretty())
+				}
+				fmt.Fprintf(w, "%s\n", cErr.JSONString())
 
-			cErr.Processed = true
+				cErr.Processed = true
+			}
 			outErr = cErr
 		}
 	} else {
@@ -518,8 +524,11 @@ func (f *Factory) CheckPostCommandError(err error) error {
 			logg.Errorf("%s", cErr)
 		}
 		logg.Debugf("Processing unexpected error. %s, exitCode=%d", err, cErr.ExitCode)
-		fmt.Fprintf(w, "%s\n", cErr.JSONString())
-		cErr.Processed = true
+
+		if !cErr.Processed {
+			fmt.Fprintf(w, "%s\n", cErr.JSONString())
+			cErr.Processed = true
+		}
 		outErr = cErr
 	}
 

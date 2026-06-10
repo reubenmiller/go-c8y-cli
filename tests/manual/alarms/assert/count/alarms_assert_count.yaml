@@ -18,7 +18,7 @@ tests:
     It returns an error when the device does not exist (using pipeline):
         command: >
           echo "{\"id\":\"1\"}" | c8y alarms assert count --minimum 0
-        exit-code: 112            
+        exit-code: 112
         stderr:
             line-count: 1
             contains:

@@ -1,20 +1,17 @@
 package factory
 
 import (
-	"errors"
-	"fmt"
-	"io"
-	"strings"
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/desiredstate"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 )
 
 type StateChecker interface {
@@ -85,42 +82,21 @@ func NewAssertCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker)
 			return err
 		}
 
-		state := h.GetStateHandler(cmd, client)
+		return f.RunWithGenericWorkers(cmd, inputIterators, path, func(j worker.Job) (any, error) {
+			state := h.GetStateHandler(cmd, client)
 
-		totalErrors := 0
-		var lastErr error
-		for {
-			itemID, input, inputErr := path.Execute(false)
+			itemID := gjson.ParseBytes(j.Value.([]byte))
+			input := j.Input
 
-			if inputErr == io.EOF {
-				break
-			}
-
-			if totalErrors >= cfg.AbortOnErrorCount() {
-				msg := fmt.Sprintf("Too many errors. total=%d, max=%d. lastError=%s", totalErrors, cfg.AbortOnErrorCount(), lastErr)
-				return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAbortedWithErrors, msg)
-			}
-
-			_ = state.SetValue(itemID)
+			// Skip checking if the input has errors
+			_ = state.SetValue(itemID.String())
 			result, err := desiredstate.WaitForWithRetries(attempts, interval, duration, state)
-
 			if err == nil {
 				outValue := h.GetValue(result, input)
 				_ = f.WriteOutputWithoutPropertyGuess(outValue, cmdutil.OutputContext{})
 			}
-
-			if err != nil {
-				if !strings.Contains(err.Error(), "Max retries exceeded") || strictMode {
-					totalErrors++
-					_ = f.CheckPostCommandError(err)
-					lastErr = err
-				}
-			}
-		}
-		if totalErrors > 0 {
-			return lastErr
-		}
-		return nil
+			return nil, err
+		}, cmdutil.ProcessAssertError(f, strictMode))
 	}
 	return cmd
 }
@@ -195,44 +171,21 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 			return err
 		}
 
-		state := h.GetStateHandler(cmd, client)
+		return f.RunWithGenericWorkers(cmd, inputIterators, path, func(j worker.Job) (any, error) {
+			state := h.GetStateHandler(cmd, client)
 
-		totalErrors := 0
-		var lastErr error
-		for {
-			itemID, input, inputErr := path.Execute(false)
+			itemID := gjson.ParseBytes(j.Value.([]byte))
+			input := j.Input
 
-			if inputErr == io.EOF {
-				break
-			}
-
-			if totalErrors >= cfg.AbortOnErrorCount() {
-				msg := fmt.Sprintf("Too many errors. total=%d, max=%d. lastError=%s", totalErrors, cfg.AbortOnErrorCount(), lastErr)
-				return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAbortedWithErrors, msg)
-			}
-
-			_ = state.SetValue(itemID)
+			// Skip checking if the input has errors
+			_ = state.SetValue(itemID.String())
 			result, err := desiredstate.WaitForWithRetries(attempts, interval, duration, state)
-
 			if err == nil {
 				outValue := h.GetValue(result, input)
 				_ = f.WriteOutputWithoutPropertyGuess(outValue, cmdutil.OutputContext{})
 			}
-
-			if err != nil {
-				if !errors.Is(err, cmderrors.ErrAssertion) || strictMode {
-					totalErrors++
-					_ = f.CheckPostCommandError(err)
-					lastErr = err
-				}
-			}
-		}
-
-		// TODO: In strict mode print out the error earlier
-		if totalErrors > 0 {
-			return lastErr
-		}
-		return nil
+			return nil, err
+		}, cmdutil.ProcessAssertError(f, strictMode))
 	}
 	return cmd
 }

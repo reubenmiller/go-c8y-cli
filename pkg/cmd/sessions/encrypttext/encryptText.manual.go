@@ -114,5 +114,5 @@ func (n *CmdEncryptText) RunE(cmd *cobra.Command, args []string) error {
 			err = n.factory.WriteOutputWithoutPropertyGuess(encryptedText, cmdutil.OutputContext{})
 		}
 		return "", nil
-	})
+	}, nil)
 }

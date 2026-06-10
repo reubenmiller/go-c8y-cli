@@ -265,5 +265,5 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		return nil, sshErr
-	})
+	}, nil)
 }

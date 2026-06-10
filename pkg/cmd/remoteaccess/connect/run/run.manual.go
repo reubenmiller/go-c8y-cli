@@ -229,5 +229,5 @@ func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		return nil, runErr
-	})
+	}, nil)
 }
