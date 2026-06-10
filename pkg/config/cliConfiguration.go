@@ -1911,6 +1911,7 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 		OutputFile:     c.GetOutputFile(),
 		OutputFileRaw:  c.GetOutputFileRaw(),
 		OutputTemplate: c.GetOutputTemplate(),
+		WithError:      c.WithError(),
 	}
 
 	// Store flag values for usage in the output template

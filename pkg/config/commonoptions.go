@@ -16,6 +16,7 @@ type CommonCommandOptions struct {
 	CommandFlags      map[string]string
 	Filters           *jsonfilter.JSONFilters
 	ResultProperty    string
+	WithError         bool
 	IncludeAll        bool
 	WithTotalPages    bool
 	WithTotalElements bool
