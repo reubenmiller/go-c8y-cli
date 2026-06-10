@@ -171,8 +171,8 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRI
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pquerna/otp v1.5.0 h1:NMMR+WrmaqXU4EzdGJEE1aUUI0AMRzsp96fFFWNPwxs=
 github.com/pquerna/otp v1.5.0/go.mod h1:dkJfzwRKNiegxyNb54X/3fLwhCynbMspSyWKnvi1AEg=
-github.com/reubenmiller/go-c8y v0.37.9 h1:55XOj9G5fok84gOexyuLny+o9bF5chCBvzOyHVBFOqU=
-github.com/reubenmiller/go-c8y v0.37.9/go.mod h1:omJlFF3uDmYwbhiBC5ll5mq44+Yk9jax+tDzkjNje/A=
+github.com/reubenmiller/go-c8y v0.37.10 h1:a3w/HSsZZ5MUVeF2jGKVotBnVa95XWD00g7xk3aUyR8=
+github.com/reubenmiller/go-c8y v0.37.10/go.mod h1:omJlFF3uDmYwbhiBC5ll5mq44+Yk9jax+tDzkjNje/A=
 github.com/reubenmiller/go-c8y/v2 v2.0.0-20260318160755-635d890df069 h1:aXy+nj/MHQjF8WWiSohXakDDxhfBwvFP5UIHKls+Kfs=
 github.com/reubenmiller/go-c8y/v2 v2.0.0-20260318160755-635d890df069/go.mod h1:djqzpynYVs+Q+7azobc1mKEh0B1u2zSKCIY0ZB2zy4M=
 github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3 h1:v8Q77ObTxkm0Wj9iAjcc0VMLxqEzKIdAnaTNPzSiw8Q=

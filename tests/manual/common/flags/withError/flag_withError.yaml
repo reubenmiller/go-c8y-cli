@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_LOGGER_HIDESENSITIVE: true
+tests:
+  It should allow output templates to use the error when shaping the output:
+    command: |
+      c8y inventory get -n --id 1 --withError -o json --outputTemplate '
+        if std.objectHas(output, "errorType") then
+          {isError:true, input: input.value, output: output}
+        else
+          output
+      '
+    exit-code: 4
+    stdout:
+      json:
+        input: "1"
+        isError: "true"
+        output.errorType: serverError
+        output.message: r/^.+$
+        output.statusCode: "404"
