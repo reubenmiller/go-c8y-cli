@@ -169,6 +169,8 @@ func NewCommand(buildVersion, buildBranch string) (*CmdRoot, error) {
 		ColumnPadding:            configHandler.ViewColumnPadding(),
 		RowMode:                  configHandler.ViewRowMode(),
 		NumberFormatter:          configHandler.GetTableViewNumberFormatter(),
+		SampleSize:               configHandler.ViewSampleSize(),
+		SampleTimeout:            configHandler.ViewSampleTimeout(),
 	}
 	consoleHandler = console.NewConsole(rootCmd.OutOrStdout(), tableOptions, func(s []string) []byte {
 		return getOutputHeaders(consoleHandler, configHandler, s)

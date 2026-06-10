@@ -38,6 +38,7 @@ type TableView struct {
 	MinEmptyValueColumnWidth int
 	MaxColumnWidth           int
 	ColumnPadding            int
+	SampleSize               int
 	Data                     gjson.Result
 	TableData                [][]string
 	EnableColor              bool
@@ -45,14 +46,27 @@ type TableView struct {
 	NumberFormatter          numbers.NumberFormatter
 }
 
-func (v *TableView) getValue(value gjson.Result) []string {
-	row := []string{}
+// DefaultSampleSize maximum number of rows sampled when resolving column widths
+const DefaultSampleSize = 5
 
-	addAlignments := false
-	if v.ColumnAlignments == nil {
-		v.ColumnAlignments = make([]int, 0)
-		addAlignments = true
+func (v *TableView) sampleLimit() int {
+	if v.SampleSize > 0 {
+		return v.SampleSize
 	}
+	return DefaultSampleSize
+}
+
+func (v *TableView) getValue(value gjson.Result) []string {
+	row, alignments := v.getRow(value)
+	if v.ColumnAlignments == nil {
+		v.ColumnAlignments = alignments
+	}
+	return row
+}
+
+func (v *TableView) getRow(value gjson.Result) (row []string, alignments []int) {
+	row = []string{}
+	alignments = []int{}
 
 	for i, col := range v.Columns {
 		node := value.Get(gjsonpath.EscapePath(col))
@@ -66,9 +80,7 @@ func (v *TableView) getValue(value gjson.Result) []string {
 			columnValue = strings.Trim(node.Raw, "\"")
 		}
 
-		if addAlignments {
-			v.ColumnAlignments = append(v.ColumnAlignments, columnAlignment)
-		}
+		alignments = append(alignments, columnAlignment)
 
 		columnWidth := v.MaxColumnWidth
 		if i < len(v.ColumnWidths) {
@@ -84,7 +96,7 @@ func (v *TableView) getValue(value gjson.Result) []string {
 		row = append(row, columnValue)
 
 	}
-	return row
+	return row, alignments
 }
 
 func (v *TableView) getWidth(defaultWidth int) int {
@@ -109,7 +121,22 @@ func minmax(values []int) (min int, max int) {
 	return
 }
 
-func (v *TableView) calculateColumnWidths(minWidth int, row []string) {
+// cellDisplayWidth display width of a cell value, using the widest line
+// for multi-line (e.g. wrapped) values
+func cellDisplayWidth(s string) int {
+	if !strings.Contains(s, "\n") {
+		return tablewriter.DisplayWidth(s)
+	}
+	width := 0
+	for _, line := range strings.Split(s, "\n") {
+		if w := tablewriter.DisplayWidth(line); w > width {
+			width = w
+		}
+	}
+	return width
+}
+
+func (v *TableView) calculateColumnWidths(minWidth int, rows [][]string) {
 	if len(v.ColumnWidths) == 0 {
 		maxTableWidth := v.getWidth(TABLE_MAX_WIDTH)
 		v.ColumnWidths = make([]int, 0)
@@ -120,22 +147,43 @@ func (v *TableView) calculateColumnWidths(minWidth int, row []string) {
 		columns := []string{}
 
 		// only include columns if they fit in the view
-		for i, columnValue := range row {
+		for i := range v.Columns {
+			// use the widest value of the sampled rows, as the first row
+			// may not contain a value for every column
+			cellWidth := 0
+			hasValue := false
+			for _, row := range rows {
+				if i >= len(row) {
+					continue
+				}
+				if row[i] != "" {
+					hasValue = true
+				}
+				if w := cellDisplayWidth(row[i]); w > cellWidth {
+					cellWidth = w
+				}
+			}
+
 			curMinWidth = minWidth
-			if columnValue == "" && v.MinEmptyValueColumnWidth > 0 {
+			if !hasValue && v.MinEmptyValueColumnWidth > 0 {
 				curMinWidth = v.MinEmptyValueColumnWidth
+			}
+
+			// only pad value (not column widths)
+			paddedCellWidth := cellWidth + v.ColumnPadding
+			if v.MaxColumnWidth > 0 && paddedCellWidth > v.MaxColumnWidth {
+				paddedCellWidth = v.MaxColumnWidth
 			}
 
 			Logger.Printf("iColumn: name=%s, cellWidth=%d, min=%d, col=%d",
 				v.Columns[i],
-				tablewriter.DisplayWidth(columnValue)+v.ColumnPadding,
+				paddedCellWidth,
 				curMinWidth+v.ColumnPadding,
 				tablewriter.DisplayWidth(v.Columns[i]),
 			)
 
 			_, colWidth := minmax([]int{
-				// only pad value (not column widths)
-				tablewriter.DisplayWidth(columnValue) + v.ColumnPadding,
+				paddedCellWidth,
 				curMinWidth + v.ColumnPadding,
 				tablewriter.DisplayWidth(v.Columns[i]),
 			})
@@ -165,6 +213,67 @@ func (v *TableView) calculateColumnWidths(minWidth int, row []string) {
 	}
 }
 
+// SampleColumnWidths resolve the column widths and alignments from multiple
+// sampled rows, where each row is a json object or an array of objects.
+// It does nothing if the column widths have already been resolved
+func (v *TableView) SampleColumnWidths(jsonRows [][]byte) {
+	if len(v.ColumnWidths) != 0 {
+		return
+	}
+	samples := []gjson.Result{}
+	limit := v.sampleLimit()
+	for _, b := range jsonRows {
+		r := gjson.ParseBytes(b)
+		if r.IsArray() {
+			for _, item := range r.Array() {
+				if len(samples) >= limit {
+					break
+				}
+				samples = append(samples, item)
+			}
+		} else if r.IsObject() {
+			samples = append(samples, r)
+		}
+		if len(samples) >= limit {
+			break
+		}
+	}
+	v.primeFromSamples(samples)
+}
+
+// primeFromSamples resolve the column widths and alignments from sampled rows
+func (v *TableView) primeFromSamples(samples []gjson.Result) {
+	if len(samples) == 0 || (len(v.ColumnWidths) != 0 && v.ColumnAlignments != nil) {
+		return
+	}
+	rows := make([][]string, 0, len(samples))
+	alignments := make([][]int, 0, len(samples))
+	for _, sample := range samples {
+		row, rowAlignments := v.getRow(sample)
+		rows = append(rows, row)
+		alignments = append(alignments, rowAlignments)
+	}
+
+	if v.ColumnAlignments == nil {
+		// use the alignment of the first row which has a value for the column,
+		// so columns are still aligned correctly (e.g. numbers) even if the
+		// first row does not contain a value
+		merged := make([]int, len(v.Columns))
+		for i := range v.Columns {
+			merged[i] = tablewriter.ALIGN_LEFT
+			for ri, row := range rows {
+				if i < len(row) && row[i] != "" && i < len(alignments[ri]) {
+					merged[i] = alignments[ri][i]
+					break
+				}
+			}
+		}
+		v.ColumnAlignments = merged
+	}
+
+	v.calculateColumnWidths(v.MinColumnWidth, rows)
+}
+
 func (v *TableView) getHeaderRow() []string {
 	header := []string{}
 	for i, name := range v.Columns {
@@ -188,8 +297,9 @@ func (v *TableView) TransformData(j []byte, property string) [][]string {
 	}
 
 	if r.IsArray() {
-		if len(r.Array()) > 0 {
-			v.calculateColumnWidths(v.MinColumnWidth, v.getValue(r.Array()[0]))
+		if items := r.Array(); len(items) > 0 {
+			sampleCount := min(len(items), v.sampleLimit())
+			v.primeFromSamples(items[0:sampleCount])
 		}
 		r.ForEach(func(key, value gjson.Result) bool {
 			Logger.Printf("parsing row: columns: %v", v.Columns)
@@ -197,7 +307,7 @@ func (v *TableView) TransformData(j []byte, property string) [][]string {
 			return true
 		})
 	} else if r.IsObject() {
-		v.calculateColumnWidths(v.MinColumnWidth, v.getValue(r))
+		v.primeFromSamples([]gjson.Result{r})
 		Logger.Printf("parsing row: columns: %v", v.Columns)
 		data = append(data, v.getValue(r))
 	}

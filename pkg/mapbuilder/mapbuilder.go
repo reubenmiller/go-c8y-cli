@@ -369,7 +369,7 @@ func registerNativeFunctions(vm *jsonnet.VM) {
 				return parameters[0], fmt.Errorf("no select values provided")
 			}
 
-			flatMap, flatKeys, err := jsonfilter.FilterPropertyByWildcard(string(jsonB), "", patterns, false)
+			flatMap, flatKeys, _, err := jsonfilter.FilterPropertyByWildcard(string(jsonB), "", patterns, false)
 			if err != nil {
 				return nil, err
 			}
