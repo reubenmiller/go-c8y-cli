@@ -17,7 +17,7 @@ tests:
       contains:
         - |
           Content-Disposition: form-data; name="file"; filename="config.ini"
-          Content-Type: application/octet-stream
+          Content-Type: text/plain
 
           [agent]
           disabled = False
@@ -30,7 +30,7 @@ tests:
       contains:
         - |
           Content-Disposition: form-data; name="file"; filename="myCustomName.json"
-          Content-Type: application/octet-stream
+          Content-Type: application/json
 
           [agent]
           disabled = False
@@ -38,3 +38,16 @@ tests:
   Creating and updating binaries are kept in their original form:
     command: ./manual/events/createBinary/tests.sh
     exit-code: 0
+  
+  It allows users to set the mime type:
+    command: |
+      c8y events createBinary --id 1234 --file manual/events/createBinary/config.ini --type foo/bar --dry --dryFormat markdown
+    exit-code: 0
+    stdout:
+      contains:
+        - |
+          Content-Disposition: form-data; name="file"; filename="config.ini"
+          Content-Type: foo/bar
+
+          [agent]
+          disabled = False

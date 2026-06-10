@@ -542,9 +542,14 @@
             "command": "c8y events createBinary --id 12345 --file ./myfile.log"
           },
           {
-            "description": "Add a binary to an event using a custom name",
+            "description": "Add a binary to an event using a custom name and use an auto-detected mime-type",
             "skipTest": true,
-            "command": "c8y events createBinary --id 12345 --file ./myfile.log --name \"myfile-2022-03-31.log\"\n"
+            "command": "c8y events createBinary --id 12345 --file ./myfile.log --name \"myfile-2022-03-31.txt\"\n"
+          },
+          {
+            "description": "Add a binary to an event using a custom name and use an explicit mime-type",
+            "skipTest": true,
+            "command": "c8y events createBinary --id 12345 --file ./myfile.log --name \"example.bin\" --type \"application/octet-stream\"\n"
           }
         ]
       },
@@ -568,6 +573,11 @@
           "name": "name",
           "type": "string",
           "description": "Set the name of the binary file. This will be the name of the file when it is downloaded in the UI"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Set the MIME type of the binary file, e.g. text/plain. If left blank, the type will be detected from the file extension or its contents"
         }
       ]
     },

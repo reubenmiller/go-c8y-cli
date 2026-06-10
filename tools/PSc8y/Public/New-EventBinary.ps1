@@ -37,7 +37,12 @@ Add a binary to an event
         # Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
         [Parameter()]
         [string]
-        $Name
+        $Name,
+
+        # Set the MIME type of the binary file, e.g. text/plain. If left blank, the type will be detected from the file extension or its contents
+        [Parameter()]
+        [string]
+        $Type
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"
