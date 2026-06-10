@@ -92,7 +92,8 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 		ctx,
 		c8y.GetContextCommonOptionsKey(),
 		c8y.CommonOptions{
-			DryRun: req.DryRun,
+			DryRun:    req.DryRun,
+			WithError: r.Config.WithError(),
 			OnResponse: func(response *http.Response) io.Reader {
 				// Add progress bar for binary downloads
 				prog := r.IO.ProgressIndicator()
@@ -875,12 +876,20 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 		printResponseSize(r.Logger, resp)
 
 		var responseText []byte
+
+		dataProperty := commonOptions.ResultProperty
+
+		if respError != nil && r.Config.WithError() {
+			// use the raw response
+			serverError := cmderrors.NewServerError(resp, respError, r.IO, !r.Config.WithError())
+			resp.SetBody([]byte(serverError.JSONString()))
+			dataProperty = "-"
+		}
+
 		isJSONResponse := jsonUtilities.IsValidJSON(resp.Body())
 
-		dataProperty := ""
 		showRaw := r.Config.RawOutput() || r.Config.WithTotalPages() || r.Config.WithTotalElements()
 
-		dataProperty = commonOptions.ResultProperty
 		if dataProperty == "" {
 			dataProperty = r.guessDataProperty(resp)
 		} else if dataProperty == "-" {
@@ -1026,7 +1035,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 		r.IO.WaitForProgressIndicator()
 
 		consol := r.Console
-		if respError == nil {
+		if respError == nil || commonOptions.WithError {
 			jsonformatter.WithOutputFormatters(
 				consol,
 				responseText,
@@ -1046,7 +1055,11 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 		if userErr, ok := respError.(cmderrors.CommandError); ok {
 			return unfilteredSize, userErr
 		}
-		return unfilteredSize, cmderrors.NewServerError(resp, respError, r.IO, !r.Config.WithError())
+		rErr := cmderrors.NewServerError(resp, respError, r.IO, !r.Config.WithError())
+		if hasOutputTemplate {
+			rErr.Processed = true
+		}
+		return unfilteredSize, rErr
 	}
 	return unfilteredSize, nil
 }

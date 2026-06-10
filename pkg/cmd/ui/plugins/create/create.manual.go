@@ -261,7 +261,8 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	ctx := c8y.WithCommonOptionsContext(context.Background(), c8y.CommonOptions{
-		DryRun: dryRun,
+		DryRun:    dryRun,
+		WithError: commonOptions.WithError,
 	})
 
 	file, fileErr := os.Open(n.file)
