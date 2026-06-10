@@ -25,7 +25,7 @@ func Test_SimpleGlobMatch(t *testing.T) {
 	}
 
 	dst := make(map[string]interface{})
-	_, err = filterFlatMap(src, dst, []glob.Glob{pattern}, []string{"id"})
+	_, _, err = filterFlatMap(src, dst, []glob.Glob{pattern}, []string{"id"}, []string{"id"})
 	assert.OK(t, err)
 	assert.EqualMarshalJSON(t, dst, `{"id":"12345"}`)
 
@@ -58,8 +58,38 @@ func Test_SimpleInvertedGlobMatch(t *testing.T) {
 	}
 
 	dst := make(map[string]interface{})
-	keys, err := filterFlatMap(src, dst, []glob.Glob{pattern1, pattern2}, []string{"", ""})
+	keys, _, err := filterFlatMap(src, dst, []glob.Glob{pattern1, pattern2}, []string{"", ""}, []string{"!id", "name"})
 	assert.OK(t, err)
 	assert.EqualMarshalJSON(t, dst, `{"name":"hello"}`)
 	assert.EqualMarshalJSON(t, keys, `["name"]`)
+}
+
+func Test_MergeKeyGroups(t *testing.T) {
+	// patterns which did not resolve against the first row should be
+	// replaced by the keys resolved from later rows
+	columns := MergeKeyGroups([][]KeyGroup{
+		{
+			{Pattern: "name", Keys: []string{"name"}},
+			{Pattern: "c8y_firmware.versio*", Keys: nil},
+		},
+		{
+			{Pattern: "name", Keys: []string{"name"}},
+			{Pattern: "c8y_firmware.versio*", Keys: []string{"c8y_Firmware.version"}},
+		},
+	})
+	assert.EqualMarshalJSON(t, columns, `["name","c8y_Firmware.version"]`)
+
+	// keys are deduplicated case insensitively, and patterns which never
+	// resolve are included as-is
+	columns = MergeKeyGroups([][]KeyGroup{
+		{
+			{Pattern: "c8y_firmware.*", Keys: []string{"c8y_Firmware.version"}},
+			{Pattern: "missing", Keys: nil},
+		},
+		{
+			{Pattern: "c8y_firmware.*", Keys: []string{"c8y_firmware.VERSION", "c8y_Firmware.url"}},
+			{Pattern: "missing", Keys: nil},
+		},
+	})
+	assert.EqualMarshalJSON(t, columns, `["c8y_Firmware.version","c8y_Firmware.url","missing"]`)
 }

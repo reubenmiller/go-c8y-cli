@@ -404,6 +404,20 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"30",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
+	"views.sampleSize": {"views.sampleSize", "int", config.SettingsViewSampleSize, []string{
+		"1",
+		"5",
+		"10",
+		"20",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"views.sampleTimeout": {"views.sampleTimeout", "string", config.SettingsViewSampleTimeout, []string{
+		"0ms",
+		"500ms",
+		"1s",
+		"5s",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
 	//
 	// Table view number format
 	//

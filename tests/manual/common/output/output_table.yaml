@@ -6,7 +6,7 @@ tests:
         c8y util show --select name,subtype --output table
     config:
       env:
-        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 20
         C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
         C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
         C8Y_SETTINGS_VIEWS_ROWMODE: "wrap"
@@ -88,21 +88,21 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        | value      |
-        |------------|
-        |        1 p |
-        |        1 n |
-        |   0.000001 |
-        |         10 |
-        |        110 |
-        |       3000 |
-        |      10000 |
-        |      50000 |
-        |    9.999 M |
-        |  123.456 M |
-        |    1.234 M |
-        |    2.038 P |
-        |  203.837 G |
+        | value         |
+        |---------------|
+        |           1 p |
+        |           1 n |
+        |      0.000001 |
+        |            10 |
+        |           110 |
+        |          3000 |
+        |         10000 |
+        |         50000 |
+        |       9.999 M |
+        |     123.456 M |
+        |       1.234 M |
+        |       2.038 P |
+        |     203.837 G |
 
   It can use no number formatter:
     config:
@@ -121,18 +121,91 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        | value      |
+        | value         |
+        |---------------|
+        |         1e-12 |
+        |          1e-9 |
+        |      0.000001 |
+        |            10 |
+        |           110 |
+        |          3000 |
+        |         10000 |
+        |         50000 |
+        |       9999999 |
+        |     123456789 |
+        | 1234567.5012… |
+        | 203837347888… |
+        |  203837347888 |
+
+  It shows row data regardless what the first row contains:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+    command: |
+      printf '%s\n%s\n' '{"name":"device01"}' '{"name":"device02","c8y_Firmware":{"version":"1.0.0"}}' |
+        c8y util show --select "name,c8y_Firmware.version" -o table --noColor
+    exit-code: 0
+    stdout:
+      exactly: |
+        | name          | c8y_Firmware.version |
+        |---------------|----------------------|
+        | device01      |                      |
+        | device02      | 1.0.0                |
+
+  It shows rows when data is irregular and selector is not case sensitive:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+    command: |
+      printf '%s\n%s\n' '{"name":"device01"}' '{"name":"device02","c8y_Firmware":{"version":"1.0.0"}}' |
+        c8y util show --select "name,c8y_firmware.versio*" -o table --noColor
+    exit-code: 0
+    stdout:
+      exactly: |
+        | name          | c8y_Firmware.version |
+        |---------------|----------------------|
+        | device01      |                      |
+        | device02      | 1.0.0                |
+
+  It calculates the column widths from the sampled rows:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+    command: |
+      printf '%s\n%s\n' '{"name":"dev01"}' '{"name":"device-with-a-much-longer-name"}' |
+        c8y util show --select "name" -o table --noColor
+    exit-code: 0
+    stdout:
+      exactly: |
+        | name                                |
+        |-------------------------------------|
+        | dev01                               |
+        | device-with-a-much-longer-name      |
+
+  It can limit the column width calculation to the first row by setting the sample size:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_SAMPLESIZE: 1
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+    command: |
+      printf '%s\n%s\n' '{"name":"dev01"}' '{"name":"device-with-a-much-longer-name"}' |
+        c8y util show --select "name" -o table --noColor
+    exit-code: 0
+    stdout:
+      exactly: |
+        | name       |
         |------------|
-        |      1e-12 |
-        |       1e-9 |
-        |   0.000001 |
-        |         10 |
-        |        110 |
-        |       3000 |
-        |      10000 |
-        |      50000 |
-        |    9999999 |
-        |  123456789 |
-        | 1234567.5… |
-        | 203837347… |
-        | 203837347… |
+        | dev01      |
+        | device-wi… |

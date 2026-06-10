@@ -291,6 +291,12 @@ const (
 	// SettingsViewRowMode controls row rendering, e.g. wrapping or truncation
 	SettingsViewRowMode = "settings.views.rowMode"
 
+	// SettingsViewSampleSize maximum number of rows which are sampled when resolving the table columns and column widths
+	SettingsViewSampleSize = "settings.views.sampleSize"
+
+	// SettingsViewSampleTimeout maximum duration to buffer rows whilst waiting for more rows to be sampled, so that streamed output (e.g. realtime subscriptions) is not delayed indefinitely. Accepts a duration, where the default unit is milliseconds
+	SettingsViewSampleTimeout = "settings.views.sampleTimeout"
+
 	// SettingsViewNumberFormat number format
 	SettingsViewNumberFormat = "settings.views.numberFormat"
 
@@ -587,6 +593,8 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsViewMaxColumnWidth, 80),
 		WithBindEnv(SettingsViewColumnPadding, 15),
 		WithBindEnv(SettingsViewRowMode, "truncate"),
+		WithBindEnv(SettingsViewSampleSize, 5),
+		WithBindEnv(SettingsViewSampleTimeout, "500ms"),
 
 		// Table number formatter
 		WithBindEnv(SettingsViewNumberFormat, NumberFormatMetric),
@@ -1439,6 +1447,16 @@ func (c *Config) ViewColumnPadding() int {
 // ViewRowMode get view row rendering mode (truncation or wrapping)
 func (c *Config) ViewRowMode() string {
 	return strings.ToLower(c.viper.GetString(SettingsViewRowMode))
+}
+
+// ViewSampleSize maximum number of rows which are sampled when resolving the table columns and column widths
+func (c *Config) ViewSampleSize() int {
+	return c.viper.GetInt(SettingsViewSampleSize)
+}
+
+// ViewSampleTimeout maximum duration to buffer rows whilst waiting for more rows to be sampled
+func (c *Config) ViewSampleTimeout() time.Duration {
+	return c.getDuration(SettingsViewSampleTimeout)
 }
 
 // RequestTimeout timeout to use when sending requests

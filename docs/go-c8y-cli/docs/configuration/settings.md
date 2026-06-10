@@ -472,3 +472,11 @@ It is recommended to only use this setting in your session file if you want a cu
 Row rendering mode. Accepts `truncate`, `wrap` or `overflow`. `truncated` is the default setting, however if there is an invalid settings, then `overflow` will be used.
 
 In `wrap` mode, row separators will also be included to better visually delimit the table cells.
+
+### views.sampleSize: int
+
+Maximum number of rows which are sampled when resolving the table columns and column widths. Sampling more rows makes the table layout more reliable when the first row does not contain all of the selected fragments, at the cost of slightly delaying the output. Defaults to `5`. Setting it to `1` resolves the columns and widths from the first row only.
+
+### views.sampleTimeout: string
+
+Maximum duration to buffer rows whilst waiting for more rows to be sampled, so that streamed output (e.g. realtime subscriptions) is not delayed indefinitely. Accepts a duration where the default unit is milliseconds, e.g. `500ms`, `1s`. Defaults to `500ms`. Setting it to `0` disables the timeout, so buffered rows are only rendered once the sample size is reached or no more output is expected.

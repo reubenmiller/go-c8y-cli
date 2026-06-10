@@ -42,7 +42,60 @@ type JSONFilters struct {
 	AsCompletionFormat bool
 }
 
-func (f JSONFilters) Apply(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) ([]byte, error) {
+// KeyGroup records which concrete json keys a single select pattern resolved to
+// within one row. Keys is empty when the pattern did not match anything in the row
+type KeyGroup struct {
+	// Pattern original (non-lowercased) select pattern
+	Pattern string
+
+	// Keys resolved json keys (empty if the pattern did not match)
+	Keys []string
+}
+
+// HeaderFunc callback which receives the resolved keys of a single row.
+// keys is the flat comma separated list (unmatched patterns are included as-is),
+// and groups contains the keys grouped by the select pattern which resolved them
+type HeaderFunc func(keys string, groups []KeyGroup)
+
+// MergeKeyGroups merges the resolved keys of multiple sampled rows into a single
+// ordered column list. Columns are ordered by select pattern, and each pattern
+// expands to the union of the keys it resolved to across all rows (deduplicated
+// case insensitively). Patterns which did not resolve against any row are
+// included as-is so the user can still see which selector returned nothing
+func MergeKeyGroups(rows [][]KeyGroup) []string {
+	patterns := []string{}
+	keysByPattern := map[string][]string{}
+	seenKeys := map[string]map[string]bool{}
+
+	for _, row := range rows {
+		for _, group := range row {
+			if _, ok := keysByPattern[group.Pattern]; !ok {
+				patterns = append(patterns, group.Pattern)
+				keysByPattern[group.Pattern] = []string{}
+				seenKeys[group.Pattern] = map[string]bool{}
+			}
+			for _, key := range group.Keys {
+				keyl := strings.ToLower(key)
+				if !seenKeys[group.Pattern][keyl] {
+					seenKeys[group.Pattern][keyl] = true
+					keysByPattern[group.Pattern] = append(keysByPattern[group.Pattern], key)
+				}
+			}
+		}
+	}
+
+	columns := []string{}
+	for _, pattern := range patterns {
+		if keys := keysByPattern[pattern]; len(keys) > 0 {
+			columns = append(columns, keys...)
+		} else {
+			columns = append(columns, pattern)
+		}
+	}
+	return columns
+}
+
+func (f JSONFilters) Apply(jsonValue string, property string, showHeaders bool, setHeaderFunc HeaderFunc) ([]byte, error) {
 	return f.filterJSON(jsonValue, property, showHeaders, setHeaderFunc)
 }
 
@@ -158,21 +211,22 @@ func (f *JSONFilters) Add(property, operation string, value interface{}) {
 }
 
 // FilterPropertyByWildcard filter a json string by using globstar (wildcards) on the nested json paths
-func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string, setAlias bool) (map[string]interface{}, []string, error) {
+func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string, setAlias bool) (map[string]interface{}, []string, []KeyGroup, error) {
 	rawMap := make(map[string]interface{})
 	err := c8y.DecodeJSONBytes([]byte(jsonValue), &rawMap)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	Logger.Debugf("flattening json")
 	flatMap, err := flatten.Flatten(rawMap, prefix, flatten.DotStyle)
 	Logger.Debugf("finished flattening json")
 
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	compiledPatterns := []glob.Glob{}
 	aliases := []string{}
+	originalPatterns := []string{}
 	filteredMap := make(map[string]interface{})
 
 	for _, p := range patterns {
@@ -183,6 +237,7 @@ func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string
 			alias = p[0:idx]
 			p = p[idx+1:]
 		}
+		originalPattern := p
 		p = strings.ToLower(p)
 
 		if p != "" {
@@ -193,18 +248,20 @@ func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string
 			}); err == nil {
 				compiledPatterns = append(compiledPatterns, cp)
 				aliases = append(aliases, alias)
+				originalPatterns = append(originalPatterns, originalPattern)
 			}
 		}
 	}
 
 	Logger.Debugf("running filterFlatMap")
-	resolvedProperties, _ := filterFlatMap(flatMap, filteredMap, compiledPatterns, aliases)
+	resolvedProperties, keyGroups, _ := filterFlatMap(flatMap, filteredMap, compiledPatterns, aliases, originalPatterns)
 	Logger.Debugf("finished filterFlatMap")
-	return filteredMap, resolvedProperties, err
+	return filteredMap, resolvedProperties, keyGroups, err
 }
 
-func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patterns []glob.Glob, aliases []string) ([]string, error) {
+func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patterns []glob.Glob, aliases []string, originalPatterns []string) ([]string, []KeyGroup, error) {
 	sortedKeys := []string{}
+	keyGroups := []KeyGroup{}
 
 	// sort source map keys, so matching is stable when using alias
 	// where one pattern can match multiple values (otherwise it will be random which property is selected)
@@ -223,6 +280,10 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 
 	for i, pattern := range patterns {
 		found := false
+		group := KeyGroup{Pattern: pattern.String()}
+		if i < len(originalPatterns) {
+			group.Pattern = originalPatterns[i]
+		}
 		Logger.Debugf("filtering keys by pattern: total=%d, pattern=%s", len(sourceKeys), pattern.String())
 		for _, key := range sourceKeys {
 			value := src[key]
@@ -270,34 +331,51 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 				}
 				dst[key] = value
 				sortedKeys = append(sortedKeys, key)
+				group.Keys = append(group.Keys, key)
 				found = true
 			}
 		}
 		if !found && !pattern.IsNegative() {
 			// store non-matching patterns for csv generation
-			sortedKeys = append(sortedKeys, pattern.String())
+			// using the original (non-lowercased) pattern so later rows
+			// can still resolve the value via a case-sensitive path lookup
+			sortedKeys = append(sortedKeys, group.Pattern)
 		}
+		if !pattern.IsNegative() {
+			keyGroups = append(keyGroups, group)
+		}
+	}
+
+	isNegatedKey := func(key string) bool {
+		keyl := strings.ToLower(key)
+		for _, pattern := range patterns {
+			if pattern.IsNegative() && pattern.MatchString(keyl) {
+				return true
+			}
+		}
+		return false
 	}
 
 	// filter for negated keys
 	sortedMatchingKeys := make([]string, 0)
 	for _, key := range sortedKeys {
-		keyl := strings.ToLower(key)
-		match := true
-		for _, pattern := range patterns {
-			if pattern.IsNegative() {
-				if pattern.MatchString(keyl) {
-					match = false
-					delete(dst, key)
-				}
-			}
-		}
-		if match {
+		if isNegatedKey(key) {
+			delete(dst, key)
+		} else {
 			sortedMatchingKeys = append(sortedMatchingKeys, key)
 		}
 	}
+	for i := range keyGroups {
+		matchingKeys := make([]string, 0, len(keyGroups[i].Keys))
+		for _, key := range keyGroups[i].Keys {
+			if !isNegatedKey(key) {
+				matchingKeys = append(matchingKeys, key)
+			}
+		}
+		keyGroups[i].Keys = matchingKeys
+	}
 
-	return sortedMatchingKeys, nil
+	return sortedMatchingKeys, keyGroups, nil
 }
 
 // NewJSONFilters create a json filter
@@ -346,7 +424,7 @@ func formatErrors(errs []error) error {
 	return nil
 }
 
-func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) ([]byte, error) {
+func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders bool, setHeaderFunc HeaderFunc) ([]byte, error) {
 	var b bytes.Buffer
 
 	var jq *gojsonq.JSONQ
@@ -426,9 +504,9 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 			for _, myval := range formattedJSON.Array() {
 
 				if myval.IsObject() {
-					if line, keys := f.pluckJsonValues(&myval, f.Pluck); line != "" {
+					if line, keys, keyGroups := f.pluckJsonValues(&myval, f.Pluck); line != "" {
 						outputValues = append(outputValues, line)
-						setHeaderFunc(strings.Join(keys, ","))
+						setHeaderFunc(strings.Join(keys, ","), keyGroups)
 					}
 				} else {
 					outputValues = append(outputValues, myval.Raw)
@@ -437,8 +515,8 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 			return []byte(strings.Join(outputValues, "\n")), formatErrors(jq.Errors())
 		}
 
-		if line, keys := f.pluckJsonValues(&formattedJSON, f.Pluck); line != "" {
-			setHeaderFunc(strings.Join(keys, ","))
+		if line, keys, keyGroups := f.pluckJsonValues(&formattedJSON, f.Pluck); line != "" {
+			setHeaderFunc(strings.Join(keys, ","), keyGroups)
 			return []byte(line), formatErrors(jq.Errors())
 		}
 
@@ -494,9 +572,9 @@ func resolveKeyName(item *gjson.Result, key string) (name string, value interfac
 	return key, nil, nil
 }
 
-func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string) (string, []string) {
+func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string) (string, []string, []KeyGroup) {
 	if item == nil {
-		return "", nil
+		return "", nil, nil
 	}
 
 	if len(properties) == 0 {
@@ -510,9 +588,9 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string) (s
 	}
 
 	useAliases := false
-	flatMap, flatKeys, err := FilterPropertyByWildcard(item.Raw, "", pathPatterns, useAliases)
+	flatMap, flatKeys, keyGroups, err := FilterPropertyByWildcard(item.Raw, "", pathPatterns, useAliases)
 	if err != nil {
-		return "", nil
+		return "", nil, nil
 	}
 
 	output := bytes.Buffer{}
@@ -520,11 +598,11 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string) (s
 	// json output
 	var v []byte
 	if f.AsCSV {
-		return convertToCSV(flatMap, flatKeys, ","), flatKeys
+		return convertToCSV(flatMap, flatKeys, ","), flatKeys, keyGroups
 	} else if f.AsTSV {
-		return convertToCSV(flatMap, flatKeys, "\t"), flatKeys
+		return convertToCSV(flatMap, flatKeys, "\t"), flatKeys, keyGroups
 	} else if f.AsCompletionFormat {
-		return convertToLine(flatMap, flatKeys), flatKeys
+		return convertToLine(flatMap, flatKeys), flatKeys, keyGroups
 	} else if f.Flatten {
 		v, err = json.Marshal(flatMap)
 	} else {
@@ -532,7 +610,7 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string) (s
 		Logger.Debugf("running unflatten. %v", pathPatterns)
 		if len(pathPatterns) == 1 && pathPatterns[0] == "**" {
 			Logger.Debugf("Returning all keys because globstar is being used")
-			return item.Raw, flatKeys
+			return item.Raw, flatKeys, keyGroups
 		}
 
 		// Protect against large amount of keys adn
@@ -547,7 +625,7 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string) (s
 				f.Logger.Warnf("Detected json with a large number of keys, returning all data by default. Use jq for further filtering. total_keys=%d, id=%s", keyCount, itemID)
 			}
 
-			return item.Raw, flatKeys
+			return item.Raw, flatKeys, keyGroups
 		}
 
 		v, err = flatten.UnflattenOrdered(flatMap, flatKeys)
@@ -562,10 +640,10 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string) (s
 	}
 
 	if err != nil {
-		return "", nil
+		return "", nil, nil
 	}
 
-	return output.String(), flatKeys
+	return output.String(), flatKeys, keyGroups
 }
 
 func convertToCSV(flatMap map[string]interface{}, keys []string, separator string) string {

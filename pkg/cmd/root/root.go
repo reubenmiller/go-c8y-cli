@@ -160,6 +160,16 @@ type CmdRoot struct {
 	muDataView  sync.RWMutex
 }
 
+// Execute runs the command and flushes any buffered output afterwards
+// (e.g. table output samples multiple rows before resolving the columns)
+func (c *CmdRoot) Execute() error {
+	err := c.Command.Execute()
+	if consol, consolErr := c.Factory.Console(); consolErr == nil && consol != nil {
+		consol.Flush()
+	}
+	return err
+}
+
 func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	ccmd := &CmdRoot{
 		Factory: f,
