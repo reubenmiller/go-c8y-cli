@@ -1,13 +1,13 @@
 ##### curl (shell)
 
 ```sh
-curl -X POST 'https://{host}/inventory/binaries' -H 'Accept: application/json' -H 'Authorization: Basic {base64 tenant/username:password}' -F 'file=@input01.txt;type=application/octet-stream' -F 'object={"name":"input01.txt","type":"text/plain; charset=utf-8"}'
+curl -X POST 'https://{host}/inventory/binaries' -H 'Accept: application/json' -H 'Authorization: Basic {base64 tenant/username:password}' -F 'file=@input01.txt;type=text/plain' -F 'object={"name":"input01.txt","type":"text/plain; charset=utf-8"}'
 ```
 
 ##### curl (PowerShell)
 
 ```powershell
-curl -X POST 'https://{host}/inventory/binaries' -H 'Accept: application/json' -H 'Authorization: Basic {base64 tenant/username:password}' -F 'file=@input01.txt;type=application/octet-stream' -F 'object={\"name\":\"input01.txt\",\"type\":\"text/plain; charset=utf-8\"}'
+curl -X POST 'https://{host}/inventory/binaries' -H 'Accept: application/json' -H 'Authorization: Basic {base64 tenant/username:password}' -F 'file=@input01.txt;type=text/plain' -F 'object={\"name\":\"input01.txt\",\"type\":\"text/plain; charset=utf-8\"}'
 ```
 
 ##### file: input01.txt

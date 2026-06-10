@@ -260,7 +260,7 @@ tests:
     stdout:
       lines:
         8: 'Content-Disposition: form-data; name="file"; filename="file1.txt"'
-        9: "Content-Type: application/octet-stream"
+        9: "Content-Type: text/plain"
         10: ""
         11: one
         12: two
@@ -310,7 +310,7 @@ tests:
         6: ""
         7: r/^--[a-zA-Z0-9]+$
         8: 'Content-Disposition: form-data; name="file"; filename="file1.txt"'
-        9: "Content-Type: application/octet-stream"
+        9: "Content-Type: text/plain"
         10: ""
         11: one
         12: two

@@ -17,7 +17,7 @@ tests:
       contains:
         - |
           Content-Disposition: form-data; name="file"; filename="data.csv"
-          Content-Type: application/octet-stream
+          Content-Type: text/csv
 
           index,name
           0,Peter
@@ -36,7 +36,7 @@ tests:
       contains:
         - |
           Content-Disposition: form-data; name="file"; filename="myCustomName.json"
-          Content-Type: application/octet-stream
+          Content-Type: application/json
 
           index,name
           0,Peter
@@ -55,7 +55,7 @@ tests:
       contains:
         - |
           Content-Disposition: form-data; name="file"; filename="override"
-          Content-Type: application/octet-stream
+          Content-Type: text/plain
 
           index,name
           0,Peter
