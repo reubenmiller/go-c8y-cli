@@ -16,6 +16,8 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/sortorder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	outputfilter "github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/filter"
 	"github.com/reubenmiller/gojsonq/v2"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap/zapcore"
@@ -40,6 +42,12 @@ type JSONFilters struct {
 	AsCSV              bool
 	AsTSV              bool
 	AsCompletionFormat bool
+
+	// SkipHeaders indicates that the output format does not consume the
+	// per-row header callback (e.g. json output), allowing rows that select
+	// every property (globstar) to be passed through without being
+	// flattened just to resolve header names.
+	SkipHeaders bool
 }
 
 // KeyGroup records which concrete json keys a single select pattern resolved to
@@ -424,7 +432,122 @@ func formatErrors(errs []error) error {
 	return nil
 }
 
+// filterJSON applies filtering and property selection. It uses the streaming
+// engine from go-c8y/v2 (compiled predicates, single pass over the items)
+// when the requested filters support it, and falls back to the legacy
+// gojsonq engine otherwise (e.g. version constraints, selectors).
 func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders bool, setHeaderFunc HeaderFunc) ([]byte, error) {
+	if pred, ok := f.compilePredicate(); ok {
+		return f.filterJSONStreaming(pred, jsonValue, property, showHeaders, setHeaderFunc)
+	}
+	return f.filterJSONLegacy(jsonValue, property, showHeaders, setHeaderFunc)
+}
+
+// compilePredicate compiles the filters to a single predicate using the
+// go-c8y/v2 filter engine. All pattern/regex/date compilation happens once
+// here rather than per row. ok is false when a filter needs a feature only
+// supported by the legacy engine.
+func (f JSONFilters) compilePredicate() (outputfilter.Predicate, bool) {
+	if len(f.Selectors) > 0 {
+		return nil, false
+	}
+	preds := make([]outputfilter.Predicate, 0, len(f.Filters))
+	for _, q := range f.Filters {
+		p, err := outputfilter.Condition(q.Property, q.Operation, q.Value)
+		if err != nil {
+			Logger.Infof("filter requires legacy engine. filter=%s %s %v, reason=%s", q.Property, q.Operation, q.Value, err)
+			return nil, false
+		}
+		preds = append(preds, p)
+	}
+	return outputfilter.And(preds...), true
+}
+
+// filterJSONStreaming filters and shapes the items in a single pass using
+// compiled predicates, avoiding gojsonq's decode/re-marshal round trip of
+// the whole payload.
+func (f JSONFilters) filterJSONStreaming(pred outputfilter.Predicate, jsonValue string, property string, showHeaders bool, setHeaderFunc HeaderFunc) ([]byte, error) {
+	v := gjson.Parse(jsonValue)
+	if property != "" {
+		v = v.Get(property)
+	}
+
+	isObject := v.IsObject()
+	if !isObject && !v.IsArray() {
+		return []byte(v.Str), nil
+	}
+
+	usePluck := len(f.Pluck) > 0 || f.Flatten
+	// When every property is selected and the output format does not use
+	// per-row headers, rows can be passed through untouched instead of being
+	// flattened (the flatten exists only to resolve header names).
+	rawPassthrough := f.SkipHeaders && !f.AsCSV && !f.AsTSV && !f.AsCompletionFormat && !f.Flatten &&
+		len(f.Pluck) == 1 && strings.TrimSpace(f.Pluck[0]) == "**"
+	outputValues := make([]string, 0)
+	matchedRaw := make([]string, 0)
+	headerDone := !showHeaders
+
+	handleItem := func(item gjson.Result) {
+		if !pred(jsondoc.New([]byte(item.Raw))) {
+			return
+		}
+		if !usePluck {
+			matchedRaw = append(matchedRaw, item.Raw)
+			return
+		}
+		if rawPassthrough {
+			outputValues = append(outputValues, item.Raw)
+			return
+		}
+		if item.IsObject() {
+			if !headerDone {
+				headerDone = true
+				outputValues = append(outputValues, expandHeaderProperties(&item, f.Pluck))
+			}
+			if line, keys, keyGroups := f.pluckJsonValues(&item, f.Pluck); line != "" {
+				outputValues = append(outputValues, line)
+				setHeaderFunc(strings.Join(keys, ","), keyGroups)
+			}
+		} else {
+			outputValues = append(outputValues, item.Raw)
+		}
+	}
+
+	if isObject {
+		handleItem(v)
+	} else {
+		v.ForEach(func(_, item gjson.Result) bool {
+			handleItem(item)
+			return true
+		})
+	}
+
+	if usePluck {
+		return []byte(strings.Join(outputValues, "\n")), nil
+	}
+
+	if isObject {
+		if len(matchedRaw) > 0 {
+			return []byte(matchedRaw[0]), nil
+		}
+		return []byte(""), nil
+	}
+
+	// JSON array output. The legacy engine's encoder emits a trailing
+	// newline which downstream empty-result detection relies on.
+	var b bytes.Buffer
+	b.WriteByte('[')
+	for i, raw := range matchedRaw {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+		b.WriteString(raw)
+	}
+	b.WriteString("]\n")
+	return b.Bytes(), nil
+}
+
+func (f JSONFilters) filterJSONLegacy(jsonValue string, property string, showHeaders bool, setHeaderFunc HeaderFunc) ([]byte, error) {
 	var b bytes.Buffer
 
 	var jq *gojsonq.JSONQ

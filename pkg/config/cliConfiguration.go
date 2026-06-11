@@ -1948,6 +1948,7 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 	filters.AsTSV = c.IsTSVOutput()
 	filters.AsCompletionFormat = c.IsCompletionOutput()
 	filters.Flatten = c.FlattenJSON()
+	filters.SkipHeaders = c.GetOutputFormat() != OutputTable
 	filters.Pluck = c.GetJSONSelect()
 	if err := filters.AddRawFilters(c.GetJSONFilter()); err != nil {
 		return options, err
