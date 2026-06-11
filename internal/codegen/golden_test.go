@@ -50,9 +50,7 @@ func TestGoldenSpecOutput(t *testing.T) {
 	}
 
 	// Stale *.auto.go files no longer produced from the specs are reported so
-	// they are not silently shipped. The PowerShell pipeline never deleted
-	// removed commands; pkg/cmd/tenantstatistics/listdevicestatistics is a
-	// known leftover.
+	// they are not silently shipped
 	err = filepath.Walk(outputDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err

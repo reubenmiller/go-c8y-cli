@@ -39,11 +39,6 @@ without regenerating and reviewing the diff:
   `golang.org/x/tools/imports` (goimports) for subcommands, which also
   resolves the conditionally-needed `pkg/c8ydata` import.
 
-Known wart: `pkg/cmd/tenantstatistics/listdevicestatistics/listDeviceStatistics.auto.go`
-is an orphan — its command no longer exists in `tenantStatistics.json` and it
-is not registered in any root command. The PowerShell pipeline never deleted
-stale outputs. The golden test logs (but does not fail on) such strays.
-
 ## Roadmap (from CLI_CODE_GENERATION.md) — status
 
 1. **Port the generator to Go** — ✅ done (this package).
