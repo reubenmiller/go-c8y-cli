@@ -6,13 +6,24 @@ tests:
             json:
                 method: POST
                 path: /event/events/12345/binaries
-    events_createBinary_Add a binary to an event using a custom name:
+    events_createBinary_Add a binary to an event using a custom name and use an auto-detected mime-type:
         command: |
-            c8y events createBinary --id 12345 --file ./testdata/myfile.log --name "myfile-2022-03-31.log"
+            c8y events createBinary --id 12345 --file ./testdata/myfile.log --name "myfile-2022-03-31.txt"
         exit-code: 0
         skip: true
         stdout:
             json:
-                body.name: myfile-2022-03-31.log
+                body.name: myfile-2022-03-31.txt
+                method: POST
+                path: /event/events/12345/binaries
+    events_createBinary_Add a binary to an event using a custom name and use an explicit mime-type:
+        command: |
+            c8y events createBinary --id 12345 --file ./testdata/myfile.log --name "example.bin" --type "application/octet-stream"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.name: example.bin
+                body.type: application/octet-stream
                 method: POST
                 path: /event/events/12345/binaries

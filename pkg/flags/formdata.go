@@ -204,6 +204,7 @@ func WithFormDataFile(srcFile string, srcData string) []GetOption {
 	return []GetOption{
 		WithFileReader(srcFile, "file"),
 		WithStringFormValue("name", "filename"),
+		WithStringFormValue("type", "contentType"),
 	}
 }
 

@@ -38,8 +38,11 @@ func NewCreateBinaryCmd(f *cmdutil.Factory) *CreateBinaryCmd {
 $ c8y events createBinary --id 12345 --file ./myfile.log
 Add a binary to an event
 
-$ c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-31.log"
-Add a binary to an event using a custom name
+$ c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-31.txt"
+Add a binary to an event using a custom name and use an auto-detected mime-type
+
+$ c8y events createBinary --id 12345 --file ./myfile.log --name "example.bin" --type "application/octet-stream"
+Add a binary to an event using a custom name and use an explicit mime-type
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled(cmd)
@@ -52,6 +55,7 @@ Add a binary to an event using a custom name
 	cmd.Flags().StringSlice("id", []string{""}, "Event id (required) (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
 	cmd.Flags().String("name", "", "Set the name of the binary file. This will be the name of the file when it is downloaded in the UI")
+	cmd.Flags().String("type", "", "Set the MIME type of the binary file, e.g. text/plain. If left blank, the type will be detected from the file extension or its contents")
 
 	completion.WithOptions(
 		cmd,
@@ -144,6 +148,7 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
+		flags.WithStringValue("type", "type"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
