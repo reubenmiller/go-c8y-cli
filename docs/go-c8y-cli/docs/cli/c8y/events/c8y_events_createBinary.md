@@ -18,8 +18,11 @@ c8y events createBinary [flags]
 $ c8y events createBinary --id 12345 --file ./myfile.log
 Add a binary to an event
 
-$ c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-31.log"
-Add a binary to an event using a custom name
+$ c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-31.txt"
+Add a binary to an event using a custom name and use an auto-detected mime-type
+
+$ c8y events createBinary --id 12345 --file ./myfile.log --name "example.bin" --type "application/octet-stream"
+Add a binary to an event using a custom name and use an explicit mime-type
         
 ```
 
@@ -31,6 +34,7 @@ Add a binary to an event using a custom name
       --id strings              Event id (required) (accepts pipeline)
       --name string             Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
       --processingMode string   Cumulocity processing mode
+      --type string             Set the MIME type of the binary file, e.g. text/plain. If left blank, the type will be detected from the file extension or its contents
 ```
 
 ### Options inherited from parent commands

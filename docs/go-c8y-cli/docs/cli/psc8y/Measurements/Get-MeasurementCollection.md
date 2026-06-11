@@ -95,12 +95,19 @@ Get a list of measurements
 
 ### EXAMPLE 2
 ```
+Get-MeasurementCollection -DateFrom -1d -Revert:$false
+```
+
+Get a list of measurements from the last day, showing the oldest first
+
+### EXAMPLE 3
+```
 Get-MeasurementCollection -Device $Device.id -Type "TempReading"
 ```
 
 Get a list of measurements for a particular device
 
-### EXAMPLE 3
+### EXAMPLE 4
 ```
 Get-DeviceCollection -Name $Device.name | Get-MeasurementCollection
 ```
@@ -201,7 +208,8 @@ Accept wildcard characters: False
 
 ### -Revert
 Return the newest instead of the oldest measurements.
-Must be used with dateFrom and dateTo parameters
+Must be used with dateFrom and dateTo parameters.
+By default, the results are sorted by the newest measurements first for time series and by the oldest first for legacy measurements
 
 ```yaml
 Type: SwitchParameter
