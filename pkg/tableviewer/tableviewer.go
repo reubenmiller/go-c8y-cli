@@ -8,6 +8,9 @@ import (
 	"unicode"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/pkg/twwidth"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 	"github.com/olekukonko/ts"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/gjsonpath"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/numbers"
@@ -33,7 +36,7 @@ type TableView struct {
 	Out                      io.Writer
 	Columns                  []string
 	ColumnWidths             []int
-	ColumnAlignments         []int
+	ColumnAlignments         []tw.Align
 	MinColumnWidth           int
 	MinEmptyValueColumnWidth int
 	MaxColumnWidth           int
@@ -64,17 +67,17 @@ func (v *TableView) getValue(value gjson.Result) []string {
 	return row
 }
 
-func (v *TableView) getRow(value gjson.Result) (row []string, alignments []int) {
+func (v *TableView) getRow(value gjson.Result) (row []string, alignments []tw.Align) {
 	row = []string{}
-	alignments = []int{}
+	alignments = []tw.Align{}
 
 	for i, col := range v.Columns {
 		node := value.Get(gjsonpath.EscapePath(col))
 
 		columnValue := ""
-		columnAlignment := tablewriter.ALIGN_LEFT
+		columnAlignment := tw.AlignLeft
 		if node.Type == gjson.Number {
-			columnAlignment = tablewriter.ALIGN_RIGHT
+			columnAlignment = tw.AlignRight
 			columnValue = v.NumberFormatter.Display(node.Float(), node.Raw, "")
 		} else {
 			columnValue = strings.Trim(node.Raw, "\"")
@@ -125,11 +128,11 @@ func minmax(values []int) (min int, max int) {
 // for multi-line (e.g. wrapped) values
 func cellDisplayWidth(s string) int {
 	if !strings.Contains(s, "\n") {
-		return tablewriter.DisplayWidth(s)
+		return twwidth.Width(s)
 	}
 	width := 0
 	for _, line := range strings.Split(s, "\n") {
-		if w := tablewriter.DisplayWidth(line); w > width {
+		if w := twwidth.Width(line); w > width {
 			width = w
 		}
 	}
@@ -179,13 +182,13 @@ func (v *TableView) calculateColumnWidths(minWidth int, rows [][]string) {
 				v.Columns[i],
 				paddedCellWidth,
 				curMinWidth+v.ColumnPadding,
-				tablewriter.DisplayWidth(v.Columns[i]),
+				twwidth.Width(v.Columns[i]),
 			)
 
 			_, colWidth := minmax([]int{
 				paddedCellWidth,
 				curMinWidth + v.ColumnPadding,
-				tablewriter.DisplayWidth(v.Columns[i]),
+				twwidth.Width(v.Columns[i]),
 			})
 
 			// TODO: When the column value is empty, then use a dedicate empty width value instead
@@ -247,7 +250,7 @@ func (v *TableView) primeFromSamples(samples []gjson.Result) {
 		return
 	}
 	rows := make([][]string, 0, len(samples))
-	alignments := make([][]int, 0, len(samples))
+	alignments := make([][]tw.Align, 0, len(samples))
 	for _, sample := range samples {
 		row, rowAlignments := v.getRow(sample)
 		rows = append(rows, row)
@@ -258,9 +261,9 @@ func (v *TableView) primeFromSamples(samples []gjson.Result) {
 		// use the alignment of the first row which has a value for the column,
 		// so columns are still aligned correctly (e.g. numbers) even if the
 		// first row does not contain a value
-		merged := make([]int, len(v.Columns))
+		merged := make([]tw.Align, len(v.Columns))
 		for i := range v.Columns {
-			merged[i] = tablewriter.ALIGN_LEFT
+			merged[i] = tw.AlignLeft
 			for ri, row := range rows {
 				if i < len(row) && row[i] != "" && i < len(alignments[ri]) {
 					merged[i] = alignments[ri][i]
@@ -272,18 +275,6 @@ func (v *TableView) primeFromSamples(samples []gjson.Result) {
 	}
 
 	v.calculateColumnWidths(v.MinColumnWidth, rows)
-}
-
-func (v *TableView) getHeaderRow() []string {
-	header := []string{}
-	for i, name := range v.Columns {
-		width := v.MinColumnWidth
-		if i < len(v.ColumnWidths) {
-			width = len(name)
-		}
-		header = append(header, strings.Repeat("-", width))
-	}
-	return header
 }
 
 // TransformData transform the data so that is presentable in the terminal
@@ -343,13 +334,20 @@ func WrapLine(line string, width int, wrapPrefix string) string {
 }
 
 func (v *TableView) GetHeaders() (headers []string) {
+	// Header names are not wrapped: a markdown header is a single row, and
+	// the renderer truncates over-wide names to the column width instead.
 	for i, col := range v.Columns {
 		if i < len(v.ColumnWidths) {
-			headers = append(headers, WrapLine(col, v.ColumnWidths[i], ""))
+			headers = append(headers, col)
 		}
 	}
 	return headers
 }
+
+const (
+	headerColorPrefix = "\x1b[1m\x1b[36m" // bold cyan
+	headerColorSuffix = "\x1b[0m"
+)
 
 // Render writes the json data to console in the form of a table
 func (v *TableView) Render(jsonData []byte, withHeader bool) {
@@ -358,62 +356,54 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 	if v.Out == nil {
 		v.Out = os.Stdout
 	}
-	table := tablewriter.NewWriter(v.Out)
 
-	isMarkdown := true
-	if withHeader {
-		table.SetHeader(v.GetHeaders())
-		if !isMarkdown {
-			table.Append(v.getHeaderRow())
-		}
-	}
-
-	maxWidth := 0
-	headerColors := []tablewriter.Colors{}
+	// Fix the column widths to the sampled widths (plus the cell padding
+	// added by the renderer) so batches rendered without a header still
+	// align with the first batch. Cells are already truncated/wrapped to
+	// the column widths by getRow when a RowMode is set.
+	widths := tw.NewMapper[int, int]()
 	for i, width := range v.ColumnWidths {
-		headerColors = append(headerColors, tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor})
-		table.SetColMinWidth(i, width)
-		if width >= maxWidth {
-			maxWidth = width
+		widths[i] = width + 2
+	}
+
+	cfg := tablewriter.Config{
+		Header: tw.CellConfig{
+			Formatting: tw.CellFormatting{AutoFormat: tw.Off, AutoWrap: tw.WrapTruncate},
+			// The markdown separator derives its alignment markers (---:)
+			// from the header alignment, which also governs how the rows
+			// are aligned, so the per-column (number-aware) alignments must
+			// be applied here.
+			Alignment: tw.CellAlignment{Global: tw.AlignLeft, PerColumn: v.ColumnAlignments},
+		},
+		Row: tw.CellConfig{
+			// Values are pre-wrapped/truncated by getRow, so the renderer
+			// must not re-wrap (multi-line cells are already split).
+			Formatting: tw.CellFormatting{AutoWrap: tw.WrapNone},
+			Alignment:  tw.CellAlignment{Global: tw.AlignLeft, PerColumn: v.ColumnAlignments},
+		},
+		Widths: tw.CellWidth{PerColumn: widths},
+	}
+
+	table := tablewriter.NewTable(v.Out,
+		tablewriter.WithRenderer(renderer.NewMarkdown()),
+		tablewriter.WithConfig(cfg),
+	)
+
+	if withHeader {
+		headers := v.GetHeaders()
+		if v.EnableColor {
+			for i, h := range headers {
+				headers[i] = headerColorPrefix + h + headerColorSuffix
+			}
 		}
-	}
-	table.SetColWidth(maxWidth)
-
-	if withHeader && v.EnableColor {
-		table.SetHeaderColor(headerColors...)
+		table.Header(headers)
 	}
 
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetColumnAlignment(v.ColumnAlignments)
-
-	wrapEnabled := v.RowMode == RowModeWrap
-
-	if isMarkdown {
-		table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
-		table.SetCenterSeparator("|")
-		table.SetAutoFormatHeaders(false)
-		table.SetAutoWrapText(true)
-	} else {
-		table.SetAutoWrapText(wrapEnabled)
-		table.SetReflowDuringAutoWrap(wrapEnabled)
-		table.SetAutoFormatHeaders(false)
-
-		table.SetHeaderLine(false)
-		table.SetBorder(false)
-		table.SetCenterSeparator("")
-		table.SetColumnSeparator("")
-		table.SetRowLine(false)
-		table.SetRowSeparator("-")
-		table.SetTablePadding(" ")
-		table.SetNoWhiteSpace(true)
+	if err := table.Bulk(data); err != nil {
+		Logger.Printf("failed to append table rows. err=%s", err)
+		return
 	}
-
-	// Enable row separator when wrapping cells to make it easier to read
-	table.SetRowSeparator("-")
-	table.SetAutoWrapText(wrapEnabled)
-	table.SetRowLine(wrapEnabled)
-
-	table.AppendBulk(data)
-	table.Render()
+	if err := table.Render(); err != nil {
+		Logger.Printf("failed to render table. err=%s", err)
+	}
 }
