@@ -16,7 +16,7 @@ import (
 
 	"github.com/google/shlex"
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/integration/models"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flatten"
+	"github.com/reubenmiller/go-c8y-cli/v2/cmd/gen-tests/flatten"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"gopkg.in/yaml.v3"
 )

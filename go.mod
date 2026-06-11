@@ -18,7 +18,7 @@ require (
 	github.com/mdp/qrterminal/v3 v3.2.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.16.0
-	github.com/obeattie/ohmyglob v0.0.0-20150811221449-290764208a0d
+	github.com/obeattie/ohmyglob v0.0.0-20150811221449-290764208a0d // indirect
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/pkg/errors v0.9.1
@@ -39,7 +39,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/hashicorp/go-version v1.9.0
+require github.com/hashicorp/go-version v1.9.0 // indirect
 
 require (
 	github.com/cli/browser v1.3.0
@@ -47,9 +47,8 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/reubenmiller/go-c8y/v2 v2.0.0-20260613165353-6079264ace0d
-	github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3
-	golang.org/x/tools v0.44.0
+	github.com/mattn/go-runewidth v0.0.20
+	github.com/reubenmiller/go-c8y/v2 v2.0.0-20260318160755-635d890df069
 	mvdan.cc/sh/v3 v3.13.1
 )
 

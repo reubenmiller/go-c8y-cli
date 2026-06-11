@@ -4,22 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/go-version"
-	glob "github.com/obeattie/ohmyglob"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flatten"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/matcher"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/sortorder"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	outputfilter "github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/filter"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/shape"
-	"github.com/reubenmiller/gojsonq/v2"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap/zapcore"
 )
@@ -37,7 +28,6 @@ func init() {
 type JSONFilters struct {
 	Logger             *logger.Logger
 	Filters            []JSONFilter
-	Selectors          []string
 	Pluck              []string
 	Flatten            bool
 	AsCSV              bool
@@ -100,10 +90,6 @@ func MergeKeyGroups(rows [][]KeyGroup) []string {
 
 func (f JSONFilters) Apply(jsonValue string, property string, showHeaders bool, setHeaderFunc HeaderFunc) ([]byte, error) {
 	return f.filterJSON(jsonValue, property, showHeaders, setHeaderFunc)
-}
-
-func (f *JSONFilters) AddSelectors(props ...string) {
-	f.Selectors = append(f.Selectors, props...)
 }
 
 func splitFilter(s string, sep rune, maxSplit int) []string {
@@ -213,180 +199,11 @@ func (f *JSONFilters) Add(property, operation string, value interface{}) {
 	})
 }
 
-// FilterPropertyByWildcard filter a json string by using globstar (wildcards) on the nested json paths
-func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string, setAlias bool) (map[string]interface{}, []string, []KeyGroup, error) {
-	rawMap := make(map[string]interface{})
-	err := c8y.DecodeJSONBytes([]byte(jsonValue), &rawMap)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	Logger.Debugf("flattening json")
-	flatMap, err := flatten.Flatten(rawMap, prefix, flatten.DotStyle)
-	Logger.Debugf("finished flattening json")
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	compiledPatterns := []glob.Glob{}
-	aliases := []string{}
-	originalPatterns := []string{}
-	filteredMap := make(map[string]interface{})
-
-	for _, p := range patterns {
-		// resolve path using wildcards
-		// strip alias reference
-		alias := ""
-		if idx := strings.Index(p, ":"); idx > -1 {
-			alias = p[0:idx]
-			p = p[idx+1:]
-		}
-		originalPattern := p
-		p = strings.ToLower(p)
-
-		if p != "" {
-			if cp, err := glob.Compile(p, &glob.Options{
-				Separator:    '.',
-				MatchAtStart: true,
-				MatchAtEnd:   true,
-			}); err == nil {
-				compiledPatterns = append(compiledPatterns, cp)
-				aliases = append(aliases, alias)
-				originalPatterns = append(originalPatterns, originalPattern)
-			}
-		}
-	}
-
-	Logger.Debugf("running filterFlatMap")
-	resolvedProperties, keyGroups, _ := filterFlatMap(flatMap, filteredMap, compiledPatterns, aliases, originalPatterns)
-	Logger.Debugf("finished filterFlatMap")
-	return filteredMap, resolvedProperties, keyGroups, err
-}
-
-func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patterns []glob.Glob, aliases []string, originalPatterns []string) ([]string, []KeyGroup, error) {
-	sortedKeys := []string{}
-	keyGroups := []KeyGroup{}
-
-	// sort source map keys, so matching is stable when using alias
-	// where one pattern can match multiple values (otherwise it will be random which property is selected)
-	sourceKeys := make([]string, len(src))
-	i := 0
-	for key := range src {
-		sourceKeys[i] = key
-		i++
-	}
-	// Use natural sorting to sort array in an user friendly way
-	// i.e. 1, 10, 2 => 1, 2, 10
-	// Skip sorting for very large key sets
-	if len(sourceKeys) <= 2000000 {
-		sort.Sort(sortorder.Natural(sourceKeys))
-	}
-
-	for i, pattern := range patterns {
-		found := false
-		group := KeyGroup{Pattern: pattern.String()}
-		if i < len(originalPatterns) {
-			group.Pattern = originalPatterns[i]
-		}
-		Logger.Debugf("filtering keys by pattern: total=%d, pattern=%s", len(sourceKeys), pattern.String())
-		for _, key := range sourceKeys {
-			value := src[key]
-
-			// normalize key, and strip the key identifier
-			keyl := strings.ReplaceAll(strings.ToLower(key), flatten.KeyPrefix, "")
-
-			if strings.HasPrefix(keyl, pattern.String()+".") || (pattern.MatchString(keyl) && !pattern.IsNegative()) {
-				if aliases[i] != "" {
-					paths := strings.Split(pattern.String(), ".")
-					if strings.Contains(pattern.String(), "*") {
-						commonpath := bytes.Buffer{}
-						hasAlias := false
-
-						if strings.HasPrefix(pattern.String(), "*") {
-							key = aliases[i] + "." + key
-							hasAlias = true
-						} else if strings.HasSuffix(pattern.String(), "*") {
-							keyPaths := strings.Split(key, ".")
-							for idxPart, part := range paths {
-								if strings.Contains(part, "**") || part == "*" {
-									break
-								}
-								// get the real key path rather than the wildcard
-								if strings.Contains(part, "*") && idxPart < len(keyPaths) {
-									part = keyPaths[idxPart]
-									commonpath.WriteString("." + part)
-									break
-								}
-								commonpath.WriteString("." + part)
-							}
-							commonprefix := strings.TrimLeft(commonpath.String(), ".")
-							if strings.HasPrefix(keyl, strings.ToLower(commonprefix)) {
-								key = aliases[i] + key[len(commonprefix):]
-								hasAlias = true
-							}
-						}
-
-						if !hasAlias {
-							key = aliases[i]
-						}
-					} else {
-						key = aliases[i]
-					}
-				}
-				dst[key] = value
-				sortedKeys = append(sortedKeys, key)
-				group.Keys = append(group.Keys, key)
-				found = true
-			}
-		}
-		if !found && !pattern.IsNegative() {
-			// store non-matching patterns for csv generation
-			// using the original (non-lowercased) pattern so later rows
-			// can still resolve the value via a case-sensitive path lookup
-			sortedKeys = append(sortedKeys, group.Pattern)
-		}
-		if !pattern.IsNegative() {
-			keyGroups = append(keyGroups, group)
-		}
-	}
-
-	isNegatedKey := func(key string) bool {
-		keyl := strings.ToLower(key)
-		for _, pattern := range patterns {
-			if pattern.IsNegative() && pattern.MatchString(keyl) {
-				return true
-			}
-		}
-		return false
-	}
-
-	// filter for negated keys
-	sortedMatchingKeys := make([]string, 0)
-	for _, key := range sortedKeys {
-		if isNegatedKey(key) {
-			delete(dst, key)
-		} else {
-			sortedMatchingKeys = append(sortedMatchingKeys, key)
-		}
-	}
-	for i := range keyGroups {
-		matchingKeys := make([]string, 0, len(keyGroups[i].Keys))
-		for _, key := range keyGroups[i].Keys {
-			if !isNegatedKey(key) {
-				matchingKeys = append(matchingKeys, key)
-			}
-		}
-		keyGroups[i].Keys = matchingKeys
-	}
-
-	return sortedMatchingKeys, keyGroups, nil
-}
-
 // NewJSONFilters create a json filter
 func NewJSONFilters(l *logger.Logger) *JSONFilters {
 	return &JSONFilters{
-		Logger:    l,
-		Filters:   make([]JSONFilter, 0),
-		Selectors: make([]string, 0),
+		Logger:  l,
+		Filters: make([]JSONFilter, 0),
 	}
 }
 
@@ -396,71 +213,34 @@ type JSONFilter struct {
 	Value     interface{}
 }
 
-func removeJSONArrayValues(jsonValue []byte) []byte {
-	v := gjson.ParseBytes(jsonValue)
-	if !v.IsArray() {
-		return jsonValue
-	}
-	if len(v.Array()) > 0 {
-		return []byte(v.Array()[0].String())
-	}
-	return []byte("")
-}
-
-func isJQJSONQNodeError(err error) bool {
-	return strings.Contains(err.Error(), "invalid node name")
-}
-
-func formatErrors(errs []error) error {
-	filteredErrs := make([]error, 0)
-
-	for _, err := range errs {
-		// ignore invalid node name errors, as the property does not exist
-		if !isJQJSONQNodeError(err) {
-			filteredErrs = append(filteredErrs, err)
-		}
-	}
-	if len(filteredErrs) > 0 {
-		return fmt.Errorf("filter error. %s", filteredErrs[0])
-	}
-
-	return nil
-}
-
-// filterJSON applies filtering and property selection. It uses the streaming
-// engine from go-c8y/v2 (compiled predicates, single pass over the items)
-// when the requested filters support it, and falls back to the legacy
-// gojsonq engine otherwise (e.g. version constraints, selectors).
+// filterJSON applies filtering and property selection using the streaming
+// engine from go-c8y/v2 (compiled predicates, single pass over the items).
 func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders bool, setHeaderFunc HeaderFunc) ([]byte, error) {
-	if pred, ok := f.compilePredicate(); ok {
-		return f.filterJSONStreaming(pred, jsonValue, property, showHeaders, setHeaderFunc)
+	pred, err := f.compilePredicate()
+	if err != nil {
+		return nil, err
 	}
-	return f.filterJSONLegacy(jsonValue, property, showHeaders, setHeaderFunc)
+	return f.filterJSONStreaming(pred, jsonValue, property, showHeaders, setHeaderFunc)
 }
 
 // compilePredicate compiles the filters to a single predicate using the
 // go-c8y/v2 filter engine. All pattern/regex/date compilation happens once
-// here rather than per row. ok is false when a filter needs a feature only
-// supported by the legacy engine.
-func (f JSONFilters) compilePredicate() (outputfilter.Predicate, bool) {
-	if len(f.Selectors) > 0 {
-		return nil, false
-	}
+// here rather than per row.
+func (f JSONFilters) compilePredicate() (outputfilter.Predicate, error) {
 	preds := make([]outputfilter.Predicate, 0, len(f.Filters))
 	for _, q := range f.Filters {
 		p, err := outputfilter.Condition(q.Property, q.Operation, q.Value)
 		if err != nil {
-			Logger.Infof("filter requires legacy engine. filter=%s %s %v, reason=%s", q.Property, q.Operation, q.Value, err)
-			return nil, false
+			return nil, fmt.Errorf("filter error. filter=%s %s %v: %w", q.Property, q.Operation, q.Value, err)
 		}
 		preds = append(preds, p)
 	}
-	return outputfilter.And(preds...), true
+	return outputfilter.And(preds...), nil
 }
 
 // filterJSONStreaming filters and shapes the items in a single pass using
-// compiled predicates, avoiding gojsonq's decode/re-marshal round trip of
-// the whole payload.
+// compiled predicates, avoiding a decode/re-marshal round trip of the whole
+// payload.
 func (f JSONFilters) filterJSONStreaming(pred outputfilter.Predicate, jsonValue string, property string, showHeaders bool, setHeaderFunc HeaderFunc) ([]byte, error) {
 	v := gjson.Parse(jsonValue)
 	if property != "" {
@@ -635,115 +415,6 @@ func convertSelectionToLine(sel *shape.Selection) string {
 	return buf.String()
 }
 
-func (f JSONFilters) filterJSONLegacy(jsonValue string, property string, showHeaders bool, setHeaderFunc HeaderFunc) ([]byte, error) {
-	var b bytes.Buffer
-
-	var jq *gojsonq.JSONQ
-	convertBackFromArray := false
-
-	v := gjson.Parse(jsonValue)
-
-	if property != "" {
-		v = v.Get(property)
-	}
-
-	if v.IsObject() {
-		Logger.Info("Converting json object to array")
-		jq = gojsonq.New().FromString("[" + v.String() + "]")
-		convertBackFromArray = true
-	} else if v.IsArray() {
-		jq = gojsonq.New().FromString(v.String())
-	} else {
-		return []byte(v.Str), nil
-	}
-
-	// Add custom filters
-	jq.Macro("like", matchWithWildcards)
-	jq.Macro("-like", matchWithWildcards)
-	jq.Macro("-notlike", matchWithWildcardsNegated)
-	jq.Macro("notlike", matchWithWildcardsNegated)
-
-	jq.Macro("match", matchWithRegex)
-	jq.Macro("-match", matchWithRegex)
-	jq.Macro("-notmatch", matchWithRegexNegated)
-	jq.Macro("notmatch", matchWithRegexNegated)
-
-	// date filters
-	jq.Macro("datelt", dateOlderThan)
-	jq.Macro("datelte", dateOlderThanEqual)
-	jq.Macro("olderthan", dateOlderThanEqual)
-
-	jq.Macro("dategt", dateNewerThan)
-	jq.Macro("dategte", dateNewerThanEqual)
-	jq.Macro("newerthan", dateNewerThanEqual)
-
-	jq.Macro("includes", includesValue)
-	jq.Macro("notincludes", notIncludesValue)
-
-	// Version filters
-	jq.Macro("version", matchVersionConstraint)
-
-	for _, query := range f.Filters {
-		Logger.Debugf("filtering data: %s %s %s", query.Property, query.Operation, query.Value)
-		jq.Where(query.Property, query.Operation, query.Value)
-	}
-
-	if errs := jq.Errors(); len(errs) > 0 {
-		Logger.Warnf("filter errors. %v", errs)
-	}
-
-	if len(f.Selectors) > 0 {
-		jq.Select(f.Selectors...)
-	}
-	Logger.Debugf("Pluck values: %v", f.Pluck)
-	// format values (using gjson)
-	// skip flatten and select if a only a globstar is provided
-	// selectAllProperties := len(f.Pluck) == 1 && f.Pluck[0] == "**"
-	// && !selectAllProperties
-	if (len(f.Pluck) > 0) || f.Flatten {
-		var tmpBuffer bytes.Buffer
-		jq.Writer(&tmpBuffer)
-		formattedJSON := gjson.ParseBytes(tmpBuffer.Bytes())
-
-		if formattedJSON.IsArray() {
-			outputValues := make([]string, 0)
-
-			if showHeaders {
-				outputValues = append(outputValues, expandHeaderProperties(&formattedJSON, f.Pluck))
-			}
-
-			for _, myval := range formattedJSON.Array() {
-
-				if myval.IsObject() {
-					if line, keys, keyGroups := f.pluckJsonValues(&myval, f.Pluck); line != "" {
-						outputValues = append(outputValues, line)
-						setHeaderFunc(strings.Join(keys, ","), keyGroups)
-					}
-				} else {
-					outputValues = append(outputValues, myval.Raw)
-				}
-			}
-			return []byte(strings.Join(outputValues, "\n")), formatErrors(jq.Errors())
-		}
-
-		if line, keys, keyGroups := f.pluckJsonValues(&formattedJSON, f.Pluck); line != "" {
-			setHeaderFunc(strings.Join(keys, ","), keyGroups)
-			return []byte(line), formatErrors(jq.Errors())
-		}
-
-		Logger.Debugf("ERROR: gjson path does not exist. %v", f.Pluck)
-		return []byte(""), formatErrors(jq.Errors())
-	}
-
-	jq.Writer(&b)
-
-	// Convert back to an object if it
-	if convertBackFromArray {
-		return removeJSONArrayValues(b.Bytes()), formatErrors(jq.Errors())
-	}
-	return b.Bytes(), formatErrors(jq.Errors())
-}
-
 func expandHeaderProperties(item *gjson.Result, properties []string) string {
 	headers := []string{}
 
@@ -781,308 +452,4 @@ func resolveKeyName(item *gjson.Result, key string) (name string, value interfac
 		return item.Raw[tokenStart+1 : tokenEnd], value.Value(), nil
 	}
 	return key, nil, nil
-}
-
-func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string) (string, []string, []KeyGroup) {
-	if item == nil {
-		return "", nil, nil
-	}
-
-	if len(properties) == 0 {
-		properties = append(properties, "**")
-	}
-
-	// flatten json
-	pathPatterns := make([]string, 0)
-	for _, key := range properties {
-		pathPatterns = append(pathPatterns, strings.Split(key, ",")...)
-	}
-
-	useAliases := false
-	flatMap, flatKeys, keyGroups, err := FilterPropertyByWildcard(item.Raw, "", pathPatterns, useAliases)
-	if err != nil {
-		return "", nil, nil
-	}
-
-	output := bytes.Buffer{}
-
-	// json output
-	var v []byte
-	if f.AsCSV {
-		return convertToCSV(flatMap, flatKeys, ","), flatKeys, keyGroups
-	} else if f.AsTSV {
-		return convertToCSV(flatMap, flatKeys, "\t"), flatKeys, keyGroups
-	} else if f.AsCompletionFormat {
-		return convertToLine(flatMap, flatKeys), flatKeys, keyGroups
-	} else if f.Flatten {
-		v, err = json.Marshal(flatMap)
-	} else {
-		// unflatten
-		Logger.Debugf("running unflatten. %v", pathPatterns)
-		if len(pathPatterns) == 1 && pathPatterns[0] == "**" {
-			Logger.Debugf("Returning all keys because globstar is being used")
-			return item.Raw, flatKeys, keyGroups
-		}
-
-		// Protect against large amount of keys adn
-		maxKeyCount := int64(10000)
-		keyCount := int64(len(flatMap))
-		if keyCount > maxKeyCount {
-			if f.Logger != nil {
-				itemID := ""
-				if v := item.Get("id"); v.Exists() {
-					itemID = v.Str
-				}
-				f.Logger.Warnf("Detected json with a large number of keys, returning all data by default. Use jq for further filtering. total_keys=%d, id=%s", keyCount, itemID)
-			}
-
-			return item.Raw, flatKeys, keyGroups
-		}
-
-		v, err = flatten.UnflattenOrdered(flatMap, flatKeys)
-		Logger.Debugf("Finished unflatten")
-	}
-	if err != nil {
-		Logger.Warningf("failed to marshal value. err=%s", err)
-	} else {
-		if v != nil {
-			output.Write(v)
-		}
-	}
-
-	if err != nil {
-		return "", nil, nil
-	}
-
-	return output.String(), flatKeys, keyGroups
-}
-
-func convertToCSV(flatMap map[string]interface{}, keys []string, separator string) string {
-	buf := bytes.Buffer{}
-	if separator == "" {
-		separator = ","
-	}
-	for i, key := range keys {
-		if i != 0 {
-			// handle for empty non-existent values by leaving it blank
-			buf.WriteString(separator)
-		}
-		if value, ok := flatMap[key]; ok {
-			if marshalledValue, err := json.Marshal(value); err != nil {
-				Logger.Warningf("failed to marshal value. value=%v, err=%s", value, err)
-			} else {
-				if !bytes.Contains(marshalledValue, []byte(",")) {
-					buf.Write(bytes.Trim(marshalledValue, "\""))
-				} else {
-					buf.Write(marshalledValue)
-				}
-			}
-		}
-	}
-	return buf.String()
-}
-
-func convertToLine(flatMap map[string]interface{}, keys []string) string {
-	buf := bytes.Buffer{}
-	for i, key := range keys {
-		if i != 0 {
-			// handle for empty non-existent values by leaving it blank
-			if i == 1 {
-				buf.WriteString("\t")
-			} else {
-				buf.WriteString(" | ")
-			}
-		}
-		if value, ok := flatMap[key]; ok {
-			if marshalledValue, err := json.Marshal(value); err != nil {
-				Logger.Warningf("failed to marshal value. value=%v, err=%s", value, err)
-			} else {
-				if i != 0 {
-					buf.WriteString(key)
-					buf.WriteString(": ")
-				}
-				if !bytes.Contains(marshalledValue, []byte(",")) {
-					buf.Write(bytes.Trim(marshalledValue, "\""))
-				} else {
-					buf.Write(marshalledValue)
-				}
-			}
-		}
-	}
-	return buf.String()
-}
-
-func dateNewerThan(x, y interface{}) (bool, error) {
-	rawDateA, okx := x.(string)
-	rawDateB, oky := y.(string)
-	if !okx || !oky {
-		return false, fmt.Errorf("wildcard matching only supports strings")
-	}
-
-	var err error
-	dateA, err := timestamp.ParseTimestamp(rawDateA)
-	if err != nil {
-		return false, fmt.Errorf("only date strings are supported. %w", err)
-	}
-
-	dateB, err := timestamp.ParseTimestamp(rawDateB)
-	if err != nil {
-		return false, fmt.Errorf("only date strings are supported. %w", err)
-	}
-
-	return dateB.UnixNano() < dateA.UnixNano(), nil
-}
-
-func dateNewerThanEqual(x, y interface{}) (bool, error) {
-	rawDateA, okx := x.(string)
-	rawDateB, oky := y.(string)
-	if !okx || !oky {
-		return false, fmt.Errorf("wildcard matching only supports strings")
-	}
-
-	var err error
-	dateA, err := timestamp.ParseTimestamp(rawDateA)
-	if err != nil {
-		return false, fmt.Errorf("only date strings are supported. %w", err)
-	}
-
-	dateB, err := timestamp.ParseTimestamp(rawDateB)
-	if err != nil {
-		return false, fmt.Errorf("only date strings are supported. %w", err)
-	}
-
-	return dateB.UnixNano() <= dateA.UnixNano(), nil
-}
-
-func dateOlderThan(x, y interface{}) (bool, error) {
-	rawDateA, okx := x.(string)
-	rawDateB, oky := y.(string)
-	if !okx || !oky {
-		return false, fmt.Errorf("wildcard matching only supports strings")
-	}
-
-	var err error
-	dateA, err := timestamp.ParseTimestamp(rawDateA)
-	if err != nil {
-		return false, fmt.Errorf("only date strings are supported. %w", err)
-	}
-
-	dateB, err := timestamp.ParseTimestamp(rawDateB)
-	if err != nil {
-		return false, fmt.Errorf("only date strings are supported. %w", err)
-	}
-
-	return dateB.UnixNano() > dateA.UnixNano(), nil
-}
-
-func dateOlderThanEqual(x, y interface{}) (bool, error) {
-	rawDateA, okx := x.(string)
-	rawDateB, oky := y.(string)
-	if !okx || !oky {
-		return false, fmt.Errorf("wildcard matching only supports strings")
-	}
-
-	var err error
-	dateA, err := timestamp.ParseTimestamp(rawDateA)
-	if err != nil {
-		return false, fmt.Errorf("only date strings are supported. %w", err)
-	}
-
-	dateB, err := timestamp.ParseTimestamp(rawDateB)
-	if err != nil {
-		return false, fmt.Errorf("only date strings are supported. %w", err)
-	}
-
-	return dateB.UnixNano() >= dateA.UnixNano(), nil
-}
-
-func matchWithWildcards(x, y interface{}) (bool, error) {
-	xs, okx := x.(string)
-	pattern, oky := y.(string)
-	if !okx || !oky {
-		return false, fmt.Errorf("wildcard matching only supports strings")
-	}
-
-	return matcher.MatchWithWildcards(xs, pattern)
-}
-
-func matchWithWildcardsNegated(x, y interface{}) (bool, error) {
-	xs, okx := x.(string)
-	pattern, oky := y.(string)
-	if !okx || !oky {
-		return false, fmt.Errorf("wildcard matching only supports strings")
-	}
-
-	match, err := matcher.MatchWithWildcards(xs, pattern)
-	return !match, err
-}
-
-func matchWithRegex(x, y interface{}) (bool, error) {
-	xs, okx := x.(string)
-	pattern, oky := y.(string)
-	if !okx || !oky {
-		return false, fmt.Errorf("wildcard matching only supports strings")
-	}
-
-	return matcher.MatchWithRegex(xs, pattern)
-}
-
-func matchWithRegexNegated(x, y interface{}) (bool, error) {
-	xs, okx := x.(string)
-	pattern, oky := y.(string)
-	if !okx || !oky {
-		return false, fmt.Errorf("wildcard matching only supports strings")
-	}
-
-	match, err := matcher.MatchWithRegex(xs, pattern)
-	return !match, err
-}
-
-func matchVersionConstraint(x, y interface{}) (bool, error) {
-	xs, okx := x.(string)
-	ys, oky := y.(string)
-	if !okx || !oky {
-		return false, fmt.Errorf("version matching only supports strings")
-	}
-
-	currentVersion, err := version.NewVersion(xs)
-	if err != nil {
-		// Treat invalid versions as 0.0.0
-		currentVersion = version.Must(version.NewVersion("0.0.0"))
-	}
-
-	constraint, err := version.NewConstraint(strings.ReplaceAll(ys, ",", ", "))
-	if err != nil {
-		return false, fmt.Errorf("Invalid version constraint. %w", err)
-	}
-
-	return constraint.Check(currentVersion), nil
-}
-
-func includesValue(x, y interface{}) (bool, error) {
-	xs, okx := x.([]interface{})
-	if !okx {
-		return false, fmt.Errorf("includes only matches against arrays of strings")
-	}
-
-	pattern := fmt.Sprintf("%v", y)
-	// pattern, oky := y.(string)
-	// if !okx || !oky {
-	// 	return false, fmt.Errorf("includes only matches against arrays of strings")
-	// }
-
-	found := false
-	for _, v := range xs {
-		sv := fmt.Sprintf("%v", v)
-		if match, _ := matcher.MatchWithWildcards(sv, pattern); match {
-			found = true
-			break
-		}
-	}
-	return found, nil
-}
-
-func notIncludesValue(x, y interface{}) (bool, error) {
-	match, err := includesValue(x, y)
-	return !match, err
 }
