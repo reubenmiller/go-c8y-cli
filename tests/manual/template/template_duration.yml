@@ -12,7 +12,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {"days":0.0035185185185185185,"duration":"5m4s","hours":0.08444444444444445,"milliseconds":304000,"minutes":5.066666666666666,"seconds":304}
+        {"days":0.0035185185185185185,"duration":"5m4s","hours":0.084444444444444447,"milliseconds":304000,"minutes":5.0666666666666664,"seconds":304}
 
   It calculates the duration between now and a date:
     # Don't check the output as the output varies over time
