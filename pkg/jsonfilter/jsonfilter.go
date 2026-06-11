@@ -18,6 +18,7 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	outputfilter "github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/filter"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/shape"
 	"github.com/reubenmiller/gojsonq/v2"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap/zapcore"
@@ -52,13 +53,7 @@ type JSONFilters struct {
 
 // KeyGroup records which concrete json keys a single select pattern resolved to
 // within one row. Keys is empty when the pattern did not match anything in the row
-type KeyGroup struct {
-	// Pattern original (non-lowercased) select pattern
-	Pattern string
-
-	// Keys resolved json keys (empty if the pattern did not match)
-	Keys []string
-}
+type KeyGroup = shape.KeyGroup
 
 // HeaderFunc callback which receives the resolved keys of a single row.
 // keys is the flat comma separated list (unmatched patterns are included as-is),
@@ -483,6 +478,14 @@ func (f JSONFilters) filterJSONStreaming(pred outputfilter.Predicate, jsonValue 
 	// flattened (the flatten exists only to resolve header names).
 	rawPassthrough := f.SkipHeaders && !f.AsCSV && !f.AsTSV && !f.AsCompletionFormat && !f.Flatten &&
 		len(f.Pluck) == 1 && strings.TrimSpace(f.Pluck[0]) == "**"
+
+	// Compile the property selection once; per item the cost is a single
+	// flatten+match pass instead of re-compiling the glob patterns per row
+	var selector *shape.Selector
+	if usePluck && !rawPassthrough {
+		selector = shape.NewSelector(f.Pluck...)
+	}
+
 	outputValues := make([]string, 0)
 	matchedRaw := make([]string, 0)
 	headerDone := !showHeaders
@@ -504,7 +507,7 @@ func (f JSONFilters) filterJSONStreaming(pred outputfilter.Predicate, jsonValue 
 				headerDone = true
 				outputValues = append(outputValues, expandHeaderProperties(&item, f.Pluck))
 			}
-			if line, keys, keyGroups := f.pluckJsonValues(&item, f.Pluck); line != "" {
+			if line, keys, keyGroups := f.applySelection(selector, &item); line != "" {
 				outputValues = append(outputValues, line)
 				setHeaderFunc(strings.Join(keys, ","), keyGroups)
 			}
@@ -545,6 +548,91 @@ func (f JSONFilters) filterJSONStreaming(pred outputfilter.Predicate, jsonValue 
 	}
 	b.WriteString("]\n")
 	return b.Bytes(), nil
+}
+
+// maxUnflattenKeyCount protects against rebuilding json with an excessive
+// number of keys; such rows are returned unshaped instead
+const maxUnflattenKeyCount = 10000
+
+// applySelection renders a single row using the compiled selector,
+// honouring the configured output mode (json, flat json, csv, tsv or
+// completion format). It returns an empty line when the row can not be
+// processed (matching the legacy pluck behavior)
+func (f JSONFilters) applySelection(selector *shape.Selector, item *gjson.Result) (string, []string, []KeyGroup) {
+	sel, err := selector.Apply([]byte(item.Raw))
+	if err != nil {
+		return "", nil, nil
+	}
+
+	line := ""
+	switch {
+	case f.AsCSV:
+		line = sel.CSV(",")
+	case f.AsTSV:
+		line = sel.CSV("\t")
+	case f.AsCompletionFormat:
+		line = convertSelectionToLine(sel)
+	case f.Flatten:
+		if v, err := sel.FlatJSON(); err == nil {
+			line = string(v)
+		} else {
+			Logger.Warningf("failed to marshal value. err=%s", err)
+		}
+	default:
+		switch {
+		case selector.SelectsEverything():
+			line = item.Raw
+		case sel.Size() > maxUnflattenKeyCount:
+			if f.Logger != nil {
+				itemID := ""
+				if v := item.Get("id"); v.Exists() {
+					itemID = v.Str
+				}
+				f.Logger.Warnf("Detected json with a large number of keys, returning all data by default. Use jq for further filtering. total_keys=%d, id=%s", sel.Size(), itemID)
+			}
+			line = item.Raw
+		default:
+			if v, err := sel.JSON(); err == nil {
+				line = string(v)
+			} else {
+				Logger.Warningf("failed to marshal value. err=%s", err)
+			}
+		}
+	}
+	return line, sel.Keys(), sel.Groups()
+}
+
+// convertSelectionToLine renders a selection in the completion format:
+// "{value}\t{key1}: {value1} | {key2}: {value2}"
+func convertSelectionToLine(sel *shape.Selection) string {
+	buf := bytes.Buffer{}
+	for i, key := range sel.Keys() {
+		if i != 0 {
+			// handle for empty non-existent values by leaving it blank
+			if i == 1 {
+				buf.WriteString("\t")
+			} else {
+				buf.WriteString(" | ")
+			}
+		}
+		if value, ok := sel.Value(key); ok {
+			marshalledValue, err := json.Marshal(value)
+			if err != nil {
+				Logger.Warningf("failed to marshal value. value=%v, err=%s", value, err)
+				continue
+			}
+			if i != 0 {
+				buf.WriteString(key)
+				buf.WriteString(": ")
+			}
+			if !bytes.Contains(marshalledValue, []byte(",")) {
+				buf.Write(bytes.Trim(marshalledValue, "\""))
+			} else {
+				buf.Write(marshalledValue)
+			}
+		}
+	}
+	return buf.String()
 }
 
 func (f JSONFilters) filterJSONLegacy(jsonValue string, property string, showHeaders bool, setHeaderFunc HeaderFunc) ([]byte, error) {
