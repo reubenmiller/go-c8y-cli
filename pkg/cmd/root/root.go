@@ -51,6 +51,7 @@ import (
 	devicesAvailabilityCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/availability"
 	devicesChildrenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/children"
 	deviceEnrollCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/enroll"
+	devicesListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/list"
 	deviceServicesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/services"
 	deviceStatisticsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/statistics"
 	deviceUserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/user"
@@ -421,6 +422,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// devices
 	devices := devicesCmd.NewSubCommand(f).GetCommand()
+	devices.AddCommand(devicesListCmd.NewList2Cmd(f).GetCommand())
 	devices.AddCommand(devicesChildrenCmd.NewSubCommand(f).GetCommand())
 	devices.AddCommand(devicesAssertCmd.NewSubCommand(f).GetCommand())
 	devices.AddCommand(devicesAvailabilityCmd.NewSubCommand(f).GetCommand())
