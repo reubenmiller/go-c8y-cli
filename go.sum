@@ -186,6 +186,8 @@ github.com/reubenmiller/go-c8y/v2 v2.0.0-20260613165353-6079264ace0d h1:8uV/p9Ma
 github.com/reubenmiller/go-c8y/v2 v2.0.0-20260613165353-6079264ace0d/go.mod h1:wZbdEK1rJBkiWEWRzlNNDKfBLMzBHGiDg4tYTRZh7Zk=
 github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3 h1:v8Q77ObTxkm0Wj9iAjcc0VMLxqEzKIdAnaTNPzSiw8Q=
 github.com/reubenmiller/gojsonq/v2 v2.0.0-20221119213524-0fd921ac20a3/go.mod h1:QidmUT4ebNVwyjKXAQgx9VFHxpOxBKWs32EEXaXnEfE=
+github.com/reubenmiller/go-c8y/v2 v2.0.0-20260611204933-e060d251a803 h1:JJA/i83L4UjoSZIZARxSm92by9c1BB/i6om8erB/TWg=
+github.com/reubenmiller/go-c8y/v2 v2.0.0-20260611204933-e060d251a803/go.mod h1:wZbdEK1rJBkiWEWRzlNNDKfBLMzBHGiDg4tYTRZh7Zk=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
