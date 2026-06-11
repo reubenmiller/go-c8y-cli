@@ -143,9 +143,27 @@ tasks:
   generate-go-code:
     desc: Generate go code from specifications
     cmds:
-      - pwsh -File scripts/build-cli/build.ps1
+      - go run ./cmd/gen-cli
     deps:
       # Use deps so that the source/generates works properly
+      - update-spec
+    sources:
+      - api/spec/json/*.json
+      - cmd/gen-cli/main.go
+      - internal/codegen/*.go
+    generates:
+      - pkg/cmd/**/*.auto.go
+
+  generate-go-code-check:
+    desc: Verify the generated go code is up to date with the specifications
+    cmds:
+      - go run ./cmd/gen-cli -check
+
+  generate-go-code-legacy:
+    desc: Generate go code from specifications using the legacy PowerShell generator
+    cmds:
+      - pwsh -File scripts/build-cli/build.ps1
+    deps:
       - update-spec
     sources:
       - api/spec/json/*.json
