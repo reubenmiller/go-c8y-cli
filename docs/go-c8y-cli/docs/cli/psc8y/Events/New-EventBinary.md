@@ -136,8 +136,9 @@ Accept wildcard characters: False
 ```
 
 ### -Type
-Custom type.
-If left blank, the MIME type will be detected from the file extension
+Set the MIME type of the binary file, e.g.
+text/plain.
+If left blank, the type will be detected from the file extension or its contents
 
 ```yaml
 Type: String

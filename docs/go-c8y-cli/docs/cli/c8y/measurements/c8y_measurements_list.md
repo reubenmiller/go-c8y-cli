@@ -17,6 +17,9 @@ c8y measurements list [flags]
 ```
 $ c8y measurements list
 Get a list of measurements
+
+$ c8y measurements list --dateFrom -1d --revert=false
+Get a list of measurements from the last day, showing the oldest first
         
 ```
 
@@ -29,7 +32,7 @@ Get a list of measurements
       --device strings               Device ID (accepts pipeline)
       --excelFormat                  Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter
   -h, --help                         help for list
-      --revert                       Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters
+      --revert                       Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters. By default, the results are sorted by the newest measurements first for time series and by the oldest first for legacy measurements
       --type string                  Measurement type.
       --unit string                  Every measurement fragment which contains 'unit' property will be transformed to use required system of units.
       --valueFragmentSeries string   value fragment series
