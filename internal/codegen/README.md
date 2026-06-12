@@ -20,13 +20,11 @@ the Pester tests under `tools/PSc8y/Tests` and the packaged module under
 go run ./cmd/gen-cli            # regenerate pkg/cmd/**/*.auto.go (in place)
 go run ./cmd/gen-cli -check     # verify outputs are current (CI-friendly)
 task generate-go-code           # same as the first command, with task deps
-task generate-go-code-legacy    # the original PowerShell pipeline
 go test ./internal/codegen      # golden test: every spec vs committed output
 
 go run ./cmd/gen-powershell           # regenerate + package the PSc8y module
 go run ./cmd/gen-powershell -check    # verify cmdlets/tests are current
 task build-powershell                 # same as the first command, with task deps
-task build-powershell-legacy          # the original PowerShell pipeline
 go test ./internal/codegen/powershell # golden test vs committed cmdlets/tests
 ```
 

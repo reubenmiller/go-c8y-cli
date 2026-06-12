@@ -159,18 +159,6 @@ tasks:
     cmds:
       - go run ./cmd/gen-cli -check
 
-  generate-go-code-legacy:
-    desc: Generate go code from specifications using the legacy PowerShell generator
-    cmds:
-      - pwsh -File scripts/build-cli/build.ps1
-    deps:
-      - update-spec
-    sources:
-      - api/spec/json/*.json
-      - scripts/**/*.ps1
-    generates:
-      - pkg/cmd/**/*.auto.go
-
   generate-cli-tests:
     desc: Generate CLI tests from the examples in the api specs
     cmds:
@@ -269,26 +257,6 @@ tasks:
     desc: Verify the generated powershell cmdlets and tests are up to date with the specifications
     cmds:
       - go run ./cmd/gen-powershell -check
-
-  build-powershell-legacy:
-    desc: Build the powershell module using the legacy PowerShell generator
-    cmds:
-      - pwsh -File scripts/build-powershell/build.ps1
-      - rm -Rf output_pwsh
-      - mkdir -p output_pwsh
-      - cp -R tools/PSc8y/dist/PSc8y output_pwsh/
-    sources:
-      - api/spec/json/*.json
-      - scripts/**/*.ps1
-      - tools/PSc8y/Public-manual/*.ps1
-      - tools/PSc8y/Private/*.ps1
-      - tools/PSc8y/completions/*.ps1
-      - tools/PSc8y/utilities/*.ps1
-      - tools/PSc8y/tools/*.ps1
-    generates:
-      - tools/PSc8y/**/*.ps1
-      - output_pwsh/PSc8y
-      - output_pwsh/PSc8y.zip
 
   build-completions:
     desc: Build completions
