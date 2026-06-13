@@ -47,8 +47,10 @@ func CommonStages(cfg *config.Config) ([]output.Stage, error) {
 // NewRenderer builds the sink for a command from the --output format, teed
 // to --outputFile as a JSON array when set.
 //
-// TODO: table output needs a renderer wrapping the existing console/dataview
-// machinery (sampled column detection); until then it falls back to JSON.
+// csv/tsv use the v2 encoders (columns derived from the documents, composing
+// with --select); json/table/serverresponse delegate to the v1 console writer
+// (consoleRenderer) so terminal rendering — table column detection and JSON
+// pretty-print/compact/colorisation — matches the v1 commands exactly.
 func NewRenderer(out io.Writer, cfg *config.Config) (output.Renderer, error) {
 	var r output.Renderer
 	switch cfg.GetOutputFormat() {
@@ -59,8 +61,8 @@ func NewRenderer(out io.Writer, cfg *config.Config) (output.Renderer, error) {
 	case config.OutputTSV:
 		r = encode.NewTSV(out, encode.CSVOptions{})
 	default:
-		// json, serverresponse and (for now) table
-		r = encode.NewNDJSON(out)
+		// json, serverresponse and table
+		r = newConsoleRenderer(out, cfg)
 	}
 
 	if path := cfg.GetOutputFile(); path != "" {

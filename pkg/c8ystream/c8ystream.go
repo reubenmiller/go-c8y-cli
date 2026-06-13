@@ -39,20 +39,6 @@ type Job func(ctx context.Context) output.Seq
 // error is surfaced and ends iteration.
 type Producer func() (Job, error)
 
-// Once returns a producer that yields the given job exactly once. Use for
-// commands whose input machinery holds no bound iterators (no piped input),
-// where the underlying templates would otherwise repeat forever.
-func Once(job Job) Producer {
-	done := false
-	return func() (Job, error) {
-		if done {
-			return nil, io.EOF
-		}
-		done = true
-		return job, nil
-	}
-}
-
 // Limit caps a producer at n jobs. n <= 0 means no limit.
 func Limit(p Producer, n int64) Producer {
 	if n <= 0 {
@@ -81,6 +67,16 @@ func FromResult[T jsondoc.Unwrapper](res op.Result[T]) output.Seq {
 			return
 		}
 		yield(doc, nil)
+	}
+}
+
+// FromStatus adapts a result with no renderable body (e.g. Delete returning
+// core.NoContent): it surfaces an error, and yields nothing on success.
+func FromStatus[T any](res op.Result[T]) output.Seq {
+	return func(yield func(jsondoc.JSONDoc, error) bool) {
+		if res.Err != nil {
+			yield(jsondoc.Empty(), res.Err)
+		}
 	}
 }
 

@@ -405,6 +405,11 @@ func WithStringValue(opts ...string) GetOption {
 		if err != nil {
 			return dst, value, err
 		}
+		// `_`/`_.path` resolves from the shared input item per iteration so
+		// multiple flags can read the same piped object.
+		if iter, ok := inputIterators.inputRef(value, format); ok {
+			return dst, iter, nil
+		}
 		if value == "" {
 			// don't assign the value anywhere
 			dst = ""
@@ -1243,4 +1248,24 @@ type RequestInputIterators struct {
 	Body        *mapbuilder.MapBuilder
 	Query       *QueryTemplate
 	PipeOptions *PipelineOptions
+
+	// InputCursor, when set, enables `_`/`_.path` flag values to resolve from
+	// a single shared input item rather than the legacy single-flag pipe
+	// binding, so several flags can read the same piped item. Set by the
+	// streamer's input source; nil for legacy commands.
+	InputCursor *iterator.InputCursor
+}
+
+// inputRef returns an input-reference iterator for the flag value when an
+// input cursor is active and value is an `_`/`_.path` reference. The second
+// result reports whether the value was an input reference.
+func (r *RequestInputIterators) inputRef(value, format string) (iterator.Iterator, bool) {
+	if r == nil || r.InputCursor == nil {
+		return nil, false
+	}
+	path, ok := iterator.InputReference(value)
+	if !ok {
+		return nil, false
+	}
+	return iterator.NewInputRefIterator(r.InputCursor, path, format), true
 }

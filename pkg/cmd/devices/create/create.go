@@ -19,32 +19,32 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Create2Cmd command
-type Create2Cmd struct {
+// CreateCmd command
+type CreateCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreate2Cmd creates a command to Create device
-func NewCreate2Cmd(f *cmdutil.Factory) *Create2Cmd {
-	ccmd := &Create2Cmd{
+// NewCreateCmd creates a command to Create device
+func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
+	ccmd := &CreateCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "create2",
+		Use:   "create",
 		Short: "Create device",
 		Long: `Create a device (managed object) with the special c8y_IsDevice fragment.
 `,
 		Example: heredoc.Doc(`
-$ c8y devices create2 --name myDevice
+$ c8y devices create --name myDevice
 Create device
 
-$ c8y devices create2 --name myDevice --data "custom_value1=1234"
+$ c8y devices create --name myDevice --data "custom_value1=1234"
 Create device with custom properties
 
-$ echo -e "device01\ndevice02" | c8y devices create2 --workers 2
-Create two devices (concurrently) using the piped names
+$ echo -e "device01\ndevice02" | c8y devices create --name - --workers 2
+Create two devices (concurrently), binding each piped line to the name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled(cmd)
@@ -77,14 +77,20 @@ Create two devices (concurrently) using the piped names
 }
 
 // RunE executes the command
-func (n *Create2Cmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// body: bound pipeline values (name) advance once per input item
-	err = r.Bind(c8ystream.Body(
+	if err := r.Input(); err != nil {
+		return err
+	}
+
+	// The whole request body is the "options" for create. Body flags reference
+	// the piped item via jsonnet (input.value.x); `-.path` is for query/path
+	// string options (see list2).
+	err = r.Body(
 		flags.WithOverrideValue("name", "name"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
@@ -94,7 +100,7 @@ func (n *Create2Cmd) RunE(cmd *cobra.Command, args []string) error {
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("name"),
-	))
+	)
 	if err != nil {
 		return err
 	}
@@ -104,7 +110,13 @@ func (n *Create2Cmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return r.Run(func(ctx context.Context, args c8ystream.Args) output.Seq {
-		return c8ystream.FromResult(client.Devices.Create(ctx, args.Body))
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context) output.Seq {
+			return c8ystream.FromResult(client.Devices.Create(ctx, body))
+		}, nil
 	})
 }

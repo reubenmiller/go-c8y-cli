@@ -1,15 +1,20 @@
+// v2-based util show: a passthrough that runs each JSON-line input item
+// through the shared output pipeline (--select / --filter / --output /
+// --outputFile), without any API call. Used heavily in tests to inspect and
+// validate input processing and the dry-run request output.
 package repeat
 
 import (
-	"fmt"
-	"io"
+	"context"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +39,7 @@ func NewCmdShow(f *cmdutil.Factory) *CmdShow {
 
 			$ c8y devices list > devices.json
 			$ c8y util show --input devices.json --select id,name --output csv
-			Save a devices list to file, then process the file in a second step and convert it to csv only keeping id and name columns (with no headers)  
+			Save a devices list to file, then process the file in a second step and convert it to csv only keeping id and name columns (with no headers)
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -56,62 +61,26 @@ func NewCmdShow(f *cmdutil.Factory) *CmdShow {
 }
 
 func (n *CmdShow) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
-
-	var iter iterator.Iterator
-	_, input, err := flags.WithPipelineIterator(&flags.PipelineOptions{
-		Name:        "input",
-		InputFilter: flags.FilterJsonLines,
-		Disabled:    inputIterators.PipeOptions.Disabled,
-		Required:    true,
-	})(cmd, inputIterators)
-
-	if err != nil {
+	if err := r.InputRaw("input"); err != nil {
 		return &flags.ParameterError{
 			Name: "input",
-			Err:  fmt.Errorf("Missing required parameter or pipeline input. %w", flags.ErrParameterMissing),
+			Err:  flags.ErrParameterMissing,
 		}
 	}
 
-	switch v := input.(type) {
-	case iterator.Iterator:
-		iter = v
-	default:
-		// use a single input iterator
-		iter = iterator.NewRepeatIterator("", 1)
-	}
-
-	bounded := iter.IsBound()
-	for {
-		responseText, _, err := iter.GetNext()
-		if err != nil {
-			if err == io.EOF {
-				break
+	// No client: each JSON-object line is yielded as-is into the pipeline.
+	// Non-object lines are skipped (matching the v1 behaviour).
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		line := in.Input()
+		return func(context.Context) output.Seq {
+			if !jsonUtilities.IsJSONObject(line) {
+				return c8ystream.FromDocs()
 			}
-			return err
-		}
-
-		if !jsonUtilities.IsJSONObject(responseText) {
-			cfg.Logger.Warnf("Could not process line. only json lines are accepted")
-			continue
-		}
-
-		if err := n.factory.WriteOutputWithoutPropertyGuess(responseText, cmdutil.OutputContext{}); err != nil {
-			cfg.Logger.Warnf("Could not process line. only json lines are accepted. %s", err)
-		}
-
-		if !bounded {
-			break
-		}
-	}
-
-	return nil
+			return c8ystream.FromDocs(jsondoc.New(line))
+		}, nil
+	})
 }

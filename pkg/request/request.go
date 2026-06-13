@@ -289,10 +289,17 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	compactJSON := r.Config.CompactJSON()
 
 	if format == "json" {
-		out, err := json.Marshal(details)
-		if err != nil {
+		// Encode without HTML escaping so query strings keep their literal
+		// '&'/'<'/'>' (e.g. "pageSize=1&withTotalPages=true") instead of
+		// & etc. This matches the CLI's JSON output convention, which the
+		// downstream consumers (util show, --select) expect.
+		var buf bytes.Buffer
+		enc := json.NewEncoder(&buf)
+		enc.SetEscapeHTML(false)
+		if err := enc.Encode(details); err != nil {
 			return
 		}
+		out := bytes.TrimRight(buf.Bytes(), "\n")
 		if !compactJSON {
 			out = pretty.Pretty(out)
 		}
