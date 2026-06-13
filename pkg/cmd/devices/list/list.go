@@ -5,7 +5,6 @@
 package list
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -19,7 +18,6 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devicegroups"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devices"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -137,13 +135,10 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	queryTemplate := cmd.Flag("queryTemplate").Value.String()
 	orderBy := cmd.Flag("orderBy").Value.String()
 
-	// Under --dry the pagination iterator's per-page request (which forces
-	// currentPage/withTotalPages/withTotalElements and an optimal page size)
-	// would leak into the reported request. Show the single base request
-	// instead, matching the v1 dry-run output.
-	dryRun := r.Config.ShouldUseDryRun(cmd.CommandPath())
-	includeAll := r.Config.IncludeAll()
+	// --raw emits per-page envelopes; otherwise the extracted items. Dry-run
+	// is handled by the transport, so it needs no branch here.
 	rawOutput := r.Config.RawOutput()
+	includeAll := r.Config.IncludeAll()
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		// Per item: read each flag as a plain value (with -.path input refs)
@@ -221,20 +216,9 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			CurrentPage:       int(common.CurrentPage),
 			MaxItems:          r.Config.MaxItems(),
 		}
-		return func(ctx context.Context) output.Seq {
-			switch {
-			case dryRun:
-				// Show the single base request without the pagination iterator's
-				// injected defaults (currentPage/withTotalPages/optimal pageSize).
-				return c8ystream.FromResult(client.Devices.List(ctx, opt))
-			case rawOutput:
-				// --raw: emit the unparsed response envelope (managedObjects,
-				// statistics, paging links) instead of the extracted items.
-				return c8ystream.FromResult(client.Devices.ListRaw(ctx, opt))
-			default:
-				return output.FromIterator(client.Devices.ListAll(ctx, opt).Items())
-			}
-		}, nil
+		// Shared --raw / default (and transparent dry-run) routing from a
+		// single paginating method, identical across all list commands.
+		return c8ystream.ListCall(rawOutput, opt, client.Devices.ListAll), nil
 	})
 }
 
