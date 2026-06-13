@@ -143,15 +143,21 @@ tasks:
   generate-go-code:
     desc: Generate go code from specifications
     cmds:
-      - pwsh -File scripts/build-cli/build.ps1
+      - go run ./cmd/gen-cli
     deps:
       # Use deps so that the source/generates works properly
       - update-spec
     sources:
       - api/spec/json/*.json
-      - scripts/**/*.ps1
+      - cmd/gen-cli/main.go
+      - internal/codegen/*.go
     generates:
       - pkg/cmd/**/*.auto.go
+
+  generate-go-code-check:
+    desc: Verify the generated go code is up to date with the specifications
+    cmds:
+      - go run ./cmd/gen-cli -check
 
   generate-cli-tests:
     desc: Generate CLI tests from the examples in the api specs
@@ -228,13 +234,15 @@ tasks:
   build-powershell:
     desc: Build the powershell module
     cmds:
-      - pwsh -File scripts/build-powershell/build.ps1
+      - go run ./cmd/gen-powershell
       - rm -Rf output_pwsh
       - mkdir -p output_pwsh
       - cp -R tools/PSc8y/dist/PSc8y output_pwsh/
     sources:
       - api/spec/json/*.json
-      - scripts/**/*.ps1
+      - cmd/gen-powershell/main.go
+      - internal/codegen/*.go
+      - internal/codegen/powershell/**/*
       - tools/PSc8y/Public-manual/*.ps1
       - tools/PSc8y/Private/*.ps1
       - tools/PSc8y/completions/*.ps1
@@ -244,6 +252,11 @@ tasks:
       - tools/PSc8y/**/*.ps1
       - output_pwsh/PSc8y
       - output_pwsh/PSc8y.zip
+
+  build-powershell-check:
+    desc: Verify the generated powershell cmdlets and tests are up to date with the specifications
+    cmds:
+      - go run ./cmd/gen-powershell -check
 
   build-completions:
     desc: Build completions

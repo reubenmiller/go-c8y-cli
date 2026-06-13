@@ -78,6 +78,9 @@ $script:Aliases = @{
     iterate = "Invoke-ClientIterator"
     batch = "Group-ClientRequests"
 
+    Enable-Application = "Enable-ApplicationByTenant"
+    Disable-Application = "Disable-ApplicationByTenant"
+
     # session
     session = "Get-Session"
 }
