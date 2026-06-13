@@ -1215,6 +1215,16 @@ func (c *Config) IncludeAll() bool {
 	return c.viper.GetBool(SettingsIncludeAll)
 }
 
+func (c *Config) MaxItems() int64 {
+	if c.IncludeAll() {
+		return 0
+	}
+	if totalPages := c.GetTotalPages(); totalPages > 0 {
+		return totalPages * int64(c.GetPageSize())
+	}
+	return int64(c.GetPageSize())
+}
+
 // GetIncludeAllDelay include all delay in milliseconds
 func (c *Config) GetIncludeAllDelay() int64 {
 	return c.viper.GetInt64(SettingsIncludeAllDelayMS)
@@ -1904,7 +1914,9 @@ func (c *Config) GetJSONSelect() []string {
 		item = strings.Trim(item, "[]")
 		item = strings.Trim(item, "\"")
 		if item != "" {
-			allitems = append(allitems, item)
+			for v := range strings.SplitSeq(item, ",") {
+				allitems = append(allitems, strings.TrimSpace(v))
+			}
 		}
 	}
 
