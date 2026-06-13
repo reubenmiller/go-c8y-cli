@@ -1,40 +1,33 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// Prototype of a v2-based list command: the CLI input machinery resolves a
+// Cumulocity query expression per input item, and each item drives a typed
+// Devices.ListAll call whose pages stream through the shared output pipeline.
 package list
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devices"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
-	output "github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/encode"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/filter"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/shape"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/template"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
-// ListCmd command
+// List2Cmd command
 type List2Cmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewListCmd creates a command to Get device collection
+// NewList2Cmd creates a command to Get device collection
 func NewList2Cmd(f *cmdutil.Factory) *List2Cmd {
 	ccmd := &List2Cmd{
 		factory: f,
@@ -44,19 +37,13 @@ func NewList2Cmd(f *cmdutil.Factory) *List2Cmd {
 		Short: "Get device collection",
 		Long:  `Get a collection of devices based on filter parameters`,
 		Example: heredoc.Doc(`
-$ c8y devices list --name "sensor*" --type myType
+$ c8y devices list2 --name "sensor*" --type myType
 Get a collection of devices of type "myType", and their names start with "sensor"
 
-$ c8y devices list --query "name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'"
+$ c8y devices list2 --query "name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'"
 Get devices which names containing 'sensor' and were created after 2021-04-02
 
-$ c8y devices list --creationTimeDateFrom -7d
-Get devices which where registered longer than 7 days ago
-
-$ c8y devices list --creationTimeDateTo -1d
-Get devices which where registered in the last day
-
-$ echo -e "c8y_MacOS\nc8y_Linux" | c8y devices list --queryTemplate "type eq '%s'"
+$ echo -e "c8y_MacOS\nc8y_Linux" | c8y devices list2 --queryTemplate "type eq '%s'"
 Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -116,39 +103,20 @@ Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipe
 
 // RunE executes the command
 func (n *List2Cmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	_ = client
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithBoolValue("skipChildrenNames", "skipChildrenNames", ""),
-		flags.WithBoolValue("withChildren", "withChildren", ""),
-		flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
-		flags.WithBoolValue("withGroups", "withGroups", ""),
-		flags.WithBoolValue("withParents", "withParents", ""),
-		flags.WithBoolValue("withLatestValues", "withLatestValues", ""),
-
+	// Cumulocity query expression. The template machinery handles pipeline
+	// input (--query accepts pipeline, --queryTemplate formatting) and the
+	// group name -> id lookup, producing one "q" value per input item.
+	//
+	// Note: custom query parameters (cfg.GetQueryParameters()) are not wired
+	// up here: typed service options have no escape hatch for arbitrary
+	// parameters yet. See the request-modifier seam in the v2 integration
+	// design notes.
+	err = r.Bind(c8ystream.Query(
 		flags.WithCumulocityQuery(
 			[]flags.GetOption{
 				flags.WithStringValue("query", "query", "%s"),
@@ -166,102 +134,35 @@ func (n *List2Cmd) RunE(cmd *cobra.Command, args []string) error {
 			},
 			"q",
 		),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
-
-	queryValue, err := query.GetQueryUnescape(true)
-	_ = queryValue
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-	)
+	))
 	if err != nil {
 		return err
 	}
 
-	ctx := apiv2.WithDryRun(context.Background(), cfg.DryRun())
+	// Typed options shared by every request; the per-item query expression is
+	// filled in from Args.
+	baseOpt := devices.ListOptions{}
+	baseOpt.SkipChildrenNames, _ = cmd.Flags().GetBool("skipChildrenNames")
+	baseOpt.WithChildren, _ = cmd.Flags().GetBool("withChildren")
+	baseOpt.WithChildrenCount, _ = cmd.Flags().GetBool("withChildrenCount")
+	baseOpt.WithParents, _ = cmd.Flags().GetBool("withParents")
+	baseOpt.WithLatestValues, _ = cmd.Flags().GetBool("withLatestValues")
+	baseOpt.PaginationOptions = pagination.PaginationOptions{
+		PageSize:          r.Config.GetPageSize(),
+		WithTotalPages:    r.Config.WithTotalPages(),
+		WithTotalElements: r.Config.WithTotalElements(),
+		CurrentPage:       int(r.Config.GetCurrentPage()),
+		MaxItems:          r.Config.MaxItems(),
+	}
 
-	clientV2 := apiv2.NewClientFromEnvironment(apiv2.ClientOptions{})
-	iter := clientV2.Devices.ListAll(
-		ctx,
-		devices.ListOptions{
-			PaginationOptions: pagination.PaginationOptions{
-				PageSize:          cfg.GetPageSize(),
-				WithTotalPages:    cfg.WithTotalPages(),
-				WithTotalElements: cfg.WithTotalElements(),
-				CurrentPage:       int(cfg.GetCurrentPage()),
-				MaxItems:          cfg.GetTotalPages() * int64(cfg.GetPageSize()),
-			},
-		})
-
-	cmdFilter, err := filter.Parse(cfg.GetJSONFilter()...)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	outputTemplate, err := template.Jsonnet(cfg.GetOutputTemplate())
-	if err != nil {
-		return err
-	}
-
-	return output.Render(
-		context.Background(),
-		output.FromIterator(iter.Items()),
-		encode.NewNDJSON(cmd.OutOrStderr()),
-		output.Filter(cmdFilter),
-		outputTemplate,
-		shape.Select(cfg.GetJSONSelect()...),
-		// output.Compose(
-		// ),
-		// output.Filter(filter.Like("name", "linux*")),
-	)
+	return r.Run(func(ctx context.Context, args c8ystream.Args) output.Seq {
+		opt := baseOpt
+		opt.Query = args.Query("q")
+		return output.FromIterator(client.Devices.ListAll(ctx, opt).Items())
+	})
 }

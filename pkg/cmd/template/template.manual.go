@@ -22,6 +22,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdTemplate {
 
 	// Subcommands
 	cmd.AddCommand(cmdExecute.NewCmdExecute(f).GetCommand())
+	cmd.AddCommand(cmdExecute.NewCmdExecute2(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
