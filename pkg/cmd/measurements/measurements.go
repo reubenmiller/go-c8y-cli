@@ -1,3 +1,8 @@
+// Package measurements wires the `c8y measurements` command and its spec-derived
+// subcommands. Every one is a hand-written v2 c8ystream command, so this group
+// command is itself hand-written rather than generated. The CLI-only measurements
+// subcommands (subscribe/assert/createBulk) are attached on top of this command
+// in pkg/cmd/root.
 package measurements
 
 import (
@@ -12,10 +17,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// SubCmdMeasurements is the `measurements` group command.
 type SubCmdMeasurements struct {
 	*subcommand.SubCommand
 }
 
+// NewSubCommand builds the `measurements` group command and attaches its
+// spec-derived subcommands.
 func NewSubCommand(f *cmdutil.Factory) *SubCmdMeasurements {
 	ccmd := &SubCmdMeasurements{}
 
