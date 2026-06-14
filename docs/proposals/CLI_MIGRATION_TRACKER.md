@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 180.**  Effort — S:97 · M:70 · L:13.  SDK call — ✅ ready:102 · ⚠️ service-exists-method-missing:61 · ❌ no-service:17.
+**Remaining commands: 172.**  Effort — S:91 · M:68 · L:13.  SDK call — ✅ ready:96 · ⚠️ service-exists-method-missing:59 · ❌ no-service:17.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -42,7 +42,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y devices getsupportedseries` | GET | `inventory/managedObjects/{device}/supportedSeries` | S | ✅ Devices.ListSupportedSeries |
 |  | `c8y devices listassets` | GET | `inventory/managedObjects/{id}/childAssets` | S | ✅ Devices.List |
 |  | `c8y devices listchildren` | GET | `inventory/managedObjects/{device}/childDevices` | S | ✅ Devices.List |
-|  | `c8y events deletecollection` | DELETE | `event/events` | S | ✅ Events.DeleteList |
 |  | `c8y features delete` | DELETE | `/features/{key}/by-tenant` | S | ✅ Features.Delete |
 |  | `c8y features disable` | PUT | `/features/{key}/by-tenant` | S | ✅ Features.Disable |
 |  | `c8y features enable` | PUT | `/features/{key}/by-tenant` | S | ✅ Features.Enable |
@@ -60,8 +59,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y inventory get` | GET | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Get |
 |  | `c8y inventory list` | GET | `inventory/managedObjects` | S | ✅ ManagedObjects.List |
 |  | `c8y inventory update` | PUT | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Update |
-|  | `c8y measurements deletecollection` | DELETE | `measurement/measurements` | S | ✅ Measurements.DeleteList |
-|  | `c8y measurements getseries` | GET | `measurement/measurements/series` | S | ✅ Measurements.ListSeries |
 |  | `c8y microservices delete` | DELETE | `/application/applications/{id}` | S | ✅ Microservices.Delete |
 |  | `c8y microservices get` | GET | `/application/applications/{id}` | S | ✅ Microservices.Get |
 |  | `c8y microservices list` | GET | `/application/applications` | S | ✅ Microservices.List |
@@ -77,8 +74,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y software get` | GET | `inventory/managedObjects/{id}` | S | ✅ Repository.Software.Get |
 |  | `c8y software list` | GET | `inventory/managedObjects` | S | ✅ Repository.Software.List |
 |  | `c8y software update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Repository.Software.Update |
-|  | `c8y systemoptions get` | GET | `/tenant/system/options/{category}/{key}` | S | ✅ Tenants.SystemOptions.Get |
-|  | `c8y systemoptions list` | GET | `/tenant/system/options` | S | ✅ Tenants.SystemOptions.List |
 |  | `c8y tenantoptions create` | POST | `/tenant/options` | S | ✅ Tenants.Options.Create |
 |  | `c8y tenantoptions delete` | DELETE | `/tenant/options/{category}/{key}` | S | ✅ Tenants.Options.Delete |
 |  | `c8y tenantoptions get` | GET | `/tenant/options/{category}/{key}` | S | ✅ Tenants.Options.Get |
@@ -89,7 +84,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y tenantoptions updateedit` | PUT | `/tenant/options/{category}/{key}/editable` | S | ✅ Tenants.Options.UpdateEditableFlag |
 |  | `c8y tenants listreferences` | GET | `/tenant/tenants/{tenant}/applications` | S | ✅ Tenants.ListApplicationReferences |
 |  | `c8y tenants tfa` | — | `— (dynamic)` | S | ✅ Tenants.GetTFA |
-|  | `c8y tenantstatistics list` | GET | `/tenant/statistics` | S | ✅ Tenants.UsageStats.List |
 |  | `c8y usergroups create` | POST | `/user/{tenant}/groups` | S | ✅ Usergroups.Create |
 |  | `c8y usergroups delete` | DELETE | `/user/{tenant}/groups/{id}` | S | ✅ Usergroups.Delete |
 |  | `c8y usergroups get` | GET | `/user/{tenant}/groups/{id}` | S | ✅ Usergroups.Get |
@@ -164,8 +158,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y tenants disableapplication` | DELETE | `/tenant/tenants/{tenant}/applications/{application}` | M | ⚠️ Tenants +method |
 |  | `c8y tenants enable` | PUT | `/tenant/tenants/{id}` | M | ⚠️ Tenants +method |
 |  | `c8y tenants enableapplication` | POST | `/tenant/tenants/{tenant}/applications` | M | ⚠️ Tenants +method |
-|  | `c8y tenantstatistics listsummaryalltenants` | GET | `/tenant/statistics/allTenantsSummary` | M | ⚠️ Tenants.UsageStats +method |
-|  | `c8y tenantstatistics listsummaryfortenant` | GET | `/tenant/statistics/summary` | M | ⚠️ Tenants.UsageStats +method |
 |  | `c8y ui plugins` | — | `— (dynamic)` | M | ⚠️ UIPlugins? |
 |  | `c8y usergroups getbyname` | GET | `/user/{tenant}/groupByName/{name}` | M | ⚠️ Usergroups +method |
 |  | `c8y userreferences addusertogroup` | POST | `/user/{tenant}/groups/{group}/users` | M | ⚠️ Users +method |
