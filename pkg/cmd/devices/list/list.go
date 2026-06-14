@@ -140,6 +140,22 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	rawOutput := r.Config.RawOutput()
 	includeAll := r.Config.IncludeAll()
 
+	// Pagination strategy: auto by default. A full walk (--includeAll) defaults
+	// to the SDK's _id keyset — which advances an "_id gt '<last id>'" cursor
+	// instead of deep offset paging — by dropping the default name ordering so
+	// the keyset applies. An explicit --orderBy or --paginationStrategy wins.
+	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
+	if paginationStrategy == "" {
+		paginationStrategy = pagination.StrategyAuto // unset == auto
+	}
+	if paginationStrategy == pagination.StrategyAuto && includeAll && !cmd.Flags().Changed("orderBy") {
+		paginationStrategy = pagination.StrategyIDKeyset
+	}
+	orderByValue := orderBy
+	if paginationStrategy == pagination.StrategyIDKeyset {
+		orderByValue = "" // the SDK forces "$orderby=_id asc"; a name order would conflict
+	}
+
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		// Per item: read each flag as a plain value (with -.path input refs)
 		// and assemble the Cumulocity query expression. The filter parts carry
@@ -192,17 +208,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			}
 		}
 
-		// --includeAll: page by ascending _id (starting after id 0) so the full
-		// result set can be walked. v1 advanced the cursor (_id gt '<lastId>')
-		// between pages; the v2 iterator still pages by currentPage, which is
-		// functionally correct over the constant filter but skips that
-		// optimisation (see the v2-integration design notes).
-		orderByValue := orderBy
-		if includeAll {
-			parts = append(parts, "(_id gt '0')")
-			orderByValue = "_id asc"
-		}
-
+		// The _id keyset cursor is now applied inside the SDK's ListAll (driven by
+		// the strategy below); the command only builds the filter and order.
 		opt := devices.ListOptions{Query: buildQuery(parts, orderByValue)}
 		opt.SkipChildrenNames = in.Bool("skipChildrenNames")
 		opt.WithChildren = in.Bool("withChildren")
@@ -215,6 +222,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			WithTotalElements: common.WithTotalElements,
 			CurrentPage:       int(common.CurrentPage),
 			MaxItems:          r.Config.MaxItems(),
+			Strategy:          paginationStrategy,
 		}
 		// Shared --raw / default (and transparent dry-run) routing from a
 		// single paginating method, identical across all list commands.

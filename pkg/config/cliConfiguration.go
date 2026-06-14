@@ -97,6 +97,9 @@ const (
 	// SettingsIncludeAll include all available results
 	SettingsIncludeAll = "settings.defaults.includeAll"
 
+	// SettingsPaginationStrategy controls how results are iterated (auto, offset, id, time)
+	SettingsPaginationStrategy = "settings.defaults.paginationStrategy"
+
 	// SettingsIncludeAllDelayMS delay in milliseconds between retrieving the next page when using include all
 	SettingsIncludeAllDelayMS = "settings.includeAll.delayMS"
 
@@ -1213,6 +1216,13 @@ func (c *Config) GetTotalPages() int64 {
 // IncludeAll return all available results
 func (c *Config) IncludeAll() bool {
 	return c.viper.GetBool(SettingsIncludeAll)
+}
+
+// PaginationStrategy returns the configured pagination strategy used when
+// iterating results: "" (auto), "offset", "id" or "time". Empty means the SDK
+// picks the optimal strategy per entity.
+func (c *Config) PaginationStrategy() string {
+	return c.viper.GetString(SettingsPaginationStrategy)
 }
 
 func (c *Config) MaxItems() int64 {

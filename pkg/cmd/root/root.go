@@ -131,6 +131,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap/zapcore"
 )
@@ -246,6 +247,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Int64(flags.FlagCurrentPage, 0, "Current page which should be returned")
 	cmd.PersistentFlags().Int64("totalPages", 0, "Total number of pages to get")
 	cmd.PersistentFlags().Bool("includeAll", false, "Include all results by iterating through each page")
+	cmd.PersistentFlags().String(flags.FlagPaginationStrategy, "", "Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time")
 	cmd.PersistentFlags().BoolP(flags.FlagWithTotalPages, "t", false, "Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages")
 	cmd.PersistentFlags().Bool(flags.FlagWithTotalElements, false, "Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)")
 	cmd.PersistentFlags().BoolP("compact", "c", !isTerm, "Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal")
@@ -337,6 +339,13 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		completion.WithValidateSet(
 			"sessionMode",
 			config.GetSessionModeCompletionHelp()...,
+		),
+		completion.WithValidateSet(
+			flags.FlagPaginationStrategy,
+			string(pagination.StrategyAuto),
+			string(pagination.StrategyIDKeyset),
+			string(pagination.StrategyOffset),
+			string(pagination.StrategyTimeKeyset),
 		),
 		cmdutil.WithViewCompletion("view", func() (*dataview.DataView, error) { return ccmd.Factory.DataView() }),
 		ccmd.Factory.WithTemplateCompletion(flags.FlagOutputTemplate),

@@ -19,6 +19,7 @@ const (
 	FlagWithTotalElements         = "withTotalElements"
 	FlagPageSize                  = "pageSize"
 	FlagCurrentPage               = "currentPage"
+	FlagPaginationStrategy        = "paginationStrategy"
 	FlagNullInput                 = "nullInput"
 	FlagAllowEmptyPipe            = "allowEmptyPipe"
 	FlagReadFromPipeText          = "-"
