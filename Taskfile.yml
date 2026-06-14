@@ -258,6 +258,24 @@ tasks:
     cmds:
       - go run ./cmd/gen-powershell -check
 
+  build-powershell-tree:
+    desc: |
+      Project powershell cmdlets from the live command tree (the hand-written
+      commands), not the REST spec. Scope with CLI_ARGS, e.g.
+      `task build-powershell-tree -- --command devices --module tmp/psc8y-tree`.
+      See docs/proposals (CLI_CODEGEN_INVERSION) for the inverted pipeline.
+    cmds:
+      - go run ./cmd/gen-powershell --from-tree {{.CLI_ARGS}}
+
+  gen-surface:
+    desc: |
+      Dump the projection-neutral CLI surface (commands, flags, metadata) as
+      JSON by walking the live command tree. Scope/redirect with CLI_ARGS, e.g.
+      `task gen-surface -- --command devices --out tmp/surface.json`.
+      The seam projectors and CI diffs consume (CLI_CODEGEN_INVERSION).
+    cmds:
+      - go run ./cmd/gen-surface {{.CLI_ARGS}}
+
   build-completions:
     desc: Build completions
     env:
