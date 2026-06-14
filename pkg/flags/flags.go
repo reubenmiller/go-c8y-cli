@@ -32,6 +32,19 @@ const (
 	AnnotationValueCollectionProperty = "collectionProperty"
 	AnnotationValueDeprecated         = "deprecatedNotice"
 	AnnotationValueSemanticMethod     = "semanticMethod"
+
+	// AnnotationValueOutputAccept and AnnotationValueOutputItemType record the
+	// response media-type and collection item media-type a command produces.
+	// They give the (now SDK-owned) "accept"/"collectionType" a home on the
+	// command so projectors (PowerShell ConvertFrom-ClientOutput) can type the
+	// output. See proposals/CLI_CODEGEN_INVERSION.md.
+	AnnotationValueOutputAccept   = "c8y:output.accept"
+	AnnotationValueOutputItemType = "c8y:output.itemType"
+
+	// AnnotationValuePowershellName records the PowerShell cmdlet name for the
+	// command (e.g. "Get-Device"), used by the tree-walking PowerShell
+	// generator instead of the spec's alias.powershell.
+	AnnotationValuePowershellName = "c8y:powershell.name"
 )
 
 // Option adds flags to a given command
@@ -258,6 +271,63 @@ func WithCollectionProperty(property string) Option {
 		cmd.Annotations[AnnotationValueCollectionProperty] = property
 		return cmd
 	}
+}
+
+// WithOutputType records the response media-type (accept) and, for
+// collections, the item media-type the command produces. Projectors use it to
+// type their output (e.g. PowerShell ConvertFrom-ClientOutput). itemType may be
+// empty for non-collection responses.
+func WithOutputType(accept string, itemType string) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		if accept == "" && itemType == "" {
+			return cmd
+		}
+		if cmd.Annotations == nil {
+			cmd.Annotations = map[string]string{}
+		}
+		if accept != "" {
+			cmd.Annotations[AnnotationValueOutputAccept] = accept
+		}
+		if itemType != "" {
+			cmd.Annotations[AnnotationValueOutputItemType] = itemType
+		}
+		return cmd
+	}
+}
+
+// GetOutputTypeFromAnnotation returns the response media-type and item
+// media-type recorded on the command (empty when unset).
+func GetOutputTypeFromAnnotation(cmd *cobra.Command) (accept string, itemType string) {
+	if cmd == nil || cmd.Annotations == nil {
+		return
+	}
+	accept = cmd.Annotations[AnnotationValueOutputAccept]
+	itemType = cmd.Annotations[AnnotationValueOutputItemType]
+	return
+}
+
+// WithPowershellName records the PowerShell cmdlet name (e.g. "Get-Device") so
+// the tree-walking PowerShell generator can name the cmdlet. When unset the
+// generator derives a name from the command verb and noun.
+func WithPowershellName(name string) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		if name != "" {
+			if cmd.Annotations == nil {
+				cmd.Annotations = map[string]string{}
+			}
+			cmd.Annotations[AnnotationValuePowershellName] = name
+		}
+		return cmd
+	}
+}
+
+// GetPowershellNameFromAnnotation returns the PowerShell cmdlet name recorded on
+// the command (empty when unset).
+func GetPowershellNameFromAnnotation(cmd *cobra.Command) (value string) {
+	if cmd == nil || cmd.Annotations == nil {
+		return
+	}
+	return cmd.Annotations[AnnotationValuePowershellName]
 }
 
 // WithDeprecationNotice marks a commands as being deprecated
