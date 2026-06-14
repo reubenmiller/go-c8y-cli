@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"net/url"
+	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	ctxhelpers "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/contexthelpers"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 // Resolver exposes the resolved values of one input item so a command can
@@ -73,6 +76,52 @@ func (in *Resolver) Time(flag string) string {
 		return ""
 	}
 	return ts
+}
+
+// TimeValue resolves a flag holding an absolute or relative timestamp to a
+// time.Time (zero when unset/invalid). Use it to fill typed time.Time fields of
+// an SDK options struct (e.g. events/alarms ListOptions.DateFrom); Time() is
+// for string query expressions.
+func (in *Resolver) TimeValue(flag string) time.Time {
+	s := in.Time(flag)
+	if s == "" {
+		return time.Time{}
+	}
+	for _, layout := range []string{time.RFC3339Nano, time.RFC3339, "2006-01-02T15:04:05.000Z07:00"} {
+		if t, err := time.Parse(layout, s); err == nil {
+			return t
+		}
+	}
+	return time.Time{}
+}
+
+// ResolveSourceID resolves a device reference held in the body's "source.id"
+// (a name -> id lookup; plain ids pass through) using resolve, returning the
+// body with source.id replaced. A body with no non-empty source.id is returned
+// unchanged. The CLI owns the name convention (NameOrID); go-c8y performs the
+// lookup, and it runs against the real API even under --dry (ResolveContext).
+//
+// This is the create/update bridge for source-bearing resources (events,
+// alarms, measurements): the command builds the full body with the CLI's body
+// machinery (--data/--template/typed flags), then this resolves the device
+// reference the body carries before the raw create call.
+func (in *Resolver) ResolveSourceID(body []byte, resolve func(context.Context, string) (string, error)) (json.RawMessage, error) {
+	ref := gjson.GetBytes(body, "source.id").String()
+	if ref == "" {
+		return json.RawMessage(body), nil
+	}
+	id, err := resolve(in.ResolveContext(), NameOrID(ref))
+	if err != nil {
+		return nil, err
+	}
+	if id == ref {
+		return json.RawMessage(body), nil // plain id passed through unchanged
+	}
+	out, err := sjson.SetBytes(body, "source.id", id)
+	if err != nil {
+		return nil, err
+	}
+	return json.RawMessage(out), nil
 }
 
 // Bool returns a bool flag's value.
