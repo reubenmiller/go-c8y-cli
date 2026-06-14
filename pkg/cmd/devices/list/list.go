@@ -6,7 +6,6 @@ package list
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -17,6 +16,7 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devicegroups"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devices"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/model"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 )
@@ -157,60 +157,43 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		// Per item: read each flag as a plain value (with -.path input refs)
-		// and assemble the Cumulocity query expression. The filter parts carry
-		// their own parentheses; they are joined with " and " and combined with
-		// the order clause, matching the v1 query builder exactly.
-		var parts []string
+		// Per item: read each flag as a plain value (with -.path input refs) and
+		// assemble the Cumulocity inventory query via the SDK builder, which skips
+		// empty values, wraps each filter part in parentheses, joins them with
+		// " and " and appends the order clause in Build().
+		q := model.NewInventoryQuery()
 
 		if raw := in.String("query"); raw != "" {
-			parts = append(parts, applyQueryTemplate(queryTemplate, raw))
+			q.AddFilterPart(applyQueryTemplate(queryTemplate, raw))
 		} else if queryTemplate != "" {
-			parts = append(parts, queryTemplate)
+			q.AddFilterPart(queryTemplate)
 		}
-		if v := in.String("name"); v != "" {
-			parts = append(parts, fmt.Sprintf("(name eq '%s')", v))
-		}
-		if v := in.String("type"); v != "" {
-			parts = append(parts, fmt.Sprintf("(type eq '%s')", v))
-		}
-		if in.Bool("agents") {
-			parts = append(parts, "has(com_cumulocity_model_Agent)")
-		}
-		if v := in.String("fragmentType"); v != "" {
-			parts = append(parts, fmt.Sprintf("has(%s)", v))
-		}
-		if v := in.String("owner"); v != "" {
-			parts = append(parts, fmt.Sprintf("(owner eq '%s')", v))
-		}
-		if v := in.String("availability"); v != "" {
-			parts = append(parts, fmt.Sprintf("(c8y_Availability.status eq '%s')", v))
-		}
-		if v := in.Time("lastMessageDateTo"); v != "" {
-			parts = append(parts, fmt.Sprintf("(c8y_Availability.lastMessage le '%s')", v))
-		}
-		if v := in.Time("lastMessageDateFrom"); v != "" {
-			parts = append(parts, fmt.Sprintf("(c8y_Availability.lastMessage ge '%s')", v))
-		}
-		if v := in.Time("creationTimeDateTo"); v != "" {
-			parts = append(parts, fmt.Sprintf("(creationTime.date le '%s')", v))
-		}
-		if v := in.Time("creationTimeDateFrom"); v != "" {
-			parts = append(parts, fmt.Sprintf("(creationTime.date ge '%s')", v))
-		}
+
+		q.AddFilterEqStr("name", in.String("name")).
+			AddFilterEqStr("type", in.String("type")).
+			AddFilter(model.FilterHasFragment("com_cumulocity_model_Agent", in.Bool("agents"))).
+			HasFragment(in.String("fragmentType")).
+			AddFilterEqStr("owner", in.String("owner")).
+			AddFilterEqStr("c8y_Availability.status", in.String("availability")).
+			AddFilterOp("c8y_Availability.lastMessage", "le", in.Time("lastMessageDateTo")).
+			AddFilterOp("c8y_Availability.lastMessage", "ge", in.Time("lastMessageDateFrom")).
+			AddFilterOp("creationTime.date", "le", in.Time("creationTimeDateTo")).
+			AddFilterOp("creationTime.date", "ge", in.Time("creationTimeDateFrom"))
+
 		for _, group := range in.StringSlice("group") {
 			if group != "" {
 				id, err := client.DeviceGroups.ResolveID(in.ResolveContext(), groupRef(group), nil)
 				if err != nil {
 					return nil, err
 				}
-				parts = append(parts, fmt.Sprintf("bygroupid(%s)", id))
+				q.ByGroupID(id)
 			}
 		}
+		q.AddOrderBy(orderByValue)
 
 		// The _id keyset cursor is now applied inside the SDK's ListAll (driven by
 		// the strategy below); the command only builds the filter and order.
-		opt := devices.ListOptions{Query: buildQuery(parts, orderByValue)}
+		opt := devices.ListOptions{Query: q.Build()}
 		opt.SkipChildrenNames = in.Bool("skipChildrenNames")
 		opt.WithChildren = in.Bool("withChildren")
 		opt.WithChildrenCount = in.Bool("withChildrenCount")
@@ -237,21 +220,6 @@ func applyQueryTemplate(template, value string) string {
 		return value
 	}
 	return fmt.Sprintf(template, value)
-}
-
-// buildQuery assembles the Cumulocity query expression from the filter parts
-// and the order clause: "$filter=<parts joined by ' and '> $orderby=<orderBy>".
-// Either clause is omitted when empty. The value is returned unescaped; the
-// v2 client encodes it.
-func buildQuery(parts []string, orderBy string) string {
-	clauses := make([]string, 0, 2)
-	if len(parts) > 0 {
-		clauses = append(clauses, "$filter="+strings.Join(parts, " and "))
-	}
-	if orderBy != "" {
-		clauses = append(clauses, "$orderby="+orderBy)
-	}
-	return strings.Join(clauses, " ")
 }
 
 // groupRef builds a device-group resolver reference: an all-digit value is an
