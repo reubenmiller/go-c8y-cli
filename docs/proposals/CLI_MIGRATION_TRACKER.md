@@ -1,14 +1,12 @@
 # CLI → v2 migration tracker (per-command)
 
-One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; the table is sorted by effort then SDK-readiness but is meant to be re-sorted/filtered freely.
+One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Done (core CRUD, 2026-06-14):** devices, events, alarms, measurements, operations, auditrecords, retentionrules, tenants, bulkoperations, identity.
+**Remaining commands: 180.**  Effort — S:97 · M:70 · L:13.  SDK call — ✅ ready:102 · ⚠️ service-exists-method-missing:61 · ❌ no-service:17.
 
-**Remaining commands: 185.**  Effort — S:102 · M:70 · L:13.  SDK call — ✅ ready:107 · ⚠️ service-exists-method-missing:61 · ❌ no-service:17.
+**Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
-**Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical with the c8ystream bridge) · `M` ≈ ~1 day (needs a new SDK method on an existing service, resolution, query-building, or is a sub-resource cmd) · `L` ≈ multi-day (new SDK service, or binary/multipart upload-download).
-
-**SDK call:** ✅ `Service.Method` exists · ⚠️ service exists but this method must be added (or surface unverified, shown as `Service?`) · ❌ no service at all (needs a new one).
+**SDK call:** ✅ `Service.Method` exists · ⚠️ service exists but this method must be added (`Service?` = surface unverified) · ❌ no service at all.
 
 | Pri | Command | HTTP | Endpoint | Effort | SDK call |
 |:--:|---|:--:|---|:--:|---|
@@ -17,9 +15,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y agents get` | GET | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Get |
 |  | `c8y agents list` | GET | `inventory/managedObjects` | S | ✅ ManagedObjects.List |
 |  | `c8y agents update` | PUT | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Update |
-|  1| `c8y alarms count` | GET | `alarm/alarms/count` | S | ✅ Alarms.Count |
-|  1| `c8y alarms deletecollection` | DELETE | `alarm/alarms` | S | ✅ Alarms.DeleteList |
-|  1| `c8y alarms updatecollection` | PUT | `alarm/alarms` | S | ✅ Alarms.UpdateList |
 |  | `c8y applications create` | POST | `/application/applications` | S | ✅ Applications.Create |
 |  | `c8y applications delete` | DELETE | `/application/applications/{id}` | S | ✅ Applications.Delete |
 |  | `c8y applications get` | GET | `/application/applications/{id}` | S | ✅ Applications.Get |
@@ -31,12 +26,12 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y configuration list` | GET | `inventory/managedObjects` | S | ✅ Repository.Configuration.List |
 |  | `c8y configuration update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Repository.Configuration.Update |
 |  | `c8y currenttenant get` | GET | `/tenant/currentTenant` | S | ✅ Tenants.Current.Get |
-|  2| `c8y devicegroups create` | POST | `inventory/managedObjects` | S | ✅ Devicegroups.Create |
-|  2| `c8y devicegroups delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ Devicegroups.Delete |
-|  2| `c8y devicegroups get` | GET | `inventory/managedObjects/{id}` | S | ✅ Devicegroups.Get |
-|  2| `c8y devicegroups list` | GET | `inventory/managedObjects` | S | ✅ Devicegroups.List |
+|  | `c8y devicegroups create` | POST | `inventory/managedObjects` | S | ✅ Devicegroups.Create |
+|  | `c8y devicegroups delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ Devicegroups.Delete |
+|  | `c8y devicegroups get` | GET | `inventory/managedObjects/{id}` | S | ✅ Devicegroups.Get |
+|  | `c8y devicegroups list` | GET | `inventory/managedObjects` | S | ✅ Devicegroups.List |
 |  | `c8y devicegroups listassets` | GET | `inventory/managedObjects/{id}/childAssets` | S | ✅ Devicegroups.List |
-|  2| `c8y devicegroups update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Devicegroups.Update |
+|  | `c8y devicegroups update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Devicegroups.Update |
 |  | `c8y deviceprofiles create` | POST | `inventory/managedObjects` | S | ✅ ManagedObjects.Create |
 |  | `c8y deviceprofiles delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Delete |
 |  | `c8y deviceprofiles get` | GET | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Get |
@@ -48,23 +43,23 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y devices listassets` | GET | `inventory/managedObjects/{id}/childAssets` | S | ✅ Devices.List |
 |  | `c8y devices listchildren` | GET | `inventory/managedObjects/{device}/childDevices` | S | ✅ Devices.List |
 |  | `c8y events deletecollection` | DELETE | `event/events` | S | ✅ Events.DeleteList |
-|  3| `c8y features delete` | DELETE | `/features/{key}/by-tenant` | S | ✅ Features.Delete |
-|  3| `c8y features disable` | PUT | `/features/{key}/by-tenant` | S | ✅ Features.Disable |
-|  3| `c8y features enable` | PUT | `/features/{key}/by-tenant` | S | ✅ Features.Enable |
-|  3| `c8y features get` | GET | `/features/{key}` | S | ✅ Features.Get |
-|  3| `c8y features list` | GET | `/features` | S | ✅ Features.List |
-|  3| `c8y features update` | PUT | `/features/{key}/by-tenant` | S | ✅ Features.Update |
+|  | `c8y features delete` | DELETE | `/features/{key}/by-tenant` | S | ✅ Features.Delete |
+|  | `c8y features disable` | PUT | `/features/{key}/by-tenant` | S | ✅ Features.Disable |
+|  | `c8y features enable` | PUT | `/features/{key}/by-tenant` | S | ✅ Features.Enable |
+|  | `c8y features get` | GET | `/features/{key}` | S | ✅ Features.Get |
+|  | `c8y features list` | GET | `/features` | S | ✅ Features.List |
+|  | `c8y features update` | PUT | `/features/{key}/by-tenant` | S | ✅ Features.Update |
 |  | `c8y firmware create` | POST | `inventory/managedObjects` | S | ✅ Repository.Firmware.Create |
 |  | `c8y firmware delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ Repository.Firmware.Delete |
 |  | `c8y firmware get` | GET | `inventory/managedObjects/{id}` | S | ✅ Repository.Firmware.Get |
 |  | `c8y firmware list` | GET | `inventory/managedObjects` | S | ✅ Repository.Firmware.List |
 |  | `c8y firmware update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Repository.Firmware.Update |
-|  1| `c8y inventory create` | POST | `inventory/managedObjects` | S | ✅ ManagedObjects.Create |
-|  1| `c8y inventory delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Delete |
-|  1| `c8y inventory findbytext` | GET | `inventory/managedObjects` | S | ✅ ManagedObjects.List |
-|  1| `c8y inventory get` | GET | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Get |
-|  1| `c8y inventory list` | GET | `inventory/managedObjects` | S | ✅ ManagedObjects.List |
-|  1| `c8y inventory update` | PUT | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Update |
+|  | `c8y inventory create` | POST | `inventory/managedObjects` | S | ✅ ManagedObjects.Create |
+|  | `c8y inventory delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Delete |
+|  | `c8y inventory findbytext` | GET | `inventory/managedObjects` | S | ✅ ManagedObjects.List |
+|  | `c8y inventory get` | GET | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Get |
+|  | `c8y inventory list` | GET | `inventory/managedObjects` | S | ✅ ManagedObjects.List |
+|  | `c8y inventory update` | PUT | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Update |
 |  | `c8y measurements deletecollection` | DELETE | `measurement/measurements` | S | ✅ Measurements.DeleteList |
 |  | `c8y measurements getseries` | GET | `measurement/measurements/series` | S | ✅ Measurements.ListSeries |
 |  | `c8y microservices delete` | DELETE | `/application/applications/{id}` | S | ✅ Microservices.Delete |
@@ -72,8 +67,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y microservices list` | GET | `/application/applications` | S | ✅ Microservices.List |
 |  | `c8y microservices update` | PUT | `/application/applications/{id}` | S | ✅ Microservices.Update |
 |  | `c8y notification2 subscriptions` | — | `— (dynamic)` | S | ✅ Notification2.List |
-|  | `c8y operations cancel` | PUT | `devicecontrol/operations/{id}` | S | ✅ Operations.Update |
-|  | `c8y operations deletecollection` | DELETE | `devicecontrol/operations` | S | ✅ Operations.DeleteList |
 |  | `c8y smartgroups create` | POST | `inventory/managedObjects` | S | ✅ ManagedObjects.Create |
 |  | `c8y smartgroups delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Delete |
 |  | `c8y smartgroups get` | GET | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Get |
