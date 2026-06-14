@@ -42,7 +42,7 @@ tests:
     exit-code: 0
     stdout:
       contains:
-        - "| input      | output     |"
+        - "| input      |     output |"
 
   It supports templates producing string output:
     command: |

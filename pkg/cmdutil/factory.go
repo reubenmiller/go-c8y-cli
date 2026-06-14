@@ -623,12 +623,6 @@ func (f *Factory) ExecuteOutputTemplate(output []byte, params OutputContext, com
 		return output, nil
 	}
 
-	outputBuilder := mapbuilder.NewInitializedMapBuilder(true)
-
-	if err := outputBuilder.AddLocalTemplateVariable("flags", commonOptions.CommandFlags); err != nil {
-		return nil, err
-	}
-
 	requestData := make(map[string]interface{})
 	responseData := make(map[string]interface{})
 
@@ -655,32 +649,11 @@ func (f *Factory) ExecuteOutputTemplate(output []byte, params OutputContext, com
 		responseData["body"] = string(output)
 	}
 
-	if err := outputBuilder.AddLocalTemplateVariable("request", requestData); err != nil {
+	tmpl, err := mapbuilder.GetOutputTemplate(commonOptions.OutputTemplate)
+	if err != nil {
 		return nil, err
 	}
-
-	if err := outputBuilder.AddLocalTemplateVariable("response", responseData); err != nil {
-		return nil, err
-	}
-
-	outputJSON := make(map[string]any)
-	if parseErr := jsonUtilities.ParseJSON(string(output), outputJSON); parseErr == nil {
-		if err := outputBuilder.AddLocalTemplateVariable("output", outputJSON); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := outputBuilder.AddLocalTemplateVariable("output", string(output)); err != nil {
-			return nil, err
-		}
-	}
-
-	outputBuilder.AppendTemplate(commonOptions.OutputTemplate)
-	out, outErr := outputBuilder.MarshalJSONWithInput(params.Input)
-
-	if outErr != nil {
-		return out, outErr
-	}
-	return out, nil
+	return tmpl.Evaluate(output, params.Input, requestData, responseData, commonOptions.CommandFlags)
 }
 
 func (f *Factory) WriteOutputWithoutPropertyGuess(output []byte, params OutputContext) error {

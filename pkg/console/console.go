@@ -13,6 +13,8 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/numbers"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/tableviewer"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/encode"
 	"github.com/tidwall/pretty"
 )
 
@@ -24,26 +26,27 @@ const DefaultSampleSize = 5
 // subscriptions) are not delayed indefinitely
 const DefaultTableFlushTimeout = 500 * time.Millisecond
 
+// DefaultTableMaxWidth table width used when the terminal width can not be detected
+const DefaultTableMaxWidth = 120
+
 // Console thread safe way to write to an output
 type Console struct {
-	mu               sync.Mutex
-	count            uint64
-	out              io.Writer
-	header           func([]string) []byte
-	samples          []string
-	sampleGroups     [][]jsonfilter.KeyGroup
-	sampleCount      int
-	sampleSize       int
-	sampleTimeout    time.Duration
-	tableBuffer      [][]byte
-	tableFlushed     bool
-	tableHeaderShown bool
-	flushTimer       *time.Timer
-	Colorized        bool
-	Compact          bool
-	Disabled         bool
-	Format           config.OutputFormat
-	TableViewer      *tableviewer.TableView
+	mu            sync.Mutex
+	count         uint64
+	out           io.Writer
+	header        func([]string) []byte
+	samples       []string
+	sampleGroups  [][]jsonfilter.KeyGroup
+	sampleCount   int
+	sampleSize    int
+	sampleTimeout time.Duration
+	flushTimer    *time.Timer
+	table         *encode.Table
+	tableOptions  TableOptions
+	Colorized     bool
+	Compact       bool
+	Disabled      bool
+	Format        config.OutputFormat
 }
 
 // TableOptions table options to control the column behaviour
@@ -80,45 +83,27 @@ type TableOptions struct {
 
 // NewConsole create a new console writer
 func NewConsole(w io.Writer, tableOptions *TableOptions, header func([]string) []byte) *Console {
-	minColumnWidth := 2
-	maxColumnWidth := 80
-	columnPadding := 15
-	minEmptyWidth := 0
-	rowMode := ""
-	sampleSize := DefaultSampleSize
-	sampleTimeout := DefaultTableFlushTimeout
-	var numberFormatter numbers.NumberFormatter
-
+	opts := TableOptions{
+		MinColumnWidth: 2,
+		MaxColumnWidth: 80,
+		ColumnPadding:  15,
+		SampleSize:     DefaultSampleSize,
+		SampleTimeout:  DefaultTableFlushTimeout,
+	}
 	if tableOptions != nil {
-		minColumnWidth = tableOptions.MinColumnWidth
-		maxColumnWidth = tableOptions.MaxColumnWidth
-		columnPadding = tableOptions.ColumnPadding
-		minEmptyWidth = tableOptions.MinEmptyValueColumnWidth
-		rowMode = tableOptions.RowMode
-		numberFormatter = tableOptions.NumberFormatter
-		if tableOptions.SampleSize > 0 {
-			sampleSize = tableOptions.SampleSize
+		opts = *tableOptions
+		if opts.SampleSize <= 0 {
+			opts.SampleSize = DefaultSampleSize
 		}
-		sampleTimeout = tableOptions.SampleTimeout
 	}
 
 	return &Console{
 		out:           w,
 		header:        header,
-		sampleSize:    sampleSize,
-		sampleTimeout: sampleTimeout,
-		TableViewer: &tableviewer.TableView{
-			Out:                      w,
-			MinColumnWidth:           minColumnWidth,
-			MaxColumnWidth:           maxColumnWidth,
-			ColumnPadding:            columnPadding,
-			MinEmptyValueColumnWidth: minEmptyWidth,
-			EnableColor:              false,
-			RowMode:                  rowMode,
-			NumberFormatter:          numberFormatter,
-			SampleSize:               sampleSize,
-		},
-		Format: config.OutputTable,
+		sampleSize:    opts.SampleSize,
+		sampleTimeout: opts.SampleTimeout,
+		tableOptions:  opts,
+		Format:        config.OutputTable,
 	}
 }
 
@@ -176,47 +161,68 @@ func (c *Console) sampleLimit() int {
 	return DefaultSampleSize
 }
 
-// renderTableRow render a single row, only including the table header if it has not been shown yet
-func (c *Console) renderTableRow(b []byte) {
-	c.TableViewer.Render(b, !c.tableHeaderShown)
-	c.tableHeaderShown = true
+// tableEngine returns the streaming table engine, creating it on first use.
+// The caller must hold the mutex
+func (c *Console) tableEngine() *encode.Table {
+	if c.table == nil {
+		maxColumnWidth := c.tableOptions.MaxColumnWidth
+		if maxColumnWidth <= 0 {
+			// no column width limit
+			maxColumnWidth = 1 << 20
+		}
+		c.table = encode.NewTableWithWriter(
+			tableviewer.NewStreamWriter(c.out, c.Colorized),
+			encode.TableOptions{
+				ColumnResolver:      c.resolveTableColumns,
+				SampleSize:          c.sampleLimit(),
+				MinColumnWidth:      c.tableOptions.MinColumnWidth,
+				MinEmptyColumnWidth: c.tableOptions.MinEmptyValueColumnWidth,
+				MaxColumnWidth:      maxColumnWidth,
+				ColumnPadding:       c.tableOptions.ColumnPadding,
+				MaxTableWidth:       tableviewer.TerminalWidth(DefaultTableMaxWidth),
+				Formatter:           tableviewer.CellFormatter(c.tableOptions.NumberFormatter),
+				Transform:           tableviewer.CellTransform(c.tableOptions.RowMode),
+			})
+	}
+	return c.table
 }
 
-// flushTable resolve the table columns from the sampled rows and render any buffered rows.
-// The caller must hold the mutex
-func (c *Console) flushTable() {
-	if c.tableFlushed {
-		return
+// resolveTableColumns resolves the table columns from the header samples
+// collected via SetHeaderFromInput. It is invoked by the table engine from
+// Write/Flush, so the caller already holds the mutex
+func (c *Console) resolveTableColumns() []string {
+	if cols := jsonfilter.MergeKeyGroups(c.sampleGroups); len(cols) > 0 {
+		return cols
 	}
-	c.tableFlushed = true
+	if len(c.samples) > 0 {
+		return strings.Split(c.samples[0], ",")
+	}
+	return nil
+}
+
+// flushSample renders any rows buffered by the table engine's sample window
+// without closing the table, so streamed output is not delayed indefinitely
+func (c *Console) flushSample() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.table != nil {
+		_ = c.table.Flush()
+	}
+}
+
+// Flush renders any buffered table output and finalizes the table. It should
+// be called once no more output is expected (e.g. at the end of a command)
+func (c *Console) Flush() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if c.flushTimer != nil {
 		c.flushTimer.Stop()
 		c.flushTimer = nil
 	}
-
-	if len(c.TableViewer.Columns) == 0 {
-		if cols := jsonfilter.MergeKeyGroups(c.sampleGroups); len(cols) > 0 {
-			c.TableViewer.Columns = cols
-		} else if len(c.samples) > 0 {
-			c.TableViewer.Columns = strings.Split(c.samples[0], ",")
-		}
+	if c.table != nil {
+		_ = c.table.Close()
+		c.table = nil
 	}
-
-	// resolve the column widths from all of the sampled rows (not just the first row)
-	c.TableViewer.SampleColumnWidths(c.tableBuffer)
-
-	for _, row := range c.tableBuffer {
-		c.renderTableRow(row)
-	}
-	c.tableBuffer = nil
-}
-
-// Flush render any buffered table output. It should be called once
-// no more output is expected (e.g. at the end of a command)
-func (c *Console) Flush() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.flushTable()
 }
 
 // Printf mimics fmt.Printf
@@ -240,30 +246,24 @@ func (c *Console) Write(b []byte) (n int, err error) {
 		fmt.Fprintf(c.out, "%s", c.header(c.samples))
 	}
 	c.count++
-	c.TableViewer.EnableColor = c.Colorized
 
 	if bt := bytes.TrimSpace(b); c.IsJSON() && (jsonUtilities.IsJSONArray(bt) || jsonUtilities.IsJSONObject(bt)) {
 
 		switch c.Format {
 		case config.OutputTable:
-			if !c.tableFlushed {
-				// Buffer the first rows so the table columns can be resolved
-				// against multiple rows instead of just the first one, as the
-				// first row may not contain all of the selected fragments
-				row := make([]byte, len(b))
-				copy(row, b)
-				c.tableBuffer = append(c.tableBuffer, row)
-				if len(c.tableBuffer) >= c.sampleLimit() {
-					c.flushTable()
-				} else if c.flushTimer == nil && c.sampleTimeout > 0 {
-					// don't delay streamed output indefinitely (e.g. realtime subscriptions)
-					c.flushTimer = time.AfterFunc(c.sampleTimeout, func() {
-						c.Flush()
-					})
+			table := c.tableEngine()
+			// The table engine buffers documents while sampling, so the
+			// rows must not reference the caller's buffer
+			doc := jsondoc.New(bytes.Clone(bt))
+			for d := range doc.Iter() {
+				if err := table.Write(d); err != nil {
+					return 0, err
 				}
-				return 0, nil
 			}
-			c.renderTableRow(b)
+			// Don't delay streamed output indefinitely (e.g. realtime subscriptions)
+			if c.flushTimer == nil && c.sampleTimeout > 0 {
+				c.flushTimer = time.AfterFunc(c.sampleTimeout, c.flushSample)
+			}
 			return 0, nil
 		}
 

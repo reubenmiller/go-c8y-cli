@@ -18,13 +18,12 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/google/go-jsonnet"
 	"github.com/google/go-jsonnet/ast"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flatten"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/randdata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/shape"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"go.uber.org/zap/zapcore"
@@ -369,11 +368,11 @@ func registerNativeFunctions(vm *jsonnet.VM) {
 				return parameters[0], fmt.Errorf("no select values provided")
 			}
 
-			flatMap, flatKeys, _, err := jsonfilter.FilterPropertyByWildcard(string(jsonB), "", patterns, false)
+			sel, err := shape.NewSelector(patterns...).Apply(jsonB)
 			if err != nil {
 				return nil, err
 			}
-			outB, err := flatten.UnflattenOrdered(flatMap, flatKeys)
+			outB, err := sel.JSON()
 			if err != nil {
 				return nil, err
 			}
@@ -442,13 +441,8 @@ func getParameter(parameters []interface{}, i int) any {
 	return nil
 }
 
-func evaluateJsonnet(imports string, snippets ...string) (string, error) {
-	// Create a JSonnet VM
-	vm := jsonnet.MakeVM()
-	registerNativeFunctions(vm)
-
-	// Add functions via jsonnet object
-	localFunctions := heredoc.Doc(`
+// localFunctions is the jsonnet helper library bound as `_` in templates
+var localFunctions = heredoc.Doc(`
 	{
 		Name(prefix='',postfix=''):: std.native("Name")(prefix,postfix),
 		GetURLPath(url):: std.native("GetURLPath")(url),
@@ -553,6 +547,11 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		ReplacePattern(x, from, to):: std.native('ReplacePattern')(x, from, to),
 		Select(o, properties=['*']):: std.native('Select')(o, properties),
 	}`)
+
+func evaluateJsonnet(imports string, snippets ...string) (string, error) {
+	// Create a JSonnet VM
+	vm := jsonnet.MakeVM()
+	registerNativeFunctions(vm)
 
 	jsonnetImport := fmt.Sprintf("\nlocal _ = %s; %s", localFunctions, imports)
 

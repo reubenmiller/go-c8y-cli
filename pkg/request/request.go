@@ -687,13 +687,6 @@ func FlattenArrayMap[K string, V []string](m map[K]V) map[K]any {
 }
 
 func ExecuteTemplate(responseText []byte, resp *http.Response, input any, commonOptions config.CommonCommandOptions, duration time.Duration) ([]byte, error) {
-
-	outputBuilder := mapbuilder.NewInitializedMapBuilder(true)
-
-	if err := outputBuilder.AddLocalTemplateVariable("flags", commonOptions.CommandFlags); err != nil {
-		return nil, err
-	}
-
 	requestData := make(map[string]interface{})
 	requestData["path"] = resp.Request.URL.Path
 	requestData["pathEncoded"] = strings.Replace(resp.Request.URL.String(), resp.Request.URL.Scheme+"://"+resp.Request.URL.Host, "", 1)
@@ -703,9 +696,6 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 	requestData["queryParams"] = FlattenArrayMap(resp.Request.URL.Query())
 	requestData["method"] = resp.Request.Method
 	// requestData["header"] = resp.Response.Request.Header
-	if err := outputBuilder.AddLocalTemplateVariable("request", requestData); err != nil {
-		return nil, err
-	}
 
 	// TODO: Add a response variable to included the status code, content type,
 	responseData := make(map[string]interface{})
@@ -717,21 +707,12 @@ func ExecuteTemplate(responseText []byte, resp *http.Response, input any, common
 	responseData["header"] = FlattenArrayMap(resp.Header)
 	responseData["proto"] = resp.Proto
 	responseData["body"] = string(responseText)
-	if err := outputBuilder.AddLocalTemplateVariable("response", responseData); err != nil {
+
+	tmpl, err := mapbuilder.GetOutputTemplate(commonOptions.OutputTemplate)
+	if err != nil {
 		return nil, err
 	}
-
-	if err := outputBuilder.AddLocalTemplateVariable("output", string(responseText)); err != nil {
-		return nil, err
-	}
-
-	outputBuilder.AppendTemplate(commonOptions.OutputTemplate)
-	out, outErr := outputBuilder.MarshalJSONWithInput(input)
-
-	if outErr != nil {
-		return out, outErr
-	}
-	return out, nil
+	return tmpl.Evaluate(responseText, input, requestData, responseData, commonOptions.CommandFlags)
 }
 
 func printResponseSize(l *logger.Logger, resp *c8y.Response) {
