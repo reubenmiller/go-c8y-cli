@@ -132,6 +132,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -541,8 +542,80 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// Handle errors (not in cobra library)
 	cmd.SilenceErrors = true
 
+	// Hide global flags from subcommands where applicable
+	hideGlobalFlags(cmd)
+
 	ccmd.Command = cmd
 	return ccmd
+}
+
+// hideGlobalFlags recursively hides global flags from all commands
+// Global flags are hidden in the following cases:
+// - Command groups (commands with subcommands) - always hidden
+// - Script commands (DisableFlagParsing == true) - always hidden
+// - Regular commands - hidden when C8Y_HELP_SKIP_GLOBAL_FLAGS env var is set
+func hideGlobalFlags(cmd *cobra.Command) {
+	// Apply to all child commands recursively
+	for _, child := range cmd.Commands() {
+		// Save the original help and usage functions
+		originalHelpFunc := child.HelpFunc()
+		originalUsageFunc := child.UsageFunc()
+
+		// Create a helper function to hide/unhide flags
+		hideGlobalFlags := func(command *cobra.Command) (unhide func()) {
+			shouldHide := false
+
+			if command.HasSubCommands() {
+				// Command group - always hide global flags
+				shouldHide = true
+			} else if command.DisableFlagParsing {
+				// Script extension - always hide global flags
+				shouldHide = true
+			} else {
+				// Regular command - check environment variable
+				shouldHide = os.Getenv("C8Y_HELP_SKIP_GLOBAL_FLAGS") != ""
+			}
+
+			if !shouldHide {
+				return func() {}
+			}
+
+			// Store original Hidden state of each inherited flag
+			originalState := make(map[string]bool)
+
+			// Hide all inherited flags (these come from parent's PersistentFlags)
+			command.InheritedFlags().VisitAll(func(flag *pflag.Flag) {
+				originalState[flag.Name] = flag.Hidden
+				flag.Hidden = true
+			})
+
+			// Return a function to restore original state
+			return func() {
+				command.InheritedFlags().VisitAll(func(flag *pflag.Flag) {
+					if originalHidden, exists := originalState[flag.Name]; exists {
+						flag.Hidden = originalHidden
+					}
+				})
+			}
+		}
+
+		// Override help function
+		child.SetHelpFunc(func(command *cobra.Command, args []string) {
+			unhide := hideGlobalFlags(command)
+			defer unhide()
+			originalHelpFunc(command, args)
+		})
+
+		// Override usage function
+		child.SetUsageFunc(func(command *cobra.Command) error {
+			unhide := hideGlobalFlags(command)
+			defer unhide()
+			return originalUsageFunc(command)
+		})
+
+		// Recursively apply to nested commands
+		hideGlobalFlags(child)
+	}
 }
 
 func isTabCompletionCommand() bool {
