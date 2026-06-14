@@ -55,11 +55,14 @@ func NewRenderer(out io.Writer, cfg *config.Config) (output.Renderer, error) {
 	var r output.Renderer
 	switch cfg.GetOutputFormat() {
 	case config.OutputCSV:
-		r = encode.NewCSV(out, encode.CSVOptions{})
+		// AutoFlush: terminal output is streamed, so each row must appear as it
+		// is produced (items may arrive seconds apart) rather than being held in
+		// csv.Writer's buffer until Close — matching the json/table sinks.
+		r = encode.NewCSV(out, encode.CSVOptions{AutoFlush: true})
 	case config.OutputCSVWithHeader:
-		r = encode.NewCSV(out, encode.CSVOptions{Header: true})
+		r = encode.NewCSV(out, encode.CSVOptions{Header: true, AutoFlush: true})
 	case config.OutputTSV:
-		r = encode.NewTSV(out, encode.CSVOptions{})
+		r = encode.NewTSV(out, encode.CSVOptions{AutoFlush: true})
 	default:
 		// json, serverresponse and table
 		r = newConsoleRenderer(out, cfg)
