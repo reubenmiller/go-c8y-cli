@@ -1,3 +1,7 @@
+// Package identity wires the `c8y identity` command and its subcommands. Every
+// subcommand (list/get/create/delete) is a hand-written v2 c8ystream command, so
+// this group command is itself hand-written rather than generated from the API
+// spec.
 package identity
 
 import (
@@ -10,10 +14,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// SubCmdIdentity is the `identity` group command.
 type SubCmdIdentity struct {
 	*subcommand.SubCommand
 }
 
+// NewSubCommand builds the `identity` group command and attaches its
+// subcommands.
 func NewSubCommand(f *cmdutil.Factory) *SubCmdIdentity {
 	ccmd := &SubCmdIdentity{}
 
