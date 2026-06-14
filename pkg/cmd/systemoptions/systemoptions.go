@@ -1,3 +1,6 @@
+// Package systemoptions wires the `c8y systemoptions` command and its
+// subcommands (list/get). Both are hand-written v2 c8ystream commands, so this
+// group command is itself hand-written rather than generated.
 package systemoptions
 
 import (
@@ -8,17 +11,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// SubCmdSystemoptions is the `systemoptions` group command.
 type SubCmdSystemoptions struct {
 	*subcommand.SubCommand
 }
 
+// NewSubCommand builds the `systemoptions` group command and attaches its
+// subcommands.
 func NewSubCommand(f *cmdutil.Factory) *SubCmdSystemoptions {
 	ccmd := &SubCmdSystemoptions{}
 
 	cmd := &cobra.Command{
 		Use:   "systemoptions",
-		Short: "Cumulocity systemOptions",
-		Long:  `REST endpoint to interact with Cumulocity systemOptions`,
+		Short: "Cumulocity system options",
+		Long:  `REST endpoint to interact with Cumulocity system options`,
 	}
 
 	// Subcommands
