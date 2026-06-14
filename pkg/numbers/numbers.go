@@ -1,10 +1,6 @@
 package numbers
 
-import (
-	"encoding/json"
-
-	"github.com/dustin/go-humanize"
-)
+import "github.com/dustin/go-humanize"
 
 type NumberFormatter interface {
 	Display(float64, string, string) string
@@ -13,13 +9,11 @@ type NumberFormatter interface {
 type RawNumber struct{}
 
 func (rawNum *RawNumber) Display(v float64, raw string, unit string) string {
-	// Normalise the number the same way the v1 output path did (it decoded
-	// and re-marshalled JSON before rendering), so e.g. 0.000000000001 is
-	// shown as 1e-12 regardless of how it was written in the source document.
-	// The raw text is preserved as a fallback for values json cannot encode.
-	if b, err := json.Marshal(v); err == nil {
-		return string(b)
-	}
+	// "none" formatting shows the number exactly as it appeared in the source
+	// document: 0.000000000001 stays 0.000000000001, not 1e-12. raw is the
+	// original JSON token (node.Raw), so re-marshalling the parsed float — which
+	// would switch large/small magnitudes to scientific notation — must be
+	// avoided.
 	return raw
 }
 

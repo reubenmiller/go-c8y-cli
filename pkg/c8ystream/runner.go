@@ -47,6 +47,7 @@ type Runner struct {
 	query       *flags.QueryTemplate
 	body        *mapbuilder.MapBuilder
 	runCtx      context.Context // set in Run; exposed to Build via Resolver.Context
+	submission  *submission     // confirmation + delays; nil when neither applies
 	index       int64
 }
 
@@ -174,7 +175,7 @@ func (r *Runner) Client() (*apiv2.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return apiv2.NewClient(apiv2.ClientOptions{
+	client := apiv2.NewClient(apiv2.ClientOptions{
 		BaseURL: legacy.BaseURL.String(),
 		Auth: authentication.AuthOptions{
 			Tenant:   legacy.TenantName,
@@ -183,7 +184,11 @@ func (r *Runner) Client() (*apiv2.Client, error) {
 			Token:    legacy.Token,
 		},
 		Debug: r.Config.Verbose() || r.Config.Debug(),
-	}), nil
+	})
+	if err := r.installActivityLog(client); err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
 // Run drains the input one item at a time, calls build to assemble each
@@ -208,13 +213,26 @@ func (r *Runner) Run(build Build) error {
 		}
 		ctx = ctxhelpers.WithDryRunHandler(ctx, handler)
 	}
-	ctx = WithProcessingMode(ctx, r.Cmd)
+	ctx = WithProcessingMode(ctx, r.Cmd, cfg)
+
+	// Confirmation + delays live on the submission, shared across items and
+	// carried via context to the per-item Submit calls. Built once here so the
+	// prompt counter and "all" answers span the whole batch.
+	r.submission = r.newSubmission()
+	ctx = withSubmission(ctx, r.submission)
+
 	r.runCtx = ctx
 
 	collector := &ErrorCollector{Max: cfg.AbortOnErrorCount()}
 	stages, err := CommonStages(cfg)
 	if err != nil {
 		return err
+	}
+	// --view: when the user didn't select columns, restrict the documents to
+	// the detected/named view's columns (no-op for --view off / the non-TTY
+	// default), matching the v1 output path.
+	if vs := r.viewStage(); vs != nil {
+		stages = append(stages, vs)
 	}
 	renderer, err := NewRenderer(r.Cmd.OutOrStdout(), cfg)
 	if err != nil {
@@ -225,6 +243,12 @@ func (r *Runner) Run(build Build) error {
 	// single consuming goroutine, so the bar needs no locking).
 	progress := newProgress(r.Factory.IOStreams.ErrOut, cfg.ShowProgress())
 	pipeline := []output.Stage{collector.Stage()}
+	// --outputFileRaw tees the unshaped document to disk, so it runs before the
+	// filter/template/select stages (it sees what the server returned, not the
+	// rendered shape), matching v1.
+	if rawPath := cfg.GetOutputFileRaw(); rawPath != "" {
+		pipeline = append(pipeline, rawFileStage(rawPath))
+	}
 	if progress != nil {
 		pipeline = append(pipeline, progress.stage())
 	}
@@ -237,7 +261,16 @@ func (r *Runner) Run(build Build) error {
 	if err != nil {
 		return err
 	}
-	return collector.Err()
+	// Convert the collected item errors to a status-aware CommandError, then run
+	// it through the standard post-command handling so --silentStatusCodes,
+	// --silentExit and error printing behave exactly as on the v1 worker path.
+	// Skip it entirely on success — CheckPostCommandError treats a nil error as
+	// an unexpected one and would print a spurious message.
+	finalErr := r.collapseErrors(collector.Errors)
+	if finalErr == nil {
+		return nil
+	}
+	return r.Factory.CheckPostCommandError(finalErr)
 }
 
 // producer drains one input item, resolves it into a Call via build, and
@@ -261,9 +294,13 @@ func (r *Runner) producer(build Build) Producer {
 		if err != nil {
 			return nil, err
 		}
-		return func(ctx context.Context) output.Seq {
+		job := Job(func(ctx context.Context) output.Seq {
 			return call(ctx)
-		}, nil
+		})
+		if r.submission != nil {
+			job = r.submission.withDelays(job)
+		}
+		return job, nil
 	})
 
 	if r.driver != nil {

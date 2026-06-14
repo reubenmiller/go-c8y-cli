@@ -254,6 +254,18 @@ var httpStatusCodeToExitCode = map[int]ExitCode{
 	508: ExitLoopDetected508,
 }
 
+// ExitCodeFromStatusCode maps an HTTP status code to the corresponding CLI
+// exit code, returning ExitUnknownError when the status is not specifically
+// mapped. Exposed so callers that already hold the status (e.g. the v2
+// streaming path, whose error type carries the code directly rather than a
+// *c8y.Response) can build a CommandError with the right exit code.
+func ExitCodeFromStatusCode(statusCode int) ExitCode {
+	if v, ok := httpStatusCodeToExitCode[statusCode]; ok {
+		return v
+	}
+	return ExitUnknownError
+}
+
 // NewServerError creates a server error from a Cumulocity response
 func NewServerError(r *c8y.Response, err error, iostream *iostreams.IOStreams, withRawMessage bool) CommandError {
 	cmdError := CommandError{
