@@ -1,3 +1,8 @@
+// Package alarms wires the `c8y alarms` command and its spec-derived
+// subcommands. Every one is a hand-written v2 c8ystream command, so this group
+// command is itself hand-written rather than generated. The CLI-only alarms
+// subcommands (subscribe/assert) are attached on top of this command in
+// pkg/cmd/root.
 package alarms
 
 import (
@@ -13,10 +18,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// SubCmdAlarms is the `alarms` group command.
 type SubCmdAlarms struct {
 	*subcommand.SubCommand
 }
 
+// NewSubCommand builds the `alarms` group command and attaches its spec-derived
+// subcommands.
 func NewSubCommand(f *cmdutil.Factory) *SubCmdAlarms {
 	ccmd := &SubCmdAlarms{}
 
