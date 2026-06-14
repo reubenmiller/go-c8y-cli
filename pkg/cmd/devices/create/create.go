@@ -69,6 +69,8 @@ Create two devices (concurrently), binding each piped line to the name
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("name", "name", false, "name"),
+		flags.WithPowershellName("New-Device"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.customDevice+json", ""),
 	)
 
 	// Required flags

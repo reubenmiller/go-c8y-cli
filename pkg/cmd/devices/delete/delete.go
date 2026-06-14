@@ -65,6 +65,7 @@ Delete each piped device concurrently
 		flags.WithProcessingMode(),
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPowershellName("Remove-Device"),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)

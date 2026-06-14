@@ -69,6 +69,8 @@ Update all piped devices concurrently
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPowershellName("Update-Device"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.customDevice+json", ""),
 	)
 
 	// Required flags

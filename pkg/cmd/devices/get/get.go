@@ -69,6 +69,8 @@ Get each piped device
 		cmd,
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPowershellName("Get-Device"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.customDevice+json", ""),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)

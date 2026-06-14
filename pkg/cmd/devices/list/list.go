@@ -96,6 +96,8 @@ Bind several filters to properties of the same piped object
 		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
 
 		flags.WithCollectionProperty("managedObjects"),
+		flags.WithPowershellName("Get-DeviceCollection"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.managedobjectcollection+json", "application/vnd.com.nsn.cumulocity.customDevice+json"),
 	)
 
 	// Required flags
