@@ -106,7 +106,18 @@ func (in *Resolver) TimeValue(flag string) time.Time {
 // machinery (--data/--template/typed flags), then this resolves the device
 // reference the body carries before the raw create call.
 func (in *Resolver) ResolveSourceID(body []byte, resolve func(context.Context, string) (string, error)) (json.RawMessage, error) {
-	ref := gjson.GetBytes(body, "source.id").String()
+	return in.ResolveBodyRef(body, "source.id", resolve)
+}
+
+// ResolveBodyRef resolves a device reference held at the given JSON path in the
+// body (name -> id; plain ids pass through) using resolve, returning the body
+// with that path replaced. A missing/empty value at path leaves the body
+// unchanged. Use it for resources whose device reference is not at source.id
+// (e.g. operations: deviceId / agentId). Call once per reference; the result
+// chains (each call takes and returns the body). Runs under ResolveContext so it
+// hits the real API even under --dry.
+func (in *Resolver) ResolveBodyRef(body []byte, path string, resolve func(context.Context, string) (string, error)) (json.RawMessage, error) {
+	ref := gjson.GetBytes(body, path).String()
 	if ref == "" {
 		return json.RawMessage(body), nil
 	}
@@ -117,7 +128,7 @@ func (in *Resolver) ResolveSourceID(body []byte, resolve func(context.Context, s
 	if id == ref {
 		return json.RawMessage(body), nil // plain id passed through unchanged
 	}
-	out, err := sjson.SetBytes(body, "source.id", id)
+	out, err := sjson.SetBytes(body, path, id)
 	if err != nil {
 		return nil, err
 	}
