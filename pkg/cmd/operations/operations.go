@@ -1,3 +1,8 @@
+// Package operations wires the `c8y operations` command and its spec-derived
+// subcommands (list/get/create/update/cancel/deleteCollection). Every one is a
+// hand-written v2 c8ystream command, so this group command is itself
+// hand-written rather than generated. The CLI-only operations subcommands
+// (subscribe/wait/assert) are attached on top of this command in pkg/cmd/root.
 package operations
 
 import (
@@ -12,10 +17,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// SubCmdOperations is the `operations` group command.
 type SubCmdOperations struct {
 	*subcommand.SubCommand
 }
 
+// NewSubCommand builds the `operations` group command and attaches its
+// spec-derived subcommands.
 func NewSubCommand(f *cmdutil.Factory) *SubCmdOperations {
 	ccmd := &SubCmdOperations{}
 
