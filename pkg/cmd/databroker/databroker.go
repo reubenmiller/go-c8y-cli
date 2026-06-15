@@ -1,3 +1,6 @@
+// Package databroker wires the `c8y databroker` command and its subcommands
+// (list/get/update). All are hand-written v2 c8ystream commands, so this group
+// command is itself hand-written rather than generated.
 package databroker
 
 import (
@@ -19,7 +22,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdDatabroker {
 	cmd := &cobra.Command{
 		Use:   "databroker",
 		Short: "Cumulocity databroker",
-		Long:  `REST endpoint to interact with Cumulocity databroker`,
+		Long:  `REST endpoint to interact with Cumulocity data broker connectors`,
 	}
 
 	// Subcommands
