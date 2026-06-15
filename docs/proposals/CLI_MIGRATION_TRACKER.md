@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 128.**  Effort — S:63 · M:52 · L:13.  SDK call — ✅ ready:63 · ⚠️ service-exists-method-missing:56 · ❌ no-service:9.
+**Remaining commands: 122.**  Effort — S:58 · M:51 · L:13.  SDK call — ✅ ready:58 · ⚠️ service-exists-method-missing:55 · ❌ no-service:9.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -57,11 +57,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y software get` | GET | `inventory/managedObjects/{id}` | S | ✅ Repository.Software.Get |
 |  | `c8y software list` | GET | `inventory/managedObjects` | S | ✅ Repository.Software.List |
 |  | `c8y software update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Repository.Software.Update |
-|  | `c8y usergroups create` | POST | `/user/{tenant}/groups` | S | ✅ Usergroups.Create |
-|  | `c8y usergroups delete` | DELETE | `/user/{tenant}/groups/{id}` | S | ✅ Usergroups.Delete |
-|  | `c8y usergroups get` | GET | `/user/{tenant}/groups/{id}` | S | ✅ Usergroups.Get |
-|  | `c8y usergroups list` | GET | `/user/{tenant}/groups` | S | ✅ Usergroups.List |
-|  | `c8y usergroups update` | PUT | `/user/{tenant}/groups/{id}` | S | ✅ Usergroups.Update |
 |  | `c8y users create` | POST | `user/{tenant}/users` | S | ✅ Users.Create |
 |  | `c8y users delete` | DELETE | `user/{tenant}/users/{id}` | S | ✅ Users.Delete |
 |  | `c8y users get` | GET | `user/{tenant}/users/{id}` | S | ✅ Users.Get |
@@ -115,7 +110,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y tenants enable` | PUT | `/tenant/tenants/{id}` | M | ⚠️ Tenants +method |
 |  | `c8y tenants enableapplication` | POST | `/tenant/tenants/{tenant}/applications` | M | ⚠️ Tenants +method |
 |  | `c8y ui plugins` | — | `— (dynamic)` | M | ⚠️ UIPlugins? |
-|  | `c8y usergroups getbyname` | GET | `/user/{tenant}/groupByName/{name}` | M | ⚠️ Usergroups +method |
 |  | `c8y userreferences addusertogroup` | POST | `/user/{tenant}/groups/{group}/users` | M | ⚠️ Users +method |
 |  | `c8y userreferences deleteuserfromgroup` | DELETE | `/user/{tenant}/groups/{group}/users/{user}` | M | ⚠️ Users +method |
 |  | `c8y userreferences listgroupmembership` | GET | `/user/{tenant}/groups/{id}/users` | M | ⚠️ Users +method |
