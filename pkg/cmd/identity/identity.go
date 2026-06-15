@@ -1,12 +1,13 @@
 // Package identity wires the `c8y identity` command and its subcommands. Every
-// subcommand (list/get/create/delete) is a hand-written v2 c8ystream command, so
-// this group command is itself hand-written rather than generated from the API
-// spec.
+// subcommand (list/get/create/delete/find) is a hand-written v2 c8ystream
+// command, so this group command is itself hand-written rather than generated
+// from the API spec.
 package identity
 
 import (
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity/create"
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity/delete"
+	cmdFind "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity/find"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity/get"
 	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity/list"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
@@ -35,6 +36,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdIdentity {
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
 	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
+	cmd.AddCommand(cmdFind.NewFindCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
