@@ -71,6 +71,32 @@ func FromResult[T jsondoc.Unwrapper](res op.Result[T]) output.Seq {
 	}
 }
 
+// FromResponse adapts a typed service result by rendering its raw response body
+// exactly as received from the server (op.Result.Response), without plucking the
+// collection items into Data. Use this for endpoints backed by a collection call
+// whose CLI output must be kept as-is — the spec's collectionProperty "-" — such
+// as the application get-by-version/tag endpoints, which the server may answer
+// with either the whole collection envelope or a single object. Falls back to
+// Data when the raw body was not retained (single-object Execute results), and
+// yields nothing under dry run (the request is rendered by the dry-run handler).
+func FromResponse[T jsondoc.Unwrapper](res op.Result[T]) output.Seq {
+	return func(yield func(jsondoc.JSONDoc, error) bool) {
+		if res.Err != nil {
+			yield(jsondoc.Empty(), res.Err)
+			return
+		}
+		if len(res.Response) > 0 {
+			yield(jsondoc.New(res.Response), nil)
+			return
+		}
+		doc := res.Data.GetJSONDoc()
+		if len(doc.Raw()) == 0 {
+			return
+		}
+		yield(doc, nil)
+	}
+}
+
 // FromStatus adapts a result with no renderable body (e.g. Delete returning
 // core.NoContent): it surfaces an error, and yields nothing on success.
 func FromStatus[T any](res op.Result[T]) output.Seq {

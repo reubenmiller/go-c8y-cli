@@ -1,3 +1,7 @@
+// Package versions wires the `c8y applications versions` command and its
+// subcommands. All subcommands are hand-written v2 c8ystream commands (backed by
+// the go-c8y v2 ApplicationVersions service), so this group command is itself
+// hand-written rather than generated.
 package versions
 
 import (
