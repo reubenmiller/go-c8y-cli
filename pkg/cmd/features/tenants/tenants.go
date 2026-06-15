@@ -1,3 +1,7 @@
+// Package tenants wires the `c8y features tenants` command and its subcommands
+// (list/enable/disable/update/delete). All are hand-written v2 c8ystream commands
+// (backed by the go-c8y v2 Features.Tenants service), so this group command is
+// itself hand-written rather than generated.
 package tenants
 
 import (

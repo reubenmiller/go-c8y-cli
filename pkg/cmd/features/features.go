@@ -1,3 +1,7 @@
+// Package features wires the `c8y features` command and its subcommands. All
+// subcommands (the toggles here plus the tenants subgroup attached in
+// root.go) are hand-written v2 c8ystream commands, so this group command is
+// itself hand-written rather than generated.
 package features
 
 import (
