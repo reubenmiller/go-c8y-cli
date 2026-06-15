@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 172.**  Effort — S:91 · M:68 · L:13.  SDK call — ✅ ready:96 · ⚠️ service-exists-method-missing:59 · ❌ no-service:17.
+**Remaining commands: 154.**  Effort — S:73 · M:68 · L:13.  SDK call — ✅ ready:78 · ⚠️ service-exists-method-missing:59 · ❌ no-service:17.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -25,7 +25,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y configuration get` | GET | `inventory/managedObjects/{id}` | S | ✅ Repository.Configuration.Get |
 |  | `c8y configuration list` | GET | `inventory/managedObjects` | S | ✅ Repository.Configuration.List |
 |  | `c8y configuration update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Repository.Configuration.Update |
-|  | `c8y currenttenant get` | GET | `/tenant/currentTenant` | S | ✅ Tenants.Current.Get |
 |  | `c8y devicegroups create` | POST | `inventory/managedObjects` | S | ✅ Devicegroups.Create |
 |  | `c8y devicegroups delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ Devicegroups.Delete |
 |  | `c8y devicegroups get` | GET | `inventory/managedObjects/{id}` | S | ✅ Devicegroups.Get |
@@ -42,12 +41,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y devices getsupportedseries` | GET | `inventory/managedObjects/{device}/supportedSeries` | S | ✅ Devices.ListSupportedSeries |
 |  | `c8y devices listassets` | GET | `inventory/managedObjects/{id}/childAssets` | S | ✅ Devices.List |
 |  | `c8y devices listchildren` | GET | `inventory/managedObjects/{device}/childDevices` | S | ✅ Devices.List |
-|  | `c8y features delete` | DELETE | `/features/{key}/by-tenant` | S | ✅ Features.Delete |
-|  | `c8y features disable` | PUT | `/features/{key}/by-tenant` | S | ✅ Features.Disable |
-|  | `c8y features enable` | PUT | `/features/{key}/by-tenant` | S | ✅ Features.Enable |
-|  | `c8y features get` | GET | `/features/{key}` | S | ✅ Features.Get |
-|  | `c8y features list` | GET | `/features` | S | ✅ Features.List |
-|  | `c8y features update` | PUT | `/features/{key}/by-tenant` | S | ✅ Features.Update |
 |  | `c8y firmware create` | POST | `inventory/managedObjects` | S | ✅ Repository.Firmware.Create |
 |  | `c8y firmware delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ Repository.Firmware.Delete |
 |  | `c8y firmware get` | GET | `inventory/managedObjects/{id}` | S | ✅ Repository.Firmware.Get |
@@ -74,22 +67,11 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y software get` | GET | `inventory/managedObjects/{id}` | S | ✅ Repository.Software.Get |
 |  | `c8y software list` | GET | `inventory/managedObjects` | S | ✅ Repository.Software.List |
 |  | `c8y software update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Repository.Software.Update |
-|  | `c8y tenantoptions create` | POST | `/tenant/options` | S | ✅ Tenants.Options.Create |
-|  | `c8y tenantoptions delete` | DELETE | `/tenant/options/{category}/{key}` | S | ✅ Tenants.Options.Delete |
-|  | `c8y tenantoptions get` | GET | `/tenant/options/{category}/{key}` | S | ✅ Tenants.Options.Get |
-|  | `c8y tenantoptions getforcategory` | GET | `/tenant/options/{category}` | S | ✅ Tenants.Options.ListByCategory |
-|  | `c8y tenantoptions list` | GET | `/tenant/options` | S | ✅ Tenants.Options.List |
-|  | `c8y tenantoptions update` | PUT | `/tenant/options/{category}/{key}` | S | ✅ Tenants.Options.Update |
-|  | `c8y tenantoptions updatebulk` | PUT | `/tenant/options/{category}` | S | ✅ Tenants.Options.UpdateByCategory |
-|  | `c8y tenantoptions updateedit` | PUT | `/tenant/options/{category}/{key}/editable` | S | ✅ Tenants.Options.UpdateEditableFlag |
-|  | `c8y tenants listreferences` | GET | `/tenant/tenants/{tenant}/applications` | S | ✅ Tenants.ListApplicationReferences |
-|  | `c8y tenants tfa` | — | `— (dynamic)` | S | ✅ Tenants.GetTFA |
 |  | `c8y usergroups create` | POST | `/user/{tenant}/groups` | S | ✅ Usergroups.Create |
 |  | `c8y usergroups delete` | DELETE | `/user/{tenant}/groups/{id}` | S | ✅ Usergroups.Delete |
 |  | `c8y usergroups get` | GET | `/user/{tenant}/groups/{id}` | S | ✅ Usergroups.Get |
 |  | `c8y usergroups list` | GET | `/user/{tenant}/groups` | S | ✅ Usergroups.List |
 |  | `c8y usergroups update` | PUT | `/user/{tenant}/groups/{id}` | S | ✅ Usergroups.Update |
-|  | `c8y userroles list` | GET | `/user/roles` | S | ✅ Userroles.List |
 |  | `c8y users create` | POST | `user/{tenant}/users` | S | ✅ Users.Create |
 |  | `c8y users delete` | DELETE | `user/{tenant}/users/{id}` | S | ✅ Users.Delete |
 |  | `c8y users get` | GET | `user/{tenant}/users/{id}` | S | ✅ Users.Get |
