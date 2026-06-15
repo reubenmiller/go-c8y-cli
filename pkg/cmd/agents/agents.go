@@ -1,3 +1,7 @@
+// Package agents wires the `c8y agents` command and its subcommands. All
+// subcommands are hand-written v2 c8ystream commands (backed by the go-c8y v2
+// Agents service), so this group command is itself hand-written rather than
+// generated.
 package agents
 
 import (
