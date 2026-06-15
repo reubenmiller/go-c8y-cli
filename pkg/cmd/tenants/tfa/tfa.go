@@ -1,3 +1,6 @@
+// Package tfa wires the `c8y tenants tfa` command and its subcommands
+// (get/update). Both are hand-written v2 c8ystream commands, so this group
+// command is itself hand-written rather than generated.
 package tfa
 
 import (
