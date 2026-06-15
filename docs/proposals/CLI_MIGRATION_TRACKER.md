@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 142.**  Effort — S:68 · M:61 · L:13.  SDK call — ✅ ready:68 · ⚠️ service-exists-method-missing:57 · ❌ no-service:17.
+**Remaining commands: 139.**  Effort — S:68 · M:58 · L:13.  SDK call — ✅ ready:68 · ⚠️ service-exists-method-missing:57 · ❌ no-service:14.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -86,9 +86,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y currentapplication get` | GET | `/application/currentApplication` | M | ❌ none |
 |  | `c8y currentapplication listsubscriptions` | GET | `/application/currentApplication/subscriptions` | M | ❌ none |
 |  | `c8y currentapplication update` | PUT | `/application/currentApplication` | M | ❌ none |
-|  | `c8y currentuser get` | GET | `/user/currentUser` | M | ❌ none |
-|  | `c8y currentuser logout` | POST | `/user/logout` | M | ❌ none |
-|  | `c8y currentuser update` | PUT | `/user/currentUser` | M | ❌ none |
 |  | `c8y databroker get` | GET | `/databroker/connectors/{id}` | M | ❌ none |
 |  | `c8y databroker list` | GET | `/databroker/connectors` | M | ❌ none |
 |  | `c8y databroker update` | PUT | `/databroker/connectors/{id}` | M | ❌ none |
