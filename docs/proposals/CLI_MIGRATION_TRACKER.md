@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 149.**  Effort — S:68 · M:68 · L:13.  SDK call — ✅ ready:73 · ⚠️ service-exists-method-missing:59 · ❌ no-service:17.
+**Remaining commands: 144.**  Effort — S:68 · M:63 · L:13.  SDK call — ✅ ready:68 · ⚠️ service-exists-method-missing:59 · ❌ no-service:17.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -78,11 +78,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y users resetuserpassword` | PUT | `user/{tenant}/users/{id}` | S | ✅ Users.ResetPassword |
 |  | `c8y users revoketotpsecret` | DELETE | `user/{tenant}/users/{id}/totpSecret/revoke` | S | ✅ Users.Update |
 |  | `c8y users update` | PUT | `user/{tenant}/users/{id}` | S | ✅ Users.Update |
-|  | `c8y binaries create` | POST | `/inventory/binaries` | M | ✅ Binaries.Create |
-|  | `c8y binaries delete` | DELETE | `/inventory/binaries/{id}` | M | ✅ Binaries.Delete |
-|  | `c8y binaries get` | GET | `/inventory/binaries/{id}` | M | ✅ Binaries.Get |
-|  | `c8y binaries list` | GET | `/inventory/binaries` | M | ✅ Binaries.List |
-|  | `c8y binaries update` | PUT | `/inventory/binaries/{id}` | M | ✅ Binaries.Update |
 |  | `c8y applications copy` | POST | `/application/applications/{id}/clone` | M | ⚠️ Applications +method |
 |  | `c8y applications listapplicationbinaries` | GET | `/application/applications/{id}/binaries` | M | ⚠️ Applications +method |
 |  | `c8y applications versions` | — | `— (dynamic)` | M | ⚠️ Applications +method |
