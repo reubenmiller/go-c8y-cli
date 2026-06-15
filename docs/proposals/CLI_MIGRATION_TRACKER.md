@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 134.**  Effort — S:68 · M:53 · L:13.  SDK call — ✅ ready:68 · ⚠️ service-exists-method-missing:57 · ❌ no-service:9.
+**Remaining commands: 133.**  Effort — S:68 · M:52 · L:13.  SDK call — ✅ ready:68 · ⚠️ service-exists-method-missing:56 · ❌ no-service:9.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -99,7 +99,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y devices statistics` | — | `— (dynamic)` | M | ⚠️ Devices +method |
 |  | `c8y devices unassignchild` | DELETE | `inventory/managedObjects/{device}/childDevices/{childDevice}` | M | ⚠️ Devices +method |
 |  | `c8y devices user` | — | `— (dynamic)` | M | ⚠️ Devices +method |
-|  | `c8y features tenants` | — | `— (dynamic)` | M | ⚠️ Features +method |
 |  | `c8y firmware patches` | — | `— (dynamic)` | M | ⚠️ Repository.Firmware +method |
 |  | `c8y firmware versions` | — | `— (dynamic)` | M | ⚠️ Repository.Firmware +method |
 |  | `c8y inventory additions` | — | `— (dynamic)` | M | ⚠️ ManagedObjects +method |
