@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 154.**  Effort — S:73 · M:68 · L:13.  SDK call — ✅ ready:78 · ⚠️ service-exists-method-missing:59 · ❌ no-service:17.
+**Remaining commands: 149.**  Effort — S:68 · M:68 · L:13.  SDK call — ✅ ready:73 · ⚠️ service-exists-method-missing:59 · ❌ no-service:17.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -10,11 +10,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 
 | Pri | Command | HTTP | Endpoint | Effort | SDK call |
 |:--:|---|:--:|---|:--:|---|
-|  | `c8y agents create` | POST | `inventory/managedObjects` | S | ✅ ManagedObjects.Create |
-|  | `c8y agents delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Delete |
-|  | `c8y agents get` | GET | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Get |
-|  | `c8y agents list` | GET | `inventory/managedObjects` | S | ✅ ManagedObjects.List |
-|  | `c8y agents update` | PUT | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Update |
 |  | `c8y applications create` | POST | `/application/applications` | S | ✅ Applications.Create |
 |  | `c8y applications delete` | DELETE | `/application/applications/{id}` | S | ✅ Applications.Delete |
 |  | `c8y applications get` | GET | `/application/applications/{id}` | S | ✅ Applications.Get |
