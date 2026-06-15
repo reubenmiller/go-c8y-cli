@@ -78,9 +78,9 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := r.Input(); err != nil {
-		return err
-	}
+	// Binaries create has no pipeline target (a single file is uploaded), so it
+	// runs exactly once and must NOT read stdin — calling r.Input() here would
+	// block waiting for piped input that never comes.
 
 	// --data/--template build the custom object properties (not a request body
 	// here — they are merged into the multipart object metadata).
