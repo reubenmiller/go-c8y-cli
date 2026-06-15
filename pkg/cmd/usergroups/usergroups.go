@@ -1,3 +1,7 @@
+// Package usergroups wires the `c8y usergroups` command and its subcommands.
+// All subcommands are hand-written v2 c8ystream commands (backed by the go-c8y v2
+// UserGroups service), so this group command is itself hand-written rather than
+// generated.
 package usergroups
 
 import (
