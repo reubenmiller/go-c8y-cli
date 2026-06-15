@@ -1,3 +1,6 @@
+// Package currentuser wires the `c8y currentuser` command and its subcommands
+// (get/update/logout). All are hand-written v2 c8ystream commands, so this group
+// command is itself hand-written rather than generated.
 package currentuser
 
 import (
