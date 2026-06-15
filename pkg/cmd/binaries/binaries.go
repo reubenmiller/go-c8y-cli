@@ -1,3 +1,7 @@
+// Package binaries wires the `c8y binaries` command and its subcommands. All
+// subcommands are hand-written v2 c8ystream commands (backed by the go-c8y v2
+// Binaries service), so this group command is itself hand-written rather than
+// generated.
 package binaries
 
 import (
@@ -21,7 +25,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdBinaries {
 	cmd := &cobra.Command{
 		Use:   "binaries",
 		Short: "Cumulocity binaries",
-		Long:  `REST endpoint to interact with Cumulocity binaries`,
+		Long:  `Manage binaries stored in the Cumulocity inventory`,
 	}
 
 	// Subcommands
