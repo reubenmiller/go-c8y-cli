@@ -1,3 +1,7 @@
+// Package smartgroups wires the `c8y smartgroups` command and its subcommands.
+// All subcommands are hand-written v2 c8ystream commands (backed by the go-c8y v2
+// SmartGroups service), so this group command is itself hand-written rather than
+// generated.
 package smartgroups
 
 import (
