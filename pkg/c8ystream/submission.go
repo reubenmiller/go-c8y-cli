@@ -237,6 +237,32 @@ func Submit[T jsondoc.Unwrapper](ctx context.Context, call func(context.Context)
 	return FromResult(prep)
 }
 
+// SubmitUpload is Submit for streaming/multipart uploads. Submit prepares the
+// request via deferred execution to show it in the confirmation prompt, but a
+// multipart/streaming body is encoded through an io.Pipe that has no reader
+// during the prepare-only round (its dry-run handler is a no-op), so the writer
+// blocks and the command hangs before the prompt ever appears. SubmitUpload
+// instead confirms from a lightweight request built from the known method and
+// resource id (no body), then runs the real upload only if the user agrees.
+// Pass id="" for create (POST to a collection) and the resource id for update.
+func SubmitUpload[T jsondoc.Unwrapper](ctx context.Context, method, id string, call func(context.Context) op.Result[T]) output.Seq {
+	s := submissionFrom(ctx)
+	if s == nil || !s.confirmActive() {
+		return FromResult(call(ctx))
+	}
+	// A minimal request carries just the method (drives ShouldConfirm) and the
+	// id in the path (shown in the prompt) — never the body.
+	req, _ := http.NewRequest(method, "/"+id, nil)
+	proceed, err := s.confirm(req)
+	if err != nil {
+		return errSeq(err)
+	}
+	if !proceed {
+		return emptySeq
+	}
+	return FromResult(call(ctx))
+}
+
 // SubmitStatus is Submit for calls with no renderable body (e.g. Delete
 // returning NoContent): same confirmation lifecycle, FromStatus rendering.
 func SubmitStatus[T any](ctx context.Context, call func(context.Context) op.Result[T]) output.Seq {

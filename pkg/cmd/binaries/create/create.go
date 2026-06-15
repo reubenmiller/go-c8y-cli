@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -114,7 +115,9 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 			Properties:  properties,
 		}
 		return func(ctx context.Context) output.Seq {
-			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.Binary] {
+			// SubmitUpload (not Submit): the multipart body can't be prepared for
+			// the confirmation prompt without blocking.
+			return c8ystream.SubmitUpload(ctx, http.MethodPost, "", func(ctx context.Context) op.Result[jsonmodels.Binary] {
 				return client.Binaries.Create(ctx, opt)
 			})
 		}, nil
