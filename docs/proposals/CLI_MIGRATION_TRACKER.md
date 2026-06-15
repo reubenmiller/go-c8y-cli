@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 139.**  Effort — S:68 · M:58 · L:13.  SDK call — ✅ ready:68 · ⚠️ service-exists-method-missing:57 · ❌ no-service:14.
+**Remaining commands: 134.**  Effort — S:68 · M:53 · L:13.  SDK call — ✅ ready:68 · ⚠️ service-exists-method-missing:57 · ❌ no-service:9.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -86,11 +86,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y currentapplication get` | GET | `/application/currentApplication` | M | ❌ none |
 |  | `c8y currentapplication listsubscriptions` | GET | `/application/currentApplication/subscriptions` | M | ❌ none |
 |  | `c8y currentapplication update` | PUT | `/application/currentApplication` | M | ❌ none |
-|  | `c8y databroker get` | GET | `/databroker/connectors/{id}` | M | ❌ none |
-|  | `c8y databroker list` | GET | `/databroker/connectors` | M | ❌ none |
-|  | `c8y databroker update` | PUT | `/databroker/connectors/{id}` | M | ❌ none |
-|  | `c8y datahub jobs` | — | `— (dynamic)` | M | ❌ none |
-|  | `c8y datahub query` | POST | `service/datahub/sql` | M | ❌ none |
 |  | `c8y devicegroups assigndevice` | POST | `inventory/managedObjects/{id}/childAssets` | M | ⚠️ Devicegroups +method |
 |  | `c8y devicegroups assigngroup` | POST | `inventory/managedObjects/{id}/childAssets` | M | ⚠️ Devicegroups +method |
 |  | `c8y devicegroups children` | — | `— (dynamic)` | M | ⚠️ Devicegroups +method |
