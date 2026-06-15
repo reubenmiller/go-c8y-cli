@@ -1,3 +1,6 @@
+// Package jobs wires the `c8y datahub jobs` command and its subcommands
+// (create/get/cancel/listResults). All are hand-written v2 c8ystream commands,
+// so this group command is itself hand-written rather than generated.
 package jobs
 
 import (
