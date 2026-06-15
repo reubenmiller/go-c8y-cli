@@ -1,3 +1,8 @@
+// Package applications wires the `c8y applications` command and its subcommands.
+// The CRUD + binary subcommands are hand-written v2 c8ystream commands (backed by
+// the go-c8y v2 Applications service), so this group command is itself
+// hand-written rather than generated. The versions subgroup and the manual
+// createHostedApplication/open commands are attached in pkg/cmd/root/root.go.
 package applications
 
 import (

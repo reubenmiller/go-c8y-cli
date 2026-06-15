@@ -1,19 +1,22 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based application update: the id flag drives iteration (pipe or --id) and the
+// body builder (name/key/availability/... + --data/--template) is evaluated per
+// item, then both feed Applications.Update (the id/name reference is resolved
+// internally by the SDK).
 package update
 
 import (
-	"io"
-	"net/http"
+	"context"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -24,18 +27,18 @@ type UpdateCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewUpdateCmd creates a command to Update application details
+// NewUpdateCmd creates a command to Update application
 func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 	ccmd := &UpdateCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Update application details",
-		Long:  `Update details of an existing application`,
+		Short: "Update application",
+		Long:  `Update an existing application`,
 		Example: heredoc.Doc(`
-$ c8y applications update --id "my-example-app" --availability MARKET
-Update application availability to MARKET
+$ c8y applications update --id 12345 --availability MARKET
+Update an application's availability
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.UpdateModeEnabled(cmd)
@@ -68,9 +71,9 @@ Update application availability to MARKET
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
 		flags.WithPipelineAliases("id", "id"),
+		flags.WithPowershellName("Update-Application"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.application+json", ""),
 	)
-
-	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -79,72 +82,16 @@ Update application availability to MARKET
 
 // RunE executes the command
 func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
+	if err := r.InputFlag("id"); err != nil {
+		return err
 	}
 
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
+	err = r.Body(
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("key", "key"),
@@ -158,31 +105,24 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
-		return cmderrors.NewUserError(err)
+		return err
 	}
 
-	// path parameters
-	path := flags.NewStringTemplate("/application/applications/{id}")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-		c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, "id", "id"),
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "PUT",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-	}
-
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		ref := c8ystream.NameOrID(in.String("id"))
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context) output.Seq {
+			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.Application] {
+				return client.Applications.Update(ctx, ref, body)
+			})
+		}, nil
+	})
 }
