@@ -1,3 +1,6 @@
+// Package currenttenant wires the `c8y currenttenant` command and its
+// subcommands (get/listApplications/version). All are hand-written v2 c8ystream
+// commands, so this group command is itself hand-written rather than generated.
 package currenttenant
 
 import (
