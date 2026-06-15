@@ -17,6 +17,7 @@ package c8ystream
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"sync"
@@ -77,6 +78,30 @@ func FromStatus[T any](res op.Result[T]) output.Seq {
 		if res.Err != nil {
 			yield(jsondoc.Empty(), res.Err)
 		}
+	}
+}
+
+// FromJSONValue adapts a typed service result whose body is a plain Go value
+// rather than a jsondoc model (e.g. the map[string]string returned by the
+// by-category tenant-option endpoints) into a document stream by JSON-encoding
+// res.Data. Pass dry=apiv2.IsDryRun(ctx): under --dry-run the request was
+// already rendered by the dry-run handler, so the zero-value result is
+// suppressed instead of emitting a spurious placeholder.
+func FromJSONValue[T any](res op.Result[T], dry bool) output.Seq {
+	return func(yield func(jsondoc.JSONDoc, error) bool) {
+		if res.Err != nil {
+			yield(jsondoc.Empty(), res.Err)
+			return
+		}
+		if dry {
+			return
+		}
+		raw, err := json.Marshal(res.Data)
+		if err != nil {
+			yield(jsondoc.Empty(), err)
+			return
+		}
+		yield(jsondoc.New(raw), nil)
 	}
 }
 

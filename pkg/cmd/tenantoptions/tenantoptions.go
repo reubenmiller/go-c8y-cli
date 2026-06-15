@@ -1,3 +1,6 @@
+// Package tenantoptions wires the `c8y tenantoptions` command and its
+// subcommands. All subcommands are hand-written v2 c8ystream commands, so this
+// group command is itself hand-written rather than generated.
 package tenantoptions
 
 import (
