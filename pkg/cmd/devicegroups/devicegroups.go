@@ -1,3 +1,8 @@
+// Package devicegroups wires the `c8y devicegroups` command and its subcommands.
+// All subcommands are hand-written v2 c8ystream commands (backed by the go-c8y v2
+// DeviceGroups service, and ManagedObjects child-reference services for the
+// deprecated child-asset operations), so this group command is itself
+// hand-written rather than generated.
 package devicegroups
 
 import (
