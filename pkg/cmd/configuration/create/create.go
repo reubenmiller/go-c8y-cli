@@ -1,20 +1,25 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based configuration create: builds the configuration body (name/description/
+// configurationType/url/deviceType + --data/--template, defaulting type
+// c8y_ConfigurationDump and the c8y_Global fragment) and creates the managed
+// object via Configuration.Create. The deviceType flag is the iterating input, so
+// the same configuration can be created for several device types from a pipe.
+// When --file is given the binary is uploaded and linked as a child addition by
+// the SDK (Configuration.Create), so the upload is streamed via SubmitUpload.
 package create
 
 import (
-	"io"
+	"context"
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/configuration"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -59,19 +64,15 @@ available for multiple device types
 	cmd.Flags().String("deviceType", "", "Device type filter. Only allow configuration to be applied to devices of this type (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to upload")
 
-	completion.WithOptions(
-		cmd,
-	)
-
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("deviceType", "deviceType", false, "deviceType", "c8y_Filter.type", "type"),
+		flags.WithPowershellName("New-Configuration"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.inventory+json", ""),
 	)
-
-	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -80,72 +81,16 @@ available for multiple device types
 
 // RunE executes the command
 func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
+	if err := r.Input(); err != nil {
+		return err
 	}
 
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
+	err = r.Body(
 		flags.WithOverrideValue("deviceType", "deviceType"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
@@ -153,41 +98,39 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("configurationType", "configurationType"),
 		flags.WithStringValue("url", "url"),
 		flags.WithStringValue("deviceType", "deviceType"),
-		c8ybinary.WithBinaryUploadURL(n.factory.Client, n.factory.IOStreams.ProgressIndicator(), "file", "url"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_ConfigurationDump', c8y_Global:{}}`),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "name", "url"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
+		flags.WithRequiredProperties("type", "name"),
 	)
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "POST",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-	}
-	inputIterators.PipeOptions.PostActions = []flags.Action{
-		&c8ydata.AddChildAddition{Client: client, URLProperty: "url"},
+	client, err := r.Client()
+	if err != nil {
+		return err
 	}
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		file := in.String("file")
+		return func(ctx context.Context) output.Seq {
+			if file != "" {
+				return c8ystream.SubmitUpload(ctx, http.MethodPost, "", func(ctx context.Context) op.Result[jsonmodels.ManagedObject] {
+					return client.Configuration.Create(ctx, configuration.CreateOptions{
+						Body: body,
+						File: configuration.UploadFileOptions{FilePath: file},
+					})
+				})
+			}
+			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.ManagedObject] {
+				return client.Configuration.CreateRaw(ctx, body)
+			})
+		}, nil
+	})
 }
