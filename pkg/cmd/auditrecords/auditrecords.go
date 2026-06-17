@@ -1,3 +1,8 @@
+// Package auditrecords wires the `c8y auditrecords` command and its subcommands.
+// The create/list/get subcommands are hand-written v2 c8ystream commands (backed by
+// the go-c8y v2 AuditRecords service), so this group command is itself hand-written
+// rather than generated. (The deprecated deleteCollection command is skipped — the
+// audit DELETE endpoint was removed in Cumulocity 10.6.6.)
 package auditrecords
 
 import (
