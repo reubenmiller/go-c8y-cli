@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 105.**  Effort — S:48 · M:46 · L:11.  SDK call — ✅ ready:48 · ⚠️ service-exists-method-missing:48 · ❌ no-service:9.
+**Remaining commands: 94.**  Effort — S:42 · M:41 · L:11.  SDK call — ✅ ready:42 · ⚠️ service-exists-method-missing:43 · ❌ no-service:9.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -15,12 +15,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y configuration get` | GET | `inventory/managedObjects/{id}` | S | ✅ Repository.Configuration.Get |
 |  | `c8y configuration list` | GET | `inventory/managedObjects` | S | ✅ Repository.Configuration.List |
 |  | `c8y configuration update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Repository.Configuration.Update |
-|  | `c8y devicegroups create` | POST | `inventory/managedObjects` | S | ✅ Devicegroups.Create |
-|  | `c8y devicegroups delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ Devicegroups.Delete |
-|  | `c8y devicegroups get` | GET | `inventory/managedObjects/{id}` | S | ✅ Devicegroups.Get |
-|  | `c8y devicegroups list` | GET | `inventory/managedObjects` | S | ✅ Devicegroups.List |
-|  | `c8y devicegroups listassets` | GET | `inventory/managedObjects/{id}/childAssets` | S | ✅ Devicegroups.List |
-|  | `c8y devicegroups update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Devicegroups.Update |
 |  | `c8y deviceprofiles create` | POST | `inventory/managedObjects` | S | ✅ ManagedObjects.Create |
 |  | `c8y deviceprofiles delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Delete |
 |  | `c8y deviceprofiles get` | GET | `inventory/managedObjects/{id}` | S | ✅ ManagedObjects.Get |
@@ -63,11 +57,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y currentapplication get` | GET | `/application/currentApplication` | M | ❌ none |
 |  | `c8y currentapplication listsubscriptions` | GET | `/application/currentApplication/subscriptions` | M | ❌ none |
 |  | `c8y currentapplication update` | PUT | `/application/currentApplication` | M | ❌ none |
-|  | `c8y devicegroups assigndevice` | POST | `inventory/managedObjects/{id}/childAssets` | M | ⚠️ Devicegroups +method |
-|  | `c8y devicegroups assigngroup` | POST | `inventory/managedObjects/{id}/childAssets` | M | ⚠️ Devicegroups +method |
-|  | `c8y devicegroups children` | — | `— (dynamic)` | M | ⚠️ Devicegroups +method |
-|  | `c8y devicegroups unassigndevice` | DELETE | `inventory/managedObjects/{group}/childAssets/{reference}` | M | ⚠️ Devicegroups +method |
-|  | `c8y devicegroups unassigngroup` | DELETE | `inventory/managedObjects/{id}/childAssets/{child}` | M | ⚠️ Devicegroups +method |
 |  | `c8y devicemanagement certificates` | — | `— (dynamic)` | M | ⚠️ TrustedCertificates +method |
 |  | `c8y devices assignchild` | POST | `inventory/managedObjects/{device}/childDevices` | M | ⚠️ Devices +method |
 |  | `c8y devices availability` | — | `— (dynamic)` | M | ⚠️ Devices +method |
