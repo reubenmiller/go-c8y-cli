@@ -1,18 +1,21 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based firmware create: builds the firmware package body (name/description/
+// deviceType + --data/--template, defaulting type c8y_Firmware) and creates the
+// managed object via Repository.Firmware.CreateRaw. The deviceType flag is the
+// iterating input, so the same package can be created for several device types
+// from a pipe.
 package create
 
 import (
-	"io"
-	"net/http"
+	"context"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -51,19 +54,15 @@ Create the same firmware package for multiple device types
 	cmd.Flags().String("description", "", "Description of the firmware package")
 	cmd.Flags().String("deviceType", "", "Device type filter. Only allow firmware to be applied to devices of this type (accepts pipeline)")
 
-	completion.WithOptions(
-		cmd,
-	)
-
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("deviceType", "c8y_Filter.type", false, "c8y_Filter.type", "deviceType", "type"),
+		flags.WithPowershellName("New-Firmware"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.inventory+json", ""),
 	)
-
-	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -72,72 +71,16 @@ Create the same firmware package for multiple device types
 
 // RunE executes the command
 func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
+	if err := r.Input(); err != nil {
+		return err
 	}
 
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
+	err = r.Body(
 		flags.WithOverrideValue("deviceType", "c8y_Filter.type"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
@@ -150,30 +93,23 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithRequiredProperties("type", "name"),
 	)
 	if err != nil {
-		return cmderrors.NewUserError(err)
+		return err
 	}
 
-	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "POST",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-	}
-
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context) output.Seq {
+			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.Firmware] {
+				return client.Repository.Firmware.CreateRaw(ctx, body)
+			})
+		}, nil
+	})
 }

@@ -1,3 +1,7 @@
+// Package patches wires the `c8y firmware patches` command and its subcommands.
+// The subcommands are hand-written v2 c8ystream commands backed by the go-c8y v2
+// Repository.Firmware.Patches service. The create command is attached in
+// pkg/cmd/root/root.go.
 package patches
 
 import (
