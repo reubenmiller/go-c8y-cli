@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 89.**  Effort — S:37 · M:41 · L:11.  SDK call — ✅ ready:37 · ⚠️ service-exists-method-missing:43 · ❌ no-service:9.
+**Remaining commands: 83.**  Effort — S:32 · M:40 · L:11.  SDK call — ✅ ready:32 · ⚠️ service-exists-method-missing:42 · ❌ no-service:9.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -10,11 +10,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 
 | Pri | Command | HTTP | Endpoint | Effort | SDK call |
 |:--:|---|:--:|---|:--:|---|
-|  | `c8y configuration create` | POST | `inventory/managedObjects` | S | ✅ Repository.Configuration.Create |
-|  | `c8y configuration delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ Repository.Configuration.Delete |
-|  | `c8y configuration get` | GET | `inventory/managedObjects/{id}` | S | ✅ Repository.Configuration.Get |
-|  | `c8y configuration list` | GET | `inventory/managedObjects` | S | ✅ Repository.Configuration.List |
-|  | `c8y configuration update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Repository.Configuration.Update |
 |  | `c8y devices getchild` | GET | `inventory/managedObjects/{device}/childDevices/{reference}` | S | ✅ Devices.Get |
 |  | `c8y devices getsupportedmeasurements` | GET | `inventory/managedObjects/{device}/supportedMeasurements` | S | ✅ Devices.ListSupportedMeasurements |
 |  | `c8y devices getsupportedseries` | GET | `inventory/managedObjects/{device}/supportedSeries` | S | ✅ Devices.ListSupportedSeries |
@@ -48,7 +43,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y users revoketotpsecret` | DELETE | `user/{tenant}/users/{id}/totpSecret/revoke` | S | ✅ Users.Update |
 |  | `c8y users update` | PUT | `user/{tenant}/users/{id}` | S | ✅ Users.Update |
 |  | `c8y bulkoperations listoperations` | GET | `devicecontrol/operations` | M | ⚠️ Bulkoperations +method |
-|  | `c8y configuration send` | POST | `devicecontrol/operations` | M | ⚠️ Repository.Configuration +method |
 |  | `c8y currentapplication get` | GET | `/application/currentApplication` | M | ❌ none |
 |  | `c8y currentapplication listsubscriptions` | GET | `/application/currentApplication/subscriptions` | M | ❌ none |
 |  | `c8y currentapplication update` | PUT | `/application/currentApplication` | M | ❌ none |
