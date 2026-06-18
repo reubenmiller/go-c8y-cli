@@ -1,3 +1,7 @@
+// Package configurations groups the remote access configuration subcommands
+// (list/get/update/delete and the create-passthrough/webssh/vnc/telnet
+// variants), all hand-written v2 c8ystream commands backed by the go-c8y v2
+// RemoteAccess.Configurations service.
 package configurations
 
 import (
