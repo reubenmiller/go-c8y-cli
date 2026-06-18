@@ -1,20 +1,25 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based device registration register: the id flag drives iteration (pipe or
+// --id), so the same registration can be applied to many device ids. The body
+// carries the device id (set from the driver), an optional type, and an optional
+// device-group reference (group), which is resolved (name -> id) into groupId
+// before the create call via Devices.Registration.CreateRaw.
 package register
 
 import (
-	"io"
-	"net/http"
+	"context"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/sjson"
 )
 
 // RegisterCmd command
@@ -54,7 +59,7 @@ Register a new device and assign to a group
 
 	cmd.Flags().StringSlice("id", []string{""}, "Device identifier. Max: 1000 characters. E.g. IMEI (required) (accepts pipeline)")
 	cmd.Flags().String("type", "", "Type of the device")
-	cmd.Flags().StringSlice("group", []string{""}, "Group to which the device will be assigned")
+	cmd.Flags().String("group", "", "Group to which the device will be assigned")
 
 	completion.WithOptions(
 		cmd,
@@ -68,9 +73,9 @@ Register a new device and assign to a group
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
 		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
+		flags.WithPowershellName("Register-Device"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.newDeviceRequest+json", ""),
 	)
-
-	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -79,104 +84,53 @@ Register a new device and assign to a group
 
 // RunE executes the command
 func (n *RegisterCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
+	if err := r.InputFlag("id"); err != nil {
+		return err
 	}
 
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
+	err = r.Body(
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithIDSlice(args, "id", "id"),
 		flags.WithStringValue("type", "type"),
-		c8yfetcher.WithDeviceGroupByNameFirstMatch(n.factory, args, "group", "groupId"),
+		flags.WithStringValue("group", "groupId"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
-		return cmderrors.NewUserError(err)
+		return err
 	}
 
-	// path parameters
-	path := flags.NewStringTemplate("devicecontrol/newDeviceRequests")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "POST",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	resolveGroup := func(ctx context.Context, ref string) (string, error) {
+		return client.DeviceGroups.ResolveID(ctx, ref, nil)
 	}
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		// The id flag is the iterating driver (a string slice), so carry its
+		// resolved value onto the body here rather than via a body getter.
+		if body, err = sjson.SetBytes(body, "id", in.String("id")); err != nil {
+			return nil, err
+		}
+		// Resolve the device-group reference (name -> id) the body carries.
+		if body, err = in.ResolveBodyRef(body, "groupId", resolveGroup); err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context) output.Seq {
+			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.DeviceRequest] {
+				return client.Devices.Registration.CreateRaw(ctx, body)
+			})
+		}, nil
+	})
 }

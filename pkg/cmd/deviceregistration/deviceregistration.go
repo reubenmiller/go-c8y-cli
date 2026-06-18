@@ -1,3 +1,8 @@
+// Package deviceregistration wires the `c8y deviceregistration` command and its
+// spec-generated subcommands. All of them are hand-written v2 c8ystream commands
+// (backed by the go-c8y v2 Devices.Registration service), so this group command
+// is itself hand-written rather than generated. The bulk register-* commands are
+// wired separately (see pkg/cmd/root) and are not part of this group definition.
 package deviceregistration
 
 import (
