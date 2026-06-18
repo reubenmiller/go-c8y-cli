@@ -1,3 +1,6 @@
+// Package currentapplication wires the `c8y currentapplication` command and its
+// subcommands (get/update/listSubscriptions). All are hand-written v2 c8ystream
+// commands, so this group command is itself hand-written rather than generated.
 package currentapplication
 
 import (
