@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 54.**  Effort — S:16 · M:31 · L:7.  SDK call — ✅ ready:16 · ⚠️ service-exists-method-missing:29 · ❌ no-service:9.
+**Remaining commands: 51.**  Effort — S:16 · M:28 · L:7.  SDK call — ✅ ready:16 · ⚠️ service-exists-method-missing:26 · ❌ no-service:9.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -54,9 +54,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y tenants enable` | PUT | `/tenant/tenants/{id}` | M | ⚠️ Tenants +method |
 |  | `c8y tenants enableapplication` | POST | `/tenant/tenants/{tenant}/applications` | M | ⚠️ Tenants +method |
 |  | `c8y ui plugins` | — | `— (dynamic)` | M | ⚠️ UIPlugins? |
-|  | `c8y userreferences addusertogroup` | POST | `/user/{tenant}/groups/{group}/users` | M | ⚠️ Users +method |
-|  | `c8y userreferences deleteuserfromgroup` | DELETE | `/user/{tenant}/groups/{group}/users/{user}` | M | ⚠️ Users +method |
-|  | `c8y userreferences listgroupmembership` | GET | `/user/{tenant}/groups/{id}/users` | M | ⚠️ Users +method |
 |  | `c8y deviceregistration approve` | PUT | `devicecontrol/newDeviceRequests/{id}` | L | ❌ none |
 |  | `c8y deviceregistration delete` | DELETE | `devicecontrol/newDeviceRequests/{id}` | L | ❌ none |
 |  | `c8y deviceregistration get` | GET | `devicecontrol/newDeviceRequests/{id}` | L | ❌ none |
