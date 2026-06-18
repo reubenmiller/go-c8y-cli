@@ -1,3 +1,6 @@
+// Package applications wires the `c8y tenants applications` command group. The
+// subcommands are hand-written v2 c8ystream commands backed by the go-c8y v2
+// Tenants service (application subscription endpoints).
 package applications
 
 import (

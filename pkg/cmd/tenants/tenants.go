@@ -1,3 +1,5 @@
+// Package tenants wires the `c8y tenants` command group. All subcommands are
+// hand-written v2 c8ystream commands backed by the go-c8y v2 Tenants service.
 package tenants
 
 import (
