@@ -1,3 +1,7 @@
+// Package users wires the `c8y users` command and its subcommands.
+// All subcommands are hand-written v2 c8ystream commands (backed by the go-c8y v2
+// Users and InventoryRoles services), so this group command is itself
+// hand-written rather than generated.
 package users
 
 import (

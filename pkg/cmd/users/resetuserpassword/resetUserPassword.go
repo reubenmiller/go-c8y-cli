@@ -1,19 +1,23 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based reset user password: the id flag drives iteration (pipe or --id); the
+// body sets the new password (or, when none is given, requests a password-reset
+// email) and the change is applied via Users.Update (PUT on the user). For
+// Cumulocity users the id is the username, passed straight through.
 package resetuserpassword
 
 import (
-	"io"
-	"net/http"
+	"context"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/users"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -61,12 +65,13 @@ Update a user
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+		flags.WithPowershellName("Reset-UserPassword"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.user+json", ""),
 	)
-
-	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -75,72 +80,16 @@ Update a user
 
 // RunE executes the command
 func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
+	if err := r.InputFlag("id"); err != nil {
+		return err
 	}
 
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
+	err = r.Body(
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("newPassword", "password"),
 		flags.WithRequiredTemplateString(`
@@ -149,32 +98,31 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
-		return cmderrors.NewUserError(err)
+		return err
 	}
 
-	// path parameters
-	path := flags.NewStringTemplate("user/{tenant}/users/{id}")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-		c8yfetcher.WithUserByNameFirstMatch(n.factory, args, "id", "id"),
-		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "PUT",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-	}
-
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		tenant := in.String("tenant")
+		if tenant == "" {
+			tenant = n.factory.GetTenant()
+		}
+		opt := users.UpdateOptions{
+			Tenant: tenant,
+			ID:     users.UserRef(in.String("id")),
+		}
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context) output.Seq {
+			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.User] {
+				return client.Users.Update(ctx, opt, body)
+			})
+		}, nil
+	})
 }
