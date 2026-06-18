@@ -1,3 +1,7 @@
+// Package events wires the `c8y events` command and its subcommands. All
+// subcommands are hand-written v2 c8ystream commands (backed by the go-c8y v2
+// Events service and its Binaries sub-service), so this group command is itself
+// hand-written rather than generated.
 package events
 
 import (
