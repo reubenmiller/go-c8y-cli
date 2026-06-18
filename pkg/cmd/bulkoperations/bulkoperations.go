@@ -1,3 +1,7 @@
+// Package bulkoperations wires the `c8y bulkoperations` command group: the
+// bulk-operation CRUD subcommands plus listOperations (the operations spawned
+// by a bulk operation). All subcommands are hand-written v2 c8ystream commands
+// backed by the go-c8y v2 BulkOperations service.
 package bulkoperations
 
 import (
