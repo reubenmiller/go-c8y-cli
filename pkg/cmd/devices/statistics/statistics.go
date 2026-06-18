@@ -1,3 +1,7 @@
+// Package statistics wires the `c8y devices statistics` command and its
+// subcommands. The list subcommand is a hand-written v2 c8ystream command backed
+// by the go-c8y v2 DeviceStatistics service, so this group command is itself
+// hand-written rather than generated.
 package statistics
 
 import (

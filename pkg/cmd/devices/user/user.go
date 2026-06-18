@@ -1,3 +1,7 @@
+// Package user wires the `c8y devices user` command and its subcommands. The
+// get/update subcommands are hand-written v2 c8ystream commands backed by the
+// go-c8y v2 ManagedObjects user endpoints, so this group command is itself
+// hand-written rather than generated.
 package user
 
 import (

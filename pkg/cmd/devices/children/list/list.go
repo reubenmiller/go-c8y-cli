@@ -1,20 +1,23 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based devices children list: the id flag drives iteration; each parent
+// (resolved as a managed object) has its child references of the selected
+// --childType (addition|asset|device) streamed via the matching child-reference
+// service, plucking the nested managed objects.
 package list
 
 import (
 	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/children/childref"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects/child"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/model"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 )
 
@@ -65,14 +68,13 @@ Get a list of the child devices of an existing managed object
 
 	flags.WithOptions(
 		cmd,
-
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
-
 		flags.WithCollectionProperty("references.#.managedObject"),
+		flags.WithPowershellName("Get-DeviceChildCollection"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json", "application/vnd.com.nsn.cumulocity.managedObject+json"),
 	)
 
-	// Required flags
 	_ = cmd.MarkFlagRequired("childType")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
@@ -82,113 +84,63 @@ Get a list of the child devices of an existing managed object
 
 // RunE executes the command
 func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithBoolValue("withChildren", "withChildren", ""),
-		flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
-
-		flags.WithCumulocityQuery(
-			[]flags.GetOption{
-				flags.WithStringValue("query", "query", "%s"),
-			},
-			"query",
-		),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
-
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
+	if err := r.InputFlag("id"); err != nil {
+		return err
 	}
 
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{id}/{childType}")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "id", "id"),
-		flags.WithInventoryChildType("childType", "childType"),
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "GET",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	common, err := r.Config.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
 	}
+	rawOutput := r.Config.RawOutput()
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	queryTemplate := cmd.Flag("queryTemplate").Value.String()
+	orderBy := cmd.Flag("orderBy").Value.String()
+
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		childType := in.String("childType")
+		parentID, err := client.ManagedObjects.ResolveID(in.ResolveContext(), c8ystream.NameOrID(in.String("id")), nil)
+		if err != nil {
+			return nil, err
+		}
+
+		q := model.NewInventoryQuery()
+		if raw := in.String("query"); raw != "" {
+			q.AddFilterPart(applyQueryTemplate(queryTemplate, raw))
+		} else if queryTemplate != "" {
+			q.AddFilterPart(queryTemplate)
+		}
+		q.AddOrderBy(orderBy)
+
+		opt := child.ListOptions{Query: q.Build()}
+		opt.WithChildren = in.Bool("withChildren")
+		opt.WithChildrenCount = in.Bool("withChildrenCount")
+		opt.PaginationOptions = pagination.PaginationOptions{
+			PageSize:          common.PageSize,
+			WithTotalPages:    common.WithTotalPages,
+			WithTotalElements: common.WithTotalElements,
+			CurrentPage:       int(common.CurrentPage),
+			MaxItems:          r.Config.MaxItems(),
+		}
+		return c8ystream.ListCall(rawOutput, opt, childref.ListAll(client, childType, parentID)), nil
+	})
+}
+
+// applyQueryTemplate formats a raw query value with the --queryTemplate (a %s
+// template). An empty template returns the value unchanged.
+func applyQueryTemplate(template, value string) string {
+	if template == "" {
+		return value
+	}
+	return fmt.Sprintf(template, value)
 }

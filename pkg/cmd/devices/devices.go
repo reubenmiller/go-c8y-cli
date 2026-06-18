@@ -1,3 +1,8 @@
+// Package devices wires the `c8y devices` command and its flat subcommands. All
+// subcommands are hand-written v2 c8ystream commands backed by the go-c8y v2
+// Devices / ManagedObjects services, so this group command is itself
+// hand-written rather than generated. The children/services/statistics/user/
+// availability subgroups are attached by pkg/cmd/root.
 package devices
 
 import (

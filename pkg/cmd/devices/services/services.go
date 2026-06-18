@@ -1,3 +1,8 @@
+// Package services wires the `c8y devices services` command and its subcommands.
+// Device services are c8y_Service managed objects stored as child additions of a
+// device; all subcommands are hand-written v2 c8ystream commands backed by the
+// go-c8y v2 ManagedObjects / ChildAdditions services, so this group command is
+// itself hand-written rather than generated.
 package services
 
 import (

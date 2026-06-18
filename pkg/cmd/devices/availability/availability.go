@@ -1,3 +1,8 @@
+// Package availability wires the `c8y devices availability` command and its
+// subcommands. The get/set subcommands are hand-written v2 c8ystream commands
+// backed by the go-c8y v2 ManagedObjects availability endpoint and a managed-
+// object update, so this group command is itself hand-written rather than
+// generated.
 package availability
 
 import (

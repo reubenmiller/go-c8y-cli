@@ -1,20 +1,19 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based device statistics list: the device flag drives iteration (or a single
+// run for the whole tenant when unset). Each run fetches daily or monthly device
+// statistics for the tenant via DeviceStatistics.ListAllDaily/ListAllMonthly,
+// streaming the paged "statistics" items.
 package list
 
 import (
-	"fmt"
-	"io"
-	"net/http"
-
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants/devicestatistics"
 	"github.com/spf13/cobra"
 )
 
@@ -70,16 +69,14 @@ Get monthly device statistics for all devices for a specific month (day is ignor
 
 	flags.WithOptions(
 		cmd,
-
 		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("date", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
-
 		flags.WithCollectionProperty("statistics"),
+		flags.WithPowershellName("Get-DeviceStatisticsCollection"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.tenantusagestatisticscollection+json", ""),
 	)
-
-	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -88,106 +85,57 @@ Get monthly device statistics for all devices for a specific month (day is ignor
 
 // RunE executes the command
 func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "deviceId"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
-
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
+	if err := r.InputFlag("device"); err != nil {
+		return err
 	}
 
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("/tenant/statistics/device/{tenant}/{type}/{date}")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-		flags.WithRelativeDate(false, "date", "date"),
-		flags.WithStringValue("type", "type"),
-		flags.WithStringDefaultValue(n.factory.GetTenant(), "tenant", "tenant"),
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "GET",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	common, err := r.Config.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
 	}
+	rawOutput := r.Config.RawOutput()
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		deviceID := ""
+		if dev := in.String("device"); dev != "" {
+			deviceID, err = client.ManagedObjects.ResolveID(in.ResolveContext(), c8ystream.NameOrID(dev), nil)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		tenant := in.String("tenant")
+		if tenant == "" {
+			tenant = n.factory.GetTenant()
+		}
+
+		opt := devicestatistics.ListOptions{
+			TenantID: tenant,
+			Date:     in.TimeValue("date").Format("2006-01-02"),
+			DeviceID: deviceID,
+			PaginationOptions: pagination.PaginationOptions{
+				PageSize:          common.PageSize,
+				WithTotalPages:    common.WithTotalPages,
+				WithTotalElements: common.WithTotalElements,
+				CurrentPage:       int(common.CurrentPage),
+				MaxItems:          r.Config.MaxItems(),
+			},
+		}
+
+		listAll := client.DeviceStatistics.ListAllDaily
+		if in.String("type") == "monthly" {
+			listAll = client.DeviceStatistics.ListAllMonthly
+		}
+		return c8ystream.ListCall(rawOutput, opt, listAll), nil
+	})
 }

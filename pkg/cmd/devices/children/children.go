@@ -1,3 +1,7 @@
+// Package children wires the `c8y devices children` command and its subcommands.
+// All subcommands are hand-written v2 c8ystream commands that dispatch the
+// --childType flag to the go-c8y v2 ManagedObjects child-reference services, so
+// this group command is itself hand-written rather than generated.
 package children
 
 import (
