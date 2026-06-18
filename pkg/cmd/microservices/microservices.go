@@ -1,3 +1,9 @@
+// Package microservices wires the `c8y microservices` command and its
+// subcommands. The CRUD + enable/disable/status/binary subcommands are
+// hand-written v2 c8ystream commands (backed by the go-c8y v2 Microservices
+// service), so this group command is itself hand-written rather than generated.
+// The loglevels subgroup and the manual create/serviceuser commands are
+// attached in pkg/cmd/root/root.go.
 package microservices
 
 import (

@@ -1,20 +1,21 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based microservice list: fills the typed microservices.ListOptions
+// (name/owner/providedFor/subscriber/user filters) and streams
+// Microservices.ListAll. The user flag is the iterating input (pipe or
+// --user), matching v1, so the command runs once for the common no-pipe case.
+// The SDK always scopes the query to the MICROSERVICE application type, so the
+// --type flag is kept only for surface parity.
 package list
 
 import (
-	"fmt"
-	"io"
-	"net/http"
-
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/microservices"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 )
 
@@ -75,17 +76,15 @@ List all microservices owned by specific tenant
 
 	flags.WithOptions(
 		cmd,
-
 		flags.WithExtendedPipelineSupport("user", "user", false, "id"),
 		flags.WithPipelineAliases("name", "id"),
 		flags.WithPipelineAliases("owner", "tenant", "owner.tenant.id"),
 		flags.WithPipelineAliases("providedFor", "tenant", "owner.tenant.id"),
 		flags.WithPipelineAliases("subscriber", "tenant", "owner.tenant.id"),
-
 		flags.WithCollectionProperty("applications"),
+		flags.WithPowershellName("Get-MicroserviceCollection"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.applicationCollection+json", "application/vnd.com.nsn.cumulocity.application+json"),
 	)
-
-	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -94,108 +93,44 @@ List all microservices owned by specific tenant
 
 // RunE executes the command
 func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithStringValue("type", "type"),
-		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("owner", "owner"),
-		flags.WithStringValue("providedFor", "providedFor"),
-		flags.WithStringValue("subscriber", "subscriber"),
-		c8yfetcher.WithUserByNameFirstMatch(n.factory, args, "user", "user"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
-
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
+	if err := r.InputFlag("user"); err != nil {
+		return err
 	}
 
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("/application/applications")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "GET",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	common, err := r.Config.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
 	}
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	rawOutput := r.Config.RawOutput()
+	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
+
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		opt := microservices.ListOptions{
+			Name:        in.String("name"),
+			Owner:       in.String("owner"),
+			ProvidedFor: in.String("providedFor"),
+			Subscriber:  in.String("subscriber"),
+			User:        in.String("user"),
+		}
+		opt.PaginationOptions = pagination.PaginationOptions{
+			PageSize:          common.PageSize,
+			WithTotalPages:    common.WithTotalPages,
+			WithTotalElements: common.WithTotalElements,
+			CurrentPage:       int(common.CurrentPage),
+			MaxItems:          r.Config.MaxItems(),
+			Strategy:          paginationStrategy,
+		}
+		return c8ystream.ListCall(rawOutput, opt, client.Microservices.ListAll), nil
+	})
 }

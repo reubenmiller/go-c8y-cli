@@ -1,3 +1,8 @@
+// Package loglevels wires the `c8y microservices loglevels` subgroup. Its
+// list/get/set/delete subcommands are hand-written v2 c8ystream commands backed
+// by the go-c8y v2 Microservices.Loggers service (the Spring Boot actuator
+// /service/{name}/loggers endpoints), so this group command is hand-written
+// rather than generated.
 package loglevels
 
 import (
