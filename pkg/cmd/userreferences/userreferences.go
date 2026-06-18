@@ -1,3 +1,7 @@
+// Package userreferences wires the `c8y userreferences` command group: user
+// group membership — adding a user to a group, removing a user from a group, and
+// listing the users in a group. Every subcommand is a hand-written v2 c8ystream
+// command backed by the typed go-c8y v2 UserGroups.Users service.
 package userreferences
 
 import (
