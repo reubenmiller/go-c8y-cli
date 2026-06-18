@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 71.**  Effort — S:27 · M:37 · L:7.  SDK call — ✅ ready:27 · ⚠️ service-exists-method-missing:35 · ❌ no-service:9.
+**Remaining commands: 60.**  Effort — S:16 · M:37 · L:7.  SDK call — ✅ ready:16 · ⚠️ service-exists-method-missing:35 · ❌ no-service:9.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -26,17 +26,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y microservices list` | GET | `/application/applications` | S | ✅ Microservices.List |
 |  | `c8y microservices update` | PUT | `/application/applications/{id}` | S | ✅ Microservices.Update |
 |  | `c8y notification2 subscriptions` | — | `— (dynamic)` | S | ✅ Notification2.List |
-|  | `c8y users create` | POST | `user/{tenant}/users` | S | ✅ Users.Create |
-|  | `c8y users delete` | DELETE | `user/{tenant}/users/{id}` | S | ✅ Users.Delete |
-|  | `c8y users get` | GET | `user/{tenant}/users/{id}` | S | ✅ Users.Get |
-|  | `c8y users getinventoryrole` | GET | `/user/inventoryroles/{id}` | S | ✅ Users.Get |
-|  | `c8y users getuserbyname` | GET | `user/{tenant}/userByName/{name}` | S | ✅ Users.GetByUsername |
-|  | `c8y users list` | GET | `/user/{tenant}/users` | S | ✅ Users.List |
-|  | `c8y users listinventoryroles` | GET | `/user/inventoryroles` | S | ✅ Users.List |
-|  | `c8y users listusermembership` | GET | `/user/{tenant}/users/{id}/groups` | S | ✅ Users.ListGroupsWithUser |
-|  | `c8y users resetuserpassword` | PUT | `user/{tenant}/users/{id}` | S | ✅ Users.ResetPassword |
-|  | `c8y users revoketotpsecret` | DELETE | `user/{tenant}/users/{id}/totpSecret/revoke` | S | ✅ Users.Update |
-|  | `c8y users update` | PUT | `user/{tenant}/users/{id}` | S | ✅ Users.Update |
 |  | `c8y currentapplication get` | GET | `/application/currentApplication` | M | ❌ none |
 |  | `c8y currentapplication listsubscriptions` | GET | `/application/currentApplication/subscriptions` | M | ❌ none |
 |  | `c8y currentapplication update` | PUT | `/application/currentApplication` | M | ❌ none |
