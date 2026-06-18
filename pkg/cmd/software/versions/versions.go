@@ -1,3 +1,8 @@
+// Package versions wires the `c8y software versions` command and its
+// subcommands. The subcommands are hand-written v2 c8ystream commands backed by
+// the go-c8y v2 Repository.Software.Versions service (install/uninstall create
+// device operations via Operations.CreateRaw). The create command is attached in
+// pkg/cmd/root/root.go.
 package versions
 
 import (

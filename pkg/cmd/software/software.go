@@ -1,3 +1,8 @@
+// Package software wires the `c8y software` command and its CRUD subcommands.
+// The subcommands are hand-written v2 c8ystream commands backed by the go-c8y v2
+// Repository.Software service, so this group command is itself hand-written
+// rather than generated. The versions subgroup (and its create command) is
+// attached in pkg/cmd/root/root.go.
 package software
 
 import (

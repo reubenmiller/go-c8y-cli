@@ -1,20 +1,29 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based software version uninstall: builds a device operation carrying a
+// c8y_SoftwareUpdate entry (action "delete"), resolves the target device
+// (name -> id), and creates the operation via Operations.CreateRaw. The device
+// flag is the iterating input, so the same software can be uninstalled from many
+// devices from a pipe. Unlike install, no repository lookup is performed.
 package uninstall
 
 import (
-	"io"
-	"net/http"
+	"context"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 // UninstallCmd command
@@ -45,7 +54,7 @@ Uninstall a software package version
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Device or agent where the software should be installed (accepts pipeline)")
+	cmd.Flags().String("device", "", "Device or agent where the software should be installed (accepts pipeline)")
 	cmd.Flags().String("software", "", "Software name (required)")
 	cmd.Flags().String("version", "", "Software version name or id")
 	cmd.Flags().String("softwareType", "", "Software type. Leave blank to automatically set it if a matching software/version is found in the c8y software repository")
@@ -66,6 +75,8 @@ Uninstall a software package version
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPowershellName("Remove-SoftwareVersion"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.operation+json", ""),
 	)
 
 	// Required flags
@@ -78,107 +89,76 @@ Uninstall a software package version
 
 // RunE executes the command
 func (n *UninstallCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
+	if err := r.InputFlag("device"); err != nil {
+		return err
 	}
 
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
+	err = r.Body(
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "deviceId"),
 		flags.WithStringValue("software", "c8y_SoftwareUpdate.0.name"),
 		flags.WithStringValue("version", "c8y_SoftwareUpdate.0.version"),
 		flags.WithStringValue("softwareType", "c8y_SoftwareUpdate.0.softwareType"),
 		flags.WithStringValue("action", "c8y_SoftwareUpdate.0.action"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("deviceId", "c8y_SoftwareUpdate.0.name", "c8y_SoftwareUpdate.0.action"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("devicecontrol/operations")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
 	)
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "POST",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	client, err := r.Client()
+	if err != nil {
+		return err
 	}
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	resolveDevice := func(ctx context.Context, ref string) (string, error) {
+		return client.Operations.DeviceResolver.ResolveID(ctx, managedobjects.DeviceRef(ref), nil)
+	}
+
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		device := in.String("device")
+		if device == "" {
+			return nil, cmderrors.NewUserError("Body is missing required properties: deviceId")
+		}
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		if body, err = sjson.SetBytes(body, "deviceId", device); err != nil {
+			return nil, err
+		}
+		if body, err = in.ResolveBodyRef(body, "deviceId", resolveDevice); err != nil {
+			return nil, err
+		}
+
+		if err := requireBodyKeys(body, "deviceId", "c8y_SoftwareUpdate.0.name", "c8y_SoftwareUpdate.0.action"); err != nil {
+			return nil, err
+		}
+
+		return func(ctx context.Context) output.Seq {
+			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.Operation] {
+				return client.Operations.CreateRaw(ctx, body)
+			})
+		}, nil
+	})
+}
+
+// requireBodyKeys returns a user error listing any of the given gjson paths that
+// are missing or empty in the body (mirrors v1's bodyRequiredKeys check).
+func requireBodyKeys(body []byte, keys ...string) error {
+	var missing []string
+	for _, k := range keys {
+		if v := gjson.GetBytes(body, k); !v.Exists() || v.String() == "" {
+			missing = append(missing, k)
+		}
+	}
+	if len(missing) > 0 {
+		return cmderrors.NewUserError("Body is missing required properties: " + strings.Join(missing, ", "))
+	}
+	return nil
 }
