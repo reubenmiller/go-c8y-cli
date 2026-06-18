@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 77.**  Effort — S:27 · M:39 · L:11.  SDK call — ✅ ready:27 · ⚠️ service-exists-method-missing:41 · ❌ no-service:9.
+**Remaining commands: 76.**  Effort — S:27 · M:38 · L:11.  SDK call — ✅ ready:27 · ⚠️ service-exists-method-missing:40 · ❌ no-service:9.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -37,7 +37,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y users resetuserpassword` | PUT | `user/{tenant}/users/{id}` | S | ✅ Users.ResetPassword |
 |  | `c8y users revoketotpsecret` | DELETE | `user/{tenant}/users/{id}/totpSecret/revoke` | S | ✅ Users.Update |
 |  | `c8y users update` | PUT | `user/{tenant}/users/{id}` | S | ✅ Users.Update |
-|  | `c8y bulkoperations listoperations` | GET | `devicecontrol/operations` | M | ⚠️ Bulkoperations +method |
 |  | `c8y currentapplication get` | GET | `/application/currentApplication` | M | ❌ none |
 |  | `c8y currentapplication listsubscriptions` | GET | `/application/currentApplication/subscriptions` | M | ❌ none |
 |  | `c8y currentapplication update` | PUT | `/application/currentApplication` | M | ❌ none |
