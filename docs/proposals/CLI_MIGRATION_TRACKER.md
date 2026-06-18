@@ -2,7 +2,7 @@
 
 One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`, cross-referenced against the go-c8y **v2** SDK. Fill the **Pri** (priority) column to plan; sorted by effort then SDK-readiness but meant to be re-sorted/filtered freely. Regenerate with `python3 docs/proposals/gen_tracker.py`.
 
-**Remaining commands: 83.**  Effort — S:32 · M:40 · L:11.  SDK call — ✅ ready:32 · ⚠️ service-exists-method-missing:42 · ❌ no-service:9.
+**Remaining commands: 77.**  Effort — S:27 · M:39 · L:11.  SDK call — ✅ ready:27 · ⚠️ service-exists-method-missing:41 · ❌ no-service:9.
 
 **Effort:** `S` ≈ ≤½ day (SDK method ready, mechanical) · `M` ≈ ~1 day (new SDK method / resolution / query-build / sub-resource) · `L` ≈ multi-day (new SDK service, or binary/multipart).
 
@@ -26,11 +26,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y microservices list` | GET | `/application/applications` | S | ✅ Microservices.List |
 |  | `c8y microservices update` | PUT | `/application/applications/{id}` | S | ✅ Microservices.Update |
 |  | `c8y notification2 subscriptions` | — | `— (dynamic)` | S | ✅ Notification2.List |
-|  | `c8y software create` | POST | `inventory/managedObjects` | S | ✅ Repository.Software.Create |
-|  | `c8y software delete` | DELETE | `inventory/managedObjects/{id}` | S | ✅ Repository.Software.Delete |
-|  | `c8y software get` | GET | `inventory/managedObjects/{id}` | S | ✅ Repository.Software.Get |
-|  | `c8y software list` | GET | `inventory/managedObjects` | S | ✅ Repository.Software.List |
-|  | `c8y software update` | PUT | `inventory/managedObjects/{id}` | S | ✅ Repository.Software.Update |
 |  | `c8y users create` | POST | `user/{tenant}/users` | S | ✅ Users.Create |
 |  | `c8y users delete` | DELETE | `user/{tenant}/users/{id}` | S | ✅ Users.Delete |
 |  | `c8y users get` | GET | `user/{tenant}/users/{id}` | S | ✅ Users.Get |
@@ -66,7 +61,6 @@ One row per individual go-c8y-cli command still on a spec-generated `*.auto.go`,
 |  | `c8y microservices loglevels` | — | `— (dynamic)` | M | ⚠️ Microservices +method |
 |  | `c8y notification2 tokens` | — | `— (dynamic)` | M | ⚠️ Notification2 +method |
 |  | `c8y remoteaccess configurations` | — | `— (dynamic)` | M | ⚠️ Remoteaccess? |
-|  | `c8y software versions` | — | `— (dynamic)` | M | ⚠️ Repository.Software +method |
 |  | `c8y tenants applications` | — | `— (dynamic)` | M | ⚠️ Tenants +method |
 |  | `c8y tenants disable` | PUT | `/tenant/tenants/{id}` | M | ⚠️ Tenants +method |
 |  | `c8y tenants disableapplication` | DELETE | `/tenant/tenants/{tenant}/applications/{application}` | M | ⚠️ Tenants +method |
