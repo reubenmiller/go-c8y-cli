@@ -284,6 +284,30 @@ func SubmitStatus[T any](ctx context.Context, call func(context.Context) op.Resu
 	return FromStatus(prep)
 }
 
+// SubmitValue is Submit for calls whose body is a plain Go value rather than a
+// jsondoc model (e.g. notification2 unsubscribe's {result}): same confirmation
+// lifecycle as Submit, FromJSONValue rendering. Pass dry=apiv2.IsDryRun(ctx) so
+// the prepared request — already shown by the dry-run handler — is not echoed as
+// a zero-value result.
+func SubmitValue[T any](ctx context.Context, dry bool, call func(context.Context) op.Result[T]) output.Seq {
+	s := submissionFrom(ctx)
+	if s == nil || !s.confirmActive() {
+		return FromJSONValue(call(ctx), dry)
+	}
+	prep := call(s.prepareContext(ctx))
+	proceed, err := s.confirm(prep.Request)
+	if err != nil {
+		return errSeq(err)
+	}
+	if !proceed {
+		return emptySeq
+	}
+	if prep.IsDeferred() {
+		return FromJSONValue(prep.Execute(ctx), dry)
+	}
+	return FromJSONValue(prep, dry)
+}
+
 // errSeq yields a single error into the stream.
 func errSeq(err error) output.Seq {
 	return func(yield func(jsondoc.JSONDoc, error) bool) {

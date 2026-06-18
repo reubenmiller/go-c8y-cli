@@ -1,3 +1,9 @@
+// Package notification2 wires the `c8y notification2` command. Its subgroups
+// (subscriptions/tokens) and the CLI-only `subscriptions subscribe` command are
+// attached on top of this command in pkg/cmd/root. Every spec-derived
+// subcommand is a hand-written v2 c8ystream command (backed by the go-c8y v2
+// Notification2 service), so this group command is itself hand-written rather
+// than generated.
 package notification2
 
 import (

@@ -1,3 +1,8 @@
+// Package subscriptions wires the `c8y notification2 subscriptions` command and
+// its subcommands (list/create/get/deleteBySource/delete). All are hand-written
+// v2 c8ystream commands backed by the go-c8y v2 Notification2 service. The
+// CLI-only `subscribe` command is attached on top of this command in
+// pkg/cmd/root.
 package subscriptions
 
 import (

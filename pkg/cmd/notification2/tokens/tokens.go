@@ -1,3 +1,6 @@
+// Package tokens wires the `c8y notification2 tokens` command and its
+// subcommands (create/unsubscribe). Both are hand-written v2 c8ystream commands
+// backed by the go-c8y v2 Notification2 service.
 package tokens
 
 import (

@@ -1,20 +1,26 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based notification2 subscription create: the CLI builds the body
+// (subscription/context, the subscriptionFilter apis/typeFilter via a jsonnet
+// template, plus --data/--template), the device flag drives iteration and its
+// value is resolved (name -> id) into the body's source.id before the raw
+// create call — so the same subscription can be created for many piped devices.
 package create
 
 import (
-	"io"
-	"net/http"
+	"context"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/sjson"
 )
 
 // CreateCmd command
@@ -74,9 +80,9 @@ Create a subscription which groups all devices in a single subscription name
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("device", "source.id", false, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPowershellName("New-Notification2Subscription"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.subscriptioncollection+json", ""),
 	)
-
-	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -85,74 +91,20 @@ Create a subscription which groups all devices in a single subscription name
 
 // RunE executes the command
 func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
+	// The device flag drives iteration: piped device objects feed it (id /
+	// source.id extracted), or its own --device value drives a single run, so the
+	// same subscription can be created for many devices from a pipe.
+	if err := r.InputFlag("device"); err != nil {
+		return err
 	}
 
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
+	err = r.Body(
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "source.id"),
 		flags.WithStringValue("name", "subscription"),
 		flags.WithStringValue("context", "context"),
 		flags.WithStringSliceValues("fragmentsToCopy", "fragmentsToCopy", ""),
@@ -174,30 +126,39 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithRequiredProperties("context", "subscription"),
 	)
 	if err != nil {
-		return cmderrors.NewUserError(err)
+		return err
 	}
 
-	// path parameters
-	path := flags.NewStringTemplate("notification2/subscriptions")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "POST",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	resolveDevice := func(ctx context.Context, ref string) (string, error) {
+		return client.Notification2.DeviceResolver.ResolveID(ctx, managedobjects.DeviceRef(ref), nil)
 	}
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		// Carry the (resolved) source id on the subscription. The device value
+		// comes from the driver so a piped device populates it; ResolveSourceID
+		// applies the name-or-id convention and resolves the name against the real
+		// API even under --dry. No device -> no source (e.g. tenant context).
+		if device := in.String("device"); device != "" {
+			if body, err = sjson.SetBytes(body, "source.id", device); err != nil {
+				return nil, err
+			}
+		}
+		if body, err = in.ResolveSourceID(body, resolveDevice); err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context) output.Seq {
+			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.Notification2Subscription] {
+				return client.Notification2.CreateRaw(ctx, body)
+			})
+		}, nil
+	})
 }
