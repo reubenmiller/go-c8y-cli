@@ -1,20 +1,19 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based inventory list: the type flag is the iterating input (piped lines feed
+// it, or its own value drives a single run); each item builds a managed-object
+// list filter and drives a typed ManagedObjects.ListAll call whose pages stream
+// through the shared output pipeline.
 package list
 
 import (
-	"fmt"
-	"io"
-	"net/http"
-
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 )
 
@@ -78,14 +77,12 @@ Get managed objects which have the same type as the managed object id=1234. pipe
 
 	flags.WithOptions(
 		cmd,
-
 		flags.WithExtendedPipelineSupport("type", "type", false, "type"),
 		flags.WithPipelineAliases("childDeviceId", "deviceId", "source.id", "managedObject.id", "id"),
-
 		flags.WithCollectionProperty("managedObjects"),
+		flags.WithPowershellName("Get-ManagedObjectCollection"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.managedObjectCollection+json", "application/vnd.com.nsn.cumulocity.managedObject+json"),
 	)
-
-	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -94,117 +91,87 @@ Get managed objects which have the same type as the managed object id=1234. pipe
 
 // RunE executes the command
 func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithStringSliceCSV("ids", "ids", ""),
-		flags.WithStringValue("type", "type"),
-		flags.WithStringValue("fragmentType", "fragmentType"),
-		flags.WithStringValue("owner", "owner"),
-		flags.WithStringValue("text", "text"),
-		flags.WithBoolValue("onlyRoots", "onlyRoots", ""),
-		flags.WithStringValue("childAdditionId", "childAdditionId"),
-		flags.WithStringValue("childAssetId", "childAssetId"),
-		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "childDeviceId", "childDeviceId"),
-		flags.WithBoolValue("skipChildrenNames", "skipChildrenNames", ""),
-		flags.WithBoolValue("withParents", "withParents", ""),
-		flags.WithBoolValue("withChildren", "withChildren", ""),
-		flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
-		flags.WithBoolValue("withGroups", "withGroups", ""),
-		flags.WithBoolValue("withLatestValues", "withLatestValues", ""),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
-
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
+	if err := r.InputFlag("type"); err != nil {
+		return err
 	}
 
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "GET",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	common, err := r.Config.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
 	}
+	rawOutput := r.Config.RawOutput()
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
+
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		childDeviceID := firstNonEmpty(in.StringSlice("childDeviceId"))
+		if childDeviceID != "" {
+			childDeviceID, err = client.ManagedObjects.ResolveID(in.ResolveContext(), c8ystream.NameOrID(childDeviceID), nil)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		opt := managedobjects.ListOptions{
+			Ids:             nonEmpty(in.StringSlice("ids")),
+			Type:            in.String("type"),
+			FragmentType:    in.String("fragmentType"),
+			Owner:           in.String("owner"),
+			Text:            in.String("text"),
+			OnlyRoots:       in.Bool("onlyRoots"),
+			ChildAdditionID: in.String("childAdditionId"),
+			ChildAssetID:    in.String("childAssetId"),
+			ChildDeviceID:   childDeviceID,
+		}
+		opt.SkipChildrenNames = in.Bool("skipChildrenNames")
+		opt.WithParents = in.Bool("withParents")
+		opt.WithChildren = in.Bool("withChildren")
+		opt.WithChildrenCount = in.Bool("withChildrenCount")
+		opt.WithGroups = in.Bool("withGroups")
+		opt.WithLatestValues = in.Bool("withLatestValues")
+		opt.PaginationOptions = pagination.PaginationOptions{
+			PageSize:          common.PageSize,
+			WithTotalPages:    common.WithTotalPages,
+			WithTotalElements: common.WithTotalElements,
+			CurrentPage:       int(common.CurrentPage),
+			MaxItems:          r.Config.MaxItems(),
+			Strategy:          paginationStrategy,
+		}
+		return c8ystream.ListCall(rawOutput, opt, client.ManagedObjects.ListAll), nil
+	})
+}
+
+// firstNonEmpty returns the first non-empty entry of a slice flag.
+func firstNonEmpty(values []string) string {
+	for _, v := range values {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+// nonEmpty drops empty entries from a slice flag (the StringSlice default is
+// `[""]`, which would otherwise serialise as an empty ids filter).
+func nonEmpty(values []string) []string {
+	out := make([]string, 0, len(values))
+	for _, v := range values {
+		if v != "" {
+			out = append(out, v)
+		}
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
 }

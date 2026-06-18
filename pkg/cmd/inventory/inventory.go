@@ -1,3 +1,7 @@
+// Package inventory wires the `c8y inventory` command and its CRUD/query
+// subcommands. All subcommands are hand-written v2 c8ystream commands backed by
+// the go-c8y v2 ManagedObjects service, so this group command is itself
+// hand-written rather than generated.
 package inventory
 
 import (

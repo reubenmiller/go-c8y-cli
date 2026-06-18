@@ -1,20 +1,22 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based inventory find: the query flag is the iterating input; each item
+// assembles a Cumulocity inventory query from the typed filter flags (name, type,
+// fragment, availability, date ranges, group inclusion, ...) and drives a typed
+// ManagedObjects.ListAll call whose pages stream through the shared pipeline.
 package find
 
 import (
 	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/model"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 )
 
@@ -82,18 +84,16 @@ Invert a given query received via piped input (stdin) by using a template
 
 	flags.WithOptions(
 		cmd,
-
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
 		flags.WithPipelineAliases("lastMessageDateTo", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("lastMessageDateFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("creationTimeDateTo", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("creationTimeDateFrom", "time", "creationTime", "lastUpdated"),
 		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
-
 		flags.WithCollectionProperty("managedObjects"),
+		flags.WithPowershellName("Find-ManagedObjectCollection"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.managedObjectCollection+json", "application/vnd.com.nsn.cumulocity.managedObject+json"),
 	)
-
-	// Required flags
 
 	_ = cmd.Flags().MarkHidden("onlyDevices")
 
@@ -104,127 +104,93 @@ Invert a given query received via piped input (stdin) by using a template
 
 // RunE executes the command
 func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithBoolValue("skipChildrenNames", "skipChildrenNames", ""),
-		flags.WithBoolValue("withChildren", "withChildren", ""),
-		flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
-		flags.WithBoolValue("withGroups", "withGroups", ""),
-		flags.WithBoolValue("withParents", "withParents", ""),
-		flags.WithBoolValue("withLatestValues", "withLatestValues", ""),
-
-		flags.WithCumulocityQuery(
-			[]flags.GetOption{
-				flags.WithStringValue("query", "query", "%s"),
-				flags.WithStringValue("name", "name", "(name eq '%s')"),
-				flags.WithStringValue("type", "type", "(type eq '%s')"),
-				flags.WithDefaultBoolValue("agents", "agents", "has(com_cumulocity_model_Agent)"),
-				flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
-				flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
-				flags.WithStringValue("availability", "availability", "(c8y_Availability.status eq '%s')"),
-				flags.WithEncodedRelativeTimestamp("lastMessageDateTo", "lastMessageDateTo", "(c8y_Availability.lastMessage le '%s')"),
-				flags.WithEncodedRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
-				flags.WithEncodedRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "(creationTime.date le '%s')"),
-				flags.WithEncodedRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "(creationTime.date ge '%s')"),
-				c8yfetcher.WithDeviceGroupByNameFirstMatch(n.factory, args, "group", "group", "bygroupid(%s)"),
-				flags.WithDefaultBoolValue("onlyDevices", "onlyDevices", "has(c8y_IsDevice)"),
-			},
-			"query",
-		),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
-
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
+	if err := r.InputFlag("query"); err != nil {
+		return err
 	}
 
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "GET",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	common, err := r.Config.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
 	}
+	rawOutput := r.Config.RawOutput()
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	queryTemplate := cmd.Flag("queryTemplate").Value.String()
+	orderBy := cmd.Flag("orderBy").Value.String()
+
+	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
+
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		q := model.NewInventoryQuery()
+
+		if raw := in.String("query"); raw != "" {
+			q.AddFilterPart(applyQueryTemplate(queryTemplate, raw))
+		} else if queryTemplate != "" {
+			q.AddFilterPart(queryTemplate)
+		}
+
+		q.AddFilterEqStr("name", in.String("name")).
+			AddFilterEqStr("type", in.String("type"))
+		if in.Bool("agents") {
+			q.AddFilterPart("has(com_cumulocity_model_Agent)")
+		}
+		q.HasFragment(in.String("fragmentType")).
+			AddFilterEqStr("owner", in.String("owner")).
+			AddFilterEqStr("c8y_Availability.status", in.String("availability")).
+			AddFilterOp("c8y_Availability.lastMessage", "le", in.Time("lastMessageDateTo")).
+			AddFilterOp("c8y_Availability.lastMessage", "ge", in.Time("lastMessageDateFrom")).
+			AddFilterOp("creationTime.date", "le", in.Time("creationTimeDateTo")).
+			AddFilterOp("creationTime.date", "ge", in.Time("creationTimeDateFrom"))
+
+		for _, group := range in.StringSlice("group") {
+			if group == "" {
+				continue
+			}
+			groupID, err := client.DeviceGroups.ResolveID(in.ResolveContext(), c8ystream.NameOrID(group), nil)
+			if err != nil {
+				return nil, err
+			}
+			q.ByGroupID(groupID)
+		}
+
+		if in.Bool("onlyDevices") {
+			q.AddFilterPart("has(c8y_IsDevice)")
+		}
+		q.AddOrderBy(orderBy)
+
+		opt := managedobjects.ListOptions{Query: q.Build()}
+		opt.SkipChildrenNames = in.Bool("skipChildrenNames")
+		opt.WithChildren = in.Bool("withChildren")
+		opt.WithChildrenCount = in.Bool("withChildrenCount")
+		opt.WithGroups = in.Bool("withGroups")
+		opt.WithParents = in.Bool("withParents")
+		opt.WithLatestValues = in.Bool("withLatestValues")
+		opt.PaginationOptions = pagination.PaginationOptions{
+			PageSize:          common.PageSize,
+			WithTotalPages:    common.WithTotalPages,
+			WithTotalElements: common.WithTotalElements,
+			CurrentPage:       int(common.CurrentPage),
+			MaxItems:          r.Config.MaxItems(),
+			Strategy:          paginationStrategy,
+		}
+		return c8ystream.ListCall(rawOutput, opt, client.ManagedObjects.ListAll), nil
+	})
+}
+
+// applyQueryTemplate formats a raw query value with the --queryTemplate (a %s
+// template). An empty template returns the value unchanged.
+func applyQueryTemplate(template, value string) string {
+	if template == "" {
+		return value
+	}
+	return fmt.Sprintf(template, value)
 }

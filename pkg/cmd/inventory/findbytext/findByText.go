@@ -1,19 +1,16 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based inventory findByText: the text flag is the iterating input (required;
+// piped lines feed it); each item drives a typed ManagedObjects.ListAll call
+// filtered by the Cumulocity text-search algorithm.
 package findbytext
 
 import (
-	"fmt"
-	"io"
-	"net/http"
-
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 )
 
@@ -61,19 +58,13 @@ Find managed objects which contain the text 'myText' and is a device (using pipe
 	cmd.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
 	cmd.Flags().Bool("withLatestValues", false, "(FEATURE_PREVIEW) Include c8y_LatestMeasurements fragment, which contains the latest measurement values reported by the device to the platform")
 
-	completion.WithOptions(
-		cmd,
-	)
-
 	flags.WithOptions(
 		cmd,
-
 		flags.WithExtendedPipelineSupport("text", "text", true, "id"),
-
 		flags.WithCollectionProperty("managedObjects"),
+		flags.WithPowershellName("Find-ByTextManagedObjectCollection"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.managedObjectCollection+json", "application/vnd.com.nsn.cumulocity.managedObject+json"),
 	)
-
-	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -82,111 +73,48 @@ Find managed objects which contain the text 'myText' and is a device (using pipe
 
 // RunE executes the command
 func (n *FindByTextCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithStringValue("text", "text"),
-		flags.WithStringValue("type", "type"),
-		flags.WithStringValue("fragmentType", "fragmentType"),
-		flags.WithBoolValue("skipChildrenNames", "skipChildrenNames", ""),
-		flags.WithBoolValue("withChildren", "withChildren", ""),
-		flags.WithBoolValue("withChildrenCount", "withChildrenCount", ""),
-		flags.WithBoolValue("withGroups", "withGroups", ""),
-		flags.WithBoolValue("withParents", "withParents", ""),
-		flags.WithBoolValue("withLatestValues", "withLatestValues", ""),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
-
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
+	if err := r.InputFlag("text"); err != nil {
+		return err
 	}
 
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "GET",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	common, err := r.Config.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
 	}
+	rawOutput := r.Config.RawOutput()
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
+
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		opt := managedobjects.ListOptions{
+			Text:         in.String("text"),
+			Type:         in.String("type"),
+			FragmentType: in.String("fragmentType"),
+		}
+		opt.SkipChildrenNames = in.Bool("skipChildrenNames")
+		opt.WithChildren = in.Bool("withChildren")
+		opt.WithChildrenCount = in.Bool("withChildrenCount")
+		opt.WithGroups = in.Bool("withGroups")
+		opt.WithParents = in.Bool("withParents")
+		opt.WithLatestValues = in.Bool("withLatestValues")
+		opt.PaginationOptions = pagination.PaginationOptions{
+			PageSize:          common.PageSize,
+			WithTotalPages:    common.WithTotalPages,
+			WithTotalElements: common.WithTotalElements,
+			CurrentPage:       int(common.CurrentPage),
+			MaxItems:          r.Config.MaxItems(),
+			Strategy:          paginationStrategy,
+		}
+		return c8ystream.ListCall(rawOutput, opt, client.ManagedObjects.ListAll), nil
+	})
 }

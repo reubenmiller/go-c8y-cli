@@ -1,3 +1,8 @@
+// Package additions wires the deprecated `c8y inventory additions` command and
+// its subcommands (use `c8y inventory children ... --childType addition`). All
+// subcommands are hand-written v2 c8ystream commands backed by the go-c8y v2
+// ManagedObjects ChildAdditions service, so this group command is itself
+// hand-written rather than generated.
 package additions
 
 import (
