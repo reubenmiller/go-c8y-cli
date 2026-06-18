@@ -1,3 +1,8 @@
+// Package versions wires the `c8y ui plugins versions` command and its
+// subcommands. All subcommands are hand-written v2 c8ystream commands backed by
+// the go-c8y v2 ApplicationVersions service (UI plugin versions are application
+// versions on the same endpoint), so this group command is itself hand-written
+// rather than generated.
 package versions
 
 import (

@@ -1,20 +1,22 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
+// v2-based UI plugin list: fills the typed plugins.ListOptions (name/owner/
+// availability/... filters) and streams UIPlugins.ListAll. UI plugins are HOSTED
+// applications with versions, so the type/hasVersions filters are pinned by the
+// SDK. The name flag is the iterating input (pipe or --name), so the command runs
+// once for the common no-pipe case.
 package list
 
 import (
-	"fmt"
-	"io"
-	"net/http"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/ui/plugins"
 	"github.com/spf13/cobra"
 )
 
@@ -75,18 +77,11 @@ Get private ui plugins
 
 	flags.WithOptions(
 		cmd,
-
 		flags.WithExtendedPipelineSupport("name", "name", false, "id"),
-		flags.WithPipelineAliases("name", "id"),
-		flags.WithPipelineAliases("owner", "tenant", "owner.tenant.id"),
-		flags.WithPipelineAliases("providedFor", "tenant", "owner.tenant.id"),
-		flags.WithPipelineAliases("subscriber", "tenant", "owner.tenant.id"),
-		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
-
 		flags.WithCollectionProperty("applications"),
+		flags.WithPowershellName("Get-UIPluginCollection"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.applicationCollection+json", "application/vnd.com.nsn.cumulocity.application+json"),
 	)
-
-	// Required flags
 
 	_ = cmd.Flags().MarkHidden("type")
 	_ = cmd.Flags().MarkHidden("hasVersions")
@@ -98,111 +93,49 @@ Get private ui plugins
 
 // RunE executes the command
 func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithStaticStringValue("type", "HOSTED"),
-		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("owner", "owner"),
-		flags.WithStringValue("providedFor", "providedFor"),
-		flags.WithStringValue("subscriber", "subscriber"),
-		c8yfetcher.WithUserByNameFirstMatch(n.factory, args, "user", "user"),
-		flags.WithStringValue("tenant", "tenant"),
-		flags.WithDefaultBoolValue("hasVersions", "hasVersions", ""),
-		flags.WithStringValue("availability", "availability"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
-
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
+	if err := r.InputFlag("name"); err != nil {
+		return err
 	}
 
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("/application/applications")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "GET",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	common, err := r.Config.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
 	}
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	rawOutput := r.Config.RawOutput()
+	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
+
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		opt := plugins.ListOptions{
+			// UI plugins are HOSTED applications that carry versions; the SDK List
+			// pins hasVersions=true, and the type filter is pinned here to match v1.
+			Type:         plugins.ApplicationTypeHosted,
+			Name:         in.String("name"),
+			Owner:        in.String("owner"),
+			ProvidedFor:  in.String("providedFor"),
+			Subscriber:   in.String("subscriber"),
+			User:         strings.Join(in.StringSlice("user"), ","),
+			Tenant:       in.String("tenant"),
+			Availability: in.String("availability"),
+		}
+		opt.PaginationOptions = pagination.PaginationOptions{
+			PageSize:          common.PageSize,
+			WithTotalPages:    common.WithTotalPages,
+			WithTotalElements: common.WithTotalElements,
+			CurrentPage:       int(common.CurrentPage),
+			MaxItems:          r.Config.MaxItems(),
+			Strategy:          paginationStrategy,
+		}
+		return c8ystream.ListCall(rawOutput, opt, client.UIPlugins.ListAll), nil
+	})
 }

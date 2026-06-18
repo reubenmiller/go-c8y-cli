@@ -1,3 +1,8 @@
+// Package plugins wires the `c8y ui plugins` command and its subcommands. The
+// list/get/update/delete subcommands are hand-written v2 c8ystream commands
+// (backed by the go-c8y v2 UIPlugins service), so this group command is itself
+// hand-written rather than generated. The `create` subcommand and the `versions`
+// subgroup are wired separately in pkg/cmd/root/root.go.
 package plugins
 
 import (
