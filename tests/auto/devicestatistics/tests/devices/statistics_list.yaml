@@ -20,7 +20,7 @@ tests:
             json:
                 method: GET
                 path: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$
-                pathEncoded: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}\?deviceId=12345$
+                queryParams.deviceId.0: "12345"
             contains:
                 - deviceId=12345
     devices/statistics_list_Get monthly device statistics for all devices for a specific month (day is ignored):

@@ -163,6 +163,7 @@ func (r *Runner) Body(getters ...flags.GetOption) error {
 	if err := flags.WithBody(r.Cmd, r.body, r.InputIterators, getters...); err != nil {
 		return cmderrors.NewUserError(err)
 	}
+	r.bindPipeBodyProperty()
 	return nil
 }
 

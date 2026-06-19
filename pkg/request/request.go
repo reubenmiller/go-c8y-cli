@@ -168,16 +168,17 @@ func isInventoryQuery(r *c8y.RequestOptions) bool {
 }
 
 type RequestDetails struct {
-	URL         string            `json:"url,omitempty"`
-	Host        string            `json:"host,omitempty"`
-	PathEncoded string            `json:"pathEncoded,omitempty"`
-	Path        string            `json:"path,omitempty"`
-	Query       string            `json:"query,omitempty"`
-	Method      string            `json:"method,omitempty"`
-	Headers     map[string]string `json:"headers,omitempty"`
-	Body        interface{}       `json:"body,omitempty"`
-	Shell       string            `json:"shell,omitempty"`
-	PowerShell  string            `json:"powershell,omitempty"`
+	URL         string              `json:"url,omitempty"`
+	Host        string              `json:"host,omitempty"`
+	PathEncoded string              `json:"pathEncoded,omitempty"`
+	Path        string              `json:"path,omitempty"`
+	Query       string              `json:"query,omitempty"`
+	QueryParams map[string][]string `json:"queryParams,omitempty"`
+	Method      string              `json:"method,omitempty"`
+	Headers     map[string]string   `json:"headers,omitempty"`
+	Body        interface{}         `json:"body,omitempty"`
+	Shell       string              `json:"shell,omitempty"`
+	PowerShell  string              `json:"powershell,omitempty"`
 }
 
 func (r *RequestHandler) DumpRequest(w io.Writer, req *http.Request) {
@@ -274,6 +275,18 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 
 	shell, pwsh, dummyFiles, _ := r.GetCurlCommands(requestOptions, req)
 
+	// queryParams is the decoded form of Query as a map, so consumers (e.g. test
+	// assertions, --select) can address a single parameter by name instead of
+	// substring-matching the raw string. It is url.Values (map[string][]string)
+	// so a parameter repeated in the query — "status=ACTIVE&status=ACKNOWLEDGED"
+	// — is preserved as ["ACTIVE","ACKNOWLEDGED"] rather than being collapsed,
+	// which a plain map[string]string could not represent. nil (omitted) when the
+	// request carries no query string.
+	var queryParams map[string][]string
+	if values := req.URL.Query(); len(values) > 0 {
+		queryParams = values
+	}
+
 	details := &RequestDetails{
 		URL:         fullURL,
 		Host:        req.URL.Scheme + "://" + req.URL.Host, // Include host port number
@@ -281,6 +294,7 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 		Method:      req.Method,
 		Headers:     headers,
 		Query:       TryUnescapeURL(req.URL.RawQuery),
+		QueryParams: queryParams,
 		Body:        requestBody,
 		Shell:       shell,
 		PowerShell:  pwsh,

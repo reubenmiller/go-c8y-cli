@@ -90,7 +90,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		ref := configuration.ConfigurationRef(c8ystream.NameOrID(in.String("id")))
-		opt := configuration.DeleteOptions{ForceCascade: in.Bool("forceCascade")}
+		opt := configuration.DeleteOptions{ForceCascade: in.BoolPtr("forceCascade")}
 		return func(ctx context.Context) output.Seq {
 			return c8ystream.SubmitStatus(ctx, func(ctx context.Context) op.Result[core.NoContent] {
 				return client.Configuration.Delete(ctx, ref, opt)

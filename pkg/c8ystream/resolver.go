@@ -141,6 +141,30 @@ func (in *Resolver) Bool(flag string) bool {
 	return v
 }
 
+// BoolPtr returns a pointer to a bool flag's value. It is never nil: the flag
+// has a registered default, so the value is always meaningful and is always
+// sent. Use it for query parameters that must carry an explicit false (e.g.
+// forceCascade with a default of true) rather than being dropped —
+// go-querystring's omitempty omits a nil pointer but keeps a pointer to false,
+// which a plain bool cannot express.
+func (in *Resolver) BoolPtr(flag string) *bool {
+	v, _ := in.r.Cmd.Flags().GetBool(flag)
+	return &v
+}
+
+// BoolPtrIfChanged returns a pointer to a bool flag's value only when the user
+// set the flag, and nil otherwise. Use it for query parameters whose default is
+// "off" so an unset flag stays off the request entirely, while an explicit
+// value (including false) is sent — matching the v1 behaviour of only emitting
+// the parameter when the user supplied it.
+func (in *Resolver) BoolPtrIfChanged(flag string) *bool {
+	if !in.r.Cmd.Flags().Changed(flag) {
+		return nil
+	}
+	v, _ := in.r.Cmd.Flags().GetBool(flag)
+	return &v
+}
+
 // StringSlice returns a string-slice flag's value.
 func (in *Resolver) StringSlice(flag string) []string {
 	v, _ := in.r.Cmd.Flags().GetStringSlice(flag)

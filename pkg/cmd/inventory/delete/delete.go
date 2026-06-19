@@ -91,7 +91,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		opt := managedobjects.DeleteOptions{
 			Cascade:        in.Bool("cascade"),
-			ForceCascade:   in.Bool("forceCascade"),
+			ForceCascade:   in.BoolPtrIfChanged("forceCascade"),
 			WithDeviceUser: in.Bool("withDeviceUser"),
 		}
 		ref := c8ystream.NameOrID(in.String("id"))

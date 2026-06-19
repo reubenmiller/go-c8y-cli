@@ -47,7 +47,7 @@ Cancel an operation
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Operation id (required) (accepts pipeline)")
-	cmd.Flags().String("status", "", "Operation status")
+	cmd.Flags().String("status", "FAILED", "Operation status")
 	cmd.Flags().String("failureReason", "User cancelled operation", "Reason for the failure")
 
 	flags.WithOptions(

@@ -131,8 +131,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		// Always scope to device groups (fragment c8y_IsDeviceGroup); a plain
-		// inventory query would also return ordinary devices.
-		q.HasFragment(devicegroups.FragmentIsDeviceGroup).
+		// inventory query would also return ordinary devices. The fragment check
+		// is wrapped in its own parentheses — "(has(c8y_IsDeviceGroup))" — to match
+		// the v1 query grouping (other has() filters, e.g. firmware patches, stay
+		// unwrapped, so this is scoped here rather than in the shared builder).
+		q.AddFilterPart("(has(" + devicegroups.FragmentIsDeviceGroup + "))").
 			AddFilterEqStr("name", in.String("name")).
 			AddFilterEqStr("type", in.String("type")).
 			HasFragment(in.String("fragmentType")).
