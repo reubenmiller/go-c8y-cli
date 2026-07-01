@@ -21,6 +21,7 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
 
@@ -110,7 +111,17 @@ func (n *EnableCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		// Build the body first so a --template/--data supplied application.id can
+		// satisfy the requirement (v1 accepted the id from the body/template, not
+		// only the --id flag). The explicit --id still wins when set.
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
 		ref := in.String("id")
+		if ref == "" {
+			ref = gjson.GetBytes(body, "application.id").String()
+		}
 		if ref == "" {
 			return nil, fmt.Errorf("Body is missing required properties: application.id")
 		}
@@ -118,10 +129,6 @@ func (n *EnableCmd) RunE(cmd *cobra.Command, args []string) error {
 		// body's application.id; the value comes from the driver flag, so this
 		// works for piped input too.
 		appID, err := client.Microservices.ResolveID(in.ResolveContext(), c8ystream.NameOrID(ref), nil)
-		if err != nil {
-			return nil, err
-		}
-		body, err := in.Body()
 		if err != nil {
 			return nil, err
 		}

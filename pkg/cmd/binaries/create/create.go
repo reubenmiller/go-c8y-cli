@@ -114,6 +114,12 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 			ContentType: in.String("type"),
 			Properties:  properties,
 		}
+		// A template-built object is rendered pretty (3-space indent), matching v1
+		// where the jsonnet body carried its own indentation; a plain --data object
+		// stays compact.
+		if cmd.Flags().Changed("template") {
+			opt.ObjectIndent = "   "
+		}
 		return func(ctx context.Context) output.Seq {
 			// SubmitUpload (not Submit): the multipart body can't be prepared for
 			// the confirmation prompt without blocking.

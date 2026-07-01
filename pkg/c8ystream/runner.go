@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+	"sync"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -12,11 +15,14 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/stream"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
 	ctxhelpers "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/contexthelpers"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // Call is one service invocation. It is built (with its arguments already
@@ -44,11 +50,21 @@ type Runner struct {
 	cursor      *iterator.InputCursor
 	driver      iterator.Iterator // pipe or primary-flag iterator; nil = run once
 	primaryName string            // flag the driver resolves (e.g. "id"); "" for a plain pipe
+	pipeOverride bool             // another flag claimed the pipe via `-`/`-.path`
 	query       *flags.QueryTemplate
 	body        *mapbuilder.MapBuilder
 	runCtx      context.Context // set in Run; exposed to Build via Resolver.Context
 	submission  *submission     // confirmation + delays; nil when neither applies
 	index       int64
+
+	// tmplInput is the current item's raw input, kept pointed at the item being
+	// produced so the --outputTemplate stage can bind it as input.value. Correct
+	// for the serial pipeline (the default); request/response stay empty until a
+	// command threads its response metadata.
+	tmplInput    []byte
+	tmplMu       sync.Mutex // guards tmplRequest/tmplResponse against the response middleware
+	tmplRequest  map[string]any
+	tmplResponse map[string]any
 }
 
 // NewRunner resolves the command configuration and pipeline annotations and
@@ -118,10 +134,56 @@ func (r *Runner) InputFlag(name string) error {
 		return err
 	}
 	if iter != nil {
+		// Mirror v1 (flags.WithStringSliceValues): an explicit --<name> value
+		// fills in whenever a piped item yields no value for the bound property,
+		// so e.g. `... | c8y devices update --id 0` still targets id 0 when the
+		// piped object carries no id/deviceId/source.id. The bound pipe keeps
+		// driving the loop length; the override only supplies the value, so an id
+		// present in the item still wins.
+		if values, verr := flags.GetFlagStringValues(r.Cmd, name); verr == nil && r.Cmd.Flags().Changed(name) && len(values) > 0 && iter.IsBound() && !anyInputReference(values) {
+			iter = iterator.NewOverrideIterator(iter, iterator.NewInfiniteSliceIterator(values))
+		}
 		r.driver = iter
 	}
 	r.primaryName = name
+	r.detectPipeOverride()
 	return nil
+}
+
+// anyInputReference reports whether any value is a `-`/`-.path` pipe reference
+// rather than a literal override value (the latter wins over the pipe; the
+// former IS the pipe and must be resolved by the driver, not overridden).
+func anyInputReference(values []string) bool {
+	for _, v := range values {
+		if _, ok := iterator.InputReference(v); ok {
+			return true
+		}
+	}
+	return false
+}
+
+// detectPipeOverride records whether the user mapped the pipeline onto a flag
+// other than the driver's, e.g. `c8y applications list --user -` (the driver is
+// "type"). When set, the driver still reads stdin to advance iteration and the
+// cursor, but its own flag value is left unset so only the explicitly mapped
+// flag(s) take the piped value — matching v1, where `--<flag> -` overrides the
+// command's default pipeline target.
+func (r *Runner) detectPipeOverride() {
+	r.Cmd.Flags().Visit(func(f *pflag.Flag) {
+		if r.pipeOverride || f.Name == r.primaryName {
+			return
+		}
+		vals, err := flags.GetFlagStringValues(r.Cmd, f.Name)
+		if err != nil {
+			return
+		}
+		for _, v := range vals {
+			if _, ok := iterator.InputReference(v); ok {
+				r.pipeOverride = true
+				return
+			}
+		}
+	})
 }
 
 // InputRaw makes a flag the iterating driver like InputFlag, but yields each
@@ -176,7 +238,7 @@ func (r *Runner) Client() (*apiv2.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	client := apiv2.NewClient(apiv2.ClientOptions{
+	opts := apiv2.ClientOptions{
 		BaseURL: legacy.BaseURL.String(),
 		Auth: authentication.AuthOptions{
 			Tenant:   legacy.TenantName,
@@ -184,11 +246,38 @@ func (r *Runner) Client() (*apiv2.Client, error) {
 			Password: legacy.Password,
 			Token:    legacy.Token,
 		},
-		Debug: r.Config.Verbose() || r.Config.Debug(),
-	})
+		Debug:   r.Config.Verbose() || r.Config.Debug(),
+		Timeout: r.Config.RequestTimeout(),
+	}
+
+	// Install the HTTP response cache exactly as the legacy factory client does
+	// (pkg/cmd/factory/c8yclient.go). The cache is a RoundTripper wrapper, so it
+	// becomes the v2 client's base transport; apiv2.NewClient further wraps it in
+	// DryRunTransport, giving DryRun -> cache -> network ordering (a dry run
+	// short-circuits before ever touching the cache). Without this the v2 path
+	// silently skipped caching entirely.
+	if r.Config.CacheEnabled() && r.Config.CacheTTL() > 0 {
+		cachableMethods := r.Config.CacheMethods()
+		opts.Transport = c8y.CacheResponse(
+			r.Config.CacheTTL(),
+			r.Config.CacheDir(),
+			func(req *http.Request) bool {
+				return strings.Contains(cachableMethods, req.Method)
+			},
+			c8y.CacheOptions{
+				ExcludeAuth: !r.Config.CacheKeyIncludeAuth(),
+				ExcludeHost: !r.Config.CacheKeyIncludeHost(),
+				Mode:        r.Config.CacheMode(),
+				BodyKeys:    r.Config.CacheBodyKeys(),
+			},
+		)(http.DefaultTransport)
+	}
+
+	client := apiv2.NewClient(opts)
 	if err := r.installActivityLog(client); err != nil {
 		return nil, err
 	}
+	r.installOutputTemplateCapture(client)
 	return client, nil
 }
 
@@ -215,6 +304,7 @@ func (r *Runner) Run(build Build) error {
 		ctx = ctxhelpers.WithDryRunHandler(ctx, handler)
 	}
 	ctx = WithProcessingMode(ctx, r.Cmd, cfg)
+	ctx = WithExtraRequestOptions(ctx, cfg)
 
 	// Confirmation + delays live on the submission, shared across items and
 	// carried via context to the per-item Submit calls. Built once here so the
@@ -225,7 +315,16 @@ func (r *Runner) Run(build Build) error {
 	r.runCtx = ctx
 
 	collector := &ErrorCollector{Max: cfg.AbortOnErrorCount()}
-	stages, err := CommonStages(cfg)
+	if cfg.WithError() {
+		// --withError: route each item's error body to stdout as a document so the
+		// shaping stages (filter/outputTemplate/select) can process it, matching v1.
+		collector.Emit = r.errorDocument
+	}
+	outputTemplate, err := r.outputTemplateStage()
+	if err != nil {
+		return err
+	}
+	stages, err := CommonStages(cfg, outputTemplate)
 	if err != nil {
 		return err
 	}
@@ -271,6 +370,15 @@ func (r *Runner) Run(build Build) error {
 	if finalErr == nil {
 		return nil
 	}
+	if collector.Emit != nil {
+		// The error body was already emitted to stdout as a document by the
+		// pipeline (--withError); tell the post-command handler not to write it
+		// again so it only sets the exit code and logs to stderr.
+		if ce, ok := finalErr.(cmderrors.CommandError); ok {
+			ce.OutputEmitted = true
+			finalErr = ce
+		}
+	}
 	return r.Factory.CheckPostCommandError(finalErr)
 }
 
@@ -289,11 +397,25 @@ func (r *Runner) producer(build Build) Producer {
 			in.primary = string(value)
 			r.cursor.Set(in.input)
 		}
+		// Point the output-template input at this item. In the serial pipeline
+		// (workers<=1) the item's documents are rendered before the next item is
+		// produced, so the stage reads the matching input.
+		r.tmplInput = in.input
 		r.index++
 
 		call, err := build(in)
 		if err != nil {
-			return nil, err
+			// A per-item build/validation error (e.g. a missing required body
+			// property) is item-level: surface it as a job that yields the error
+			// so the collector records it and the batch continues with the next
+			// item, matching the v1 worker semantics. Returning (nil, err) here
+			// would instead abort the whole stream after the first bad item.
+			itemErr := err
+			return Job(func(context.Context) output.Seq {
+				return func(yield func(jsondoc.JSONDoc, error) bool) {
+					yield(jsondoc.Empty(), itemErr)
+				}
+			}), nil
 		}
 		job := Job(func(ctx context.Context) output.Seq {
 			return call(ctx)

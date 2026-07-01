@@ -222,6 +222,12 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	// strip headers which are not useful to anyone
 	req.Header.Del("User-Agent")
 	req.Header.Del("X-Application")
+	// resty's v2 transport sets Accept-Encoding ("gzip, deflate") on every
+	// request; v1 relied on http.DefaultTransport adding it transparently at
+	// send time, so it never appeared in the dry-run output. Drop it here so the
+	// rendered request (json/markdown/curl) matches the v1 behaviour. Display
+	// only — the real request is unaffected.
+	req.Header.Del("Accept-Encoding")
 	headers := map[string]string{}
 	for key := range req.Header {
 		headers[key] = r.HideSensitive(r.Client, req.Header.Get(key))

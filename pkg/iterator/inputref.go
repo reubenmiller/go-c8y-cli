@@ -1,6 +1,7 @@
 package iterator
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
@@ -78,3 +79,35 @@ func (it *InputRefIterator) GetNext() (line []byte, input interface{}, err error
 
 // IsBound always returns true: the value is sourced from the per-item input.
 func (it *InputRefIterator) IsBound() bool { return true }
+
+// InputRefFuncIterator resolves a gjson path against the shared cursor and
+// passes the extracted value through a transform (e.g. a relative-time → ISO
+// conversion) on each iteration. Like InputRefIterator it is bound and never
+// ends iteration itself.
+type InputRefFuncIterator struct {
+	cursor *InputCursor
+	path   string
+	fn     func(string) (string, error)
+}
+
+// NewInputRefFuncIterator returns an iterator bound to cursor that extracts path
+// (empty = whole item) and applies fn to the resolved value.
+func NewInputRefFuncIterator(cursor *InputCursor, path string, fn func(string) (string, error)) *InputRefFuncIterator {
+	return &InputRefFuncIterator{cursor: cursor, path: path, fn: fn}
+}
+
+// GetNext returns fn applied to the value extracted from the current input item.
+func (it *InputRefFuncIterator) GetNext() (line []byte, input interface{}, err error) {
+	raw := it.cursor.Raw()
+	var value string
+	if it.path == "" {
+		value = string(bytes.TrimSpace(raw))
+	} else {
+		value = gjson.GetBytes(raw, it.path).String()
+	}
+	out, err := it.fn(value)
+	return []byte(out), raw, err
+}
+
+// IsBound always returns true: the value is sourced from the per-item input.
+func (it *InputRefFuncIterator) IsBound() bool { return true }

@@ -81,7 +81,11 @@ type CommandError struct {
 	Err             error                `json:"error,omitempty"`
 	Processed       bool                 `json:"-"`
 	WithRawMessage  bool                 `json:"-"`
-	IO              *iostreams.IOStreams `json:"-"`
+	// OutputEmitted marks that the error body was already written to stdout as a
+	// document by the command's output pipeline (the v2 --withError path), so the
+	// post-command handler must not write it a second time.
+	OutputEmitted bool                 `json:"-"`
+	IO            *iostreams.IOStreams `json:"-"`
 }
 
 func (c CommandError) Unwrap() error {

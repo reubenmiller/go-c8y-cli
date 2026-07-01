@@ -114,8 +114,12 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = r.Body(
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("software", "c8y_SoftwareUpdate.0.name"),
-		flags.WithStringValue("version", "c8y_SoftwareUpdate.0.version"),
-		flags.WithStringValue("url", "c8y_SoftwareUpdate.0.url"),
+		// version/url use WithAnyStringValue so an empty value is still written
+		// (c8y_SoftwareUpdate.0.version: ""), matching v1 which always emitted
+		// all keys via the computed softwareDetails type. WithStringValue skips
+		// empties.
+		flags.WithAnyStringValue("version", "c8y_SoftwareUpdate.0.version"),
+		flags.WithAnyStringValue("url", "c8y_SoftwareUpdate.0.url"),
 		flags.WithStringValue("softwareType", "c8y_SoftwareUpdate.0.softwareType"),
 		flags.WithStringValue("description", "description"),
 		flags.WithStringValue("action", "c8y_SoftwareUpdate.0.action"),
@@ -196,7 +200,20 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 			}
 		}
 
-		if err := requireBodyKeys(body, "deviceId", "c8y_SoftwareUpdate.0.name", "c8y_SoftwareUpdate.0.version", "c8y_SoftwareUpdate.0.action"); err != nil {
+		// v1 always emitted c8y_SoftwareUpdate.0.version/url (defaulting to "") via
+		// the computed softwareDetails type. Fill the defaults so the body carries
+		// them even when the flags are unset.
+		for _, k := range []string{"c8y_SoftwareUpdate.0.version", "c8y_SoftwareUpdate.0.url"} {
+			if !gjson.GetBytes(body, k).Exists() {
+				if body, err = sjson.SetBytes(body, k, ""); err != nil {
+					return nil, err
+				}
+			}
+		}
+
+		// version is intentionally NOT required: an empty version is valid (v1
+		// emitted c8y_SoftwareUpdate.0.version: "" and only checked key existence).
+		if err := requireBodyKeys(body, "deviceId", "c8y_SoftwareUpdate.0.name", "c8y_SoftwareUpdate.0.action"); err != nil {
 			return nil, err
 		}
 

@@ -592,6 +592,17 @@ func WithOverrideValue(opts ...string) GetOption {
 			value = fValue[0]
 			err = nil
 		}
+		// A `-`/`-.path` value reads from the shared input item per iteration
+		// (e.g. `alarms create --device -.custom.id`). Skip it here and let the
+		// paired WithStringValue getter resolve the reference — as the
+		// high-precedence "override" getter, WithOverrideValue would otherwise
+		// write the literal "-.custom.id" and shadow the resolved value (and
+		// binding it here too would duplicate the input value).
+		if inputIterators != nil {
+			if _, ok := inputIterators.inputRef(value, format); ok {
+				return "", "", nil
+			}
+		}
 		if value == "" {
 			// don't assign the value anywhere
 			dst = ""
@@ -807,6 +818,25 @@ func NewTimestampFromRelative(encode bool, utc bool, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
+
+		// A `-`/`-.path` value reads the timestamp from the shared input item per
+		// iteration (e.g. `alarms create --time -`), converting the relative value
+		// just like a literal flag would. Mirrors WithStringValue's inputRef
+		// handling, which the timestamp getter previously lacked.
+		if inputIterators != nil && inputIterators.InputCursor != nil {
+			if path, ok := iterator.InputReference(value); ok {
+				return dst, iterator.NewInputRefFuncIterator(inputIterators.InputCursor, path, func(v string) (string, error) {
+					datetime, terr := timestamp.TryGetTimestamp(v, encode, utc)
+					if terr != nil {
+						datetime = v // leave a non-timestamp value untouched
+					}
+					if format != "" {
+						return fmt.Sprintf(format, datetime), nil
+					}
+					return datetime, nil
+				}), nil
+			}
+		}
 
 		if inputIterators != nil {
 			if inputIterators.PipeOptions.Name == src {

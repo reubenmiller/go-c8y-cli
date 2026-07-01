@@ -1,12 +1,15 @@
 package c8ystream
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	ctxhelpers "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/contexthelpers"
@@ -51,14 +54,22 @@ func (in *Resolver) Input() []byte { return in.input }
 
 // String returns a string flag's value, resolving `-`/`-.path` references
 // against the current input item so several flags can read one piped object.
-// For the driver flag (InputFlag) it returns the value the driver resolved.
+// For the driver flag (InputFlag) it returns the value the driver resolved —
+// unless another flag claimed the pipe via `-` (pipeOverride), in which case the
+// driver's own flag is left at its (unset) command-line value.
 func (in *Resolver) String(flag string) string {
-	if flag != "" && flag == in.r.primaryName {
+	// The driver flag uses the value the driver resolved, except when another
+	// flag claimed the pipe (pipeOverride) AND the driver flag was not given
+	// explicitly — then the pipe belongs to the other flag and the driver's own
+	// flag stays unset (e.g. `applications list --user -` leaves type empty,
+	// while `devices children list --id 12345 --childType -.type` keeps id=12345).
+	if flag != "" && flag == in.r.primaryName &&
+		(!in.r.pipeOverride || in.r.Cmd.Flags().Changed(flag)) {
 		return in.primary
 	}
 	value, _ := in.r.Cmd.Flags().GetString(flag)
 	if path, ok := iterator.InputReference(value); ok {
-		return in.ref(path)
+		return in.refForFlag(flag, path)
 	}
 	return value
 }
@@ -135,6 +146,38 @@ func (in *Resolver) ResolveBodyRef(body []byte, path string, resolve func(contex
 	return json.RawMessage(out), nil
 }
 
+// ApplyOverrideSlice sets path in body to a multi-valued flag's value for the
+// current item, cycling through the supplied values one per piped item — the v1
+// StringSlice + override-iterator fan-out (e.g. `--device 11111,22222` piped two
+// measurements creates one each, source.id 11111 then 22222; a single value
+// repeats for every item). A `-`/`-.path` element resolves against the current
+// input item. No-op (body returned unchanged) when the flag was not set, so a
+// source.id carried by the piped input still wins.
+func (in *Resolver) ApplyOverrideSlice(body []byte, flag, path string) (json.RawMessage, error) {
+	if !in.r.Cmd.Flags().Changed(flag) {
+		return json.RawMessage(body), nil
+	}
+	values, _ := in.r.Cmd.Flags().GetStringSlice(flag)
+	nonEmpty := make([]string, 0, len(values))
+	for _, v := range values {
+		if p, ok := iterator.InputReference(v); ok {
+			v = in.refForFlag(flag, p)
+		}
+		if v != "" {
+			nonEmpty = append(nonEmpty, v)
+		}
+	}
+	if len(nonEmpty) == 0 {
+		return json.RawMessage(body), nil
+	}
+	val := nonEmpty[in.index%int64(len(nonEmpty))]
+	out, err := sjson.SetBytes(body, path, val)
+	if err != nil {
+		return nil, err
+	}
+	return json.RawMessage(out), nil
+}
+
 // Bool returns a bool flag's value.
 func (in *Resolver) Bool(flag string) bool {
 	v, _ := in.r.Cmd.Flags().GetBool(flag)
@@ -165,9 +208,15 @@ func (in *Resolver) BoolPtrIfChanged(flag string) *bool {
 	return &v
 }
 
-// StringSlice returns a string-slice flag's value.
+// StringSlice returns a string-slice flag's value, resolving any `-`/`-.path`
+// element against the current input item (e.g. `--user -`).
 func (in *Resolver) StringSlice(flag string) []string {
 	v, _ := in.r.Cmd.Flags().GetStringSlice(flag)
+	for i, item := range v {
+		if path, ok := iterator.InputReference(item); ok {
+			v[i] = in.refForFlag(flag, path)
+		}
+	}
 	return v
 }
 
@@ -212,11 +261,47 @@ func (in *Resolver) Body() (json.RawMessage, error) {
 	return json.RawMessage(raw), nil
 }
 
-// ref extracts a gjson path (empty = whole item) from the current input.
-func (in *Resolver) ref(path string) string {
-	it := iterator.NewInputRefIterator(in.r.cursor, path, "%s")
-	value, _, _ := it.GetNext()
-	return string(value)
+// refForFlag resolves a `-`/`-.path` flag reference against the current input
+// item, matching the v1 pipe-binding extraction:
+//   - bare `-`: a JSON object yields the flag's own property; a plain line is
+//     taken whole.
+//   - `-.a,.b`: the first existing of the comma-separated gjson paths (leading
+//     dots optional), so a fallback chain like `-.id,.one` resolves to whichever
+//     property the piped object carries.
+func (in *Resolver) refForFlag(flag, path string) string {
+	raw := bytes.TrimSpace(in.r.cursor.Raw())
+	if path == "" {
+		if jsonUtilities.IsJSONObject(raw) {
+			return gjsonFirst(raw, []string{flag})
+		}
+		return string(raw)
+	}
+	return gjsonFirst(raw, splitRefPaths(path))
+}
+
+// splitRefPaths turns a `-.a,.b` reference tail into the gjson paths ["a","b"],
+// trimming the optional leading dot of each fallback segment.
+func splitRefPaths(path string) []string {
+	parts := strings.Split(path, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		p = strings.TrimPrefix(p, ".")
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+// gjsonFirst returns the first of paths that exists in raw, or "".
+func gjsonFirst(raw []byte, paths []string) string {
+	for _, p := range paths {
+		if v := gjson.GetBytes(raw, p); v.Exists() {
+			return v.String()
+		}
+	}
+	return ""
 }
 
 // NameOrID turns a CLI reference into a go-c8y resolver reference: an all-digit

@@ -6,6 +6,7 @@ package find
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -167,7 +168,17 @@ func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		q.AddOrderBy(orderBy)
 
-		opt := managedobjects.ListOptions{Query: q.Build()}
+		// Decode any user-supplied percent-encoding once before the SDK re-encodes
+		// the query, so a pre-encoded value (e.g. `name eq 'salt %26 pepper'`) is
+		// not double-encoded (%26 -> %2526). PathUnescape leaves `+` untouched so a
+		// timestamp query (…T00:00:00+02:00) survives; on an invalid escape (e.g. a
+		// literal `%$`) it errors and we keep the raw query. Mirrors v1, which
+		// decoded the query once before encoding.
+		query := q.Build()
+		if decoded, derr := url.PathUnescape(query); derr == nil {
+			query = decoded
+		}
+		opt := managedobjects.ListOptions{Query: query}
 		opt.SkipChildrenNames = in.Bool("skipChildrenNames")
 		opt.WithChildren = in.Bool("withChildren")
 		opt.WithChildrenCount = in.Bool("withChildrenCount")

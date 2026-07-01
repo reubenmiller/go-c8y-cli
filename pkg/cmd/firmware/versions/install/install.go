@@ -22,6 +22,7 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
 
@@ -106,8 +107,12 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("device", "deviceId"),
 		flags.WithStringValue("firmware", "c8y_Firmware.name"),
-		flags.WithStringValue("version", "c8y_Firmware.version"),
-		flags.WithStringValue("url", "c8y_Firmware.url"),
+		// version/url use WithAnyStringValue so an empty value is still written
+		// (c8y_Firmware.version: ""): v1 emitted all three keys via a computed
+		// firmwareDetails type, defaulting version/url to "". WithStringValue
+		// skips empties, which left the body missing the required version.
+		flags.WithAnyStringValue("version", "c8y_Firmware.version"),
+		flags.WithAnyStringValue("url", "c8y_Firmware.url"),
 		flags.WithStringValue("description", "description"),
 		flags.WithDefaultTemplateString(`
 {
@@ -119,7 +124,10 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 `),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("deviceId", "c8y_Firmware.name", "c8y_Firmware.version"),
+		// version is intentionally not required: v1 emitted c8y_Firmware.version: ""
+		// via the computed firmwareDetails type and only checked key existence; an
+		// empty version is valid. The default is filled in below.
+		flags.WithRequiredProperties("deviceId", "c8y_Firmware.name"),
 	)
 	if err != nil {
 		return err
@@ -143,10 +151,23 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 
+		// v1 always emitted c8y_Firmware.version/url (defaulting to "") via the
+		// computed firmwareDetails type. Fill the defaults so the body carries
+		// them even when the flags are unset.
+		for _, k := range []string{"c8y_Firmware.version", "c8y_Firmware.url"} {
+			if !gjson.GetBytes(body, k).Exists() {
+				if body, err = sjson.SetBytes(body, k, ""); err != nil {
+					return nil, err
+				}
+			}
+		}
+
 		// Look up the binary url (and firmware name) from the repository when no
-		// explicit url is provided, matching v1.
-		if in.String("url") == "" {
-			ref := versionRef(in.String("version"), in.String("firmware"))
+		// explicit url is provided, matching v1. With no version there is no
+		// specific version managed-object to resolve a url from (versionRef yields
+		// an empty reference), so skip the lookup and keep the flag values
+		// (url stays "", name from --firmware) rather than resolving an empty id.
+		if ref := versionRef(in.String("version"), in.String("firmware")); in.String("url") == "" && ref != "" {
 			vres := client.Repository.Firmware.Versions.Get(in.ResolveContext(), ref, firmwareversions.GetOptions{WithParents: true})
 			if vres.Err != nil {
 				return nil, vres.Err

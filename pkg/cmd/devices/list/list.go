@@ -208,6 +208,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			CurrentPage:       int(common.CurrentPage),
 			MaxItems:          r.Config.MaxItems(),
 			Strategy:          paginationStrategy,
+			FullWalk:          includeAll,
 		}
 		// Shared --raw / default (and transparent dry-run) routing from a
 		// single paginating method, identical across all list commands.

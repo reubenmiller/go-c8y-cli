@@ -1,12 +1,14 @@
 package c8ystream
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 )
 
 // toServerError turns a go-c8y v2 HTTP error into a cmderrors.CommandError that
@@ -21,6 +23,19 @@ import (
 func (r *Runner) toServerError(err error) error {
 	if err == nil {
 		return nil
+	}
+	// A request that exceeded --timeout surfaces as a context deadline. Map it to
+	// the dedicated timeout exit code (106) and the stable "command timed out"
+	// message, matching v1's NewServerError. The sentinel error is used as Err so
+	// it serialises to "error":{} rather than leaking the wrapped *url.Error.
+	if errors.Is(err, context.DeadlineExceeded) {
+		return cmderrors.CommandError{
+			Message:   "command timed out",
+			ErrorType: cmderrors.ErrTypeCommand,
+			ExitCode:  cmderrors.ExitTimeout,
+			Err:       context.DeadlineExceeded,
+			IO:        r.Factory.IOStreams,
+		}
 	}
 	var apiErr *core.Error
 	if !errors.As(err, &apiErr) {
@@ -52,6 +67,23 @@ func (r *Runner) toServerError(err error) error {
 		WithRawMessage:  r.Config.WithError(),
 		IO:              r.Factory.IOStreams,
 	}
+}
+
+// errorDocument converts an item error into the JSON document emitted to stdout
+// under --withError: the status-aware CommandError (errorType, message,
+// statusCode, c8yResponse) marshalled to JSON, so the output template and select
+// stages can shape it like any other document. Non-CommandError errors (which
+// have no structured body) are not emitted.
+func (r *Runner) errorDocument(err error) (jsondoc.JSONDoc, bool) {
+	var ce cmderrors.CommandError
+	if !errors.As(r.toServerError(err), &ce) {
+		return jsondoc.Empty(), false
+	}
+	raw, marshalErr := json.Marshal(ce)
+	if marshalErr != nil {
+		return jsondoc.Empty(), false
+	}
+	return jsondoc.New(raw), true
 }
 
 // collapseErrors reduces the collected item errors to the single command result

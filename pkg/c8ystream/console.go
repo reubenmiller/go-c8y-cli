@@ -1,10 +1,12 @@
 package c8ystream
 
 import (
+	"bytes"
 	"io"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/tidwall/gjson"
@@ -58,6 +60,14 @@ func (r *consoleRenderer) Write(doc jsondoc.JSONDoc) error {
 		if cols := leafPaths(raw); len(cols) > 0 {
 			r.console.SetHeaderFromInput("", []jsonfilter.KeyGroup{{Pattern: "*", Keys: cols}})
 		}
+	}
+	// console.Write only newline-terminates JSON objects/arrays; a scalar or
+	// string document (e.g. a template producing `63613,agent01` or a stand-alone
+	// timestamp) is written verbatim, so successive scalar docs would run
+	// together. Terminate it here, matching v1's jsonformatter text path.
+	if trimmed := bytes.TrimSpace(raw); !r.isTable && len(trimmed) > 0 &&
+		!jsonUtilities.IsJSONObject(trimmed) && !jsonUtilities.IsJSONArray(trimmed) {
+		raw = append(bytes.Clone(raw), '\n')
 	}
 	_, err := r.console.Write(raw)
 	return err

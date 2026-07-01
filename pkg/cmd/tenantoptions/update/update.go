@@ -5,6 +5,7 @@ package update
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -98,8 +99,11 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		opt := tenantoptions.UpdateOption{
 			Category: in.String("category"),
-			Key:      in.String("key"),
-			Body:     body,
+			// The SDK url.PathEscapes the key when it builds the path. v1 accepted
+			// an already-percent-encoded key and sent it through unchanged, so
+			// decode once here to avoid double-encoding (M%23123.%2A -> M%2523...).
+			Key:  decodePathSegment(in.String("key")),
+			Body: body,
 		}
 		return func(ctx context.Context) output.Seq {
 			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.TenantOption] {
@@ -107,4 +111,15 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 			})
 		}, nil
 	})
+}
+
+// decodePathSegment percent-decodes a value once so the SDK's path escaping
+// produces a single encoding. An already-encoded segment (e.g. "M%23123.%2A")
+// decodes to its literal form; a literal segment is unchanged. An invalid
+// escape falls back to the raw value.
+func decodePathSegment(v string) string {
+	if decoded, err := url.QueryUnescape(v); err == nil {
+		return decoded
+	}
+	return v
 }

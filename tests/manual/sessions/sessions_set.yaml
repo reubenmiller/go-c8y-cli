@@ -220,6 +220,9 @@ tests:
           "pathEncoded": "/c8y/inventory/managedObjects?pageSize=1",
           "path": "/c8y/inventory/managedObjects",
           "query": "pageSize=1",
+          "queryParams": {
+            "pageSize": ["1"]
+          },
           "method": "GET",
           "headers": {
             "Accept": "application/json"

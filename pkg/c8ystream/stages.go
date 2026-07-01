@@ -20,6 +20,13 @@ import (
 type ErrorCollector struct {
 	Errors []error
 	Max    int
+
+	// Emit, when set, converts a collected item error into an output document
+	// that is yielded downstream (so --filter/--outputTemplate/--select/--output
+	// see it) in addition to being recorded for the exit code. This is the
+	// --withError behaviour: the error response body flows to stdout as a
+	// document. Returning ok=false suppresses emission for that error.
+	Emit func(error) (jsondoc.JSONDoc, bool)
 }
 
 // Stage returns the stream stage that performs the collection.
@@ -34,6 +41,13 @@ func (c *ErrorCollector) Stage() output.Stage {
 					continue
 				}
 				c.Errors = append(c.Errors, err)
+				if c.Emit != nil {
+					if errDoc, ok := c.Emit(err); ok {
+						if !yield(errDoc, nil) {
+							return
+						}
+					}
+				}
 				if c.Max > 0 && len(c.Errors) >= c.Max {
 					yield(jsondoc.Empty(), fmt.Errorf("aborted batch as the error count (%d) reached the limit: %w", len(c.Errors), err))
 					return

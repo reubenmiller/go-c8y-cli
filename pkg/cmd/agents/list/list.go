@@ -154,10 +154,13 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		// Always scope to agents (the com_cumulocity_model_Agent fragment); a
-		// plain inventory query would also return ordinary devices.
+		// plain inventory query would also return ordinary devices. The scope is
+		// wrapped in its own parentheses — "(has(com_cumulocity_model_Agent))" —
+		// to match the v1 agents query grouping (other has() filters stay
+		// unwrapped, hence AddFilterPart rather than the shared FilterHasFragment).
+		q.AddFilterPart("(has(" + agents.FragmentIsAgent + "))")
 		q.AddFilterEqStr("name", in.String("name")).
 			AddFilterEqStr("type", in.String("type")).
-			AddFilter(model.FilterHasFragment(agents.FragmentIsAgent, true)).
 			HasFragment(in.String("fragmentType")).
 			AddFilterEqStr("owner", in.String("owner")).
 			AddFilterEqStr("c8y_Availability.status", in.String("availability")).

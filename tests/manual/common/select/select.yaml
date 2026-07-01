@@ -90,7 +90,7 @@ tests:
   
   It returns csv ignoring the aliases when no header options is provided:
     command: |
-      c8y applications get --id cockpit --select "appId:id,appName:name" --output csv
+      c8y applications get -n --id cockpit --select "appId:id,appName:name" --output csv
     stdout:
       line-count: 1
       match-pattern: ^\d+,cockpit$

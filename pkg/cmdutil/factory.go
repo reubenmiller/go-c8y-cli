@@ -510,7 +510,11 @@ func (f *Factory) CheckPostCommandError(err error) error {
 				if printLogEntries {
 					logg.Errorf("%s", cErr.ErrorPretty())
 				}
-				fmt.Fprintf(w, "%s\n", cErr.JSONString())
+				// Skip the stdout write when the streaming --withError path already
+				// emitted the (template-shaped) error document.
+				if !cErr.OutputEmitted {
+					fmt.Fprintf(w, "%s\n", cErr.JSONString())
+				}
 
 				cErr.Processed = true
 			}
