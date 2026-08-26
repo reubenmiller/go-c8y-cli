@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/mitchellh/go-homedir"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
@@ -21,6 +22,7 @@ import (
 type CmdRotatePassphrase struct {
 	passphrase    string
 	newPassphrase string
+	dir           string
 
 	*subcommand.SubCommand
 
@@ -40,9 +42,10 @@ func NewCmdRotatePassphrase(f *cmdutil.Factory) *CmdRotatePassphrase {
 			Change the passphrase used to encrypt sensitive session information (e.g. passwords and tokens)
 			without having to manually update each session.
 
-			Every session file in the session home folder is checked for encrypted values. Each value is
-			decrypted using the current passphrase and re-encrypted using the new passphrase, and the
-			reference key file (.key) is updated to match the new passphrase.
+			Every session file in the session home folder (or a custom folder given via --dir) is checked
+			for encrypted values. Each value is decrypted using the current passphrase and re-encrypted
+			using the new passphrase, and the reference key file (.key) is updated to match the new
+			passphrase.
 
 			Sessions which can not be decrypted with the current passphrase are left untouched and reported,
 			so a failed or partial rotation never destroys existing values.
@@ -61,6 +64,10 @@ func NewCmdRotatePassphrase(f *cmdutil.Factory) *CmdRotatePassphrase {
 			### Example 3: Preview which files would be changed without modifying anything
 
 			$ c8y sessions rotatePassphrase --dry
+
+			### Example 4: Rotate sessions stored in a custom folder (instead of the session home folder)
+
+			$ c8y sessions rotatePassphrase --dir /backups/c8y-sessions
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -70,6 +77,7 @@ func NewCmdRotatePassphrase(f *cmdutil.Factory) *CmdRotatePassphrase {
 
 	cmd.Flags().StringVar(&ccmd.passphrase, "passphrase", "", "Current passphrase. Read from env C8Y_PASSPHRASE or prompted if missing")
 	cmd.Flags().StringVar(&ccmd.newPassphrase, "newPassphrase", "", "New passphrase. Prompted (with confirmation) if missing")
+	cmd.Flags().StringVar(&ccmd.dir, "dir", "", "Directory to scan for session files. Defaults to the session home folder")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -88,15 +96,41 @@ func (n *CmdRotatePassphrase) RunE(cmd *cobra.Command, args []string) error {
 	cs := n.factory.IOStreams.ColorScheme()
 
 	//
-	// 1. Read the reference key file and verify the current passphrase against it
+	// 1. Resolve the folder to scan and its reference key file
 	//
-	keyFileContents, err := os.ReadFile(cfg.KeyFile())
-	if err != nil {
-		return fmt.Errorf("could not read the key file (%s), so there is no passphrase to rotate. %w", cfg.KeyFile(), err)
+	sessionDir := cfg.GetSessionHomeDir()
+	keyFile := cfg.KeyFile()
+	if n.dir != "" {
+		sessionDir, err = homedir.Expand(n.dir)
+		if err != nil {
+			return err
+		}
+		if absDir, err := filepath.Abs(sessionDir); err == nil {
+			sessionDir = absDir
+		}
+		if info, err := os.Stat(sessionDir); err != nil || !info.IsDir() {
+			return fmt.Errorf("session directory does not exist or is not a directory. dir=%s", sessionDir)
+		}
+		keyFile = filepath.Join(sessionDir, config.KeyFileName)
 	}
-	secretText := strings.TrimSpace(string(keyFileContents))
-	if cfg.SecureData.IsEncryptedBytes(keyFileContents) != 1 {
-		return fmt.Errorf("key file (%s) does not contain encrypted reference text", cfg.KeyFile())
+
+	//
+	// 2. Read the reference key file and verify the current passphrase against it.
+	// A custom directory (e.g. a backup or copy) does not have to contain a key file,
+	// in which case the passphrase can not be pre-validated, however each session value
+	// is still only rewritten if it can be decrypted with the current passphrase.
+	//
+	secretText := ""
+	keyFileContents, err := os.ReadFile(keyFile)
+	if err != nil {
+		if n.dir == "" {
+			return fmt.Errorf("could not read the key file (%s), so there is no passphrase to rotate. %w", keyFile, err)
+		}
+	} else {
+		secretText = strings.TrimSpace(string(keyFileContents))
+		if cfg.SecureData.IsEncryptedBytes(keyFileContents) != 1 {
+			return fmt.Errorf("key file (%s) does not contain encrypted reference text", keyFile)
+		}
 	}
 
 	currentPassphrase := n.passphrase
@@ -111,9 +145,14 @@ func (n *CmdRotatePassphrase) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	referenceText, err := cfg.SecureData.DecryptString(secretText, currentPassphrase)
-	if err != nil {
-		return fmt.Errorf("current passphrase is incorrect (it does not match the key file %s)", cfg.KeyFile())
+	referenceText := ""
+	if secretText != "" {
+		referenceText, err = cfg.SecureData.DecryptString(secretText, currentPassphrase)
+		if err != nil {
+			return fmt.Errorf("current passphrase is incorrect (it does not match the key file %s)", keyFile)
+		}
+	} else {
+		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s No key file found in %s. The current passphrase can not be pre-validated, sessions which do not match it will be skipped\n", cs.WarningIcon(), sessionDir)
 	}
 
 	//
@@ -133,7 +172,7 @@ func (n *CmdRotatePassphrase) RunE(cmd *cobra.Command, args []string) error {
 	//
 	// 3. Re-encrypt every session file
 	//
-	sessionFiles, err := findSessionFiles(cfg, log)
+	sessionFiles, err := findSessionFiles(cfg, log, sessionDir)
 	if err != nil {
 		return err
 	}
@@ -161,14 +200,14 @@ func (n *CmdRotatePassphrase) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	//
-	// 4. Update the reference key file so future passphrase checks use the new passphrase
+	// 4. Update the reference key file (if one was found) so future passphrase checks use the new passphrase
 	//
-	if !cfg.DryRun() {
+	if referenceText != "" && !cfg.DryRun() {
 		newKeyText, err := cfg.SecureData.EncryptString(referenceText, newPassphrase)
 		if err != nil {
 			return fmt.Errorf("failed to create new key file contents. %w", err)
 		}
-		if err := os.WriteFile(cfg.KeyFile(), []byte(newKeyText), 0600); err != nil {
+		if err := os.WriteFile(keyFile, []byte(newKeyText), 0600); err != nil {
 			return fmt.Errorf("failed to update key file. %w", err)
 		}
 	}
@@ -176,9 +215,14 @@ func (n *CmdRotatePassphrase) RunE(cmd *cobra.Command, args []string) error {
 	//
 	// 5. Summary
 	//
-	if cfg.DryRun() {
+	switch {
+	case cfg.DryRun():
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "DRY: Would rotate passphrase. sessions=%d, values=%d\n", totalFiles, totalValues)
-	} else {
+	case totalFiles == 0 && len(failedFiles) > 0:
+		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s No sessions were rotated. Check that the current passphrase is correct\n", cs.WarningIcon())
+	case totalFiles == 0:
+		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s No encrypted values found in %s. Nothing to do\n", cs.SuccessIcon(), sessionDir)
+	default:
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Passphrase rotated. sessions=%d, values=%d\n", cs.SuccessIcon(), totalFiles, totalValues)
 	}
 	if len(failedFiles) > 0 {
@@ -193,12 +237,11 @@ func (n *CmdRotatePassphrase) RunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// findSessionFiles returns the list of session files in the session home folder,
+// findSessionFiles returns the list of session files in the given folder,
 // applying the same skip rules as the interactive session selection
 // (ignoring the activity log, git internals, extensions and dot/settings files)
-func findSessionFiles(cfg *config.Config, log *logger.Logger) ([]string, error) {
+func findSessionFiles(cfg *config.Config, log *logger.Logger, srcdir string) ([]string, error) {
 	files := make([]string, 0)
-	srcdir := cfg.GetSessionHomeDir()
 
 	err := filepath.WalkDir(srcdir, func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
