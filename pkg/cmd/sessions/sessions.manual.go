@@ -9,6 +9,7 @@ import (
 	getCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/get"
 	listCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/list"
 	loginCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/login"
+	rotatePassphraseCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/rotatepassphrase"
 	setCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/set"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -39,6 +40,7 @@ func NewSubCommand(f *cmdutil.Factory) *sessionsCmd {
 	cmd.AddCommand(cmdutil.DisableAuthCheck(setCmd.NewCmdSet(f).GetCommand()))
 	cmd.AddCommand(cmdutil.DisableAuthCheck(cloneCmd.NewCmdCloneSession(f).GetCommand()))
 	cmd.AddCommand(cmdutil.DisableAuthCheck(loginCmd.NewCmdLogin(f).GetCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(rotatePassphraseCmd.NewCmdRotatePassphrase(f).GetCommand()))
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
