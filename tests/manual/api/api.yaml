@@ -295,3 +295,12 @@ tests:
         pathEncoded: '/path/to/myapi?id=supercoolid&other=1'
         headers.Content-Type: r/multipart/form-data
         body: r/{"foo":"bar"}
+
+  It preverves one trailing slash when present:
+    command: |
+      c8y api GET "/service/example/foo/" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /service/example/foo/
