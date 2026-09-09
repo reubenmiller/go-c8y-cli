@@ -23,7 +23,7 @@ require (
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.5.0
-	github.com/reubenmiller/go-c8y v0.37.11
+	github.com/reubenmiller/go-c8y v0.37.12
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
@@ -120,4 +120,4 @@ require (
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
-go 1.25.0
+go 1.26.0
