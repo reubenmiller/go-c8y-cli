@@ -222,23 +222,16 @@ func (s *IOStreams) TempFile(dir, pattern string) (*os.File, error) {
 	return os.CreateTemp(dir, pattern)
 }
 
-func (s *IOStreams) ProgressIndicator() *mpb.Progress {
-	s.progressMu.Lock()
-	defer s.progressMu.Unlock()
-	if s.progressIndicatorEnabled {
-		if s.progress == nil {
-			s.progress = mpb.New(
-				mpb.WithOutput(s.ErrOut),
-				mpb.WithRefreshRate(180*time.Millisecond),
-			)
-		}
-	}
-	return s.progress
+// ProgressIndicator returns a handle to the shared progress indicator which is used
+// to display binary upload/download progress bars.
+// The handle is safe to use from multiple workers
+func (s *IOStreams) ProgressIndicator() *Progress {
+	return &Progress{s: s}
 }
 
 // WaitForProgressIndicator waits for the current progress indicator to finish.
 // A progress instance can't be reused once it is done, so it is detached
-// before waiting, and a new instance will be created on the next call to ProgressIndicator
+// before waiting, and a new instance will be created when the next bar is added
 func (s *IOStreams) WaitForProgressIndicator() {
 	s.progressMu.Lock()
 	progress := s.progress
@@ -248,6 +241,53 @@ func (s *IOStreams) WaitForProgressIndicator() {
 	if progress != nil {
 		progress.Wait()
 	}
+}
+
+// Progress is a handle to the shared progress indicator
+type Progress struct {
+	s *IOStreams
+}
+
+// IsEnabled checks if progress bars should be displayed
+func (p *Progress) IsEnabled() bool {
+	if p == nil || p.s == nil {
+		return false
+	}
+	p.s.progressMu.Lock()
+	defer p.s.progressMu.Unlock()
+	return p.s.progressIndicatorEnabled
+}
+
+// Add adds a new bar to the current progress indicator (creating one if required).
+// Getting the progress indicator and adding the bar is done whilst holding the lock,
+// so that another worker can't wait on (and shutdown) the progress indicator in between,
+// as an mpb.Progress instance panics if a bar is added after it is done.
+// Returns nil if progress bars are disabled
+func (p *Progress) Add(total int64, filler mpb.BarFiller, options ...mpb.BarOption) *mpb.Bar {
+	if p == nil || p.s == nil {
+		return nil
+	}
+	s := p.s
+	s.progressMu.Lock()
+	defer s.progressMu.Unlock()
+	if !s.progressIndicatorEnabled {
+		return nil
+	}
+	if s.progress == nil {
+		s.progress = mpb.New(
+			mpb.WithOutput(s.ErrOut),
+			mpb.WithRefreshRate(180*time.Millisecond),
+		)
+	}
+	return s.progress.Add(total, filler, options...)
+}
+
+// Wait waits for the current progress indicator to finish
+func (p *Progress) Wait() {
+	if p == nil || p.s == nil {
+		return
+	}
+	p.s.WaitForProgressIndicator()
 }
 
 // Environment variables to force the terminal (TTY) detection of the standard streams.

@@ -97,7 +97,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 			OnResponse: func(response *http.Response) io.Reader {
 				// Add progress bar for binary downloads
 				prog := r.IO.ProgressIndicator()
-				if prog != nil && response.Header.Get("Content-Disposition") != "" {
+				if prog.IsEnabled() && response.Header.Get("Content-Disposition") != "" {
 					if response.ContentLength > 0 {
 						return c8ybinary.CreateProxyReader(prog)(response)
 					}
