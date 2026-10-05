@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cli/safeexec"
@@ -46,10 +47,13 @@ type IOStreams struct {
 
 	TempFileOverride *os.File
 
-	progress *mpb.Progress
+	progress   *mpb.Progress
+	progressMu sync.Mutex
 }
 
 func (s *IOStreams) SetProgress(v bool) {
+	s.progressMu.Lock()
+	defer s.progressMu.Unlock()
 	s.progressIndicatorEnabled = v
 	s.progress = nil
 }
@@ -219,6 +223,8 @@ func (s *IOStreams) TempFile(dir, pattern string) (*os.File, error) {
 }
 
 func (s *IOStreams) ProgressIndicator() *mpb.Progress {
+	s.progressMu.Lock()
+	defer s.progressMu.Unlock()
 	if s.progressIndicatorEnabled {
 		if s.progress == nil {
 			s.progress = mpb.New(
@@ -230,9 +236,17 @@ func (s *IOStreams) ProgressIndicator() *mpb.Progress {
 	return s.progress
 }
 
+// WaitForProgressIndicator waits for the current progress indicator to finish.
+// A progress instance can't be reused once it is done, so it is detached
+// before waiting, and a new instance will be created on the next call to ProgressIndicator
 func (s *IOStreams) WaitForProgressIndicator() {
-	if s.progress != nil {
-		s.progress.Wait()
+	s.progressMu.Lock()
+	progress := s.progress
+	s.progress = nil
+	s.progressMu.Unlock()
+
+	if progress != nil {
+		progress.Wait()
 	}
 }
 
