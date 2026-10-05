@@ -43,7 +43,7 @@ require github.com/hashicorp/go-version v1.9.0 // indirect
 
 require (
 	github.com/cli/browser v1.3.0
-	github.com/dustin/go-humanize v1.0.1
+	github.com/dustin/go-humanize v1.1.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
