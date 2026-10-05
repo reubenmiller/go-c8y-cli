@@ -55,3 +55,40 @@ func TestStreamWriterRendersFromSDKPipeline(t *testing.T) {
 		}
 	}
 }
+
+// TestStreamWriterRightAlignsNumericColumns checks that numeric columns are
+// marked as right-aligned in the markdown separator (---:) and that every
+// row, including those after the first, is right-aligned.
+func TestStreamWriterRightAlignsNumericColumns(t *testing.T) {
+	body := `{"items": [
+		{"name": "a", "value": 1},
+		{"name": "b", "value": 22},
+		{"name": "c", "value": 333}
+	]}`
+
+	var buf bytes.Buffer
+	err := output.Render(context.Background(),
+		output.FromBytes([]byte(body), "items"),
+		encode.NewTableWithWriter(
+			tableviewer.NewStreamWriter(&buf, false),
+			encode.TableOptions{
+				Columns: []string{"name", "value"},
+			}))
+	if err != nil {
+		t.Fatalf("render failed: %s", err)
+	}
+
+	out := buf.String()
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	if len(lines) != 5 {
+		t.Fatalf("expected header + separator + 3 rows, got %d lines:\n%s", len(lines), out)
+	}
+	if !strings.HasPrefix(lines[1], "|:-") || !strings.HasSuffix(lines[1], "-:|") {
+		t.Errorf("expected left-aligned name and right-aligned value separator, got %q", lines[1])
+	}
+	for i, want := range []string{"   1 |", "  22 |", " 333 |"} {
+		if !strings.HasSuffix(lines[i+2], want) {
+			t.Errorf("row %d not right-aligned, got %q:\n%s", i, lines[i+2], out)
+		}
+	}
+}
