@@ -64,18 +64,19 @@ func (s *StreamWriter) WriteHeader(columns []encode.Column) error {
 			Behavior: tw.Behavior{TrimSpace: tw.Off},
 			Header: tw.CellConfig{
 				Formatting: tw.CellFormatting{AutoFormat: tw.Off, AutoWrap: tw.WrapTruncate},
-				// The markdown separator derives its alignment markers
-				// (---:) from the header alignment.
 				Alignment: tw.CellAlignment{Global: tw.AlignLeft, PerColumn: aligns},
 			},
 			Row: tw.CellConfig{
 				// Cells are pre-fitted (truncated/wrapped) by the engine;
 				// multi-line cells are already split with newlines.
-				// Alignment is applied manually in WriteRow: in streaming
-				// mode tablewriter only honors per-column alignment for
-				// the first appended row.
+				// The markdown separator derives its alignment markers
+				// (---:) from the first row's alignment, so the per-column
+				// alignment must be set here too. Right-aligned cells are
+				// still padded manually in WriteRow as older tablewriter
+				// versions only honored per-column alignment for the first
+				// appended row in streaming mode.
 				Formatting: tw.CellFormatting{AutoWrap: tw.WrapNone},
-				Alignment:  tw.CellAlignment{Global: tw.AlignLeft},
+				Alignment:  tw.CellAlignment{Global: tw.AlignLeft, PerColumn: aligns},
 			},
 			Widths: tw.CellWidth{PerColumn: widthMap},
 		}),
