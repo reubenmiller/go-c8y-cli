@@ -236,9 +236,38 @@ func (s *IOStreams) WaitForProgressIndicator() {
 	}
 }
 
+// Environment variables to force the terminal (TTY) detection of the standard streams.
+// These are intended for testing only, e.g. to show progress bars when stderr is not a terminal.
+// Accepts boolean values, e.g. "true" or "false"
+const (
+	EnvForceStdinTTY  = "C8Y_FORCE_STDIN_TTY"
+	EnvForceStdoutTTY = "C8Y_FORCE_STDOUT_TTY"
+	EnvForceStderrTTY = "C8Y_FORCE_STDERR_TTY"
+)
+
+// forcedTTY returns the value of an environment variable used to force the terminal detection.
+// The second return value is false if the variable is not set or is not a valid boolean
+func forcedTTY(name string) (isTTY bool, ok bool) {
+	value, found := os.LookupEnv(name)
+	if !found {
+		return false, false
+	}
+	isTTY, err := strconv.ParseBool(value)
+	if err != nil {
+		return false, false
+	}
+	return isTTY, true
+}
+
 func System(colorDisabled bool, colorForced bool) *IOStreams {
 	stdoutIsTTY := isTerminal(os.Stdout)
+	if v, ok := forcedTTY(EnvForceStdoutTTY); ok {
+		stdoutIsTTY = v
+	}
 	stderrIsTTY := isTerminal(os.Stderr)
+	if v, ok := forcedTTY(EnvForceStderrTTY); ok {
+		stderrIsTTY = v
+	}
 
 	io := &IOStreams{
 		In:           os.Stdin,
@@ -256,6 +285,9 @@ func System(colorDisabled bool, colorForced bool) *IOStreams {
 	// prevent duplicate isTerminal queries now that we know the answer
 	io.SetStdoutTTY(stdoutIsTTY)
 	io.SetStderrTTY(stderrIsTTY)
+	if v, ok := forcedTTY(EnvForceStdinTTY); ok {
+		io.SetStdinTTY(v)
+	}
 	return io
 }
 
