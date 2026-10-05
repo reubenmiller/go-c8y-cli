@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/pkg/c8y/binary"
 	"github.com/spf13/cobra"
@@ -25,7 +26,7 @@ const BarFiller = "[━━ ]"
 
 type ClientFunc func() (*c8y.Client, error)
 
-func CreateBinaryWithProgress(ctx context.Context, client *c8y.Client, path string, filename string, properties interface{}, progress *mpb.Progress) (*c8y.Response, error) {
+func CreateBinaryWithProgress(ctx context.Context, client *c8y.Client, path string, filename string, properties interface{}, progress *iostreams.Progress) (*c8y.Response, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -49,7 +50,7 @@ func CreateBinaryWithProgress(ctx context.Context, client *c8y.Client, path stri
 		Path:     path,
 		FormData: values,
 		PrepareRequest: func(r *http.Request) (*http.Request, error) {
-			if r.Body == nil || progress == nil {
+			if r.Body == nil || !progress.IsEnabled() {
 				return r, nil
 			}
 
@@ -57,7 +58,9 @@ func CreateBinaryWithProgress(ctx context.Context, client *c8y.Client, path stri
 			if err != nil {
 				return nil, err
 			}
-			r.Body = bar.ProxyReader(r.Body)
+			if bar != nil {
+				r.Body = bar.ProxyReader(r.Body)
+			}
 			return r, nil
 		},
 	})
@@ -78,7 +81,7 @@ func AddProgress(cmd *cobra.Command, fileFlag string, progress *mpb.Progress) fu
 			return r, nil
 		}
 
-		bar, err := NewProgressBar(progress, filename)
+		bar, err := newFileProgressBar(progress, filename)
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +91,7 @@ func AddProgress(cmd *cobra.Command, fileFlag string, progress *mpb.Progress) fu
 	}
 }
 
-func CreateProxyReader(progress *mpb.Progress) func(response *http.Response) io.Reader {
+func CreateProxyReader(progress *iostreams.Progress) func(response *http.Response) io.Reader {
 	return func(r *http.Response) io.Reader {
 		size := int64(r.ContentLength)
 		basename := "download"
@@ -112,6 +115,9 @@ func CreateProxyReader(progress *mpb.Progress) func(response *http.Response) io.
 				decor.CountersKibiByte("% .2f / % .2f"),
 			),
 		)
+		if bar == nil {
+			return r.Body
+		}
 
 		proxyReader := c8y.NewProxyReader(bar.ProxyReader(r.Body))
 		r.Body = proxyReader
@@ -119,11 +125,19 @@ func CreateProxyReader(progress *mpb.Progress) func(response *http.Response) io.
 	}
 }
 
-func NewProgressBar(progress *mpb.Progress, filename string) (*mpb.Bar, error) {
-	if progress == nil {
+// progressBarAdder adds a new bar to a progress indicator
+type progressBarAdder interface {
+	Add(total int64, filler mpb.BarFiller, options ...mpb.BarOption) *mpb.Bar
+}
+
+func NewProgressBar(progress *iostreams.Progress, filename string) (*mpb.Bar, error) {
+	if !progress.IsEnabled() {
 		return nil, nil
 	}
+	return newFileProgressBar(progress, filename)
+}
 
+func newFileProgressBar(progress progressBarAdder, filename string) (*mpb.Bar, error) {
 	file, err := os.Stat(filename)
 
 	if err != nil {
@@ -149,8 +163,8 @@ func NewProgressBar(progress *mpb.Progress, filename string) (*mpb.Bar, error) {
 	return bar, nil
 }
 
-func NewProxyReader(progress *mpb.Progress, r io.ReadCloser, filename string) (io.ReadCloser, error) {
-	if progress == nil {
+func NewProxyReader(progress *iostreams.Progress, r io.ReadCloser, filename string) (io.ReadCloser, error) {
+	if !progress.IsEnabled() {
 		return r, nil
 	}
 
@@ -180,7 +194,7 @@ func NewProxyReader(progress *mpb.Progress, r io.ReadCloser, filename string) (i
 }
 
 // WithBinaryUploadURL uploads an inventory binary and returns the URL to it
-func WithBinaryUploadURL(clientFunc ClientFunc, progress *mpb.Progress, opts ...string) flags.GetOption {
+func WithBinaryUploadURL(clientFunc ClientFunc, progress *iostreams.Progress, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := flags.UnpackGetterOptions("%s", opts...)
 
@@ -228,9 +242,7 @@ func WithBinaryUploadURL(clientFunc ClientFunc, progress *mpb.Progress, opts ...
 			return r, nil
 		})
 
-		if progress != nil {
-			progress.Wait()
-		}
+		progress.Wait()
 
 		if err != nil {
 			return "", nil, err

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cli/safeexec"
@@ -46,10 +47,13 @@ type IOStreams struct {
 
 	TempFileOverride *os.File
 
-	progress *mpb.Progress
+	progress   *mpb.Progress
+	progressMu sync.Mutex
 }
 
 func (s *IOStreams) SetProgress(v bool) {
+	s.progressMu.Lock()
+	defer s.progressMu.Unlock()
 	s.progressIndicatorEnabled = v
 	s.progress = nil
 }
@@ -218,27 +222,106 @@ func (s *IOStreams) TempFile(dir, pattern string) (*os.File, error) {
 	return os.CreateTemp(dir, pattern)
 }
 
-func (s *IOStreams) ProgressIndicator() *mpb.Progress {
-	if s.progressIndicatorEnabled {
-		if s.progress == nil {
-			s.progress = mpb.New(
-				mpb.WithOutput(s.ErrOut),
-				mpb.WithRefreshRate(180*time.Millisecond),
-			)
-		}
-	}
-	return s.progress
+// ProgressIndicator returns a handle to the shared progress indicator which is used
+// to display binary upload/download progress bars.
+// The handle is safe to use from multiple workers
+func (s *IOStreams) ProgressIndicator() *Progress {
+	return &Progress{s: s}
 }
 
+// WaitForProgressIndicator waits for the current progress indicator to finish.
+// A progress instance can't be reused once it is done, so it is detached
+// before waiting, and a new instance will be created when the next bar is added
 func (s *IOStreams) WaitForProgressIndicator() {
-	if s.progress != nil {
-		s.progress.Wait()
+	s.progressMu.Lock()
+	progress := s.progress
+	s.progress = nil
+	s.progressMu.Unlock()
+
+	if progress != nil {
+		progress.Wait()
 	}
+}
+
+// Progress is a handle to the shared progress indicator
+type Progress struct {
+	s *IOStreams
+}
+
+// IsEnabled checks if progress bars should be displayed
+func (p *Progress) IsEnabled() bool {
+	if p == nil || p.s == nil {
+		return false
+	}
+	p.s.progressMu.Lock()
+	defer p.s.progressMu.Unlock()
+	return p.s.progressIndicatorEnabled
+}
+
+// Add adds a new bar to the current progress indicator (creating one if required).
+// Getting the progress indicator and adding the bar is done whilst holding the lock,
+// so that another worker can't wait on (and shutdown) the progress indicator in between,
+// as an mpb.Progress instance panics if a bar is added after it is done.
+// Returns nil if progress bars are disabled
+func (p *Progress) Add(total int64, filler mpb.BarFiller, options ...mpb.BarOption) *mpb.Bar {
+	if p == nil || p.s == nil {
+		return nil
+	}
+	s := p.s
+	s.progressMu.Lock()
+	defer s.progressMu.Unlock()
+	if !s.progressIndicatorEnabled {
+		return nil
+	}
+	if s.progress == nil {
+		s.progress = mpb.New(
+			mpb.WithOutput(s.ErrOut),
+			mpb.WithRefreshRate(180*time.Millisecond),
+		)
+	}
+	return s.progress.Add(total, filler, options...)
+}
+
+// Wait waits for the current progress indicator to finish
+func (p *Progress) Wait() {
+	if p == nil || p.s == nil {
+		return
+	}
+	p.s.WaitForProgressIndicator()
+}
+
+// Environment variables to force the terminal (TTY) detection of the standard streams.
+// These are intended for testing only, e.g. to show progress bars when stderr is not a terminal.
+// Accepts boolean values, e.g. "true" or "false"
+const (
+	EnvForceStdinTTY  = "C8Y_FORCE_STDIN_TTY"
+	EnvForceStdoutTTY = "C8Y_FORCE_STDOUT_TTY"
+	EnvForceStderrTTY = "C8Y_FORCE_STDERR_TTY"
+)
+
+// forcedTTY returns the value of an environment variable used to force the terminal detection.
+// The second return value is false if the variable is not set or is not a valid boolean
+func forcedTTY(name string) (isTTY bool, ok bool) {
+	value, found := os.LookupEnv(name)
+	if !found {
+		return false, false
+	}
+	isTTY, err := strconv.ParseBool(value)
+	if err != nil {
+		return false, false
+	}
+	return isTTY, true
 }
 
 func System(colorDisabled bool, colorForced bool) *IOStreams {
 	stdoutIsTTY := isTerminal(os.Stdout)
+	if v, ok := forcedTTY(EnvForceStdoutTTY); ok {
+		stdoutIsTTY = v
+	}
 	stderrIsTTY := isTerminal(os.Stderr)
+	if v, ok := forcedTTY(EnvForceStderrTTY); ok {
+		stderrIsTTY = v
+	}
 
 	io := &IOStreams{
 		In:           os.Stdin,
@@ -256,6 +339,9 @@ func System(colorDisabled bool, colorForced bool) *IOStreams {
 	// prevent duplicate isTerminal queries now that we know the answer
 	io.SetStdoutTTY(stdoutIsTTY)
 	io.SetStderrTTY(stderrIsTTY)
+	if v, ok := forcedTTY(EnvForceStdinTTY); ok {
+		io.SetStdinTTY(v)
+	}
 	return io
 }
 

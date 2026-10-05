@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  # https://github.com/reubenmiller/go-c8y-cli/issues/711
+  It downloads multiple piped binaries when progress bars are enabled:
+    command: |
+      ./manual/binaries/get/tests.sh
+    exit-code: 0
