@@ -26,7 +26,7 @@ Host [device]
 
 Note: When using the "--browser" flag, by default the URL scheme (e.g. http, https) will be
 auto detected based on the Remote Access configuration's name. For example, if the configuration
-name has the "https:" prefix, then http will be used, otherwise http will be used. This aligns
+name has the "https:" (or e.g. "https+mux:") prefix, then https will be used, otherwise http will be used. This aligns
 with the naming convention used in https://github.com/Cumulocity-IoT/cumulocity-remote-access-cloud-http-proxy
 
 
@@ -55,6 +55,12 @@ Start a local proxy and match on the configuration using wildcards, then open th
 $ c8y remoteaccess server --device 12345 --configuration "*rugpi*" --browser --scheme https
 Start a local proxy and match on the configuration using wildcards, then open the browser to the endpoint and force usage of https
 
+$ c8y remoteaccess server --device 12345 --configuration "http:*" --browser --multiplex
+Start a local proxy which carries all connections over a single remote access session (if supported by the device), e.g. to speed up loading a web application
+
+$ c8y remoteaccess server --device 12345 --configuration "https+mux:*" --browser
+Start a local proxy for a configuration named with the mux option, which is multiplexed automatically
+
 ```
 
 ### Options
@@ -65,6 +71,7 @@ Start a local proxy and match on the configuration using wildcards, then open th
       --device strings         Device
   -h, --help                   help for server
       --listen string          Listen. unix:///run/example.sock (default "127.0.0.1:0")
+      --multiplex              Carry all local connections over a single remote access session (yamux), which avoids the setup cost of a new session per connection. Requires a device supporting it (e.g. thin-edge.io), otherwise one session per connection is used. Enabled by default for configurations named with the mux option, e.g. "http+mux:example"
       --scheme string          URL scheme to use when opening the address in a browser, e.g. http, https or auto (default "auto")
 ```
 
