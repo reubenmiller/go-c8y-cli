@@ -28,6 +28,7 @@ type CmdRun struct {
 	device        []string
 	listen        string
 	configuration string
+	multiplex     bool
 
 	*subcommand.SubCommand
 
@@ -70,6 +71,9 @@ func NewCmdRun(f *cmdutil.Factory) *CmdRun {
 
 			$ c8y remoteaccess connect run --device rpi5-abcdef01 --configuration passthrough -- ssh -p %p -L 1885:127.0.0.1:1883 -o ServerAliveInterval=120 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@127.0.0.1
 			Start an SSH session to setup port-forwarding to map the remote's 127.0.0.1:1883 port to your machine's 1885 port
+
+			$ c8y remoteaccess connect run --device 12345 --configuration "http:*" --multiplex -- curl -s http://%h:%p/
+			Run a command against a web server on the device, carrying all its connections over a single remote access session (if supported by the device)
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -78,6 +82,7 @@ func NewCmdRun(f *cmdutil.Factory) *CmdRun {
 	cmd.Flags().StringSliceVar(&ccmd.device, "device", []string{}, "Device")
 	cmd.Flags().StringVar(&ccmd.listen, "listen", "127.0.0.1:0", "Listener address. unix:///run/example.sock")
 	cmd.Flags().StringVar(&ccmd.configuration, "configuration", "", "Remote Access Configuration")
+	cmd.Flags().BoolVar(&ccmd.multiplex, "multiplex", false, "Carry all local connections over a single remote access session (yamux), which avoids the setup cost of a new session per connection. Requires a device supporting it (e.g. thin-edge.io), otherwise one session per connection is used. Enabled by default for configurations named with the mux option, e.g. \"http+mux:example\"")
 
 	completion.WithOptions(
 		cmd,
@@ -150,10 +155,21 @@ func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 
 		log.Debugf("Using remote access configuration: id=%s, name=%s", craConfig.ID, craConfig.Name)
 
+		// Multiplex configurations named with the mux option (e.g. "http+mux:example"), unless
+		// the --multiplex flag was given explicitly
+		multiplex := n.multiplex
+		if !cmd.Flags().Changed("multiplex") {
+			if name, ok := remoteaccess.ParseConfigurationName(craConfig.Name); ok && name.Multiplex {
+				log.Debugf("Multiplexing as the configuration name has the mux option")
+				multiplex = true
+			}
+		}
+
 		// Lookup configuration
 		craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
 			ManagedObjectID: device,
 			RemoteAccessID:  craConfig.ID,
+			Multiplex:       multiplex,
 		})
 
 		// TCP / socket listener

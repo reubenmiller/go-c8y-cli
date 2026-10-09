@@ -41,6 +41,9 @@ Start an interactive SSH session on the device with a given ssh user
 $ c8y remoteaccess connect run --device rpi5-abcdef01 --configuration passthrough -- ssh -p %p -L 1885:127.0.0.1:1883 -o ServerAliveInterval=120 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@127.0.0.1
 Start an SSH session to setup port-forwarding to map the remote's 127.0.0.1:1883 port to your machine's 1885 port
 
+$ c8y remoteaccess connect run --device 12345 --configuration "http:*" --multiplex -- curl -s http://%h:%p/
+Run a command against a web server on the device, carrying all its connections over a single remote access session (if supported by the device)
+
 ```
 
 ### Options
@@ -50,6 +53,7 @@ Start an SSH session to setup port-forwarding to map the remote's 127.0.0.1:1883
       --device strings         Device
   -h, --help                   help for run
       --listen string          Listener address. unix:///run/example.sock (default "127.0.0.1:0")
+      --multiplex              Carry all local connections over a single remote access session (yamux), which avoids the setup cost of a new session per connection. Requires a device supporting it (e.g. thin-edge.io), otherwise one session per connection is used. Enabled by default for configurations named with the mux option, e.g. "http+mux:example"
 ```
 
 ### Options inherited from parent commands

@@ -26,6 +26,7 @@ type CmdServer struct {
 	configuration string
 	open          bool
 	browserScheme string
+	multiplex     bool
 
 	*subcommand.SubCommand
 
@@ -61,7 +62,7 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 
 			Note: When using the "--browser" flag, by default the URL scheme (e.g. http, https) will be
 			auto detected based on the Remote Access configuration's name. For example, if the configuration
-			name has the "https:" prefix, then http will be used, otherwise http will be used. This aligns
+			name has the "https:" (or e.g. "https+mux:") prefix, then https will be used, otherwise http will be used. This aligns
 			with the naming convention used in https://github.com/Cumulocity-IoT/cumulocity-remote-access-cloud-http-proxy
 		`, "````"),
 		Example: heredoc.Doc(`
@@ -82,6 +83,12 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 
 			$ c8y remoteaccess server --device 12345 --configuration "*rugpi*" --browser --scheme https
 			Start a local proxy and match on the configuration using wildcards, then open the browser to the endpoint and force usage of https
+
+			$ c8y remoteaccess server --device 12345 --configuration "http:*" --browser --multiplex
+			Start a local proxy which carries all connections over a single remote access session (if supported by the device), e.g. to speed up loading a web application
+
+			$ c8y remoteaccess server --device 12345 --configuration "https+mux:*" --browser
+			Start a local proxy for a configuration named with the mux option, which is multiplexed automatically
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -92,6 +99,7 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 	cmd.Flags().StringVar(&ccmd.configuration, "configuration", "", "Remote Access Configuration. Accepts wildcards")
 	cmd.Flags().BoolVar(&ccmd.open, "browser", false, "Open the endpoint in a browser (if available)")
 	cmd.Flags().StringVar(&ccmd.browserScheme, "scheme", "auto", "URL scheme to use when opening the address in a browser, e.g. http, https or auto")
+	cmd.Flags().BoolVar(&ccmd.multiplex, "multiplex", false, "Carry all local connections over a single remote access session (yamux), which avoids the setup cost of a new session per connection. Requires a device supporting it (e.g. thin-edge.io), otherwise one session per connection is used. Enabled by default for configurations named with the mux option, e.g. \"http+mux:example\"")
 
 	completion.WithOptions(
 		cmd,
@@ -173,10 +181,21 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 
 		log.Debugf("Using remote access configuration: id=%s, name=%s", craConfig.ID, craConfig.Name)
 
+		// Multiplex configurations named with the mux option (e.g. "http+mux:example"), unless
+		// the --multiplex flag was given explicitly
+		multiplex := n.multiplex
+		if !cmd.Flags().Changed("multiplex") {
+			if name, ok := remoteaccess.ParseConfigurationName(craConfig.Name); ok && name.Multiplex {
+				log.Debugf("Multiplexing as the configuration name has the mux option")
+				multiplex = true
+			}
+		}
+
 		// Lookup configuration
 		craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
 			ManagedObjectID: device,
 			RemoteAccessID:  craConfig.ID,
+			Multiplex:       multiplex,
 		})
 
 		if n.listen == "-" {
@@ -201,11 +220,10 @@ func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
 		case "auto":
 			// Align to convention used by
 			// https://github.com/Cumulocity-IoT/cumulocity-remote-access-cloud-http-proxy
+			// (configuration names "<scheme>[+<option>...]:<label>", e.g. "https:Router", "https+mux:Router")
 			n.browserScheme = "http"
-			if strings.HasPrefix(craConfig.Name, "https:") {
-				n.browserScheme = "https"
-			} else if strings.HasPrefix(craConfig.Name, "http:") {
-				n.browserScheme = "http"
+			if name, ok := remoteaccess.ParseConfigurationName(craConfig.Name); ok {
+				n.browserScheme = name.Scheme
 			}
 		}
 
