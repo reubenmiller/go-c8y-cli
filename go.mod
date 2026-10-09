@@ -50,7 +50,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.30
 	github.com/reubenmiller/go-c8y/v2 v2.0.0-20261005080355-282a2c252221
 	golang.org/x/tools v0.50.0
-	mvdan.cc/sh/v3 v3.13.1
+	mvdan.cc/sh/v3 v3.14.1
 )
 
 require (
