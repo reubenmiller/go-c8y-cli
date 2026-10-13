@@ -206,3 +206,23 @@ tests:
         |:-----------|
         | dev01      |
         | device-wi… |
+
+  It shows numbers right aligned:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_SAMPLESIZE: 1
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+    command: |
+      printf '{"name":"row1","value":1}\n{"name":"row2","value":0}\n{"name":"row3","value":10}\n' |
+        c8y util show -o table --noColor
+    exit-code: 0
+    stdout:
+      exactly: |
+        | name       |      value |
+        |:-----------|-----------:|
+        | row1       |          1 |
+        | row2       |          0 |
+        | row3       |         10 |
