@@ -1,6 +1,10 @@
 package numbers
 
-import "github.com/dustin/go-humanize"
+import (
+	"strings"
+
+	"github.com/dustin/go-humanize"
+)
 
 type NumberFormatter interface {
 	Display(float64, string, string) string
@@ -41,7 +45,9 @@ func (num *NumberViewOptions) GetPrecision() int {
 
 func (num *NumberViewOptions) Display(v float64, raw string, unit string) string {
 	if num.IsVerySmallOrVeryLarge(v) {
-		return humanize.SIWithDigits(v, num.Precision, unit)
+		// humanize separates the value and the SI prefix/unit with a space,
+		// leaving a trailing space when both are empty (e.g. 0 => "0 ")
+		return strings.TrimRight(humanize.SIWithDigits(v, num.Precision, unit), " ")
 	}
 	return raw
 }
