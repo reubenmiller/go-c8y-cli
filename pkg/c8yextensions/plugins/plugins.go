@@ -3,6 +3,7 @@ package plugins
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -107,8 +108,12 @@ func buildUIRemotes(out map[string]ExtensionReference, ext gjson.Result, version
 	return nil
 }
 
-func formatApplicationRemotes(extensions map[string]ExtensionReference) map[string][]string {
-	out := make(map[string][]string)
+func formatApplicationRemotes(extensions map[string]ExtensionReference, preserved map[string]interface{}) map[string]interface{} {
+	out := make(map[string]interface{})
+	// Entries which are not managed by this command (e.g. keys without a @version suffix) are kept as is
+	for key, value := range preserved {
+		out[key] = value
+	}
 	for _, ext := range extensions {
 		out[fmt.Sprintf("%s@%s", ext.ContextPath, ext.Version)] = ext.Modules
 	}
@@ -256,10 +261,26 @@ func buildBody(f *cmdutil.Factory, applicationID string, managerOptions *PluginC
 
 	remotes := make(map[string]ExtensionReference)
 
+	// Existing remotes which are not in the <contextPath>@<version> form are never modified
+	preserved := make(map[string]interface{})
+
 	extensions := make([]string, 0)
 	extensions = append(extensions, managerOptions.Add...)
 
 	bodyErrors := make([]error, 0)
+
+	// Keep all remotes which are not managed by this command
+	if existingRemotes := app.Get("config.remotes"); existingRemotes.Exists() && existingRemotes.IsObject() {
+		existingRemotes.ForEach(func(key, value gjson.Result) bool {
+			if !strings.Contains(key.String(), "@") {
+				var v interface{}
+				if err := json.Unmarshal([]byte(value.Raw), &v); err == nil {
+					preserved[key.String()] = v
+				}
+			}
+			return true
+		})
+	}
 
 	if !managerOptions.ReplaceAll {
 		// Get existing remotes
@@ -347,30 +368,35 @@ func buildBody(f *cmdutil.Factory, applicationID string, managerOptions *PluginC
 		return nil, err
 	}
 
-	body := mapbuilder.NewInitializedMapBuilder(true)
-
-	// Get existing config
-	if v := app.Get("config"); v.Exists() && v.IsObject() {
-		// body.AppendTemplate(app.Get("config").Str)
-		body = mapbuilder.NewMapBuilderWithInit([]byte(app.Get("config").Str))
-	}
-
-	// HACK: Perform a deep merge by using the jsonnet "+:" operator
-	// This is required because the original template has already be converted to json
-	// thus losing information
-	body.AppendTemplate(string(convertToJsonnetDeepMerge(currentBody)))
-	body.SetAppendTemplatePreference(true)
-
-	body.Set("id", app.Get("id").String())
-	body.Set("config.remotes", formatApplicationRemotes(remotes))
-	body.SetRequiredKeys("config.remotes")
-
-	tmpBody, err := body.MarshalJSON()
+	tmpBody, err := buildApplicationBody(app, remotes, preserved, currentBody)
 	if err != nil {
 		return nil, err
 	}
 
 	return bytes.NewBuffer(tmpBody), wrapErrors(bodyErrors)
+}
+
+// buildApplicationBody creates the PUT body from the existing application config, preserving every
+// config field (e.g. excludedRemotes and unknown fields) and only replacing config.remotes
+func buildApplicationBody(app gjson.Result, remotes map[string]ExtensionReference, preserved map[string]interface{}, inputBody []byte) ([]byte, error) {
+	body := mapbuilder.NewInitializedMapBuilder(true)
+
+	// Start from the existing config, nested under "config" (Raw is required as Str is only set for json strings)
+	if v := app.Get("config"); v.Exists() && v.IsObject() {
+		body = mapbuilder.NewMapBuilderWithInit([]byte(`{"config":` + v.Raw + `}`))
+	}
+
+	// HACK: Perform a deep merge by using the jsonnet "+:" operator
+	// This is required because the original template has already be converted to json
+	// thus losing information
+	body.AppendTemplate(string(convertToJsonnetDeepMerge(inputBody)))
+	body.SetAppendTemplatePreference(true)
+
+	body.Set("id", app.Get("id").String())
+	body.Set("config.remotes", formatApplicationRemotes(remotes, preserved))
+	body.SetRequiredKeys("config.remotes")
+
+	return body.MarshalJSON()
 }
 
 func wrapErrors(errs []error) error {
