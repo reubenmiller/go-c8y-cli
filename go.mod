@@ -47,7 +47,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/mattn/go-runewidth v0.0.30
+	github.com/mattn/go-runewidth v0.0.31
 	github.com/reubenmiller/go-c8y/v2 v2.0.0-20261005080355-282a2c252221
 	golang.org/x/tools v0.51.0
 	mvdan.cc/sh/v3 v3.14.1
