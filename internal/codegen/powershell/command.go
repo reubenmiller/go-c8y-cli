@@ -66,11 +66,22 @@ func renderCmdlet(command *codegen.Value, noun string) (string, error) {
 	var cmdletParameters []string
 	iteratorVariable := ""
 
+	// An argument explicitly marked as "pipeline" takes precedence. Only fall
+	// back to treating an "id" argument as the pipeline argument when no other
+	// (non-deprecated) argument has been explicitly marked.
+	hasExplicitPipeline := false
+	for _, iArg := range argumentSources {
+		if iArg.Get("pipeline").Truthy() && !iArg.Get("deprecated").Truthy() {
+			hasExplicitPipeline = true
+			break
+		}
+	}
+
 	for _, iArg := range argumentSources {
 		name := iArg.Get("name").Str()
 		alias := iArg.Get("alias").Str()
 		readFromPipeline := iArg.Get("pipeline").Truthy() ||
-			strings.EqualFold(name, "id") || strings.EqualFold(alias, "id")
+			(!hasExplicitPipeline && (strings.EqualFold(name, "id") || strings.EqualFold(alias, "id")))
 
 		if iArg.Get("deprecated").Truthy() {
 			continue
