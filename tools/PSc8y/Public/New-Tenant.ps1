@@ -66,7 +66,7 @@ Create a new tenant and send a password reset email (from the management tenant)
         # The tenant ID. This should be left bank unless you know what you are doing. Will be auto-generated if not present.
         [Parameter()]
         [string]
-        $TenantId,
+        $Id,
 
         # Allow the tenant to create sub-tenants
         [Parameter()]
