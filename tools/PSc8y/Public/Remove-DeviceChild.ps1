@@ -23,9 +23,7 @@ Unassign a child addition from its parent managed object
     [OutputType([object])]
     Param(
         # Managed object id (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true)]
         [object[]]
         $Id,
 
