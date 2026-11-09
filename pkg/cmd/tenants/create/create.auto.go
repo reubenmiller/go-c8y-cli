@@ -55,6 +55,7 @@ Create a new tenant and send a password reset email (from the management tenant)
 	cmd.Flags().String("adminPass", "", "Password of the tenant administrator")
 	cmd.Flags().String("contactName", "", "A contact name, for example an administrator, of the tenant")
 	cmd.Flags().String("contactPhone", "", "An international contact phone number")
+	cmd.Flags().String("id", "", "The tenant ID. This should be left bank unless you know what you are doing. Will be auto-generated if not present.")
 	cmd.Flags().String("tenantId", "", "The tenant ID. This should be left bank unless you know what you are doing. Will be auto-generated if not present.")
 	cmd.Flags().Bool("allowCreateTenants", false, "Allow the tenant to create sub-tenants")
 	cmd.Flags().Bool("sendPasswordResetEmail", false, "Send password reset email to the user instead of setting a password")
@@ -74,6 +75,7 @@ Create a new tenant and send a password reset email (from the management tenant)
 	// Required flags
 
 	flags.MarkDeprecated(cmd, "company", "please use 'name' instead")
+	flags.MarkDeprecated(cmd, "tenantId", "please use 'id' instead")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -158,7 +160,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("adminPass", "adminPass"),
 		flags.WithStringValue("contactName", "contactName"),
 		flags.WithStringValue("contactPhone", "contactPhone"),
-		flags.WithStringValue("tenantId", "tenantId"),
+		flags.WithStringValue("id", "id"),
+		flags.WithStringValue("tenantId", "id"),
 		flags.WithBoolValue("allowCreateTenants", "allowCreateTenants", ""),
 		flags.WithBoolValue("sendPasswordResetEmail", "sendPasswordResetEmail", ""),
 		cmdutil.WithTemplateValue(n.factory),

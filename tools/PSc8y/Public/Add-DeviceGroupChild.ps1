@@ -23,9 +23,7 @@ Add a related managed object as a child addition to an existing managed object
     [OutputType([object])]
     Param(
         # Managed object id where the child will be assigned to (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true)]
         [object[]]
         $Id,
 
