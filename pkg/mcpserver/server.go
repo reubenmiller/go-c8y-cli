@@ -17,6 +17,9 @@ const (
 	ToolRead    = "c8y_read"
 	ToolWrite   = "c8y_write"
 	ToolSession = "c8y_session"
+
+	// PromptSwitchSession prompt to let the user switch the session (stdio mode)
+	PromptSwitchSession = "switch_session"
 )
 
 // SessionInfo non-secret information about the session used by the server
@@ -47,6 +50,12 @@ type Server struct {
 	// Gate optional check which is run before each tool call, e.g. to wait until the
 	// user has approved the client
 	Gate func(ctx context.Context, ss *mcp.ServerSession) error
+
+	// SwitchSession optional function which lets the user select another session. It is
+	// offered as an MCP prompt (in Claude Code a slash command), which only the user can
+	// run, not the agent. It returns a message for the conversation, and should not wait
+	// for the user's selection: tool calls wait for it instead (see Gate)
+	SwitchSession func(ctx context.Context) (string, error)
 
 	// ConfirmDeviceShell optional confirmation by the user of commands which run a shell
 	// command on a device, in addition to the normal approval. Unlike the approval, the
@@ -166,6 +175,25 @@ func (s *Server) New() *mcp.Server {
 			OpenWorldHint:   boolPtr(false),
 		},
 	}, s.handleSession)
+
+	if s.SwitchSession != nil {
+		server.AddPrompt(&mcp.Prompt{
+			Name:        PromptSwitchSession,
+			Title:       "Switch the Cumulocity session",
+			Description: "Open a session picker in the browser to change the Cumulocity session used by the c8y tools",
+		}, func(ctx context.Context, req *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+			message, err := s.SwitchSession(ctx)
+			if err != nil {
+				return nil, err
+			}
+			return &mcp.GetPromptResult{
+				Description: "Switch the Cumulocity session",
+				Messages: []*mcp.PromptMessage{
+					{Role: "user", Content: &mcp.TextContent{Text: message}},
+				},
+			}, nil
+		})
+	}
 
 	return server
 }

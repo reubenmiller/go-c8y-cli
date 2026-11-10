@@ -220,6 +220,11 @@ func TestCapMode(t *testing.T) {
 		{config.SessionModeDev, config.SessionModeCI, config.SessionModeDev},
 		{config.SessionModeDev, config.SessionModeUnset, config.SessionModeProduction},
 		{config.SessionModeProduction, config.SessionModeDev, config.SessionModeProduction},
+		// unset policy mode: the session's mode is used
+		{config.SessionModeUnset, config.SessionModeDev, config.SessionModeDev},
+		{config.SessionModeUnset, config.SessionModeQual, config.SessionModeQual},
+		{config.SessionModeUnset, config.SessionModeUnset, config.SessionModeProduction},
+		{config.SessionModeUnset, config.SessionModeCI, config.SessionModeDev},
 	}
 	for _, tc := range cases {
 		if got := CapMode(tc.policy, tc.session); got != tc.expected {

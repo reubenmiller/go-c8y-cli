@@ -21,6 +21,8 @@ const maxCredentialsSize = 64 * 1024
 type Credentials struct {
 	Token    string `json:"token,omitempty"`
 	Password string `json:"password,omitempty"`
+	// Passphrase to unlock an encrypted session (used by the login)
+	Passphrase string `json:"passphrase,omitempty"`
 }
 
 // ReadCredentialsFromFD reads the credentials (json) from the file descriptor given
@@ -56,6 +58,9 @@ func (c *Config) ReadCredentialsFromFD() error {
 	}
 	if credentials.Password != "" {
 		c.viper.Set("password", credentials.Password)
+	}
+	if credentials.Passphrase != "" {
+		c.Passphrase = credentials.Passphrase
 	}
 	return nil
 }

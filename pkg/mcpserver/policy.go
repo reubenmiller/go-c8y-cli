@@ -115,7 +115,7 @@ var DeniedShortFlags = []rune{'U', 'P', 'k', 'f', 'l'}
 // Policy controls what the agent can and can't do
 type Policy struct {
 	// Mode maximum session mode the agent may use. It can never exceed the
-	// mode of the session itself
+	// mode of the session itself. SessionModeUnset uses the session's mode
 	Mode config.SessionMode
 
 	// Allow if non-empty, only commands matching one of these patterns are allowed
@@ -147,7 +147,7 @@ type Policy struct {
 
 func DefaultPolicy() Policy {
 	return Policy{
-		Mode:           config.SessionModeProduction,
+		Mode:           config.SessionModeUnset,
 		Deny:           append([]string{}, DefaultDenyCommands...),
 		ReadCommands:   append([]string{}, DefaultReadCommands...),
 		Approval:       ApprovalAuto,
@@ -166,8 +166,9 @@ func ParseMode(name string) (config.SessionMode, error) {
 	return config.SessionModeUnset, fmt.Errorf("invalid mode %q. Accepted values: prod, qual, dev", name)
 }
 
-// CapMode returns the more restrictive of the policy mode and the session mode.
-// The ci mode is treated like dev so the agent never gets more than dev.
+// CapMode returns the more restrictive of the policy mode and the session mode. An
+// unset policy mode uses the session mode, and an unset session mode is prod (read
+// only). The ci mode is treated like dev so the agent never gets more than dev.
 func CapMode(policyMode, sessionMode config.SessionMode) config.SessionMode {
 	if sessionMode == config.SessionModeUnset {
 		sessionMode = config.SessionModeProduction

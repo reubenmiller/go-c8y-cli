@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -79,18 +78,23 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			8 hours. "a" is only offered when the connecting process is this c8y binary (c8y mcp connect).
 			The socket must be in a directory which is owned by your user and not writable by other users.
 
-			With --stdio, the MCP client starts the server itself and communicates over stdin/stdout. The
-			session must then work without user input, e.g. by setting C8Y_HOST, C8Y_TENANT, C8Y_USER and
-			C8Y_PASSWORD or C8Y_TOKEN in the MCP client configuration, or C8Y_PASSPHRASE for encrypted
-			sessions. This mode is intended for automation and CI.
+			With --stdio, the MCP client starts the server itself and communicates over stdin/stdout, so no
+			terminal is needed. Without --session, the first tool call opens a session picker in the browser,
+			which logs in to the selected session and shows the result. Encrypted sessions are unlocked with the
+			pin entry command (settings.pinEntry, e.g. "c8y settings update pinEntry 'touchie get'"), or else
+			with the passphrase entered on the page. Run the server's "switch_session" prompt (in Claude Code
+			"/mcp__<server>__switch_session") to select another session in the browser. For automation and CI,
+			set C8Y_HOST, C8Y_TENANT, C8Y_USER and C8Y_PASSWORD or C8Y_TOKEN in the MCP client configuration
+			instead.
 
 			You control what the agent can do:
 
-			* Session: selected by you in the server terminal. The agent can't switch the session, host or
+			* Session: selected by you in the server terminal (or browser). The agent can't switch the session, host or
 			  credentials. In socket mode, commands only receive the token, not the password or passphrase.
-			* Mode (prod, qual, dev): the maximum mode the agent can use. It can only narrow the session's own
-			  mode, never widen it, also after switching the session. Read-only commands always run in prod
-			  (read-only) mode.
+			* Mode (prod, qual, dev): the maximum mode the agent can use. By default, the agent uses the mode
+			  of the session (settings.session.mode), and prod (read only) if the session has none. --mode can
+			  only narrow the session's own mode, never widen it, also after switching the session. Read-only
+			  commands always run in prod (read-only) mode.
 			* Allow and deny lists: which commands the agent can use, e.g. "devices", "inventory *", "* delete".
 			* Device shell: with --allowDeviceShell (and qual or dev mode), the agent can run single shell
 			  commands on a device for troubleshooting, via "remoteaccess connect ssh --device <id> -- <command>"
@@ -127,6 +131,9 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			$ c8y mcp serve --session dev --mode dev --deny "users" --deny "tenants" --approval elicit
 			Allow all actions (including delete) except for user and tenant management, and always ask the user to approve writes
 
+			$ claude mcp add --scope user c8y -- c8y mcp serve --stdio
+			Let the MCP client start the server. Select the session in the browser on the first tool call
+
 			$ claude mcp add c8y -e C8Y_HOST=https://example.cumulocity.com -e C8Y_USER=ci -e C8Y_PASSWORD=... -- c8y mcp serve --stdio
 			Let the MCP client start the server, using credentials from environment variables
 		`),
@@ -135,7 +142,7 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 	}
 
 	cmd.Flags().StringVar(&ccmd.policyFile, "policy", "", "Policy file (json, yaml or toml). Flags override the values in the file")
-	cmd.Flags().StringVar(&ccmd.mode, "mode", "", "Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: prod")
+	cmd.Flags().StringVar(&ccmd.mode, "mode", "", "Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: the session's mode (prod if the session has none)")
 	cmd.Flags().StringArrayVar(&ccmd.allow, "allow", nil, "Only allow commands matching this pattern, e.g. devices, \"inventory *\". Can be used multiple times")
 	cmd.Flags().StringArrayVar(&ccmd.deny, "deny", nil, "Deny commands matching this pattern, e.g. users, \"* delete\". Can be used multiple times")
 	cmd.Flags().StringArrayVar(&ccmd.readCommands, "read", nil, "Additional commands to treat as read-only, e.g. extension commands. Can be used multiple times")
@@ -143,7 +150,7 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 	cmd.Flags().DurationVar(&ccmd.timeout, "timeout", 0, "Default timeout per command. Default: 2m")
 	cmd.Flags().DurationVar(&ccmd.maxTimeout, "maxTimeout", 0, "Maximum timeout the agent can request per command. Default: 10m")
 	cmd.Flags().IntVar(&ccmd.maxOutput, "maxOutput", 0, "Maximum number of output bytes returned to the agent per command. Default: 100000")
-	cmd.Flags().BoolVar(&ccmd.stdio, "stdio", false, "Communicate over stdin/stdout (the MCP client starts the server). The session must work without user input")
+	cmd.Flags().BoolVar(&ccmd.stdio, "stdio", false, "Communicate over stdin/stdout (the MCP client starts the server). The session is selected in the browser")
 	cmd.Flags().StringVar(&ccmd.socket, "socket", "", "Unix socket path to listen on, e.g. to run several servers at the same time. Defaults to server.sock in the mcp folder of the session home directory")
 	cmd.Flags().BoolVar(&ccmd.allowDeviceShell, "allowDeviceShell", false, "Allow the agent to run shell commands on devices (remoteaccess connect ssh and c8y_Command operations). Needs --mode qual or dev")
 	cmd.Flags().BoolVar(&ccmd.confirmDeviceShell, "confirmDeviceShell", false, "Ask for confirmation of each command run on a device in a dialog or the server terminal, in addition to the normal approval")
@@ -262,11 +269,6 @@ func (n *CmdServe) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
-
 	policy, err := n.buildPolicy(cmd)
 	if err != nil {
 		return err
@@ -305,7 +307,8 @@ func (n *CmdServe) RunE(cmd *cobra.Command, args []string) error {
 
 	host := cfg.GetHost()
 	sessionFile := mcpserver.ResolveSessionFile(cfg.GetSessionFile(), cfg.GetSessionHomeDir())
-	if host == "" && sessionFile == "" {
+	// In stdio mode, the user selects the session in the browser on the first tool call
+	if host == "" && sessionFile == "" && !n.stdio {
 		return cmderrors.NewUserError("no Cumulocity session is configured. Use --session <name> or set C8Y_SESSION")
 	}
 	// Read the mode from the resolved session file, the same way as when switching sessions.
@@ -325,58 +328,7 @@ func (n *CmdServe) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if n.stdio {
-		tenant, username := cfg.GetTenant(), cfg.GetUsername()
-		if isFile(sessionFile) {
-			// Read the details from the resolved session file, as a session given by name
-			// is not always loaded by the global configuration
-			details := readSessionDetails(sessionFile)
-			host, tenant, username = firstNonEmpty(host, details.host), firstNonEmpty(tenant, details.tenant), firstNonEmpty(username, details.username)
-		}
-		if host == "" {
-			return cmderrors.NewUserError("the session does not have a host")
-		}
-		sessionMode, effectiveMode := capMode(log, policy.Mode, sessionModeName)
-		server.Session = mcpserver.SessionInfo{
-			Host:        host,
-			Tenant:      tenant,
-			Username:    username,
-			SessionName: mcpserver.SessionKey(sessionFile),
-			SessionMode: sessionMode.String(),
-		}
-		server.Runner = &mcpserver.Runner{
-			Executable:  executable,
-			SessionFile: sessionFile,
-			Mode:        effectiveMode,
-		}
-		if isFile(sessionFile) {
-			// Log in on the first command, so the MCP client isn't kept waiting. An encrypted
-			// session is unlocked with the pin entry command (settings.pinEntry) as there is
-			// no terminal. The commands then only receive the token, like in socket mode
-			tempDir, err := os.MkdirTemp("", "c8y-mcp-")
-			if err != nil {
-				return err
-			}
-			defer os.RemoveAll(tempDir)
-			server.Runner.Auth = &mcpserver.InteractiveLogin{
-				Executable:  executable,
-				SessionFile: sessionFile,
-				// there is no terminal to select the mode
-				SessionMode: sessionMode.String(),
-				Stderr:      n.factory.IOStreams.ErrOut,
-				TempDir:     tempDir,
-				NoTerminal:  true,
-			}
-		}
-		if n.confirmDeviceShell {
-			// stdin is used by the MCP transport, so only a dialog can be used
-			confirmer := &mcpserver.DeviceShellConfirmer{Stderr: n.factory.IOStreams.ErrOut}
-			server.ConfirmDeviceShell = confirmer.Confirm
-		}
-		log.Infof("Starting MCP server (stdio). host=%s, mode=%s, approval=%s", host, effectiveMode.String(), policy.Approval)
-		if err := server.New().Run(ctx, &mcp.StdioTransport{}); err != nil && ctx.Err() == nil {
-			return err
-		}
-		return nil
+		return n.runStdio(ctx, cfg, server, executable, host, sessionFile, sessionModeName)
 	}
 	return n.runSocket(ctx, cfg, server, executable, sessionFile, sessionModeName)
 }
@@ -390,7 +342,7 @@ func capMode(log interface{ Warnf(string, ...any) }, policyMode config.SessionMo
 		sessionMode = config.SessionModeProduction
 	}
 	effectiveMode := mcpserver.CapMode(policyMode, sessionMode)
-	if effectiveMode != policyMode {
+	if policyMode != config.SessionModeUnset && effectiveMode != policyMode {
 		log.Warnf("MCP mode %q is limited by the session mode %q", policyMode.String(), sessionMode.String())
 	}
 	return sessionMode, effectiveMode
@@ -412,6 +364,10 @@ func firstNonEmpty(values ...string) string {
 
 type sessionDetails struct {
 	host, tenant, username string
+	// mode the session's mode (settings.session.mode)
+	mode string
+	// encrypted an encrypted secret of the session (if any), to check the passphrase
+	encrypted string
 }
 
 // readSessionDetails returns the non-secret details of a session file
@@ -419,7 +375,19 @@ func readSessionDetails(sessionFile string) sessionDetails {
 	c := config.NewConfig(viper.New())
 	c.SetSessionFile(sessionFile)
 	_, _ = c.ReadConfigFiles(nil)
-	return sessionDetails{host: c.GetHost(), tenant: c.GetTenant(), username: c.GetUsername()}
+	details := sessionDetails{
+		host:     c.GetHost(),
+		tenant:   c.GetTenant(),
+		username: c.GetUsername(),
+		mode:     c.GetString(config.SettingsMode),
+	}
+	for _, key := range []string{"password", config.SettingsToken} {
+		if value := c.GetString(key); c.SecureData.IsEncrypted(value) == 1 {
+			details.encrypted = value
+			break
+		}
+	}
+	return details
 }
 
 // readSessionMode returns the mode of a session. A new configuration is used, so no

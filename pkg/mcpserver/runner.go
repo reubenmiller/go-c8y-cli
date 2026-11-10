@@ -106,6 +106,9 @@ func passCredentials(cmd *exec.Cmd, credentials *config.Credentials) error {
 		if credentials.Password != "" {
 			cmd.Env = append(cmd.Env, "C8Y_PASSWORD="+credentials.Password)
 		}
+		if credentials.Passphrase != "" {
+			cmd.Env = append(cmd.Env, "C8Y_PASSPHRASE="+credentials.Passphrase)
+		}
 		return nil
 	}
 

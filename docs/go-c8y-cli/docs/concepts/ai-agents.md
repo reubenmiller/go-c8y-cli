@@ -44,13 +44,13 @@ Each tool call runs a normal `c8y` command, so the existing go-c8y-cli features 
 1. Start the server in a terminal and log in:
 
     ```sh
-    # select a session interactively (read-only access)
+    # select a session interactively (the agent uses the session's mode)
     c8y mcp serve
 
-    # read-only access (default)
+    # use a specific session
     c8y mcp serve --session my-tenant
 
-    # allow creating and updating data
+    # at most create and update data, even if the session allows deleting
     c8y mcp serve --session my-dev-tenant --mode qual
     ```
 
@@ -112,15 +112,39 @@ Type a command in the server's terminal and press Enter:
 
 Connected clients use the new session for new commands, so you don't need to reconnect the MCP client. Commands which are already running finish with the previous session. If the login to the new session fails, the server keeps using the previous session.
 
-The mode set with `--mode` applies to every session, limited by each session's own mode. For example, with `--mode qual`, the agent can create and update data in a `dev` session, but only read data after you switch to a `prod` session.
+By default, the agent uses the mode of each session (`settings.session.mode`), so it can only read data in a `prod` session and can also delete data in a `dev` session. A session without a mode is read only. The mode set with `--mode` (or in the policy file) is a maximum for every session, limited by each session's own mode. For example, with `--mode qual`, the agent can create and update data in a `dev` session, but only read data after you switch to a `prod` session.
 
 ### Socket
 
 The socket is `server.sock` in the `mcp` folder of the session home directory, so the server and the relay find each other no matter which session is active. To run several servers at the same time, for example for two MCP clients working with different tenants, use `--socket <path>` on both commands. The folder containing the socket must be owned by your user and must not be writable by other users, so shared folders such as `/tmp` are rejected. `c8y mcp connect` also checks that the server runs as your user before connecting.
 
-### Automation and CI (stdio)
+### Without a terminal (stdio)
 
-With `--stdio`, the MCP client starts the server itself and communicates over stdin and stdout. Nobody can answer login prompts in this mode, so the session must work without user input, for example by setting the credentials as environment variables in the MCP client configuration:
+With `--stdio`, the MCP client starts the server itself and communicates over stdin and stdout, so you don't need to keep a terminal open. Register the server instead of the relay:
+
+```sh
+claude mcp add --scope user c8y -- c8y mcp serve --stdio
+```
+
+As the server has no terminal, it asks for input in other ways:
+
+* **Session**: Without `--session`, the first tool call opens a session picker in your browser. When you select a session, the server logs in straight away and shows the result on the page, so you can retry or pick another session if the login fails. The agent's tool call waits until the login succeeds (for up to 3 minutes). If you cancel, the agent is asked to check with you, and the picker opens again on the next tool call.
+* **Encrypted sessions**: If you use a pin entry command, such as a password manager or keychain helper, it provides the passphrase when you select the session. Configure it once with a setting instead of an environment variable:
+
+    ```sh
+    c8y settings update pinEntry "touchie get"
+    ```
+
+    Without a pin entry command, the page asks for the passphrase of encrypted sessions and checks it before logging in. This also applies to a session given with `--session`. The passphrase is only passed to the login and isn't kept, so if the session's token expires, the page opens again to ask for it.
+* **Two-factor authentication**: The session must contain a TOTP secret, as there is nowhere to enter a code.
+
+To switch to another session, run the server's `switch_session` prompt, for example `/mcp__c8y__switch_session` in Claude Code. Only you can run it, not the agent. The session picker opens in the browser, and the agent's tool calls wait until you select a session. The new session applies to new commands. As in the terminal, the agent uses the new session's mode, limited by `--mode` if set.
+
+The session picker only listens on `127.0.0.1` while it is open, and can only be opened with the one-time link which the server opens in the browser. The link is never shown to the agent.
+
+#### Automation and CI
+
+In CI, set the credentials as environment variables in the MCP client configuration. The server then uses them without a session picker:
 
 ```json
 {
@@ -139,13 +163,13 @@ With `--stdio`, the MCP client starts the server itself and communicates over st
 }
 ```
 
-Alternatively use `--session` with a session file and set `C8Y_PASSPHRASE` for encrypted sessions, or provide `C8Y_TOKEN` instead of a password. In this mode, the commands receive the credentials from the server's environment.
+You can also provide `C8Y_TOKEN` instead of a password. In this mode, the commands receive the credentials from the server's environment.
 
 ## Controlling what the agent can do
 
 | Flag | Description |
 |------|-------------|
-| `--mode` | Maximum mode: `prod` (read only, default), `qual` (create and update) or `dev` (create, update and delete) |
+| `--mode` | Maximum mode: `prod` (read only), `qual` (create and update) or `dev` (create, update and delete). Default: the session's mode, or `prod` if the session has none |
 | `--allow` | Only allow commands matching the pattern. Can be used multiple times |
 | `--deny` | Deny commands matching the pattern (wins over `--allow`). Can be used multiple times |
 | `--read` | Treat additional commands as read-only, e.g. extension commands |

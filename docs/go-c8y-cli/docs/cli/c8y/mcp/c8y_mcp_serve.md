@@ -29,18 +29,23 @@ also allows later connections from that client (e.g. reconnects), until it hasn'
 8 hours. "a" is only offered when the connecting process is this c8y binary (c8y mcp connect).
 The socket must be in a directory which is owned by your user and not writable by other users.
 
-With --stdio, the MCP client starts the server itself and communicates over stdin/stdout. The
-session must then work without user input, e.g. by setting C8Y_HOST, C8Y_TENANT, C8Y_USER and
-C8Y_PASSWORD or C8Y_TOKEN in the MCP client configuration, or C8Y_PASSPHRASE for encrypted
-sessions. This mode is intended for automation and CI.
+With --stdio, the MCP client starts the server itself and communicates over stdin/stdout, so no
+terminal is needed. Without --session, the first tool call opens a session picker in the browser,
+which logs in to the selected session and shows the result. Encrypted sessions are unlocked with the
+pin entry command (settings.pinEntry, e.g. "c8y settings update pinEntry 'touchie get'"), or else
+with the passphrase entered on the page. Run the server's "switch_session" prompt (in Claude Code
+"/mcp__\<server>__switch_session") to select another session in the browser. For automation and CI,
+set C8Y_HOST, C8Y_TENANT, C8Y_USER and C8Y_PASSWORD or C8Y_TOKEN in the MCP client configuration
+instead.
 
 You control what the agent can do:
 
-* Session: selected by you in the server terminal. The agent can't switch the session, host or
+* Session: selected by you in the server terminal (or browser). The agent can't switch the session, host or
   credentials. In socket mode, commands only receive the token, not the password or passphrase.
-* Mode (prod, qual, dev): the maximum mode the agent can use. It can only narrow the session's own
-  mode, never widen it, also after switching the session. Read-only commands always run in prod
-  (read-only) mode.
+* Mode (prod, qual, dev): the maximum mode the agent can use. By default, the agent uses the mode
+  of the session (settings.session.mode), and prod (read only) if the session has none. --mode can
+  only narrow the session's own mode, never widen it, also after switching the session. Read-only
+  commands always run in prod (read-only) mode.
 * Allow and deny lists: which commands the agent can use, e.g. "devices", "inventory *", "* delete".
 * Device shell: with --allowDeviceShell (and qual or dev mode), the agent can run single shell
   commands on a device for troubleshooting, via "remoteaccess connect ssh --device \<id> -- \<command>"
@@ -84,6 +89,9 @@ Add the server to Claude Code (run once). Claude Code starts the relay, which co
 $ c8y mcp serve --session dev --mode dev --deny "users" --deny "tenants" --approval elicit
 Allow all actions (including delete) except for user and tenant management, and always ask the user to approve writes
 
+$ claude mcp add --scope user c8y -- c8y mcp serve --stdio
+Let the MCP client start the server. Select the session in the browser on the first tool call
+
 $ claude mcp add c8y -e C8Y_HOST=https://example.cumulocity.com -e C8Y_USER=ci -e C8Y_PASSWORD=... -- c8y mcp serve --stdio
 Let the MCP client start the server, using credentials from environment variables
 
@@ -100,13 +108,13 @@ Let the MCP client start the server, using credentials from environment variable
   -h, --help[=true|false]                 help for serve
       --maxOutput int                     Maximum number of output bytes returned to the agent per command. Default: 100000
       --maxTimeout duration               Maximum timeout the agent can request per command. Default: 10m
-      --mode string                       Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: prod
+      --mode string                       Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: the session's mode (prod if the session has none)
       --noDefaultDeny[=true|false]        Don't include the default deny list: mcp, sessions, settings, cli, alias, completion, extensions, microservices getBootstrapUser, deviceregistration getCredentials, remoteaccess connect run, remoteaccess server
       --noNotify[=true|false]             Don't show a desktop notification when a client needs to be approved
       --policy string                     Policy file (json, yaml or toml). Flags override the values in the file
       --read stringArray                  Additional commands to treat as read-only, e.g. extension commands. Can be used multiple times
       --socket string                     Unix socket path to listen on, e.g. to run several servers at the same time. Defaults to server.sock in the mcp folder of the session home directory
-      --stdio[=true|false]                Communicate over stdin/stdout (the MCP client starts the server). The session must work without user input
+      --stdio[=true|false]                Communicate over stdin/stdout (the MCP client starts the server). The session is selected in the browser
       --timeout duration                  Default timeout per command. Default: 2m
 ```
 
