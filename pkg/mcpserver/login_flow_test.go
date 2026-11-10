@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -13,7 +12,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 )
 
@@ -26,17 +24,6 @@ func shortTempDir(t *testing.T) string {
 	}
 	t.Cleanup(func() { os.RemoveAll(dir) })
 	return dir
-}
-
-func TestDefaultSocketPath(t *testing.T) {
-	if p := DefaultSocketPath("/home/user/.cumulocity"); p != filepath.Join("/home/user/.cumulocity", "mcp", "server.sock") {
-		t.Errorf("unexpected path %s", p)
-	}
-
-	long := DefaultSocketPath("/home/user/" + strings.Repeat("a", 120))
-	if len(long) > maxSocketPathLength {
-		t.Errorf("socket path is too long: %d", len(long))
-	}
 }
 
 func TestParseDotEnv(t *testing.T) {
@@ -212,46 +199,6 @@ func TestInteractiveLoginRenewsExpiringToken(t *testing.T) {
 	}
 }
 
-func TestListenRejectsSecondServer(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("unix socket permissions")
-	}
-	socketPath := filepath.Join(shortTempDir(t), "sub", "s.sock")
-	l, err := Listen(socketPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer l.Close()
-
-	info, err := os.Stat(socketPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if info.Mode().Perm() != 0o600 {
-		t.Errorf("unexpected socket permissions %v", info.Mode().Perm())
-	}
-	dirInfo, _ := os.Stat(filepath.Dir(socketPath))
-	if dirInfo.Mode().Perm() != 0o700 {
-		t.Errorf("unexpected socket dir permissions %v", dirInfo.Mode().Perm())
-	}
-
-	if _, err := Listen(socketPath); err == nil || !strings.Contains(err.Error(), "already running") {
-		t.Errorf("expected already running error, got %v", err)
-	}
-}
-
-func TestListenRemovesStaleSocket(t *testing.T) {
-	socketPath := filepath.Join(shortTempDir(t), "s.sock")
-	if err := os.WriteFile(socketPath, nil, 0o600); err != nil {
-		t.Fatal(err)
-	}
-	l, err := Listen(socketPath)
-	if err != nil {
-		t.Fatalf("expected the stale socket to be replaced: %s", err)
-	}
-	l.Close()
-}
-
 func newTestServer() *Server {
 	policy := DefaultPolicy()
 	return &Server{
@@ -260,119 +207,5 @@ func newTestServer() *Server {
 		Policy:     policy,
 		Classifier: &Classifier{Root: newTestRoot(), Policy: policy},
 		Runner:     &Runner{Executable: "/bin/false", Mode: config.SessionModeProduction},
-	}
-}
-
-func callSessionTool(t *testing.T, ctx context.Context, transport mcp.Transport) string {
-	t.Helper()
-	client := mcp.NewClient(&mcp.Implementation{Name: "test", Version: "0"}, nil)
-	cs, err := client.Connect(ctx, transport, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer cs.Close()
-	res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: ToolSession})
-	if err != nil {
-		t.Fatal(err)
-	}
-	return res.Content[0].(*mcp.TextContent).Text
-}
-
-func TestServeAndRelay(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	socketPath := filepath.Join(shortTempDir(t), "s.sock")
-	listener, err := Listen(socketPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	serveCtx, stopServe := context.WithCancel(ctx)
-	served := make(chan error, 1)
-	connected := make(chan int, 4)
-	go func() {
-		served <- Serve(serveCtx, newTestServer().New(), listener, ServeOptions{OnConnect: func(n int) { connected <- n }})
-	}()
-
-	// Two clients connected through the relay at the same time
-	for i := range 2 {
-		clientIn, relayStdin := net.Pipe()
-		relayStdout, clientOut := net.Pipe()
-
-		conn, err := net.Dial("unix", socketPath)
-		if err != nil {
-			t.Fatal(err)
-		}
-		relayDone := make(chan error, 1)
-		go func() { relayDone <- Relay(ctx, conn, relayStdin, relayStdout) }()
-
-		text := callSessionTool(t, ctx, &mcp.IOTransport{Reader: clientOut, Writer: clientIn})
-		if !strings.Contains(text, `"tenant": "t123"`) {
-			t.Errorf("client %d: unexpected session info: %s", i, text)
-		}
-		if strings.Contains(text, `"password":`) || strings.Contains(text, `"token":`) {
-			t.Errorf("session info should not include credentials: %s", text)
-		}
-
-		clientIn.Close()
-		select {
-		case <-relayDone:
-		case <-time.After(5 * time.Second):
-			t.Fatalf("relay did not stop after the client closed stdin")
-		}
-	}
-
-	stopServe()
-	select {
-	case err := <-served:
-		if err != nil {
-			t.Errorf("unexpected serve error: %s", err)
-		}
-	case <-time.After(5 * time.Second):
-		t.Fatalf("server did not stop")
-	}
-	if len(connected) != 2 {
-		t.Errorf("expected 2 connections, got %d", len(connected))
-	}
-}
-
-func TestRelayStopsWhenServerCloses(t *testing.T) {
-	socketPath := filepath.Join(shortTempDir(t), "s.sock")
-	listener, err := Listen(socketPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer listener.Close()
-	go func() {
-		conn, err := listener.Accept()
-		if err == nil {
-			conn.Close()
-		}
-	}()
-
-	conn, err := net.Dial("unix", socketPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	stdinReader, _ := net.Pipe() // never closed by the client
-	done := make(chan error, 1)
-	go func() { done <- Relay(context.Background(), conn, stdinReader, &strings.Builder{}) }()
-	select {
-	case <-done:
-	case <-time.After(5 * time.Second):
-		t.Fatalf("relay did not stop when the server closed the connection")
-	}
-}
-
-func TestUnavailableServer(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	t1, t2 := mcp.NewInMemoryTransports()
-	server := NewUnavailableServer("test", "start the server")
-	go func() { _ = server.Run(ctx, t1) }()
-	text := callSessionTool(t, ctx, t2)
-	if text != "start the server" {
-		t.Errorf("unexpected text %q", text)
 	}
 }

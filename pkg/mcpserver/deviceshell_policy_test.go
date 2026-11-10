@@ -132,7 +132,7 @@ func TestDeviceShellConfirmer(t *testing.T) {
 	t.Run("dialog", func(t *testing.T) {
 		for _, allow := range []bool{true, false} {
 			var message string
-			c := &DeviceShellConfirmer{Stderr: &syncBuffer{}, dialog: func(ctx context.Context, title, msg string, timeout time.Duration) (bool, error) {
+			c := &DeviceShellConfirmer{dialog: func(ctx context.Context, title, msg string, timeout time.Duration) (bool, error) {
 				message = msg
 				return allow, nil
 			}}
@@ -149,38 +149,8 @@ func TestDeviceShellConfirmer(t *testing.T) {
 	noDialog := func(ctx context.Context, title, msg string, timeout time.Duration) (bool, error) {
 		return false, errNoDialog
 	}
-	terminal := func(t *testing.T, input string, timeout time.Duration) (error, string) {
-		t.Helper()
-		r, w, err := os.Pipe()
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer r.Close()
-		defer w.Close()
-		if input != "" {
-			if _, err := w.Write([]byte(input)); err != nil {
-				t.Fatal(err)
-			}
-		}
-		stderr := &syncBuffer{}
-		c := &DeviceShellConfirmer{Stdin: r, Stderr: stderr, Timeout: timeout, dialog: noDialog}
-		return c.Confirm(ctx, session, "c8y remoteaccess connect ssh --device 1 -- uptime"), stderr.String()
-	}
-
-	t.Run("terminal fallback", func(t *testing.T) {
-		if err, out := terminal(t, "y\n", time.Second); err != nil || !strings.Contains(out, "[y/N]") {
-			t.Errorf("expected the command to be allowed in the terminal: %v\n%s", err, out)
-		}
-		if err, _ := terminal(t, "n\n", time.Second); err == nil {
-			t.Errorf("expected the command to be rejected")
-		}
-		if err, _ := terminal(t, "", 300*time.Millisecond); err == nil || !strings.Contains(err.Error(), "in time") {
-			t.Errorf("expected a timeout, got %v", err)
-		}
-	})
-
-	t.Run("no terminal", func(t *testing.T) {
-		c := &DeviceShellConfirmer{Stderr: &syncBuffer{}, dialog: noDialog}
+	t.Run("no dialog", func(t *testing.T) {
+		c := &DeviceShellConfirmer{dialog: noDialog}
 		if err := c.Confirm(ctx, session, "c8y remoteaccess connect ssh --device 1 -- uptime"); err == nil {
 			t.Errorf("command should be rejected when it can't be confirmed")
 		}

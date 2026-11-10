@@ -23,7 +23,17 @@ type Credentials struct {
 	Password string `json:"password,omitempty"`
 	// Passphrase to unlock an encrypted session (used by the login)
 	Passphrase string `json:"passphrase,omitempty"`
+	// TOTPCode two-factor authentication code entered by the user (used by the login)
+	TOTPCode string `json:"totpCode,omitempty"`
 }
+
+// Messages of the login when a two-factor authentication code is needed but there is
+// no terminal to ask for it. The MCP server looks for them, to ask for the code in
+// the browser instead
+const (
+	TOTPCodeRequiredMessage  = "a two-factor authentication (TOTP) code is required"
+	TOTPSetupRequiredMessage = "two-factor authentication (TOTP) must be set up first. Log in once in a terminal with \"c8y sessions login\""
+)
 
 // ReadCredentialsFromFD reads the credentials (json) from the file descriptor given
 // by EnvCredentialsFD, if set, and uses them instead of any other credentials.
@@ -61,6 +71,9 @@ func (c *Config) ReadCredentialsFromFD() error {
 	}
 	if credentials.Passphrase != "" {
 		c.Passphrase = credentials.Passphrase
+	}
+	if credentials.TOTPCode != "" {
+		c.TOTPCode = credentials.TOTPCode
 	}
 	return nil
 }

@@ -8,18 +8,20 @@ go-c8y-cli includes a [Model Context Protocol (MCP)](https://modelcontextprotoco
 
 ## How it works
 
-You run `c8y mcp serve` in a terminal. It logs in to the session using the normal session login, so encrypted sessions, two-factor authentication and SSO work as usual. If you don't set a session with `--session` or `C8Y_SESSION`, you are asked to select one, the same as with `set-session`. The server then listens on a unix socket which only your user can access. You can switch to another session at any time in the server's terminal, without changing the MCP client configuration.
+Your MCP client starts `c8y mcp serve` and communicates with it over stdin and stdout, so you only register it once and don't need to keep a terminal open. As the server has no terminal, you select and unlock sessions in your browser:
 
-Your MCP client starts `c8y mcp connect`, which forwards the client's messages to the server's socket. The relay doesn't use any credentials. If the server isn't running, the agent is told to ask you to start it.
+* **Session**: Without `--session`, the first tool call opens a session picker in your browser. When you select a session, the server logs in straight away and shows the result on the page, so you can retry or pick another session if the login fails. The agent's tool call waits until the login succeeds (for up to 3 minutes). If you cancel, the agent is asked to check with you, and the picker opens again on the next tool call.
+* **Encrypted sessions**: If you use a pin entry command, such as a password manager or keychain helper, it provides the passphrase when you select the session. Configure it once with a setting:
 
-Each new client must be approved in the server's terminal. The prompt shows the process which is connecting and the processes which started it, for example `c8y mcp connect` started by `claude`. It stops programs running as your user from using the logged-in session without you noticing. It doesn't stop a program which targets your setup on purpose, as such a program could also change your MCP client's configuration or replace the `c8y` binary.
+    ```sh
+    c8y settings update pinEntry "touchie get"
+    ```
 
-```text
-your terminal                                  MCP client (e.g. Claude Code)
-c8y mcp serve                          ◄────── c8y mcp connect
-  (session selection, login prompts,     unix socket, only accessible by your user
-   connection approval, activity log)
-```
+    Without a pin entry command, the page asks for the passphrase of encrypted sessions and checks it before logging in. This also applies to a session given with `--session`.
+* **Two-factor authentication**: If the login needs a code, the page asks for the code from your authenticator app, unless the session contains a TOTP secret. Setting up two-factor authentication for the first time needs a terminal, so run `c8y sessions login` once in a terminal first.
+* **Switching sessions**: Run the server's `switch_session` prompt, for example `/mcp__c8y__switch_session` in Claude Code. Only you can run it, not the agent. The session picker opens in the browser, and the agent's tool calls wait until you have selected and logged in to a session. Commands which are already running finish with the previous session.
+
+The session picker only listens on `127.0.0.1` while it is open, and can only be opened with the one-time link which the server opens in your browser. The link is never shown to the agent. The passphrase and the two-factor code are passed to the login through a pipe, not environment variables, and aren't kept.
 
 The server gives the agent three tools:
 
@@ -31,118 +33,44 @@ The server gives the agent three tools:
 
 Each tool call runs a normal `c8y` command, so the existing go-c8y-cli features apply:
 
-* **Session**: selected by you in the server's terminal. The agent can't switch it, and can't use `--session`, `--sessionUsername`, `--sessionPassword`, `--host` or `--proxy`. The agent is told to check the active session with `c8y_session`, as you can switch it at any time.
-* **Credentials**: the commands only receive the token from the login and a copy of the session file without secrets. The password and encryption passphrase stay in the server. Sessions which use basic auth (no token) also pass the password to the commands. The token and password are passed through a pipe, not environment variables, as other programs running as your user can read the environment of a process. On Windows, environment variables are still used.
-* **Token renewal**: when the token is about to expire, the server asks you to log in again in its terminal.
-* **Session mode**: read commands always run in `prod` (read-only) mode. Write commands run in the mode you set with `--mode`. It can only narrow the session's own mode, never widen it, also after switching to another session, and CI environment variables are ignored.
+* **Session**: selected by you in the browser. The agent can't switch it, and can't use `--session`, `--sessionUsername`, `--sessionPassword`, `--host` or `--proxy`. The agent is told to check the active session with `c8y_session`, as you can switch it at any time.
+* **Credentials**: the commands only receive the token from the login and a copy of the session file without secrets. The password and encryption passphrase are never passed to the commands, except the password for sessions which use basic auth (no token). The token and password are passed through a pipe, not environment variables, as other programs running as your user can read the environment of a process. On Windows, environment variables are still used.
+* **Token renewal**: when the token is about to expire, the server logs in again. If the passphrase or a two-factor code is needed, the page opens again in your browser.
+* **Session mode**: by default, the agent uses the mode of each session (`settings.session.mode`), so it can only read data in a `prod` session and can also delete data in a `dev` session. A session without a mode is read only. The mode set with `--mode` (or in the policy file) is a maximum for every session, limited by each session's own mode. For example, with `--mode qual`, the agent can create and update data in a `dev` session, but only read data after you switch to a `prod` session. Read commands always run in `prod` (read-only) mode, and CI environment variables are ignored.
 * **Dry run**: commands with `--dry` are treated as read commands, and the approval prompt shows the dry run output of the requests.
-* **Activity log**: each command is recorded in the [activity log](/docs/concepts/activitylog) with the message `mcp:c8y_read` or `mcp:c8y_write`, and shown in the server's terminal.
+* **Activity log**: each command is recorded in the [activity log](/docs/concepts/activitylog) with the message `mcp:c8y_read` or `mcp:c8y_write`.
 * **Sensitive information**: always hidden in log output.
 
 ## Setup
 
-1. Start the server in a terminal and log in:
+Register the server in your MCP client (once).
 
-    ```sh
-    # select a session interactively (the agent uses the session's mode)
-    c8y mcp serve
-
-    # use a specific session
-    c8y mcp serve --session my-tenant
-
-    # at most create and update data, even if the session allows deleting
-    c8y mcp serve --session my-dev-tenant --mode qual
-    ```
-
-2. Register the relay in your MCP client (once). The server prints the command to use.
-
-    **Claude Code**
-
-    ```sh
-    claude mcp add --scope user c8y -- c8y mcp connect
-    ```
-
-    **Other clients (Claude Desktop, VS Code, Cursor)**
-
-    ```json
-    {
-      "mcpServers": {
-        "c8y": {
-          "command": "c8y",
-          "args": ["mcp", "connect"]
-        }
-      }
-    }
-    ```
-
-3. Approve the connection in the server's terminal when your MCP client starts. Check that the process is the one you expect, then answer:
-
-    ```text
-    A new MCP client is connecting:
-      c8y mcp connect
-          pid 52124, /opt/homebrew/bin/c8y
-      started by: claude
-          pid 88512, /Users/me/.local/bin/claude
-    Allow this client to use the MCP server? (a = also allow later connections from claude, pid 88512) [y/N/a]
-    ```
-
-    | Answer | Behavior |
-    |--------|----------|
-    | `y` | Allow the connections which are waiting. You are asked again when the client reconnects |
-    | `a` | Also allow later connections from the same client process (e.g. reconnects). A new client process, such as a restarted Claude Code, is asked again, and so is a client which hasn't connected for 8 hours |
-    | `n` | Reject the connections which are waiting |
-
-    The client connects straight away and doesn't have to wait for your answer, so it never times out. Until you answer, the agent's tool calls wait for up to 10 seconds, and then the agent is asked to remind you to approve the client. The server also rings the terminal bell and shows a desktop notification (macOS, and Linux with `notify-send`). Use `--noNotify` to turn the notification off.
-
-    MCP clients can open more than one connection, for example when reconnecting. One answer applies to all connections from the same client which are waiting, and the prompt shows how many there are. If the client disconnects before you answer, the prompt is cancelled.
-
-    `a` is only offered when the connecting process is the `c8y` binary of the server, i.e. the `c8y mcp connect` relay. It allows all relays started by that client process, including ones started by its hooks or shell commands.
-
-4. Keep the terminal open while the agent works. Press Ctrl+C to stop the server, which immediately removes the agent's access.
-
-### Switching sessions
-
-Type a command in the server's terminal and press Enter:
-
-| Command | Description |
-|---------|-------------|
-| `s` | Switch to another session. Select the session from the list and log in. Press Ctrl+C in the list to cancel |
-| `i` | Show the current session |
-| `h` | Show the available commands |
-
-Connected clients use the new session for new commands, so you don't need to reconnect the MCP client. Commands which are already running finish with the previous session. If the login to the new session fails, the server keeps using the previous session.
-
-By default, the agent uses the mode of each session (`settings.session.mode`), so it can only read data in a `prod` session and can also delete data in a `dev` session. A session without a mode is read only. The mode set with `--mode` (or in the policy file) is a maximum for every session, limited by each session's own mode. For example, with `--mode qual`, the agent can create and update data in a `dev` session, but only read data after you switch to a `prod` session.
-
-### Socket
-
-The socket is `server.sock` in the `mcp` folder of the session home directory, so the server and the relay find each other no matter which session is active. To run several servers at the same time, for example for two MCP clients working with different tenants, use `--socket <path>` on both commands. The folder containing the socket must be owned by your user and must not be writable by other users, so shared folders such as `/tmp` are rejected. `c8y mcp connect` also checks that the server runs as your user before connecting.
-
-### Without a terminal (stdio)
-
-With `--stdio`, the MCP client starts the server itself and communicates over stdin and stdout, so you don't need to keep a terminal open. Register the server instead of the relay:
+**Claude Code**
 
 ```sh
-claude mcp add --scope user c8y -- c8y mcp serve --stdio
+# select the session in the browser on the first tool call
+claude mcp add --scope user c8y -- c8y mcp serve
+
+# use a specific session, and at most create and update data
+claude mcp add --scope user c8y -- c8y mcp serve --session my-dev-tenant --mode qual
 ```
 
-As the server has no terminal, it asks for input in other ways:
+**Other clients (Claude Desktop, VS Code, Cursor)**
 
-* **Session**: Without `--session`, the first tool call opens a session picker in your browser. When you select a session, the server logs in straight away and shows the result on the page, so you can retry or pick another session if the login fails. The agent's tool call waits until the login succeeds (for up to 3 minutes). If you cancel, the agent is asked to check with you, and the picker opens again on the next tool call.
-* **Encrypted sessions**: If you use a pin entry command, such as a password manager or keychain helper, it provides the passphrase when you select the session. Configure it once with a setting instead of an environment variable:
+```json
+{
+  "mcpServers": {
+    "c8y": {
+      "command": "c8y",
+      "args": ["mcp", "serve"]
+    }
+  }
+}
+```
 
-    ```sh
-    c8y settings update pinEntry "touchie get"
-    ```
+The server opens the session picker with a desktop notification (macOS, and Linux with `notify-send`). Use `--noNotify` to turn the notification off.
 
-    Without a pin entry command, the page asks for the passphrase of encrypted sessions and checks it before logging in. This also applies to a session given with `--session`. The passphrase is only passed to the login and isn't kept, so if the session's token expires, the page opens again to ask for it.
-* **Two-factor authentication**: The session must contain a TOTP secret, as there is nowhere to enter a code.
-
-To switch to another session, run the server's `switch_session` prompt, for example `/mcp__c8y__switch_session` in Claude Code. Only you can run it, not the agent. The session picker opens in the browser, and the agent's tool calls wait until you select a session. The new session applies to new commands. As in the terminal, the agent uses the new session's mode, limited by `--mode` if set.
-
-The session picker only listens on `127.0.0.1` while it is open, and can only be opened with the one-time link which the server opens in the browser. The link is never shown to the agent.
-
-#### Automation and CI
+### Automation and CI
 
 In CI, set the credentials as environment variables in the MCP client configuration. The server then uses them without a session picker:
 
@@ -151,7 +79,7 @@ In CI, set the credentials as environment variables in the MCP client configurat
   "mcpServers": {
     "c8y": {
       "command": "c8y",
-      "args": ["mcp", "serve", "--stdio", "--mode", "qual"],
+      "args": ["mcp", "serve", "--mode", "qual"],
       "env": {
         "C8Y_HOST": "https://example.cumulocity.com",
         "C8Y_TENANT": "t12345",
@@ -163,7 +91,7 @@ In CI, set the credentials as environment variables in the MCP client configurat
 }
 ```
 
-You can also provide `C8Y_TOKEN` instead of a password. In this mode, the commands receive the credentials from the server's environment.
+You can also provide `C8Y_TOKEN` instead of a password. In this case, the commands receive the credentials from the server's environment.
 
 ## Controlling what the agent can do
 
@@ -185,10 +113,10 @@ By default the following commands are denied, because they expose credentials, c
 
 ### Troubleshooting devices
 
-For troubleshooting, the agent can run shell commands on a device. This is disabled by default. Start the server with `--allowDeviceShell` to enable it:
+For troubleshooting, the agent can run shell commands on a device. This is disabled by default. Add `--allowDeviceShell` to the server's arguments to enable it:
 
 ```sh
-c8y mcp serve --mode qual --allowDeviceShell
+claude mcp add --scope user c8y -- c8y mcp serve --mode qual --allowDeviceShell
 ```
 
 Both ways are write commands, so they also need `--mode qual` or `--mode dev`, and are approved like any other write command:
@@ -210,15 +138,15 @@ For `remoteaccess connect ssh`, the MCP server only allows running a single comm
 A shell command on a device can change anything the ssh or agent user is allowed to change, regardless of the mode. To confirm each command yourself, add `--confirmDeviceShell`:
 
 ```sh
-c8y mcp serve --mode qual --allowDeviceShell --confirmDeviceShell
+claude mcp add --scope user c8y -- c8y mcp serve --mode qual --allowDeviceShell --confirmDeviceShell
 ```
 
-The server then shows a dialog with the command and the tenant after the normal approval (macOS, and Linux with `zenity` or `kdialog`), or asks in its terminal if no dialog is available. Unlike the normal approval, the MCP client can't answer it. Deny is the default, and the command is rejected if you don't answer within 2 minutes.
+The server then shows a dialog with the command and the tenant after the normal approval (macOS, and Linux with `zenity` or `kdialog`). If no dialog is available, the command is rejected. Unlike the normal approval, the MCP client can't answer it. Deny is the default, and the command is rejected if you don't answer within 2 minutes.
 
 Without `--allowDeviceShell`, `remoteaccess connect ssh` is rejected, and so are `operations create` and `c8y api` commands whose arguments or input contain `c8y_Command`. The check of the operations is best effort: a template can assemble the operation in other ways. To make sure the agent can't send any operation to a device, also deny `operations create`:
 
 ```sh
-c8y mcp serve --mode qual --deny "operations create"
+claude mcp add --scope user c8y -- c8y mcp serve --mode qual --deny "operations create"
 ```
 
 ### Approval
@@ -234,7 +162,7 @@ The elicitation prompt shows the command, the tenant and the requests from a dry
 
 With MCP clients which use protocol version 2026-07-28 or later, the question is returned with the tool result and the client calls the tool again with your answer. With older clients, the server sends an elicitation request instead. In both cases, an approval is only valid once, and only for the exact command, input and session you were asked about. If you switch the session before answering, the agent has to run the command again.
 
-The approval of write commands is handled by the MCP client: either the client shows the elicitation prompt, or its tool permission prompt. It protects against unwanted actions of the agent, but not against a program which connects to the socket directly and answers the prompts itself. The connection approval in the server's terminal makes that harder.
+The approval of write commands is handled by the MCP client: either the client shows the elicitation prompt, or its tool permission prompt. It protects against unwanted actions of the agent, but not against a modified MCP client, which can answer the prompts itself.
 
 ### Policy file
 
@@ -250,7 +178,7 @@ maxOutputBytes: 100000
 ```
 
 ```sh
-c8y mcp serve --session my-dev-tenant --policy ./c8y-mcp-policy.yaml
+claude mcp add --scope user c8y -- c8y mcp serve --policy /path/to/c8y-mcp-policy.yaml
 ```
 
 ### Limits
@@ -259,8 +187,7 @@ c8y mcp serve --session my-dev-tenant --policy ./c8y-mcp-policy.yaml
 * The policy controls the `c8y` commands run through the MCP server. It doesn't stop an agent which also has shell access from running `c8y` or reading files directly. Use your client's permission settings to control shell access.
 * Commands can read local files, for example with `--template`, `--data` or jsonnet imports, and the output is returned to the agent. Don't rely on the MCP server alone to keep local files away from an agent.
 * Commands are run without a shell. Only c8y commands joined with ` | ` are supported.
-* The connection approval shows the names and paths of the connecting processes. A malicious program can use a misleading name, so check the executable path, and reject connections which you didn't expect.
-* On Windows, the socket folder check is skipped and the connecting process isn't shown.
+* The session picker opens in a browser on the machine which runs the server. On a remote machine (e.g. over ssh), use `--session` with a session which can log in without user input, or environment variables.
 * `remoteaccess connect ssh` can't ask for a password or a key passphrase, as the command doesn't run in a terminal. Use an ssh key which is loaded in your ssh agent.
 
 ## Agent skill

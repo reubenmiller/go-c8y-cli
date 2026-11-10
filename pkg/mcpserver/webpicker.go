@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -47,12 +48,17 @@ type SessionChoice struct {
 	// NeedsPassphrase true if the passphrase must be entered on the page to unlock the
 	// session (it is encrypted and no pin entry command is configured)
 	NeedsPassphrase bool
+
+	// NeedsCode true if a two-factor authentication code is expected, e.g. because the
+	// last login needed one. The code field is also shown when the login asks for it
+	NeedsCode bool
 }
 
-// LoginFunc logs in to the selected session. The passphrase is only set for sessions
-// which need it (see SessionChoice.NeedsPassphrase). It returns a value which is
+// LoginFunc logs in to the selected session with the secrets entered on the page. The
+// passphrase is only set for sessions which need it (see SessionChoice.NeedsPassphrase).
+// It returns ErrTOTPRequired if a two-factor code is needed, and a value which is
 // returned by Pick
-type LoginFunc func(ctx context.Context, choice SessionChoice, passphrase string) (value any, err error)
+type LoginFunc func(ctx context.Context, choice SessionChoice, secrets LoginSecrets) (value any, err error)
 
 // Selection the session selected by the user
 type Selection struct {
@@ -125,9 +131,12 @@ type pickerView struct {
 	Choices   []SessionChoice
 	CanGoBack bool
 
-	// Unlock the session for which the passphrase is entered
+	// Unlock the session for which the passphrase or code is entered
 	Unlock      *SessionChoice
 	UnlockIndex int
+	// AskPassphrase, AskCode which fields are shown
+	AskPassphrase bool
+	AskCode       bool
 
 	Error     string
 	Done      *SessionChoice
@@ -164,6 +173,16 @@ func (w *WebPicker) run(ctx context.Context, title string, message string, choic
 	finished := false
 	// only one login at a time
 	var loginMu sync.Mutex
+	// sessions which need a two-factor code, and the passphrase which was entered for
+	// them, so it doesn't have to be entered again with the code. Kept until the
+	// picker finishes
+	needsCode := map[int]bool{}
+	pendingPassphrase := map[int]string{}
+	defer func() {
+		mu.Lock()
+		clear(pendingPassphrase)
+		mu.Unlock()
+	}()
 	results := make(chan pickerResult, 1)
 	setHeaders := func(rw http.ResponseWriter, nonce string) {
 		h := rw.Header()
@@ -198,9 +217,22 @@ func (w *WebPicker) run(ctx context.Context, title string, message string, choic
 		rw.WriteHeader(status)
 		_ = pickerPage.Execute(rw, view)
 	}
+	unlockViewFor := func(index int, errorMessage string) pickerView {
+		mu.Lock()
+		_, hasPassphrase := pendingPassphrase[index]
+		askCode := choices[index].NeedsCode || needsCode[index]
+		mu.Unlock()
+		return pickerView{
+			Unlock:        &choices[index],
+			UnlockIndex:   index,
+			AskPassphrase: choices[index].NeedsPassphrase && !hasPassphrase,
+			AskCode:       askCode,
+			Error:         errorMessage,
+		}
+	}
 	listView := func() pickerView {
 		if unlockOnly {
-			return pickerView{Unlock: &choices[0], UnlockIndex: 0}
+			return unlockViewFor(0, "")
 		}
 		return pickerView{Choices: choices}
 	}
@@ -276,10 +308,13 @@ func (w *WebPicker) run(ctx context.Context, title string, message string, choic
 			return
 		}
 		unlockView := func(errorMessage string) pickerView {
-			return pickerView{Unlock: selected, UnlockIndex: index, Error: errorMessage}
+			return unlockViewFor(index, errorMessage)
 		}
 		errorView := func(errorMessage string) pickerView {
-			if selected.NeedsPassphrase || unlockOnly {
+			mu.Lock()
+			askCode := needsCode[index]
+			mu.Unlock()
+			if selected.NeedsPassphrase || selected.NeedsCode || askCode || unlockOnly {
 				return unlockView(errorMessage)
 			}
 			v := listView()
@@ -287,18 +322,31 @@ func (w *WebPicker) run(ctx context.Context, title string, message string, choic
 			return v
 		}
 
-		passphrase := ""
+		// the secrets entered on the page
+		secrets := LoginSecrets{TOTPCode: strings.ReplaceAll(r.PostFormValue("code"), " ", "")}
+		mu.Lock()
+		stored, hasStored := pendingPassphrase[index]
+		askCode := selected.NeedsCode || needsCode[index]
+		mu.Unlock()
 		if selected.NeedsPassphrase {
-			passphrase = r.PostFormValue("passphrase")
-			if passphrase == "" {
-				// show the passphrase field first
-				msg := ""
-				if r.PostFormValue("unlock") != "" {
-					msg = "Enter the passphrase."
-				}
-				render(rw, http.StatusOK, unlockView(msg))
-				return
+			secrets.Passphrase = r.PostFormValue("passphrase")
+			if secrets.Passphrase == "" && hasStored {
+				secrets.Passphrase = stored
 			}
+		}
+		// show the fields first, if input is needed
+		missing := ""
+		if selected.NeedsPassphrase && secrets.Passphrase == "" {
+			missing = "Enter the passphrase."
+		} else if askCode && secrets.TOTPCode == "" {
+			missing = "Enter the code from your authenticator app."
+		}
+		if missing != "" {
+			if r.PostFormValue("unlock") == "" {
+				missing = ""
+			}
+			render(rw, http.StatusOK, unlockView(missing))
+			return
 		}
 
 		if !loginMu.TryLock() {
@@ -320,9 +368,23 @@ func (w *WebPicker) run(ctx context.Context, title string, message string, choic
 			loginCtx, cancelLogin := context.WithCancel(runCtx)
 			stop := context.AfterFunc(r.Context(), cancelLogin)
 			var err error
-			value, err = w.Login(loginCtx, *selected, passphrase)
+			value, err = w.Login(loginCtx, *selected, secrets)
 			stop()
 			cancelLogin()
+			if errors.Is(err, ErrTOTPRequired) {
+				mu.Lock()
+				needsCode[index] = true
+				if secrets.Passphrase != "" {
+					pendingPassphrase[index] = secrets.Passphrase
+				}
+				mu.Unlock()
+				msg := ""
+				if secrets.TOTPCode != "" {
+					msg = "The code was not accepted. Enter the current code from your authenticator app."
+				}
+				render(rw, http.StatusOK, unlockView(msg))
+				return
+			}
 			if err != nil {
 				render(rw, http.StatusOK, errorView(err.Error()))
 				return
@@ -442,7 +504,9 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
     text-transform: uppercase; color: var(--faint);
   }
 
-  input[type=search], input[type=password] {
+  .field + .field { margin-top: 16px; }
+  input.code { font-family: var(--mono); font-size: 1.1rem; letter-spacing: .3em; }
+  input[type=search], input[type=password], input.code {
     width: 100%; padding: 12px 14px; font: inherit; font-size: .95rem; color: var(--strong);
     background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; outline: none;
     transition: border-color .15s, box-shadow .15s;
@@ -570,16 +634,24 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
 <main class="card">
   {{template "logo"}}
   <h1>{{.Title}}</h1>
-  <p class="lead">{{if .Message}}{{.Message}}{{else if .Unlock.NeedsPassphrase}}The session is encrypted. Enter the passphrase to unlock it.{{else}}Log in to the session.{{end}}</p>
+  <p class="lead">{{if .Message}}{{.Message}}{{else if and .AskPassphrase .AskCode}}The session is encrypted and needs two-factor authentication. Enter the passphrase and the code from your authenticator app.{{else if .AskPassphrase}}The session is encrypted. Enter the passphrase to unlock it.{{else if .AskCode}}The session needs two-factor authentication. Enter the code from your authenticator app.{{else}}Log in to the session.{{end}}</p>
   <div class="selected">{{template "session" .Unlock}}</div>
   {{if .Error}}<p class="error" role="alert">{{.Error}}</p>{{end}}
   <form method="post" action="/select" class="login" id="login">
     <input type="hidden" name="csrf" value="{{.CSRF}}">
     <input type="hidden" name="session" value="{{.UnlockIndex}}">
     <input type="hidden" name="unlock" value="1">
-    {{if .Unlock.NeedsPassphrase}}
-    <label class="label" for="passphrase">Passphrase</label>
-    <input type="password" id="passphrase" name="passphrase" autofocus autocomplete="off" required>
+    {{if .AskPassphrase}}
+    <div class="field">
+      <label class="label" for="passphrase">Passphrase</label>
+      <input type="password" id="passphrase" name="passphrase" autofocus autocomplete="off" required>
+    </div>
+    {{end}}
+    {{if .AskCode}}
+    <div class="field">
+      <label class="label" for="code">Two-factor code</label>
+      <input type="text" id="code" name="code" class="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,10}" maxlength="10" placeholder="123456" required {{if not .AskPassphrase}}autofocus{{end}}>
+    </div>
     {{end}}
   </form>
   <div class="actions">

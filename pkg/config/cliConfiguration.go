@@ -424,6 +424,10 @@ type Config struct {
 	// Passphrase used for encrypting/decrypting fields
 	Passphrase string
 
+	// TOTPCode two-factor authentication code passed by the MCP server (see
+	// ReadCredentialsFromFD), used by the login instead of a prompt
+	TOTPCode string
+
 	prompter prompt.Prompt
 
 	// SecretText used to test the encryption passphrase

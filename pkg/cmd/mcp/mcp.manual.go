@@ -1,7 +1,6 @@
 package mcp
 
 import (
-	cmdConnect "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/mcp/connect"
 	cmdServe "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/mcp/serve"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -22,7 +21,6 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdMCP {
 	}
 
 	cmd.AddCommand(cmdServe.NewCmdServe(f).GetCommand())
-	cmd.AddCommand(cmdConnect.NewCmdConnect(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

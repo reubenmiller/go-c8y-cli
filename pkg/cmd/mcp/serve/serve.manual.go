@@ -3,11 +3,9 @@ package serve
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"strings"
-	"sync"
 	"syscall"
 	"time"
 
@@ -41,9 +39,7 @@ type CmdServe struct {
 
 	allowDeviceShell   bool
 	confirmDeviceShell bool
-	deviceShellInfo    string
 	stdio              bool
-	socket             string
 }
 
 func NewCmdServe(f *cmdutil.Factory) *CmdServe {
@@ -58,39 +54,33 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			Start a Model Context Protocol (MCP) server which gives AI agents controlled access to a
 			Cumulocity tenant using c8y commands.
 
-			By default you run the server in your own terminal. It logs in using the normal session login,
-			so encrypted sessions, two-factor authentication and SSO work as usual, then listens on a
-			unix socket which only your user can access. If no session is set (via --session or C8Y_SESSION),
-			you are prompted to select one. MCP clients connect to it with "c8y mcp connect".
-			The token is renewed by logging in again in the terminal when it is about to expire.
+			The MCP client starts the server and communicates with it over stdin/stdout, so register the
+			command in the MCP client once (see the examples) rather than running it in a terminal.
 
-			You can switch to another session while the server is running by typing "s" and Enter in the
-			server terminal. Connected clients use the new session for new commands, so the MCP client only
-			needs to be registered once. Type "i" to show the current session and "h" for help.
+			Sessions are selected and unlocked in the browser, as the server has no terminal:
 
-			Each new client must be approved in the server terminal, which shows the process that is connecting
-			and the processes that started it. This stops other programs running as your user from using the
-			server without you noticing, as the approval can't be given by the client. The client connects
-			straight away, and its tool calls wait until it is approved, so it doesn't time out. The terminal
-			bell and a desktop notification draw your attention to the prompt (disable with --noNotify).
-			One answer applies to all connections from the same client which are waiting, and answering "a"
-			also allows later connections from that client (e.g. reconnects), until it hasn't connected for
-			8 hours. "a" is only offered when the connecting process is this c8y binary (c8y mcp connect).
-			The socket must be in a directory which is owned by your user and not writable by other users.
+			* Without --session, the first tool call opens a session picker in the browser. Selecting a
+			  session logs in to it straight away and shows the result, so you can retry or pick another
+			  session. The tool call waits until the login succeeds.
+			* Encrypted sessions are unlocked with the pin entry command (settings.pinEntry, e.g.
+			  "c8y settings update pinEntry 'touchie get'"), or else with the passphrase entered on the page.
+			* If the login needs a two-factor authentication code, the page asks for it, unless the session
+			  contains a TOTP secret.
+			* Run the server's "switch_session" prompt (in Claude Code "/mcp__<server>__switch_session") to
+			  select another session. Only the user can run it, not the agent.
+			* The page only listens on 127.0.0.1 while it is open, and can only be opened with the one-time
+			  link which the server opens in the browser. The link is never shown to the agent.
+			* The passphrase and code are passed to the login via a pipe, and aren't kept. When the token
+			  expires, the page opens again if they are needed.
 
-			With --stdio, the MCP client starts the server itself and communicates over stdin/stdout, so no
-			terminal is needed. Without --session, the first tool call opens a session picker in the browser,
-			which logs in to the selected session and shows the result. Encrypted sessions are unlocked with the
-			pin entry command (settings.pinEntry, e.g. "c8y settings update pinEntry 'touchie get'"), or else
-			with the passphrase entered on the page. Run the server's "switch_session" prompt (in Claude Code
-			"/mcp__<server>__switch_session") to select another session in the browser. For automation and CI,
-			set C8Y_HOST, C8Y_TENANT, C8Y_USER and C8Y_PASSWORD or C8Y_TOKEN in the MCP client configuration
-			instead.
+			For automation and CI, set C8Y_HOST, C8Y_TENANT, C8Y_USER and C8Y_PASSWORD or C8Y_TOKEN in the MCP
+			client configuration instead.
 
 			You control what the agent can do:
 
-			* Session: selected by you in the server terminal (or browser). The agent can't switch the session, host or
-			  credentials. In socket mode, commands only receive the token, not the password or passphrase.
+			* Session: selected by you in the browser. The agent can't switch the session, host or
+			  credentials. Commands only receive the token (or the password for basic auth sessions), never
+			  the passphrase.
 			* Mode (prod, qual, dev): the maximum mode the agent can use. By default, the agent uses the mode
 			  of the session (settings.session.mode), and prod (read only) if the session has none. --mode can
 			  only narrow the session's own mode, never widen it, also after switching the session. Read-only
@@ -99,7 +89,7 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			* Device shell: with --allowDeviceShell (and qual or dev mode), the agent can run single shell
 			  commands on a device for troubleshooting, via "remoteaccess connect ssh --device <id> -- <command>"
 			  (if remote access is configured) or c8y_Command operations. Add --confirmDeviceShell to confirm
-			  each command in a dialog or the server terminal, which the MCP client can't answer.
+			  each command in a native dialog, which the MCP client can't answer.
 			* Approval: how write commands are approved:
 			    auto    ask via MCP elicitation if the client supports it, otherwise rely on the client's tool permission prompt
 			    elicit  always ask via MCP elicitation and reject writes if the client does not support it
@@ -119,23 +109,17 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			    maxOutputBytes: 100000
 		`),
 		Example: heredoc.Doc(`
-			$ c8y mcp serve
-			Select a session interactively, log in and start the server in the current terminal (read only)
+			$ claude mcp add --scope user c8y -- c8y mcp serve
+			Add the server to Claude Code (run once). Select the session in the browser on the first tool call
 
-			$ c8y mcp serve --session my-dev-tenant --mode qual
-			Log in to the session and start the server in the current terminal (allowing create and update commands)
+			$ claude mcp add --scope user c8y -- c8y mcp serve --session my-dev-tenant --mode qual
+			Use a specific session, and at most allow creating and updating data
 
-			$ claude mcp add --scope user c8y -- c8y mcp connect
-			Add the server to Claude Code (run once). Claude Code starts the relay, which connects to the running server
+			$ claude mcp add --scope user c8y -- c8y mcp serve --deny "users" --deny "tenants" --approval elicit
+			Deny user and tenant management, and always ask the user to approve writes
 
-			$ c8y mcp serve --session dev --mode dev --deny "users" --deny "tenants" --approval elicit
-			Allow all actions (including delete) except for user and tenant management, and always ask the user to approve writes
-
-			$ claude mcp add --scope user c8y -- c8y mcp serve --stdio
-			Let the MCP client start the server. Select the session in the browser on the first tool call
-
-			$ claude mcp add c8y -e C8Y_HOST=https://example.cumulocity.com -e C8Y_USER=ci -e C8Y_PASSWORD=... -- c8y mcp serve --stdio
-			Let the MCP client start the server, using credentials from environment variables
+			$ claude mcp add c8y -e C8Y_HOST=https://example.cumulocity.com -e C8Y_USER=ci -e C8Y_PASSWORD=... -- c8y mcp serve
+			Use credentials from environment variables (e.g. for CI)
 		`),
 		Args: cobra.NoArgs,
 		RunE: ccmd.RunE,
@@ -150,11 +134,12 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 	cmd.Flags().DurationVar(&ccmd.timeout, "timeout", 0, "Default timeout per command. Default: 2m")
 	cmd.Flags().DurationVar(&ccmd.maxTimeout, "maxTimeout", 0, "Maximum timeout the agent can request per command. Default: 10m")
 	cmd.Flags().IntVar(&ccmd.maxOutput, "maxOutput", 0, "Maximum number of output bytes returned to the agent per command. Default: 100000")
-	cmd.Flags().BoolVar(&ccmd.stdio, "stdio", false, "Communicate over stdin/stdout (the MCP client starts the server). The session is selected in the browser")
-	cmd.Flags().StringVar(&ccmd.socket, "socket", "", "Unix socket path to listen on, e.g. to run several servers at the same time. Defaults to server.sock in the mcp folder of the session home directory")
+	// stdin/stdout is always used. The flag is accepted for compatibility with existing registrations
+	cmd.Flags().BoolVar(&ccmd.stdio, "stdio", true, "Communicate over stdin/stdout (always enabled)")
+	_ = cmd.Flags().MarkHidden("stdio")
 	cmd.Flags().BoolVar(&ccmd.allowDeviceShell, "allowDeviceShell", false, "Allow the agent to run shell commands on devices (remoteaccess connect ssh and c8y_Command operations). Needs --mode qual or dev")
-	cmd.Flags().BoolVar(&ccmd.confirmDeviceShell, "confirmDeviceShell", false, "Ask for confirmation of each command run on a device in a dialog or the server terminal, in addition to the normal approval")
-	cmd.Flags().BoolVar(&ccmd.noNotify, "noNotify", false, "Don't show a desktop notification when a client needs to be approved")
+	cmd.Flags().BoolVar(&ccmd.confirmDeviceShell, "confirmDeviceShell", false, "Ask for confirmation of each command run on a device in a native dialog, in addition to the normal approval")
+	cmd.Flags().BoolVar(&ccmd.noNotify, "noNotify", false, "Don't show a desktop notification when the session picker opens in the browser")
 	cmd.Flags().BoolVar(&ccmd.noDefaultDeny, "noDefaultDeny", false, fmt.Sprintf("Don't include the default deny list: %s", strings.Join(mcpserver.DefaultDenyCommands, ", ")))
 
 	completion.WithOptions(
@@ -253,14 +238,6 @@ func (n *CmdServe) buildPolicy(cmd *cobra.Command) (mcpserver.Policy, error) {
 	if n.confirmDeviceShell && !policy.AllowDeviceShell {
 		return policy, cmderrors.NewUserError("--confirmDeviceShell needs --allowDeviceShell")
 	}
-	switch {
-	case n.confirmDeviceShell:
-		n.deviceShellInfo = "shell commands allowed, each one is confirmed by you here or in a dialog"
-	case policy.AllowDeviceShell:
-		n.deviceShellInfo = "shell commands allowed (approved like other write commands)"
-	default:
-		n.deviceShellInfo = "shell commands disabled (enable with --allowDeviceShell)"
-	}
 	return policy, nil
 }
 
@@ -274,10 +251,12 @@ func (n *CmdServe) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if !n.stdio && !n.factory.IOStreams.IsStdinTTY() {
+	if n.factory.IOStreams.IsStdinTTY() {
 		return cmderrors.NewUserError(heredoc.Doc(`
-			c8y mcp serve needs a terminal to log in. Run it in a terminal, and register "c8y mcp connect" in the
-			MCP client instead. Use --stdio if the MCP client should start the server itself.
+			c8y mcp serve is started by the MCP client, which communicates with it over stdin/stdout.
+			Register it in the MCP client instead of running it in a terminal, e.g. for Claude Code:
+
+			    claude mcp add --scope user c8y -- c8y mcp serve
 		`))
 	}
 
@@ -289,28 +268,9 @@ func (n *CmdServe) RunE(cmd *cobra.Command, args []string) error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	// Let the user pick a session interactively if none is configured (similar to set-session).
-	// This is only possible in socket mode, as stdin is used by the MCP transport in stdio mode
-	if !n.stdio && cfg.GetHost() == "" && cfg.GetSessionFile() == "" {
-		selected, err := mcpserver.SelectSession(ctx, executable, os.Stdin, n.factory.IOStreams.ErrOut)
-		if err != nil {
-			return cmderrors.NewUserError(err)
-		}
-		if selected == "" {
-			return cmderrors.NewUserError("no Cumulocity session was selected")
-		}
-		cfg.SetSessionFile(selected)
-		if _, err := cfg.ReadConfigFiles(nil); err != nil {
-			return err
-		}
-	}
-
 	host := cfg.GetHost()
 	sessionFile := mcpserver.ResolveSessionFile(cfg.GetSessionFile(), cfg.GetSessionHomeDir())
-	// In stdio mode, the user selects the session in the browser on the first tool call
-	if host == "" && sessionFile == "" && !n.stdio {
-		return cmderrors.NewUserError("no Cumulocity session is configured. Use --session <name> or set C8Y_SESSION")
-	}
+	// Without a session, the user selects one in the browser on the first tool call
 	// Read the mode from the resolved session file, the same way as when switching sessions.
 	// Sessions which are only defined by environment variables use the current configuration
 	sessionModeName := cfg.GetString(config.SettingsMode)
@@ -327,10 +287,7 @@ func (n *CmdServe) RunE(cmd *cobra.Command, args []string) error {
 		},
 	}
 
-	if n.stdio {
-		return n.runStdio(ctx, cfg, server, executable, host, sessionFile, sessionModeName)
-	}
-	return n.runSocket(ctx, cfg, server, executable, sessionFile, sessionModeName)
+	return n.runStdio(ctx, cfg, server, executable, host, sessionFile, sessionModeName)
 }
 
 // capMode returns the session mode, and the mode the agent can use (the policy mode limited
@@ -351,15 +308,6 @@ func capMode(log interface{ Warnf(string, ...any) }, policyMode config.SessionMo
 func isFile(p string) bool {
 	info, err := os.Stat(p)
 	return err == nil && !info.IsDir()
-}
-
-func firstNonEmpty(values ...string) string {
-	for _, v := range values {
-		if v != "" {
-			return v
-		}
-	}
-	return ""
 }
 
 type sessionDetails struct {
@@ -397,266 +345,4 @@ func readSessionMode(sessionFile string) string {
 	c.SetSessionFile(sessionFile)
 	_, _ = c.ReadConfigFiles(nil)
 	return c.GetString(config.SettingsMode)
-}
-
-// activeSession a session which the server has logged in to
-type activeSession struct {
-	info   mcpserver.SessionInfo
-	runner *mcpserver.Runner
-	login  *mcpserver.InteractiveLogin
-}
-
-// sessionStarter logs in to sessions in the server's terminal
-type sessionStarter struct {
-	executable string
-	policyMode config.SessionMode
-	tempDir    string
-	terminal   sync.Locker
-	stderr     io.Writer
-	log        interface{ Warnf(string, ...any) }
-}
-
-// start logs in to the session (prompting in the terminal if needed) and returns the
-// session details and the runner which uses it
-func (s *sessionStarter) start(ctx context.Context, sessionFile string, sessionModeName string) (*activeSession, error) {
-	// Each session has its own directory for the copy of its session file
-	tempDir, err := os.MkdirTemp(s.tempDir, "session-")
-	if err != nil {
-		return nil, err
-	}
-
-	login := &mcpserver.InteractiveLogin{
-		Executable:  s.executable,
-		SessionFile: sessionFile,
-		SessionMode: sessionModeName,
-		Stdin:       os.Stdin,
-		Stderr:      s.stderr,
-		TempDir:     tempDir,
-		Terminal:    s.terminal,
-	}
-	if err := login.Login(ctx); err != nil {
-		os.RemoveAll(tempDir)
-		return nil, err
-	}
-
-	sessionMode, effectiveMode := capMode(s.log, s.policyMode, sessionModeName)
-	info := mcpserver.SessionInfo{
-		SessionName: mcpserver.SessionKey(sessionFile),
-		SessionMode: sessionMode.String(),
-	}
-	// Use the values from the login, which take environment variables into account
-	if authEnv, err := login.AuthEnv(ctx); err == nil {
-		for _, item := range authEnv {
-			key, value, _ := strings.Cut(item, "=")
-			switch key {
-			case "C8Y_HOST":
-				info.Host = value
-			case "C8Y_TENANT":
-				info.Tenant = value
-			case "C8Y_USER":
-				info.Username = value
-			}
-		}
-	}
-
-	return &activeSession{
-		info:  info,
-		login: login,
-		runner: &mcpserver.Runner{
-			Executable:  s.executable,
-			SessionFile: sessionFile,
-			Mode:        effectiveMode,
-			Auth:        login,
-		},
-	}, nil
-}
-
-func (n *CmdServe) printSession(session *activeSession, approval mcpserver.Approval) {
-	stderr := n.factory.IOStreams.ErrOut
-	auth := "basic auth (commands receive the password)"
-	if session.login.UsesToken() {
-		auth = "token (expiry unknown)"
-		if t := session.login.ExpiresAt(); t != nil {
-			auth = "token, expires " + t.Local().Format(time.RFC1123)
-		}
-	}
-	if session.info.SessionName != "" && session.info.SessionName != "default" {
-		fmt.Fprintf(stderr, "  session:   %s\n", session.info.SessionName)
-	}
-	fmt.Fprintf(stderr, "  tenant:    %s (%s)\n", session.info.Host, session.info.Tenant)
-	fmt.Fprintf(stderr, "  user:      %s\n", session.info.Username)
-	fmt.Fprintf(stderr, "  mode:      %s\n", session.runner.Mode.Description())
-	fmt.Fprintf(stderr, "  approval:  %s\n", approval)
-	if n.deviceShellInfo != "" {
-		fmt.Fprintf(stderr, "  devices:   %s\n", n.deviceShellInfo)
-	}
-	fmt.Fprintf(stderr, "  auth:      %s\n", auth)
-}
-
-const consoleHelp = `Commands (type the letter and press Enter):
-  s  switch to another session
-  i  show the current session
-  h  show this help
-Press Ctrl+C to stop the server.
-`
-
-func (n *CmdServe) runSocket(ctx context.Context, cfg *config.Config, server *mcpserver.Server, executable string, sessionFile string, sessionModeName string) error {
-	stderr := n.factory.IOStreams.ErrOut
-	cs := n.factory.IOStreams.ColorScheme()
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
-
-	socketPath := n.socket
-	if socketPath == "" {
-		socketPath = mcpserver.DefaultSocketPath(cfg.GetSessionHomeDir())
-	}
-
-	// Create the socket first so a second server fails before asking the user to log in
-	listener, err := mcpserver.Listen(socketPath)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-	defer os.Remove(socketPath)
-	defer listener.Close()
-
-	tempDir, err := os.MkdirTemp("", "c8y-mcp-")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tempDir)
-
-	// The terminal is shared by the login, the session selection, the connection approval
-	// and the commands typed by the user
-	terminal := &sync.Mutex{}
-
-	starter := &sessionStarter{
-		executable: executable,
-		policyMode: server.Policy.Mode,
-		tempDir:    tempDir,
-		terminal:   terminal,
-		stderr:     stderr,
-		log:        log,
-	}
-	session, err := starter.start(ctx, sessionFile, sessionModeName)
-	if err != nil {
-		return err
-	}
-	server.SetSession(session.info, session.runner)
-	var sessionMu sync.Mutex
-
-	server.OnCall = func(tool, command, outcome string) {
-		icon := cs.SuccessIcon()
-		if outcome != "ok" {
-			icon = cs.WarningIcon()
-		}
-		fmt.Fprintf(stderr, "%s %s  [%s] %s: %s\n", time.Now().Format("15:04:05"), icon, tool, command, outcome)
-	}
-
-	connectArgs := "c8y mcp connect"
-	if n.socket != "" {
-		connectArgs += " --socket " + socketPath
-	}
-
-	fmt.Fprintf(stderr, "\n%s MCP server is running\n\n", cs.SuccessIcon())
-	n.printSession(session, server.Policy.Approval)
-	fmt.Fprintf(stderr, "  socket:    %s\n\n", socketPath)
-	fmt.Fprintf(stderr, "Register it in your MCP client (once), e.g. for Claude Code:\n\n")
-	fmt.Fprintf(stderr, "  claude mcp add --scope user c8y -- %s\n\n", connectArgs)
-	fmt.Fprintf(stderr, "Each new client must be approved in this terminal. Until then, the agent is asked to remind you.\n")
-	fmt.Fprint(stderr, consoleHelp)
-	fmt.Fprintln(stderr)
-
-	switchSession := func() {
-		fmt.Fprintf(stderr, "\nSelect the session to switch to (Ctrl+C to cancel):\n")
-		terminal.Lock()
-		selected, err := mcpserver.SelectSession(ctx, executable, os.Stdin, stderr)
-		terminal.Unlock()
-		if err != nil || selected == "" {
-			fmt.Fprintf(stderr, "%s Session not changed\n", cs.WarningIcon())
-			return
-		}
-		newFile := mcpserver.ResolveSessionFile(selected, cfg.GetSessionHomeDir())
-		newSession, err := starter.start(ctx, newFile, readSessionMode(newFile))
-		if err != nil {
-			fmt.Fprintf(stderr, "%s Could not log in to the session, so the session was not changed. %s\n", cs.FailureIcon(), err)
-			return
-		}
-		sessionMu.Lock()
-		session = newSession
-		sessionMu.Unlock()
-		server.SetSession(newSession.info, newSession.runner)
-		fmt.Fprintf(stderr, "\n%s Switched session. New commands from the agent use:\n\n", cs.SuccessIcon())
-		n.printSession(newSession, server.Policy.Approval)
-		fmt.Fprintln(stderr)
-	}
-
-	go func() {
-		err := mcpserver.RunConsole(ctx, os.Stdin, terminal, func(command string) {
-			switch strings.ToLower(command) {
-			case "":
-			case "s", "switch":
-				switchSession()
-			case "i", "info":
-				sessionMu.Lock()
-				current := session
-				sessionMu.Unlock()
-				fmt.Fprintln(stderr)
-				n.printSession(current, server.Policy.Approval)
-				fmt.Fprintln(stderr)
-			default:
-				fmt.Fprint(stderr, consoleHelp)
-			}
-		})
-		if err != nil && ctx.Err() == nil {
-			fmt.Fprintf(stderr, "%s Commands typed in this terminal are not supported (%s). Restart the server to switch the session.\n", cs.WarningIcon(), err)
-		}
-	}()
-
-	approver := &mcpserver.ConnectionApprover{
-		Stdin:           os.Stdin,
-		Stderr:          stderr,
-		Terminal:        terminal,
-		RelayExecutable: executable,
-	}
-	if !n.noNotify {
-		approver.Notify = func(message string) {
-			mcpserver.DesktopNotification("c8y mcp serve", message)
-		}
-	}
-
-	if n.confirmDeviceShell {
-		confirmer := &mcpserver.DeviceShellConfirmer{
-			Stdin:    os.Stdin,
-			Stderr:   stderr,
-			Terminal: terminal,
-		}
-		if !n.noNotify {
-			confirmer.Notify = func(message string) {
-				mcpserver.DesktopNotification("c8y mcp serve", message)
-			}
-		}
-		server.ConfirmDeviceShell = confirmer.Confirm
-	}
-
-	// Clients connect straight away, and their tool calls wait until they are approved
-	gates := &mcpserver.ConnectionGates{}
-	server.Gate = gates.Check
-
-	err = mcpserver.Serve(ctx, server.New(), listener, mcpserver.ServeOptions{
-		Authorize: approver.Approve,
-		Gates:     gates,
-		OnConnect: func(active int) {
-			fmt.Fprintf(stderr, "%s %s  client connected (active: %d)\n", time.Now().Format("15:04:05"), cs.SuccessIcon(), active)
-		},
-		OnDisconnect: func(active int) {
-			fmt.Fprintf(stderr, "%s %s  client disconnected (active: %d)\n", time.Now().Format("15:04:05"), cs.WarningIcon(), active)
-		},
-		OnRejected: func() {
-			fmt.Fprintf(stderr, "%s %s  client rejected\n", time.Now().Format("15:04:05"), cs.WarningIcon())
-		},
-	})
-	fmt.Fprintf(stderr, "\nMCP server stopped\n")
-	return err
 }

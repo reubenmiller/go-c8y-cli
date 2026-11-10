@@ -19,7 +19,7 @@ go-c8y-cli (`c8y`) is a command line tool for the Cumulocity REST API. Commands 
    - Use the `stdin` field to pipe in data such as ids or JSON lines.
    - If a tool rejects a command because of the policy or mode, tell the user. Don't try to work around it.
    - The user selects the session; you can't change it. If they want another tenant, ask them to switch it
-     (in the server terminal, or with the server's `switch_session` prompt), then call `c8y_session` again.
+     (with the server's `switch_session` prompt), then call `c8y_session` again.
 2. **Shell**. Run `c8y ...` directly. The session must already be active in the environment
    (`C8Y_SESSION` or `C8Y_HOST` plus credentials). Never run `c8y sessions set` or `c8y sessions login` yourself;
    they are interactive. Ask the user to activate a session instead.

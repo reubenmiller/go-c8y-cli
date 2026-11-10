@@ -43,12 +43,12 @@ type Server struct {
 	Policy     Policy
 	Classifier *Classifier
 
-	// OnCall optional callback which is called after each tool call, e.g. to
-	// show the agent's activity in the server's terminal
+	// OnCall optional callback which is called after each tool call, e.g. to log the
+	// agent's activity
 	OnCall func(tool string, command string, outcome string)
 
 	// Gate optional check which is run before each tool call, e.g. to wait until the
-	// user has approved the client
+	// user has selected a session
 	Gate func(ctx context.Context, ss *mcp.ServerSession) error
 
 	// SwitchSession optional function which lets the user select another session. It is
@@ -67,7 +67,7 @@ type Server struct {
 }
 
 // SetSession changes the session used by the commands, e.g. when the user switches
-// the session in the server's terminal. Tool calls which have already started keep
+// the session. Tool calls which have already started keep
 // using the previous session, so a command always runs against the tenant it was
 // approved for.
 func (s *Server) SetSession(info SessionInfo, runner *Runner) {
@@ -318,7 +318,7 @@ func (s *Server) handleWrite(ctx context.Context, req *mcp.CallToolRequest, in C
 			return inputRequest, nil, nil
 		}
 		if plan.HasDeviceShell() && s.ConfirmDeviceShell != nil {
-			s.logCall(ToolWrite, in.Command, "waiting for confirmation in the server terminal")
+			s.logCall(ToolWrite, in.Command, "waiting for confirmation in a dialog")
 			if err := s.ConfirmDeviceShell(ctx, session, plan.String()); err != nil {
 				s.logCall(ToolWrite, in.Command, "not confirmed")
 				return errorResult("%s", err), nil, nil

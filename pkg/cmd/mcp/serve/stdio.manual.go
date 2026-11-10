@@ -25,9 +25,13 @@ func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcp
 	if err != nil {
 		return err
 	}
+	// the server's log is shown by the MCP client (e.g. claude --debug)
+	server.OnCall = func(tool string, command string, outcome string) {
+		log.Infof("%s: %s (%s)", tool, command, outcome)
+	}
 	if n.confirmDeviceShell {
 		// stdin is used by the MCP transport, so only a dialog can be used
-		confirmer := &mcpserver.DeviceShellConfirmer{Stderr: n.factory.IOStreams.ErrOut}
+		confirmer := &mcpserver.DeviceShellConfirmer{}
 		server.ConfirmDeviceShell = confirmer.Confirm
 	}
 
@@ -114,6 +118,10 @@ type stdioSessions struct {
 	current string
 	// startup session given with --session, which needs the passphrase from the browser
 	startup string
+
+	// sessions which need a two-factor code
+	codeMu    sync.Mutex
+	needsCode map[string]bool
 }
 
 // pendingSession a session which was logged in to, but isn't used yet
@@ -143,11 +151,9 @@ func (s *stdioSessions) newSession(sessionFile string) (*pendingSession, *mcpser
 		SessionMode: sessionMode.String(),
 		Stderr:      s.stderr,
 		TempDir:     tempDir,
-		NoTerminal:  true,
-	}
-	if s.needsPassphraseFor(details) {
-		// log in again via the browser when the token expires
-		login.Renew = s.renew(sessionFile)
+		// log in again when the token expires, asking for the passphrase or the
+		// two-factor code in the browser if needed
+		Renew: s.renew(sessionFile),
 	}
 	return &pendingSession{
 		path: sessionFile,
@@ -176,10 +182,10 @@ func (s *stdioSessions) use(session *pendingSession) {
 
 // login is called by the picker when the user selects a session, so the user sees
 // straight away whether the session works
-func (s *stdioSessions) login(ctx context.Context, choice mcpserver.SessionChoice, passphrase string) (any, error) {
+func (s *stdioSessions) login(ctx context.Context, choice mcpserver.SessionChoice, secrets mcpserver.LoginSecrets) (any, error) {
 	if choice.NeedsPassphrase {
 		// check the passphrase first, for a clear message if it is wrong
-		if err := s.checkPassphrase(choice.Path, passphrase); err != nil {
+		if err := s.checkPassphrase(choice.Path, secrets.Passphrase); err != nil {
 			return nil, err
 		}
 	}
@@ -187,26 +193,54 @@ func (s *stdioSessions) login(ctx context.Context, choice mcpserver.SessionChoic
 	if err != nil {
 		return nil, err
 	}
-	if err := login.LoginWithPassphrase(ctx, passphrase); err != nil {
+	if err := s.loginWith(ctx, choice.Path, login.LoginWith, secrets); err != nil {
 		return nil, err
 	}
 	return session, nil
 }
 
-// renew returns a function which asks the user to log in again in the browser,
-// e.g. when the token expires
-func (s *stdioSessions) renew(sessionFile string) func(context.Context, func(context.Context, string) error) error {
-	return func(ctx context.Context, login func(context.Context, string) error) error {
-		choice := s.choice(sessionFile)
-		picker := *s.picker
-		picker.Login = func(ctx context.Context, choice mcpserver.SessionChoice, passphrase string) (any, error) {
-			if err := s.checkPassphrase(sessionFile, passphrase); err != nil {
-				return nil, err
-			}
-			return nil, login(ctx, passphrase)
+// loginWith logs in, and remembers whether the session needs a two-factor code, so
+// the code field is shown straight away the next time
+func (s *stdioSessions) loginWith(ctx context.Context, sessionFile string, login func(context.Context, mcpserver.LoginSecrets) error, secrets mcpserver.LoginSecrets) error {
+	err := login(ctx, secrets)
+	if errors.Is(err, mcpserver.ErrTOTPRequired) || (err == nil && secrets.TOTPCode != "") {
+		s.codeMu.Lock()
+		if s.needsCode == nil {
+			s.needsCode = map[string]bool{}
 		}
-		_, err := picker.Unlock(ctx, "Log in to the Cumulocity session again",
-			"The session token expires soon. Enter the passphrase to log in again.", choice)
+		s.needsCode[sessionFile] = true
+		s.codeMu.Unlock()
+	}
+	return err
+}
+
+func (s *stdioSessions) needsCodeFor(sessionFile string) bool {
+	s.codeMu.Lock()
+	defer s.codeMu.Unlock()
+	return s.needsCode[sessionFile]
+}
+
+// renew returns a function which logs in again, e.g. when the token expires. It logs
+// in without user input if possible (e.g. with the pin entry command), and otherwise
+// asks for the passphrase or the two-factor code in the browser
+func (s *stdioSessions) renew(sessionFile string) func(context.Context, func(context.Context, mcpserver.LoginSecrets) error) error {
+	return func(ctx context.Context, login func(context.Context, mcpserver.LoginSecrets) error) error {
+		if !s.needsPassphrase(sessionFile) && !s.needsCodeFor(sessionFile) {
+			err := s.loginWith(ctx, sessionFile, login, mcpserver.LoginSecrets{})
+			if !errors.Is(err, mcpserver.ErrTOTPRequired) {
+				return err
+			}
+		}
+		picker := *s.picker
+		picker.Login = func(ctx context.Context, choice mcpserver.SessionChoice, secrets mcpserver.LoginSecrets) (any, error) {
+			if choice.NeedsPassphrase {
+				if err := s.checkPassphrase(sessionFile, secrets.Passphrase); err != nil {
+					return nil, err
+				}
+			}
+			return nil, s.loginWith(ctx, sessionFile, login, secrets)
+		}
+		_, err := picker.Unlock(ctx, "Log in to the Cumulocity session", "", s.choice(sessionFile))
 		return err
 	}
 }
@@ -250,6 +284,7 @@ func (s *stdioSessions) choice(sessionFile string) mcpserver.SessionChoice {
 		Mode:            mode.String(),
 		ModeInfo:        modeLabel(mode),
 		NeedsPassphrase: s.needsPassphraseFor(details),
+		NeedsCode:       s.needsCodeFor(sessionFile),
 	}
 }
 

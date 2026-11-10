@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -71,10 +72,24 @@ type AuthProvider interface {
 	AuthEnv(ctx context.Context) ([]string, error)
 }
 
-// InteractiveLogin logs in once using the existing "c8y sessions login" command
-// (so the user can enter the passphrase, 2FA code or complete an SSO login in
-// the terminal), then provides the resulting token to the commands. The login
-// is repeated in the terminal when the token is about to expire.
+// LoginSecrets secrets entered by the user for a login. They are passed to the login
+// via an inherited pipe, and aren't kept
+type LoginSecrets struct {
+	// Passphrase to unlock an encrypted session
+	Passphrase string
+	// TOTPCode two-factor authentication code
+	TOTPCode string
+}
+
+// ErrTOTPRequired the login needs a two-factor authentication code
+var ErrTOTPRequired = errors.New(config.TOTPCodeRequiredMessage)
+
+// InteractiveLogin logs in using the existing "c8y sessions login" command, then
+// provides the resulting token to the commands. The server has no terminal, so the
+// login can't prompt: an encrypted session is unlocked with the pin entry command
+// (settings.pinEntry) or the passphrase given in LoginSecrets, and a two-factor
+// code is generated from the session's TOTP secret or given in LoginSecrets. The
+// login is repeated when the token is about to expire (see Renew).
 type InteractiveLogin struct {
 	// Executable path to the c8y binary
 	Executable string
@@ -86,13 +101,8 @@ type InteractiveLogin struct {
 	// SessionMode mode passed to the login command (to avoid the mode prompt)
 	SessionMode string
 
-	// Stdin, Stderr terminal used for the login prompts
-	Stdin  io.Reader
+	// Stderr receives the login's messages
 	Stderr io.Writer
-
-	// Terminal lock which is held while the login uses the terminal (shared with
-	// the connection approval prompt)
-	Terminal sync.Locker
 
 	// RenewBefore log in again when the token expires within this duration
 	RenewBefore time.Duration
@@ -100,16 +110,11 @@ type InteractiveLogin struct {
 	// TempDir directory for the copy of the session file without secrets
 	TempDir string
 
-	// NoTerminal the server has no terminal (stdio mode), so the session can only be
-	// unlocked without user input, with the pin entry command (settings.pinEntry) or
-	// with the passphrase entered in the browser (see Renew)
-	NoTerminal bool
-
 	// Renew optional function which logs in again when the token expires, instead of
-	// logging in without a passphrase. It is used when the passphrase is entered in the
+	// logging in without secrets. It is used to ask the user for the secrets in the
 	// browser. It must call login (which may be called several times, e.g. after a wrong
 	// passphrase) and return its last error. It is called while the login is locked
-	Renew func(ctx context.Context, login func(ctx context.Context, passphrase string) error) error
+	Renew func(ctx context.Context, login func(ctx context.Context, secrets LoginSecrets) error) error
 
 	mu        sync.Mutex
 	env       []string
@@ -120,19 +125,18 @@ type InteractiveLogin struct {
 
 // Login runs the interactive login
 func (l *InteractiveLogin) Login(ctx context.Context) error {
-	return l.LoginWithPassphrase(ctx, "")
+	return l.LoginWith(ctx, LoginSecrets{})
 }
 
-// LoginWithPassphrase runs the login, unlocking an encrypted session with the given
-// passphrase (if not empty). The passphrase is passed to the login via an inherited
-// pipe, and isn't kept
-func (l *InteractiveLogin) LoginWithPassphrase(ctx context.Context, passphrase string) error {
+// LoginWith runs the login with the secrets entered by the user (if any). It returns
+// ErrTOTPRequired if a two-factor code is needed
+func (l *InteractiveLogin) LoginWith(ctx context.Context, secrets LoginSecrets) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	return l.login(ctx, passphrase)
+	return l.login(ctx, secrets)
 }
 
-func (l *InteractiveLogin) login(ctx context.Context, passphrase string) error {
+func (l *InteractiveLogin) login(ctx context.Context, secrets LoginSecrets) error {
 	args := []string{"sessions", "login", "--output-format", "dotenv", "--no-banner"}
 	if l.SessionFile != "" {
 		args = append(args, "--from-file", l.SessionFile)
@@ -144,7 +148,6 @@ func (l *InteractiveLogin) login(ctx context.Context, passphrase string) error {
 	}
 
 	cmd := exec.CommandContext(ctx, l.Executable, args...)
-	cmd.Stdin = l.Stdin
 	// keep the end of the output, to explain why the login failed
 	stderrTail := &tailWriter{max: 2048}
 	if l.Stderr != nil {
@@ -152,23 +155,20 @@ func (l *InteractiveLogin) login(ctx context.Context, passphrase string) error {
 	} else {
 		cmd.Stderr = stderrTail
 	}
-	if passphrase != "" {
+	if secrets != (LoginSecrets{}) {
 		cmd.Env = os.Environ()
-		if err := passCredentials(cmd, &config.Credentials{Passphrase: passphrase}); err != nil {
+		if err := passCredentials(cmd, &config.Credentials{Passphrase: secrets.Passphrase, TOTPCode: secrets.TOTPCode}); err != nil {
 			return err
 		}
 	}
 	stdout := &bytes.Buffer{}
 	cmd.Stdout = stdout
-	if l.Terminal != nil {
-		l.Terminal.Lock()
-	}
-	err := cmd.Run()
-	if l.Terminal != nil {
-		l.Terminal.Unlock()
-	}
-	if err != nil {
-		if reason := stderrTail.lastLine(); reason != "" {
+	if err := cmd.Run(); err != nil {
+		reason := stderrTail.lastLine()
+		if strings.Contains(reason, config.TOTPCodeRequiredMessage) {
+			return ErrTOTPRequired
+		}
+		if reason != "" {
 			return fmt.Errorf("login failed. %s", reason)
 		}
 		return fmt.Errorf("login failed. %w", err)
@@ -236,13 +236,10 @@ func (l *InteractiveLogin) AuthEnv(ctx context.Context) ([]string, error) {
 		if l.Renew != nil {
 			err = l.Renew(ctx, l.login)
 		} else {
-			err = l.login(ctx, "")
+			err = l.login(ctx, LoginSecrets{})
 		}
 		if err != nil {
-			if l.NoTerminal {
-				return nil, fmt.Errorf("could not log in to the Cumulocity session. Without a terminal, an encrypted session is unlocked with the pin entry command (settings.pinEntry, e.g. a password manager or keychain helper), the passphrase entered in the browser or C8Y_PASSPHRASE, and two-factor authentication needs a TOTP secret in the session. Ask the user to check this, or to run \"c8y mcp serve\" in a terminal and register \"c8y mcp connect\" instead. %w", err)
-			}
-			return nil, fmt.Errorf("the Cumulocity session expired and the login in the 'c8y mcp serve' terminal failed. Ask the user to log in again in that terminal. %w", err)
+			return nil, fmt.Errorf("could not log in to the Cumulocity session. %w. Ask the user to check the session, or to switch to another session (switch_session prompt)", err)
 		}
 	}
 	return append([]string{}, l.env...), nil

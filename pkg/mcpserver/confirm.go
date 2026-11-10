@@ -4,12 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -21,25 +19,12 @@ const maxDialogText = 1500
 
 var errNoDialog = errors.New("no dialog available")
 
-// DeviceShellConfirmer asks the user to confirm commands which run on a device. It uses
-// a native dialog if available, so the user doesn't have to switch to the server's
-// terminal, and falls back to the terminal otherwise. The MCP client can't answer it.
+// DeviceShellConfirmer asks the user to confirm commands which run on a device, with a
+// native dialog (macOS, or Linux with zenity or kdialog). The MCP client can't answer
+// it. Commands are rejected if no dialog is available.
 type DeviceShellConfirmer struct {
-	// Stdin, Stderr server terminal
-	Stdin  *os.File
-	Stderr io.Writer
-
-	// Terminal lock which is held while the terminal is used
-	Terminal sync.Locker
-
-	// Notify optional callback to draw the user's attention to the terminal prompt
-	Notify func(message string)
-
 	// Timeout how long the user has to answer. Defaults to DefaultConfirmTimeout
 	Timeout time.Duration
-
-	// NoDialog only use the terminal
-	NoDialog bool
 
 	// dialog shows the native dialog (replaced in tests)
 	dialog func(ctx context.Context, title string, message string, timeout time.Duration) (bool, error)
@@ -57,61 +42,21 @@ func (c *DeviceShellConfirmer) Confirm(ctx context.Context, session SessionInfo,
 	}
 	message := fmt.Sprintf("The agent wants to run a command on a device of %s:\n\n%s", target, truncate(command, maxDialogText))
 
-	if !c.NoDialog {
-		dialog := c.dialog
-		if dialog == nil {
-			dialog = nativeDialog
-		}
-		allowed, err := dialog(ctx, "c8y mcp serve", message, timeout)
-		if err == nil {
-			if !allowed {
-				return errors.New("the user did not allow running the command on the device. Don't retry it unless the user asks you to")
-			}
-			return nil
-		}
-		if !errors.Is(err, errNoDialog) {
-			fmt.Fprintf(c.Stderr, "Could not show a dialog, asking in the terminal instead. %s\n", err)
-		}
+	dialog := c.dialog
+	if dialog == nil {
+		dialog = nativeDialog
 	}
-	return c.confirmInTerminal(ctx, message, timeout)
-}
-
-func (c *DeviceShellConfirmer) confirmInTerminal(ctx context.Context, message string, timeout time.Duration) error {
-	if c.Stdin == nil {
-		return errors.New("the command could not be confirmed, as no dialog is available and the server has no terminal")
+	allowed, err := dialog(ctx, "c8y mcp serve", message, timeout)
+	if errors.Is(err, errNoDialog) {
+		return errors.New("the command could not be confirmed, as no dialog is available (macOS, or Linux with zenity or kdialog). Ask the user to remove --confirmDeviceShell, or to confirm the commands in another way")
 	}
-	if c.Terminal != nil {
-		c.Terminal.Lock()
-		defer c.Terminal.Unlock()
+	if err != nil {
+		return fmt.Errorf("the command could not be confirmed. %w", err)
 	}
-	fmt.Fprintf(c.Stderr, "\n%s\n\nAllow this command? [y/N] \a", message)
-	if c.Notify != nil {
-		go c.Notify("The agent wants to run a command on a device. Confirm it in the c8y mcp serve terminal.")
+	if !allowed {
+		return errors.New("the user did not allow running the command on the device. Don't retry it unless the user asks you to")
 	}
-
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	if _, err := waitReadable(c.Stdin, 0); err != nil {
-		return fmt.Errorf("the command could not be confirmed in the terminal. %w", err)
-	}
-	for {
-		if ctx.Err() != nil {
-			fmt.Fprintln(c.Stderr)
-			return errors.New("the user did not confirm running the command on the device in time")
-		}
-		line, ok, err := readLineIfReady(c.Stdin, pollInterval)
-		if ok {
-			switch strings.ToLower(strings.TrimSpace(line)) {
-			case "y", "yes":
-				return nil
-			}
-			fmt.Fprintln(c.Stderr, "Command rejected")
-			return errors.New("the user did not allow running the command on the device. Don't retry it unless the user asks you to")
-		}
-		if err != nil {
-			return fmt.Errorf("the command could not be confirmed in the terminal. %w", err)
-		}
-	}
+	return nil
 }
 
 func truncate(s string, n int) string {

@@ -3,6 +3,7 @@ package mcpserver
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/cookiejar"
@@ -241,9 +242,9 @@ func TestWebPickerLogin(t *testing.T) {
 	}
 	type call struct{ name, passphrase string }
 	calls := make(chan call, 10)
-	picker := &WebPicker{Login: func(ctx context.Context, choice SessionChoice, passphrase string) (any, error) {
-		calls <- call{choice.Name, passphrase}
-		if choice.NeedsPassphrase && passphrase != "secret" {
+	picker := &WebPicker{Login: func(ctx context.Context, choice SessionChoice, secrets LoginSecrets) (any, error) {
+		calls <- call{choice.Name, secrets.Passphrase}
+		if choice.NeedsPassphrase && secrets.Passphrase != "secret" {
 			return nil, errors.New("wrong passphrase <b>")
 		}
 		return "value-" + choice.Name, nil
@@ -328,4 +329,78 @@ func TestWebPickerLogin(t *testing.T) {
 			t.Errorf("unexpected result: %+v", r)
 		}
 	})
+}
+
+func TestWebPickerTOTP(t *testing.T) {
+	choices := []SessionChoice{
+		{Path: "/s/enc.json", Name: "enc", Host: "https://b.example.com", NeedsPassphrase: true},
+	}
+	var logins []LoginSecrets
+	picker := &WebPicker{Login: func(ctx context.Context, choice SessionChoice, secrets LoginSecrets) (any, error) {
+		logins = append(logins, secrets)
+		if secrets.Passphrase != "secret" {
+			return nil, errors.New("the passphrase is not correct")
+		}
+		if secrets.TOTPCode != "123456" {
+			return nil, ErrTOTPRequired
+		}
+		return "ok", nil
+	}}
+	link, results := startPickerWith(t, picker, choices)
+	b := newBrowser(t)
+	b.open(link)
+	form := func(extra url.Values) url.Values {
+		v := url.Values{"csrf": {b.csrf}, "session": {"0"}, "unlock": {"1"}}
+		for k, val := range extra {
+			v[k] = val
+		}
+		return v
+	}
+
+	// the login asks for a code: the code field is shown, and the passphrase isn't asked again
+	_, body := b.post("/select", form(url.Values{"passphrase": {"secret"}}), nil)
+	if !strings.Contains(body, `name="code"`) || strings.Contains(body, `type="password"`) {
+		t.Fatalf("expected only the code field: %s", body)
+	}
+	// wrong code
+	_, body = b.post("/select", form(url.Values{"code": {"000000"}}), nil)
+	if !strings.Contains(body, "The code was not accepted") || !strings.Contains(body, `name="code"`) {
+		t.Fatalf("expected the code to be rejected: %s", body)
+	}
+	// empty code
+	_, body = b.post("/select", form(nil), nil)
+	if !strings.Contains(body, "Enter the code") {
+		t.Errorf("expected a message to enter the code: %s", body)
+	}
+	// the stored passphrase is used with the code (spaces are removed)
+	_, body = b.post("/select", form(url.Values{"code": {"123 456"}}), nil)
+	if !strings.Contains(body, "Session selected") {
+		t.Fatalf("expected the login to succeed: %s", body)
+	}
+	if r := waitPicker(t, results); r.err != nil || r.selection.Value != "ok" {
+		t.Errorf("unexpected result: %+v", r)
+	}
+	want := []LoginSecrets{{"secret", ""}, {"secret", "000000"}, {"secret", "123456"}}
+	if fmt.Sprint(logins) != fmt.Sprint(want) {
+		t.Errorf("unexpected logins: %+v", logins)
+	}
+}
+
+func TestWebPickerKnownTOTP(t *testing.T) {
+	// e.g. when renewing the token of a session which needed a code before
+	choices := []SessionChoice{{Path: "/s/a.json", Name: "a", Host: "https://a.example.com", NeedsCode: true}}
+	picker := &WebPicker{Login: func(ctx context.Context, choice SessionChoice, secrets LoginSecrets) (any, error) {
+		return nil, nil
+	}}
+	link, results := startPickerWith(t, picker, choices)
+	b := newBrowser(t)
+	b.open(link)
+	_, body := b.post("/select", url.Values{"csrf": {b.csrf}, "session": {"0"}}, nil)
+	if !strings.Contains(body, `name="code"`) || strings.Contains(body, "Session selected") {
+		t.Fatalf("expected the code field before logging in: %s", body)
+	}
+	b.post("/select", url.Values{"csrf": {b.csrf}, "session": {"0"}, "unlock": {"1"}, "code": {"123456"}}, nil)
+	if r := waitPicker(t, results); r.err != nil {
+		t.Errorf("unexpected result: %+v", r)
+	}
 }

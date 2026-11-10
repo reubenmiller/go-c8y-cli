@@ -644,6 +644,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 				v2handler.BrowserCallbackURL = cfg.BrowserCallbackURL()
 			}
 			v2handler.TOTPSecret = session.TOTP
+			v2handler.TOTPCode = cfg.TOTPCode
 			v2handler.SetLogger(log)
 			log.Infof("User preference for login type: %s", v2handler.LoginType)
 			err = v2handler.Run()
@@ -667,6 +668,10 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 			handler.SSO.Audience = n.SSOAudience
 			log.Infof("User preference for login type: %s", handler.LoginType)
 			handler.TFACode = session.TOTP
+			if cfg.TOTPCode != "" {
+				// entered by the user in the MCP server's session picker
+				handler.TFACode = cfg.TOTPCode
+			}
 			if n.TFACode == "" {
 				if code, err := cfg.GetTOTP(time.Now()); err == nil {
 					cfg.Logger.Infof("Setting totp code: %s", code)
