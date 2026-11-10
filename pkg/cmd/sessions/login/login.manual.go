@@ -556,6 +556,11 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Session files can contain an encrypted password and token
+	if err := n.decryptSession(cfg, session); err != nil {
+		return err
+	}
+
 	// Fail early if the domain is not set
 	if session.GetDomain() == "" {
 		return cmderrors.NewUserError("invalid session. host is empty")
@@ -732,4 +737,40 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 	// Write session details to stdout (for machines)
 	return c8ysession.WriteOutput(n.GetCommand().OutOrStdout(), client, cfg, session, outputFormat)
+}
+
+// decryptSession decrypts the password and token if they are encrypted (e.g. when read
+// from a session file), prompting for the passphrase if it isn't already set via C8Y_PASSPHRASE
+func (n *CmdLogin) decryptSession(cfg *config.Config, session *c8ysession.CumulocitySession) error {
+	encryptedValue := ""
+	for _, value := range []string{session.Password, session.Token} {
+		if cfg.SecureData.IsEncrypted(value) == 1 {
+			encryptedValue = value
+			break
+		}
+	}
+	if encryptedValue == "" {
+		return nil
+	}
+
+	// Validate the passphrase against the encrypted value itself, so no key file is needed
+	passphrase, err := cfg.CheckEncryption(encryptedValue)
+	if err != nil {
+		return fmt.Errorf("could not decrypt the session. %w", err)
+	}
+	if passphrase == "" || passphrase == "null" {
+		return cmderrors.NewUserError("could not decrypt the session. passphrase can not be empty")
+	}
+
+	if session.Password, err = cfg.SecureData.TryDecryptString(session.Password, passphrase); err != nil {
+		return fmt.Errorf("could not decrypt the session password. %w", err)
+	}
+	if session.Token, err = cfg.SecureData.TryDecryptString(session.Token, passphrase); err != nil {
+		return fmt.Errorf("could not decrypt the session token. %w", err)
+	}
+
+	if n.factory.IOStreams != nil {
+		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Passphrase OK\n", n.factory.IOStreams.ColorScheme().SuccessIcon())
+	}
+	return nil
 }
