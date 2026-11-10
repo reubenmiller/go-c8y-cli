@@ -98,6 +98,10 @@ type InteractiveLogin struct {
 	// TempDir directory for the copy of the session file without secrets
 	TempDir string
 
+	// NoTerminal the server has no terminal (stdio mode), so the session can only be
+	// unlocked without user input or with the pin entry command (settings.pinEntry)
+	NoTerminal bool
+
 	mu        sync.Mutex
 	env       []string
 	expiresAt *time.Time
@@ -198,6 +202,9 @@ func (l *InteractiveLogin) AuthEnv(ctx context.Context) ([]string, error) {
 			fmt.Fprintf(l.Stderr, "\nThe session token expires soon. Log in again to continue.\n")
 		}
 		if err := l.login(ctx); err != nil {
+			if l.NoTerminal {
+				return nil, fmt.Errorf("could not log in to the Cumulocity session. Without a terminal, an encrypted session is unlocked with the pin entry command (settings.pinEntry, e.g. a password manager or keychain helper) or C8Y_PASSPHRASE, and two-factor authentication needs a TOTP secret in the session. Ask the user to check this, or to run \"c8y mcp serve\" in a terminal and register \"c8y mcp connect\" instead. %w", err)
+			}
 			return nil, fmt.Errorf("the Cumulocity session expired and the login in the 'c8y mcp serve' terminal failed. Ask the user to log in again in that terminal. %w", err)
 		}
 	}

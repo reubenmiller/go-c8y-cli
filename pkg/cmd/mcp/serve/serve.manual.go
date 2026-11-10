@@ -325,14 +325,21 @@ func (n *CmdServe) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if n.stdio {
+		tenant, username := cfg.GetTenant(), cfg.GetUsername()
+		if isFile(sessionFile) {
+			// Read the details from the resolved session file, as a session given by name
+			// is not always loaded by the global configuration
+			details := readSessionDetails(sessionFile)
+			host, tenant, username = firstNonEmpty(host, details.host), firstNonEmpty(tenant, details.tenant), firstNonEmpty(username, details.username)
+		}
 		if host == "" {
 			return cmderrors.NewUserError("the session does not have a host")
 		}
 		sessionMode, effectiveMode := capMode(log, policy.Mode, sessionModeName)
 		server.Session = mcpserver.SessionInfo{
 			Host:        host,
-			Tenant:      cfg.GetTenant(),
-			Username:    cfg.GetUsername(),
+			Tenant:      tenant,
+			Username:    username,
 			SessionName: mcpserver.SessionKey(sessionFile),
 			SessionMode: sessionMode.String(),
 		}
@@ -340,6 +347,25 @@ func (n *CmdServe) RunE(cmd *cobra.Command, args []string) error {
 			Executable:  executable,
 			SessionFile: sessionFile,
 			Mode:        effectiveMode,
+		}
+		if isFile(sessionFile) {
+			// Log in on the first command, so the MCP client isn't kept waiting. An encrypted
+			// session is unlocked with the pin entry command (settings.pinEntry) as there is
+			// no terminal. The commands then only receive the token, like in socket mode
+			tempDir, err := os.MkdirTemp("", "c8y-mcp-")
+			if err != nil {
+				return err
+			}
+			defer os.RemoveAll(tempDir)
+			server.Runner.Auth = &mcpserver.InteractiveLogin{
+				Executable:  executable,
+				SessionFile: sessionFile,
+				// there is no terminal to select the mode
+				SessionMode: sessionMode.String(),
+				Stderr:      n.factory.IOStreams.ErrOut,
+				TempDir:     tempDir,
+				NoTerminal:  true,
+			}
 		}
 		if n.confirmDeviceShell {
 			// stdin is used by the MCP transport, so only a dialog can be used
@@ -368,6 +394,32 @@ func capMode(log interface{ Warnf(string, ...any) }, policyMode config.SessionMo
 		log.Warnf("MCP mode %q is limited by the session mode %q", policyMode.String(), sessionMode.String())
 	}
 	return sessionMode, effectiveMode
+}
+
+func isFile(p string) bool {
+	info, err := os.Stat(p)
+	return err == nil && !info.IsDir()
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, v := range values {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+type sessionDetails struct {
+	host, tenant, username string
+}
+
+// readSessionDetails returns the non-secret details of a session file
+func readSessionDetails(sessionFile string) sessionDetails {
+	c := config.NewConfig(viper.New())
+	c.SetSessionFile(sessionFile)
+	_, _ = c.ReadConfigFiles(nil)
+	return sessionDetails{host: c.GetHost(), tenant: c.GetTenant(), username: c.GetUsername()}
 }
 
 // readSessionMode returns the mode of a session. A new configuration is used, so no
