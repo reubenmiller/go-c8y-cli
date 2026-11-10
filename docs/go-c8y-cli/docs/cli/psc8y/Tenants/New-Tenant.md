@@ -25,7 +25,7 @@ New-Tenant
 	[[-AdminPass] <String>]
 	[[-ContactName] <String>]
 	[[-ContactPhone] <String>]
-	[[-TenantId] <String>]
+	[[-Id] <String>]
 	[-AllowCreateTenants]
 	[-SendPasswordResetEmail]
 	[-Data <Object>]
@@ -209,7 +209,7 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TenantId
+### -Id
 The tenant ID.
 This should be left bank unless you know what you are doing.
 Will be auto-generated if not present.

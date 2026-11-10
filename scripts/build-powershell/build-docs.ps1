@@ -14,7 +14,7 @@ if (!(Get-Module -Name "platyPS")) {
 }
 
 Import-Module platyPS
-Import-Module $Module -Force
+Import-Module $Module -Force -ErrorAction Stop
 
 $ModuleName = $Module -replace ".+/(\w+)$", '$1'
 
@@ -109,6 +109,12 @@ Function Invoke-FixMarkdownFormatting {
     $OutputText = $OutputText -replace '{basename}', "\{basename}"
 
     $OutputText = $OutputText -replace "##? $Name", ""
+
+    # Remove the ProgressAction common parameter (added in PowerShell 7.4), as platyPS
+    # documents it as a regular parameter
+    $OutputText = $OutputText -join "`n"
+    $OutputText = $OutputText -replace "(?m)^\s*\[-ProgressAction <ActionPreference>\]\n", ""
+    $OutputText = $OutputText -replace "(?ms)^### -ProgressAction\n.*?(?=^##)", ""
     $OutputText | Out-File $File
 
 }
@@ -118,7 +124,7 @@ if (!(Test-Path $OutputFolder)) {
 
     # -ModulePagePath ""
     # | Where-Object { $_.Name -eq 'New-HostedApplication' }
-    [array] $commands = Get-Command -Module $ModuleName
+    [array] $commands = Get-Command -Module $ModuleName | Where-Object CommandType -ne 'Alias'
     foreach ($command in $commands) {
         $category = Get-Category $command.Name | Select-Object -First 1
         $CurrentOutputFolder = $OutputFolder
