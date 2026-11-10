@@ -3,6 +3,7 @@ package mapbuilder
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -1096,6 +1097,9 @@ func (b *MapBuilder) MarshalJSONArray() ([]byte, error) {
 	return out, outErr
 }
 
+// ErrEmptyPath is returned when trying to set a value using an empty path
+var ErrEmptyPath = errors.New("path cannot be empty")
+
 // MarshalJSON returns the body as json
 func (b *MapBuilder) MarshalJSONObject() (body []byte, err error) {
 	if !b.HasChanged() {
@@ -1118,8 +1122,9 @@ func (b *MapBuilder) MarshalJSONObject() (body []byte, err error) {
 			}
 			Logger.Debugf("setting externalInput: %s", b.externalInput)
 
-			// NOTE: Do not overwrite existing values if non empty
-			if len(value) > 0 {
+			// NOTE: Do not overwrite existing values if non empty.
+			// Skip empty paths, as sjson >= 1.2.7 treats "" as a valid key instead of returning an error
+			if len(value) > 0 && it.Path != "" {
 				if v := gjson.GetBytes(body, it.Path); !v.Exists() {
 
 					// Only assign non-object and non-array values, as these types will be handled in the templating engine
@@ -1174,6 +1179,9 @@ func (b *MapBuilder) SetOptionalMap(value map[string]interface{}) {
 }
 
 func (b *MapBuilder) SetPath(path string, value interface{}) error {
+	if path == "" {
+		return ErrEmptyPath
+	}
 	out, err := sjson.SetBytes(b.BodyRaw, path, value)
 	if err != nil {
 		return err
@@ -1183,6 +1191,9 @@ func (b *MapBuilder) SetPath(path string, value interface{}) error {
 }
 
 func (b *MapBuilder) SetRawPath(path string, value []byte) error {
+	if path == "" {
+		return ErrEmptyPath
+	}
 	out, err := sjson.SetRawBytes(b.BodyRaw, path, value)
 	if err != nil {
 		return err
