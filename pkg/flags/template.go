@@ -2,7 +2,6 @@ package flags
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -22,11 +21,13 @@ func WithTemplateOptions(templateName string, variablesName string, pathResolver
 	}
 }
 
-func ResolveTemplate(value string, pathResolver Resolver) string {
+// ResolveTemplate returns the contents of the template file, or the value itself if it
+// is not a file. An error is returned if the file is in a denied location
+func ResolveTemplate(value string, pathResolver Resolver) (string, error) {
 	// ignore errors, as we will try to read the contents
 	contents, err := pathResolver.Resolve(value)
 	if err != nil {
-		return value
+		return value, nil
 	}
 	return getContents(contents)
 }
@@ -43,7 +44,11 @@ func WithTemplateValue(src string, pathResolver Resolver) GetOption {
 			return "", nil, err
 		}
 
-		return src, Template(ResolveTemplate(value, pathResolver)), nil
+		contents, err := ResolveTemplate(value, pathResolver)
+		if err != nil {
+			return src, nil, fmt.Errorf("flag: %s. %w", src, err)
+		}
+		return src, Template(contents), nil
 	}
 }
 
@@ -76,16 +81,6 @@ func WithTemplateVariablesValue(src ...string) GetOption {
 
 // getContents checks whether the given string is a file reference if so it returns the contents, otherwise it returns the
 // input value as is
-func getContents(content string) string {
-	if _, err := os.Stat(content); err != nil {
-		// not a file
-		return content
-	}
-
-	fileContent, err := os.ReadFile(content)
-	if err != nil {
-		return content
-	}
-	// file contents
-	return string(fileContent)
+func getContents(content string) (string, error) {
+	return resolveContents(content)
 }

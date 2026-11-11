@@ -138,5 +138,6 @@ c8y api POST /event/events --data "type=myType,text=hello,source.id=12345,time=2
 
 - `401` / `403`: the session is not logged in or lacks permissions. Ask the user; don't try other sessions.
 - `mode is disabled`: the action needs a higher session mode. Report it; don't add `--sessionMode` or `--force`.
+- `access to the file is denied`: the file is protected, e.g. a session file. Report it; don't try to read it another way.
 - Unknown command or flag: check `c8y <resource> --help` for the available sub commands.
 - Large or truncated output: add `--select`, `--filter` or a smaller `--pageSize`.

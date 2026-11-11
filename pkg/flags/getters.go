@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yquery"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/stream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
@@ -914,7 +915,7 @@ func WithCertificateFile(opts ...string) GetOption {
 			return "", nil, fmt.Errorf("flag: %s. %w", src, err)
 		}
 
-		r, err := os.ReadFile(value)
+		r, err := fileguard.ReadFile(value)
 
 		if err != nil {
 			return "", nil, fmt.Errorf("flag: %s. %w", src, err)
@@ -1000,11 +1001,12 @@ func WithFileContentsAsString(opts ...string) GetOption {
 		if value == "" {
 			return "", "", nil
 		}
-		file, err := os.Open(value)
+		file, err := fileguard.Open(value)
 
 		if err != nil {
 			return "", "", err
 		}
+		defer file.Close()
 
 		contents, err := io.ReadAll(file)
 		if err != nil {
@@ -1046,13 +1048,20 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, raw bool, opts ...string) G
 		}
 
 		if raw {
-			return dst, RawString(resolveContents(values[0])), nil
+			v, err := resolveContents(values[0])
+			if err != nil {
+				return dst, "", fmt.Errorf("flag: %s. %w", src, err)
+			}
+			return dst, RawString(v), nil
 		}
 		data := make(map[string]interface{})
 
 		// Merge multiple data objects together
 		for _, value := range values {
-			v := resolveContents(value)
+			v, err := resolveContents(value)
+			if err != nil {
+				return dst, "", fmt.Errorf("flag: %s. %w", src, err)
+			}
 			// data flag does not yet support arrays
 			if jsonUtilities.IsValidJSON([]byte(v)) && jsonUtilities.IsJSONArray([]byte(v)) {
 				return dst, "", fmt.Errorf("invalid data type (array) provided on the '%s' flag. Currently only key/value or json objects are supported. Hint: Try using the 'template' flag instead", src)

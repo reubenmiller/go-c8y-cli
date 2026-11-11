@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 )
 
 // ciEnvVars environment variables which would activate the CI mode in c8y
@@ -43,6 +44,7 @@ var controlledEnvPrefixes = []string{
 	"C8Y_SETTINGS_DEFAULTS_DRY",
 	"C8Y_SETTINGS_LOGGER_HIDESENSITIVE=",
 	"C8Y_SETTINGS_DEFAULTS_INSECURE=",
+	fileguard.EnvDeniedPaths + "=",
 }
 
 // Runner executes c8y commands as child processes
@@ -52,6 +54,10 @@ type Runner struct {
 
 	// SessionFile session file which is used for all commands
 	SessionFile string
+
+	// DeniedPaths local files and folders the commands can't read or write, e.g.
+	// the session files, so their secrets can't be read with --template or --data
+	DeniedPaths []string
 
 	// Mode the maximum mode used for write commands
 	Mode config.SessionMode
@@ -178,6 +184,9 @@ func (r *Runner) Env(mode config.SessionMode, authEnv []string) []string {
 		"C8Y_SETTINGS_CI=false",
 		"C8Y_SETTINGS_LOGGER_HIDESENSITIVE=true",
 	)
+	if len(r.DeniedPaths) > 0 {
+		env = append(env, fileguard.EnvDeniedPaths+"="+strings.Join(r.DeniedPaths, string(os.PathListSeparator)))
+	}
 	if authEnv != nil {
 		env = append(env, authEnv...)
 	} else if r.SessionFile != "" {

@@ -35,6 +35,7 @@ Each tool call runs a normal `c8y` command, so the existing go-c8y-cli features 
 
 * **Session**: selected by you in the browser. The agent can't switch it, and can't use `--session`, `--sessionUsername`, `--sessionPassword`, `--host` or `--proxy`. The agent is told to check the active session with `c8y_session`, as you can switch it at any time.
 * **Credentials**: the commands only receive the token from the login and a copy of the session file without secrets. The password and encryption passphrase are never passed to the commands, except the password for sessions which use basic auth (no token). The token and password are passed through a pipe, not environment variables, as other programs running as your user can read the environment of a process. On Windows, environment variables are still used.
+* **Session files**: the commands can't read or write files in the session home folder (`C8Y_SESSION_HOME`, e.g. `~/.cumulocity`) or the session file, so the agent can't read secrets with `--template`, `--data`, `--templateVars`, `--file`, or a jsonnet `import`. Use `--denyPath` to protect other folders, such as `~/.ssh`.
 * **Token renewal**: when the token is about to expire, the server logs in again. If the passphrase or a two-factor code is needed, the page opens again in your browser.
 * **Session mode**: by default, the agent uses the mode of each session (`settings.session.mode`), so it can only read data in a `prod` session and can also delete data in a `dev` session. A session without a mode is read only. The mode set with `--mode` (or in the policy file) is a maximum for every session, limited by each session's own mode. For example, with `--mode qual`, the agent can create and update data in a `dev` session, but only read data after you switch to a `prod` session. Read commands always run in `prod` (read-only) mode, and CI environment variables are ignored.
 * **Dry run**: commands with `--dry` are treated as read commands, and the approval prompt shows the dry run output of the requests.
@@ -101,6 +102,7 @@ You can also provide `C8Y_TOKEN` instead of a password. In this case, the comman
 | `--allow` | Only allow commands matching the pattern. Can be used multiple times |
 | `--deny` | Deny commands matching the pattern (wins over `--allow`). Can be used multiple times |
 | `--read` | Treat additional commands as read-only, e.g. extension commands |
+| `--denyPath` | Local file or folder the commands can't read, e.g. `~/.ssh`. The session home folder and the session file are always denied. Can be used multiple times |
 | `--approval` | How write commands are approved: `auto` (default), `elicit`, `client` or `none` |
 | `--policy` | Load the policy from a json, yaml or toml file. Flags override values in the file |
 | `--timeout`, `--maxTimeout` | Default and maximum timeout per command |
@@ -173,6 +175,7 @@ approval: elicit
 allow: [devices, inventory, alarms, events, measurements, operations, api]
 deny: ["* delete"]
 readCommands: ["mycompany list"]
+denyPaths: ["~/.ssh", "~/.aws"]
 timeout: 2m
 maxOutputBytes: 100000
 ```
@@ -185,7 +188,8 @@ claude mcp add --scope user c8y -- c8y mcp serve --policy /path/to/c8y-mcp-polic
 
 * Read commands are detected by their name (`get*`, `list*`, `find*`, `count*`, `exists*`) and by the HTTP method for `c8y api`. Even if a command is detected incorrectly, it still runs in `prod` mode, so the session mode check rejects any write.
 * The policy controls the `c8y` commands run through the MCP server. It doesn't stop an agent which also has shell access from running `c8y` or reading files directly. Use your client's permission settings to control shell access.
-* Commands can read local files, for example with `--template`, `--data` or jsonnet imports, and the output is returned to the agent. Don't rely on the MCP server alone to keep local files away from an agent.
+* Commands can read local files outside the denied folders, for example with `--template`, `--data` or jsonnet imports, and the output is returned to the agent. Add folders with secrets to `--denyPath`, and don't rely on the MCP server alone to keep local files away from an agent.
+* Use encrypted sessions. A session file outside the session home folder is only protected while it is the active session.
 * Commands are run without a shell. Only c8y commands joined with ` | ` are supported.
 * The session picker opens in a browser on the machine which runs the server. On a remote machine (e.g. over ssh), use `--session` with a session which can log in without user input, or environment variables.
 * `remoteaccess connect ssh` can't ask for a password or a key passphrase, as the command doesn't run in a terminal. Use an ssh key which is loaded in your ssh agent.

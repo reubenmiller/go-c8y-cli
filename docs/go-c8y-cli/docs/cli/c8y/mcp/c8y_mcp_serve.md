@@ -41,6 +41,9 @@ You control what the agent can do:
   only narrow the session's own mode, never widen it, also after switching the session. Read-only
   commands always run in prod (read-only) mode.
 * Allow and deny lists: which commands the agent can use, e.g. "devices", "inventory *", "* delete".
+* Local files: commands can't read files in the session home folder or the session file (e.g. with
+  --template, --data or --file), so the agent can't read secrets from session files. Use --denyPath
+  to protect other folders, e.g. ~/.ssh.
 * Device shell: with --allowDeviceShell (and qual or dev mode), the agent can run single shell
   commands on a device for troubleshooting, via "remoteaccess connect ssh --device \<id> -- \<command>"
   (if remote access is configured) or c8y_Command operations. Add --confirmDeviceShell to confirm
@@ -60,6 +63,7 @@ The policy can also be loaded from a file (json, yaml or toml):
     allow: [devices, inventory, alarms, events, measurements, operations, api]
     deny: ["* delete"]
     readCommands: ["mycompany list"]
+    denyPaths: ["~/.ssh"]
     timeout: 2m
     maxOutputBytes: 100000
 
@@ -93,6 +97,7 @@ Use credentials from environment variables (e.g. for CI)
       --approval string                   How write commands are approved: auto, elicit, client or none. Default: auto
       --confirmDeviceShell[=true|false]   Ask for confirmation of each command run on a device in a native dialog, in addition to the normal approval
       --deny stringArray                  Deny commands matching this pattern, e.g. users, "* delete". Can be used multiple times
+      --denyPath stringArray              Local file or folder the commands can't read, e.g. ~/.ssh. The session home folder and the session file are always denied. Can be used multiple times
   -h, --help[=true|false]                 help for serve
       --maxOutput int                     Maximum number of output bytes returned to the agent per command. Default: 100000
       --maxTimeout duration               Maximum timeout the agent can request per command. Default: 10m

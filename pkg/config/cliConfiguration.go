@@ -1640,7 +1640,11 @@ func (c *Config) GetOutputFile() string {
 // GetOutputTemplate returns the output template to use when processing the output
 func (c *Config) GetOutputTemplate() string {
 	if c.outputTemplate == nil {
-		contents := flags.ResolveTemplate(c.viper.GetString(SettingsOutputTemplate), c.templateResolver)
+		contents, err := flags.ResolveTemplate(c.viper.GetString(SettingsOutputTemplate), c.templateResolver)
+		if err != nil {
+			c.Logger.Errorf("output template: %s", err)
+			contents = ""
+		}
 		c.outputTemplate = &contents
 	}
 	return *c.outputTemplate

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -29,6 +30,7 @@ type CmdServe struct {
 	mode          string
 	allow         []string
 	deny          []string
+	denyPaths     []string
 	readCommands  []string
 	approval      string
 	timeout       time.Duration
@@ -86,6 +88,9 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			  only narrow the session's own mode, never widen it, also after switching the session. Read-only
 			  commands always run in prod (read-only) mode.
 			* Allow and deny lists: which commands the agent can use, e.g. "devices", "inventory *", "* delete".
+			* Local files: commands can't read files in the session home folder or the session file (e.g. with
+			  --template, --data or --file), so the agent can't read secrets from session files. Use --denyPath
+			  to protect other folders, e.g. ~/.ssh.
 			* Device shell: with --allowDeviceShell (and qual or dev mode), the agent can run single shell
 			  commands on a device for troubleshooting, via "remoteaccess connect ssh --device <id> -- <command>"
 			  (if remote access is configured) or c8y_Command operations. Add --confirmDeviceShell to confirm
@@ -105,6 +110,7 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			    allow: [devices, inventory, alarms, events, measurements, operations, api]
 			    deny: ["* delete"]
 			    readCommands: ["mycompany list"]
+			    denyPaths: ["~/.ssh"]
 			    timeout: 2m
 			    maxOutputBytes: 100000
 		`),
@@ -129,6 +135,7 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 	cmd.Flags().StringVar(&ccmd.mode, "mode", "", "Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: the session's mode (prod if the session has none)")
 	cmd.Flags().StringArrayVar(&ccmd.allow, "allow", nil, "Only allow commands matching this pattern, e.g. devices, \"inventory *\". Can be used multiple times")
 	cmd.Flags().StringArrayVar(&ccmd.deny, "deny", nil, "Deny commands matching this pattern, e.g. users, \"* delete\". Can be used multiple times")
+	cmd.Flags().StringArrayVar(&ccmd.denyPaths, "denyPath", nil, "Local file or folder the commands can't read, e.g. ~/.ssh. The session home folder and the session file are always denied. Can be used multiple times")
 	cmd.Flags().StringArrayVar(&ccmd.readCommands, "read", nil, "Additional commands to treat as read-only, e.g. extension commands. Can be used multiple times")
 	cmd.Flags().StringVar(&ccmd.approval, "approval", "", "How write commands are approved: auto, elicit, client or none. Default: auto")
 	cmd.Flags().DurationVar(&ccmd.timeout, "timeout", 0, "Default timeout per command. Default: 2m")
@@ -160,6 +167,7 @@ type policyFile struct {
 	Mode           string        `mapstructure:"mode"`
 	Allow          []string      `mapstructure:"allow"`
 	Deny           []string      `mapstructure:"deny"`
+	DenyPaths      []string      `mapstructure:"denyPaths"`
 	ReadCommands   []string      `mapstructure:"readCommands"`
 	Approval       string        `mapstructure:"approval"`
 	Timeout        time.Duration `mapstructure:"timeout"`
@@ -213,6 +221,9 @@ func (n *CmdServe) buildPolicy(cmd *cobra.Command) (mcpserver.Policy, error) {
 	policy.Deny = append(policy.Deny, file.Deny...)
 	policy.Deny = append(policy.Deny, n.deny...)
 	policy.Allow = append(append(policy.Allow, file.Allow...), n.allow...)
+	for _, p := range append(append([]string{}, file.DenyPaths...), n.denyPaths...) {
+		policy.DenyPaths = append(policy.DenyPaths, expandHome(p))
+	}
 	policy.ReadCommands = append(append(policy.ReadCommands, file.ReadCommands...), n.readCommands...)
 
 	if cmd.Flags().Changed("timeout") {
@@ -303,6 +314,30 @@ func capMode(log interface{ Warnf(string, ...any) }, policyMode config.SessionMo
 		log.Warnf("MCP mode %q is limited by the session mode %q", policyMode.String(), sessionMode.String())
 	}
 	return sessionMode, effectiveMode
+}
+
+// expandHome expands a leading ~ to the user's home folder
+func expandHome(p string) string {
+	if p == "~" || strings.HasPrefix(p, "~/") || strings.HasPrefix(p, `~\`) {
+		if home, err := os.UserHomeDir(); err == nil {
+			return filepath.Join(home, p[1:])
+		}
+	}
+	return p
+}
+
+// deniedPaths returns the local paths the commands can't access: the session home
+// folder (with all session files and the encryption key), the session file and the
+// paths from the policy
+func deniedPaths(cfg *config.Config, policy mcpserver.Policy, sessionFile string) []string {
+	paths := []string{}
+	if home := cfg.GetSessionHomeDir(); home != "" {
+		paths = append(paths, home)
+	}
+	if sessionFile != "" && isFile(sessionFile) {
+		paths = append(paths, sessionFile)
+	}
+	return append(paths, policy.DenyPaths...)
 }
 
 func isFile(p string) bool {

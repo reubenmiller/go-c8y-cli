@@ -46,7 +46,7 @@ func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcp
 			SessionName: mcpserver.SessionKey(sessionFile),
 			SessionMode: sessionMode.String(),
 		}
-		server.Runner = &mcpserver.Runner{Executable: executable, SessionFile: sessionFile, Mode: effectiveMode}
+		server.Runner = &mcpserver.Runner{Executable: executable, SessionFile: sessionFile, Mode: effectiveMode, DeniedPaths: deniedPaths(cfg, server.Policy, sessionFile)}
 		log.Infof("Starting MCP server (stdio). host=%s, mode=%s, approval=%s", host, effectiveMode.String(), server.Policy.Approval)
 		return runStdioServer(ctx, server)
 	}
@@ -169,6 +169,7 @@ func (s *stdioSessions) newSession(sessionFile string) (*pendingSession, *mcpser
 			SessionFile: sessionFile,
 			Mode:        effectiveMode,
 			Auth:        login,
+			DeniedPaths: deniedPaths(s.cfg, s.server.Policy, sessionFile),
 		},
 	}, login, nil
 }

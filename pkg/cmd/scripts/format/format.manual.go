@@ -12,6 +12,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/spf13/cobra"
 )
 
@@ -74,7 +75,7 @@ func (n *CmdFormat) run(cmd *cobra.Command, args []string) error {
 	cfg.DisableStdin()
 
 	for _, inputFile := range args {
-		data, err := os.ReadFile(inputFile)
+		data, err := fileguard.ReadFile(inputFile)
 		if err != nil {
 			return err
 		}

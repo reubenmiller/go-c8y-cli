@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 )
 
 // ZipDirectoryContents zips the contents of a source folder. The root folder will be excluded from the created zip file
@@ -101,7 +103,7 @@ func zipit(source, target string, excludeRoot bool) error {
 			return nil
 		}
 
-		file, err := os.Open(path)
+		file, err := fileguard.Open(path)
 		if err != nil {
 			return err
 		}

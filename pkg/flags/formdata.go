@@ -5,10 +5,10 @@ import (
 	"errors"
 	"io"
 	"mime"
-	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/spf13/cobra"
@@ -140,7 +140,7 @@ func WithFileReader(opts ...string) GetOption {
 			return dst, nil, err
 		}
 
-		r, err := os.Open(value)
+		r, err := fileguard.Open(value)
 		return dst, r, err
 	}
 }

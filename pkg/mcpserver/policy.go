@@ -139,6 +139,11 @@ type Policy struct {
 	// MaxOutputBytes maximum number of bytes returned to the agent per call
 	MaxOutputBytes int
 
+	// DenyPaths additional local files and folders the commands can't read, e.g. with
+	// --template, --data or --file. The session home folder and the active session
+	// file are always denied
+	DenyPaths []string
+
 	// AllowDeviceShell allows commands which run a shell command on a device (see
 	// DeviceShellCommands and c8y_Command operations). They still need a mode which
 	// allows creating data, and are approved like other write commands

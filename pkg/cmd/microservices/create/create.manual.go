@@ -18,6 +18,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -124,7 +125,7 @@ func (n *CmdCreate) getApplicationDetails(log *logger.Logger) (*Application, err
 	} else if n.file != "" {
 		// Assume json (regardless of file type)
 		log.Infof("Assuming file is json (regardless of file extension). path=%s", n.file)
-		jsonFile, err := os.Open(n.file)
+		jsonFile, err := fileguard.Open(n.file)
 		if err != nil {
 			return nil, err
 		}

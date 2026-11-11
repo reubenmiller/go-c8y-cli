@@ -19,6 +19,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
@@ -226,6 +227,12 @@ func (n *DeviceEnrollCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		if certFile == "" {
 			certFile = fmt.Sprintf("%s.crt", deviceID)
+		}
+		// the files are read, written or removed, so they can't be in a denied location
+		for _, p := range []string{keyFile, csrFile, certFile} {
+			if err := fileguard.Check(p); err != nil {
+				return nil, err
+			}
 		}
 
 		if oneTimePassword == "" {
@@ -468,7 +475,7 @@ func LoadCSRFromFile(path string) CSRSource {
 		if path == "" {
 			return nil, false, nil
 		}
-		contents, err := os.ReadFile(path)
+		contents, err := fileguard.ReadFile(path)
 		if err != nil {
 			return nil, false, err
 		}
