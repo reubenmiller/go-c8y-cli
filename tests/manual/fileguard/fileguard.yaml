@@ -1,0 +1,184 @@
+# Files in the locations listed in C8Y_DENIED_PATHS can't be read by commands.
+# A tool which runs c8y for an AI agent can set it, so the agent can't read session
+# secrets, e.g. via --template, --data or a jsonnet import.
+tests:
+  It denies a jsonnet import of a denied file:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y devices create --dry --template "{name: 'x', leak: import 'testdata/fileguard/sessions/session.json'}"
+    exit-code: 101
+    stdout:
+      not-contains:
+        - fileguard-secret-value
+    stderr:
+      contains:
+        - "access to the file is denied: testdata/fileguard/sessions/session.json"
+      not-contains:
+        - fileguard-secret-value
+
+  It denies a jsonnet importstr of a denied file:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y devices create --dry --template "{name: 'x', leak: importstr 'testdata/fileguard/sessions/session.json'}"
+    exit-code: 101
+    stdout:
+      not-contains:
+        - fileguard-secret-value
+    stderr:
+      contains:
+        - access to the file is denied
+
+  It denies a jsonnet importbin of a denied file:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y devices create --dry --template "{name: 'x', leak: importbin 'testdata/fileguard/sessions/session.json'}"
+    exit-code: 101
+    stderr:
+      contains:
+        - access to the file is denied
+
+  It denies a denied file as the template:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y devices create --dry --data name=x --template testdata/fileguard/sessions/session.json
+    exit-code: 101
+    stdout:
+      not-contains:
+        - fileguard-secret-value
+    stderr:
+      contains:
+        - "flag: template. access to the file is denied"
+
+  It denies a denied file as data:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y inventory create --dry --data testdata/fileguard/sessions/session.json
+    exit-code: 101
+    stdout:
+      not-contains:
+        - fileguard-secret-value
+    stderr:
+      contains:
+        - "flag: data. access to the file is denied"
+
+  It denies a denied file as template variables:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y devices create --dry --template "{name: var('password')}" --templateVars testdata/fileguard/sessions/session.json
+    exit-code: 101
+    stdout:
+      not-contains:
+        - fileguard-secret-value
+    stderr:
+      contains:
+        - "flag: templateVars. access to the file is denied"
+
+  It ignores a denied output template:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y devices get --id 12345 --dry --outputTemplate testdata/fileguard/sessions/session.json
+    exit-code: 0
+    stdout:
+      not-contains:
+        - fileguard-secret-value
+    stderr:
+      contains:
+        - "output template: access to the file is denied"
+
+  It denies uploading a denied file:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y binaries create --dry --file testdata/fileguard/sessions/session.json
+    exit-code: 101
+    stdout:
+      not-contains:
+        - fileguard-secret-value
+    stderr:
+      contains:
+        - access to the file is denied
+
+  It denies a denied file as pipeline input:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y inventory get --id testdata/fileguard/sessions/ids.txt --dry
+    exit-code: 100
+    stderr:
+      contains:
+        - access to the file is denied
+
+  It doesn't drop a device filter when its input file is denied:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y events list --device testdata/fileguard/sessions/ids.txt --dry
+    exit-code: 101
+    stdout:
+      not-contains:
+        - /event/events
+    stderr:
+      contains:
+        - access to the file is denied
+
+  It reports a denied file when looking up a device:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y devices get --id testdata/fileguard/sessions/ids.txt --dry
+    exit-code: 100
+    stderr:
+      contains:
+        - access to the file is denied
+
+  It allows a jsonnet import outside the denied paths:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y devices create --dry --template "{name: 'x'} + import 'testdata/fileguard/templates/base.json'"
+    exit-code: 0
+    stdout:
+      json:
+        body.name: x
+        body.type: c8y_FileguardBase
+
+  It allows data from a file outside the denied paths:
+    config:
+      env:
+        C8Y_DENIED_PATHS: testdata/fileguard/sessions
+    command: >
+      c8y inventory create --dry --data testdata/fileguard/templates/base.json
+    exit-code: 0
+    stdout:
+      json:
+        body.type: c8y_FileguardBase
+
+  It reads files normally without denied paths:
+    config:
+      env:
+        C8Y_DENIED_PATHS: ""
+    command: >
+      c8y inventory create --dry --data testdata/fileguard/sessions/session.json
+    exit-code: 0
+    stdout:
+      json:
+        body.username: fileguard-user

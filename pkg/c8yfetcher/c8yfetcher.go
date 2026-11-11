@@ -2,6 +2,7 @@ package c8yfetcher
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"reflect"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -544,6 +546,10 @@ func WithManagedObjectPropertyFirstMatch(factory *cmdutil.Factory, fetcher Entit
 		name, values, err := opt(cmd, inputIterators)
 
 		if name == "" {
+			// a denied input file must not be ignored, as the command would run without the filter
+			if errors.Is(err, fileguard.ErrDenied) {
+				return "", "", err
+			}
 			return "", "", nil
 		}
 
@@ -588,6 +594,10 @@ func WithReferenceByNameFirstMatch(factory *cmdutil.Factory, fetcher EntityFetch
 		name, values, err := opt(cmd, inputIterators)
 
 		if name == "" {
+			// a denied input file must not be ignored, as the command would run without the filter
+			if errors.Is(err, fileguard.ErrDenied) {
+				return "", "", err
+			}
 			return "", "", nil
 		}
 
@@ -617,6 +627,10 @@ func WithSelfReferenceByNameFirstMatch(factory *cmdutil.Factory, fetcher EntityF
 		name, values, err := opt(cmd, inputIterators)
 
 		if name == "" {
+			// a denied input file must not be ignored, as the command would run without the filter
+			if errors.Is(err, fileguard.ErrDenied) {
+				return "", "", err
+			}
 			return "", "", nil
 		}
 

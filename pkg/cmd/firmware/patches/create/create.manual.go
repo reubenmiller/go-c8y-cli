@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"os"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
@@ -13,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -199,7 +199,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 			_, resp, respErr = client.Inventory.CreateChildAddition(context.Background(), firmwareID, body)
 		} else {
 
-			file, err := os.Open(filename)
+			file, err := fileguard.Open(filename)
 			if err != nil {
 				return err
 			}

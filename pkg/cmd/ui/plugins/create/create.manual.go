@@ -16,6 +16,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
@@ -265,7 +266,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		WithError: commonOptions.WithError,
 	})
 
-	file, fileErr := os.Open(n.file)
+	file, fileErr := fileguard.Open(n.file)
 	if fileErr != nil {
 		return fileErr
 	}

@@ -18,6 +18,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/zipUtilities"
@@ -135,7 +136,7 @@ func (n *CmdCreateHostedApplication) getApplicationDetails(log *logger.Logger) (
 		log.Infof("Assuming file is json (regardless of file extension). path=%s", manifestPath)
 
 		if _, err := os.Stat(manifestPath); err == nil {
-			jsonFile, err := os.Open(manifestPath)
+			jsonFile, err := fileguard.Open(manifestPath)
 			if err != nil {
 				return nil, err
 			}

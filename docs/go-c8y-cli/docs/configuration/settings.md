@@ -207,6 +207,16 @@ By default the `$HOME/.cumulocity` directory is used to store the Cumulocity ses
 
 Use a custom folder where the Cumulocity Session files should be kept and searched through.
 
+### C8Y_DENIED_PATHS
+
+A list of files or folders which commands are not allowed to read, separated by `:` (or `;` on Windows). A command fails with `access to the file is denied` if it is given a file in one of these locations, e.g. via `--data`, `--template`, `--templateVars`, `--file`, piped input from a file, or a jsonnet `import`. Files which c8y reads itself, such as the session and settings files, are not affected.
+
+It is meant for tools which run c8y commands on behalf of someone else, such as an AI agent, so that the commands can't read the session files and send their secrets elsewhere.
+
+```bash
+export C8Y_DENIED_PATHS="$HOME/.cumulocity"
+```
+
 ## Environment variable mapping
 
 All of the settings can be also set via an environment settings.

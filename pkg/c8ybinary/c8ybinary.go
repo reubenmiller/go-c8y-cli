@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -27,7 +28,7 @@ const BarFiller = "[━━ ]"
 type ClientFunc func() (*c8y.Client, error)
 
 func CreateBinaryWithProgress(ctx context.Context, client *c8y.Client, path string, filename string, properties interface{}, progress *iostreams.Progress) (*c8y.Response, error) {
-	file, err := os.Open(filename)
+	file, err := fileguard.Open(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +209,7 @@ func WithBinaryUploadURL(clientFunc ClientFunc, progress *iostreams.Progress, op
 		}
 
 		// binary properties
-		file, err := os.Open(filename)
+		file, err := fileguard.Open(filename)
 		if err != nil {
 			return "", nil, err
 		}
