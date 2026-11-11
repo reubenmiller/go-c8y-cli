@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
+	"github.com/spf13/cobra"
 )
 
 func TestResolveContentsOfDeniedFile(t *testing.T) {
@@ -36,5 +37,23 @@ func TestResolveContentsOfDeniedFile(t *testing.T) {
 	}
 	if v, err := resolveContents("name=value"); err != nil || v != "name=value" {
 		t.Errorf("expected a non-file value to be returned as is, got %q, %v", v, err)
+	}
+}
+
+// A data flag of type string (instead of a string array) must not return the error
+// from the string array lookup, e.g. "bulkoperations create --operation"
+func TestDataValueFromStringFlag(t *testing.T) {
+	cmd := &cobra.Command{}
+	cmd.Flags().String("operation", "", "")
+	if err := cmd.Flags().Set("operation", "c8y_Restart={}"); err != nil {
+		t.Fatal(err)
+	}
+	dst, value, err := WithDataValueAdvanced(false, false, "operation", "operationPrototype")(cmd, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	data, ok := value.(map[string]interface{})
+	if dst != "operationPrototype" || !ok || data["c8y_Restart"] == nil {
+		t.Fatalf("unexpected value: dst=%s, value=%v", dst, value)
 	}
 }

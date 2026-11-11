@@ -1075,7 +1075,7 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, raw bool, opts ...string) G
 		if stripCumulocityKeys {
 			c8ydata.RemoveCumulocityProperties(data, true)
 		}
-		return dst, data, err
+		return dst, data, nil
 	}
 }
 
