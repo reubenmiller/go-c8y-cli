@@ -3,6 +3,7 @@ package ssh
 import (
 	"context"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 	"time"
@@ -30,6 +31,7 @@ type CmdSSH struct {
 	configuration  string
 	portForwarding string
 	preferredAuth  string
+	batch          bool
 
 	*subcommand.SubCommand
 
@@ -56,6 +58,13 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 
 				c8y settings update remoteaccess.sshuser root
 
+			If no user is given (via --user or the setting), ssh uses your local user name. If the
+			authentication fails, the connection is tried once more with the "root" user.
+
+			Use --batch when running ssh from a script or an AI agent. ssh then never prompts for a
+			password or passphrase, only key-based authentication is used, and the connection fails
+			instead of waiting for input.
+
 		`),
 		Example: heredoc.Doc(`
 			$ c8y remoteaccess connect ssh --device 12345
@@ -81,6 +90,9 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 
 			$ c8y remoteaccess connect ssh --device 12345 --user admin -- "sh -c 'cat /etc/os-release'"
 			use a non-interactive session to execute a custom shell command (notice the surrounding double quotes on the command!)
+
+			$ c8y remoteaccess connect ssh --device 12345 --batch -- systemctl status
+			Execute a single command using key-based authentication only, failing instead of prompting for a password
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -91,6 +103,7 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 	cmd.Flags().StringVar(&ccmd.user, "user", "", "Default ssh user")
 	cmd.Flags().StringVar(&ccmd.configuration, "configuration", "", "Remote Access Configuration")
 	cmd.Flags().StringVar(&ccmd.preferredAuth, "preferred-auth", "", "Set the preferred authentication for the ssh connection. This will add '-o PreferredAuthentications=<value>' to the ssh command")
+	cmd.Flags().BoolVar(&ccmd.batch, "batch", false, "Never prompt for a password or passphrase. Only key-based authentication is used, and the connection fails instead of waiting for input")
 	cmd.Flags().StringVarP(&ccmd.portForwarding, "port-forward", "L", "", "SSH Port-Forwarding option in the format [bind_address:]port:host:hostport. It also accepts a custom short form, <local>[:<remote>]. The value is passed to the ssh -L option, so read the ssh man page for more info")
 
 	completion.WithOptions(
@@ -204,43 +217,26 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		// Start in background
 		go craClient.Serve()
 
-		// Build ssh command
-		sshArgs := []string{
-			"-o", "ServerAliveInterval=120",
-			"-o", "StrictHostKeyChecking=no",
-			"-o", "UserKnownHostsFile=/dev/null",
+		if n.batch && n.preferredAuth != "" && n.preferredAuth != "publickey" {
+			return nil, cmderrors.NewUserError(fmt.Sprintf("--preferred-auth %s can't be used with --batch, as batch mode only uses key-based authentication", n.preferredAuth))
 		}
 
-		if n.preferredAuth != "" {
-			sshArgs = append(sshArgs, "-o", fmt.Sprintf("PreferredAuthentications=%s", n.preferredAuth))
-		}
-
-		sshTarget := host
-		if n.user == "" {
+		user := n.user
+		if user == "" {
 			// Use default user (if set)
-			n.user = cfg.GetRemoteAccessDefaultSSHUser()
+			user = cfg.GetRemoteAccessDefaultSSHUser()
 		}
-		if n.user != "" {
-			sshTarget = fmt.Sprintf("%s@%s", n.user, host)
+		users := []string{user}
+		if user == "" {
+			// ssh uses the local user name, which often doesn't exist on the device
+			users = append(users, FallbackSSHUser)
 		}
-		sshArgs = append(sshArgs, "-p", port, sshTarget)
 
 		portForwarding := n.GetPortForwarding()
-		if portForwarding != "" {
-			sshArgs = append(sshArgs, "-L", portForwarding)
+		var command []string
+		if dashIdx := cmd.ArgsLenAtDash(); dashIdx > -1 {
+			command = args[dashIdx:]
 		}
-
-		dashIdx := cmd.ArgsLenAtDash()
-		if dashIdx > -1 {
-			sshArgs = append(sshArgs, "--")
-			sshArgs = append(sshArgs, args[dashIdx:]...)
-		}
-
-		sshCmd := exec.CommandContext(context.Background(), "ssh", sshArgs...)
-		sshCmd.Stdout = n.factory.IOStreams.Out
-		sshCmd.Stdin = n.factory.IOStreams.In
-		sshCmd.Stderr = n.factory.IOStreams.ErrOut
-		log.Infof("Executing command: ssh %s\n", strings.Join(sshArgs, " "))
 
 		cs := n.factory.IOStreams.ColorScheme()
 		if portForwarding != "" {
@@ -249,21 +245,141 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 			fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting interactive ssh session with %s (%s)\n", device, strings.TrimRight(client.BaseURL.String(), "/"))))
 		}
 
-		start := time.Now()
-		sshErr := sshCmd.Run()
-		duration := time.Since(start).Truncate(time.Millisecond)
-		fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", duration)
+		exitCode, sshErr := ConnectWithFallback(users, func(u string) (int, string, error) {
+			sshArgs := BuildSSHArgs(SSHOptions{
+				Host:           host,
+				Port:           port,
+				User:           u,
+				PreferredAuth:  n.preferredAuth,
+				Batch:          n.batch,
+				PortForwarding: portForwarding,
+				Command:        command,
+			})
+
+			stderr := &tailWriter{max: 4096}
+			sshCmd := exec.CommandContext(context.Background(), "ssh", sshArgs...)
+			sshCmd.Stdout = n.factory.IOStreams.Out
+			sshCmd.Stdin = n.factory.IOStreams.In
+			sshCmd.Stderr = io.MultiWriter(n.factory.IOStreams.ErrOut, stderr)
+			log.Infof("Executing command: ssh %s\n", strings.Join(sshArgs, " "))
+
+			start := time.Now()
+			err := sshCmd.Run()
+			duration := time.Since(start).Truncate(time.Millisecond)
+			fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", duration)
+
+			exitCode := 0
+			if sshCmd.ProcessState != nil {
+				exitCode = sshCmd.ProcessState.ExitCode()
+			}
+			return exitCode, stderr.String(), err
+		}, func(next string) {
+			fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Yellow(fmt.Sprintf("Authentication failed with the default user. Retrying with the %q user", next)))
+		})
 
 		// Use exit code from the command
-		if sshCmd.ProcessState != nil {
-			if sshCmd.ProcessState.ExitCode() != 0 {
-				return nil, cmderrors.NewErrorWithExitCode(
-					cmderrors.ExitCode(sshCmd.ProcessState.ExitCode()),
-					sshErr,
-				)
-			}
+		if exitCode != 0 {
+			return nil, cmderrors.NewErrorWithExitCode(
+				cmderrors.ExitCode(exitCode),
+				sshErr,
+			)
 		}
 
 		return nil, sshErr
 	}, nil)
+}
+
+// ConnectWithFallback runs connect for each user until it succeeds, or fails for
+// another reason than the authentication. It returns the result of the last attempt
+func ConnectWithFallback(users []string, connect func(user string) (int, string, error), onRetry func(next string)) (int, error) {
+	var exitCode int
+	var err error
+	for i, u := range users {
+		var stderr string
+		exitCode, stderr, err = connect(u)
+		if i < len(users)-1 && IsAuthFailure(exitCode, stderr) {
+			if onRetry != nil {
+				onRetry(users[i+1])
+			}
+			continue
+		}
+		break
+	}
+	return exitCode, err
+}
+
+// FallbackSSHUser user which is tried if no user was given and the authentication
+// with the local user name failed
+const FallbackSSHUser = "root"
+
+// SSHOptions options to build the ssh command
+type SSHOptions struct {
+	Host           string
+	Port           string
+	User           string
+	PreferredAuth  string
+	Batch          bool
+	PortForwarding string
+	Command        []string
+}
+
+// BuildSSHArgs returns the arguments for the ssh command
+func BuildSSHArgs(opts SSHOptions) []string {
+	sshArgs := []string{
+		"-o", "ServerAliveInterval=120",
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "UserKnownHostsFile=/dev/null",
+	}
+
+	if opts.Batch {
+		// never prompt for a password or passphrase, and don't wait forever
+		sshArgs = append(sshArgs,
+			"-o", "BatchMode=yes",
+			"-o", "PreferredAuthentications=publickey",
+			"-o", "ConnectTimeout=30",
+		)
+	} else if opts.PreferredAuth != "" {
+		sshArgs = append(sshArgs, "-o", fmt.Sprintf("PreferredAuthentications=%s", opts.PreferredAuth))
+	}
+
+	sshTarget := opts.Host
+	if opts.User != "" {
+		sshTarget = fmt.Sprintf("%s@%s", opts.User, opts.Host)
+	}
+	sshArgs = append(sshArgs, "-p", opts.Port, sshTarget)
+
+	if opts.PortForwarding != "" {
+		sshArgs = append(sshArgs, "-L", opts.PortForwarding)
+	}
+
+	if len(opts.Command) > 0 {
+		sshArgs = append(sshArgs, "--")
+		sshArgs = append(sshArgs, opts.Command...)
+	}
+	return sshArgs
+}
+
+// IsAuthFailure returns true if ssh failed to authenticate. ssh uses the exit
+// code 255 for its own errors, and prints "Permission denied (<methods>)" when
+// all authentication methods failed
+func IsAuthFailure(exitCode int, stderr string) bool {
+	return exitCode == 255 && strings.Contains(stderr, "Permission denied (")
+}
+
+// tailWriter keeps the last bytes written to it
+type tailWriter struct {
+	max int
+	buf []byte
+}
+
+func (w *tailWriter) Write(p []byte) (int, error) {
+	w.buf = append(w.buf, p...)
+	if len(w.buf) > w.max {
+		w.buf = w.buf[len(w.buf)-w.max:]
+	}
+	return len(p), nil
+}
+
+func (w *tailWriter) String() string {
+	return string(w.buf)
 }
