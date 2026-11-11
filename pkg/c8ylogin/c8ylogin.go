@@ -24,6 +24,7 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/pkg/oauth/api"
 	"github.com/reubenmiller/go-c8y/pkg/oauth/device"
+	"golang.org/x/term"
 )
 
 // LoginState current state of the login flow
@@ -206,7 +207,7 @@ func (lh *LoginHandler) Run() error {
 			}
 		} else if c == LoginStateTFASetup {
 			if err := lh.setupTFA(); err != nil {
-				return fmt.Errorf("TFA Setup failed")
+				return fmt.Errorf("TFA Setup failed. %w", err)
 			}
 			lh.state <- LoginStateTFAConfirm
 		} else if c == LoginStateAbort {
@@ -500,6 +501,11 @@ func (lh *LoginHandler) login() {
 
 				if lh.TFACodeRequired && option.TFAStrategy == "TOTP" {
 					os.Stderr.WriteString(fmt.Sprintf("Session details:\nHost=%s, username=%s\n", lh.C8Yclient.BaseURL.Host, lh.C8Yclient.Username))
+					if lh.TFACode == "" && !term.IsTerminal(int(os.Stdin.Fd())) {
+						lh.state <- LoginStateAbort
+						lh.Err = errors.New(config.TOTPCodeRequiredMessage)
+						return lh.Err
+					}
 					if lh.TFACode == "" {
 						prompt := promptui.Prompt{
 							Stdin:       os.Stdin,
@@ -710,6 +716,10 @@ func (lh LoginHandler) writeMessageF(format string, a interface{}) {
 }
 
 func (lh *LoginHandler) setupTFA() error {
+	if !term.IsTerminal(int(os.Stdin.Fd())) {
+		// the secret is shown as a QR code in the terminal
+		return errors.New(config.TOTPSetupRequiredMessage)
+	}
 
 	// Request TFA secret
 	authFunc := c8y.WithTenantUsernamePassword(

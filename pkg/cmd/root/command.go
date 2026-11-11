@@ -109,6 +109,11 @@ func NewCommand(buildVersion, buildBranch string) (*CmdRoot, error) {
 	// init logger
 	logHandler = logger.NewLogger(module, GetInitLoggerOptions(os.Args))
 
+	// Credentials passed by the MCP server via an inherited file descriptor
+	if err := configHandler.ReadCredentialsFromFD(); err != nil {
+		logHandler.Warnf("%s", err)
+	}
+
 	// Note: Loading of the session should be deferred until the commands are loaded
 	if _, err := configHandler.ReadConfigFiles(nil, ShouldIgnoreSessionFile(os.Args)); err != nil {
 		logHandler.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)

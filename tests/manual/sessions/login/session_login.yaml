@@ -14,6 +14,25 @@ tests:
         username: r/^.+$
         token: r/^.+$
 
+  It decrypts an encrypted session file:
+    command: |
+      tmpdir=$(mktemp -d)
+      export C8Y_PASSPHRASE="test-passphrase"
+      password=$(c8y sessions encryptText --text "$C8Y_PASSWORD" --passphrase "$C8Y_PASSPHRASE" -n)
+      printf '{"host":"%s","username":"%s","password":"%s"}' "$C8Y_HOST" "$C8Y_USERNAME" "$password" > "$tmpdir/session.json"
+      env -i PATH="$PATH" C8Y_PASSPHRASE="$C8Y_PASSPHRASE" \
+        c8y sessions login --from-file "$tmpdir/session.json" --output-format json --no-banner
+      code=$?
+      rm -rf "$tmpdir"
+      exit $code
+    exit-code: 0
+    stdout:
+      json:
+        host: r/^.+$
+        tenant: r/^.+$
+        username: r/^.+$
+        token: r/^.+$
+
   It reads a session from environment variables:
     command: |
       env -i PATH="$PATH" C8Y_HOST="$C8Y_HOST" C8Y_USERNAME="$C8Y_USERNAME" C8Y_PASSWORD="$C8Y_PASSWORD" \

@@ -50,6 +50,7 @@ package c8ylogin
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -64,6 +65,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
+	"golang.org/x/term"
 
 	// pkg/c8y – the existing c8y.Client type used throughout the CLI.
 	// Uses the old module so *c8y.Client remains type-compatible with call sites.
@@ -195,6 +197,11 @@ type LoginHandlerV2 struct {
 	// instead of prompting the user interactively. Do NOT set this for
 	// interactive sessions – it negates the second-factor security benefit.
 	TOTPSecret string
+
+	// TOTPCode optional two-factor code entered by the user elsewhere (e.g. in the
+	// browser by the MCP server). It is used once instead of a prompt
+	TOTPCode     string
+	totpCodeUsed bool
 
 	onSave func()
 }
@@ -433,6 +440,18 @@ func (h *LoginHandlerV2) deviceFlowOptions() *apiv2.DeviceFlowOptions {
 // promptTOTPCode is called by the SDK whenever a TOTP code is needed (either
 // for first-time enrollment verification or for a regular login challenge).
 func (h *LoginHandlerV2) promptTOTPCode(_ context.Context, challenge totp.TOTPChallenge) (string, error) {
+	if !term.IsTerminal(int(os.Stdin.Fd())) {
+		if challenge.IsSetup {
+			return "", errors.New(config.TOTPSetupRequiredMessage)
+		}
+		// a code given by the MCP server is only used once, so a rejected code
+		// isn't sent again
+		if h.TOTPCode != "" && !h.totpCodeUsed {
+			h.totpCodeUsed = true
+			return h.TOTPCode, nil
+		}
+		return "", errors.New(config.TOTPCodeRequiredMessage)
+	}
 	label := "Enter Two-Factor code"
 	if challenge.IsSetup {
 		label = "Verify TOTP setup – enter the code shown in your authenticator app"

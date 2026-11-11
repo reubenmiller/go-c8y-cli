@@ -54,8 +54,9 @@ func matchSession(session c8ysession.CumulocitySession, input string) bool {
 	return match || input == ""
 }
 
-// SelectSession select a Cumulocity session interactively
-func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logger, filter string) (sessionFile string, err error) {
+// ListSessions returns the sessions in the session home directory. Files which
+// don't contain a host, username or tenant are skipped
+func ListSessions(cfg *config.Config, log *logger.Logger) ([]c8ysession.CumulocitySession, error) {
 	sessions := &c8ysession.CumulocitySessions{}
 	sessions.Sessions = make([]c8ysession.CumulocitySession, 0)
 
@@ -66,7 +67,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	srcdir := cfg.GetSessionHomeDir()
 	log.Infof("using c8y session folder: %s", srcdir)
 
-	err = filepath.WalkDir(srcdir, func(path string, info fs.DirEntry, err error) error {
+	err := filepath.WalkDir(srcdir, func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
 			log.Printf("Prevent panic by handling failure accessing a path %q: %v", path, err)
 			return err
@@ -125,12 +126,30 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	})
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Add index numbers
 	for i := range sessions.Sessions {
 		sessions.Sessions[i].Index = i + 1
+	}
+
+	out := make([]c8ysession.CumulocitySession, 0, len(sessions.Sessions))
+	for _, session := range sessions.Sessions {
+		if session.Host == "" && session.Username == "" && session.Tenant == "" {
+			continue
+		}
+		session.Index = len(out) + 1
+		out = append(out, session)
+	}
+	return out, nil
+}
+
+// SelectSession select a Cumulocity session interactively
+func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logger, filter string) (sessionFile string, err error) {
+	sessionList, err := ListSessions(cfg, log)
+	if err != nil {
+		return "", err
 	}
 
 	funcMap := promptui.FuncMap
@@ -174,10 +193,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 
 	filteredSessions := make([]c8ysession.CumulocitySession, 0)
 	sessionIndex := 1
-	for _, session := range sessions.Sessions {
-		if session.Host == "" && session.Username == "" && session.Tenant == "" {
-			continue
-		}
+	for _, session := range sessionList {
 		if matchSession(session, filter) {
 			session.Index = sessionIndex
 			filteredSessions = append(filteredSessions, session)
