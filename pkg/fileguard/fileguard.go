@@ -1,5 +1,5 @@
 // Package fileguard prevents commands from reading local files in denied
-// locations, e.g. the session files when c8y is run by the MCP server on
+// locations, e.g. the session files when c8y is run by another tool on
 // behalf of an AI agent. The denied paths are set by the parent process with
 // the C8Y_DENIED_PATHS environment variable (separated by os.PathListSeparator),
 // so they can't be changed by the command's arguments.

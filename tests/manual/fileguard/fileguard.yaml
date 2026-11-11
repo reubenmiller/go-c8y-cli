@@ -1,5 +1,5 @@
 # Files in the locations listed in C8Y_DENIED_PATHS can't be read by commands.
-# The MCP server sets it for each command it runs, so an agent can't read session
+# A tool which runs c8y for an AI agent can set it, so the agent can't read session
 # secrets, e.g. via --template, --data or a jsonnet import.
 tests:
   It denies a jsonnet import of a denied file:
