@@ -733,6 +733,7 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 			log.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
 		}
 	}
+	cfg.ApplyDeniedPaths()
 
 	if cfg.DisableProgress() {
 		log.Debugf("Disabling progress bars")

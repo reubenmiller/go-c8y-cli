@@ -1,0 +1,7 @@
+{
+  "settings": {
+    "files": {
+      "deniedPaths": ["testdata/fileguard/sessions"]
+    }
+  }
+}
