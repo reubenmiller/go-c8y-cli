@@ -386,6 +386,10 @@ const (
 	// SettingsRemoteAccessDefaultSSHUser the default ssh user
 	SettingsRemoteAccessDefaultSSHUser = "settings.remoteaccess.sshuser"
 
+	// SettingsRemoteAccessSSHFallbackUser the ssh user to try if no user is given and the
+	// login with the local user name fails
+	SettingsRemoteAccessSSHFallbackUser = "settings.remoteaccess.sshFallbackUser"
+
 	// Extensions
 	SettingsExtensionDataDir         = "settings.extensions.datadir"
 	SettingsExtensionDefaultHost     = "settings.extensions.defaultHost"
@@ -630,6 +634,9 @@ func (c *Config) bindSettings() {
 		// Extensions
 		WithBindEnv(SettingsExtensionDataDir, ""),
 		WithBindEnv(SettingsExtensionDefaultHost, "github.com"),
+
+		// Remote access
+		WithBindEnv(SettingsRemoteAccessSSHFallbackUser, ""),
 	)
 
 	if err != nil {
@@ -1891,6 +1898,12 @@ func (c *Config) ExtensionDefaultUsername() string {
 
 func (c *Config) GetRemoteAccessDefaultSSHUser() string {
 	return c.viper.GetString(SettingsRemoteAccessDefaultSSHUser)
+}
+
+// GetRemoteAccessSSHFallbackUser ssh user to try if no user is given and the login with
+// the local user name fails. An empty value disables the fallback
+func (c *Config) GetRemoteAccessSSHFallbackUser() string {
+	return c.viper.GetString(SettingsRemoteAccessSSHFallbackUser)
 }
 
 // GetJSONSelect get json properties to be selected from the output. Only the given properties will be returned

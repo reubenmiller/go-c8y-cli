@@ -17,8 +17,11 @@ using:
 
 	c8y settings update remoteaccess.sshuser root
 
-If no user is given (via --user or the setting), ssh uses your local user name. If the
-authentication fails, the connection is tried once more with the "root" user.
+If no user is given (via --user or the setting), ssh uses your local user name. Use
+--fallback-user (or the remoteaccess.sshFallbackUser setting) to try another user, e.g. root,
+if the authentication with the local user name fails:
+
+	c8y settings update remoteaccess.sshFallbackUser root
 
 Use --batch when running ssh from a script or an AI agent. ssh then never prompts for a
 password or passphrase, only key-based authentication is used, and the connection fails
@@ -60,6 +63,9 @@ use a non-interactive session to execute a custom shell command (notice the surr
 $ c8y remoteaccess connect ssh --device 12345 --batch -- systemctl status
 Execute a single command using key-based authentication only, failing instead of prompting for a password
 
+$ c8y remoteaccess connect ssh --device 12345 --fallback-user root -- systemctl status
+Execute a single command with the local user name, or as root if the authentication fails
+
 ```
 
 ### Options
@@ -68,6 +74,7 @@ Execute a single command using key-based authentication only, failing instead of
       --batch                   Never prompt for a password or passphrase. Only key-based authentication is used, and the connection fails instead of waiting for input
       --configuration string    Remote Access Configuration
       --device strings          Device
+      --fallback-user string    ssh user to try if no user is given and the authentication with the local user name fails, e.g. root. Defaults to the remoteaccess.sshFallbackUser setting
   -h, --help                    help for ssh
       --listen string           Listener address. unix:///run/example.sock (default "127.0.0.1:0")
   -L, --port-forward string     SSH Port-Forwarding option in the format [bind_address:]port:host:hostport. It also accepts a custom short form, <local>[:<remote>]. The value is passed to the ssh -L option, so read the ssh man page for more info

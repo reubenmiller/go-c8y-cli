@@ -397,6 +397,14 @@ c8y settings update mode.confirmation "PUT DELETE"
 </CodeExample>
 
 
+### remoteaccess.sshFallbackUser: string
+
+ssh user which `c8y remoteaccess connect ssh` tries if no user is given (via `--user` or the `remoteaccess.sshuser` setting) and the authentication with your local user name fails. It is empty by default, so no other user is tried.
+
+```bash
+c8y settings update remoteaccess.sshFallbackUser root
+```
+
 ### session.mode: string
 
 Enable `POST` commands. If set to `false` then all `POST` related commands will return an error.

@@ -453,6 +453,9 @@ var updateSettingsOptions = map[string]argumentHandler{
 	"remoteaccess.sshuser": {"remoteaccess.sshuser", "string", config.SettingsRemoteAccessDefaultSSHUser, []string{
 		"root",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
+	"remoteaccess.sshFallbackUser": {"remoteaccess.sshFallbackUser", "string", config.SettingsRemoteAccessSSHFallbackUser, []string{
+		"root",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
 }
 
 // NewCmdUpdate returns a new command used to update session settings
