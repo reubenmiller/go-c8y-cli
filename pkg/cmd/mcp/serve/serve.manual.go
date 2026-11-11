@@ -343,6 +343,17 @@ func deniedPaths(cfg *config.Config, policy mcpserver.Policy, sessionFile string
 	return append(paths, policy.DenyPaths...)
 }
 
+// sshFallbackUser returns the ssh user which device shell commands try if the login
+// with the local user name fails: the user's remoteaccess.sshFallbackUser setting,
+// or root, as the agent can't ask which user to use. Set remoteaccess.sshuser to
+// always use a specific user
+func sshFallbackUser(cfg *config.Config) string {
+	if user := cfg.GetRemoteAccessSSHFallbackUser(); user != "" {
+		return user
+	}
+	return "root"
+}
+
 func isFile(p string) bool {
 	info, err := os.Stat(p)
 	return err == nil && !info.IsDir()

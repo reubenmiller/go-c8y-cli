@@ -133,7 +133,7 @@ For `remoteaccess connect ssh`, the MCP server only allows running a single comm
 * The command to run on the device must be given after `--`. Interactive sessions are rejected.
 * `--listen` and `-L`/`--port-forward` are rejected, as they open local network listeners.
 * The command is always treated as a write command, also with `--dry`, as it has no dry run mode. For the same reason, the approval prompt doesn't show a dry run of the requests, but notes that the command runs on the device.
-* The command runs in ssh batch mode (`--batch`): only your ssh keys are used, and ssh fails instead of waiting for a password or a key passphrase. Without `--user` or the `remoteaccess.sshuser` setting, your local user name is tried first, then `root`.
+* The command runs in ssh batch mode (`--batch`): only your ssh keys are used, and ssh fails instead of waiting for a password or a key passphrase. Without `--user` or the `remoteaccess.sshuser` setting, your local user name is tried first, then `root` (`--fallback-user`). Set `remoteaccess.sshFallbackUser` to try another user instead, or `remoteaccess.sshuser` to always use one user.
 * The ssh connection only exists while the command runs. When the timeout is reached, the command and its ssh process are stopped.
 
 `remoteaccess connect run` stays denied, as it runs a command on your machine, and `remoteaccess server` as it opens a local listener.

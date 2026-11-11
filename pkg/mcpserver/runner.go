@@ -62,6 +62,10 @@ type Runner struct {
 	// the session files, so their secrets can't be read with --template or --data
 	DeniedPaths []string
 
+	// SSHFallbackUser ssh user which device shell commands try if no user is given
+	// and the login with the local user name fails (empty to disable)
+	SSHFallbackUser string
+
 	// Mode the maximum mode used for write commands
 	Mode config.SessionMode
 
@@ -258,6 +262,9 @@ func (r *Runner) Run(ctx context.Context, plan *Plan, stdin string, tag string, 
 		if seg.DeviceShell {
 			// ssh must never wait for a password or passphrase, as no one can enter it
 			injected = append(injected, "--batch")
+			if r.SSHFallbackUser != "" {
+				injected = append(injected, "--fallback-user", r.SSHFallbackUser)
+			}
 		}
 		cmd := exec.CommandContext(ctx, r.Executable, injectFlags(seg.Args, injected...)...)
 		cmd.Env = env

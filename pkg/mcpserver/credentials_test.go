@@ -52,20 +52,20 @@ func TestRunnerAddsBatchModeToDeviceShellCommands(t *testing.T) {
 	if err := os.WriteFile(script, []byte("#!/bin/sh\necho \"$@\"\n"), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	r := &Runner{Executable: script, BaseEnv: []string{"PATH=/usr/bin:/bin"}}
+	r := &Runner{Executable: script, BaseEnv: []string{"PATH=/usr/bin:/bin"}, SSHFallbackUser: "root"}
 	plan := &Plan{Segments: []Segment{{Args: []string{"remoteaccess", "connect", "ssh", "--device", "1", "--batch=false", "--", "uptime"}, DeviceShell: true}}}
 	result, err := r.Run(context.Background(), plan, "", "mcp:test", 10_000)
 	if err != nil {
 		t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
 	}
 	// the injected flag comes after the agent's flags (so it wins), and before "--"
-	if got := strings.TrimSpace(result.Stdout); !strings.HasSuffix(got, "--batch=false --logMessage mcp:test --force --batch -- uptime") {
+	if got := strings.TrimSpace(result.Stdout); !strings.HasSuffix(got, "--batch=false --logMessage mcp:test --force --batch --fallback-user root -- uptime") {
 		t.Errorf("expected --batch before the argument terminator, got %q", got)
 	}
 
 	plan = &Plan{Segments: []Segment{{Args: []string{"devices", "list"}, Read: true}}}
 	result, _ = r.Run(context.Background(), plan, "", "mcp:test", 10_000)
-	if strings.Contains(result.Stdout, "--batch") {
+	if strings.Contains(result.Stdout, "--batch") || strings.Contains(result.Stdout, "--fallback-user") {
 		t.Errorf("expected no --batch for other commands, got %q", result.Stdout)
 	}
 }

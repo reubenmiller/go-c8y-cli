@@ -96,9 +96,10 @@ c8y remoteaccess connect ssh --device 12345 --user root -- "sh -c 'journalctl -u
 ```
 
 - Put the command after `--`. Quote commands which use shell syntax (pipes, `&&`, redirects).
-- Without `--user`, the default ssh user is tried first, then `root`. Use `--batch` outside the MCP
-  server so ssh fails instead of waiting for a password (the MCP server always adds it). If the
-  authentication fails, ask the user for the ssh user or to load their key, instead of guessing users.
+- Without `--user`, the default ssh user is used. The MCP server also tries `root` if that fails;
+  outside of it, add `--fallback-user root` to do the same. Use `--batch` outside the MCP server so
+  ssh fails instead of waiting for a password (the MCP server always adds it). If the authentication
+  fails, ask the user for the ssh user or to load their key, instead of guessing users.
 - Only single commands are supported, not interactive sessions. Avoid commands which never finish, such
   as `journalctl -f` or `tail -f`; limit the output instead (`-n 50`).
 
