@@ -84,7 +84,7 @@ func TestDeviceShellPolicy(t *testing.T) {
 			}
 		}
 		content, _ := os.ReadFile(marker)
-		if !strings.Contains(string(content), "--force -- uptime") {
+		if !strings.Contains(string(content), "--force --batch -- uptime") {
 			t.Errorf("injected flags should be before --: %s", content)
 		}
 	})

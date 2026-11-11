@@ -112,6 +112,7 @@ func (s *Server) Instructions() string {
 		- To troubleshoot a device, you can run a shell command on it with %s, if the user enabled it (see deviceShell in %s). Both ways need a mode which allows creating data:
 		  - via ssh, if Cumulocity remote access is configured for the device: remoteaccess connect ssh --device <id> -- <command>
 		    Quote commands which use shell syntax, e.g. -- "sh -c 'ps | grep agent'". Interactive sessions are not supported.
+		    Only ssh keys are used (no passwords). Without --user, the user's default ssh user is tried first, then root.
 		  - via a c8y_Command operation, if the device supports it: operations create --device <id> --description "<why>" --data 'c8y_Command.text=<command>' | operations wait --status SUCCESSFUL --status FAILED --duration 2m
 		    The output is in c8y_Command.result.
 	`, ToolRead, ToolWrite, ToolSession, ToolWrite, ToolWrite, ToolSession)

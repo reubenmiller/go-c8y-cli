@@ -45,3 +45,27 @@ func TestRunnerPassesCredentialsViaPipe(t *testing.T) {
 		t.Errorf("expected the credentials on the fd: %s", fd)
 	}
 }
+
+func TestRunnerAddsBatchModeToDeviceShellCommands(t *testing.T) {
+	// A fake c8y which prints its arguments
+	script := filepath.Join(t.TempDir(), "c8y")
+	if err := os.WriteFile(script, []byte("#!/bin/sh\necho \"$@\"\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	r := &Runner{Executable: script, BaseEnv: []string{"PATH=/usr/bin:/bin"}}
+	plan := &Plan{Segments: []Segment{{Args: []string{"remoteaccess", "connect", "ssh", "--device", "1", "--batch=false", "--", "uptime"}, DeviceShell: true}}}
+	result, err := r.Run(context.Background(), plan, "", "mcp:test", 10_000)
+	if err != nil {
+		t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+	}
+	// the injected flag comes after the agent's flags (so it wins), and before "--"
+	if got := strings.TrimSpace(result.Stdout); !strings.HasSuffix(got, "--batch=false --logMessage mcp:test --force --batch -- uptime") {
+		t.Errorf("expected --batch before the argument terminator, got %q", got)
+	}
+
+	plan = &Plan{Segments: []Segment{{Args: []string{"devices", "list"}, Read: true}}}
+	result, _ = r.Run(context.Background(), plan, "", "mcp:test", 10_000)
+	if strings.Contains(result.Stdout, "--batch") {
+		t.Errorf("expected no --batch for other commands, got %q", result.Stdout)
+	}
+}

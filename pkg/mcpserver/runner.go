@@ -255,6 +255,10 @@ func (r *Runner) Run(ctx context.Context, plan *Plan, stdin string, tag string, 
 			injected = append(injected, "--force")
 			env = writeEnv
 		}
+		if seg.DeviceShell {
+			// ssh must never wait for a password or passphrase, as no one can enter it
+			injected = append(injected, "--batch")
+		}
 		cmd := exec.CommandContext(ctx, r.Executable, injectFlags(seg.Args, injected...)...)
 		cmd.Env = env
 		if err := passCredentials(cmd, credentials); err != nil {

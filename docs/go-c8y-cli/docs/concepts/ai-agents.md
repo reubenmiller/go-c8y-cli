@@ -133,6 +133,7 @@ For `remoteaccess connect ssh`, the MCP server only allows running a single comm
 * The command to run on the device must be given after `--`. Interactive sessions are rejected.
 * `--listen` and `-L`/`--port-forward` are rejected, as they open local network listeners.
 * The command is always treated as a write command, also with `--dry`, as it has no dry run mode. For the same reason, the approval prompt doesn't show a dry run of the requests, but notes that the command runs on the device.
+* The command runs in ssh batch mode (`--batch`): only your ssh keys are used, and ssh fails instead of waiting for a password or a key passphrase. Without `--user` or the `remoteaccess.sshuser` setting, your local user name is tried first, then `root`.
 * The ssh connection only exists while the command runs. When the timeout is reached, the command and its ssh process are stopped.
 
 `remoteaccess connect run` stays denied, as it runs a command on your machine, and `remoteaccess server` as it opens a local listener.
@@ -192,7 +193,7 @@ claude mcp add --scope user c8y -- c8y mcp serve --policy /path/to/c8y-mcp-polic
 * Use encrypted sessions. A session file outside the session home folder is only protected while it is the active session.
 * Commands are run without a shell. Only c8y commands joined with ` | ` are supported.
 * The session picker opens in a browser on the machine which runs the server. On a remote machine (e.g. over ssh), use `--session` with a session which can log in without user input, or environment variables.
-* `remoteaccess connect ssh` can't ask for a password or a key passphrase, as the command doesn't run in a terminal. Use an ssh key which is loaded in your ssh agent.
+* `remoteaccess connect ssh` can't ask for a password or a key passphrase, as it runs in batch mode. Use an ssh key without a passphrase, or one which is loaded in your ssh agent.
 
 ## Agent skill
 
