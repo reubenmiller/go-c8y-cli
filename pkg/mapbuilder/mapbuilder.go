@@ -19,6 +19,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/google/go-jsonnet"
 	"github.com/google/go-jsonnet/ast"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
@@ -549,9 +550,27 @@ var localFunctions = heredoc.Doc(`
 		Select(o, properties=['*']):: std.native('Select')(o, properties),
 	}`)
 
+// guardedImporter rejects jsonnet imports (import, importstr, importbin) of files in
+// denied locations, e.g. session files when c8y is run by the MCP server
+type guardedImporter struct {
+	inner jsonnet.Importer
+}
+
+func (i *guardedImporter) Import(importedFrom, importedPath string) (jsonnet.Contents, string, error) {
+	contents, foundAt, err := i.inner.Import(importedFrom, importedPath)
+	if err != nil {
+		return contents, foundAt, err
+	}
+	if err := fileguard.Check(foundAt); err != nil {
+		return jsonnet.Contents{}, "", err
+	}
+	return contents, foundAt, nil
+}
+
 func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	// Create a JSonnet VM
 	vm := jsonnet.MakeVM()
+	vm.Importer(&guardedImporter{inner: &jsonnet.FileImporter{}})
 	registerNativeFunctions(vm)
 
 	jsonnetImport := fmt.Sprintf("\nlocal _ = %s; %s", localFunctions, imports)
@@ -970,7 +989,7 @@ func (b *MapBuilder) GetMap() map[string]interface{} {
 
 // GetFileContents returns the map contents as a file (only if a file is already set)
 func (b *MapBuilder) GetFileContents() *os.File {
-	file, err := os.Open(b.file)
+	file, err := fileguard.Open(b.file)
 	if err != nil {
 		Logger.Errorf("failed to open file. %s", err)
 		return nil
@@ -995,13 +1014,13 @@ func (b *MapBuilder) GetRaw() string {
 
 // GetFile get the file reference
 func (b *MapBuilder) GetFile() (*os.File, error) {
-	return os.Open(b.file)
+	return fileguard.Open(b.file)
 }
 
 // GetBody returns the body as an interface
 func (b *MapBuilder) GetBody() (interface{}, error) {
 	if b.HasFile() {
-		return os.Open(b.file)
+		return fileguard.Open(b.file)
 	}
 	if b.HasRaw() {
 		return b.raw, nil

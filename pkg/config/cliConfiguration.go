@@ -18,6 +18,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydefaults"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
@@ -200,6 +201,9 @@ const (
 
 	// SettingsTemplatePath template folder where the template files are located
 	SettingsTemplatePath = "settings.template.path"
+
+	// SettingsFilesDeniedPaths local files and folders which commands are not allowed to read
+	SettingsFilesDeniedPaths = "settings.files.deniedPaths"
 
 	// SettingsTemplateCustomPaths custom template folder where the template files are located
 	SettingsTemplateCustomPaths = "settings.template.customPath"
@@ -561,6 +565,7 @@ func (c *Config) bindSettings() {
 
 		WithBindEnv(SettingsIncludeAllDelayMS, 50),
 		WithBindEnv(SettingsTemplatePath, ""),
+		WithBindEnv(SettingsFilesDeniedPaths, ""),
 		WithBindEnv(SettingsMode, SessionModeProduction.String()),
 
 		WithBindEnv(SettingsModeCI, false),
@@ -1643,7 +1648,11 @@ func (c *Config) GetOutputFile() string {
 // GetOutputTemplate returns the output template to use when processing the output
 func (c *Config) GetOutputTemplate() string {
 	if c.outputTemplate == nil {
-		contents := flags.ResolveTemplate(c.viper.GetString(SettingsOutputTemplate), c.templateResolver)
+		contents, err := flags.ResolveTemplate(c.viper.GetString(SettingsOutputTemplate), c.templateResolver)
+		if err != nil {
+			c.Logger.Errorf("output template: %s", err)
+			contents = ""
+		}
 		c.outputTemplate = &contents
 	}
 	return *c.outputTemplate
@@ -1701,6 +1710,30 @@ func (c *Config) EncryptionEnabled() bool {
 // Enable/Disable encryption
 func (c *Config) SetEncryptionEnabled(v bool) {
 	c.viper.Set(SettingsEncryptionEnabled, v)
+}
+
+// GetDeniedPaths local files and folders which commands are not allowed to read.
+// The value is a list of paths, or a string with the paths separated by the
+// os.PathListSeparator (":", or ";" on Windows)
+func (c *Config) GetDeniedPaths() []string {
+	rawPaths := []string{}
+	if v := c.viper.GetString(SettingsFilesDeniedPaths); v != "" {
+		rawPaths = filepath.SplitList(v)
+	} else {
+		rawPaths = c.viper.GetStringSlice(SettingsFilesDeniedPaths)
+	}
+	paths := []string{}
+	for _, p := range rawPaths {
+		if p = strings.TrimSpace(p); p != "" {
+			paths = append(paths, c.ExpandHomePath(p))
+		}
+	}
+	return paths
+}
+
+// ApplyDeniedPaths stops commands from reading files in the denied paths
+func (c *Config) ApplyDeniedPaths() {
+	fileguard.SetDeniedPaths(c.GetDeniedPaths()...)
 }
 
 // GetActivityLogPath path where the activity log will be stored

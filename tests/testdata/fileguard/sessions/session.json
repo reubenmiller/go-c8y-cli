@@ -1,0 +1,5 @@
+{
+  "host": "https://example.cumulocity.com",
+  "username": "fileguard-user",
+  "password": "fileguard-secret-value"
+}

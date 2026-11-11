@@ -370,6 +370,21 @@ Enable session encryption where your session password and/or token will be store
 
 You may need to run `set-session` on your session again to apply the session encryption.
 
+### files.deniedPaths: []string
+
+Local files and folders which commands are not allowed to read. A command fails with `access to the file is denied` if it is given a file in one of these locations, e.g. via `--data`, `--template`, `--templateVars`, `--file`, piped input from a file, or a jsonnet `import`. Files which c8y reads itself, such as the session and settings files, are not affected.
+
+It is meant for tools which run c8y commands on behalf of someone else, such as an AI agent, so that the commands can't read the session files and send their secrets elsewhere.
+
+The value can be a list of paths, or a string with the paths separated by `:` (or `;` on Windows).
+
+```bash
+c8y settings update files.deniedPaths "$HOME/.cumulocity"
+
+# or
+export C8Y_SETTINGS_FILES_DENIEDPATHS="$HOME/.cumulocity:$HOME/.ssh"
+```
+
 ### includeall.delayms: int
 
 Delay in milliseconds used internally by go-c8y-cli when iterating through the pages when using the `includeAll` parameter.

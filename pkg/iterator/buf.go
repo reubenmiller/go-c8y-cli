@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"sync"
+
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 )
 
 // BufioIterator is a wrapper around a bufio.Reader which conforms to the Iterator interface
@@ -76,7 +78,7 @@ func (i *FileContentsIterator) IsBound() bool {
 
 // NewFileContentsIterator returns a file contents iterator
 func NewFileContentsIterator(path string, format ...string) (Iterator, error) {
-	fp, err := os.Open(path)
+	fp, err := fileguard.Open(path)
 	if err != nil {
 		return nil, err
 	}

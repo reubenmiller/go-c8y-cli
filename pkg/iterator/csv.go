@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 )
 
 // CSVFileContentsIterator to iterator over the contents of a csv file
@@ -116,7 +118,7 @@ func (i *CSVFileContentsIterator) IsBound() bool {
 
 // NewCSVFileContentsIterator returns a file contents iterator
 func NewCSVFileContentsIterator(path string, delimiter string, hasHeaders bool, headers []string) (Iterator, error) {
-	fp, err := os.Open(path)
+	fp, err := fileguard.Open(path)
 	if err != nil {
 		return nil, err
 	}
