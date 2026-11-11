@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/spf13/cobra"
 )
 
@@ -267,13 +266,13 @@ func TestRunnerEnvDeniedPaths(t *testing.T) {
 	r := &Runner{
 		SessionFile: "/tmp/session.json",
 		DeniedPaths: []string{"/home/user/.cumulocity", "/home/user/.ssh"},
-		BaseEnv:     []string{"PATH=/usr/bin", fileguard.EnvDeniedPaths + "=/nothing"},
+		BaseEnv:     []string{"PATH=/usr/bin", EnvDeniedPaths + "=/nothing"},
 	}
 	env := r.Env(config.SessionModeProduction, nil)
-	want := fileguard.EnvDeniedPaths + "=/home/user/.cumulocity" + string(os.PathListSeparator) + "/home/user/.ssh"
+	want := EnvDeniedPaths + "=/home/user/.cumulocity" + string(os.PathListSeparator) + "/home/user/.ssh"
 	found := 0
 	for _, item := range env {
-		if strings.HasPrefix(item, fileguard.EnvDeniedPaths+"=") {
+		if strings.HasPrefix(item, EnvDeniedPaths+"=") {
 			found++
 			if item != want {
 				t.Errorf("got %q, want %q", item, want)
@@ -281,7 +280,7 @@ func TestRunnerEnvDeniedPaths(t *testing.T) {
 		}
 	}
 	if found != 1 {
-		t.Errorf("expected exactly one %s entry (the inherited one is replaced), got %d", fileguard.EnvDeniedPaths, found)
+		t.Errorf("expected exactly one %s entry (the inherited one is replaced), got %d", EnvDeniedPaths, found)
 	}
 }
 

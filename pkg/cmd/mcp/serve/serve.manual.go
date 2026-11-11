@@ -337,6 +337,9 @@ func deniedPaths(cfg *config.Config, policy mcpserver.Policy, sessionFile string
 	if sessionFile != "" && isFile(sessionFile) {
 		paths = append(paths, sessionFile)
 	}
+	// keep the paths the user denied in the settings, as the env variable
+	// set for the commands replaces the setting
+	paths = append(paths, cfg.GetDeniedPaths()...)
 	return append(paths, policy.DenyPaths...)
 }
 

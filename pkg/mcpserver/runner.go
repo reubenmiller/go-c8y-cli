@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 )
 
 // ciEnvVars environment variables which would activate the CI mode in c8y
@@ -32,6 +31,10 @@ var ciEnvVars = []string{
 	"CONTINUOUS_INTEGRATION",
 }
 
+// EnvDeniedPaths environment variable which sets the settings.files.deniedPaths
+// setting of the commands, so they can't read files in the denied paths
+const EnvDeniedPaths = "C8Y_SETTINGS_FILES_DENIEDPATHS"
+
 // controlledEnvPrefixes environment variables which control settings the MCP
 // server is responsible for
 var controlledEnvPrefixes = []string{
@@ -44,7 +47,7 @@ var controlledEnvPrefixes = []string{
 	"C8Y_SETTINGS_DEFAULTS_DRY",
 	"C8Y_SETTINGS_LOGGER_HIDESENSITIVE=",
 	"C8Y_SETTINGS_DEFAULTS_INSECURE=",
-	fileguard.EnvDeniedPaths + "=",
+	EnvDeniedPaths + "=",
 }
 
 // Runner executes c8y commands as child processes
@@ -185,7 +188,7 @@ func (r *Runner) Env(mode config.SessionMode, authEnv []string) []string {
 		"C8Y_SETTINGS_LOGGER_HIDESENSITIVE=true",
 	)
 	if len(r.DeniedPaths) > 0 {
-		env = append(env, fileguard.EnvDeniedPaths+"="+strings.Join(r.DeniedPaths, string(os.PathListSeparator)))
+		env = append(env, EnvDeniedPaths+"="+strings.Join(r.DeniedPaths, string(os.PathListSeparator)))
 	}
 	if authEnv != nil {
 		env = append(env, authEnv...)
