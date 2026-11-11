@@ -32,6 +32,7 @@ type CmdSSH struct {
 	portForwarding string
 	preferredAuth  string
 	batch          bool
+	fallbackUser   string
 
 	*subcommand.SubCommand
 
@@ -58,8 +59,11 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 
 				c8y settings update remoteaccess.sshuser root
 
-			If no user is given (via --user or the setting), ssh uses your local user name. If the
-			authentication fails, the connection is tried once more with the "root" user.
+			If no user is given (via --user or the setting), ssh uses your local user name. Use
+			--fallback-user (or the remoteaccess.sshFallbackUser setting) to try another user, e.g. root,
+			if the authentication with the local user name fails:
+
+				c8y settings update remoteaccess.sshFallbackUser root
 
 			Use --batch when running ssh from a script or an AI agent. ssh then never prompts for a
 			password or passphrase, only key-based authentication is used, and the connection fails
@@ -93,6 +97,9 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 
 			$ c8y remoteaccess connect ssh --device 12345 --batch -- systemctl status
 			Execute a single command using key-based authentication only, failing instead of prompting for a password
+
+			$ c8y remoteaccess connect ssh --device 12345 --fallback-user root -- systemctl status
+			Execute a single command with the local user name, or as root if the authentication fails
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -104,6 +111,7 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 	cmd.Flags().StringVar(&ccmd.configuration, "configuration", "", "Remote Access Configuration")
 	cmd.Flags().StringVar(&ccmd.preferredAuth, "preferred-auth", "", "Set the preferred authentication for the ssh connection. This will add '-o PreferredAuthentications=<value>' to the ssh command")
 	cmd.Flags().BoolVar(&ccmd.batch, "batch", false, "Never prompt for a password or passphrase. Only key-based authentication is used, and the connection fails instead of waiting for input")
+	cmd.Flags().StringVar(&ccmd.fallbackUser, "fallback-user", "", "ssh user to try if no user is given and the authentication with the local user name fails, e.g. root. Defaults to the remoteaccess.sshFallbackUser setting")
 	cmd.Flags().StringVarP(&ccmd.portForwarding, "port-forward", "L", "", "SSH Port-Forwarding option in the format [bind_address:]port:host:hostport. It also accepts a custom short form, <local>[:<remote>]. The value is passed to the ssh -L option, so read the ssh man page for more info")
 
 	completion.WithOptions(
@@ -111,6 +119,7 @@ func NewCmdSSH(f *cmdutil.Factory) *CmdSSH {
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithRemoteAccessPassthroughConfiguration("configuration", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithValidateSet("preferred-auth", "password", "publickey"),
+		completion.WithValidateSet("fallback-user", "root"),
 	)
 
 	flags.WithOptions(
@@ -226,11 +235,11 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 			// Use default user (if set)
 			user = cfg.GetRemoteAccessDefaultSSHUser()
 		}
-		users := []string{user}
-		if user == "" {
-			// ssh uses the local user name, which often doesn't exist on the device
-			users = append(users, FallbackSSHUser)
+		fallbackUser := n.fallbackUser
+		if !cmd.Flags().Changed("fallback-user") {
+			fallbackUser = cfg.GetRemoteAccessSSHFallbackUser()
 		}
+		users := SSHUsers(user, fallbackUser)
 
 		portForwarding := n.GetPortForwarding()
 		var command []string
@@ -308,9 +317,16 @@ func ConnectWithFallback(users []string, connect func(user string) (int, string,
 	return exitCode, err
 }
 
-// FallbackSSHUser user which is tried if no user was given and the authentication
-// with the local user name failed
-const FallbackSSHUser = "root"
+// SSHUsers returns the users to try in order. The fallback user is only tried if no
+// user was given, as ssh then uses the local user name, which often doesn't exist on
+// the device
+func SSHUsers(user, fallbackUser string) []string {
+	users := []string{user}
+	if user == "" && fallbackUser != "" {
+		users = append(users, fallbackUser)
+	}
+	return users
+}
 
 // SSHOptions options to build the ssh command
 type SSHOptions struct {

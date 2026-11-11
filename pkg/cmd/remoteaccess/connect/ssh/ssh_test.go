@@ -61,7 +61,7 @@ func TestConnectWithFallback(t *testing.T) {
 	t.Run("retries with root after an authentication failure", func(t *testing.T) {
 		tried := []string{}
 		retried := ""
-		code, err := ConnectWithFallback([]string{"", FallbackSSHUser}, func(u string) (int, string, error) {
+		code, err := ConnectWithFallback([]string{"", "root"}, func(u string) (int, string, error) {
 			tried = append(tried, u)
 			if u == "" {
 				return 255, authFailed, errors.New("exit status 255")
@@ -74,7 +74,7 @@ func TestConnectWithFallback(t *testing.T) {
 	})
 	t.Run("doesn't retry other failures", func(t *testing.T) {
 		tried := 0
-		code, _ := ConnectWithFallback([]string{"", FallbackSSHUser}, func(u string) (int, string, error) {
+		code, _ := ConnectWithFallback([]string{"", "root"}, func(u string) (int, string, error) {
 			tried++
 			return 3, "", errors.New("exit status 3")
 		}, nil)
@@ -83,7 +83,7 @@ func TestConnectWithFallback(t *testing.T) {
 		}
 	})
 	t.Run("returns the last failure", func(t *testing.T) {
-		code, err := ConnectWithFallback([]string{"", FallbackSSHUser}, func(u string) (int, string, error) {
+		code, err := ConnectWithFallback([]string{"", "root"}, func(u string) (int, string, error) {
 			return 255, authFailed, errors.New("exit status 255")
 		}, nil)
 		if code != 255 || err == nil {
@@ -108,5 +108,22 @@ func TestTailWriter(t *testing.T) {
 	_, _ = w.Write([]byte("ab"))
 	if got := w.String(); got != "456789ab" || !strings.HasSuffix(got, "ab") {
 		t.Fatalf("got %q", got)
+	}
+}
+
+func TestSSHUsers(t *testing.T) {
+	cases := []struct {
+		user, fallback string
+		want           []string
+	}{
+		{"", "", []string{""}},
+		{"", "root", []string{"", "root"}},
+		{"admin", "root", []string{"admin"}},
+		{"admin", "", []string{"admin"}},
+	}
+	for _, tc := range cases {
+		if got := SSHUsers(tc.user, tc.fallback); !reflect.DeepEqual(got, tc.want) {
+			t.Errorf("SSHUsers(%q, %q) = %v, want %v", tc.user, tc.fallback, got, tc.want)
+		}
 	}
 }
