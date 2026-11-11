@@ -118,6 +118,7 @@ func NewCommand(buildVersion, buildBranch string) (*CmdRoot, error) {
 	if _, err := configHandler.ReadConfigFiles(nil, ShouldIgnoreSessionFile(os.Args)); err != nil {
 		logHandler.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
 	}
+	configHandler.ApplyDeniedPaths()
 
 	// cmd factory
 	configFunc := func() (*config.Config, error) {

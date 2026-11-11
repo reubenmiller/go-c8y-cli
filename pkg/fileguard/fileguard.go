@@ -1,8 +1,9 @@
 // Package fileguard prevents commands from reading local files in denied
 // locations, e.g. the session files when c8y is run by another tool on
-// behalf of an AI agent. The denied paths are set by the parent process with
-// the C8Y_DENIED_PATHS environment variable (separated by os.PathListSeparator),
-// so they can't be changed by the command's arguments.
+// behalf of an AI agent. The denied paths are set from the
+// settings.files.deniedPaths setting when the configuration is loaded, e.g. by
+// the parent process with the C8Y_SETTINGS_FILES_DENIEDPATHS environment
+// variable.
 //
 // Only reads of files which are referenced by the user (or agent) are guarded,
 // e.g. the --data, --template and --file flags and jsonnet imports. Files which
@@ -19,24 +20,17 @@ import (
 	"sync"
 )
 
-// EnvDeniedPaths environment variable which contains the denied paths
-const EnvDeniedPaths = "C8Y_DENIED_PATHS"
-
 // ErrDenied the file is in a denied location
 var ErrDenied = errors.New("access to the file is denied")
 
 var (
-	once   sync.Once
+	mu     sync.RWMutex
 	denied []string
 )
 
-func load() {
-	denied = parse(os.Getenv(EnvDeniedPaths))
-}
-
-func parse(value string) []string {
+func parse(paths ...string) []string {
 	out := []string{}
-	for _, p := range filepath.SplitList(value) {
+	for _, p := range paths {
 		if strings.TrimSpace(p) == "" {
 			continue
 		}
@@ -92,25 +86,36 @@ func within(p, dir string) bool {
 	return strings.HasPrefix(p, dir)
 }
 
-// SetDeniedPaths replaces the denied paths (instead of reading them from the
-// environment). It is used by tests
+// SetDeniedPaths replaces the denied files and folders. Relative paths are
+// resolved against the current working directory
 func SetDeniedPaths(paths ...string) {
-	once.Do(func() {})
-	denied = parse(strings.Join(paths, string(os.PathListSeparator)))
+	resolved := parse(paths...)
+	mu.Lock()
+	defer mu.Unlock()
+	denied = resolved
+}
+
+func deniedPaths() []string {
+	mu.RLock()
+	defer mu.RUnlock()
+	return denied
 }
 
 // Enabled returns true if any paths are denied
 func Enabled() bool {
-	once.Do(load)
-	return len(denied) > 0
+	return len(deniedPaths()) > 0
 }
 
 // Check returns an error if the file is in a denied location
 func Check(path string) error {
-	if !Enabled() || path == "" || path == "-" {
+	if path == "" || path == "-" {
 		return nil
 	}
-	return check(path, denied)
+	d := deniedPaths()
+	if len(d) == 0 {
+		return nil
+	}
+	return check(path, d)
 }
 
 func check(path string, deniedPaths []string) error {

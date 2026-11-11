@@ -94,6 +94,9 @@ var updateSettingsOptions = map[string]argumentHandler{
 	// "template.path":        {"template.path", "string", config.SettingsTemplatePath, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
 	"template.customPaths": {"template.customPaths", "string", config.SettingsTemplateCustomPaths, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
 
+	// files
+	"files.deniedPaths": {"files.deniedPaths", "string", config.SettingsFilesDeniedPaths, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
+
 	// sso
 	"sso.discoveryUrl": {"sso.discoveryUrl", "string", config.SettingsSSODiscoveryUrl, []string{}, nil, cobra.ShellCompDirectiveNoFileComp},
 	"sso.scopes":       {"sso.scopes", "string", config.SettingsSSOScopes, []string{}, nil, cobra.ShellCompDirectiveNoFileComp},

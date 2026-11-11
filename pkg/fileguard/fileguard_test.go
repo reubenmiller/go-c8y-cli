@@ -76,9 +76,26 @@ func TestCheckRelativePath(t *testing.T) {
 	}
 }
 
+func TestSetDeniedPaths(t *testing.T) {
+	root := t.TempDir()
+	t.Cleanup(func() { SetDeniedPaths() })
+	SetDeniedPaths(filepath.Join(root, "a"), filepath.Join(root, "b"))
+	for _, p := range []string{"a/x.json", "b/y.json"} {
+		if err := Check(filepath.Join(root, p)); !errors.Is(err, ErrDenied) {
+			t.Errorf("expected %s to be denied, got %v", p, err)
+		}
+	}
+	if err := Check(filepath.Join(root, "c.json")); err != nil {
+		t.Errorf("expected an allowed file, got %v", err)
+	}
+	SetDeniedPaths()
+	if Enabled() {
+		t.Error("expected no denied paths after clearing them")
+	}
+}
+
 func TestParseIgnoresEmptyEntries(t *testing.T) {
-	sep := string(os.PathListSeparator)
-	if got := parse(sep + sep); len(got) != 0 {
+	if got := parse("", " "); len(got) != 0 {
 		t.Fatalf("expected no denied paths, got %v", got)
 	}
 }
