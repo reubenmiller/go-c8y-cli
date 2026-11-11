@@ -17,6 +17,13 @@ using:
 
 	c8y settings update remoteaccess.sshuser root
 
+If no user is given (via --user or the setting), ssh uses your local user name. If the
+authentication fails, the connection is tried once more with the "root" user.
+
+Use --batch when running ssh from a script or an AI agent. ssh then never prompts for a
+password or passphrase, only key-based authentication is used, and the connection fails
+instead of waiting for input.
+
 
 
 ```
@@ -50,11 +57,15 @@ Use a non-interactive session to execute a single command and print the result
 $ c8y remoteaccess connect ssh --device 12345 --user admin -- "sh -c 'cat /etc/os-release'"
 use a non-interactive session to execute a custom shell command (notice the surrounding double quotes on the command!)
 
+$ c8y remoteaccess connect ssh --device 12345 --batch -- systemctl status
+Execute a single command using key-based authentication only, failing instead of prompting for a password
+
 ```
 
 ### Options
 
 ```
+      --batch                   Never prompt for a password or passphrase. Only key-based authentication is used, and the connection fails instead of waiting for input
       --configuration string    Remote Access Configuration
       --device strings          Device
   -h, --help                    help for ssh
