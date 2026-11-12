@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    # Placeholder session. Commands only run in dry mode, so no requests are sent
+    C8Y_SESSION: ""
+    C8Y_HOST: https://example.invalid
+    C8Y_TENANT: t12345
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  # https://github.com/reubenmiller/go-c8y-cli/issues/585
+  Run a script command in a group which is also defined by an api specification:
+    command: |
+      c8y kitchensink features script_command one two
+    exit-code: 0
+    stdout:
+      exactly: "features script_command: one two"
+
+  Run an api command in a group which also contains script commands:
+    command: |
+      c8y kitchensink features disable_pageSize
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /inventory/managedObjects
+
+  Show api and script commands in the same group:
+    command: |
+      c8y kitchensink features --help
+    exit-code: 0
+    stdout:
+      contains:
+        - disable_pageSize
+        - script_command
+
+  Run a deeply nested script command:
+    command: |
+      c8y kitchensink nested level1 level2 run --flag value
+    exit-code: 0
+    stdout:
+      exactly: "nested level1 level2 run: --flag value"
+
+  Show nested script command groups:
+    command: |
+      c8y kitchensink nested level1 --help
+    exit-code: 0
+    stdout:
+      contains:
+        - level2
+
+  # https://github.com/reubenmiller/go-c8y-cli/issues/562
+  Run an api command in a nested command group:
+    command: |
+      c8y kitchensink hierarchy items get --id 12345
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /inventory/managedObjects/12345
+
+  Show nested api command groups:
+    command: |
+      c8y kitchensink hierarchy --help
+    exit-code: 0
+    stdout:
+      contains:
+        - Example of nested command groups
+        - "items       Manage items"

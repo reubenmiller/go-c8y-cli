@@ -29,6 +29,34 @@ echo "Hey look at me" >&2
 Note: Make sure that your file is executable. On Unix, you can execute `chmod +x file_name` in the command line to make file_name executable. On Windows, you can run `git init -b main`, `git add file_name`, then `git update-index --chmod=+x file_name`.
 :::
 
+## Combining script and API commands
+
+Script commands and [API commands](/docs/concepts/extensions/api-commands/) can be placed in the same command group. A folder under `commands/` and an API specification whose `group.name` has the same name are merged into a single group.
+
+For example, an extension called `c8y-myext` with the following files:
+
+```text
+api/devices.yaml           # group.name: devices, with a command called "list"
+commands/devices/report    # script
+```
+
+provides both commands under the same `devices` group:
+
+| Command | Provided by |
+|-----------|------|
+| `c8y myext devices list` | `api/devices.yaml` |
+| `c8y myext devices report` | `commands/devices/report` |
+
+The description of the group is taken from the API specification.
+
+If more than one file provides a command with the same name, only one of them is used:
+
+* An API command is used instead of a script command with the same name.
+* A command group is used instead of a script command with the same name. For example, the script `commands/devices` is ignored if a `devices` group exists.
+* If two API specifications define the same command, the one in the first file (sorted by file name) is used.
+
+A warning is logged for each ignored command. Use `--verbose` to see it.
+
 ## General Tips
 
 Below are some general tips to keep in mind when creating script based commands:

@@ -1,0 +1,785 @@
+file: body_basic.yaml
+  cmd: body
+    short: body
+    hidden: false
+    runnable: false
+    cmd: attachment
+      short: Upload file contents as binary
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --file (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: binaryUploadURL
+      short: Add fragment via boolean flag
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --file (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: boolean
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --enable (bool) default=false
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: booleanDefault
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --active (bool) default=true
+      flag: --data (stringArray) default=[]
+      flag: --enable (bool) default=false
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: booleanValue
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --value (string) default=
+    cmd: date
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --dateFrom (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: datetime
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --dateFrom (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: file
+      short: Upload contents of a file
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --file (string) default=
+      flag: --name (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --type (string) default=
+    cmd: fileContents
+      short: Upload contents of a file
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --file (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: fileContentsAsString
+      short: Read file and upload contents as part of a json request
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --file (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: float
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --value (float32) default=0
+    cmd: integer
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --value (int) default=0
+    cmd: json
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --mydata (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: jsonarray
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --name (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --version (string) default=
+    cmd: jsonobject
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --name (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --version (string) default=
+    cmd: optional_fragment
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --enable (bool) default=false
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: string
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --value (string) default=
+    cmd: stringArray
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --value (stringSlice) default=[]
+    cmd: stringStatic
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --value (string) default=
+    cmd: stringcsvArray
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --value (stringSlice) default=[]
+    cmd: upload
+      short: Upload contents of a file
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --file (string) default=
+      flag: --foo (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+file: body_cumulocity.yaml
+  cmd: body_complex
+    short: body
+    hidden: false
+    runnable: false
+    cmd: agent
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: application
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: applicationname
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --name (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: certificate
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: certificatefile
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --file (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: configuration
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: configurationDetails
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: device
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: devicegroup
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: deviceprofile
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: devicerequest
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: devicerequestArray
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: deviceservice
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --device (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --service (stringSlice) default=[]
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: firmware
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: firmwareDetails
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --sourceFirmware (stringSlice) default=[]
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --version (string) default=
+    cmd: firmwarename
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --name (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: firmwarepatch
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --patch (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --sourceFirmware (stringSlice) default=[]
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: firmwarepatchName
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --firmware (stringSlice) default=[]
+      flag: --patch (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: firmwareversion
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --sourceFirmware (stringSlice) default=[]
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --version (stringSlice) default=[]
+    cmd: firmwareversionName
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --firmware (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --version (string) default=
+    cmd: hostedapplication
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: idArray
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: microservice
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: microserviceinstance
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --instance (string) default=
+      flag: --microservice (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: microservicename
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --name (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: role
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --role (stringSlice) default=[]
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: roleself
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --roleself (stringSlice) default=[]
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: smartgroup
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: software
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: softwareDetails
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --software (stringSlice) default=[]
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --version (string) default=
+    cmd: softwareName
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --name (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: softwareversion
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --software (stringSlice) default=[]
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --version (stringSlice) default=[]
+    cmd: softwareversionName
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --sourceSoftware (stringSlice) default=[]
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --version (string) default=
+    cmd: source
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: tenant
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: tenantname
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --name (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: user
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --user (stringSlice) default=[]
+    cmd: usergroup
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --group (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: userself
+      short: Create object
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --user (stringSlice) default=[]
+file: features.yaml
+  cmd: features
+    short: Example features
+    hidden: false
+    runnable: false
+    cmd: applications
+      short: application lookups
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (string) default=
+      flag: --instance (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: completion
+      short: Get application
+      hidden: false
+      runnable: true
+      flag: --id (string) default=
+    cmd: completion2
+      short: Get device collection
+      hidden: false
+      runnable: true
+      flag: --type (string) default=
+    cmd: devicerequests
+      short: application lookups
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --id (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: disable_pageSize
+      short: Common flags such as pageSize can be disabled
+      hidden: false
+      runnable: true
+    cmd: map_pageSize_to_limit
+      short: Common flags such as pageSize can be disabled
+      hidden: false
+      runnable: true
+    cmd: platform_features
+      short: platform feature lookups
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --key (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+    cmd: user
+      short: user lookups
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --user (stringSlice) default=[]
+      flag: --usergroup (stringSlice) default=[]
+      flag: --userself (stringSlice) default=[]
+file: hierarchy.yaml
+  cmd: hierarchy
+    short: Example of nested command groups
+    hidden: false
+    runnable: false
+file: hierarchy_items.yaml
+  cmd: hierarchy
+    short: Manage items
+    hidden: false
+    runnable: false
+    cmd: get
+      short: Get an item
+      hidden: false
+      runnable: true
+      flag: --id (stringSlice) default=[]
+    cmd: list
+      short: List items
+      hidden: false
+      runnable: true
+      flag: --type (string) default=
+file: presets.yaml
+  cmd: presets
+    short: Example features
+    hidden: false
+    runnable: false
+    cmd: get-identity-default
+      short: Get identity with defaults
+      hidden: false
+      runnable: true
+      flag: --name (string) default=
+    cmd: get-identity-with-options
+      short: Get identity with defaults
+      hidden: false
+      runnable: true
+      flag: --name (string) default=
+      flag: --one (string) default=
+      flag: --withValues (bool) default=false
+    cmd: query-inventory-children
+      short: List inventory collection
+      hidden: false
+      runnable: true
+      flag: --agents (bool) default=false
+      flag: --availability (string) default=
+      flag: --creationTimeDateFrom (string) default=
+      flag: --creationTimeDateTo (string) default=
+      flag: --fragmentType (string) default=
+      flag: --id (stringSlice) default=[]
+      flag: --lastMessageDateFrom (string) default=
+      flag: --lastMessageDateTo (string) default=
+      flag: --name (string) default=
+      flag: --option (string) default=
+      flag: --orderBy (string) default=name
+      flag: --owner (string) default=
+      flag: --query (string) default=
+      flag: --queryTemplate (string) default=
+      flag: --skipChildrenNames (bool) default=false
+      flag: --type (string) default=
+      flag: --withChildren (bool) default=false
+      flag: --withChildrenCount (bool) default=false
+      flag: --withGroups (bool) default=false
+      flag: --withParents (bool) default=false
+    cmd: query-inventory-default
+      short: List device collection with defaults
+      hidden: false
+      runnable: true
+      flag: --agents (bool) default=false
+      flag: --availability (string) default=
+      flag: --creationTimeDateFrom (string) default=
+      flag: --creationTimeDateTo (string) default=
+      flag: --fragmentType (string) default=
+      flag: --group (stringSlice) default=[]
+      flag: --lastMessageDateFrom (string) default=
+      flag: --lastMessageDateTo (string) default=
+      flag: --name (string) default=
+      flag: --orderBy (string) default=name
+      flag: --owner (string) default=
+      flag: --query (string) default=
+      flag: --queryTemplate (string) default=
+      flag: --skipChildrenNames (bool) default=false
+      flag: --type (string) default=
+      flag: --withChildren (bool) default=false
+      flag: --withChildrenCount (bool) default=false
+      flag: --withGroups (bool) default=false
+      flag: --withParents (bool) default=false
+    cmd: query-inventory-device
+      short: List device collection
+      hidden: false
+      runnable: true
+      flag: --agents (bool) default=false
+      flag: --availability (string) default=
+      flag: --creationTimeDateFrom (string) default=
+      flag: --creationTimeDateTo (string) default=
+      flag: --fragmentType (string) default=
+      flag: --group (stringSlice) default=[]
+      flag: --lastMessageDateFrom (string) default=
+      flag: --lastMessageDateTo (string) default=
+      flag: --name (string) default=
+      flag: --orderBy (string) default=name
+      flag: --owner (string) default=
+      flag: --query (string) default=
+      flag: --queryTemplate (string) default=
+      flag: --skipChildrenNames (bool) default=false
+      flag: --type (string) default=
+      flag: --withChildren (bool) default=false
+      flag: --withChildrenCount (bool) default=false
+      flag: --withGroups (bool) default=false
+      flag: --withParents (bool) default=false
+    cmd: query-inventory-mo
+      short: List inventory collection
+      hidden: false
+      runnable: true
+      flag: --agents (bool) default=false
+      flag: --availability (string) default=
+      flag: --creationTimeDateFrom (string) default=
+      flag: --creationTimeDateTo (string) default=
+      flag: --fragmentType (string) default=
+      flag: --group (stringSlice) default=[]
+      flag: --lastMessageDateFrom (string) default=
+      flag: --lastMessageDateTo (string) default=
+      flag: --name (string) default=
+      flag: --option (string) default=
+      flag: --orderBy (string) default=name
+      flag: --owner (string) default=
+      flag: --query (string) default=
+      flag: --queryTemplate (string) default=
+      flag: --skipChildrenNames (bool) default=false
+      flag: --type (string) default=
+      flag: --withChildren (bool) default=false
+      flag: --withChildrenCount (bool) default=false
+      flag: --withGroups (bool) default=false
+      flag: --withParents (bool) default=false
+file: required.yaml
+  cmd: required
+    short: Example required
+    hidden: false
+    runnable: false
+    cmd: queryparameters_withoutpipe
+      short: Get inventory list
+      hidden: false
+      runnable: true
+      flag: --option1 (string) default=
+      flag: --required_string (string) default=
+    cmd: queryparameters_withpipe
+      short: Get inventory list
+      hidden: false
+      runnable: true
+      flag: --required_string (string) default=
+file: types.yaml
+  cmd: types
+    short: Example types
+    hidden: false
+    runnable: false
+    cmd: dates
+      short: Get inventory list
+      hidden: false
+      runnable: true
+      flag: --dateFromUTC (string) default=
