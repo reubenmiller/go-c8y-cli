@@ -24,6 +24,22 @@ The system SHALL merge command groups that have the same path within an extensio
 - **THEN** `c8y <ext> devices list` and `c8y <ext> devices get` both work
 - **AND** only one `devices` group is registered
 
+### Requirement: API specs can define nested command groups
+The system SHALL split an API spec's `group.name` on whitespace and register its commands under one nested group per word. A spec with no commands SHALL still declare its group, so it can provide the description of a parent group.
+
+#### Scenario: Nested group from a group name with spaces (#562)
+- **WHEN** an API spec declares `group.name: inventory items` with commands `list` and `get`
+- **THEN** `c8y <ext> inventory items list` and `c8y <ext> inventory items get` run those commands
+- **AND** `c8y <ext> inventory --help` lists `items`
+
+#### Scenario: Parent group description from a spec without commands
+- **WHEN** one API spec declares `group.name: inventory items` with commands, and another declares `group.name: inventory` with `description: Manage inventory` and no commands
+- **THEN** `c8y <ext> --help` shows `inventory` with the description `Manage inventory`
+
+#### Scenario: Group without any commands
+- **WHEN** the only spec for group `inventory` has no commands and no nested groups contain commands
+- **THEN** no `inventory` group is registered
+
 ### Requirement: Script commands are registered at any folder depth
 The system SHALL register an executable file at `commands/<p1>/<p2>/.../<name>` as `c8y <ext> <p1> <p2> ... <name>`, creating every intermediate group.
 

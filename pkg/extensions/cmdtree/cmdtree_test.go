@@ -192,6 +192,32 @@ func TestDeepNesting(t *testing.T) {
 	}
 }
 
+func TestNestedAPIGroups(t *testing.T) {
+	// Issue #562: api specs can define nested groups, and a spec without commands
+	// can provide the description of a parent group
+	r := &recorder{}
+	tree := newTree(r)
+
+	tree.AddGroup(split("hierarchy items"), "Manage items", "", "api/hierarchy_items.yaml")
+	addLeaf(tree, SourceAPI, "api/hierarchy_items.yaml", "hierarchy items list", &r.ran)
+	addLeaf(tree, SourceAPI, "api/hierarchy_items.yaml", "hierarchy items get", &r.ran)
+	tree.AddGroup(split("hierarchy"), "Nested groups", "", "api/hierarchy.yaml")
+
+	execute(t, tree, r, "analytics hierarchy items get")
+	if r.ran != "api/hierarchy_items.yaml" {
+		t.Errorf("unexpected command ran. got=%q", r.ran)
+	}
+	if got := findCmd(t, tree, "hierarchy").Short; got != "Nested groups" {
+		t.Errorf("expected parent group description from separate spec. got=%q", got)
+	}
+	if got := findCmd(t, tree, "hierarchy items").Short; got != "Manage items" {
+		t.Errorf("unexpected nested group description. got=%q", got)
+	}
+	if got := childNames(findCmd(t, tree, "hierarchy items")); strings.Join(got, ",") != "get,list" {
+		t.Errorf("unexpected children. got=%v", got)
+	}
+}
+
 func TestLeafConflictPrecedence(t *testing.T) {
 	for _, apiFirst := range []bool{true, false} {
 		r := &recorder{}

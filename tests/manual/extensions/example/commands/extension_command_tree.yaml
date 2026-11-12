@@ -50,3 +50,22 @@ tests:
     stdout:
       contains:
         - level2
+
+  # https://github.com/reubenmiller/go-c8y-cli/issues/562
+  Run an api command in a nested command group:
+    command: |
+      c8y kitchensink hierarchy items get --id 12345
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /inventory/managedObjects/12345
+
+  Show nested api command groups:
+    command: |
+      c8y kitchensink hierarchy --help
+    exit-code: 0
+    stdout:
+      contains:
+        - Example of nested command groups
+        - "items       Manage items"

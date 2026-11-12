@@ -54,6 +54,12 @@ Each source adds entries with `tree.AddGroup(path, short, long)` and `tree.AddLe
 
 `cmdparser.ParseCommand` is split so the caller gets the group metadata and one builder per command (for example `cmdparser.ParseSpec(r) (*Spec, error)` and `cmdparser.NewCommand(spec, item, factory) *cobra.Command`). `ParseCommand` stays as a thin wrapper for any other callers.
 
+### 2a. Nested API groups (#562)
+
+`group.name` is split on whitespace (`strings.Fields`) and used as the group path, so `inventory items` becomes `inventory` → `items`. A spec with no commands still calls `AddGroup`, which lets it provide the description of a parent group (for example `inventory`) that only has nested groups as children.
+
+*Alternative considered:* allowing spaces in command names (`name: items list`) so one spec file can define several groups. This would change the one-file-one-group model and needs a schema change for the command name pattern, so it is left out. It can be added later on top of the same tree builder.
+
 ### 3. Conflict precedence for leaves
 
 When two sources define the same leaf path: **API spec, then script**. The binary change appends **binary** between them (API, binary, script). The losing leaf is dropped and an info-level message is logged with both origins, for example:

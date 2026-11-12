@@ -626,6 +626,26 @@ file: features.yaml
       flag: --user (stringSlice) default=[]
       flag: --usergroup (stringSlice) default=[]
       flag: --userself (stringSlice) default=[]
+file: hierarchy.yaml
+  cmd: hierarchy
+    short: Example of nested command groups
+    hidden: false
+    runnable: false
+file: hierarchy_items.yaml
+  cmd: hierarchy
+    short: Manage items
+    hidden: false
+    runnable: false
+    cmd: get
+      short: Get an item
+      hidden: false
+      runnable: true
+      flag: --id (stringSlice) default=[]
+    cmd: list
+      short: List items
+      hidden: false
+      runnable: true
+      flag: --type (string) default=
 file: presets.yaml
   cmd: presets
     short: Example features

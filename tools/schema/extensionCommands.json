@@ -340,7 +340,7 @@
                 "name": {
                     "type": "string",
                     "title": "endpoint name / category for the cli",
-                    "description": "The name will be used for the command line tool category and is case sensitive"
+                    "description": "The name will be used for the command line tool category and is case sensitive. Use spaces to create nested command groups, e.g. 'inventory items'"
                 },
                 "description": {
                     "type": "string",

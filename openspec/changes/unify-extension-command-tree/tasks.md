@@ -27,3 +27,10 @@
 
 - [x] 5.1 Document in the extension concepts docs (`docs/go-c8y-cli/docs/concepts/extensions`) that API and script commands can share groups, the nesting rule, and the conflict precedence
 - [x] 5.2 Reference #585 in the PR description (CHANGELOG.md is not maintained; release notes come from GitHub releases)
+
+## 6. Nested API command groups (#562)
+
+- [x] 6.1 Split `group.name` on whitespace into the group path, and declare groups for specs without commands (so they can set a parent group's description)
+- [x] 6.2 Unit test for nested API groups and parent group descriptions in `pkg/extensions/cmdtree`
+- [x] 6.3 Add `api/hierarchy.yaml` and `api/hierarchy_items.yaml` to the kitchensink fixture, update the `cmdparser` golden file, and add commander tests for `c8y kitchensink hierarchy items ...`
+- [x] 6.4 Document nested groups in `tools/schema/extensionCommands.json` and in `docs/go-c8y-cli/docs/concepts/extensions/02-api-commands/01-command-groups.md`
