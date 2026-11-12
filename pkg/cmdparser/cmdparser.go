@@ -27,19 +27,16 @@ type Command struct {
 	Name string `yaml:"name"`
 }
 
+// ParseCommand parses an extension API specification and returns a cobra command group
+// containing all of the commands defined in the specification.
+// It returns nil if the specification's group should be skipped.
 func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command) (*cobra.Command, error) {
-
-	log, err := factory.Logger()
-	if err != nil {
-		return nil, err
+	origin := ""
+	if file, ok := r.(*os.File); ok {
+		origin = file.Name()
 	}
 
-	spec := &models.Specification{}
-	b, err := io.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-	err = yaml.Unmarshal(b, spec)
+	spec, err := ParseSpec(r)
 	if err != nil {
 		return nil, err
 	}
@@ -54,88 +51,113 @@ func ParseCommand(r io.Reader, factory *cmdutil.Factory, rootCmd *cobra.Command)
 		Long:  spec.Group.DescriptionLong,
 	}
 
-	// commands
 	for _, item := range spec.Commands {
 		if item.ShouldIgnore() {
 			continue
 		}
-
-		log.Debugf("Adding command. name=%s", item.Name)
-		subcmd := NewCommandWithOptions(&cobra.Command{
-			Use:     item.Name,
-			Short:   item.Description,
-			Long:    item.GetDescriptionLong(),
-			Example: item.GetExamples(),
-			Hidden:  item.IsHidden(),
-		}, item)
-
-		// Use a preset to populate some common flags/options
-		if item.HasPreset() {
-			AddPredefinedGroupsFlags(subcmd, factory, item.Preset)
+		subcmd, err := NewCommandFromSpec(item, factory, origin)
+		if err != nil {
+			return nil, err
 		}
-
-		flagNames := make(map[string]interface{})
-		for _, param := range item.GetAllParameters() {
-			// Ignore duplicated flags
-			if _, ok := flagNames[param.Name]; ok {
-				continue
-			}
-			flagNames[param.Name] = 0
-
-			if err := AddFlag(subcmd, &param, factory); err != nil {
-				if file, ok := r.(*os.File); ok {
-					log.Warnf("Extension: Ignoring invalid flag. details=%s, command=%s, file=%s", err, item.Name, file.Name())
-				} else {
-					log.Warnf("Extension: Ignoring invalid flag. details=%s, command=%s", err, item.Name)
-				}
-				// TODO: Is it better to be more forgiving or should it fail hard?
-				// return nil, err
-				continue
-			}
-
-			if param.AcceptsPipeline() {
-				subcmd.Runtime = append(subcmd.Runtime, flags.WithExtendedPipelineSupport(param.Name, param.GetTargetProperty(), param.IsRequired(), param.PipelineAliases...))
-				subcmd.Runtime = append(subcmd.Runtime, flags.WithPipelineAliases(param.Name, param.PipelineAliases...))
-			}
-
-			if len(param.ValidationSet) > 0 {
-				subcmd.Completion = append(subcmd.Completion, completion.WithValidateSet(param.Name, param.ValidationSet...))
-			}
-
-			// Add completions
-			subcmd.Completion = AppendCompletionOptions(subcmd.Completion, subcmd, &param, factory)
-		}
-
-		// Misc. options
-		if item.CollectionProperty != "" {
-			subcmd.Runtime = append(subcmd.Runtime, flags.WithCollectionProperty(item.CollectionProperty))
-		}
-
-		if item.SemanticMethod != "" {
-			subcmd.Runtime = append(subcmd.Runtime, flags.WithSemanticMethod(item.SemanticMethod))
-		}
-
-		if item.IsDeprecated() {
-			subcmd.Runtime = append(subcmd.Runtime, flags.WithDeprecationNotice(item.Deprecated))
-		}
-
-		if item.SupportsProcessingMode() {
-			subcmd.Runtime = append(subcmd.Runtime, flags.WithProcessingMode())
-		}
-
-		// Add template/data support by default
-		if item.SupportsTemplates() {
-			subcmd.Runtime = append(
-				subcmd.Runtime,
-				flags.WithData(),
-				factory.WithTemplateFlag(subcmd.Command),
-			)
-		}
-
-		cmd.AddCommand(subcmd.NewRuntimeCommand(factory).SetRequiredFlags(subcmd.RequiredFlags...).GetCommand())
+		cmd.AddCommand(subcmd)
 	}
 
 	return cmd, nil
+}
+
+// ParseSpec reads an extension API specification
+func ParseSpec(r io.Reader) (*models.Specification, error) {
+	spec := &models.Specification{}
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	if err := yaml.Unmarshal(b, spec); err != nil {
+		return nil, err
+	}
+	return spec, nil
+}
+
+// NewCommandFromSpec creates the runtime command for a single command in an extension API specification.
+// The origin (e.g. the file path of the specification) is only used in log messages.
+func NewCommandFromSpec(item models.Command, factory *cmdutil.Factory, origin string) (*cobra.Command, error) {
+	log, err := factory.Logger()
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debugf("Adding command. name=%s", item.Name)
+	subcmd := NewCommandWithOptions(&cobra.Command{
+		Use:     item.Name,
+		Short:   item.Description,
+		Long:    item.GetDescriptionLong(),
+		Example: item.GetExamples(),
+		Hidden:  item.IsHidden(),
+	}, item)
+
+	// Use a preset to populate some common flags/options
+	if item.HasPreset() {
+		AddPredefinedGroupsFlags(subcmd, factory, item.Preset)
+	}
+
+	flagNames := make(map[string]interface{})
+	for _, param := range item.GetAllParameters() {
+		// Ignore duplicated flags
+		if _, ok := flagNames[param.Name]; ok {
+			continue
+		}
+		flagNames[param.Name] = 0
+
+		if err := AddFlag(subcmd, &param, factory); err != nil {
+			if origin != "" {
+				log.Warnf("Extension: Ignoring invalid flag. details=%s, command=%s, file=%s", err, item.Name, origin)
+			} else {
+				log.Warnf("Extension: Ignoring invalid flag. details=%s, command=%s", err, item.Name)
+			}
+			// TODO: Is it better to be more forgiving or should it fail hard?
+			continue
+		}
+
+		if param.AcceptsPipeline() {
+			subcmd.Runtime = append(subcmd.Runtime, flags.WithExtendedPipelineSupport(param.Name, param.GetTargetProperty(), param.IsRequired(), param.PipelineAliases...))
+			subcmd.Runtime = append(subcmd.Runtime, flags.WithPipelineAliases(param.Name, param.PipelineAliases...))
+		}
+
+		if len(param.ValidationSet) > 0 {
+			subcmd.Completion = append(subcmd.Completion, completion.WithValidateSet(param.Name, param.ValidationSet...))
+		}
+
+		// Add completions
+		subcmd.Completion = AppendCompletionOptions(subcmd.Completion, subcmd, &param, factory)
+	}
+
+	// Misc. options
+	if item.CollectionProperty != "" {
+		subcmd.Runtime = append(subcmd.Runtime, flags.WithCollectionProperty(item.CollectionProperty))
+	}
+
+	if item.SemanticMethod != "" {
+		subcmd.Runtime = append(subcmd.Runtime, flags.WithSemanticMethod(item.SemanticMethod))
+	}
+
+	if item.IsDeprecated() {
+		subcmd.Runtime = append(subcmd.Runtime, flags.WithDeprecationNotice(item.Deprecated))
+	}
+
+	if item.SupportsProcessingMode() {
+		subcmd.Runtime = append(subcmd.Runtime, flags.WithProcessingMode())
+	}
+
+	// Add template/data support by default
+	if item.SupportsTemplates() {
+		subcmd.Runtime = append(
+			subcmd.Runtime,
+			flags.WithData(),
+			factory.WithTemplateFlag(subcmd.Command),
+		)
+	}
+
+	return subcmd.NewRuntimeCommand(factory).SetRequiredFlags(subcmd.RequiredFlags...).GetCommand(), nil
 }
 
 func MapCommandAPI(cmd *CmdOptions, param *models.Parameter, typeName string) {
