@@ -128,6 +128,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions/cmdtree"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
@@ -551,8 +552,10 @@ func isTabCompletionCommand() bool {
 	return strings.HasPrefix(strings.Join(os.Args[1:], ""), "__complete")
 }
 
+// ConvertToCobraCommands adds the commands provided by the extensions to the given root command.
+// Each extension is added under its own name, and commands from all of the extension's
+// command sources (api specifications and scripts) are merged into a single command tree.
 func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions []extensions.Extension) error {
-	extCommandTree := make(map[string]*cobra.Command)
 	// Enable flag parsing when using tab completion, otherwise disable it
 	// as it affects passing the arguments to the extension binary
 	disableFlagParsing := !isTabCompletionCommand()
@@ -562,144 +565,139 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 		return err
 	}
 
-	var extError error
+	var errs []error
 	for _, ext := range extensions {
-		commands, err := ext.Commands()
-		if err != nil {
-			extError = fmt.Errorf("%w", err)
-			continue
-		}
-
 		extName := ext.Name()
-		extRoot := &cobra.Command{
-			Use:   extName,
-			Short: extName + " extension",
+		tree := cmdtree.New(extName, extName+" extension")
+		// Only log conflicts at info level, as the message would otherwise be shown on every
+		// command, and the user is generally not able to fix the extension
+		tree.OnConflict = func(c cmdtree.Conflict) {
+			log.Infof("Ignoring conflicting extension command. extension=%s, %s", extName, c)
 		}
-		extCommandTree[extName] = extRoot
 
-		//
-		// API/Spec commands
-		//
-		// Parse all api files
-		apiDir := filepath.Join(ext.Path(), "api")
-		if _, err := os.Stat(apiDir); !os.IsNotExist(err) {
-			walkErr := filepath.WalkDir(apiDir, func(path string, d fs.DirEntry, walkErr error) error {
-				if walkErr != nil {
-					return walkErr
-				}
+		if err := addExtensionAPICommands(f, log, tree, ext); err != nil {
+			errs = append(errs, fmt.Errorf("%w. extension_name=%s", err, extName))
+		}
 
-				if d.IsDir() {
-					return nil
-				}
+		if err := addExtensionScriptCommands(f, tree, ext, disableFlagParsing); err != nil {
+			errs = append(errs, fmt.Errorf("%w. extension_name=%s", err, extName))
+		}
 
-				if ext := filepath.Ext(path); ext != ".yaml" && ext != ".yml" {
-					return nil
-				}
+		extRoot, err := tree.ToCobra()
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%w. extension_name=%s", err, extName))
+		}
 
-				log.Debugf("Reading extension file: %s", path)
-				spec, err := os.Open(path)
-				if err != nil {
-					return err
-				}
-				defer spec.Close()
-				extCommand, err := cmdparser.ParseCommand(spec, f, cmd.Root())
-				if err != nil {
-					// Only log a warning for the user, don't prevent the whole cli from working
-					log.Warnf("Invalid extension file. reason=%s. file=%s", err, path)
-					// return fmt.Errorf("%w. file=%s", err, path)
-				} else {
-					if extCommand != nil {
-						extRoot.AddCommand(extCommand)
-					}
-				}
+		// Only add the extension if it has at least one command
+		if extRoot != nil {
+			cmd.AddCommand(extRoot)
+		}
+	}
+	return errors.Join(errs...)
+}
 
-				return nil
-			})
-			if walkErr != nil {
-				return fmt.Errorf("%w. extension_name=%s", walkErr, ext.Name())
+// relativeToExtension returns the path relative to the extension's folder (used in log messages)
+func relativeToExtension(ext extensions.Extension, path string) string {
+	if rel, err := filepath.Rel(ext.Path(), path); err == nil {
+		return filepath.ToSlash(rel)
+	}
+	return path
+}
+
+// addExtensionAPICommands adds the commands defined in the extension's api specification files (api/*.yaml)
+func addExtensionAPICommands(f *cmdutil.Factory, log *logger.Logger, tree *cmdtree.Tree, ext extensions.Extension) error {
+	apiDir := filepath.Join(ext.Path(), "api")
+	if _, err := os.Stat(apiDir); os.IsNotExist(err) {
+		return nil
+	}
+
+	return filepath.WalkDir(apiDir, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		if ext := filepath.Ext(path); ext != ".yaml" && ext != ".yml" {
+			return nil
+		}
+
+		log.Debugf("Reading extension file: %s", path)
+		file, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		spec, err := cmdparser.ParseSpec(file)
+		file.Close()
+		if err != nil {
+			// Only log a warning for the user, don't prevent the whole cli from working
+			log.Warnf("Invalid extension file. reason=%s. file=%s", err, path)
+			return nil
+		}
+
+		if spec.Group.Skip {
+			return nil
+		}
+
+		groupPath := strings.Fields(spec.Group.Name)
+		origin := relativeToExtension(ext, path)
+		tree.AddGroup(groupPath, spec.Group.Description, spec.Group.DescriptionLong, origin)
+
+		for _, item := range spec.Commands {
+			if item.ShouldIgnore() {
+				continue
 			}
+			tree.AddLeaf(append(slices.Clone(groupPath), item.Name), cmdtree.Leaf{
+				Source: cmdtree.SourceAPI,
+				Origin: origin,
+				Build: func() (*cobra.Command, error) {
+					return cmdparser.NewCommandFromSpec(item, f, path)
+				},
+			})
 		}
+		return nil
+	})
+}
 
-		//
-		// Shell commands
-		//
-		for _, command := range commands {
-			path := extName + " " + command.Name()
-			key := path
-			name := path
-			var parentCmd *cobra.Command
-			exists := false
+// addExtensionScriptCommands adds the executable files under the extension's commands folder
+func addExtensionScriptCommands(f *cmdutil.Factory, tree *cmdtree.Tree, ext extensions.Extension, disableFlagParsing bool) error {
+	commands, err := ext.Commands()
+	if err != nil {
+		return err
+	}
 
-			parts := strings.Split(path, " ")
+	extName := ext.Name()
+	for _, command := range commands {
+		path := strings.Split(command.Name(), " ")
+		name := path[len(path)-1]
+		exe := command.Command()
 
-			if len(parts) > 1 {
-				name = parts[len(parts)-1]
-				key = strings.Join(parts[0:len(parts)-1], " ")
-				parentName := parts[0]
-				if len(parts) > 2 {
-					parentName = parts[len(parts)-2]
-				}
-				parentCmd, exists = extCommandTree[key]
-				if !exists {
-					parentCmd = &cobra.Command{
-						Use:   parentName,
-						Short: fmt.Sprintf("%s command group", parentName),
-					}
-					if len(parts) == 3 {
-						extRoot.AddCommand(parentCmd)
-					}
-					extCommandTree[key] = parentCmd
-				}
-
-				iCmd := &cobra.Command{
+		tree.AddLeaf(path, cmdtree.Leaf{
+			Source: cmdtree.SourceScript,
+			Origin: relativeToExtension(ext, exe),
+			Build: func() (*cobra.Command, error) {
+				return &cobra.Command{
 					Use:                name,
 					Short:              fmt.Sprintf("Run %s command", name),
 					FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 					DisableFlagParsing: disableFlagParsing,
-					RunE: func(name, exe string) func(*cobra.Command, []string) error {
-						return func(cmd *cobra.Command, args []string) error {
-							log, err := f.Logger()
-							if err != nil {
-								return err
-							}
-							log.Infof("Executing extension. name: %s, command: %s, args: %v", name, exe, args)
-							_, err = f.ExtensionManager().Execute(exe, args, false, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
+					RunE: func(cmd *cobra.Command, args []string) error {
+						// Get the logger at runtime, as it is reconfigured after the commands are created
+						log, err := f.Logger()
+						if err != nil {
 							return err
 						}
-					}(extName, command.Command()),
-				}
-
-				if parentCmd != nil {
-					parentCmd.AddCommand(iCmd)
-				}
-			} else {
-				iCmd := &cobra.Command{
-					Use:                key,
-					Short:              fmt.Sprintf("%s command group", key),
-					FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-					DisableFlagParsing: disableFlagParsing,
-					RunE: func(name, exe string) func(*cobra.Command, []string) error {
-						return func(cmd *cobra.Command, args []string) error {
-							log, err := f.Logger()
-							if err != nil {
-								return err
-							}
-							log.Infof("Executing extension. name: %s, command: %s, args: %v", name, exe, args)
-							_, err = f.ExtensionManager().Execute(exe, args, false, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
-							return err
-						}
-					}(extName, command.Command()),
-				}
-				extRoot.AddCommand(iCmd)
-			}
-		}
-
-		// Only add if the is at least 1 command
-		if len(extRoot.Commands()) > 0 {
-			cmd.AddCommand(extRoot)
-		}
+						log.Infof("Executing extension. name: %s, command: %s, args: %v", extName, exe, args)
+						_, err = f.ExtensionManager().Execute(exe, args, false, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
+						return err
+					},
+				}, nil
+			},
+		})
 	}
-	return extError
+	return nil
 }
 
 func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug bool) error {

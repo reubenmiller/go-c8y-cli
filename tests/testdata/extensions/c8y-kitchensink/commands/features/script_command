@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Script command inside a group which is also defined by an api specification (api/features.yaml)
+# See https://github.com/reubenmiller/go-c8y-cli/issues/585
+set -e
+echo "features script_command: $*"

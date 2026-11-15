@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
+---
+# Description of the parent group "hierarchy". The commands are defined in hierarchy_items.yaml
+# See https://github.com/reubenmiller/go-c8y-cli/issues/562
+group:
+  name: hierarchy
+  description: Example of nested command groups
+
+commands: []

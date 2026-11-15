@@ -79,6 +79,51 @@ Flags:
   -h, --help   help for example
 ```
 
+### Example: Nested command groups
+
+Larger extensions can organize their commands in nested command groups. A group name with spaces creates one level of nesting per word. For example, the following specification provides the commands `c8y myextension inventory items list` and `c8y myextension inventory items get`:
+
+```yaml title="file: api/inventory_items.yaml"
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
+---
+group:
+  name: inventory items
+  description: Manage items
+
+commands:
+  - name: list
+    description: List items
+    method: GET
+    path: inventory/managedObjects
+
+  - name: get
+    description: Get an item
+    method: GET
+    path: inventory/managedObjects/{id}
+    pathParameters:
+      - name: id
+        type: id[]
+        pipeline: true
+        required: true
+        description: Item id
+```
+
+Specifications with the same group name, or with groups under the same parent, are merged. So other specification files can add more groups under `inventory`, for example `inventory assets`.
+
+The parent group `inventory` gets a generated description. To set your own description, add a specification for the parent group without any commands:
+
+```yaml title="file: api/inventory.yaml"
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
+---
+group:
+  name: inventory
+  description: Manage inventory items and assets
+
+commands: []
+```
+
+Script based commands can also be added to the same groups, see [combining script and API commands](/docs/concepts/extensions/script-based-commands/#combining-script-and-api-commands).
+
 ### Example: Ignoring or mapping the pageSize query parameter value
 
 The example below shows how the common query parameter `pageSize` can be controlled to either map the value to a different query parameter, or to ignore the value entirely from the outgoing HTTP request.

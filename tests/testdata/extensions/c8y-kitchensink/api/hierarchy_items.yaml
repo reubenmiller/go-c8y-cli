@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
+---
+# A group name with spaces creates nested command groups, e.g. "c8y kitchensink hierarchy items list"
+# See https://github.com/reubenmiller/go-c8y-cli/issues/562
+group:
+  name: hierarchy items
+  description: Manage items
+
+commands:
+  - name: list
+    description: List items
+    method: GET
+    path: inventory/managedObjects
+    queryParameters:
+      - name: type
+        type: string
+        description: Item type
+
+  - name: get
+    description: Get an item
+    method: GET
+    path: inventory/managedObjects/{id}
+    pathParameters:
+      - name: id
+        type: id[]
+        pipeline: true
+        required: true
+        description: Item id

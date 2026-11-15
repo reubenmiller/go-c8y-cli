@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Deeply nested script command
+set -e
+echo "nested level1 level2 run: $*"
