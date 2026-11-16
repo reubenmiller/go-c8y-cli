@@ -142,6 +142,19 @@ func PrepareExtensionArgs(rootCmd *cobra.Command, args []string) []string {
 	return prepared
 }
 
+// hasHelpFlag returns true if the arguments request help (-h or --help, before any "--")
+func hasHelpFlag(args []string) bool {
+	for _, arg := range args {
+		switch arg {
+		case "--":
+			return false
+		case "-h", "--help", "--help=true":
+			return true
+		}
+	}
+	return false
+}
+
 // splitJSONValues splits the output of a command into json values. The output can be a json
 // array, a json object or newline delimited json values. ok is false if the output is not json
 func splitJSONValues(output []byte) (values [][]byte, isArray bool, ok bool) {
@@ -199,8 +212,9 @@ func runJSONExtensionCommand(f *cmdutil.Factory, cmd *cobra.Command, ext extensi
 func writeJSONOutput(f *cmdutil.Factory, cmd *cobra.Command, output []byte) error {
 	values, isArray, ok := splitJSONValues(output)
 	if !ok {
+		// Not an error, e.g. a command can print a message instead of json
 		if log, err := f.Logger(); err == nil {
-			log.Warnf("Extension command output is not valid json, so it is written without formatting")
+			log.Infof("Extension command output is not json, so it is written without formatting")
 		}
 		_, err := f.IOStreams.Out.Write(output)
 		return err

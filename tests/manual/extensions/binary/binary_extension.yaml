@@ -37,6 +37,18 @@ tests:
     stdout:
       exactly: reports,stopped
 
+  It shows the help of a json command without processing it:
+    command: |
+      c8y hello services list --help
+    exit-code: 0
+    stdout:
+      contains:
+        - "Usage:"
+        - "--status"
+    stderr:
+      not-contains:
+        - json
+
   It uses the view provided by the extension:
     command: |
       c8y hello services list -o table --view auto

@@ -242,3 +242,18 @@ func TestIsExtensionCommand(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, IsExtensionCommand(devices))
 }
+
+func TestHasHelpFlag(t *testing.T) {
+	cases := map[string]bool{
+		"--help":            true,
+		"-h":                true,
+		"--status x --help": true,
+		"--help=true":       true,
+		"--status x":        false,
+		"-- --help":         false,
+		"":                  false,
+	}
+	for args, want := range cases {
+		assert.Equal(t, want, hasHelpFlag(strings.Fields(args)), args)
+	}
+}

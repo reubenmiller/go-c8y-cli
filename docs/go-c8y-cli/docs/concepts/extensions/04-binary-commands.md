@@ -81,7 +81,7 @@ The binary can write:
 
 The following c8y flags are removed from the arguments and handled by c8y, so the binary can't use these flag names in JSON commands: `--output`/`-o`, `--select`, `--filter`, `--view`, `--compact`/`-c`, `--raw`/`-r`, `--noColor`/`-M`.
 
-If the output is not valid JSON, then it is written unchanged and a warning is shown. stderr is never processed, so use it for log and progress messages.
+If the output is not JSON (for example a message), then it is written unchanged (shown in the log with `--verbose`). The output of `--help` and `-h` is not processed. stderr is never processed, so use it for log and progress messages.
 
 Commands without `output: json`, and arguments passed to the mount, are not processed at all. The binary is connected directly to the terminal, so it can prompt the user.
 

@@ -129,7 +129,8 @@ For commands with `output: json`:
 
 1. Before forwarding, c8y removes its own output flags from the args: `--output/-o`, `--select`, `--filter`, `--view`, `--compact/-c`, `--raw/-r`, `--noColor/-M`. Binaries cannot define flags with these names on JSON commands (documented).
 2. c8y captures stdout, reads it as a JSON array, a JSON object, or newline-delimited JSON objects, and passes each value through `Factory.WriteOutput`, which applies views, selection, filtering, and formatting.
-3. stderr is passed through unchanged. If stdout is not valid JSON, c8y writes it unchanged and logs a warning.
+3. stderr is passed through unchanged. If stdout is not valid JSON, c8y writes it unchanged and logs an info message (text output such as messages is valid, so no warning).
+4. With `-h` or `--help`, the output is not captured, so the binary's help is shown directly.
 
 *Why host-side:* formatting lives inside the CLI (`cmdutil`, `dataview`, `console`). Re-implementing it in an SDK would drift, and a host-side pipeline works for extensions written in any language.
 

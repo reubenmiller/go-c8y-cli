@@ -313,7 +313,8 @@ func addExtensionBinaryCommands(f *cmdutil.Factory, log *logger.Logger, tree *cm
 					Annotations:        map[string]string{},
 					RunE: func(cmd *cobra.Command, args []string) error {
 						binArgs := append(slices.Clone(item.ExecArgs()), args...)
-						if item.IsJSON() {
+						// Help is text, so show it directly
+						if item.IsJSON() && !hasHelpFlag(args) {
 							// c8y output flags have already been removed from the args (see PrepareExtensionArgs)
 							return runJSONExtensionCommand(f, cmd, ext, exe, binArgs)
 						}

@@ -23,11 +23,16 @@ For `output: json` commands, the system SHALL remove `--output/-o`, `--select`, 
 - **THEN** the binary is run with args `services list --name x`
 
 ### Requirement: Non-JSON output is passed through
-If stdout of an `output: json` command is not valid JSON, the system SHALL write it unchanged to stdout and log a warning. stderr SHALL always be passed through unchanged and uncaptured.
+If stdout of an `output: json` command is not valid JSON, the system SHALL write it unchanged to stdout and log an info-level message (shown with `--verbose`), and SHALL NOT show a warning. stderr SHALL always be passed through unchanged and uncaptured. When the arguments contain `-h` or `--help` (before `--`), the system SHALL NOT capture or process the output.
 
 #### Scenario: Invalid JSON
 - **WHEN** the binary prints `hello` to stdout
-- **THEN** `hello` is printed and a warning says the output was not valid JSON
+- **THEN** `hello` is printed without a warning
+- **AND** running with `--verbose` logs that the output was not JSON
+
+#### Scenario: Help of a JSON command
+- **WHEN** the user runs `c8y foo services list --help` for a command with `output: json`
+- **THEN** the binary's help is printed unchanged and no message about JSON is shown
 
 ### Requirement: Raw output commands are not processed
 Commands without `output: json` (the default `raw`), passthrough mounts, and script commands SHALL have stdout connected directly, with no buffering or processing, and SHALL receive all arguments unchanged.
