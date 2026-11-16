@@ -35,14 +35,37 @@ c8y hello services list --output table
 
 ## Releases
 
-The SDK is a nested Go module, so it has its own tags with the `pkg/extsdk/` prefix, for example `pkg/extsdk/v0.1.0`. The following command runs the SDK tests, creates the tag, and pushes it to `origin` (use `REMOTE=<name>` for another remote):
+The SDK is a nested Go module, so it has its own tags with the `pkg/extsdk/` prefix, for example `pkg/extsdk/v0.1.0`. A release is only a git tag. It doesn't need a code change, a commit, or a GitHub release.
 
-```sh
-task release-extsdk -- v0.1.0
-```
+To release a new SDK version:
 
-Only the git tag is needed. Don't create a GitHub release for it, as the c8y install scripts use the latest GitHub release of the repository.
+1. Merge the SDK changes into `v2`, then check out and update `v2`:
 
-The Go template of `c8y extensions create --precompiled go` uses the newest SDK tag: `task build-fast` and GoReleaser read it with `git describe` and set it with `-ldflags`, so the next c8y release uses the new SDK version without a code change. Builds without it, such as `go install`, use `defaultExtSDKVersion` in `pkg/cmd/extension/manager.go`. Update that default from time to time.
+    ```sh
+    git checkout v2
+    git pull
+    ```
 
-The runtime context version (`extsdk.ContextVersion`) must match the newest version that c8y sends (`C8Y_EXTENSION_CONTEXT_VERSION`). When c8y adds or changes environment variables, increase the version in both places and release the SDK together with the CLI.
+2. Run the SDK tests, create the tag, and push it to `origin` (use `REMOTE=<name>` for another remote):
+
+    ```sh
+    task release-extsdk -- v0.1.0
+    ```
+
+3. Optional: check that the Go module proxy serves the version (it can take a few minutes):
+
+    ```sh
+    curl https://proxy.golang.org/github.com/reubenmiller/go-c8y-cli/pkg/extsdk/@v/v0.1.0.info
+    ```
+
+Don't create a GitHub release for the tag, as the c8y install scripts use the latest GitHub release of the repository.
+
+### How c8y picks the SDK version
+
+The Go template of `c8y extensions create --precompiled go` uses the newest SDK tag which is part of the c8y build. `task build-fast` and GoReleaser read it with `git describe --tags --match 'pkg/extsdk/v*'` and set it with `-ldflags`. So the next c8y release uses the new SDK version, as long as the c8y release is tagged on a commit which includes the SDK tag (for example a later commit on `v2`).
+
+Builds without the tag, such as `go install` or a plain `go build`, use `defaultExtSDKVersion` in `pkg/cmd/extension/manager.go`. This is the only place where the version is in the code. Updating it is optional, and only affects these builds.
+
+### When c8y changes the runtime context
+
+This is the only case where an SDK release needs a code change. The runtime context version (`extsdk.ContextVersion`) must match the newest version that c8y sends (`C8Y_EXTENSION_CONTEXT_VERSION`). When c8y adds or changes environment variables, increase the version in both places and release the SDK together with the CLI.

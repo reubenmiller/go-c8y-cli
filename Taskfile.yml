@@ -368,7 +368,9 @@ tasks:
     desc: "Tag a release of the extension Go SDK and push the tag. Usage: task release-extsdk -- v0.1.0"
     summary: |
       Tag a release of the extension Go SDK (pkg/extsdk/<version>) and push the tag.
-      Only the git tag is needed, so don't create a GitHub release for it.
+      Only the git tag is needed, so don't create a GitHub release for it. No code change is
+      needed either: c8y builds use the newest SDK tag in the Go extension template.
+      See pkg/extsdk/README.md for the steps.
 
       Usage:
         task release-extsdk -- v0.1.0
