@@ -20,3 +20,11 @@ commands:
   - name: context
     description: Show the runtime context passed by c8y
     output: json
+
+# Session providers can be used by "c8y sessions login --from-extension hello" and set-session
+sessionProviders:
+  - name: hello
+    description: Select a session from the example vault
+    exec: [session, select]
+    secrets: [HELLO_VAULT_TOKEN]
+    format: json

@@ -233,3 +233,23 @@ func TestNewRootCommandCompletion(t *testing.T) {
 		t.Errorf("completion command should be hidden: %s", out.String())
 	}
 }
+
+func TestFprintSession(t *testing.T) {
+	var buf bytes.Buffer
+	authorized := true
+	err := FprintSession(&buf, Session{
+		Host:       "https://example.com",
+		Tenant:     "t123",
+		Username:   "user1",
+		Token:      "abc",
+		Authorized: &authorized,
+		SessionUri: "vault://item/1",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `{"host":"https://example.com","tenant":"t123","username":"user1","token":"abc","authorized":true,"sessionUri":"vault://item/1"}` + "\n"
+	if buf.String() != want {
+		t.Errorf("unexpected session json:\n%s\nwant:\n%s", buf.String(), want)
+	}
+}

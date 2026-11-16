@@ -72,6 +72,7 @@ var (
 	ProviderTypeExternal    = "external"
 	ProviderTypeStdin       = "stdin"
 	ProviderTypeInteractive = "interactive"
+	ProviderTypeExtension   = "extension"
 )
 
 const (
@@ -331,6 +332,9 @@ const (
 
 	// SettingsSessionProviderSecrets the secrets which should be included as environment variables when calling the external provider command
 	SettingsSessionProviderSecrets = "settings.session.provider.secrets"
+
+	// SettingsSessionProviderExtension the session provider of an extension which is used by the "extension" provider type
+	SettingsSessionProviderExtension = "settings.session.provider.extension"
 
 	// SettingsLoginType preferred login type, i.e. BASIC, OAUTH2_INTERNAL etc.
 	SettingsLoginType = "settings.login.type"
@@ -633,6 +637,7 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsSessionProviderType, ProviderTypeExternal),
 		WithBindEnv(SettingsSessionProviderCommand, "c8y sessions set --no-banner --output json"),
 		WithBindEnv(SettingsSessionProviderSecrets, ""),
+		WithBindEnv(SettingsSessionProviderExtension, ""),
 		WithBindEnv(SettingsPinEntry, ""),
 		WithBindEnv(SettingsSessionAlwaysIncludePassword, false),
 		WithBindEnv(SettingsSessionTokenValidFor, "8h"),
@@ -1128,6 +1133,12 @@ func (c *Config) SessionProvider() string {
 // SessionProviderCommand returns the command to use when logging into a session
 func (c *Config) SessionProviderCommand() string {
 	return c.viper.GetString(SettingsSessionProviderCommand)
+}
+
+// SessionProviderExtension returns the session provider of an extension (<provider> or <extension>/<provider>)
+// which is used by the "extension" provider type
+func (c *Config) SessionProviderExtension() string {
+	return strings.TrimSpace(c.viper.GetString(SettingsSessionProviderExtension))
 }
 
 // SessionProviderSecrets returns the env variables to be included in the external command
