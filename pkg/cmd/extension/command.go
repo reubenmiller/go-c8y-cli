@@ -85,6 +85,15 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					ext["kind"] = string(c.Kind())
 					ext["executable"] = c.Executable()
 
+					providerNames := []string{}
+					if manifest, err := c.Manifest(); err == nil {
+						providers, _ := manifest.ValidSessionProviders()
+						for _, provider := range providers {
+							providerNames = append(providerNames, provider.Name)
+						}
+					}
+					ext["sessionProviders"] = providerNames
+
 					rowText, err := json.Marshal(ext)
 					if err != nil {
 						return cmderrors.NewUserError("Settings error. ", err)

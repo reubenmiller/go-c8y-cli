@@ -1,7 +1,6 @@
 package root
 
 import (
-	"sort"
 	"strings"
 	"testing"
 
@@ -218,22 +217,6 @@ func TestSplitJSONValues(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestMergeEnv(t *testing.T) {
-	base := []string{"PATH=/bin", "C8Y_HOST=https://old", "C8Y_TOKEN=old", "C8Y_PASSWORD=keep", "OTHER=1"}
-	env := mergeEnv(base,
-		map[string]string{"C8Y_HOST": "https://new", "C8Y_EXTENSION_NAME": "foo"},
-		map[string]bool{"C8Y_HOST": true, "C8Y_TOKEN": true},
-	)
-	sort.Strings(env)
-	assert.Equal(t, []string{
-		"C8Y_EXTENSION_NAME=foo",
-		"C8Y_HOST=https://new",
-		"C8Y_PASSWORD=keep",
-		"OTHER=1",
-		"PATH=/bin",
-	}, env)
 }
 
 func TestParseCobraCompletion(t *testing.T) {

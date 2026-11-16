@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -26,19 +25,6 @@ import (
 )
 
 const (
-	// ExtensionContextVersion is the version of the runtime context (environment variables)
-	// which is passed to extension commands. Increase it when variables are added or changed
-	ExtensionContextVersion = "1"
-
-	// Environment variables passed to extension commands
-	EnvExtensionName           = "C8Y_EXTENSION_NAME"
-	EnvExtensionDir            = "C8Y_EXTENSION_DIR"
-	EnvExtensionContextVersion = "C8Y_EXTENSION_CONTEXT_VERSION"
-	EnvBin                     = "C8Y_BIN"
-	EnvSettingsDryRun          = "C8Y_SETTINGS_DEFAULTS_DRY"
-	EnvSettingsMode            = "C8Y_SETTINGS_MODE"
-	EnvSettingsInsecure        = "C8Y_SETTINGS_DEFAULTS_INSECURE"
-
 	// annotationExtension marks the root command of an extension (value is the extension name)
 	annotationExtension = "c8y.extension"
 
@@ -112,61 +98,19 @@ func extensionEnv(f *cmdutil.Factory, ext extensions.Extension) []string {
 
 		mode := cfg.SessionMode().String()
 		set[config.EnvSessionMode] = mode
-		set[EnvSettingsMode] = mode
+		set[extensions.EnvSettingsMode] = mode
 		if cfg.DryRun() {
-			set[EnvSettingsDryRun] = "true"
+			set[extensions.EnvSettingsDryRun] = "true"
 		}
 		if cfg.SkipSSLVerify() {
-			set[EnvSettingsInsecure] = "true"
+			set[extensions.EnvSettingsInsecure] = "true"
 		}
 	}
 
-	set[EnvExtensionName] = ext.Name()
-	set[EnvExtensionDir] = ext.Path()
-	set[EnvExtensionContextVersion] = ExtensionContextVersion
-	if exe, err := os.Executable(); err == nil {
-		set[EnvBin] = exe
-	} else if f.Executable != "" {
-		set[EnvBin] = f.Executable
+	for key, value := range extensions.Variables(ext, f.Executable) {
+		set[key] = value
 	}
-
-	return mergeEnv(os.Environ(), set, unset)
-}
-
-// mergeEnv returns base without the variables in set and unset, followed by the variables in set
-func mergeEnv(base []string, set map[string]string, unset map[string]bool) []string {
-	sameKey := func(a, b string) bool {
-		if runtime.GOOS == "windows" {
-			return strings.EqualFold(a, b)
-		}
-		return a == b
-	}
-	isReplaced := func(name string) bool {
-		for key := range set {
-			if sameKey(key, name) {
-				return true
-			}
-		}
-		for key := range unset {
-			if sameKey(key, name) {
-				return true
-			}
-		}
-		return false
-	}
-
-	env := make([]string, 0, len(base)+len(set))
-	for _, item := range base {
-		name, _, _ := strings.Cut(item, "=")
-		if isReplaced(name) {
-			continue
-		}
-		env = append(env, item)
-	}
-	for key, value := range set {
-		env = append(env, key+"="+value)
-	}
-	return env
+	return extensions.MergeEnv(os.Environ(), set, unset)
 }
 
 // extensionExitError converts the error of an extension process. The extension has already

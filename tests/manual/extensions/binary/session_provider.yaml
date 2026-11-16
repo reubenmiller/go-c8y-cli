@@ -1,0 +1,99 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+# Uses the session provider "hello" of the example extension (pkg/extsdk/examples/c8y-hello).
+# Build it first with:
+#   task build-extension-fixtures
+# The provider returns an authorized session, so no requests are sent.
+config:
+  env:
+    C8Y_SESSION: ""
+    C8Y_HOST: https://active.example.invalid
+    C8Y_TENANT: t12345
+    C8Y_SETTINGS_EXTENSIONS_SYSTEMDIRS: ../pkg/extsdk/examples
+    HELLO_VAULT_TOKEN: example-secret
+
+tests:
+  It selects a session from an extension provider:
+    command: |
+      c8y sessions login --from-extension hello --shell bash -- --name prod
+    exit-code: 0
+    stdout:
+      contains:
+        - export C8Y_HOST='https://prod.example.com'
+        - export C8Y_TENANT='t100'
+        - export C8Y_SESSION='hello://prod'
+    stderr:
+      contains:
+        # The active session is not passed to the provider
+        - 'Selected session "prod" from the example vault (active host: "")'
+
+  It accepts the qualified provider reference:
+    command: |
+      c8y sessions login --from-extension hello/hello --shell bash
+    exit-code: 0
+    stdout:
+      contains:
+        - export C8Y_HOST='https://demo.example.com'
+
+  It uses the extension provider from the settings:
+    command: |
+      c8y sessions login --shell bash -- --name fromsettings
+    exit-code: 0
+    config:
+      env:
+        C8Y_SETTINGS_SESSION_PROVIDER_TYPE: extension
+        C8Y_SETTINGS_SESSION_PROVIDER_EXTENSION: hello
+    stdout:
+      contains:
+        - export C8Y_HOST='https://fromsettings.example.com'
+
+  It keeps using the external provider when only the extension setting is set:
+    command: |
+      c8y sessions login --shell bash
+    exit-code: 0
+    config:
+      env:
+        C8Y_SETTINGS_SESSION_PROVIDER_TYPE: external
+        C8Y_SETTINGS_SESSION_PROVIDER_COMMAND: c8y hello session select --name external
+        C8Y_SETTINGS_SESSION_PROVIDER_EXTENSION: hello
+    stdout:
+      contains:
+        - export C8Y_HOST='https://external.example.com'
+
+  It fails when the provider fails:
+    command: |
+      c8y sessions login --from-extension hello --shell bash
+    # Same exit code as for failing external providers
+    exit-code: 100
+    config:
+      env:
+        HELLO_VAULT_TOKEN: ""
+    stderr:
+      contains:
+        - HELLO_VAULT_TOKEN is not set
+
+  It lists the available providers for an unknown provider:
+    command: |
+      c8y sessions login --from-extension keepass --shell bash
+    exit-code: 101
+    stderr:
+      contains:
+        - unknown session provider "keepass"
+        - hello/hello
+
+  It completes the provider names:
+    command: |
+      c8y __complete sessions login --from-extension ""
+    exit-code: 0
+    stdout:
+      contains:
+        - "hello\tSelect a session from the example vault"
+
+  It shows the session providers of an extension:
+    command: |
+      c8y extensions list --filter "name eq hello" --select name,sessionProviders -o json
+    exit-code: 0
+    stdout:
+      json:
+        name: hello
+        sessionProviders.0: hello

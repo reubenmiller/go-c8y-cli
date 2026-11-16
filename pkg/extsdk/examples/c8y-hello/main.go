@@ -113,6 +113,44 @@ func newContextCmd() *cobra.Command {
 	}
 }
 
+// newSessionCmd is an example session provider. A real provider reads the sessions from a
+// password manager or vault, and lets the user pick one
+func newSessionCmd() *cobra.Command {
+	cmd := &cobra.Command{Use: "session", Short: "Example session provider"}
+
+	var name string
+	selectCmd := &cobra.Command{
+		Use:   "select",
+		Short: "Select a session (declared as session provider in extension.yaml)",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// The secret is declared in extension.yaml, so c8y passes it from the
+			// environment or the pin entry. Talk to the user on stderr only
+			if os.Getenv("HELLO_VAULT_TOKEN") == "" {
+				return fmt.Errorf("HELLO_VAULT_TOKEN is not set")
+			}
+			fmt.Fprintf(os.Stderr, "Selected session %q from the example vault (active host: %q)\n", name, os.Getenv("C8Y_HOST"))
+
+			authorized := true
+			return extsdk.PrintSession(extsdk.Session{
+				Host:       "https://" + name + ".example.com",
+				Tenant:     "t100",
+				Username:   "hello-user",
+				Token:      "example-token",
+				Authorized: &authorized,
+				SessionUri: "hello://" + name,
+			})
+		},
+	}
+	selectCmd.Flags().StringVar(&name, "name", "demo", "Name of the session")
+	// c8y passes its provider flags (e.g. --clear, -v) to providers, so accept them
+	selectCmd.Flags().Bool("clear", false, "Clear the token")
+	selectCmd.Flags().BoolP("verbose", "v", false, "Verbose output")
+	selectCmd.Flags().Bool("debug", false, "Debug output")
+	selectCmd.Flags().String("loginType", "", "Login type")
+	cmd.AddCommand(selectCmd)
+	return cmd
+}
+
 func newExitCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "exit <code>",
@@ -133,6 +171,6 @@ func newExitCmd() *cobra.Command {
 func main() {
 	root := extsdk.NewRootCommand("c8y-hello")
 	root.Short = "Example c8y extension written in Go"
-	root.AddCommand(newServicesCmd(), newDevicesCmd(), newContextCmd(), newExitCmd())
+	root.AddCommand(newServicesCmd(), newDevicesCmd(), newContextCmd(), newSessionCmd(), newExitCmd())
 	extsdk.Execute(root)
 }

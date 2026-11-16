@@ -12,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
@@ -319,9 +320,11 @@ var updateSettingsOptions = map[string]argumentHandler{
 		config.ProviderTypeExternal,
 		config.ProviderTypeFile,
 		config.ProviderTypeStdin,
+		config.ProviderTypeExtension,
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
-	"session.provider.command": {"session.provider.command", "string", config.SettingsSessionProviderCommand, []string{}, nil, cobra.ShellCompDirectiveDefault},
-	"session.provider.secrets": {"session.provider.secrets", "string", config.SettingsSessionProviderSecrets, []string{}, nil, cobra.ShellCompDirectiveNoFileComp},
+	"session.provider.command":   {"session.provider.command", "string", config.SettingsSessionProviderCommand, []string{}, nil, cobra.ShellCompDirectiveDefault},
+	"session.provider.secrets":   {"session.provider.secrets", "string", config.SettingsSessionProviderSecrets, []string{}, nil, cobra.ShellCompDirectiveNoFileComp},
+	"session.provider.extension": {"session.provider.extension", "string", config.SettingsSessionProviderExtension, []string{}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	"pinEntry": {"pinEntry", "string", config.SettingsPinEntry, []string{}, nil, cobra.ShellCompDirectiveDefault},
 
@@ -510,6 +513,12 @@ func NewCmdUpdate(f *cmdutil.Factory) *UpdateSettingsCmd {
 			} else {
 				// values
 				name := args[len(args)-1]
+
+				if name == "session.provider.extension" {
+					// Providers of the installed extensions
+					providers := extensions.ListSessionProviders(f.ExtensionManager().List(), nil)
+					return extensions.SessionProviderCompletions(providers), cobra.ShellCompDirectiveNoFileComp
+				}
 
 				if handler, ok := updateSettingsOptions[name]; ok {
 					return handler.Options, cobra.ShellCompDirectiveNoSpace | handler.ShellCompDirective

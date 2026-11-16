@@ -21,6 +21,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
@@ -40,6 +41,9 @@ type CmdLogin struct {
 	Format   string
 	Provider string
 	Secrets  []string
+
+	// FromExtension is the session provider of an extension (<provider> or <extension>/<provider>)
+	FromExtension string
 
 	// Login options
 	LoginType          string
@@ -89,6 +93,9 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 			$ eval "$( c8y sessions login --from-cmd "c8y-session-bitwarden list --folder c8y" --secrets BW_SESSION --format json )"
 			Set a session from an external command, where the external commands returns the selected session in json format on stdout
 
+			$ eval "$( c8y sessions login --from-extension bitwarden )"
+			Set a session using the session provider "bitwarden" of an installed extension
+
 			$ eval "$( c8y sessions login --from-prompt --host example.cumulocity.com)"
 
 			$ eval "$( c8y sessions login --from-file .env --loginType DEVICE )"
@@ -111,6 +118,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().StringVar(&ccmd.Provider, "provider", "", "Session provider which returns the session to use")
 	cmd.Flags().StringVar(&ccmd.File, "from-file", "", "Read session from a file")
 	cmd.Flags().StringVar(&ccmd.Exec, "from-cmd", "", "External command to execute to get the log in details")
+	cmd.Flags().StringVar(&ccmd.FromExtension, "from-extension", "", "Session provider of an installed extension, i.e. <provider> or <extension>/<provider>")
 	cmd.Flags().BoolVar(&ccmd.Env, "from-env", false, "Read from environment variables")
 	cmd.Flags().BoolVar(&ccmd.Stdin, "from-stdin", false, "Read from standard input")
 	cmd.Flags().BoolVar(&ccmd.Prompt, "from-prompt", false, "Read from user prompted input")
@@ -122,7 +130,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", "", "Shell type to return the environment variables")
 	cmd.Flags().StringVar(&ccmd.LoginType, "loginType", "", "Login type preference, e.g. OAUTH2_INTERNAL, DEVICE (device flow), BROWSER (Authorization Code via browser), BASIC or CERTIFICATE (mTLS). OAUTH2 is a legacy alias for DEVICE. When set to BASIC, any existing token will be cleared")
 	cmd.Flags().StringVar(&ccmd.Mode, "mode", "", "Session mode which controls which commands are allowed, e.g. dev, qual or prod")
-	cmd.Flags().StringSliceVar(&ccmd.Secrets, "secrets", []string{}, "List of secrets to include as env variables when running an external command. Only valid with from-cmd")
+	cmd.Flags().StringSliceVar(&ccmd.Secrets, "secrets", []string{}, "List of secrets to include as env variables when running an external command or extension provider. Only valid with from-cmd or from-extension")
 	cmd.Flags().StringVar(&ccmd.Host, "host", "", "Cumulocity host. Only used with the 'interactive' provider")
 	cmd.Flags().StringVar(&ccmd.SSOScopes, "sso-scopes", "", "SSO Scopes")
 	cmd.Flags().StringVar(&ccmd.SSOAudience, "sso-audience", "", "SSO Audience")
@@ -140,6 +148,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 			config.ProviderTypeExternal,
 			config.ProviderTypeAuto,
 			config.ProviderTypeInteractive,
+			config.ProviderTypeExtension,
 		),
 		completion.WithValidateSet("format", "json", "yaml", "toml", "dotenv"),
 		completion.WithValidateSet("loginType", c8y.LoginTypeOAuth2Internal, c8y.LoginTypeBasic, c8y.LoginTypeNone, c8y.LoginTypeOAuth2, logintype.Device, logintype.Browser, logintype.Certificate),
@@ -150,7 +159,11 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
-	cmd.MarkFlagsMutuallyExclusive("from-file", "from-cmd", "from-stdin", "from-env", "from-prompt")
+	cmd.MarkFlagsMutuallyExclusive("from-file", "from-cmd", "from-stdin", "from-env", "from-prompt", "from-extension")
+	_ = cmd.RegisterFlagCompletionFunc("from-extension", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		providers := extensions.ListSessionProviders(f.ExtensionManager().List(), nil)
+		return extensions.SessionProviderCompletions(providers), cobra.ShellCompDirectiveNoFileComp
+	})
 	cmd.MarkFlagsMutuallyExclusive("output-format", "shell")
 
 	return ccmd
@@ -260,7 +273,66 @@ func (n *CmdLogin) FromInteractive(cmd *cobra.Command) (*c8ysession.CumulocitySe
 	return session, nil
 }
 
-func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySession, error) {
+// providerFlags returns the flags which are passed to external and extension session providers
+func (n *CmdLogin) providerFlags(cfg *config.Config) []string {
+	flags := []string{}
+	if n.ClearToken {
+		flags = append(flags, "--clear")
+	}
+	if n.LoginType != "" {
+		flags = append(flags, fmt.Sprintf("--loginType=%s", n.LoginType))
+	}
+	if n.BrowserCallbackURL != "" {
+		flags = append(flags, fmt.Sprintf("--browserCallback=%s", n.BrowserCallbackURL))
+	}
+	if n.SSOScopes != "" {
+		flags = append(flags, fmt.Sprintf("--sso-scopes=%s", n.SSOScopes))
+	}
+	if n.SSOAudience != "" {
+		flags = append(flags, fmt.Sprintf("--sso-audience=%s", n.SSOAudience))
+	}
+	if cfg.Verbose() {
+		flags = append(flags, "-v")
+	}
+	if cfg.Debug() {
+		flags = append(flags, "--debug")
+	}
+	return flags
+}
+
+// readSecrets returns the values of the given secrets ("KEY=value"), from the environment if set,
+// otherwise from the pin entry prompt. Secrets without a value are skipped
+func readSecrets(cfg *config.Config, keys []string) []string {
+	values := []string{}
+	seen := map[string]bool{}
+	for _, key := range keys {
+		key = strings.TrimSpace(key)
+		if key == "" || seen[key] {
+			continue
+		}
+		seen[key] = true
+		if v := os.Getenv(key); v != "" {
+			values = append(values, fmt.Sprintf("%s=%s", key, v))
+			continue
+		}
+		secret, secretErr := cfg.PromptSecret(key)
+		if secretErr != nil {
+			if !errors.Is(secretErr, prompt.ErrNoPrompter) {
+				cfg.Logger.Warnf("Could not get secret. key=%s, err=%s", key, secretErr)
+			} else {
+				cfg.Logger.Debugf("Secret is not set and no pin entry is configured. key=%s", key)
+			}
+			continue
+		}
+		cfg.Logger.Debugf("Setting env variable secret for session provider. %s", key)
+		values = append(values, fmt.Sprintf("%s=%s", key, secret))
+	}
+	return values
+}
+
+// runProvider runs a session provider command and parses the session which it writes to stdout.
+// stdin and stderr are connected so the provider can interact with the user
+func (n *CmdLogin) runProvider(argv []string, env []string, format string) (*c8ysession.CumulocitySession, error) {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return nil, err
@@ -270,22 +342,57 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 		return nil, err
 	}
 
-	// add secrets when executing the environment in case
-	// if the external command requires extra authentication
-	env := os.Environ()
-	for _, key := range n.Secrets {
-		if v := os.Getenv(key); v == "" {
-			secret, secretErr := cfg.PromptSecret(key)
-			if secretErr != nil {
-				if !errors.Is(secretErr, prompt.ErrNoPrompter) {
-					cfg.Logger.Warnf("Could not get secret. key=%s, err=%s", key, secretErr)
-				}
-			} else {
-				cfg.Logger.Debugf("Setting env variable secret for external provider. %s", key)
-				env = append(env, fmt.Sprintf("%s=%s", key, secret))
-			}
+	cmd := exec.Command(argv[0], argv[1:]...)
+	cmd.Env = env
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+
+	log.Infof("Executing session provider: %s", shellquote.Join(argv...))
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	if format == "" {
+		// Try to detect the format
+		if jsonUtilities.IsJSONObject(output) {
+			format = "json"
+			log.Infof("Detected input format: %s", format)
+		} else {
+			format = "dotenv"
+			log.Infof("Guessing input format: %s", format)
 		}
 	}
+
+	if client, err := n.factory.Client(); err == nil {
+		if cfg.HideSensitive() {
+			log.Infof("Parsing session provider output: %s", cfg.HideSensitiveInformation(client, strings.TrimSpace(string(output))))
+		} else {
+			log.Infof("Parsing session provider output: %s", strings.TrimSpace(string(output)))
+		}
+	} else {
+		log.Infof("Parsing session provider output")
+	}
+	return n.FromReader(bytes.NewReader(output), format)
+}
+
+func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySession, error) {
+	cfg, err := n.factory.Config()
+	if err != nil {
+		return nil, err
+	}
+
+	// add secrets when executing the environment in case
+	// if the external command requires extra authentication.
+	// Note: Secrets which are already set are part of the environment
+	env := os.Environ()
+	missingSecrets := []string{}
+	for _, key := range n.Secrets {
+		if os.Getenv(key) == "" {
+			missingSecrets = append(missingSecrets, key)
+		}
+	}
+	env = append(env, readSecrets(cfg, missingSecrets)...)
 
 	providerCmd := strings.TrimSpace(n.Exec)
 	if providerCmd == "" {
@@ -301,68 +408,78 @@ func (n *CmdLogin) FromExternalProvider(args []string) (*c8ysession.CumulocitySe
 	}
 	providerCommand := make([]string, 0, len(cmdArgs))
 	providerCommand = append(providerCommand, cmdArgs...)
-
-	if n.ClearToken {
-		providerCommand = append(providerCommand, "--clear")
-	}
-
-	if n.LoginType != "" {
-		providerCommand = append(providerCommand, fmt.Sprintf("--loginType=%s", n.LoginType))
-	}
-
-	if n.BrowserCallbackURL != "" {
-		providerCommand = append(providerCommand, fmt.Sprintf("--browserCallback=%s", n.BrowserCallbackURL))
-	}
-
-	if n.SSOScopes != "" {
-		providerCommand = append(providerCommand, fmt.Sprintf("--sso-scopes=%s", n.SSOScopes))
-	}
-
-	if n.SSOAudience != "" {
-		providerCommand = append(providerCommand, fmt.Sprintf("--sso-audience=%s", n.SSOAudience))
-	}
-
-	if cfg.Verbose() {
-		providerCommand = append(providerCommand, "-v")
-	}
-
-	if cfg.Debug() {
-		providerCommand = append(providerCommand, "--debug")
-	}
-
+	providerCommand = append(providerCommand, n.providerFlags(cfg)...)
 	providerCommand = append(providerCommand, args...)
-	cmd := exec.Command(providerCommand[0], providerCommand[1:]...)
-	cmd.Env = env
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
 
-	log.Infof("Executing session provider: %s", shellquote.Join(providerCommand...))
-	output, err := cmd.Output()
+	return n.runProvider(providerCommand, env, n.Format)
+}
+
+// extensionProviderEnv returns the environment of an extension session provider: the current
+// environment without the variables of the active session, the extension variables, and the secrets
+func extensionProviderEnv(cfg *config.Config, provider *extensions.InstalledSessionProvider, executable string, secrets []string) []string {
+	unset := map[string]bool{}
+	for _, key := range c8ysession.GetSessionEnvKeys() {
+		unset[key] = true
+	}
+	// The secrets are added again below
+	keys := append(append([]string{}, provider.Provider.Secrets...), secrets...)
+	for _, key := range keys {
+		delete(unset, key)
+	}
+	set := extensions.Variables(provider.Extension, executable)
+	base := extensions.MergeEnv(os.Environ(), nil, unset)
+	env := extensions.MergeEnv(base, set, nil)
+
+	secretValues := readSecrets(cfg, keys)
+	names := []string{}
+	for _, item := range secretValues {
+		name, _, _ := strings.Cut(item, "=")
+		names = append(names, name)
+	}
+	cfg.Logger.Infof("Passing secrets to session provider. provider=%s, secrets=%v", provider.Ref(), names)
+	secretSet := map[string]string{}
+	for _, item := range secretValues {
+		name, value, _ := strings.Cut(item, "=")
+		secretSet[name] = value
+	}
+	return extensions.MergeEnv(env, secretSet, nil)
+}
+
+// FromExtensionProvider gets the session from a session provider of an installed extension
+func (n *CmdLogin) FromExtensionProvider(ref string, args []string) (*c8ysession.CumulocitySession, error) {
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return nil, err
 	}
-
-	if n.Format == "" {
-		// Try to detect the format
-		if jsonUtilities.IsJSONObject(output) {
-			n.Format = "json"
-			log.Infof("Detected input format: %s", n.Format)
-		} else {
-			n.Format = "dotenv"
-			log.Infof("Guessing input format: %s", n.Format)
-		}
+	if strings.TrimSpace(ref) == "" {
+		return nil, cmderrors.NewUserError("no extension session provider is set. Use --from-extension <provider>, or set it using 'c8y settings update session.provider.extension <provider>'")
 	}
 
-	if client, err := n.factory.Client(); err == nil {
-		if cfg.HideSensitive() {
-			log.Infof("Parsing session provider output: %s", cfg.HideSensitiveInformation(client, strings.TrimSpace(string(output))))
-		} else {
-			log.Infof("Parsing session provider output: %s", strings.TrimSpace(string(output)))
-		}
-	} else {
-		log.Infof("Parsing session provider output")
+	providers := extensions.ListSessionProviders(n.factory.ExtensionManager().List(), func(ext extensions.Extension, msg string) {
+		cfg.Logger.Warnf("%s. extension=%s", msg, ext.Name())
+	})
+	provider, err := extensions.ResolveSessionProvider(providers, ref)
+	if err != nil {
+		return nil, cmderrors.NewUserError(err)
 	}
-	return n.FromReader(bytes.NewReader(output), n.Format)
+
+	exe := provider.Extension.Executable()
+	if _, err := os.Stat(exe); err != nil {
+		return nil, cmderrors.NewUserError(fmt.Sprintf("the binary of extension %s was not found (%s). Reinstall or update the extension using 'c8y extensions update %s'", provider.Extension.Name(), exe, provider.Extension.Name()))
+	}
+
+	argv := []string{exe}
+	argv = append(argv, provider.Provider.Exec...)
+	argv = append(argv, n.providerFlags(cfg)...)
+	argv = append(argv, args...)
+
+	format := n.Format
+	if format == "" {
+		format = provider.Provider.OutputFormat()
+	}
+
+	env := extensionProviderEnv(cfg, provider, n.factory.Executable, n.Secrets)
+	return n.runProvider(argv, env, format)
 }
 
 func (n *CmdLogin) FromViper(v *viper.Viper) (*c8ysession.CumulocitySession, error) {
@@ -486,7 +603,12 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if !oneHasChanged(cmd, "from-cmd", "from-file", "from-env", "from-stdin", "from-prompt") {
+	if cmd.Flags().Changed("from-extension") {
+		// Explicit extension provider overrides the configured provider type
+		n.Provider = config.ProviderTypeExtension
+	}
+
+	if !oneHasChanged(cmd, "from-cmd", "from-file", "from-env", "from-stdin", "from-prompt", "from-extension") {
 
 		// Set defaults from config if values from flags aren't provided
 		if !cmd.Flags().Changed("provider") {
@@ -495,6 +617,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		n.Exec = cfg.SessionProviderCommand()
+		n.FromExtension = cfg.SessionProviderExtension()
 	}
 
 	if !cmd.Flags().Changed("secrets") {
@@ -538,6 +661,8 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		session, err = n.FromInteractive(cmd)
 	case config.ProviderTypeExternal:
 		session, err = n.FromExternalProvider(args)
+	case config.ProviderTypeExtension:
+		session, err = n.FromExtensionProvider(n.FromExtension, args)
 	case config.ProviderTypeEnv:
 		session, err = n.FromEnv()
 	case config.ProviderTypeStdin:

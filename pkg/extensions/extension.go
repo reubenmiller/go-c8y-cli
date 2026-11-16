@@ -1,7 +1,9 @@
 package extensions
 
 import (
+	"fmt"
 	"io"
+	"regexp"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/ghrepo"
@@ -65,6 +67,73 @@ type Manifest struct {
 
 	// Commands declares commands which are provided by the binary
 	Commands []BinaryCommand `json:"commands,omitempty" yaml:"commands,omitempty"`
+
+	// SessionProviders declares session providers which are provided by the binary
+	SessionProviders []SessionProvider `json:"sessionProviders,omitempty" yaml:"sessionProviders,omitempty"`
+}
+
+// Session provider output formats
+const (
+	ProviderFormatAuto   = "auto"
+	ProviderFormatJSON   = "json"
+	ProviderFormatDotenv = "dotenv"
+)
+
+// SessionProvider is a session provider which is run by "c8y sessions login" to select a session
+type SessionProvider struct {
+	// Name of the provider
+	Name string `json:"name" yaml:"name"`
+
+	// Description shown in the completion
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+
+	// Exec are the arguments passed to the binary before the provider flags
+	Exec []string `json:"exec,omitempty" yaml:"exec,omitempty"`
+
+	// Secrets are the names of environment variables which the provider needs
+	Secrets []string `json:"secrets,omitempty" yaml:"secrets,omitempty"`
+
+	// Format of the provider output: json, dotenv or auto (default)
+	Format string `json:"format,omitempty" yaml:"format,omitempty"`
+}
+
+// OutputFormat returns the declared output format, or an empty string for automatic detection
+func (p *SessionProvider) OutputFormat() string {
+	if strings.EqualFold(p.Format, ProviderFormatAuto) {
+		return ""
+	}
+	return strings.ToLower(p.Format)
+}
+
+var sessionProviderName = regexp.MustCompile(`^[a-z][a-z0-9-]*$`)
+
+// ValidSessionProviders returns the usable session providers of the manifest, and warnings for
+// providers which are ignored: all providers if no binary is declared, providers with an invalid
+// name or format, and duplicate names (the first one is used)
+func (m *Manifest) ValidSessionProviders() ([]SessionProvider, []string) {
+	if len(m.SessionProviders) == 0 {
+		return nil, nil
+	}
+	if m.Binary == nil {
+		return nil, []string{"session providers are ignored as the extension does not declare a binary"}
+	}
+	providers := make([]SessionProvider, 0, len(m.SessionProviders))
+	warnings := []string{}
+	seen := map[string]bool{}
+	for _, provider := range m.SessionProviders {
+		switch {
+		case !sessionProviderName.MatchString(provider.Name):
+			warnings = append(warnings, fmt.Sprintf("session provider is ignored as the name is invalid. name=%q, expected=%s", provider.Name, sessionProviderName.String()))
+		case seen[provider.Name]:
+			warnings = append(warnings, fmt.Sprintf("duplicate session provider is ignored. name=%s", provider.Name))
+		case provider.Format != "" && provider.OutputFormat() != "" && provider.OutputFormat() != ProviderFormatJSON && provider.OutputFormat() != ProviderFormatDotenv:
+			warnings = append(warnings, fmt.Sprintf("session provider is ignored as the format is invalid. name=%s, format=%s", provider.Name, provider.Format))
+		default:
+			seen[provider.Name] = true
+			providers = append(providers, provider)
+		}
+	}
+	return providers, warnings
 }
 
 // Binary completion modes

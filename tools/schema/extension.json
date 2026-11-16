@@ -115,6 +115,69 @@
             "required": [
                 "name"
             ]
+        },
+        "sessionProvider": {
+            "type": "object",
+            "title": "Session provider",
+            "description": "Session provider which 'c8y sessions login' (and set-session) runs to select a session. Requires the binary property. The binary must print the selected session to stdout (json or dotenv), and can use stderr and stdin to interact with the user",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "title": "Provider name",
+                    "description": "Name used to select the provider, e.g. 'c8y sessions login --from-extension <name>'",
+                    "pattern": "^[a-z][a-z0-9-]*$",
+                    "examples": [
+                        "bitwarden"
+                    ]
+                },
+                "description": {
+                    "type": "string",
+                    "title": "Description",
+                    "description": "Description shown in the tab completion"
+                },
+                "exec": {
+                    "type": "array",
+                    "title": "Binary arguments",
+                    "description": "Arguments passed to the binary before the provider flags (e.g. --clear, --loginType) and the user's arguments",
+                    "items": {
+                        "type": "string"
+                    },
+                    "examples": [
+                        [
+                            "list"
+                        ]
+                    ]
+                },
+                "secrets": {
+                    "type": "array",
+                    "title": "Secrets",
+                    "description": "Names of environment variables the provider needs. The value is read from the environment, otherwise from the pin entry prompt",
+                    "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                    },
+                    "examples": [
+                        [
+                            "BW_SESSION"
+                        ]
+                    ]
+                },
+                "format": {
+                    "type": "string",
+                    "title": "Output format",
+                    "description": "Format of the session printed by the provider",
+                    "enum": [
+                        "auto",
+                        "json",
+                        "dotenv"
+                    ],
+                    "default": "auto"
+                }
+            },
+            "required": [
+                "name"
+            ]
         }
     },
     "properties": {
@@ -142,6 +205,14 @@
             "description": "Commands provided by the extension's binary",
             "items": {
                 "$ref": "#/definitions/command"
+            }
+        },
+        "sessionProviders": {
+            "type": "array",
+            "title": "Session providers",
+            "description": "Session providers provided by the extension's binary",
+            "items": {
+                "$ref": "#/definitions/sessionProvider"
             }
         }
     }
