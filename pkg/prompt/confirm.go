@@ -159,8 +159,9 @@ func Confirm(prefix, label string, target, defaultValue string, force bool) (Con
 
 func Select(message string, options []string, defaultOption string) (string, error) {
 	if !clio.IsInteractiveTerminal(os.Stderr) {
-		// Can't prompt user, so return the default option
-		return defaultOption, nil
+		// Can't prompt user, so return the default option (without its description)
+		value, _, _ := strings.Cut(defaultOption, "\t")
+		return value, nil
 	}
 	descriptions := make(map[string]string, 0)
 	for _, opt := range options {
