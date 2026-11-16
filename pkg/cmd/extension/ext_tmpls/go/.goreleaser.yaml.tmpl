@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# Builds the release archives which "c8y extensions install <owner>/[[.Name]]" installs.
+# Each archive contains the binary (bin/[[.Name]]) and the extension files.
+version: 2
+
+project_name: [[.Name]]
+
+builds:
+  - binary: bin/[[.Name]]
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w
+
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - extension.yaml
+      - README.md
+      - views/**
+      # Add other extension folders when you use them
+      # - api/**
+      # - templates/**
+      # - commands/**
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github

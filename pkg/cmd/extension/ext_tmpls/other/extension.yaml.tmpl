@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extension.json
+version: v1
+
+# The binary is mounted at the extension root. Arguments which do not match a declared
+# command (or an api/ or commands/ command) are passed to the binary
+binary:
+  path: bin/[[.Name]]
+
+# Declared commands are listed in the help. Use "output: json" when the command writes
+# json to stdout, so c8y can format it
+commands: []
+#  - name: services list
+#    description: List services
+#    output: json

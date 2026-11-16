@@ -19,6 +19,8 @@ type SourceKind int
 const (
 	// SourceAPI is a command defined in an API specification file (api/*.yaml)
 	SourceAPI SourceKind = iota
+	// SourceBinary is a command declared in the extension manifest (extension.yaml) which runs the extension's binary
+	SourceBinary
 	// SourceScript is an executable file under the commands/ folder
 	SourceScript
 )
@@ -27,6 +29,8 @@ func (s SourceKind) String() string {
 	switch s {
 	case SourceAPI:
 		return "api"
+	case SourceBinary:
+		return "binary"
 	case SourceScript:
 		return "script"
 	}
@@ -44,6 +48,24 @@ type Leaf struct {
 	// Build creates the cobra command. The returned command's Use field is set to the
 	// last element of the command's path
 	Build func() (*cobra.Command, error)
+}
+
+// Mount passes all arguments under a command path to a single handler (e.g. the extension's binary).
+// A mount is not a leaf: other commands can be added below the mount path, and they take precedence
+// over the mount. Any other arguments are passed to the mount.
+type Mount struct {
+	// Origin of the mount, e.g. a file path. Only used for conflict reporting
+	Origin string
+
+	// Short description, used if the mount path is not also a command group with a description
+	Short string
+
+	// Long description which is appended to the group's long description
+	Long string
+
+	// Configure is called with the cobra command which is created for the mount path. It
+	// should set RunE (and optionally ValidArgsFunction). It is called once for the mount
+	Configure func(cmd *cobra.Command) error
 }
 
 // Conflict describes a command which was dropped because another command
@@ -76,6 +98,7 @@ type node struct {
 
 	children map[string]*node
 	leaf     *Leaf
+	mount    *Mount
 }
 
 func newNode(name string) *node {
@@ -177,6 +200,14 @@ func (t *Tree) AddLeaf(path []string, leaf Leaf) {
 		return
 	}
 
+	if existing.mount != nil && !existing.group {
+		// A runnable command at the mount path takes precedence over the mount
+		t.conflict(path, leaf.Origin, existing.mount.Origin)
+		existing.mount = nil
+		existing.leaf = &leaf
+		return
+	}
+
 	if existing.group {
 		t.conflict(path, existing.groupOrigin, leaf.Origin)
 		return
@@ -193,13 +224,43 @@ func (t *Tree) AddLeaf(path []string, leaf Leaf) {
 	existing.leaf = &leaf
 }
 
+// AddMount adds a mount at the given path. An empty path mounts at the root of the tree.
+// If a runnable command already exists at the path, the mount is dropped. If a group exists
+// at the path, then the group's commands are used for their paths, and any other arguments
+// are passed to the mount. If more than one mount is added at the same path, the first one is kept.
+func (t *Tree) AddMount(path []string, mount Mount) {
+	var target *node
+	if len(path) == 0 {
+		target = t.root
+	} else {
+		parent := t.ensureGroup(path[:len(path)-1], mount.Origin)
+		name := path[len(path)-1]
+		existing, ok := parent.children[name]
+		if !ok {
+			existing = newNode(name)
+			parent.children[name] = existing
+		}
+		target = existing
+	}
+
+	if target.leaf != nil {
+		t.conflict(path, target.leaf.Origin, mount.Origin)
+		return
+	}
+	if target.mount != nil {
+		t.conflict(path, target.mount.Origin, mount.Origin)
+		return
+	}
+	target.mount = &mount
+}
+
 // IsEmpty returns true if the tree does not contain any runnable commands
 func (t *Tree) IsEmpty() bool {
 	return !hasLeaf(t.root)
 }
 
 func hasLeaf(n *node) bool {
-	if n.leaf != nil {
+	if n.leaf != nil || n.mount != nil {
 		return true
 	}
 	for _, child := range n.children {
@@ -249,8 +310,61 @@ func toCobra(n *node, errs *[]error) *cobra.Command {
 			group.AddCommand(child)
 		}
 	}
+
+	if n.mount != nil {
+		if err := configureMount(group, n, n.mount); err != nil {
+			*errs = append(*errs, fmt.Errorf("%s: %w", n.mount.Origin, err))
+			if !group.HasSubCommands() {
+				return nil
+			}
+		}
+		return group
+	}
+
 	if !group.HasSubCommands() {
 		return nil
 	}
 	return group
+}
+
+// IsHelpRequest returns true if the arguments only request help for the command
+func IsHelpRequest(args []string) bool {
+	return len(args) == 1 && (args[0] == "-h" || args[0] == "--help")
+}
+
+func configureMount(cmd *cobra.Command, n *node, mount *Mount) error {
+	if !n.explicitDesc && mount.Short != "" {
+		cmd.Short = mount.Short
+	}
+	if mount.Long != "" {
+		if cmd.Long != "" {
+			cmd.Long += "\n\n" + mount.Long
+		} else {
+			cmd.Long = mount.Long
+		}
+	}
+
+	// Pass all arguments (including flags) to the mount
+	cmd.Args = cobra.ArbitraryArgs
+	cmd.DisableFlagParsing = true
+
+	if err := mount.Configure(cmd); err != nil {
+		return err
+	}
+	if cmd.RunE == nil && cmd.Run == nil {
+		return fmt.Errorf("mount did not set a run function")
+	}
+
+	if cmd.HasSubCommands() {
+		// Show the help of the group (which lists the other commands), as the
+		// mount's own help would not include them
+		run := cmd.RunE
+		cmd.RunE = func(c *cobra.Command, args []string) error {
+			if IsHelpRequest(args) {
+				return c.Help()
+			}
+			return run(c, args)
+		}
+	}
+	return nil
 }

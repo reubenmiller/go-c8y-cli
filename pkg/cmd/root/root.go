@@ -554,7 +554,7 @@ func isTabCompletionCommand() bool {
 
 // ConvertToCobraCommands adds the commands provided by the extensions to the given root command.
 // Each extension is added under its own name, and commands from all of the extension's
-// command sources (api specifications and scripts) are merged into a single command tree.
+// command sources (api specifications, binary and scripts) are merged into a single command tree.
 func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions []extensions.Extension) error {
 	// Enable flag parsing when using tab completion, otherwise disable it
 	// as it affects passing the arguments to the extension binary
@@ -579,6 +579,10 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 			errs = append(errs, fmt.Errorf("%w. extension_name=%s", err, extName))
 		}
 
+		if err := addExtensionBinaryCommands(f, log, tree, ext); err != nil {
+			errs = append(errs, fmt.Errorf("%w. extension_name=%s", err, extName))
+		}
+
 		if err := addExtensionScriptCommands(f, tree, ext, disableFlagParsing); err != nil {
 			errs = append(errs, fmt.Errorf("%w. extension_name=%s", err, extName))
 		}
@@ -590,6 +594,10 @@ func ConvertToCobraCommands(f *cmdutil.Factory, cmd *cobra.Command, extensions [
 
 		// Only add the extension if it has at least one command
 		if extRoot != nil {
+			if extRoot.Annotations == nil {
+				extRoot.Annotations = map[string]string{}
+			}
+			extRoot.Annotations[annotationExtension] = extName
 			cmd.AddCommand(extRoot)
 		}
 	}
@@ -668,7 +676,6 @@ func addExtensionScriptCommands(f *cmdutil.Factory, tree *cmdtree.Tree, ext exte
 		return err
 	}
 
-	extName := ext.Name()
 	for _, command := range commands {
 		path := strings.Split(command.Name(), " ")
 		name := path[len(path)-1]
@@ -684,14 +691,7 @@ func addExtensionScriptCommands(f *cmdutil.Factory, tree *cmdtree.Tree, ext exte
 					FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 					DisableFlagParsing: disableFlagParsing,
 					RunE: func(cmd *cobra.Command, args []string) error {
-						// Get the logger at runtime, as it is reconfigured after the commands are created
-						log, err := f.Logger()
-						if err != nil {
-							return err
-						}
-						log.Infof("Executing extension. name: %s, command: %s, args: %v", extName, exe, args)
-						_, err = f.ExtensionManager().Execute(exe, args, false, f.IOStreams.In, f.IOStreams.Out, f.IOStreams.ErrOut)
-						return err
+						return runExtension(f, ext, exe, args, false, f.IOStreams.Out)
 					},
 				}, nil
 			},

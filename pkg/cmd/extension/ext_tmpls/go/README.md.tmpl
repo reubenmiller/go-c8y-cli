@@ -1,0 +1,28 @@
+# [[.Name]]
+
+go-c8y-cli extension written in Go, using the [extension SDK](https://pkg.go.dev/github.com/reubenmiller/go-c8y-cli/pkg/extsdk).
+
+## Install
+
+```sh
+c8y extensions install <owner>/[[.Name]]
+```
+
+c8y installs the release archive for your platform. Repositories without releases are installed using git, but then the binary has to be built manually.
+
+## Development
+
+```sh
+go build -o bin/[[.Name]] .
+c8y extensions install .
+c8y [[.ExtName]] services list
+```
+
+The extension is installed as a link to this folder, so rebuilding the binary is enough to see your changes.
+
+* `extension.yaml` declares the binary and its commands
+* `views/` contains views which c8y uses to display the output of the commands
+
+## Release
+
+Push a tag starting with `v` (for example `v1.0.0`). The release workflow uses [GoReleaser](https://goreleaser.com) to build an archive for each platform, with the binary and the extension files, and a `checksums.txt` file which c8y uses to verify the download.

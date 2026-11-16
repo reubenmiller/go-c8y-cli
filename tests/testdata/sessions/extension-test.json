@@ -1,0 +1,11 @@
+{
+  "host": "https://session.invalid",
+  "tenant": "t98765",
+  "username": "extension-user",
+  "password": "not-passed-to-extensions",
+  "settings": {
+    "encryption": {
+      "enabled": false
+    }
+  }
+}

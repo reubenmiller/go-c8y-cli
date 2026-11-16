@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
+---
+group:
+  name: devices
+  description: Device commands
+
+commands:
+  - name: get
+    description: Get a device
+    method: GET
+    path: inventory/managedObjects/{id}
+    pathParameters:
+      - name: id
+        type: device[]
+        pipeline: true
+        required: true
+        description: Device

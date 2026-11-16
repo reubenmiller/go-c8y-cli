@@ -114,6 +114,9 @@ func MainRun() {
 		return results, cobra.ShellCompDirectiveNoFileComp
 	}
 
+	// Extension commands don't parse c8y flags, so handle them before running the command
+	expandedArgs = root.PrepareExtensionArgs(rootCmd.Command, expandedArgs)
+
 	Logger.Debugf("Expanded args: %v", expandedArgs)
 	rootCmd.SetArgs(expandedArgs)
 
@@ -207,7 +210,8 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 }
 
 func hasCommand(rootCmd *cobra.Command, args []string) bool {
-	c, _, err := rootCmd.Traverse(args)
+	// Note: Find does not parse any flags (unlike Traverse), so flags are only parsed once
+	c, _, err := rootCmd.Find(args)
 	return err == nil && c != rootCmd
 }
 
@@ -264,19 +268,6 @@ func setArgs(cmd *cobra.Command, cmdFactory *cmdutil.Factory) ([]string, error) 
 				return nil, err
 			}
 			os.Exit(int(cmderrors.ExitOK))
-		} else if len(expandedArgs) > 0 && !hasCommand(cmd.Root(), expandedArgs) {
-
-			extensionManager := cmdFactory.ExtensionManager()
-			if found, err := extensionManager.Dispatch(expandedArgs, os.Stdin, os.Stdout, os.Stderr); err != nil {
-				var execError *exec.ExitError
-				if errors.As(err, &execError) {
-					return nil, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCode(execError.ExitCode()), execError)
-				}
-				fmt.Fprintf(cmdFactory.IOStreams.ErrOut, "failed to run extension: %s\n", err)
-				return nil, cmderrors.NewSystemError("failed to run extension")
-			} else if found {
-				return nil, cmderrors.NewErrorWithExitCode(0, nil)
-			}
 		}
 	}
 	return expandedArgs, nil

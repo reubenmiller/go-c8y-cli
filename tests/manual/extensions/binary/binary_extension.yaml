@@ -1,0 +1,180 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+# Uses the example binary extension from the extension SDK (pkg/extsdk/examples/c8y-hello),
+# which is loaded from a system-wide extension folder. Build it first with:
+#   task build-extension-fixtures
+config:
+  env:
+    # Placeholder session. No requests are sent to the host
+    C8Y_SESSION: ""
+    C8Y_HOST: https://example.invalid
+    C8Y_TENANT: t12345
+    C8Y_SETTINGS_EXTENSIONS_SYSTEMDIRS: ../pkg/extsdk/examples
+
+tests:
+  It lists the binary extension from the system folder:
+    command: |
+      c8y extensions list --select name,kind -o csv
+    exit-code: 0
+    stdout:
+      contains:
+        - hello,system
+
+  It formats the json output of a declared binary command:
+    command: |
+      c8y hello services list --select name -o csv
+    exit-code: 0
+    stdout:
+      exactly: |
+        ingest
+        reports
+        alerts
+
+  It passes the other arguments of a json command to the binary:
+    command: |
+      c8y hello services list --status stopped --select name,status -o csv
+    exit-code: 0
+    stdout:
+      exactly: reports,stopped
+
+  It shows the help of a json command without processing it:
+    command: |
+      c8y hello services list --help
+    exit-code: 0
+    stdout:
+      contains:
+        - "Usage:"
+        - "--status"
+    stderr:
+      not-contains:
+        - json
+
+  It uses the view provided by the extension:
+    command: |
+      c8y hello services list -o table --view auto
+    exit-code: 0
+    stdout:
+      contains:
+        - "| name "
+        - "| status "
+
+  It passes unknown commands to the binary mounted at the extension root:
+    command: |
+      c8y hello exit 0 --session not-a-c8y-flag-here
+    # "exit" is not declared, so all arguments (including --session) are passed to the binary
+    exit-code: 1
+    stderr:
+      contains:
+        - "unknown flag: --session"
+
+  It passes the runtime context to the extension:
+    command: |
+      c8y hello context
+    exit-code: 0
+    stdout:
+      json:
+        name: hello
+        version: "1"
+        host: https://example.invalid
+        tenant: t12345
+
+  It runs an api command in the same group as a binary command:
+    command: |
+      c8y hello devices get --id 12345 --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /inventory/managedObjects/12345
+
+  It lists api and binary commands in the same group:
+    command: |
+      c8y hello devices --help
+    exit-code: 0
+    stdout:
+      contains:
+        - count
+        - get
+
+  It uses the exit code of the binary:
+    command: |
+      c8y hello exit 4
+    exit-code: 4
+    stderr:
+      contains:
+        - exiting with code 4
+
+  It passes dry run to the extension:
+    command: |
+      c8y --dry hello devices count
+    exit-code: 0
+    stderr:
+      contains:
+        - "dry run: would count the devices in https://example.invalid"
+
+  It passes the session from the session flag to the extension:
+    command: |
+      c8y --session testdata/sessions/extension-test.json hello context
+    exit-code: 0
+    stdout:
+      json:
+        host: https://session.invalid
+        tenant: t98765
+
+  It applies global flags after a declared command:
+    command: |
+      c8y hello context --session testdata/sessions/extension-test.json --dry --select host,tenant,dry -o csv
+    exit-code: 0
+    stdout:
+      exactly: https://session.invalid,t98765,true
+
+  It completes the values of global flags after a declared command:
+    command: |
+      c8y __complete hello context --sessionMode ""
+    exit-code: 0
+    stdout:
+      contains:
+        - "dev\tDevelopment mode (no restrictions)"
+
+  It forwards tab completion to the binary:
+    command: |
+      c8y __complete hello services list --status ""
+    exit-code: 0
+    stdout:
+      contains:
+        - running
+        - stopped
+
+  It completes the values of c8y output flags of json commands:
+    command: |
+      c8y __complete hello services list --output ""
+    exit-code: 0
+    stdout:
+      contains:
+        - "table\ttable format"
+        - "csv\tcsv format without headers"
+
+  It completes the binary flags after c8y output flags:
+    command: |
+      c8y __complete hello services list -o csv --status ""
+    exit-code: 0
+    stdout:
+      contains:
+        - running
+        - stopped
+
+  It installs a binary extension from a local folder:
+    command: |
+      export C8Y_SETTINGS_EXTENSIONS_DATADIR="$(mktemp -d)"
+      export C8Y_SETTINGS_EXTENSIONS_SYSTEMDIRS=/nonexistent
+      c8y extensions install ../pkg/extsdk/examples/c8y-hello --name hellolocal >/dev/null
+      c8y extensions list --select name,kind -o csv
+      c8y hellolocal services list --select name -o csv
+      rm -rf "$C8Y_SETTINGS_EXTENSIONS_DATADIR"
+    exit-code: 0
+    stdout:
+      exactly: |
+        hellolocal,local
+        ingest
+        reports
+        alerts

@@ -450,7 +450,8 @@ var updateSettingsOptions = map[string]argumentHandler{
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// extensions
-	"extensions.datadir": {"extensions.datadir", "string", config.SettingsExtensionDataDir, []string{}, nil, cobra.ShellCompDirectiveDefault},
+	"extensions.datadir":    {"extensions.datadir", "string", config.SettingsExtensionDataDir, []string{}, nil, cobra.ShellCompDirectiveDefault},
+	"extensions.systemDirs": {"extensions.systemDirs", "string", config.SettingsExtensionSystemDirs, []string{}, nil, cobra.ShellCompDirectiveDefault},
 
 	// remote access
 	"remoteaccess.sshuser": {"remoteaccess.sshuser", "string", config.SettingsRemoteAccessDefaultSSHUser, []string{

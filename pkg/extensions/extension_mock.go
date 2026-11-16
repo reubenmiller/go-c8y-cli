@@ -26,6 +26,9 @@ var _ Extension = &ExtensionMock{}
 //			CurrentVersionFunc: func() string {
 //				panic("mock out the CurrentVersion method")
 //			},
+//			ExecutableFunc: func() string {
+//				panic("mock out the Executable method")
+//			},
 //			IsBinaryFunc: func() bool {
 //				panic("mock out the IsBinary method")
 //			},
@@ -34,6 +37,12 @@ var _ Extension = &ExtensionMock{}
 //			},
 //			IsPinnedFunc: func() bool {
 //				panic("mock out the IsPinned method")
+//			},
+//			KindFunc: func() Kind {
+//				panic("mock out the Kind method")
+//			},
+//			ManifestFunc: func() (*Manifest, error) {
+//				panic("mock out the Manifest method")
 //			},
 //			NameFunc: func() string {
 //				panic("mock out the Name method")
@@ -69,6 +78,9 @@ type ExtensionMock struct {
 	// CurrentVersionFunc mocks the CurrentVersion method.
 	CurrentVersionFunc func() string
 
+	// ExecutableFunc mocks the Executable method.
+	ExecutableFunc func() string
+
 	// IsBinaryFunc mocks the IsBinary method.
 	IsBinaryFunc func() bool
 
@@ -77,6 +89,12 @@ type ExtensionMock struct {
 
 	// IsPinnedFunc mocks the IsPinned method.
 	IsPinnedFunc func() bool
+
+	// KindFunc mocks the Kind method.
+	KindFunc func() Kind
+
+	// ManifestFunc mocks the Manifest method.
+	ManifestFunc func() (*Manifest, error)
 
 	// NameFunc mocks the Name method.
 	NameFunc func() string
@@ -107,6 +125,9 @@ type ExtensionMock struct {
 		// CurrentVersion holds details about calls to the CurrentVersion method.
 		CurrentVersion []struct {
 		}
+		// Executable holds details about calls to the Executable method.
+		Executable []struct {
+		}
 		// IsBinary holds details about calls to the IsBinary method.
 		IsBinary []struct {
 		}
@@ -115,6 +136,12 @@ type ExtensionMock struct {
 		}
 		// IsPinned holds details about calls to the IsPinned method.
 		IsPinned []struct {
+		}
+		// Kind holds details about calls to the Kind method.
+		Kind []struct {
+		}
+		// Manifest holds details about calls to the Manifest method.
+		Manifest []struct {
 		}
 		// Name holds details about calls to the Name method.
 		Name []struct {
@@ -138,9 +165,12 @@ type ExtensionMock struct {
 	lockAliases         sync.RWMutex
 	lockCommands        sync.RWMutex
 	lockCurrentVersion  sync.RWMutex
+	lockExecutable      sync.RWMutex
 	lockIsBinary        sync.RWMutex
 	lockIsLocal         sync.RWMutex
 	lockIsPinned        sync.RWMutex
+	lockKind            sync.RWMutex
+	lockManifest        sync.RWMutex
 	lockName            sync.RWMutex
 	lockPath            sync.RWMutex
 	lockTemplatePath    sync.RWMutex
@@ -230,6 +260,33 @@ func (mock *ExtensionMock) CurrentVersionCalls() []struct {
 	return calls
 }
 
+// Executable calls ExecutableFunc.
+func (mock *ExtensionMock) Executable() string {
+	if mock.ExecutableFunc == nil {
+		panic("ExtensionMock.ExecutableFunc: method is nil but Extension.Executable was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockExecutable.Lock()
+	mock.calls.Executable = append(mock.calls.Executable, callInfo)
+	mock.lockExecutable.Unlock()
+	return mock.ExecutableFunc()
+}
+
+// ExecutableCalls gets all the calls that were made to Executable.
+// Check the length with:
+//
+//	len(mockedExtension.ExecutableCalls())
+func (mock *ExtensionMock) ExecutableCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockExecutable.RLock()
+	calls = mock.calls.Executable
+	mock.lockExecutable.RUnlock()
+	return calls
+}
+
 // IsBinary calls IsBinaryFunc.
 func (mock *ExtensionMock) IsBinary() bool {
 	if mock.IsBinaryFunc == nil {
@@ -308,6 +365,60 @@ func (mock *ExtensionMock) IsPinnedCalls() []struct {
 	mock.lockIsPinned.RLock()
 	calls = mock.calls.IsPinned
 	mock.lockIsPinned.RUnlock()
+	return calls
+}
+
+// Kind calls KindFunc.
+func (mock *ExtensionMock) Kind() Kind {
+	if mock.KindFunc == nil {
+		panic("ExtensionMock.KindFunc: method is nil but Extension.Kind was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockKind.Lock()
+	mock.calls.Kind = append(mock.calls.Kind, callInfo)
+	mock.lockKind.Unlock()
+	return mock.KindFunc()
+}
+
+// KindCalls gets all the calls that were made to Kind.
+// Check the length with:
+//
+//	len(mockedExtension.KindCalls())
+func (mock *ExtensionMock) KindCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockKind.RLock()
+	calls = mock.calls.Kind
+	mock.lockKind.RUnlock()
+	return calls
+}
+
+// Manifest calls ManifestFunc.
+func (mock *ExtensionMock) Manifest() (*Manifest, error) {
+	if mock.ManifestFunc == nil {
+		panic("ExtensionMock.ManifestFunc: method is nil but Extension.Manifest was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockManifest.Lock()
+	mock.calls.Manifest = append(mock.calls.Manifest, callInfo)
+	mock.lockManifest.Unlock()
+	return mock.ManifestFunc()
+}
+
+// ManifestCalls gets all the calls that were made to Manifest.
+// Check the length with:
+//
+//	len(mockedExtension.ManifestCalls())
+func (mock *ExtensionMock) ManifestCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockManifest.RLock()
+	calls = mock.calls.Manifest
+	mock.lockManifest.RUnlock()
 	return calls
 }
 

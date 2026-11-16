@@ -31,7 +31,12 @@ func NewRepoFromHost(u string, defaultHost string) (*Repository, error) {
 		if repoURL.Scheme != "" {
 			repo.rawURL = u
 		}
-		parts = strings.Split(repoURL.Path, "/")
+		path := repoURL.Path
+		if repoURL.Host != "" {
+			// Full url, e.g. https://github.com/owner/repo.git
+			path = strings.TrimSuffix(strings.Trim(path, "/"), ".git")
+		}
+		parts = strings.Split(path, "/")
 	}
 
 	if len(parts) >= 2 {

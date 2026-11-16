@@ -37,9 +37,87 @@
                 "command",
                 "description"
             ]
+        },
+        "binary": {
+            "type": "object",
+            "title": "Binary",
+            "description": "Executable provided by the extension. Arguments under the mount path which do not match another command are passed to the binary",
+            "additionalProperties": false,
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "title": "Binary path",
+                    "description": "Path to the binary relative to the extension folder. On Windows, .exe is added if the path has no file extension. Defaults to bin/<extension-name>",
+                    "examples": [
+                        "bin/c8y-example"
+                    ]
+                },
+                "mount": {
+                    "type": "string",
+                    "title": "Mount path",
+                    "description": "Space separated command path under the extension name where the binary is mounted. Defaults to the extension root",
+                    "default": "",
+                    "examples": [
+                        "tools"
+                    ]
+                },
+                "completion": {
+                    "type": "string",
+                    "title": "Completion",
+                    "description": "Forward tab completion to the binary. Use cobra for binaries built with github.com/spf13/cobra",
+                    "enum": [
+                        "none",
+                        "cobra"
+                    ],
+                    "default": "none"
+                }
+            }
+        },
+        "command": {
+            "type": "object",
+            "title": "Binary command",
+            "description": "Command provided by the extension's binary. Requires the binary property",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "title": "Command path",
+                    "description": "Space separated command path under the extension name. Spaces create nested command groups",
+                    "examples": [
+                        "services list"
+                    ],
+                    "minLength": 1
+                },
+                "description": {
+                    "type": "string",
+                    "title": "Description",
+                    "description": "Description shown in the help"
+                },
+                "exec": {
+                    "type": "array",
+                    "title": "Binary arguments",
+                    "description": "Arguments passed to the binary before the user's arguments. Defaults to the command name split on spaces",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "output": {
+                    "type": "string",
+                    "title": "Output",
+                    "description": "Use json if the command writes JSON to stdout, so c8y can format it (views, --select, --output). Use raw to pass the output through unchanged",
+                    "enum": [
+                        "raw",
+                        "json"
+                    ],
+                    "default": "raw"
+                }
+            },
+            "required": [
+                "name"
+            ]
         }
     },
-    "properties":{
+    "properties": {
         "version": {
             "type": "string",
             "title": "Extension version",
@@ -53,6 +131,17 @@
             "minItems": 0,
             "items": {
                 "$ref": "#/definitions/alias"
+            }
+        },
+        "binary": {
+            "$ref": "#/definitions/binary"
+        },
+        "commands": {
+            "type": "array",
+            "title": "Binary commands",
+            "description": "Commands provided by the extension's binary",
+            "items": {
+                "$ref": "#/definitions/command"
             }
         }
     }

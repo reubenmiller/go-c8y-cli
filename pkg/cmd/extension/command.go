@@ -33,11 +33,16 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 		Use:   "extensions",
 		Short: "Manage c8y extensions",
 		Long: heredoc.Docf(`
-			go-c8y-cli extensions are repositories that provide additional c8y commands.
+			go-c8y-cli extensions are repositories that provide additional c8y commands, aliases,
+			views and templates.
 
-			The name of the extension repository must start with "c8y-" and it must contain an
-			executable of the same name. All arguments passed to the %[1]sc8y [extname]%[1]s invocation
-			will be forwarded to the %[1]sc8y-[extname]%[1]s executable of the extension.
+			The name of the extension repository must start with "c8y-". Its commands are available
+			under %[1]sc8y [extname]%[1]s, and can be provided by API specifications (api/), scripts
+			(commands/), or a compiled binary declared in extension.yaml.
+
+			Extensions are installed from git repositories, GitHub releases (binary extensions), or
+			local folders. Extensions in system-wide folders (installed by package managers) are
+			also loaded, see the extensions.systemDirs setting.
 
 			An extension cannot override any of the core c8y commands.
 
@@ -77,6 +82,8 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					ext["path"] = c.Path()
 					ext["isLocal"] = c.IsLocal()
 					ext["isBinary"] = c.IsBinary()
+					ext["kind"] = string(c.Kind())
+					ext["executable"] = c.Executable()
 
 					rowText, err := json.Marshal(ext)
 					if err != nil {
@@ -102,6 +109,11 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					The repository argument can be specified in "owner/repo" format as well as a full URL.
 					The URL format is useful when the repository is not hosted on github.com.
 
+					If the latest GitHub release (or the release given by --pin) has an asset for the current
+					platform, then the binary extension is downloaded from the release. The download is verified
+					using the release's checksums.txt file if available. Otherwise the repository is installed
+					using git. Set GH_TOKEN or GITHUB_TOKEN to avoid GitHub API rate limits.
+
 					To install an extension in development from the current directory, use "." as the
 					value of the repository argument.
 
@@ -109,6 +121,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				`),
 				Example: heredoc.Doc(`
 					$ c8y extensions install owner/c8y-extension
+					$ c8y extensions install owner/c8y-extension --pin v1.2.0
 					$ c8y extensions install https://git.example.com/owner/c8y-extension
 					$ c8y extensions install .
 				`),
@@ -384,6 +397,12 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 
 					# Create a script-based extension
 					c8y extensions create foobar
+
+					# Create a binary extension written in Go
+					c8y extensions create foobar --precompiled go
+
+					# Create a binary extension written in another language
+					c8y extensions create foobar --precompiled other
 				`),
 				Args: cobra.MaximumNArgs(1),
 				RunE: func(cmd *cobra.Command, args []string) error {
@@ -434,18 +453,25 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 
 					cs := io.ColorScheme()
 					if tmplType == extensions.GoBinTemplateType {
-						goBinChecks = heredoc.Docf(`
-						%[1]s Downloaded Go dependencies
-						%[1]s Built %[2]s binary
-						`, cs.SuccessIcon(), fullName)
+						if _, err := os.Stat(filepath.Join(fullName, "bin", fullName)); err == nil {
+							goBinChecks = heredoc.Docf(`
+							%[1]s Downloaded Go dependencies
+							%[1]s Built %[2]s binary
+							`, cs.SuccessIcon(), fullName)
+						} else {
+							goBinChecks = heredoc.Docf(`
+							%[1]s The binary was not built (see the messages above). Run 'go mod tidy' and 'go build -o bin/%[2]s .'
+							`, cs.WarningIcon(), fullName)
+						}
 						steps = heredoc.Docf(`
-						- run 'cd %[1]s; c8y extensions install .; c8y %[2]s' to see your new extension in action
-						- use 'go build && c8y %[2]s' to see changes in your code as you develop`, fullName, extName)
+						- run 'cd %[1]s; c8y extensions install .; c8y %[2]s services list' to see your new extension in action
+						- use 'go build -o bin/%[1]s . && c8y %[2]s services list' to see changes in your code as you develop
+						- push a tag starting with "v" to publish release archives with GoReleaser`, fullName, extName)
 					} else if tmplType == extensions.OtherBinTemplateType {
 						steps = heredoc.Docf(`
-						- run 'cd %[1]s; c8y extensions install .' to install your extension locally
-						- fill in script/build.sh with your compilation script for automated builds
-						- compile a %[1]s binary locally and run 'c8y %[2]s' to see changes`, fullName, extName)
+						- compile a binary to bin/%[1]s, then run 'cd %[1]s; c8y extensions install .; c8y %[2]s --help'
+						- fill in script/build.sh to build the release archives
+						- push a tag starting with "v" to publish a release`, fullName, extName)
 					}
 					link := "https://c8y.app/docs/tutorials/extensions/"
 					out := heredoc.Docf(`
@@ -466,8 +492,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					return nil
 				},
 			}
-			// FUTURE: Support other types of extensions in the future
-			// cmd.Flags().StringVar(&flagType, "precompiled", "", "Create a precompiled extension. Possible values: go, other")
+			cmd.Flags().StringVar(&flagType, "precompiled", "", "Create a precompiled (binary) extension. Possible values: go, other")
 			completion.WithOptions(
 				cmd,
 				completion.MarkLocalFlag(),
@@ -498,7 +523,8 @@ func checkValidExtension(rootCmd *cobra.Command, m extensions.ExtensionManager, 
 	}
 
 	for _, ext := range m.List() {
-		if ext.Name() == commandName {
+		// Extensions in the user's extension folder take precedence over system extensions
+		if ext.Name() == commandName && ext.Kind() != extensions.KindSystem {
 			return fmt.Errorf("there is already an installed extension that provides the %q command", commandName)
 		}
 	}
