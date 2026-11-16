@@ -57,6 +57,10 @@ If more than one file provides a command with the same name, only one of them is
 
 A warning is logged for each ignored command. Use `--verbose` to see it.
 
+## Session and settings
+
+Scripts are run with the active session and some extension variables in their environment, for example `C8Y_HOST`, `C8Y_SESSION`, `C8Y_EXTENSION_DIR` and `C8Y_BIN`. c8y flags placed before the extension name are applied by c8y and are not passed to the script, so `c8y --session customer1.json --dry myext cleanup` runs the script with the `customer1.json` session in dry run mode, and any `c8y` command called by the script uses the same settings. See [runtime context](/docs/concepts/extensions/binary-commands/#runtime-context) for the full list of variables.
+
 ## General Tips
 
 Below are some general tips to keep in mind when creating script based commands:

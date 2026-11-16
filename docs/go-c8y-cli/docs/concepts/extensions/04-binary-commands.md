@@ -1,0 +1,203 @@
+---
+category: Concepts - Extensions
+title: Binary commands
+---
+
+import CodeExample from '@site/src/components/CodeExample';
+
+An extension can provide commands with a compiled binary, for example a program written in Go, Rust, or C#. Binary commands don't need a shell interpreter (so Git for Windows is not required on Windows), they can use any library of their language, and they can be distributed as GitHub releases or with package managers.
+
+A binary extension can also contain API based commands, script based commands, views, templates, and aliases. All commands are merged into the same command tree, so commands from different sources can share a command group.
+
+## Declaring the binary
+
+The binary is declared in the `binary` section of the `extension.yaml` file.
+
+```yaml title="file: extension.yaml"
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extension.json
+version: v1
+
+binary:
+  # Path to the binary, relative to the extension folder.
+  # On Windows, ".exe" is added if the path has no file extension.
+  # Default: bin/<extension-name>
+  path: bin/c8y-myext
+
+  # Command path under "c8y myext" where the binary is mounted. Default: "" (the extension root)
+  mount: ""
+
+  # Forward tab completion to the binary: cobra or none. Default: none
+  completion: cobra
+
+# Optional: commands provided by the binary, which are shown in the help
+commands:
+  - name: services list
+    description: List services
+    output: json
+
+  - name: ls
+    description: Short name for services list
+    exec: [services, list]
+    output: json
+```
+
+### Mount
+
+The binary is mounted at the `mount` path. Any arguments which do not match another command of the extension are passed to the binary unchanged, including flags such as `--help`.
+
+| `mount` | Command | Binary is called with |
+|---|---|---|
+| `""` | `c8y myext report --month 10` | `report --month 10` |
+| `tools` | `c8y myext tools check --verbose` | `check --verbose` |
+
+If the mount path also contains other commands (for example API based commands under `c8y myext devices`), then those commands are used for their paths, and only the other arguments are passed to the binary. In this case `c8y myext --help` shows the c8y help, which lists the other commands. Use `c8y myext help` to show the binary's own help.
+
+### Declared commands
+
+Each entry in `commands` adds a command at `c8y myext <name>`. A name with spaces creates nested command groups, the same way as for API based commands.
+
+| Property | Description |
+|---|---|
+| `name` | Command path under the extension, for example `services list` |
+| `description` | Description shown in the help |
+| `exec` | Arguments passed to the binary before the user's arguments. Default: the name split on spaces |
+| `output` | `json` if the command writes JSON to stdout (see [JSON output](#json-output)). Default: `raw` |
+
+Declared commands appear in the help and can be mixed with API and script commands in the same group. When two sources define the same command, c8y uses the first one in this order: API based command, declared binary command, script based command. Run the command with `--verbose` to see which commands were ignored.
+
+:::note
+If `commands` are declared but `extension.yaml` has no `binary` section, then the commands are ignored and a warning is shown. If the binary file does not exist, then a warning is shown and only the other commands of the extension are available.
+:::
+
+## JSON output
+
+Commands declared with `output: json` write JSON to stdout, and c8y formats it the same way as its built-in commands. So users can use views, `--select`, `--filter`, and `--output table|csv|json`.
+
+The binary can write:
+
+* a JSON array
+* a single JSON object
+* newline delimited JSON (one JSON value per line)
+
+The following c8y flags are removed from the arguments and handled by c8y, so the binary can't use these flag names in JSON commands: `--output`/`-o`, `--select`, `--filter`, `--view`, `--compact`/`-c`, `--raw`/`-r`, `--noColor`/`-M`.
+
+If the output is not valid JSON, then it is written unchanged and a warning is shown. stderr is never processed, so use it for log and progress messages.
+
+Commands without `output: json`, and arguments passed to the mount, are not processed at all. The binary is connected directly to the terminal, so it can prompt the user.
+
+## Runtime context
+
+c8y passes the following environment variables to all extension commands (binaries and scripts):
+
+| Variable | Description |
+|---|---|
+| `C8Y_HOST`, `C8Y_TENANT`, `C8Y_USER`, `C8Y_TOKEN`, `C8Y_SESSION`, ... | The active session. These are the same variables that `c8y sessions set` exports |
+| `C8Y_HEADER_AUTHORIZATION` | Value of the `Authorization` header for the active session |
+| `C8Y_EXTENSION_NAME` | Name of the extension without the `c8y-` prefix |
+| `C8Y_EXTENSION_DIR` | Folder where the extension is installed. Use it to read the extension's templates or other files |
+| `C8Y_BIN` | Path to the c8y executable which started the command. Use it to call other c8y commands |
+| `C8Y_SETTINGS_DEFAULTS_DRY` | `true` when dry run is active (`--dry`) |
+| `C8Y_SETTINGS_DEFAULTS_INSECURE` | `true` when TLS verification is turned off (`--insecure`) |
+| `C8Y_SETTINGS_MODE`, `C8Y_MODE` | Session mode, for example `dev` or `prod` (respects `--sessionMode`) |
+| `C8Y_EXTENSION_CONTEXT_VERSION` | Version of this list of variables (currently `1`) |
+
+c8y flags placed before the extension name are applied by c8y and are not passed to the extension:
+
+<CodeExample>
+
+```sh
+# Run the extension against another session in dry run mode
+c8y --session customer1.json --dry myext cleanup
+```
+
+</CodeExample>
+
+The password of the session is not passed to extensions. Use the token, the authorization header, or call c8y (`$C8Y_BIN`). c8y does not log in before running an extension, so binary commands also run without an active session. Script based commands still require an active session.
+
+:::caution
+Extensions run with your session's credentials, the same as any command you run in your shell after `set-session`. Only install extensions that you trust.
+:::
+
+## Tab completion
+
+With `completion: cobra`, c8y forwards tab completion requests to the binary by running it with cobra's hidden `__complete` command. Binaries built with [cobra](https://github.com/spf13/cobra) (including the [Go SDK](#go-sdk)) support this without any extra code. With `completion: none` (the default), the binary is never started for tab completion.
+
+## Go SDK
+
+The [extension SDK](https://pkg.go.dev/github.com/reubenmiller/go-c8y-cli/pkg/extsdk) is a small Go module which reads the runtime context, creates a [go-c8y](https://github.com/reubenmiller/go-c8y) client for the active session, and writes JSON output for c8y to format.
+
+```go
+ctx, err := extsdk.FromEnv()
+client, err := ctx.Client()
+devices, _, err := client.Inventory.GetDevices(cmd.Context(), nil)
+if err != nil {
+    return extsdk.CheckError(err)
+}
+return extsdk.Print(devices.ManagedObjects)
+```
+
+See the [example extension](https://github.com/reubenmiller/go-c8y-cli/tree/v2/pkg/extsdk/examples/c8y-hello), or create a new extension with `c8y extensions create myext --precompiled go`.
+
+## Publishing a binary extension
+
+### GitHub releases
+
+`c8y extensions install <owner>/<repo>` checks the latest GitHub release (or the release given by `--pin <tag>`) for an asset for the user's platform. If there is no release, or the release has no assets for any platform, then the repository is installed using `git clone` as before.
+
+Assets are selected in this order:
+
+1. An archive named `<anything>_<os>_<arch>.tar.gz` (or `.zip`), using Go names for the operating system and architecture, for example `c8y-myext_1.0.0_linux_amd64.tar.gz` or `c8y-myext_1.0.0_windows_amd64.zip`. `-` can be used instead of `_`, and `x86_64` and `aarch64` are also accepted.
+2. A single binary named `<anything>-<os>-<arch>` (with `.exe` on Windows). This is compatible with GitHub CLI extensions, but can't include views, templates, or other files.
+3. On macOS with Apple silicon, the `darwin` `amd64` asset if Rosetta 2 is installed.
+
+An archive must contain `extension.yaml` and the binary at the path declared in it, plus any `views/`, `templates/`, `api/`, or `commands/` folders. The files can be inside a single top-level folder.
+
+```
+c8y-myext_1.0.0_linux_amd64.tar.gz
+├── extension.yaml
+├── bin/
+│   └── c8y-myext
+└── views/
+    └── services.json
+```
+
+If the release has a `checksums.txt` file (the [GoReleaser](https://goreleaser.com) format: `<sha256>  <file name>` per line), then c8y verifies the download and stops the install if the checksum does not match. Releases without checksums are installed with a notice.
+
+The extensions created by `c8y extensions create --precompiled go` include a GoReleaser configuration and a GitHub workflow which publish these archives when you push a tag.
+
+`c8y extensions update` installs the latest release, and only replaces the installed version after the download is verified and extracted. Pinned extensions (`--pin`) are not updated. If a git based extension starts publishing release assets, then `c8y extensions update` replaces the git checkout with the release.
+
+To avoid GitHub API rate limits, or to install from private repositories, set `GH_TOKEN` or `GITHUB_TOKEN` (`GH_ENTERPRISE_TOKEN` for GitHub Enterprise Server).
+
+### Package managers
+
+Package managers such as Homebrew, apt, or Scoop install files for all users, so they can't run `c8y extensions install` for each user. Instead, c8y also loads extensions from system-wide folders. A package installs the extension folder (with `extension.yaml`, the binary, and any other folders) into one of them:
+
+| Platform | Folder |
+|---|---|
+| All | `share/c8y/extensions` next to the c8y executable's folder, for example `/opt/homebrew/share/c8y/extensions` |
+| macOS (Homebrew) | `/opt/homebrew/share/c8y/extensions` |
+| Linux (Homebrew) | `/home/linuxbrew/.linuxbrew/share/c8y/extensions` |
+| Linux | `/usr/local/share/c8y/extensions`, `/usr/share/c8y/extensions` |
+| Windows | `%ProgramData%\c8y\extensions` |
+
+For example, a Homebrew formula installs the extension with:
+
+```ruby
+def install
+  (share/"c8y/extensions/c8y-myext").install "extension.yaml", "views"
+  (share/"c8y/extensions/c8y-myext/bin").install "c8y-myext"
+end
+```
+
+The folders can be changed with the `extensions.systemDirs` setting (a list separated by `:`, or `;` on Windows):
+
+<CodeExample>
+
+```sh
+c8y settings update extensions.systemDirs "/opt/acme/c8y-extensions:/usr/share/c8y/extensions"
+```
+
+</CodeExample>
+
+System extensions are shown with the kind `system` in `c8y extensions list`. c8y never changes them: `c8y extensions update` and `c8y extensions delete` show a message to use the package manager instead. If an extension with the same name is installed in your own extension folder, then your copy is used.

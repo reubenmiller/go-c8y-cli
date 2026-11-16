@@ -14,13 +14,14 @@ By default extensions are accessible across all sessions. Though for scenarios w
 
 ## What is an extension?
 
-An extension is a git repository which contains multiple files/folders which control what the extension has to offer. The extension creator is free to pick which elements should be included. By default all extensions start with `c8y-`. This is to make public extension easier to discover, however the `c8y-` prefix will be ignore when using the extension (to avoid unnecessary typing).
+An extension is a git repository (or a GitHub release, or a folder installed by a package manager) which contains multiple files/folders which control what the extension has to offer. The extension creator is free to pick which elements should be included. By default all extensions start with `c8y-`. This is to make public extension easier to discover, however the `c8y-` prefix will be ignore when using the extension (to avoid unnecessary typing).
 
 The different elements of an extension and where they are stored within the extension repository are listed below:
 
 | Type | Path | Description |
 |-----------|------|-------------|
 | Aliases | `extension.yaml` | Convenience commands which are easily accessible under the root command. e.g. `c8y my-alias` |
+| Binary | `extension.yaml`, `bin/` | Commands provided by a compiled binary, e.g. written in Go. See [binary commands](/docs/concepts/extensions/binary-commands/) |
 | API | `api/` | Commands which are generated via an API specification which re-use the same go-c8y-cli logic for in-built commands |
 | Commands | `commands/` | More complex commands which can be written in language  (e.g. bash, python etc.). The commands can call other go-c8y-cli commands or any other tooling |
 | Templates | `templates/` | Any go-c8y-cli templates that can be referenced by when using the `template` flag |
@@ -151,6 +152,12 @@ For more information about script based commands checkout the dedicated [script 
 Script based commands are less portable than API based commands, so try to avoid them if possible.
 :::
 
+### Binary commands
+
+Binary commands are provided by a compiled program which is declared in `extension.yaml`. They don't need a shell interpreter, and they can be published as GitHub releases or with package managers. Commands declared with `output: json` are formatted by go-c8y-cli, so views, `--select` and `--output` work the same as for the in-built commands.
+
+For more information checkout the dedicated [binary commands](/docs/concepts/extensions/binary-commands/) section.
+
 ### Templates
 
 An extension can provide templates which are accessible when using the `template` flag. Templates can be more useful than commands when using them together with the template `var("name")` syntax which enables the user to customize the template values via the `templateVars` flag (which is tab completed).
@@ -222,7 +229,7 @@ c8y extensions list --raw
 
 **Prerequisites**
 
-Installing extensions requires the `git` command to be already installed. When an extension is installed from an external source, git is used to clone the repository to your file system. If you are cloning a private repository, then it is up to you to provide the necessary credentials when prompted. `go-c8y-cli` does not handle any of the repository authentication. If you are having problems then try cloning the repository manually.
+Installing extensions from a git repository requires the `git` command to be already installed. Extensions which publish GitHub releases with binaries are downloaded without git (see [publishing a binary extension](/docs/concepts/extensions/binary-commands/#publishing-a-binary-extension)). When an extension is installed from an external source, git is used to clone the repository to your file system. If you are cloning a private repository, then it is up to you to provide the necessary credentials when prompted. `go-c8y-cli` does not handle any of the repository authentication. If you are having problems then try cloning the repository manually.
 
 If you do not have git on your machine, then you also install an extension from a local folder.
 
@@ -239,8 +246,11 @@ Extensions can be installed from the following locations:
 # From a local folder
 c8y extensions install .
 
-# From GitHub
+# From GitHub (uses the release for your platform if there is one, otherwise git)
 c8y extensions install reubenmiller/c8y-myext
+
+# A specific GitHub release
+c8y extensions install reubenmiller/c8y-myext --pin v1.0.0
 
 # From another git repository hosting service
 c8y extensions install https://github.com/reubenmiller/c8y-myext.git
@@ -291,6 +301,16 @@ c8y extensions create myext
 
 Then follow the on-screen instructions for using it.
 
+To create an extension with a compiled binary, use the `--precompiled` flag. `go` creates a Go project which uses the extension SDK, with a GoReleaser configuration and a release workflow. `other` creates the same layout for any other language.
+
+<CodeExample>
+
+```bash
+c8y extensions create myext --precompiled go
+```
+
+</CodeExample>
+
 :::tip
 Creating an extension requires `git` to already by installed.
 :::
@@ -315,7 +335,7 @@ c8y extensions update --all
 
 </CodeExample>
 
-Extensions are updated by `go-c8y-cli` by using standard git commands, `git fetch` and `git pull`.
+Extensions are updated by `go-c8y-cli` by using standard git commands, `git fetch` and `git pull`. Binary extensions are updated to the latest GitHub release. Extensions installed by a package manager are updated by the package manager.
 
 ## Advanced usage
 
