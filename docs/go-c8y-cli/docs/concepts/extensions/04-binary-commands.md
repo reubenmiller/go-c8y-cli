@@ -186,6 +186,34 @@ return extsdk.Print(devices.ManagedObjects)
 
 See the [example extension](https://github.com/reubenmiller/go-c8y-cli/tree/v2/pkg/extsdk/examples/c8y-hello), or create a new extension with `c8y extensions create myext --precompiled go`.
 
+## Validating an extension
+
+`c8y extensions validate` checks an extension for problems, for example in the folder you are developing it in:
+
+<CodeExample>
+
+```sh
+c8y extensions validate .
+```
+
+</CodeExample>
+
+It checks:
+
+| Check | Severity | Problem |
+|---|---|---|
+| `manifest` | error | `extension.yaml` is not valid YAML, has invalid values (`binary.completion`, `output`), or declares `commands` without a `binary` section, or the same command twice |
+| `manifest` | warning | Unknown keys in `extension.yaml`, which usually are typos |
+| `binary` | error | The declared binary does not exist or is not executable |
+| `flags` | warning | A declared command has a flag with the name of a c8y global flag, so c8y handles it and the binary never receives it. This is checked when `binary.completion` is `cobra` |
+| `commands` | warning | A command is ignored because another source (API spec, binary, script) defines the same command |
+| `api` | error | An API spec can't be parsed |
+| `scripts` | warning | A script under `commands/` is not executable |
+
+The exit code is non-zero (101) if there are errors, or warnings when `--strict` is used, so the command can run in CI. The release workflow of `c8y extensions create --precompiled go` runs `c8y extensions validate . --strict` before publishing a release.
+
+`c8y extensions install` also validates the extension (without the `flags` check, which runs the binary) and shows the number of problems.
+
 ## Publishing a binary extension
 
 ### GitHub releases
