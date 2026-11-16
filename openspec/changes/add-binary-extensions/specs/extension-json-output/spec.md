@@ -1,0 +1,37 @@
+## ADDED Requirements
+
+### Requirement: JSON output commands use the c8y output pipeline
+For a declared binary command with `output: json`, the system SHALL capture the binary's stdout, parse it as a JSON array, a single JSON object, or newline-delimited JSON objects, and write each item through the same output handling as built-in commands (views, `--select`, `--filter`, `--output`, `--compact`, `--raw`).
+
+#### Scenario: Table output
+- **WHEN** the binary writes two JSON objects as NDJSON and the user runs `c8y foo services list --output table`
+- **THEN** c8y prints a table with two rows using the matching view
+
+#### Scenario: Select
+- **WHEN** the user runs `c8y foo services list --select id,name`
+- **THEN** each item only contains `id` and `name`
+
+#### Scenario: Extension view
+- **WHEN** the extension ships `views/services.json` that matches the items
+- **THEN** that view selects the default table columns
+
+### Requirement: c8y output flags are not forwarded
+For `output: json` commands, the system SHALL remove `--output/-o`, `--select`, `--filter`, `--view`, `--compact/-c`, `--raw/-r`, and `--noColor/-M` (with their values) from the arguments before running the binary.
+
+#### Scenario: Output flags stripped
+- **WHEN** the user runs `c8y foo services list --name x -o csv --select id`
+- **THEN** the binary is run with args `services list --name x`
+
+### Requirement: Non-JSON output is passed through
+If stdout of an `output: json` command is not valid JSON, the system SHALL write it unchanged to stdout and log a warning. stderr SHALL always be passed through unchanged and uncaptured.
+
+#### Scenario: Invalid JSON
+- **WHEN** the binary prints `hello` to stdout
+- **THEN** `hello` is printed and a warning says the output was not valid JSON
+
+### Requirement: Raw output commands are not processed
+Commands without `output: json` (the default `raw`), passthrough mounts, and script commands SHALL have stdout connected directly, with no buffering or processing, and SHALL receive all arguments unchanged.
+
+#### Scenario: Interactive binary
+- **WHEN** a raw binary command prompts the user on stdout and reads stdin
+- **THEN** the prompt appears immediately and the input is read
