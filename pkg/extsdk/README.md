@@ -43,4 +43,6 @@ task release-extsdk -- v0.1.0
 
 Only the git tag is needed. Don't create a GitHub release for it, as the c8y install scripts use the latest GitHub release of the repository.
 
+The Go template of `c8y extensions create --precompiled go` uses the newest SDK tag: `task build-fast` and GoReleaser read it with `git describe` and set it with `-ldflags`, so the next c8y release uses the new SDK version without a code change. Builds without it, such as `go install`, use `defaultExtSDKVersion` in `pkg/cmd/extension/manager.go`. Update that default from time to time.
+
 The runtime context version (`extsdk.ContextVersion`) must match the newest version that c8y sends (`C8Y_EXTENSION_CONTEXT_VERSION`). When c8y adds or changes environment variables, increase the version in both places and release the SDK together with the CLI.
