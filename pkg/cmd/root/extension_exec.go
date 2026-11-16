@@ -81,22 +81,6 @@ func countLeadingFlags(flags *pflag.FlagSet, args []string) int {
 	return len(args)
 }
 
-// StripLeadingGlobalFlags removes the c8y flags which are placed before an extension
-// command, e.g. "c8y --session prod.json myext list" (they have already been parsed by c8y
-// and are passed to the extension via the runtime context). The arguments are returned
-// unchanged for any other command.
-func StripLeadingGlobalFlags(rootCmd *cobra.Command, args []string) []string {
-	cmd, _, err := rootCmd.Traverse(args)
-	if err != nil || cmd == rootCmd || !IsExtensionCommand(cmd) {
-		return args
-	}
-	n := countLeadingFlags(rootCmd.PersistentFlags(), args)
-	if n == 0 || n >= len(args) {
-		return args
-	}
-	return args[n:]
-}
-
 // extensionEnv builds the environment for an extension command: the current environment,
 // the variables of the active session (without the password), and the extension variables
 func extensionEnv(f *cmdutil.Factory, ext extensions.Extension) []string {
@@ -315,18 +299,23 @@ func addExtensionBinaryCommands(f *cmdutil.Factory, log *logger.Logger, tree *cm
 						binArgs := append(slices.Clone(item.ExecArgs()), args...)
 						// Help is text, so show it directly
 						if item.IsJSON() && !hasHelpFlag(args) {
-							// c8y output flags have already been removed from the args (see PrepareExtensionArgs)
+							// c8y global flags have already been removed from the args (see PrepareExtensionArgs)
 							return runJSONExtensionCommand(f, cmd, ext, exe, binArgs)
 						}
 						return runExtension(f, ext, exe, binArgs, true, f.IOStreams.Out)
 					},
 				}
+				// c8y handles the global flags of declared commands (see PrepareExtensionArgs)
+				cmd.Annotations[annotationDeclared] = "true"
 				if item.IsJSON() {
 					cmd.Annotations[annotationOutput] = extensions.OutputJSON
 				}
+				var binaryComplete cobra.CompletionFunc
 				if binary.CompletionEnabled() {
-					cmd.ValidArgsFunction = completeWithBinary(f, ext, exe, item.ExecArgs())
+					binaryComplete = completeWithBinary(f, ext, exe, item.ExecArgs())
 				}
+				// c8y handles the global flags of declared commands, so it also completes their values
+				cmd.ValidArgsFunction = declaredCommandCompletion(binaryComplete)
 				cmdutil.DisableAuthCheckForCommand(cmd)
 				return cmd, nil
 			},

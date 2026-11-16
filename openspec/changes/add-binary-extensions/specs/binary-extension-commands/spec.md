@@ -51,6 +51,40 @@ Each entry in the top-level `commands` list of `extension.yaml` SHALL be registe
 - **WHEN** `commands` entries exist but `extension.yaml` has no `binary` section
 - **THEN** a warning is logged and the entries are ignored
 
+### Requirement: c8y global flags of declared commands
+For declared binary commands, the system SHALL handle the c8y global flags (the persistent flags of the c8y root command, for example `--session`, `--sessionMode`, `--dry`, `--output/-o`, `--select`, `--verbose/-v`) placed after the command the same way as for built-in commands, and SHALL NOT pass them to the binary. `--help`, `-h`, and `--examples`, all other flags, and the arguments after `--` SHALL be passed to the binary. Combined shorthand flags (for example `-vc`) SHALL be passed to the binary. Arguments passed to the mount and to script commands SHALL NOT be changed.
+
+#### Scenario: Session after a declared command
+- **WHEN** the user runs `c8y foo services list --session prod.json --name x`
+- **THEN** the binary runs with args `services list --name x` and the runtime context of the `prod.json` session
+
+#### Scenario: Output flags stripped
+- **WHEN** the user runs `c8y foo services list --name x -o csv --select id` for a command with `output: json`
+- **THEN** the binary is run with args `services list --name x` and the output is formatted as CSV with only `id`
+
+#### Scenario: Help is still forwarded
+- **WHEN** the user runs `c8y foo services list --help`
+- **THEN** the binary runs with args `services list --help`
+
+#### Scenario: Mount keeps all arguments
+- **WHEN** the user runs `c8y foo report --session prod.json` and `report` is not a declared command
+- **THEN** the binary runs with args `report --session prod.json`
+
+### Requirement: Completion of c8y global flags
+For declared binary commands, the system SHALL complete the values of c8y global flags (for example `--output`, `-o`, `--output=`, `--session`, `--sessionMode`, and `--view`) with the same values as for built-in commands, without running the binary. Completion of all other arguments SHALL be forwarded to the binary (when `binary.completion` is `cobra`) without the c8y global flags.
+
+#### Scenario: Output format completion
+- **WHEN** the user presses tab after `c8y foo services list --output `
+- **THEN** the c8y output formats (`json`, `table`, `csv`, ...) are listed
+
+#### Scenario: Session mode completion
+- **WHEN** the user presses tab after `c8y foo services list --sessionMode `
+- **THEN** the session modes (`dev`, `qual`, `prod`, `ci`) are listed
+
+#### Scenario: Binary flags after c8y flags
+- **WHEN** the user presses tab after `c8y foo services list -o csv --status `
+- **THEN** the binary is asked to complete `--status ` without `-o csv`
+
 ### Requirement: Direct execution and exit codes
 The system SHALL run extension binaries directly (not through `sh`) on every platform, connect stdin, stdout, and stderr (except as defined by `extension-json-output`), and exit with the binary's exit code.
 

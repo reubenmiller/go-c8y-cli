@@ -15,13 +15,6 @@ For a declared binary command with `output: json`, the system SHALL capture the 
 - **WHEN** the extension ships `views/services.json` that matches the items
 - **THEN** that view selects the default table columns
 
-### Requirement: c8y output flags are not forwarded
-For `output: json` commands, the system SHALL remove `--output/-o`, `--select`, `--filter`, `--view`, `--compact/-c`, `--raw/-r`, and `--noColor/-M` (with their values) from the arguments before running the binary.
-
-#### Scenario: Output flags stripped
-- **WHEN** the user runs `c8y foo services list --name x -o csv --select id`
-- **THEN** the binary is run with args `services list --name x`
-
 ### Requirement: Non-JSON output is passed through
 If stdout of an `output: json` command is not valid JSON, the system SHALL write it unchanged to stdout and log an info-level message (shown with `--verbose`), and SHALL NOT show a warning. stderr SHALL always be passed through unchanged and uncaptured. When the arguments contain `-h` or `--help` (before `--`), the system SHALL NOT capture or process the output.
 

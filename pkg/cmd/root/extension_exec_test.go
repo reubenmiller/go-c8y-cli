@@ -29,6 +29,8 @@ func newTestRoot() (*cobra.Command, *[]string) {
 	root.PersistentFlags().BoolP("compact", "c", false, "")
 	root.PersistentFlags().BoolP("raw", "r", false, "")
 	root.PersistentFlags().BoolP("noColor", "M", false, "")
+	root.PersistentFlags().IntP("pageSize", "p", 5, "")
+	root.PersistentFlags().Bool("examples", false, "")
 
 	root.AddCommand(&cobra.Command{Use: "devices", RunE: record})
 
@@ -43,12 +45,13 @@ func newTestRoot() (*cobra.Command, *[]string) {
 	services.AddCommand(&cobra.Command{
 		Use:                "list",
 		DisableFlagParsing: true,
-		Annotations:        map[string]string{annotationOutput: "json"},
+		Annotations:        map[string]string{annotationOutput: "json", annotationDeclared: "true"},
 		RunE:               record,
 	})
 	services.AddCommand(&cobra.Command{
 		Use:                "raw",
 		DisableFlagParsing: true,
+		Annotations:        map[string]string{annotationDeclared: "true"},
 		RunE:               record,
 	})
 	ext.AddCommand(services)
@@ -78,7 +81,8 @@ func TestCountLeadingFlags(t *testing.T) {
 	}
 }
 
-func TestExtractOutputFlags(t *testing.T) {
+func TestExtractGlobalFlags(t *testing.T) {
+	root, _ := newTestRoot()
 	cases := []struct {
 		args      string
 		wantFlags string
@@ -87,12 +91,16 @@ func TestExtractOutputFlags(t *testing.T) {
 		{"--name x -o csv --select id", "-o csv --select id", "--name x"},
 		{"--output=table --compact --filter name=a* --name x", "--output=table --compact --filter name=a*", "--name x"},
 		{"-ocsv -c -r -M --view off", "-ocsv -c -r -M --view off", ""},
+		{"--session s.json --dry -v --verbose -v=true -p 10", "--session s.json --dry -v --verbose -v=true -p 10", ""},
 		{"--name x -- --output csv", "", "--name x -- --output csv"},
 		{"--outputFile x --selected y", "", "--outputFile x --selected y"},
-		{"-v --verbose", "", "-v --verbose"},
+		// combined shorthands are not split
+		{"-vc", "", "-vc"},
+		// help and examples are passed to the binary
+		{"--help -h --examples", "", "--help -h --examples"},
 	}
 	for _, tc := range cases {
-		flags, rest := extractOutputFlags(strings.Fields(tc.args))
+		flags, rest := extractGlobalFlags(root.PersistentFlags(), strings.Fields(tc.args))
 		assert.Equal(t, tc.wantFlags, strings.Join(flags, " "), tc.args)
 		assert.Equal(t, tc.wantRest, strings.Join(rest, " "), tc.args)
 	}
@@ -118,23 +126,29 @@ func TestPrepareExtensionArgs(t *testing.T) {
 			wantFlags: map[string]string{"session": "prod.json", "dry": "true"},
 		},
 		{
-			name:       "output flags of json commands are parsed and removed",
-			args:       "-v foo services list --name x -o csv --select id,name",
+			name:       "global flags of json commands are parsed and removed",
+			args:       "-v foo services list --name x -o csv --select id,name --session s.json",
 			want:       "foo services list --name x",
-			wantFlags:  map[string]string{"verbose": "true", "output": "csv"},
+			wantFlags:  map[string]string{"verbose": "true", "output": "csv", "session": "s.json"},
 			wantSelect: []string{"id,name"},
 		},
 		{
-			name:      "output flags of raw commands are passed on",
-			args:      "foo services raw -o csv",
-			want:      "foo services raw -o csv",
-			wantFlags: map[string]string{"output": "json"},
+			name:      "global flags of raw commands are parsed and removed",
+			args:      "foo services raw --session s.json --dry --x 1 -p 10",
+			want:      "foo services raw --x 1",
+			wantFlags: map[string]string{"session": "s.json", "dry": "true", "pageSize": "10"},
 		},
 		{
-			name:      "output flags of mounts are passed on",
-			args:      "foo report -o csv",
-			want:      "foo report -o csv",
-			wantFlags: map[string]string{"output": "json"},
+			name:      "help and examples are passed to declared commands",
+			args:      "foo services list --help --examples",
+			want:      "foo services list --help --examples",
+			wantFlags: map[string]string{"examples": "false"},
+		},
+		{
+			name:      "global flags of mounts are passed on",
+			args:      "foo report -o csv --session s.json",
+			want:      "foo report -o csv --session s.json",
+			wantFlags: map[string]string{"output": "json", "session": ""},
 		},
 	}
 	for _, tc := range cases {
@@ -256,4 +270,51 @@ func TestHasHelpFlag(t *testing.T) {
 	for args, want := range cases {
 		assert.Equal(t, want, hasHelpFlag(strings.Fields(args)), args)
 	}
+}
+
+func TestDeclaredCommandCompletion(t *testing.T) {
+	root, _ := newTestRoot()
+	require.NoError(t, root.RegisterFlagCompletionFunc("output", cobra.FixedCompletions([]string{"json", "csv", "table"}, cobra.ShellCompDirectiveNoFileComp)))
+	require.NoError(t, root.RegisterFlagCompletionFunc("session", cobra.FixedCompletions([]string{"dev.json", "prod.json"}, cobra.ShellCompDirectiveNoFileComp)))
+
+	var binaryArgs []string
+	list, _, err := root.Find([]string{"foo", "services", "list"})
+	require.NoError(t, err)
+	list.ValidArgsFunction = declaredCommandCompletion(func(cmd *cobra.Command, args []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
+		binaryArgs = append(append([]string{}, args...), toComplete)
+		return []cobra.Completion{"--status"}, cobra.ShellCompDirectiveNoFileComp
+	})
+
+	complete := func(args ...string) string {
+		t.Helper()
+		binaryArgs = nil
+		var out strings.Builder
+		root.SetOut(&out)
+		root.SetArgs(append([]string{cobra.ShellCompRequestCmd, "foo", "services", "list"}, args...))
+		require.NoError(t, root.Execute())
+		return out.String()
+	}
+
+	out := complete("--output", "")
+	assert.Contains(t, out, "json\ncsv\ntable\n")
+	assert.Nil(t, binaryArgs, "binary should not be asked for c8y flag values")
+
+	out = complete("-o", "c")
+	assert.Contains(t, out, "csv")
+
+	out = complete("--output=")
+	assert.Contains(t, out, "--output=json\n--output=csv\n")
+
+	out = complete("--session", "")
+	assert.Contains(t, out, "dev.json\nprod.json\n")
+	assert.Nil(t, binaryArgs)
+
+	// Flags without a registered completion don't ask the binary
+	complete("--select", "")
+	assert.Nil(t, binaryArgs)
+
+	// Other arguments are completed by the binary, without the c8y output flags
+	out = complete("--output", "csv", "--session", "dev.json", "--name", "x", "--st")
+	assert.Contains(t, out, "--status")
+	assert.Equal(t, []string{"--name", "x", "--st"}, binaryArgs)
 }

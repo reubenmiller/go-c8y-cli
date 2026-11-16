@@ -9,72 +9,76 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // annotationOutput marks extension commands whose output is processed by c8y (value "json")
 const annotationOutput = "c8y.extension.output"
 
-// outputFlag is a c8y output flag which is handled by c8y for extension commands with json output
-type outputFlag struct {
-	name      string
-	shorthand string
-	hasValue  bool
+// annotationDeclared marks binary commands which are declared in the extension manifest.
+// c8y handles the global flags of these commands, so they are not passed to the binary
+const annotationDeclared = "c8y.extension.declared"
+
+// passthroughGlobalFlags are global flags which are still passed to declared binary commands,
+// so the binary can show its own help and examples
+var passthroughGlobalFlags = map[string]bool{
+	"help":     true,
+	"examples": true,
 }
 
-// outputFlags are not passed to extension commands which produce json, as c8y applies them
-var outputFlags = []outputFlag{
-	{name: "output", shorthand: "o", hasValue: true},
-	{name: "select", hasValue: true},
-	{name: "filter", hasValue: true},
-	{name: "view", hasValue: true},
-	{name: "compact", shorthand: "c"},
-	{name: "raw", shorthand: "r"},
-	{name: "noColor", shorthand: "M"},
-}
-
-// matchOutputFlag returns the flag matching the argument, and whether the value is part of the
-// argument (--name=value or -ovalue)
-func matchOutputFlag(arg string) (*outputFlag, bool) {
-	for i, flag := range outputFlags {
-		if strings.HasPrefix(arg, "--") {
-			name, _, inline := strings.Cut(arg[2:], "=")
-			if name == flag.name {
-				return &outputFlags[i], inline
+// lookupGlobalFlag returns the c8y global flag matching the argument, and whether the argument
+// includes the value (--name=value, -n=value or -nvalue). Only single shorthand flags are matched
+// (e.g. -o csv), not combined shorthands (e.g. -vc)
+func lookupGlobalFlag(flags *pflag.FlagSet, arg string) (*pflag.Flag, bool) {
+	var flag *pflag.Flag
+	inline := false
+	switch {
+	case strings.HasPrefix(arg, "--") && len(arg) > 2:
+		name, _, hasValue := strings.Cut(arg[2:], "=")
+		flag = flags.Lookup(name)
+		inline = hasValue
+	case strings.HasPrefix(arg, "-") && len(arg) >= 2:
+		flag = flags.ShorthandLookup(arg[1:2])
+		if flag != nil && len(arg) > 2 {
+			// Bool flags only accept -v=true, others also accept -ovalue
+			if arg[2] != '=' && flag.NoOptDefVal != "" {
+				return nil, false
 			}
-			continue
-		}
-		if flag.shorthand != "" && len(arg) >= 2 && arg[0] == '-' && arg[1:2] == flag.shorthand {
-			if len(arg) == 2 {
-				return &outputFlags[i], false
-			}
-			// -ocsv or -o=csv, or -c=false
-			return &outputFlags[i], true
+			inline = true
 		}
 	}
-	return nil, false
+	if flag == nil || passthroughGlobalFlags[flag.Name] {
+		return nil, false
+	}
+	return flag, inline
 }
 
-// extractOutputFlags splits args into the c8y output flags (with their values) and the
+// takesValue returns true if the flag needs a value as a separate argument
+func takesValue(flag *pflag.Flag, inline bool) bool {
+	return !inline && flag.NoOptDefVal == ""
+}
+
+// extractGlobalFlags splits args into the c8y global flags (with their values) and the
 // remaining arguments. Arguments after "--" are not checked.
-func extractOutputFlags(args []string) (flags []string, rest []string) {
+func extractGlobalFlags(flags *pflag.FlagSet, args []string) (globalFlags []string, rest []string) {
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 		if arg == "--" {
 			rest = append(rest, args[i:]...)
 			break
 		}
-		flag, inline := matchOutputFlag(arg)
+		flag, inline := lookupGlobalFlag(flags, arg)
 		if flag == nil {
 			rest = append(rest, arg)
 			continue
 		}
-		flags = append(flags, arg)
-		if flag.hasValue && !inline && i+1 < len(args) {
-			flags = append(flags, args[i+1])
+		globalFlags = append(globalFlags, arg)
+		if takesValue(flag, inline) && i+1 < len(args) {
+			globalFlags = append(globalFlags, args[i+1])
 			i++
 		}
 	}
-	return flags, rest
+	return globalFlags, rest
 }
 
 // findChild returns the subcommand matching the name or one of its aliases
@@ -96,8 +100,9 @@ func findChild(cmd *cobra.Command, name string) *cobra.Command {
 // Extension commands do not parse c8y flags, so:
 //   - c8y flags before the command (e.g. c8y --session prod.json myext list) are parsed by c8y
 //     and removed. They are passed to the extension via the runtime context.
-//   - for commands with json output, the c8y output flags (e.g. --output, --select) are parsed by c8y
-//     and removed, as c8y formats the output.
+//   - for binary commands declared in the extension manifest, the c8y global flags after the
+//     command (e.g. myext list --session prod.json --output csv) are also parsed by c8y and
+//     removed, the same as for built-in commands. Other arguments are passed to the binary.
 //
 // The arguments are returned unchanged for all other commands.
 func PrepareExtensionArgs(rootCmd *cobra.Command, args []string) []string {
@@ -124,10 +129,10 @@ func PrepareExtensionArgs(rootCmd *cobra.Command, args []string) []string {
 
 	c8yFlags := append([]string{}, args[:n]...)
 	rest := args[i:]
-	if target.Annotations[annotationOutput] == extensions.OutputJSON {
-		var output []string
-		output, rest = extractOutputFlags(rest)
-		c8yFlags = append(c8yFlags, output...)
+	if target.Annotations[annotationDeclared] != "" {
+		var globalFlags []string
+		globalFlags, rest = extractGlobalFlags(rootCmd.PersistentFlags(), rest)
+		c8yFlags = append(c8yFlags, globalFlags...)
 	}
 
 	if len(c8yFlags) > 0 {
@@ -140,6 +145,62 @@ func PrepareExtensionArgs(rootCmd *cobra.Command, args []string) []string {
 	prepared = append(prepared, args[n:i]...)
 	prepared = append(prepared, rest...)
 	return prepared
+}
+
+// completeGlobalFlagValue completes the value of a c8y global flag (e.g. "--session <TAB>" or
+// "--output=<TAB>") using the completion registered on the root command. ok is false if the
+// argument being completed is not the value of a global flag
+func completeGlobalFlagValue(cmd *cobra.Command, args []string, toComplete string) (values []cobra.Completion, directive cobra.ShellCompDirective, ok bool) {
+	flags := cmd.Root().PersistentFlags()
+	var flag *pflag.Flag
+	prefix := ""
+	value := toComplete
+
+	if strings.HasPrefix(toComplete, "-") && strings.Contains(toComplete, "=") {
+		// --name=<value>
+		name, v, _ := strings.Cut(toComplete, "=")
+		if f, _ := lookupGlobalFlag(flags, name); f != nil {
+			flag = f
+			prefix = name + "="
+			value = v
+		}
+	} else if len(args) > 0 {
+		// --name <value>
+		if f, inline := lookupGlobalFlag(flags, args[len(args)-1]); f != nil && takesValue(f, inline) {
+			flag = f
+		}
+	}
+	if flag == nil {
+		return nil, cobra.ShellCompDirectiveDefault, false
+	}
+
+	completeFunc, exists := cmd.Root().GetFlagCompletionFunc(flag.Name)
+	if !exists {
+		return nil, cobra.ShellCompDirectiveNoFileComp, true
+	}
+	values, directive = completeFunc(cmd, args, value)
+	if prefix != "" {
+		for i := range values {
+			values[i] = prefix + values[i]
+		}
+	}
+	return values, directive, true
+}
+
+// declaredCommandCompletion returns the completion of a declared binary command. The values of
+// c8y global flags are completed by c8y, all other arguments by binaryComplete (if not nil),
+// without the c8y global flags
+func declaredCommandCompletion(binaryComplete cobra.CompletionFunc) cobra.CompletionFunc {
+	return func(cmd *cobra.Command, args []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
+		if values, directive, ok := completeGlobalFlagValue(cmd, args, toComplete); ok {
+			return values, directive
+		}
+		if binaryComplete == nil {
+			return nil, cobra.ShellCompDirectiveDefault
+		}
+		_, binaryArgs := extractGlobalFlags(cmd.Root().PersistentFlags(), args)
+		return binaryComplete(cmd, binaryArgs, toComplete)
+	}
 }
 
 // hasHelpFlag returns true if the arguments request help (-h or --help, before any "--")

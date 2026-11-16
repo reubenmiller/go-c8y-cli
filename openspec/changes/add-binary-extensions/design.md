@@ -102,6 +102,9 @@ Updated leaf precedence: **API spec, then declared binary command, then script**
 
 - Binaries run directly on all platforms (`Execute(..., isBinary=true)`); `sh` wrapping on Windows stays for scripts only.
 - Flag parsing stays disabled for extension commands (except during `__complete`), so `--help`, `-h`, and `--examples` reach the binary.
+- For declared commands, c8y takes its global flags out of the arguments before running the binary (all persistent flags of the root command except `--examples`), the same as for built-in commands, and completes their values. The binary can't use these flag names (including `-v`, `-o`, `-p`, `-f`) in declared commands. The mount and script commands still receive all arguments unchanged.
+
+  *Alternatives considered:* only reserving the flags which are part of the runtime context (`--session`, `--sessionMode`, `--dry`, `--insecure`), or requiring c8y flags before the extension name. Both leave flags such as `--output` or `-v` behaving differently than for built-in commands, which is confusing as completion offers all global flags.
 - The exit code of the binary becomes the exit code of `c8y` (as `Dispatch` already does through `cmderrors.NewUserErrorWithExitCode`). The cobra `RunE` path in `root.go` is aligned with that.
 - stdin, stdout, and stderr are connected directly, except for `output: json` commands (decision 7).
 
@@ -127,7 +130,7 @@ c8y does not force a login before running an extension. It passes the credential
 
 For commands with `output: json`:
 
-1. Before forwarding, c8y removes its own output flags from the args: `--output/-o`, `--select`, `--filter`, `--view`, `--compact/-c`, `--raw/-r`, `--noColor/-M`. Binaries cannot define flags with these names on JSON commands (documented).
+1. Before forwarding, c8y removes its global flags from the args (decision 5), which includes the output flags `--output/-o`, `--select`, `--filter`, `--view`, `--compact/-c`, `--raw/-r`, `--noColor/-M`.
 2. c8y captures stdout, reads it as a JSON array, a JSON object, or newline-delimited JSON objects, and passes each value through `Factory.WriteOutput`, which applies views, selection, filtering, and formatting.
 3. stderr is passed through unchanged. If stdout is not valid JSON, c8y writes it unchanged and logs an info message (text output such as messages is valid, so no warning).
 4. With `-h` or `--help`, the output is not captured, so the binary's help is shown directly.

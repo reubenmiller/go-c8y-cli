@@ -63,6 +63,8 @@ Each entry in `commands` adds a command at `c8y myext <name>`. A name with space
 | `exec` | Arguments passed to the binary before the user's arguments. Default: the name split on spaces |
 | `output` | `json` if the command writes JSON to stdout (see [JSON output](#json-output)). Default: `raw` |
 
+c8y global flags after a declared command work the same as for built-in commands, for example `c8y myext services list --session prod.json --dry --output csv`. c8y applies them and does not pass them to the binary, so a binary can't use the names of c8y's global flags (for example `--session`, `--output`/`-o`, `--verbose`/`-v`, `--force`/`-f`, `--pageSize`/`-p`) in declared commands. All other flags, `--help`, `-h`, `--examples`, and the arguments after `--` are passed to the binary. Arguments passed to the mount are never changed, so use the mount for commands which need these flag names.
+
 Declared commands appear in the help and can be mixed with API and script commands in the same group. When two sources define the same command, c8y uses the first one in this order: API based command, declared binary command, script based command. Run the command with `--verbose` to see which commands were ignored.
 
 :::note
@@ -79,7 +81,7 @@ The binary can write:
 * a single JSON object
 * newline delimited JSON (one JSON value per line)
 
-The following c8y flags are removed from the arguments and handled by c8y, so the binary can't use these flag names in JSON commands: `--output`/`-o`, `--select`, `--filter`, `--view`, `--compact`/`-c`, `--raw`/`-r`, `--noColor`/`-M`.
+The c8y output flags (`--output`/`-o`, `--select`, `--filter`, `--view`, ...) are handled by c8y, like all other [global flags of declared commands](#declared-commands).
 
 If the output is not JSON (for example a message), then it is written unchanged (shown in the log with `--verbose`). The output of `--help` and `-h` is not processed. stderr is never processed, so use it for log and progress messages.
 
@@ -121,6 +123,8 @@ Extensions run with your session's credentials, the same as any command you run 
 ## Tab completion
 
 With `completion: cobra`, c8y forwards tab completion requests to the binary by running it with cobra's hidden `__complete` command. Binaries built with [cobra](https://github.com/spf13/cobra) (including the [Go SDK](#go-sdk)) support this without any extra code. With `completion: none` (the default), the binary is never started for tab completion.
+
+For declared commands, c8y completes the values of its global flags (for example `--output <TAB>`, `--session <TAB>`, and `--view <TAB>`), and forwards the completion of all other arguments to the binary.
 
 ## Go SDK
 
