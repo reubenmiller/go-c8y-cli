@@ -126,6 +126,50 @@ With `completion: cobra`, c8y forwards tab completion requests to the binary by 
 
 For declared commands, c8y completes the values of its global flags (for example `--output <TAB>`, `--session <TAB>`, and `--view <TAB>`), and forwards the completion of all other arguments to the binary.
 
+## Session providers
+
+An extension can provide [session providers](/docs/concepts/sessions/#activate-a-session-from-a-session-provider), which `set-session` and `c8y sessions login` run to select a session, for example from a password manager.
+
+```yaml title="file: extension.yaml"
+binary:
+  path: bin/c8y-session-bitwarden
+
+sessionProviders:
+  - name: bitwarden                  # lower case letters, numbers and "-"
+    description: Select a session from a Bitwarden folder
+    exec: [list]                     # arguments before the c8y provider flags
+    secrets: [BW_SESSION]            # environment variables the provider needs
+    format: json                     # json, dotenv or auto (default)
+```
+
+Users select the provider with `c8y sessions login --from-extension bitwarden` (or `set-session --from-extension bitwarden`), or with the `session.provider.type extension` and `session.provider.extension bitwarden` settings.
+
+c8y runs the binary with:
+
+1. the `exec` arguments
+2. the login flags which are set: `--clear`, `--loginType=<value>`, `--browserCallback=<value>`, `--sso-scopes=<value>`, `--sso-audience=<value>`, `-v`, `--debug`
+3. the arguments the user gave after `--`
+
+For example, `set-session --from-extension bitwarden -v -- --folder c8y` runs `bin/c8y-session-bitwarden list -v --folder c8y`.
+
+The provider must write only the selected session to stdout, in the session file format (json) or as dotenv. Use stderr and stdin to interact with the user, for example to show a list of sessions to pick from. If the provider exits with a non-zero exit code, then the session is not changed.
+
+The provider gets the same environment as the user, except the variables of the active session (`C8Y_HOST`, `C8Y_TOKEN`, `C8Y_SESSION`, ...), plus `C8Y_EXTENSION_NAME`, `C8Y_EXTENSION_DIR`, `C8Y_BIN`, and `C8Y_EXTENSION_CONTEXT_VERSION`. The `secrets` are read from the environment, or from the user's pin entry command if they are not set.
+
+If the provider already verified the credentials (for example it returns a fresh token), then set `"authorized": true` in the session, so c8y doesn't log in again. With the [Go SDK](#go-sdk), use `extsdk.PrintSession`:
+
+```go
+authorized := true
+return extsdk.PrintSession(extsdk.Session{
+    Host:       item.Host,
+    Tenant:     item.Tenant,
+    Username:   item.Username,
+    Password:   item.Password,
+    SessionUri: "bitwarden://" + item.ID,
+    Authorized: &authorized, // only if the credentials are verified
+})
+```
+
 ## Go SDK
 
 The [extension SDK](https://pkg.go.dev/github.com/reubenmiller/go-c8y-cli/pkg/extsdk) is a small Go module which reads the runtime context, creates a [go-c8y](https://github.com/reubenmiller/go-c8y) client for the active session, and writes JSON output for c8y to format.

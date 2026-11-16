@@ -175,6 +175,58 @@ set-session
 You can also provide additional flags to set session, as these are passed directly to the underlying `c8y sessions login` command.
 :::
 
+## Activate a session from a session provider
+
+By default, `set-session` lists the session files that go-c8y-cli manages. A session provider can return the session from somewhere else instead, for example a password manager.
+
+### Session providers from extensions
+
+Extensions can provide session providers. Install the extension, then select the provider by name:
+
+<CodeExample>
+
+```bash
+c8y extensions install reubenmiller/c8y-session-bitwarden
+
+# Use the provider once
+set-session --from-extension bitwarden
+
+# Or use it by default for set-session
+c8y settings update session.provider.type extension
+c8y settings update session.provider.extension bitwarden
+set-session
+```
+
+</CodeExample>
+
+Press tab after `--from-extension` to list the providers of the installed extensions, or run `c8y extensions list --select name,sessionProviders`. If more than one extension has a provider with the same name, use `<extension>/<provider>`, for example `session-bitwarden/bitwarden`.
+
+Arguments for the provider go after `--`:
+
+<CodeExample>
+
+```bash
+set-session --from-extension bitwarden -- --folder c8y
+```
+
+</CodeExample>
+
+The provider runs with your environment, but without the variables of the currently active session. If the provider needs a secret (for example `BW_SESSION` for Bitwarden), then the value is taken from the environment, or from the pin entry command (`c8y settings update pinEntry <command>`) if it is not set.
+
+### External commands
+
+Any command which prints a session in json or dotenv format can be used as a session provider:
+
+<CodeExample>
+
+```bash
+c8y settings update session.provider.type external
+c8y settings update session.provider.command "c8y-session-bitwarden list --folder c8y"
+c8y settings update session.provider.secrets BW_SESSION
+```
+
+</CodeExample>
+
 ## Activate a session (manually)
 
 If you can't use the `set-session` shell helper, then you can run the command directly along with the associated shell built-in functions which will set the required environment variables. Each shell has a slightly different way of doing this, so make sure you select the method appropriate to your shell
