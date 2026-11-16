@@ -35,11 +35,12 @@ c8y hello services list --output table
 
 ## Releases
 
-The SDK is a nested Go module, so it has its own tags with the `pkg/extsdk/` prefix, for example `pkg/extsdk/v0.1.0`. Create a tag with:
+The SDK is a nested Go module, so it has its own tags with the `pkg/extsdk/` prefix, for example `pkg/extsdk/v0.1.0`. The following command runs the SDK tests, creates the tag, and pushes it to `origin` (use `REMOTE=<name>` for another remote):
 
 ```sh
 task release-extsdk -- v0.1.0
-git push origin pkg/extsdk/v0.1.0
 ```
+
+Only the git tag is needed. Don't create a GitHub release for it, as the c8y install scripts use the latest GitHub release of the repository.
 
 The runtime context version (`extsdk.ContextVersion`) must match the newest version that c8y sends (`C8Y_EXTENSION_CONTEXT_VERSION`). When c8y adds or changes environment variables, increase the version in both places and release the SDK together with the CLI.

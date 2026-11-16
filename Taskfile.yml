@@ -360,11 +360,24 @@ tasks:
       - goreleaser release --clean --auto-snapshot
 
   release-extsdk:
-    desc: "Tag a release of the extension Go SDK. Usage: task release-extsdk -- v0.1.0"
+    desc: "Tag a release of the extension Go SDK and push the tag. Usage: task release-extsdk -- v0.1.0"
+    summary: |
+      Tag a release of the extension Go SDK (pkg/extsdk/<version>) and push the tag.
+      Only the git tag is needed, so don't create a GitHub release for it.
+
+      Usage:
+        task release-extsdk -- v0.1.0
+        task release-extsdk REMOTE=upstream -- v0.1.0
+    vars:
+      VERSION: "{{.CLI_ARGS}}"
+      REMOTE: '{{.REMOTE | default "origin"}}'
+    preconditions:
+      - sh: echo "{{.VERSION}}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
+        msg: "Expected a version like v0.1.0. Usage: task release-extsdk -- v0.1.0"
     cmds:
       - task: test-extsdk
-      - git tag "pkg/extsdk/{{.CLI_ARGS}}"
-      - echo "Created tag pkg/extsdk/{{.CLI_ARGS}}. Push it with 'git push origin pkg/extsdk/{{.CLI_ARGS}}'"
+      - git tag "pkg/extsdk/{{.VERSION}}"
+      - git push "{{.REMOTE}}" "pkg/extsdk/{{.VERSION}}"
 
   publish-powershell:
     desc: Publish powershell module
