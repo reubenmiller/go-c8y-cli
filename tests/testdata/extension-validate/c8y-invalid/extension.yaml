@@ -1,0 +1,10 @@
+# Extension with problems, used by tests/manual/extensions/validate
+version: v1
+comands: []
+binary:
+  completion: cobra
+commands:
+  - name: tools check
+    output: json
+  - name: tools report
+    output: xml

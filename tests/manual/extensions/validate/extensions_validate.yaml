@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+# The example extension needs to be built first: task build-extension-fixtures
+config:
+  env:
+    C8Y_SESSION: ""
+    C8Y_HOST: https://example.invalid
+    C8Y_TENANT: t12345
+    C8Y_SETTINGS_EXTENSIONS_SYSTEMDIRS: ../pkg/extsdk/examples
+
+tests:
+  It validates an extension folder without problems:
+    command: |
+      c8y extensions validate ../pkg/extsdk/examples/c8y-hello
+    exit-code: 0
+    stdout:
+      exactly: ""
+    stderr:
+      contains:
+        - No problems found in extension hello
+
+  It validates an installed extension by name:
+    command: |
+      c8y extensions validate hello
+    exit-code: 0
+    stderr:
+      contains:
+        - No problems found in extension hello
+
+  It lists the problems of an extension:
+    command: |
+      c8y extensions validate testdata/extension-validate/c8y-invalid -o csv --select severity,check,location
+    exit-code: 101
+    stdout:
+      contains:
+        - error,api,api/broken.yaml
+        - error,manifest,extension.yaml commands[1]
+        - warning,manifest,extension.yaml:3
+        - warning,commands,c8y invalid tools check
+        - warning,flags,c8y invalid tools check
+    stderr:
+      contains:
+        - "Extension invalid: 2 error(s), 6 warning(s), 0 info"
+
+  It describes flag clashes:
+    command: |
+      c8y extensions validate testdata/extension-validate/c8y-invalid --filter "check eq flags" --select message -o csv
+    exit-code: 101
+    stdout:
+      contains:
+        - "flag --verbose, -v of 'tools check' clashes with the c8y global flag -v/--verbose"
+        - "flag --pageSize, -p of 'tools check' clashes with the c8y global flag -p/--pageSize"
+
+  It does not fail on warnings by default:
+    command: |
+      c8y extensions validate testdata/extension-validate/c8y-warnings -o csv --select severity,location,message
+    exit-code: 0
+    stdout:
+      exactly: "warning,extension.yaml:3,unknown key 'alises' is ignored. Check the spelling"
+
+  It fails on warnings in strict mode:
+    command: |
+      c8y extensions validate testdata/extension-validate/c8y-warnings --strict
+    exit-code: 101
+
+  It fails for an unknown extension:
+    command: |
+      c8y extensions validate does-not-exist
+    exit-code: 101
+    stderr:
+      contains:
+        - "'does-not-exist' is neither a folder nor an installed extension"

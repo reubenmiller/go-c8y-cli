@@ -1,0 +1,3 @@
+# Extension with warnings only, used by tests/manual/extensions/validate
+version: v1
+alises: []
