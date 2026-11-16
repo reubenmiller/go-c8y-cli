@@ -517,6 +517,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				cmd,
 				completion.MarkLocalFlag(),
 			)
+			_ = cmd.RegisterFlagCompletionFunc("precompiled", cobra.FixedCompletions([]string{
+				"go\tGo extension using the extension SDK, with GoReleaser and a release workflow",
+				"other\tExtension in any language, with a release workflow for prebuilt binaries",
+			}, cobra.ShellCompDirectiveNoFileComp))
 			return cmd
 		}(),
 	)
