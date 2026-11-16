@@ -832,7 +832,7 @@ var commandGroupTmpl string
 var precompiledTemplates embed.FS
 
 // ExtSDKVersion is the version of the extension Go SDK used by the Go template
-const ExtSDKVersion = "v0.1.0"
+const ExtSDKVersion = "v0.0.1"
 
 // templateData is the data available in the precompiled extension templates
 type templateData struct {
