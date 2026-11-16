@@ -12,6 +12,11 @@ vars:
 
 env:
   C8Y_SETTINGS_CI: true
+  # Version of the extension Go SDK used by "c8y extensions create --precompiled go": the newest
+  # pkg/extsdk/* tag. It's passed to the build with -ldflags (see .goreleaser.yml), so tagging
+  # the SDK with "task release-extsdk" is enough. If it's empty, c8y uses its default version
+  C8Y_EXTSDK_VERSION:
+    sh: git describe --tags --match 'pkg/extsdk/v*' --abbrev=0 2>/dev/null | sed 's|^pkg/extsdk/||' || true
   GITHUB_TOKEN: ""
   LOCAL_PATH:
     sh: |
@@ -194,7 +199,7 @@ tasks:
       GOARCH: "{{.GOARCH | default ARCH}}"
     cmds:
       - echo "GOOS=$GOOS, GOARCH=$GOARCH"
-      - go build -o {{.OUTPUT}} -ldflags="-s -w -X 'github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildVersion={{trimPrefix "v" .VERSION}}' -X 'github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildBranch={{.GIT_BRANCH}}'" cmd/c8y/main.go
+      - go build -o {{.OUTPUT}} -ldflags="-s -w -X 'github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildVersion={{trimPrefix "v" .VERSION}}' -X 'github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildBranch={{.GIT_BRANCH}}' -X 'github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/extension.extSDKVersion=$C8Y_EXTSDK_VERSION'" cmd/c8y/main.go
 
   build:
     desc: Build
@@ -378,6 +383,7 @@ tasks:
       - task: test-extsdk
       - git tag "pkg/extsdk/{{.VERSION}}"
       - git push "{{.REMOTE}}" "pkg/extsdk/{{.VERSION}}"
+      - echo "The next c8y build uses SDK {{.VERSION}} in the Go extension template"
 
   publish-powershell:
     desc: Publish powershell module

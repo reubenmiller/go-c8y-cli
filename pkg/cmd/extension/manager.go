@@ -25,6 +25,7 @@ import (
 	"github.com/cli/safeexec"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
+	"golang.org/x/mod/semver"
 	"gopkg.in/yaml.v3"
 )
 
@@ -831,8 +832,21 @@ var commandGroupTmpl string
 //go:embed all:ext_tmpls/go all:ext_tmpls/other
 var precompiledTemplates embed.FS
 
-// ExtSDKVersion is the version of the extension Go SDK used by the Go template
-const ExtSDKVersion = "v0.0.1"
+// defaultExtSDKVersion is the extension Go SDK version used by the Go template if the
+// build does not set extSDKVersion, e.g. go install or go build without -ldflags
+const defaultExtSDKVersion = "v0.0.1"
+
+// extSDKVersion is set at build time to the newest pkg/extsdk/* tag (without the prefix),
+// see the C8Y_EXTSDK_VERSION variable in Taskfile.yml and the ldflags in .goreleaser.yml
+var extSDKVersion string
+
+// ExtSDKVersion returns the version of the extension Go SDK used by the Go template
+func ExtSDKVersion() string {
+	if semver.IsValid(extSDKVersion) {
+		return extSDKVersion
+	}
+	return defaultExtSDKVersion
+}
 
 // templateData is the data available in the precompiled extension templates
 type templateData struct {
@@ -891,7 +905,7 @@ func (m *Manager) createPrecompiled(gitExe string, name string, tmplType extensi
 		Name:       name,
 		ExtName:    cmdName,
 		ViewType:   strings.ReplaceAll(name, "-", "") + "_service",
-		SDKVersion: ExtSDKVersion,
+		SDKVersion: ExtSDKVersion(),
 	}
 
 	root := "ext_tmpls/other"

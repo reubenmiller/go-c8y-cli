@@ -19,7 +19,7 @@ builds:
       flags:
         - -trimpath
       ldflags:
-        - -s -w -X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildVersion={{.Version}} -X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildBranch={{.Branch}}
+        - -s -w -X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildVersion={{.Version}} -X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildBranch={{.Branch}} -X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/extension.extSDKVersion={{ envOrDefault "C8Y_EXTSDK_VERSION" "" }}
       hooks:
         post:
           - echo "Copying binaries for PowerShell Module"
