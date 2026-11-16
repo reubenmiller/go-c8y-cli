@@ -125,6 +125,16 @@ c8y inventory-report types --output table
 
 </CodeExample>
 
+Check that the extension has no problems, for example a flag which clashes with a c8y global flag:
+
+<CodeExample>
+
+```bash
+c8y extensions validate .
+```
+
+</CodeExample>
+
 The command uses the active session, so it also works with another session:
 
 <CodeExample>

@@ -18,6 +18,13 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
+
+      # Check the extension for problems, e.g. flags which clash with c8y global flags
+      - name: Validate extension
+        run: |
+          go build -o bin/[[.Name]] .
+          go run github.com/reubenmiller/go-c8y-cli/v2/cmd/c8y@latest extensions validate . --strict
+
       - uses: goreleaser/goreleaser-action@v7
         with:
           version: "~> v2"

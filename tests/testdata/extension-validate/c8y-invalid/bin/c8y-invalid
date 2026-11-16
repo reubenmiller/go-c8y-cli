@@ -1,0 +1,7 @@
+#!/bin/sh
+# Lists flags which clash with the c8y global flags --verbose/-v and --pageSize/-p
+if [ "$1" = "__complete" ]; then
+  printf '%s\n' --verbose -v --pageSize -p --status --help -h ":4"
+  exit 0
+fi
+echo "invalid $*"

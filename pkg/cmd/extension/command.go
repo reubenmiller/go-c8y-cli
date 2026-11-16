@@ -17,6 +17,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/git"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -167,6 +168,13 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 							cs := io.ColorScheme()
 							fmt.Fprintf(io.Out, "%s %s extension %s\n", cs.SuccessIcon(), successStr, filepath.Base(sourcePath))
 						}
+						if !cfg.DryRun() {
+							localName := nameFlag
+							if localName == "" {
+								localName = filepath.Base(sourcePath)
+							}
+							printValidationSummary(m(), io, localName)
+						}
 						return nil
 					}
 
@@ -209,6 +217,9 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						if pinFlag != "" {
 							fmt.Fprintf(io.Out, "%s Pinned extension at %s\n", cs.SuccessIcon(), cs.Cyan(pinFlag))
 						}
+					}
+					if !cfg.DryRun() {
+						printValidationSummary(m(), io, extName)
 					}
 					return nil
 				},
@@ -510,6 +521,8 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 		}(),
 	)
 
+	extCmd.AddCommand(newCmdValidate(f))
+
 	for _, cmd := range extCmd.Commands() {
 		cmdutil.DisableAuthCheck(cmd)
 	}
@@ -553,4 +566,121 @@ func displayExtensionVersion(ext extensions.Extension, version string) string {
 		return version[:8]
 	}
 	return version
+}
+
+// findInstalledExtension returns the installed extension with the given name (with or without the c8y- prefix)
+func findInstalledExtension(m extensions.ExtensionManager, name string) extensions.Extension {
+	name = normalizeExtensionSelector(name)
+	for _, ext := range m.List() {
+		if ext.Name() == name {
+			return ext
+		}
+	}
+	return nil
+}
+
+// printValidationSummary validates an installed extension (without running its binary), and
+// prints the number of problems to stderr
+func printValidationSummary(m extensions.ExtensionManager, io *iostreams.IOStreams, name string) {
+	ext := findInstalledExtension(m, name)
+	if ext == nil {
+		return
+	}
+	errorCount, warningCount := CountFindings(ValidateExtension(ext, ValidateOptions{SkipFlagCheck: true}))
+	if errorCount+warningCount == 0 {
+		return
+	}
+	cs := io.ColorScheme()
+	fmt.Fprintf(io.ErrOut, "%s Extension %s has %d error(s) and %d warning(s). Run 'c8y extensions validate %s' for details\n", cs.WarningIcon(), ext.Name(), errorCount, warningCount, ext.Name())
+}
+
+func newCmdValidate(f *cmdutil.Factory) *cobra.Command {
+	var strict bool
+	cmd := &cobra.Command{
+		Use:   "validate [<name> | <path>]",
+		Short: "Validate an extension",
+		Long: heredoc.Doc(`
+			Check an extension for problems, for example typos in extension.yaml, a missing binary,
+			commands which are ignored because another command has the same name, or flags of declared
+			binary commands which are c8y global flags (so the binary never receives them).
+
+			The argument is the folder of an extension, or the name of an installed extension. The
+			current folder is used if no argument is given.
+
+			The command exits with a non-zero exit code if there are errors, or warnings when using --strict,
+			so it can be used in CI.
+		`),
+		Example: heredoc.Doc(`
+			$ c8y extensions validate
+			Validate the extension in the current folder
+
+			$ c8y extensions validate myext
+			Validate the installed extension myext
+
+			$ c8y extensions validate . --strict
+			Fail on warnings as well, e.g. in a release workflow
+		`),
+		Args: cobra.MaximumNArgs(1),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			names := []string{}
+			for _, ext := range f.ExtensionManager().List() {
+				names = append(names, ext.Name())
+			}
+			return names, cobra.ShellCompDirectiveDefault
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			target := "."
+			if len(args) > 0 {
+				target = args[0]
+			}
+
+			var ext extensions.Extension
+			if info, err := os.Stat(target); err == nil && info.IsDir() {
+				dir, err := filepath.Abs(target)
+				if err != nil {
+					return err
+				}
+				ext = &Extension{path: dir, isLocal: true, manifest: &manifestCache{}}
+			} else if installed := findInstalledExtension(f.ExtensionManager(), target); installed != nil {
+				ext = installed
+			} else {
+				return cmderrors.NewUserError(fmt.Sprintf("'%s' is neither a folder nor an installed extension", target))
+			}
+
+			// Show the columns in a fixed order (by default the table sorts them, so the severity
+			// column would be cut off by long messages)
+			if flag := cmd.Flags().Lookup("select"); flag != nil && !flag.Changed {
+				if err := flag.Value.Set("severity,check,location,message"); err == nil {
+					flag.Changed = true
+				}
+			}
+
+			findings := ValidateExtension(ext, ValidateOptions{GlobalFlags: cmd.Root().PersistentFlags()})
+			for _, finding := range findings {
+				row, err := json.Marshal(finding)
+				if err != nil {
+					return err
+				}
+				if err := f.WriteOutputWithoutPropertyGuess(row, cmdutil.OutputContext{}); err != nil {
+					return err
+				}
+			}
+
+			io := f.IOStreams
+			cs := io.ColorScheme()
+			errorCount, warningCount := CountFindings(findings)
+			if len(findings) == 0 {
+				fmt.Fprintf(io.ErrOut, "%s No problems found in extension %s\n", cs.SuccessIcon(), ext.Name())
+				return nil
+			}
+			fmt.Fprintf(io.ErrOut, "Extension %s: %d error(s), %d warning(s), %d info\n", ext.Name(), errorCount, warningCount, len(findings)-errorCount-warningCount)
+			if errorCount > 0 || (strict && warningCount > 0) {
+				return cmderrors.NewSilentErrorWithExitCode(cmderrors.ExitUserError, fmt.Errorf("extension validation failed"))
+			}
+			return nil
+		},
+	}
+	cmd.Flags().BoolVar(&strict, "strict", false, "Fail on warnings as well")
+	completion.WithOptions(cmd, completion.MarkLocalFlag())
+	return cmd
 }

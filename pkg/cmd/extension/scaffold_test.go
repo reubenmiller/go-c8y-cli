@@ -107,6 +107,16 @@ func TestCreateGoExtension(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, string(output), "must be run through c8y")
 
+	// The generated extension has no problems
+	findings := ValidateExtension(&Extension{path: dir, isLocal: true, manifest: &manifestCache{}}, ValidateOptions{GlobalFlags: testGlobalFlags()})
+	assert.Empty(t, findings, findingsText(findings))
+
+	// The release workflow validates the extension
+	workflow, err := os.ReadFile(filepath.Join(dir, ".github", "workflows", "release.yml"))
+	require.NoError(t, err)
+	assert.Contains(t, string(workflow), "extensions validate . --strict")
+	assert.Contains(t, string(workflow), "go build -o bin/c8y-gofoo .")
+
 	// The view matches the example items
 	view, err := os.ReadFile(filepath.Join(dir, "views", "services.json"))
 	require.NoError(t, err)
