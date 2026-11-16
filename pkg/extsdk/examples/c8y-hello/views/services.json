@@ -1,0 +1,11 @@
+{
+  "definitions": [
+    {
+      "name": "c8yHelloService",
+      "priority": 350,
+      "fragments": ["type"],
+      "selectors": { "type": "c8yHello_service" },
+      "columns": ["name", "status", "id"]
+    }
+  ]
+}

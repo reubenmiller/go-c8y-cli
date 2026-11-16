@@ -1,0 +1,28 @@
+# [[.Name]]
+
+go-c8y-cli extension with a precompiled binary.
+
+## Install
+
+```sh
+c8y extensions install <owner>/[[.Name]]
+```
+
+## Development
+
+Build the binary to `bin/[[.Name]]` (`bin/[[.Name]].exe` on Windows), then install the folder as a local extension:
+
+```sh
+c8y extensions install .
+c8y [[.ExtName]] --help
+```
+
+c8y runs the binary with the active session in its environment (`C8Y_HOST`, `C8Y_TOKEN`, `C8Y_HEADER_AUTHORIZATION`, ...), and passes all arguments after `c8y [[.ExtName]]` to it.
+
+## Release
+
+Push a tag starting with `v`. The release workflow runs `script/build.sh` and publishes a GitHub release with one archive per platform:
+
+* name: `<anything>_<os>_<arch>.tar.gz` (or `.zip`), using Go names, for example `[[.Name]]_1.0.0_linux_amd64.tar.gz`
+* contents: `extension.yaml`, the binary at the path in `extension.yaml`, and any `views/`, `templates/`, `api/`, or `commands/` folders
+* a `checksums.txt` file with the SHA-256 of each archive, which c8y uses to verify the download

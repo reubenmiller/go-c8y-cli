@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Build the release archives for [[.Name]].
+#
+# c8y extensions install <owner>/[[.Name]] downloads the archive for the user's platform
+# from the latest GitHub release. Each archive must:
+#   * be named <anything>_<os>_<arch>.tar.gz (or .zip), using Go names for os and arch,
+#     e.g. [[.Name]]_1.0.0_linux_amd64.tar.gz, [[.Name]]_1.0.0_windows_amd64.zip
+#   * contain extension.yaml, and the binary at the path set in extension.yaml (bin/[[.Name]],
+#     bin/[[.Name]].exe on Windows), plus any views/, templates/, api/ or commands/ folders
+# A checksums.txt file ("<sha256>  <archive name>" per line) lets c8y verify the download.
+#
+# Usage: script/build.sh <version>
+set -euo pipefail
+
+VERSION="${1:-dev}"
+DIST=dist
+rm -rf "$DIST"
+mkdir -p "$DIST"
+
+for platform in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64; do
+    os="${platform%/*}"
+    arch="${platform#*/}"
+    ext=""
+    if [ "$os" = windows ]; then ext=".exe"; fi
+
+    stage="$DIST/stage/$os-$arch"
+    mkdir -p "$stage/bin"
+
+    # TODO: build the binary for $os/$arch into $stage/bin/[[.Name]]$ext
+    echo "Build step for $os/$arch is missing in script/build.sh" >&2
+    exit 1
+
+    cp extension.yaml "$stage/"
+    [ -d views ] && cp -R views "$stage/"
+
+    name="[[.Name]]_${VERSION}_${os}_${arch}"
+    if [ "$os" = windows ]; then
+        (cd "$stage" && zip -qr "../../$name.zip" .)
+    else
+        tar -czf "$DIST/$name.tar.gz" -C "$stage" .
+    fi
+done
+
+(cd "$DIST" && sha256sum ./*.tar.gz ./*.zip | sed 's| \./| |' > checksums.txt)

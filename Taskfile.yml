@@ -316,6 +316,7 @@ tasks:
     vars:
       FILTER: "*"
     cmds:
+      - task: build-extension-fixtures
       - env PATH="$LOCAL_PATH" ./tests/run-manual.sh {{.CLI_ARGS}}
   
   test-cli-auto:
@@ -327,6 +328,20 @@ tasks:
     cmds:
       - env PATH="$LOCAL_PATH" ./tests/scripts/setup.sh
       - env PATH="$LOCAL_PATH" ./tests/run-auto.sh {{.CLI_ARGS}}
+
+  build-extension-fixtures:
+    desc: Build the binary extension used by the extension tests (pkg/extsdk/examples/c8y-hello)
+    dir: pkg/extsdk/examples/c8y-hello
+    cmds:
+      - go build -o bin/c8y-hello .
+
+  test-extsdk:
+    desc: Test the extension Go SDK (nested module pkg/extsdk) and build its example extension
+    dir: pkg/extsdk
+    cmds:
+      - go vet ./...
+      - go test ./...
+      - go build -o examples/c8y-hello/bin/c8y-hello ./examples/c8y-hello
 
   test-installation:
     desc: Test installation of linux packages
@@ -343,6 +358,13 @@ tasks:
       - git status
       - git diff
       - goreleaser release --clean --auto-snapshot
+
+  release-extsdk:
+    desc: "Tag a release of the extension Go SDK. Usage: task release-extsdk -- v0.1.0"
+    cmds:
+      - task: test-extsdk
+      - git tag "pkg/extsdk/{{.CLI_ARGS}}"
+      - echo "Created tag pkg/extsdk/{{.CLI_ARGS}}. Push it with 'git push origin pkg/extsdk/{{.CLI_ARGS}}'"
 
   publish-powershell:
     desc: Publish powershell module

@@ -178,6 +178,16 @@ func NewSilentError() error {
 	}
 }
 
+// NewSilentErrorWithExitCode creates an error which is not logged, but sets the exit code.
+// Used when the error has already been reported, e.g. by an external process
+func NewSilentErrorWithExitCode(exitCode ExitCode, err error) CommandError {
+	return CommandError{
+		silent:   true,
+		Err:      err,
+		ExitCode: exitCode,
+	}
+}
+
 func NewAssertionError(e *AssertionError) error {
 	return CommandError{
 		silent:    false,

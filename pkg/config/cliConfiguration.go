@@ -10,6 +10,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -396,6 +397,7 @@ const (
 
 	// Extensions
 	SettingsExtensionDataDir         = "settings.extensions.datadir"
+	SettingsExtensionSystemDirs      = "settings.extensions.systemDirs"
 	SettingsExtensionDefaultHost     = "settings.extensions.defaultHost"
 	SettingsExtensionDefaultUsername = "settings.extensions.defaultUsername"
 )
@@ -642,6 +644,7 @@ func (c *Config) bindSettings() {
 
 		// Extensions
 		WithBindEnv(SettingsExtensionDataDir, ""),
+		WithBindEnv(SettingsExtensionSystemDirs, ""),
 		WithBindEnv(SettingsExtensionDefaultHost, "github.com"),
 
 		// Remote access
@@ -1923,6 +1926,60 @@ func (c *Config) ExtensionsDataDir() string {
 		dir = c.GetSessionHomeDir()
 	}
 	return filepath.Join(dir, "extensions")
+}
+
+// ExtensionsSystemDirs returns the system-wide extension folders, which are used for extensions
+// installed by package managers (e.g. Homebrew or apt). The folders are only read, never written to.
+// The setting is a list of folders separated by the OS path list separator (":" or ";" on Windows).
+// If it is not set, then the default folders are used (see DefaultExtensionsSystemDirs)
+func (c *Config) ExtensionsSystemDirs() []string {
+	value := strings.TrimSpace(c.viper.GetString(SettingsExtensionSystemDirs))
+	if value == "" {
+		return DefaultExtensionsSystemDirs()
+	}
+	dirs := []string{}
+	for _, dir := range filepath.SplitList(value) {
+		if dir = strings.TrimSpace(dir); dir != "" {
+			dirs = append(dirs, dir)
+		}
+	}
+	return dirs
+}
+
+// DefaultExtensionsSystemDirs returns the default system-wide extension folders:
+//   - share/c8y/extensions relative to the c8y executable (e.g. the Homebrew prefix)
+//   - common package manager locations
+func DefaultExtensionsSystemDirs() []string {
+	candidates := []string{}
+	if exe, err := os.Executable(); err == nil {
+		candidates = append(candidates, filepath.Join(filepath.Dir(exe), "..", "share", "c8y", "extensions"))
+		if resolved, err := filepath.EvalSymlinks(exe); err == nil {
+			candidates = append(candidates, filepath.Join(filepath.Dir(resolved), "..", "share", "c8y", "extensions"))
+		}
+	}
+	if runtime.GOOS == "windows" {
+		if programData := os.Getenv("ProgramData"); programData != "" {
+			candidates = append(candidates, filepath.Join(programData, "c8y", "extensions"))
+		}
+	} else {
+		candidates = append(candidates,
+			"/opt/homebrew/share/c8y/extensions",
+			"/home/linuxbrew/.linuxbrew/share/c8y/extensions",
+			"/usr/local/share/c8y/extensions",
+			"/usr/share/c8y/extensions",
+		)
+	}
+
+	dirs := []string{}
+	seen := map[string]bool{}
+	for _, dir := range candidates {
+		dir = filepath.Clean(dir)
+		if !seen[dir] {
+			seen[dir] = true
+			dirs = append(dirs, dir)
+		}
+	}
+	return dirs
 }
 
 func (c *Config) DefaultHost() string {

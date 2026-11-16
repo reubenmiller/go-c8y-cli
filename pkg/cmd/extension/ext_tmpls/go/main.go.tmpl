@@ -1,0 +1,62 @@
+// [[.Name]] is a c8y extension. Build it into the extension folder and install it locally:
+//
+//	go build -o bin/[[.Name]] .
+//	c8y extensions install .
+//	c8y [[.ExtName]] services list
+package main
+
+import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/extsdk"
+	"github.com/spf13/cobra"
+)
+
+// Service is an example item. Its type matches the view in views/services.json
+type Service struct {
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+	Status string `json:"status"`
+}
+
+func newServicesCmd() *cobra.Command {
+	cmd := &cobra.Command{Use: "services", Short: "Manage services"}
+
+	var status string
+	list := &cobra.Command{
+		Use:   "list",
+		Short: "List services",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// The runtime context contains the active c8y session.
+			// Use ctx.Client() to create a Cumulocity client
+			ctx, err := extsdk.FromEnv()
+			if err != nil {
+				return err
+			}
+			_ = ctx
+
+			items := []Service{
+				{ID: "1", Name: "ingest", Type: "[[.ViewType]]", Status: "running"},
+				{ID: "2", Name: "reports", Type: "[[.ViewType]]", Status: "stopped"},
+			}
+			results := []Service{}
+			for _, item := range items {
+				if status == "" || item.Status == status {
+					results = append(results, item)
+				}
+			}
+			// The command is declared with "output: json" in extension.yaml, so c8y formats
+			// the output (views, --select, --output table etc.)
+			return extsdk.Print(results)
+		},
+	}
+	list.Flags().StringVar(&status, "status", "", "Only include services with the given status")
+	_ = list.RegisterFlagCompletionFunc("status", cobra.FixedCompletions([]string{"running", "stopped"}, cobra.ShellCompDirectiveNoFileComp))
+	cmd.AddCommand(list)
+	return cmd
+}
+
+func main() {
+	root := extsdk.NewRootCommand("[[.Name]]")
+	root.AddCommand(newServicesCmd())
+	extsdk.Execute(root)
+}

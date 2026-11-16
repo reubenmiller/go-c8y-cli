@@ -13,8 +13,22 @@ func DisableAuthCheck(cmd *cobra.Command) *cobra.Command {
 	return cmd
 }
 
+// DisableAuthCheckForCommand disables the auth check for the command only. Unlike
+// DisableAuthCheck, the auth check of its subcommands is not affected
+func DisableAuthCheckForCommand(cmd *cobra.Command) *cobra.Command {
+	if cmd.Annotations == nil {
+		cmd.Annotations = map[string]string{}
+	}
+
+	cmd.Annotations["skipAuthCheckCommand"] = "true"
+	return cmd
+}
+
 func IsAuthCheckEnabled(cmd *cobra.Command) bool {
 	if !cmd.Runnable() {
+		return false
+	}
+	if cmd.Annotations != nil && cmd.Annotations["skipAuthCheckCommand"] == "true" {
 		return false
 	}
 	for c := cmd; c.Parent() != nil; c = c.Parent() {

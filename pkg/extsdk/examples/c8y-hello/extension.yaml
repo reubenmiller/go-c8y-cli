@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extension.json
+version: v1
+
+# The binary is mounted at the extension root: any command which is not declared below
+# (or provided by api/ or commands/) is passed to the binary, e.g. "c8y hello context"
+binary:
+  path: bin/c8y-hello
+  completion: cobra
+
+# Declared commands are shown in the help, and can be mixed with api and script commands
+commands:
+  - name: services list
+    description: List services
+    output: json
+
+  - name: devices count
+    description: Count the devices in the tenant
+    output: json

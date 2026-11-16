@@ -394,3 +394,219 @@ func writeTree(b *strings.Builder, cmd *cobra.Command, indent string) {
 		writeTree(b, c, indent+"  ")
 	}
 }
+
+// mount creates a test mount. When run, it records the arguments it received
+func mount(origin string, got *[]string) Mount {
+	return Mount{
+		Origin: origin,
+		Short:  "Run binary",
+		Configure: func(cmd *cobra.Command) error {
+			cmd.RunE = func(cmd *cobra.Command, args []string) error {
+				*got = append([]string{"mount:" + origin}, args...)
+				return nil
+			}
+			return nil
+		},
+	}
+}
+
+func TestBinaryPrecedence(t *testing.T) {
+	r := &recorder{}
+	tree := newTree(r)
+	addLeaf(tree, SourceScript, "commands/management/logs", "management logs", &r.ran)
+	addLeaf(tree, SourceBinary, "extension.yaml", "management logs", &r.ran)
+	addLeaf(tree, SourceBinary, "extension.yaml", "management health", &r.ran)
+	addLeaf(tree, SourceAPI, "api/management.yaml", "management health", &r.ran)
+
+	execute(t, tree, r, "analytics management logs")
+	if r.ran != "extension.yaml" {
+		t.Errorf("binary should win over script, got %s", r.ran)
+	}
+	execute(t, tree, r, "analytics management health")
+	if r.ran != "api/management.yaml" {
+		t.Errorf("api should win over binary, got %s", r.ran)
+	}
+	if len(r.conflicts) != 2 {
+		t.Fatalf("expected 2 conflicts, got %v", r.conflicts)
+	}
+	if r.conflicts[0].Kept != "extension.yaml" || r.conflicts[0].Dropped != "commands/management/logs" {
+		t.Errorf("unexpected conflict: %s", r.conflicts[0])
+	}
+}
+
+func TestBinaryAPIAndScriptInOneGroup(t *testing.T) {
+	r := &recorder{}
+	tree := newTree(r)
+	addLeaf(tree, SourceAPI, "api/management.yaml", "management health", &r.ran)
+	addLeaf(tree, SourceScript, "commands/management/logs", "management logs", &r.ran)
+	addLeaf(tree, SourceBinary, "extension.yaml", "management export", &r.ran)
+
+	group := findCmd(t, tree, "management")
+	if got := strings.Join(childNames(group), ","); got != "export,health,logs" {
+		t.Errorf("unexpected children: %s", got)
+	}
+}
+
+func TestRootMount(t *testing.T) {
+	r := &recorder{}
+	tree := newTree(r)
+	var got []string
+	tree.AddMount(nil, mount("extension.yaml", &got))
+
+	if tree.IsEmpty() {
+		t.Fatal("tree with a mount should not be empty")
+	}
+	execute(t, tree, r, "analytics services list --pageSize 5")
+	if strings.Join(got, " ") != "mount:extension.yaml services list --pageSize 5" {
+		t.Errorf("unexpected args: %v", got)
+	}
+
+	// help is passed to the binary when there are no other commands
+	execute(t, tree, r, "analytics --help")
+	if strings.Join(got, " ") != "mount:extension.yaml --help" {
+		t.Errorf("unexpected args: %v", got)
+	}
+}
+
+func TestSubPathMount(t *testing.T) {
+	r := &recorder{}
+	tree := newTree(r)
+	var got []string
+	tree.AddMount(split("tools"), mount("extension.yaml", &got))
+	addLeaf(tree, SourceScript, "commands/hello", "hello", &r.ran)
+
+	execute(t, tree, r, "analytics tools check --verbose")
+	if strings.Join(got, " ") != "mount:extension.yaml check --verbose" {
+		t.Errorf("unexpected args: %v", got)
+	}
+	execute(t, tree, r, "analytics hello")
+	if r.ran != "commands/hello" {
+		t.Errorf("unexpected command: %s", r.ran)
+	}
+}
+
+func TestRootMountWithOtherCommands(t *testing.T) {
+	r := &recorder{}
+	tree := newTree(r)
+	var got []string
+	tree.AddGroup(split("devices"), "Devices", "", "api/devices.yaml")
+	addLeaf(tree, SourceAPI, "api/devices.yaml", "devices list", &r.ran)
+	tree.AddMount(nil, mount("extension.yaml", &got))
+
+	execute(t, tree, r, "analytics devices list")
+	if r.ran != "api/devices.yaml" {
+		t.Errorf("api command should run, got %s", r.ran)
+	}
+	if got != nil {
+		t.Errorf("mount should not run, got %v", got)
+	}
+
+	execute(t, tree, r, "analytics report --month 10")
+	if strings.Join(got, " ") != "mount:extension.yaml report --month 10" {
+		t.Errorf("unexpected args: %v", got)
+	}
+
+	// help shows the group's help, which lists the other commands
+	got = nil
+	cmd, err := tree.ToCobra()
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := &cobra.Command{Use: "c8y"}
+	root.AddCommand(cmd)
+	var out strings.Builder
+	root.SetOut(&out)
+	root.SetArgs(split("analytics --help"))
+	if err := root.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	if got != nil {
+		t.Errorf("mount should not run for help, got %v", got)
+	}
+	if !strings.Contains(out.String(), "devices") {
+		t.Errorf("help should list the devices group: %s", out.String())
+	}
+}
+
+func TestMountInsideGroup(t *testing.T) {
+	r := &recorder{}
+	tree := newTree(r)
+	var got []string
+	addLeaf(tree, SourceAPI, "api/tools.yaml", "tools version", &r.ran)
+	tree.AddMount(split("tools"), mount("extension.yaml", &got))
+
+	execute(t, tree, r, "analytics tools version")
+	if r.ran != "api/tools.yaml" {
+		t.Errorf("api command should run, got %s", r.ran)
+	}
+	execute(t, tree, r, "analytics tools check")
+	if strings.Join(got, " ") != "mount:extension.yaml check" {
+		t.Errorf("unexpected args: %v", got)
+	}
+}
+
+func TestLeafAtMountPathDropsMount(t *testing.T) {
+	for _, mountFirst := range []bool{true, false} {
+		r := &recorder{}
+		tree := newTree(r)
+		var got []string
+		if mountFirst {
+			tree.AddMount(split("tools"), mount("extension.yaml", &got))
+		}
+		addLeaf(tree, SourceScript, "commands/tools", "tools", &r.ran)
+		if !mountFirst {
+			tree.AddMount(split("tools"), mount("extension.yaml", &got))
+		}
+
+		execute(t, tree, r, "analytics tools")
+		if r.ran != "commands/tools" || got != nil {
+			t.Errorf("mountFirst=%v: script should run. ran=%s, mount=%v", mountFirst, r.ran, got)
+		}
+		if len(r.conflicts) != 1 || r.conflicts[0].Dropped != "extension.yaml" {
+			t.Errorf("mountFirst=%v: unexpected conflicts: %v", mountFirst, r.conflicts)
+		}
+	}
+}
+
+// TestCobraNonRootGroupWithRunEReceivesUnknownArgs locks in the cobra behavior which
+// mounts rely on: a non-root command with subcommands and RunE receives arguments that
+// do not match a subcommand, instead of failing with "unknown command".
+func TestCobraNonRootGroupWithRunEReceivesUnknownArgs(t *testing.T) {
+	var got []string
+	ran := ""
+	group := &cobra.Command{
+		Use:                "ext",
+		Args:               cobra.ArbitraryArgs,
+		DisableFlagParsing: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			got = args
+			return nil
+		},
+	}
+	group.AddCommand(&cobra.Command{
+		Use: "known",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ran = "known"
+			return nil
+		},
+	})
+	root := &cobra.Command{Use: "c8y", SilenceErrors: true, SilenceUsage: true}
+	root.PersistentFlags().Bool("verbose", false, "")
+	root.AddCommand(group)
+
+	root.SetArgs([]string{"ext", "unknown", "--flag", "value"})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+	if strings.Join(got, " ") != "unknown --flag value" {
+		t.Errorf("unexpected args: %v", got)
+	}
+
+	root.SetArgs([]string{"ext", "--verbose", "known"})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+	if ran != "known" {
+		t.Errorf("known subcommand should run")
+	}
+}

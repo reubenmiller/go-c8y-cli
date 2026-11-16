@@ -5,7 +5,6 @@ package extensions
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/ghrepo"
-	"io"
 	"sync"
 )
 
@@ -22,13 +21,10 @@ var _ ExtensionManager = &ExtensionManagerMock{}
 //			CreateFunc: func(name string, tmplType ExtTemplateType) error {
 //				panic("mock out the Create method")
 //			},
-//			DispatchFunc: func(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) (bool, error) {
-//				panic("mock out the Dispatch method")
-//			},
 //			EnableDryRunModeFunc: func()  {
 //				panic("mock out the EnableDryRunMode method")
 //			},
-//			ExecuteFunc: func(exe string, args []string, isBinary bool, stdin io.Reader, stdout io.Writer, stderr io.Writer) (bool, error) {
+//			ExecuteFunc: func(opts ExecOptions) error {
 //				panic("mock out the Execute method")
 //			},
 //			InstallFunc: func(interfaceMoqParam ghrepo.Interface, s1 string, s2 string) error {
@@ -56,14 +52,11 @@ type ExtensionManagerMock struct {
 	// CreateFunc mocks the Create method.
 	CreateFunc func(name string, tmplType ExtTemplateType) error
 
-	// DispatchFunc mocks the Dispatch method.
-	DispatchFunc func(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) (bool, error)
-
 	// EnableDryRunModeFunc mocks the EnableDryRunMode method.
 	EnableDryRunModeFunc func()
 
 	// ExecuteFunc mocks the Execute method.
-	ExecuteFunc func(exe string, args []string, isBinary bool, stdin io.Reader, stdout io.Writer, stderr io.Writer) (bool, error)
+	ExecuteFunc func(opts ExecOptions) error
 
 	// InstallFunc mocks the Install method.
 	InstallFunc func(interfaceMoqParam ghrepo.Interface, s1 string, s2 string) error
@@ -89,34 +82,13 @@ type ExtensionManagerMock struct {
 			// TmplType is the tmplType argument value.
 			TmplType ExtTemplateType
 		}
-		// Dispatch holds details about calls to the Dispatch method.
-		Dispatch []struct {
-			// Args is the args argument value.
-			Args []string
-			// Stdin is the stdin argument value.
-			Stdin io.Reader
-			// Stdout is the stdout argument value.
-			Stdout io.Writer
-			// Stderr is the stderr argument value.
-			Stderr io.Writer
-		}
 		// EnableDryRunMode holds details about calls to the EnableDryRunMode method.
 		EnableDryRunMode []struct {
 		}
 		// Execute holds details about calls to the Execute method.
 		Execute []struct {
-			// Exe is the exe argument value.
-			Exe string
-			// Args is the args argument value.
-			Args []string
-			// IsBinary is the isBinary argument value.
-			IsBinary bool
-			// Stdin is the stdin argument value.
-			Stdin io.Reader
-			// Stdout is the stdout argument value.
-			Stdout io.Writer
-			// Stderr is the stderr argument value.
-			Stderr io.Writer
+			// Opts is the opts argument value.
+			Opts ExecOptions
 		}
 		// Install holds details about calls to the Install method.
 		Install []struct {
@@ -151,7 +123,6 @@ type ExtensionManagerMock struct {
 		}
 	}
 	lockCreate           sync.RWMutex
-	lockDispatch         sync.RWMutex
 	lockEnableDryRunMode sync.RWMutex
 	lockExecute          sync.RWMutex
 	lockInstall          sync.RWMutex
@@ -197,50 +168,6 @@ func (mock *ExtensionManagerMock) CreateCalls() []struct {
 	return calls
 }
 
-// Dispatch calls DispatchFunc.
-func (mock *ExtensionManagerMock) Dispatch(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) (bool, error) {
-	if mock.DispatchFunc == nil {
-		panic("ExtensionManagerMock.DispatchFunc: method is nil but ExtensionManager.Dispatch was just called")
-	}
-	callInfo := struct {
-		Args   []string
-		Stdin  io.Reader
-		Stdout io.Writer
-		Stderr io.Writer
-	}{
-		Args:   args,
-		Stdin:  stdin,
-		Stdout: stdout,
-		Stderr: stderr,
-	}
-	mock.lockDispatch.Lock()
-	mock.calls.Dispatch = append(mock.calls.Dispatch, callInfo)
-	mock.lockDispatch.Unlock()
-	return mock.DispatchFunc(args, stdin, stdout, stderr)
-}
-
-// DispatchCalls gets all the calls that were made to Dispatch.
-// Check the length with:
-//
-//	len(mockedExtensionManager.DispatchCalls())
-func (mock *ExtensionManagerMock) DispatchCalls() []struct {
-	Args   []string
-	Stdin  io.Reader
-	Stdout io.Writer
-	Stderr io.Writer
-} {
-	var calls []struct {
-		Args   []string
-		Stdin  io.Reader
-		Stdout io.Writer
-		Stderr io.Writer
-	}
-	mock.lockDispatch.RLock()
-	calls = mock.calls.Dispatch
-	mock.lockDispatch.RUnlock()
-	return calls
-}
-
 // EnableDryRunMode calls EnableDryRunModeFunc.
 func (mock *ExtensionManagerMock) EnableDryRunMode() {
 	if mock.EnableDryRunModeFunc == nil {
@@ -269,29 +196,19 @@ func (mock *ExtensionManagerMock) EnableDryRunModeCalls() []struct {
 }
 
 // Execute calls ExecuteFunc.
-func (mock *ExtensionManagerMock) Execute(exe string, args []string, isBinary bool, stdin io.Reader, stdout io.Writer, stderr io.Writer) (bool, error) {
+func (mock *ExtensionManagerMock) Execute(opts ExecOptions) error {
 	if mock.ExecuteFunc == nil {
 		panic("ExtensionManagerMock.ExecuteFunc: method is nil but ExtensionManager.Execute was just called")
 	}
 	callInfo := struct {
-		Exe      string
-		Args     []string
-		IsBinary bool
-		Stdin    io.Reader
-		Stdout   io.Writer
-		Stderr   io.Writer
+		Opts ExecOptions
 	}{
-		Exe:      exe,
-		Args:     args,
-		IsBinary: isBinary,
-		Stdin:    stdin,
-		Stdout:   stdout,
-		Stderr:   stderr,
+		Opts: opts,
 	}
 	mock.lockExecute.Lock()
 	mock.calls.Execute = append(mock.calls.Execute, callInfo)
 	mock.lockExecute.Unlock()
-	return mock.ExecuteFunc(exe, args, isBinary, stdin, stdout, stderr)
+	return mock.ExecuteFunc(opts)
 }
 
 // ExecuteCalls gets all the calls that were made to Execute.
@@ -299,20 +216,10 @@ func (mock *ExtensionManagerMock) Execute(exe string, args []string, isBinary bo
 //
 //	len(mockedExtensionManager.ExecuteCalls())
 func (mock *ExtensionManagerMock) ExecuteCalls() []struct {
-	Exe      string
-	Args     []string
-	IsBinary bool
-	Stdin    io.Reader
-	Stdout   io.Writer
-	Stderr   io.Writer
+	Opts ExecOptions
 } {
 	var calls []struct {
-		Exe      string
-		Args     []string
-		IsBinary bool
-		Stdin    io.Reader
-		Stdout   io.Writer
-		Stderr   io.Writer
+		Opts ExecOptions
 	}
 	mock.lockExecute.RLock()
 	calls = mock.calls.Execute

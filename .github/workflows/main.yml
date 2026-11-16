@@ -15,6 +15,35 @@ on:
 
 jobs:
 
+  test-extensions:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: pkg/extsdk/go.mod
+        cache-dependency-path: pkg/extsdk/go.sum
+
+    - name: Test extension SDK
+      working-directory: pkg/extsdk
+      run: |
+        go vet ./...
+        go test ./...
+        go build -o examples/c8y-hello/bin/c8y-hello ./examples/c8y-hello
+
+    - name: Install GoReleaser
+      uses: goreleaser/goreleaser-action@v7
+      with:
+        version: '~> v2'
+        install-only: true
+
+    # Scaffold binary extensions, build them against the local SDK, and check that the
+    # GoReleaser archives match the format which "c8y extensions install" expects
+    - name: Test binary extension install and scaffolding
+      run: go test ./pkg/cmd/extension/ ./pkg/cmd/root/ ./pkg/extensions/...
+
   build:
     runs-on: ubuntu-latest
 
