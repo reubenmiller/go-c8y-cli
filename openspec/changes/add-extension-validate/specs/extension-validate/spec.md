@@ -27,11 +27,15 @@ The command SHALL exit with code 101 (the c8y user error code) when there is at 
 - **THEN** the exit code is 0, and 101 with `--strict`
 
 ### Requirement: Manifest checks
-The system SHALL report: invalid YAML (error), unknown keys with their line (warning), invalid `binary.completion` or `commands[].output` values (error), declared commands with an empty or duplicate name (error), and declared `commands` without a `binary` section (error).
+The system SHALL report: invalid YAML (error), unknown keys with their line (warning), invalid `binary.completion` or `commands[].output` values (error), declared commands with an empty or duplicate name (error), declared `commands` without a `binary` section (error), and session providers which are ignored because the manifest has no `binary` section, or because of an invalid or duplicate name or an invalid format (error).
 
 #### Scenario: Typo in a key
 - **WHEN** `extension.yaml` contains `comands:`
 - **THEN** a warning names the key `comands` and its line
+
+#### Scenario: Invalid session provider
+- **WHEN** `extension.yaml` declares two session providers named `vault`
+- **THEN** an error says that the duplicate session provider is ignored
 
 #### Scenario: Commands without binary
 - **WHEN** `extension.yaml` declares `commands` but no `binary`

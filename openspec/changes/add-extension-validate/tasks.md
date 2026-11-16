@@ -7,6 +7,7 @@
 - [x] 1.5 Command tree checks: build a `cmdtree.Tree` with API, binary, mount, and script paths and collect conflicts
 - [x] 1.6 API spec parse errors and non-executable scripts
 - [x] 1.7 Unit tests for each check, including the kitchensink fixture and the SDK example
+- [x] 1.8 Session provider checks (from `add-extension-session-providers`): providers which are ignored are errors
 
 ## 2. Command
 

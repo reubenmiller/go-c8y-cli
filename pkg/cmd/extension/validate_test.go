@@ -246,3 +246,33 @@ func TestCountFindings(t *testing.T) {
 	assert.Equal(t, 1, errorCount)
 	assert.Equal(t, 2, warningCount)
 }
+
+func TestValidateSessionProviders(t *testing.T) {
+	skipWithoutShell(t)
+	ext := newTestExt(t, "c8y-providers").
+		file("extension.yaml", `binary: {}
+sessionProviders:
+  - name: vault
+    exec: [session, select]
+    secrets: [VAULT_TOKEN]
+  - name: vault
+  - name: Invalid_Name
+  - name: other
+    format: yaml
+  - name: typo
+    secret: [X]
+`, 0644).
+		file("bin/c8y-providers", "#!/bin/sh\n", 0755)
+
+	text := findingsText(ext.validate(ValidateOptions{SkipFlagCheck: true}))
+	assert.Contains(t, text, "error|manifest|extension.yaml sessionProviders|duplicate session provider is ignored. name=vault")
+	assert.Contains(t, text, "error|manifest|extension.yaml sessionProviders|session provider is ignored as the name is invalid")
+	assert.Contains(t, text, "error|manifest|extension.yaml sessionProviders|session provider is ignored as the format is invalid. name=other")
+	assert.Contains(t, text, "warning|manifest|extension.yaml:11|unknown key 'sessionProviders[].secret'")
+
+	// Providers without a binary are ignored
+	ext = newTestExt(t, "c8y-providers-nobinary").file("extension.yaml", "sessionProviders:\n  - name: vault\n", 0644)
+	findings := ext.validate(ValidateOptions{})
+	require.Len(t, findings, 1, findingsText(findings))
+	assert.Contains(t, findings[0].Message, "does not declare a binary")
+}

@@ -121,6 +121,7 @@ func ValidateExtension(ext extensions.Extension, opts ValidateOptions) []Finding
 
 	manifest := v.checkManifest()
 	commands := v.checkDeclaredCommands(manifest)
+	v.checkSessionProviders(manifest)
 	exe := v.checkBinary(manifest)
 	v.checkCommandTree(manifest, commands)
 	if exe != "" && !opts.SkipFlagCheck && opts.GlobalFlags != nil {
@@ -202,6 +203,14 @@ func (v *validator) checkDeclaredCommands(manifest *extensions.Manifest) []exten
 		valid = append(valid, item)
 	}
 	return valid
+}
+
+// checkSessionProviders reports session providers which are ignored
+func (v *validator) checkSessionProviders(manifest *extensions.Manifest) {
+	_, problems := manifest.ValidSessionProviders()
+	for _, problem := range problems {
+		v.add(SeverityError, CheckManifest, fileAlias+" sessionProviders", "%s", problem)
+	}
 }
 
 // checkBinary checks that the declared binary exists and is executable, and returns its path

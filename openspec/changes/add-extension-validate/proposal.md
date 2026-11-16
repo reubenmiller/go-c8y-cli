@@ -28,4 +28,4 @@ Binary extensions (change `add-binary-extensions`) have rules that are easy to b
 
 - Code: `pkg/cmd/extension` (new `validate` command and validator, install summary, template workflow).
 - Docs: binary commands page (validation section), generated `c8y extensions validate` docs.
-- Depends on `add-binary-extensions` (PR #743). Session provider checks for `add-extension-session-providers` (PR #744) are added in whichever of the two PRs merges second.
+- Depends on `add-binary-extensions` (PR #743). Includes the session provider checks of `add-extension-session-providers` (PR #744), which merges first.

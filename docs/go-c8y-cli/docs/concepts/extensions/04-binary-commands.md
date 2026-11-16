@@ -202,7 +202,7 @@ It checks:
 
 | Check | Severity | Problem |
 |---|---|---|
-| `manifest` | error | `extension.yaml` is not valid YAML, has invalid values (`binary.completion`, `output`), or declares `commands` without a `binary` section, or the same command twice |
+| `manifest` | error | `extension.yaml` is not valid YAML, has invalid values (`binary.completion`, `output`), or declares `commands` without a `binary` section, or the same command twice, or session providers which are ignored (no `binary` section, invalid or duplicate name, invalid format) |
 | `manifest` | warning | Unknown keys in `extension.yaml`, which usually are typos |
 | `binary` | error | The declared binary does not exist or is not executable |
 | `flags` | warning | A declared command has a flag with the name of a c8y global flag, so c8y handles it and the binary never receives it. This is checked when `binary.completion` is `cobra` |
