@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It does not change the request:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_DRY: true
+    command: |
+      c8y kitchensink filters list --type myType
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /inventory/managedObjects?type=myType
+
+  It applies the command filter to the response:
+    command: manual/extensions/example/filters/001_command_filter.sh
+    exit-code: 0

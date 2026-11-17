@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
+---
+group:
+  name: filters
+  description: Commands with client side filters
+
+commands:
+  - name: list
+    description: List managed objects which are not templates
+    descriptionLong: |
+      List managed objects of a given type, excluding the ones with the c8y_Template fragment.
+      The c8y_Template fragment is removed by a client side filter
+    method: GET
+    path: inventory/managedObjects
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionProperty: managedObjects
+    queryParameters:
+      - name: type
+        type: string
+        description: Managed object type
