@@ -15,7 +15,7 @@
                 "availability",
                 "resources",
                 "*.tenant.id",
-                "requiredRoles.0"
+                "requiredRoles"
             ]
         },
         {

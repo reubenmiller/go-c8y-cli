@@ -12,6 +12,7 @@ import (
 
 	"github.com/olekukonko/ts"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/gjsonpath"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/numbers"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/encode"
@@ -55,8 +56,30 @@ func CellFormatter(formatter numbers.NumberFormatter) encode.CellFormatter {
 			}
 			return value, encode.AlignRight
 		}
+		if node.IsArray() && jsonfilter.IsScalarArray(node) {
+			return joinScalarArray(node, ArraySeparator), encode.AlignLeft
+		}
 		return strings.Trim(node.Raw, "\""), encode.AlignLeft
 	}
+}
+
+// ArraySeparator is used to join the values of an array of scalars into a
+// single table cell, e.g. [one, two]
+var ArraySeparator = ", "
+
+// joinScalarArray renders an array of scalars as a bracketed list so it can
+// be distinguished from a plain text value, e.g. [one, two]
+func joinScalarArray(node gjson.Result, sep string) string {
+	parts := []string{}
+	node.ForEach(func(_, v gjson.Result) bool {
+		if v.Type == gjson.Null {
+			parts = append(parts, "null")
+		} else {
+			parts = append(parts, v.String())
+		}
+		return true
+	})
+	return "[" + strings.Join(parts, sep) + "]"
 }
 
 // CellTransform returns the cell fitting behavior for the given row mode:

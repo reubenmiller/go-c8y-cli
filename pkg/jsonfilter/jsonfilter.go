@@ -379,7 +379,65 @@ func (f JSONFilters) applySelection(selector *shape.Selector, item *gjson.Result
 			}
 		}
 	}
-	return line, sel.Keys(), sel.Groups()
+	groups := sel.Groups()
+	if !f.AsCSV && !f.AsTSV && !f.AsCompletionFormat && !f.Flatten {
+		groups = CollapseScalarArrays(groups, line)
+	}
+	return line, sel.Keys(), groups
+}
+
+// CollapseScalarArrays replaces the per-index keys of arrays which only
+// contain scalar values (string, number, boolean, null), e.g. tags.0, tags.1,
+// with a single key for the array itself (tags), so the array is rendered as
+// one table column. Keys which the user selected explicitly (e.g. tags.0) and
+// arrays containing objects or arrays are left untouched.
+func CollapseScalarArrays(groups []KeyGroup, doc string) []KeyGroup {
+	out := make([]KeyGroup, 0, len(groups))
+	for _, group := range groups {
+		keys := make([]string, 0, len(group.Keys))
+		seen := map[string]bool{}
+		for _, key := range group.Keys {
+			if !strings.EqualFold(key, group.Pattern) {
+				if parent, ok := scalarArrayParent(key, doc); ok {
+					key = parent
+				}
+			}
+			if !seen[key] {
+				seen[key] = true
+				keys = append(keys, key)
+			}
+		}
+		out = append(out, KeyGroup{Pattern: group.Pattern, Keys: keys})
+	}
+	return out
+}
+
+// scalarArrayParent returns the parent path of an array index key (e.g.
+// "tags" for "tags.3") when the parent is an array of scalar values
+func scalarArrayParent(key, doc string) (string, bool) {
+	idx := strings.LastIndexByte(key, '.')
+	if idx <= 0 || key[idx-1] == '\\' {
+		return "", false
+	}
+	if _, err := strconv.Atoi(key[idx+1:]); err != nil {
+		return "", false
+	}
+	parent := key[:idx]
+	node := gjson.Get(doc, parent)
+	if !node.IsArray() || !IsScalarArray(node) {
+		return "", false
+	}
+	return parent, true
+}
+
+// IsScalarArray returns true if the array only contains scalar values
+func IsScalarArray(node gjson.Result) bool {
+	scalar := true
+	node.ForEach(func(_, v gjson.Result) bool {
+		scalar = !v.IsObject() && !v.IsArray()
+		return scalar
+	})
+	return scalar
 }
 
 // convertSelectionToLine renders a selection in the completion format:
