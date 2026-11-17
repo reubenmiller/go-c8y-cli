@@ -259,7 +259,9 @@ func (r *Runner) Run(ctx context.Context, plan *Plan, stdin string, tag string, 
 			injected = append(injected, "--force")
 			env = writeEnv
 		}
-		if seg.DeviceShell {
+		// Only the ssh command takes these flags: a c8y_Command operation is a device
+		// shell command too, but "operations create" and "api" don't know them
+		if seg.DeviceShell && IsDeviceShellCommand(seg.CommandPath) {
 			// ssh must never wait for a password or passphrase, as no one can enter it
 			injected = append(injected, "--batch")
 			if r.SSHFallbackUser != "" {
