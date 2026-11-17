@@ -1,0 +1,116 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+# Extension names declared in extension.yaml. Each test uses its own extension folder
+config:
+  env:
+    # Placeholder session. No requests are sent to the host
+    C8Y_SESSION: ""
+    C8Y_HOST: https://example.invalid
+    C8Y_TENANT: t12345
+    C8Y_SETTINGS_EXTENSIONS_SYSTEMDIRS: ""
+
+tests:
+  It installs a local extension under its declared name:
+    command: |
+      export C8Y_SETTINGS_EXTENSIONS_DATADIR="$(mktemp -d)"
+      src="$(mktemp -d)/my-analytics-tool"
+      mkdir -p "$src/commands"
+      printf 'version: v1\nname: Analytics\n' > "$src/extension.yaml"
+      printf '#!/bin/sh\necho hello from analytics\n' > "$src/commands/hello"
+      chmod +x "$src/commands/hello"
+      c8y extensions install "$src" >/dev/null
+      c8y extensions list --select name,kind -o csv
+      c8y analytics hello
+    exit-code: 0
+    stdout:
+      contains:
+        - analytics,local
+        - hello from analytics
+
+  It installs the same local folder again:
+    command: |
+      export C8Y_SETTINGS_EXTENSIONS_DATADIR="$(mktemp -d)"
+      src="$(mktemp -d)/my-analytics-tool"
+      mkdir -p "$src"
+      printf 'version: v1\nname: analytics\n' > "$src/extension.yaml"
+      c8y extensions install "$src" >/dev/null
+      c8y extensions install "$src" >/dev/null
+      c8y extensions list --select name -o csv
+    exit-code: 0
+    stdout:
+      exactly: analytics
+
+  It uses --name instead of the declared name:
+    command: |
+      export C8Y_SETTINGS_EXTENSIONS_DATADIR="$(mktemp -d)"
+      src="$(mktemp -d)/my-analytics-tool"
+      mkdir -p "$src"
+      printf 'version: v1\nname: analytics\n' > "$src/extension.yaml"
+      c8y extensions install "$src" --name myanalytics >/dev/null
+      c8y extensions list --select name -o csv
+    exit-code: 0
+    stdout:
+      exactly: myanalytics
+
+  It rejects a declared name of a built-in command:
+    command: |
+      export C8Y_SETTINGS_EXTENSIONS_DATADIR="$(mktemp -d)"
+      src="$(mktemp -d)/my-tool"
+      mkdir -p "$src"
+      printf 'version: v1\nname: devices\n' > "$src/extension.yaml"
+      c8y extensions install "$src"
+    exit-code: 100
+    stderr:
+      contains:
+        - '"devices" matches the name of a built-in command'
+
+  It rejects an invalid declared name:
+    command: |
+      export C8Y_SETTINGS_EXTENSIONS_DATADIR="$(mktemp -d)"
+      src="$(mktemp -d)/my-tool"
+      mkdir -p "$src"
+      printf 'version: v1\nname: My_Tool\n' > "$src/extension.yaml"
+      c8y extensions install "$src"
+    exit-code: 100
+    stderr:
+      contains:
+        - invalid extension name "My_Tool"
+
+  It validates the declared name:
+    command: |
+      export C8Y_SETTINGS_EXTENSIONS_DATADIR="$(mktemp -d)"
+      src="$(mktemp -d)/c8y-analytics"
+      mkdir -p "$src"
+      printf 'version: v1\nname: C8Y-Analytics\n' > "$src/extension.yaml"
+      c8y extensions validate "$src" --strict -o csv --select severity,check,message
+    exit-code: 101
+    stdout:
+      exactly: "warning,name,the extension is installed as 'analytics'. Use 'name: analytics'"
+
+  It reports a declared name of a built-in command:
+    command: |
+      export C8Y_SETTINGS_EXTENSIONS_DATADIR="$(mktemp -d)"
+      src="$(mktemp -d)/c8y-tool"
+      mkdir -p "$src"
+      printf 'version: v1\nname: devices\n' > "$src/extension.yaml"
+      c8y extensions validate "$src" -o csv --select severity,check,message
+    exit-code: 101
+    stdout:
+      contains:
+        - "error,name,"
+        - "name 'devices' is a built-in command"
+
+  It doesn't report the name of an installed extension as a built-in command:
+    command: |
+      export C8Y_SETTINGS_EXTENSIONS_DATADIR="$(mktemp -d)"
+      src="$(mktemp -d)/my-analytics-tool"
+      mkdir -p "$src/commands"
+      printf 'version: v1\nname: analytics\n' > "$src/extension.yaml"
+      printf '#!/bin/sh\necho hello\n' > "$src/commands/hello"
+      chmod +x "$src/commands/hello"
+      c8y extensions install "$src" >/dev/null
+      c8y extensions validate analytics --strict
+    exit-code: 0
+    stderr:
+      contains:
+        - No problems found in extension analytics

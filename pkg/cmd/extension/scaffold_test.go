@@ -107,8 +107,11 @@ func TestCreateGoExtension(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, string(output), "must be run through c8y")
 
-	// The generated extension has no problems
-	findings := ValidateExtension(&Extension{path: dir, isLocal: true, manifest: &manifestCache{}}, ValidateOptions{GlobalFlags: testGlobalFlags()})
+	// The generated extension declares its name and has no problems
+	declared, err := readDeclaredName(dir)
+	require.NoError(t, err)
+	assert.Equal(t, "gofoo", declared)
+	findings := ValidateExtension(&Extension{path: dir, isLocal: true, manifest: &manifestCache{}}, ValidateOptions{GlobalFlags: testGlobalFlags(), RootCommand: testRootCommand()})
 	assert.Empty(t, findings, findingsText(findings))
 
 	// The release workflow validates the extension
@@ -192,6 +195,7 @@ func TestCreateOtherExtension(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, manifest.Binary)
 	assert.Equal(t, "bin/c8y-otherfoo", manifest.Binary.Path)
+	assert.Equal(t, "otherfoo", manifest.Name)
 
 	out := runIn(t, "c8y-otherfoo", nil, "git", "ls-files", "-s", "script/build.sh")
 	assert.True(t, strings.HasPrefix(out, "100755"), "build.sh should be executable in git: %s", out)
@@ -213,4 +217,11 @@ func TestCreateScriptExtensionIsDefault(t *testing.T) {
 	manifest, err := readManifest("c8y-scriptfoo")
 	require.NoError(t, err)
 	assert.Nil(t, manifest.Binary)
+	assert.Equal(t, "scriptfoo", manifest.Name)
+
+	findings := ValidateExtension(&Extension{path: "c8y-scriptfoo", isLocal: true, manifest: &manifestCache{}}, ValidateOptions{SkipFlagCheck: true, RootCommand: testRootCommand()})
+	for _, f := range findings {
+		assert.NotEqual(t, CheckName, f.Check, findingsText(findings))
+		assert.NotEqual(t, CheckManifest, f.Check, findingsText(findings))
+	}
 }

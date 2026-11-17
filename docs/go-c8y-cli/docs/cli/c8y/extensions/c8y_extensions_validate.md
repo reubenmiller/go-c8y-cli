@@ -6,9 +6,10 @@ Validate an extension
 
 ### Synopsis
 
-Check an extension for problems, for example typos in extension.yaml, a missing binary,
-commands which are ignored because another command has the same name, or flags of declared
-binary commands which are c8y global flags (so the binary never receives them).
+Check an extension for problems, for example typos in extension.yaml, an invalid extension
+name, a missing binary, commands which are ignored because another command has the same
+name, or flags of declared binary commands which are c8y global flags (so the binary never
+receives them).
 
 The argument is the folder of an extension, or the name of an installed extension. The
 current folder is used if no argument is given.

@@ -37,9 +37,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 			go-c8y-cli extensions are repositories that provide additional c8y commands, aliases,
 			views and templates.
 
-			The name of the extension repository must start with "c8y-". Its commands are available
-			under %[1]sc8y [extname]%[1]s, and can be provided by API specifications (api/), scripts
-			(commands/), or a compiled binary declared in extension.yaml.
+			The extension name is set by the "name" in its extension.yaml file, or else it's the
+			repository name without the "c8y-" prefix (the repository name must then start with
+			"c8y-"). Its commands are available under %[1]sc8y [extname]%[1]s, and can be provided by API
+			specifications (api/), scripts (commands/), or a compiled binary declared in extension.yaml.
 
 			Extensions are installed from git repositories, GitHub releases (binary extensions), or
 			local folders. Extensions in system-wide folders (installed by package managers) are
@@ -127,11 +128,17 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					To install an extension in development from the current directory, use "." as the
 					value of the repository argument.
 
+					The extension is installed under the first of these names: the --name flag, the "name" in
+					the extension's extension.yaml file, or the repository (or folder) name. Without --name or
+					"name", the repository name must start with "c8y-". The name can't be the name of a
+					built-in command or of another installed extension. Updates keep the installed name.
+
 					See the list of available extensions at https://github.com/topics/c8y-extension
 				`),
 				Example: heredoc.Doc(`
 					$ c8y extensions install owner/c8y-extension
 					$ c8y extensions install owner/c8y-extension --pin v1.2.0
+					$ c8y extensions install owner/c8y-extension --name myextension
 					$ c8y extensions install https://git.example.com/owner/c8y-extension
 					$ c8y extensions install .
 				`),
@@ -147,6 +154,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 					if err != nil {
 						return err
 					}
+					checkName := func(name string) error {
+						return checkExtensionName(cmd.Root(), m(), name)
+					}
+
 					if fileInfo, err := os.Stat(args[0]); err == nil && fileInfo.IsDir() {
 						if pinFlag != "" {
 							return fmt.Errorf("local extensions cannot be pinned")
@@ -157,7 +168,11 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 							return err
 						}
 
-						if err := m().InstallLocal(sourcePath, nameFlag); err != nil {
+						name, err := m().InstallLocal(sourcePath, extensions.InstallOptions{
+							Name:      nameFlag,
+							CheckName: checkName,
+						})
+						if err != nil {
 							return err
 						}
 						if io.IsStdoutTTY() {
@@ -166,14 +181,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 								successStr = "Would have installed"
 							}
 							cs := io.ColorScheme()
-							fmt.Fprintf(io.Out, "%s %s extension %s\n", cs.SuccessIcon(), successStr, filepath.Base(sourcePath))
+							fmt.Fprintf(io.Out, "%s %s extension %s from %s\n", cs.SuccessIcon(), successStr, name, sourcePath)
 						}
 						if !cfg.DryRun() {
-							localName := nameFlag
-							if localName == "" {
-								localName = filepath.Base(sourcePath)
-							}
-							printValidationSummary(m(), io, localName)
+							printValidationSummary(m(), io, name)
 						}
 						return nil
 					}
@@ -183,22 +194,21 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						return err
 					}
 
-					extName := nameFlag
-					skipNameCheck := true
-					if extName == "" {
-						extName = repo.RepoName()
-						skipNameCheck = false
-					} else {
-						if !strings.HasPrefix(extName, ExtPrefix) {
-							extName = ExtPrefix + extName
+					// Report a clash with the name set by the user before downloading anything. Otherwise
+					// the name is only known after the download (it can be declared in extension.yaml)
+					if nameFlag != "" {
+						if err := checkName(strings.TrimPrefix(nameFlag, ExtPrefix)); err != nil {
+							return err
 						}
-					}
-					if err := checkValidExtension(cmd.Root(), m(), extName, skipNameCheck); err != nil {
-						return err
 					}
 
 					cs := io.ColorScheme()
-					if err := m().Install(repo, extName, pinFlag); err != nil {
+					extName, err := m().Install(repo, extensions.InstallOptions{
+						Name:      nameFlag,
+						Pin:       pinFlag,
+						CheckName: checkName,
+					})
+					if err != nil {
 						if errors.Is(err, ErrReleaseNotFound) {
 							return fmt.Errorf("%s Could not find a release of %s for %s",
 								cs.FailureIcon(), args[0], cs.Cyan(pinFlag))
@@ -212,6 +222,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						return err
 					}
 
+					if extName == "" {
+						// Dry run
+						return nil
+					}
 					if io.IsStdoutTTY() {
 						fmt.Fprintf(io.Out, "%s Installed extension %s\n", cs.SuccessIcon(), extName)
 						if pinFlag != "" {
@@ -225,7 +239,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 				},
 			}
 			cmd.Flags().StringVar(&pinFlag, "pin", "", "pin extension to a release tag or commit ref")
-			cmd.Flags().StringVar(&nameFlag, "name", "", "use custom name for the extension")
+			cmd.Flags().StringVar(&nameFlag, "name", "", "use custom name for the extension, instead of the name in its extension.yaml or the repository name")
 			completion.WithOptions(
 				cmd,
 				completion.MarkLocalFlag(),
@@ -533,18 +547,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 	return &extCmd
 }
 
-func checkValidExtension(rootCmd *cobra.Command, m extensions.ExtensionManager, extName string, skipNameCheck bool) error {
-	// Allow prefix anyway in the extension name
-	if !skipNameCheck {
-		if !strings.HasPrefix(extName, ExtPrefix) && !strings.Contains(extName, ExtPrefix) {
-			return fmt.Errorf("extension repository name must start with `%s`", ExtPrefix)
-		}
-	}
-
-	commandName := strings.TrimPrefix(extName, ExtPrefix)
-	if c, _, err := rootCmd.Traverse([]string{commandName}); err != nil {
-		return err
-	} else if c != rootCmd {
+// checkExtensionName checks that the extension name (without the c8y- prefix) is not the name of
+// a built-in command, or of another installed extension
+func checkExtensionName(rootCmd *cobra.Command, m extensions.ExtensionManager, commandName string) error {
+	if isBuiltInCommand(rootCmd, commandName) {
 		return fmt.Errorf("%q matches the name of a built-in command", commandName)
 	}
 
@@ -556,6 +562,16 @@ func checkValidExtension(rootCmd *cobra.Command, m extensions.ExtensionManager, 
 	}
 
 	return nil
+}
+
+// isBuiltInCommand returns true if the name is a command of c8y. Commands of installed extensions
+// are not built-in commands
+func isBuiltInCommand(rootCmd *cobra.Command, name string) bool {
+	c, _, err := rootCmd.Traverse([]string{name})
+	if err != nil || c == rootCmd {
+		return false
+	}
+	return c.Annotations[extensions.CommandAnnotation] == ""
 }
 
 func normalizeExtensionSelector(n string) string {
@@ -590,7 +606,7 @@ func printValidationSummary(m extensions.ExtensionManager, io *iostreams.IOStrea
 	if ext == nil {
 		return
 	}
-	errorCount, warningCount := CountFindings(ValidateExtension(ext, ValidateOptions{SkipFlagCheck: true}))
+	errorCount, warningCount := CountFindings(ValidateExtension(ext, ValidateOptions{SkipFlagCheck: true, Installed: true}))
 	if errorCount+warningCount == 0 {
 		return
 	}
@@ -604,9 +620,10 @@ func newCmdValidate(f *cmdutil.Factory) *cobra.Command {
 		Use:   "validate [<name> | <path>]",
 		Short: "Validate an extension",
 		Long: heredoc.Doc(`
-			Check an extension for problems, for example typos in extension.yaml, a missing binary,
-			commands which are ignored because another command has the same name, or flags of declared
-			binary commands which are c8y global flags (so the binary never receives them).
+			Check an extension for problems, for example typos in extension.yaml, an invalid extension
+			name, a missing binary, commands which are ignored because another command has the same
+			name, or flags of declared binary commands which are c8y global flags (so the binary never
+			receives them).
 
 			The argument is the folder of an extension, or the name of an installed extension. The
 			current folder is used if no argument is given.
@@ -639,14 +656,16 @@ func newCmdValidate(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			var ext extensions.Extension
+			installed := false
 			if info, err := os.Stat(target); err == nil && info.IsDir() {
 				dir, err := filepath.Abs(target)
 				if err != nil {
 					return err
 				}
 				ext = &Extension{path: dir, isLocal: true, manifest: &manifestCache{}}
-			} else if installed := findInstalledExtension(f.ExtensionManager(), target); installed != nil {
-				ext = installed
+			} else if installedExt := findInstalledExtension(f.ExtensionManager(), target); installedExt != nil {
+				ext = installedExt
+				installed = true
 			} else {
 				return cmderrors.NewUserError(fmt.Sprintf("'%s' is neither a folder nor an installed extension", target))
 			}
@@ -659,7 +678,11 @@ func newCmdValidate(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
-			findings := ValidateExtension(ext, ValidateOptions{GlobalFlags: cmd.Root().PersistentFlags()})
+			findings := ValidateExtension(ext, ValidateOptions{
+				GlobalFlags: cmd.Root().PersistentFlags(),
+				RootCommand: cmd.Root(),
+				Installed:   installed,
+			})
 			for _, finding := range findings {
 				row, err := json.Marshal(finding)
 				if err != nil {

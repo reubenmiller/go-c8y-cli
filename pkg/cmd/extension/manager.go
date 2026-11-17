@@ -365,19 +365,111 @@ func (m *Manager) getLatestVersion(ext Extension) (string, error) {
 	}
 }
 
-func (m *Manager) InstallLocal(dir string, name string) error {
-	if name == "" {
-		name = filepath.Base(dir)
+func (m *Manager) InstallLocal(dir string, opts extensions.InstallOptions) (string, error) {
+	folder, err := resolveInstallFolder(opts, dir, filepath.Base(dir), false)
+	if err != nil {
+		return "", err
 	}
-	// Extensions are only listed if they have the prefix
-	if !strings.HasPrefix(name, ExtPrefix) {
-		name = ExtPrefix + name
+	name := strings.TrimPrefix(folder, ExtPrefix)
+	targetLink := filepath.Join(m.installDir(), folder)
+
+	// Installing the same folder again replaces the link, e.g. after changing the extension
+	if target, ok := localLinkTarget(targetLink); ok && sameDir(target, dir) {
+		if m.dryRunMode {
+			return name, nil
+		}
+		if err := os.Remove(targetLink); err != nil {
+			return "", err
+		}
+	} else if opts.CheckName != nil {
+		if err := opts.CheckName(name); err != nil {
+			return "", err
+		}
 	}
-	targetLink := filepath.Join(m.installDir(), name)
+
+	if m.dryRunMode {
+		return name, nil
+	}
 	if err := os.MkdirAll(filepath.Dir(targetLink), 0755); err != nil {
-		return err
+		return "", err
 	}
-	return makeSymlink(dir, targetLink)
+	return name, makeSymlink(dir, targetLink)
+}
+
+// localLinkTarget returns the folder which a local extension link points to: the target of a
+// symlink, or the path in the file which is used instead of a symlink on Windows
+func localLinkTarget(link string) (string, bool) {
+	info, err := os.Lstat(link)
+	if err != nil {
+		return "", false
+	}
+	if isSymlink(info.Mode().Type()) {
+		target, err := filepath.EvalSymlinks(link)
+		return target, err == nil
+	}
+	if info.Mode().IsRegular() {
+		target, err := readPathFromFile(link)
+		return target, err == nil
+	}
+	return "", false
+}
+
+// sameDir reports whether both paths are the same folder, after resolving symlinks
+func sameDir(a, b string) bool {
+	resolve := func(p string) string {
+		if r, err := filepath.EvalSymlinks(p); err == nil {
+			p = r
+		}
+		if abs, err := filepath.Abs(p); err == nil {
+			p = abs
+		}
+		return filepath.Clean(p)
+	}
+	return resolve(a) == resolve(b)
+}
+
+// ErrInvalidRepositoryName is returned if the extension name is taken from the repository name, which doesn't have the c8y- prefix
+var ErrInvalidRepositoryName = errors.New("invalid extension repository name")
+
+// resolveInstallFolder returns the folder name of an extension in the extension directory. It is
+// c8y-<name> for the name set by the user (--name) or declared in the extension.yaml file in dir.
+// Otherwise it is the fallback (the repository or folder name). For remote installs the fallback
+// must contain the c8y- prefix, and for local installs the prefix is added
+func resolveInstallFolder(opts extensions.InstallOptions, dir string, fallback string, requirePrefix bool) (string, error) {
+	if opts.Name != "" {
+		if strings.HasPrefix(opts.Name, ExtPrefix) {
+			return opts.Name, nil
+		}
+		return ExtPrefix + opts.Name, nil
+	}
+
+	declared, err := readDeclaredName(dir)
+	if err != nil {
+		return "", err
+	}
+	if declared != "" {
+		name, err := extensions.NormalizeName(declared)
+		if err != nil {
+			return "", fmt.Errorf("%w. Fix the name in %s, or install the extension with --name", err, fileAlias)
+		}
+		return ExtPrefix + name, nil
+	}
+
+	if strings.HasPrefix(fallback, ExtPrefix) || strings.Contains(fallback, ExtPrefix) {
+		return fallback, nil
+	}
+	if requirePrefix {
+		return "", fmt.Errorf("%w %q. The repository name must start with %q, or its %s must set name (or install it with --name)", ErrInvalidRepositoryName, fallback, ExtPrefix, fileAlias)
+	}
+	return ExtPrefix + fallback, nil
+}
+
+// checkInstallName runs the name check of the install options
+func checkInstallName(opts extensions.InstallOptions, folder string) error {
+	if opts.CheckName == nil {
+		return nil
+	}
+	return opts.CheckName(strings.TrimPrefix(folder, ExtPrefix))
 }
 
 type binManifest struct {
@@ -403,13 +495,13 @@ func isGitHubHost(host string) bool {
 // Install installs an extension from repo, and pins to a release tag or commit hash if provided.
 // GitHub repositories which publish release assets for the current platform are installed
 // as binary extensions, all others are installed using git clone
-func (m *Manager) Install(repo ghrepo.Interface, name string, target string) error {
+func (m *Manager) Install(repo ghrepo.Interface, opts extensions.InstallOptions) (string, error) {
 	if m.allowBinary && isGitHubHost(repo.RepoHost()) {
-		r, err := m.fetchRelease(repo, target)
+		r, err := m.fetchRelease(repo, opts.Pin)
 		switch {
 		case err == nil:
 			if hasPlatformAssets(r) {
-				return m.installBinRelease(repo, name, r, target != "")
+				return m.installBinRelease(repo, binInstall{opts: opts}, r, opts.Pin != "")
 			}
 		case errors.Is(err, ErrReleaseNotFound):
 			// No release, so install the repository using git
@@ -419,7 +511,7 @@ func (m *Manager) Install(repo ghrepo.Interface, name string, target string) err
 		}
 	}
 
-	return m.installGit(repo, name, target, m.io.Out, m.io.ErrOut)
+	return m.installGit(repo, opts, m.io.Out, m.io.ErrOut)
 }
 
 // fetchRelease returns the release with the given tag, or the latest release if tag is empty
@@ -431,67 +523,83 @@ func (m *Manager) fetchRelease(repo ghrepo.Interface, tag string) (*release, err
 }
 
 // installBin installs the latest release (or the release with the given tag) as a binary extension
-func (m *Manager) installBin(repo ghrepo.Interface, name string, tag string) error {
+// The folder is the folder name of the installed extension
+func (m *Manager) installBin(repo ghrepo.Interface, folder string, tag string) error {
 	r, err := m.fetchRelease(repo, tag)
 	if err != nil {
 		return err
 	}
-	return m.installBinRelease(repo, name, r, tag != "")
+	_, err = m.installBinRelease(repo, binInstall{folder: folder}, r, tag != "")
+	return err
+}
+
+// binInstall is where a binary extension is installed: in a fixed folder (updates), or in the
+// folder resolved from the install options and the extension's manifest (installs)
+type binInstall struct {
+	folder string
+	opts   extensions.InstallOptions
 }
 
 // installBinRelease installs a release as a binary extension. The release asset is downloaded,
 // verified and extracted into a temporary folder in the data directory, and only then moved into
 // place, so a failure leaves any previously installed version untouched
-func (m *Manager) installBinRelease(repo ghrepo.Interface, name string, r *release, isPinned bool) error {
+func (m *Manager) installBinRelease(repo ghrepo.Interface, target binInstall, r *release, isPinned bool) (string, error) {
 	goos, goarch := m.platform()
 	asset, kind, trueARMBinary := selectAsset(r.Assets, goos, goarch, m.rosetta())
 	if asset == nil {
-		return fmt.Errorf("%w. repository=%s, release=%s, platform=%s/%s", ErrNoPlatformAsset, ghrepo.FullName(repo), r.Tag, goos, goarch)
+		return "", fmt.Errorf("%w. repository=%s, release=%s, platform=%s/%s", ErrNoPlatformAsset, ghrepo.FullName(repo), r.Tag, goos, goarch)
 	}
 
-	if name == "" {
-		name = repo.RepoName()
+	// resolveFolder returns the folder of the extension, using the manifest in dir for new installs
+	resolveFolder := func(dir string) (string, error) {
+		if target.folder != "" {
+			return target.folder, nil
+		}
+		folder, err := resolveInstallFolder(target.opts, dir, repo.RepoName(), true)
+		if err != nil {
+			return "", err
+		}
+		return folder, checkInstallName(target.opts, folder)
 	}
-	targetDir := filepath.Join(m.installDir(), name)
 
 	if m.dryRunMode {
-		fmt.Fprintf(m.io.Out, "would install %s %s (asset %s) to %s\n", ghrepo.FullName(repo), r.Tag, asset.Name, targetDir)
-		return nil
+		m.printDryRunInstall(fmt.Sprintf("%s %s (asset %s)", ghrepo.FullName(repo), r.Tag, asset.Name), target.folder, target.opts, repo.RepoName())
+		return "", nil
 	}
 
 	if err := os.MkdirAll(m.installDir(), 0755); err != nil {
-		return fmt.Errorf("failed to create installation directory: %w", err)
+		return "", fmt.Errorf("failed to create installation directory: %w", err)
 	}
 
 	// Hidden folder (ignored when listing extensions), on the same file system as the target
 	// so it can be renamed into place
 	tmpDir, err := os.MkdirTemp(m.installDir(), ".tmp-install-")
 	if err != nil {
-		return fmt.Errorf("failed to create temporary directory: %w", err)
+		return "", fmt.Errorf("failed to create temporary directory: %w", err)
 	}
 	defer os.RemoveAll(tmpDir)
 
 	downloadPath := filepath.Join(tmpDir, "download")
 	if err := downloadAsset(m.client, repo.RepoHost(), *asset, downloadPath); err != nil {
-		return fmt.Errorf("failed to download asset %s: %w", asset.Name, err)
+		return "", fmt.Errorf("failed to download asset %s: %w", asset.Name, err)
 	}
 
 	checksum, err := fileSHA256(downloadPath)
 	if err != nil {
-		return err
+		return "", err
 	}
 	verifiedChecksum := ""
 	if checksumAsset := findChecksumAsset(r.Assets); checksumAsset != nil {
 		checksums, err := downloadChecksums(m.client, repo.RepoHost(), *checksumAsset)
 		if err != nil {
-			return fmt.Errorf("failed to download checksums %s: %w", checksumAsset.Name, err)
+			return "", fmt.Errorf("failed to download checksums %s: %w", checksumAsset.Name, err)
 		}
 		expected, ok := checksums[asset.Name]
 		if !ok {
-			return fmt.Errorf("%w. %s does not contain an entry for %s", ErrChecksumMismatch, checksumAsset.Name, asset.Name)
+			return "", fmt.Errorf("%w. %s does not contain an entry for %s", ErrChecksumMismatch, checksumAsset.Name, asset.Name)
 		}
 		if !strings.EqualFold(expected, checksum) {
-			return fmt.Errorf("%w. asset=%s, expected=%s, got=%s", ErrChecksumMismatch, asset.Name, expected, checksum)
+			return "", fmt.Errorf("%w. asset=%s, expected=%s, got=%s", ErrChecksumMismatch, asset.Name, expected, checksum)
 		}
 		verifiedChecksum = checksum
 	} else {
@@ -499,26 +607,32 @@ func (m *Manager) installBinRelease(repo ghrepo.Interface, name string, r *relea
 	}
 
 	contentDir := filepath.Join(tmpDir, "content")
+	folder := ""
 	if kind.IsArchive() {
 		if err := extractArchive(downloadPath, kind, contentDir); err != nil {
-			return fmt.Errorf("failed to extract asset %s: %w", asset.Name, err)
+			return "", fmt.Errorf("failed to extract asset %s: %w", asset.Name, err)
 		}
 		root, err := extensionRoot(contentDir)
 		if err != nil {
-			return fmt.Errorf("invalid extension archive %s: %w", asset.Name, err)
+			return "", fmt.Errorf("invalid extension archive %s: %w", asset.Name, err)
 		}
 		contentDir = root
 	} else {
 		// Bare binary (gh compatible), so generate a minimal extension manifest
-		binName := name
+		// The extension has no manifest, so the folder is the name set by the user or the repository name
+		folder, err = resolveFolder(contentDir)
+		if err != nil {
+			return "", err
+		}
+		binName := folder
 		if goos == "windows" {
 			binName += ".exe"
 		}
 		if err := os.MkdirAll(contentDir, 0755); err != nil {
-			return err
+			return "", err
 		}
 		if err := os.Rename(downloadPath, filepath.Join(contentDir, binName)); err != nil {
-			return err
+			return "", err
 		}
 		manifestFile, err := yaml.Marshal(&ExtensionFile{
 			Manifest: extensions.Manifest{
@@ -527,16 +641,16 @@ func (m *Manager) installBinRelease(repo ghrepo.Interface, name string, r *relea
 			},
 		})
 		if err != nil {
-			return err
+			return "", err
 		}
 		if err := os.WriteFile(filepath.Join(contentDir, fileAlias), manifestFile, 0644); err != nil {
-			return err
+			return "", err
 		}
 	}
 
 	exePath := ""
 	if manifest, err := readManifest(contentDir); err != nil {
-		return err
+		return "", err
 	} else if manifest.Binary != nil {
 		// The default binary path uses the repository name (the extension can be installed under a different name)
 		binPath := manifest.Binary.Path
@@ -545,16 +659,16 @@ func (m *Manager) installBinRelease(repo ghrepo.Interface, name string, r *relea
 		}
 		exePath = resolveExecutable(contentDir, binPath, goos)
 		if _, err := os.Stat(exePath); err != nil {
-			return fmt.Errorf("the binary declared in %s is missing from asset %s: %w", fileAlias, asset.Name, err)
+			return "", fmt.Errorf("the binary declared in %s is missing from asset %s: %w", fileAlias, asset.Name, err)
 		}
 		if goos != "windows" {
 			if err := os.Chmod(exePath, 0755); err != nil {
-				return err
+				return "", err
 			}
 		}
 		if trueARMBinary {
 			if err := m.codesign(exePath); err != nil {
-				return fmt.Errorf("failed to codesign downloaded binary: %w", err)
+				return "", fmt.Errorf("failed to codesign downloaded binary: %w", err)
 			}
 		}
 	}
@@ -576,13 +690,22 @@ func (m *Manager) installBinRelease(repo ghrepo.Interface, name string, r *relea
 
 	bs, err := yaml.Marshal(manifest)
 	if err != nil {
-		return fmt.Errorf("failed to serialize manifest: %w", err)
+		return "", fmt.Errorf("failed to serialize manifest: %w", err)
 	}
 	if err := os.WriteFile(filepath.Join(contentDir, manifestName), bs, 0600); err != nil {
-		return fmt.Errorf("failed write manifest file: %w", err)
+		return "", fmt.Errorf("failed write manifest file: %w", err)
 	}
 
-	return replaceDir(contentDir, targetDir, filepath.Join(tmpDir, "previous"))
+	if folder == "" {
+		folder, err = resolveFolder(contentDir)
+		if err != nil {
+			return "", err
+		}
+	}
+	if err := replaceDir(contentDir, filepath.Join(m.installDir(), folder), filepath.Join(tmpDir, "previous")); err != nil {
+		return "", err
+	}
+	return strings.TrimPrefix(folder, ExtPrefix), nil
 }
 
 // replaceDir moves src to dst. An existing dst is moved to backup first, and restored if the move fails
@@ -603,51 +726,97 @@ func replaceDir(src, dst, backup string) error {
 	return nil
 }
 
-func (m *Manager) installGit(repo ghrepo.Interface, name, target string, stdout, stderr io.Writer) error {
+func (m *Manager) installGit(repo ghrepo.Interface, opts extensions.InstallOptions, stdout, stderr io.Writer) (string, error) {
 	protocol := repo.RepoHost()
 	cloneURL := ghrepo.FormatRemoteURL(repo, protocol)
+	repoName := strings.TrimSuffix(path.Base(cloneURL), ".git")
 
 	exe, err := m.lookPath("git")
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	var commitSHA string
-	if target != "" {
-		commitSHA, err = fetchCommitSHA(m.client, repo, target)
+	if opts.Pin != "" {
+		commitSHA, err = fetchCommitSHA(m.client, repo, opts.Pin)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
-	if name == "" {
-		name = strings.TrimSuffix(path.Base(cloneURL), ".git")
+	if m.dryRunMode {
+		m.printDryRunInstall(cloneURL, "", opts, repoName)
+		return "", nil
 	}
-	targetDir := filepath.Join(m.installDir(), name)
 
-	externalCmd := m.newCommand(exe, "clone", cloneURL, targetDir)
+	if err := os.MkdirAll(m.installDir(), 0755); err != nil {
+		return "", fmt.Errorf("failed to create installation directory: %w", err)
+	}
+
+	// Clone into a hidden folder (ignored when listing extensions), on the same file system as the
+	// target, so the name can be read from the extension's manifest before it is moved into place
+	tmpDir, err := os.MkdirTemp(m.installDir(), ".tmp-install-")
+	if err != nil {
+		return "", fmt.Errorf("failed to create temporary directory: %w", err)
+	}
+	defer os.RemoveAll(tmpDir)
+	cloneDir := filepath.Join(tmpDir, "repo")
+
+	externalCmd := m.newCommand(exe, "clone", cloneURL, cloneDir)
 	externalCmd.Stdout = stdout
 	externalCmd.Stderr = stderr
 	if err := externalCmd.Run(); err != nil {
-		return err
-	}
-	if commitSHA == "" {
-		return nil
+		return "", err
 	}
 
-	checkoutCmd := m.newCommand(exe, "-C", targetDir, "checkout", commitSHA)
-	checkoutCmd.Stdout = stdout
-	checkoutCmd.Stderr = stderr
-	if err := checkoutCmd.Run(); err != nil {
-		return err
+	if commitSHA != "" {
+		checkoutCmd := m.newCommand(exe, "-C", cloneDir, "checkout", commitSHA)
+		checkoutCmd.Stdout = stdout
+		checkoutCmd.Stderr = stderr
+		if err := checkoutCmd.Run(); err != nil {
+			return "", err
+		}
+
+		pinPath := filepath.Join(cloneDir, fmt.Sprintf(".pin-%s", commitSHA))
+		f, err := os.OpenFile(pinPath, os.O_WRONLY|os.O_CREATE, 0600)
+		if err != nil {
+			return "", fmt.Errorf("failed to create pin file in directory: %w", err)
+		}
+		if err := f.Close(); err != nil {
+			return "", err
+		}
 	}
 
-	pinPath := filepath.Join(targetDir, fmt.Sprintf(".pin-%s", commitSHA))
-	f, err := os.OpenFile(pinPath, os.O_WRONLY|os.O_CREATE, 0600)
+	folder, err := resolveInstallFolder(opts, cloneDir, repoName, true)
 	if err != nil {
-		return fmt.Errorf("failed to create pin file in directory: %w", err)
+		return "", err
 	}
-	return f.Close()
+	if err := checkInstallName(opts, folder); err != nil {
+		return "", err
+	}
+	if err := replaceDir(cloneDir, filepath.Join(m.installDir(), folder), filepath.Join(tmpDir, "previous")); err != nil {
+		return "", err
+	}
+	return strings.TrimPrefix(folder, ExtPrefix), nil
+}
+
+// printDryRunInstall prints what an install would do. The folder is empty for new installs, where the
+// name set by the user, or the name declared in the extension's manifest, or the repository name is used
+func (m *Manager) printDryRunInstall(source string, folder string, opts extensions.InstallOptions, repoName string) {
+	if folder != "" {
+		fmt.Fprintf(m.io.Out, "would install %s to %s\n", source, filepath.Join(m.installDir(), folder))
+		return
+	}
+	if opts.Name != "" {
+		name := opts.Name
+		if !strings.HasPrefix(name, ExtPrefix) {
+			name = ExtPrefix + name
+		}
+		fmt.Fprintf(m.io.Out, "would install %s to %s\n", source, filepath.Join(m.installDir(), name))
+		return
+	}
+	fmt.Fprintf(m.io.Out, "would install %s to %s, or to %s if its %s declares a name\n",
+		source, filepath.Join(m.installDir(), repoName), filepath.Join(m.installDir(), ExtPrefix+"<name>"), fileAlias)
 }
 
 var ErrNoPlatformAsset = errors.New("the release does not have an asset for this platform")
@@ -727,6 +896,9 @@ func (m *Manager) upgradeExtension(ext Extension, force bool) error {
 	if !ext.UpdateAvailable() {
 		return ErrUpToDate
 	}
+	// The installed name is kept. If the update changes the declared name, users are told how to use it
+	previousName, _ := readDeclaredName(ext.Path())
+
 	var err error
 	if ext.IsBinary() {
 		err = m.upgradeBinExtension(ext)
@@ -739,11 +911,35 @@ func (m *Manager) upgradeExtension(ext Extension, force bool) error {
 		}
 		if isBin {
 			// The git checkout is replaced only after the binary release is installed successfully
-			return m.installBin(repo, filepath.Base(ext.Path()), "")
+			err = m.installBin(repo, filepath.Base(ext.Path()), "")
+		} else {
+			err = m.upgradeGitExtension(ext, force)
 		}
-		err = m.upgradeGitExtension(ext, force)
+	}
+	if err == nil && !m.dryRunMode {
+		m.printNameChange(ext, previousName)
 	}
 	return err
+}
+
+// printNameChange prints a notice if the name declared in the extension's manifest changed in an update,
+// and differs from the installed name. Updates don't rename extensions
+func (m *Manager) printNameChange(ext Extension, previousName string) {
+	currentName, err := readDeclaredName(ext.Path())
+	if err != nil || currentName == "" {
+		return
+	}
+	previous, _ := extensions.NormalizeName(previousName)
+	current, err := extensions.NormalizeName(currentName)
+	if err != nil || current == previous || current == ext.Name() {
+		return
+	}
+	source := ext.URL()
+	if repo, err := ghrepo.FromFullName(source); err == nil && repo.RepoHost() == "github.com" {
+		source = ghrepo.FullName(repo)
+	}
+	fmt.Fprintf(m.io.ErrOut, "extension %s now declares the name '%s'. To use the new name, run:\n  c8y extensions delete %s\n  c8y extensions install %s\n",
+		ext.Name(), current, ext.Name(), source)
 }
 
 func (m *Manager) upgradeGitExtension(ext Extension, force bool) error {
@@ -970,7 +1166,15 @@ func (m *Manager) Create(name string, tmplType extensions.ExtTemplateType) error
 		return m.createPrecompiled(exe, name, tmplType)
 	}
 
-	if err := writeFile(filepath.Join(name, "extension.yaml"), exampleExtensionManifest, 0755); err != nil {
+	manifest := &bytes.Buffer{}
+	manifestTmpl, err := template.New(fileAlias).Delims("[[", "]]").Parse(string(exampleExtensionManifest))
+	if err != nil {
+		return err
+	}
+	if err := manifestTmpl.Execute(manifest, templateData{Name: name, ExtName: cmdName}); err != nil {
+		return err
+	}
+	if err := writeFile(filepath.Join(name, "extension.yaml"), manifest.Bytes(), 0755); err != nil {
 		return err
 	}
 

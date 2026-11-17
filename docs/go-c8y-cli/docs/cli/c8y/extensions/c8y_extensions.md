@@ -9,9 +9,10 @@ Manage c8y extensions
 go-c8y-cli extensions are repositories that provide additional c8y commands, aliases,
 views and templates.
 
-The name of the extension repository must start with "c8y-". Its commands are available
-under `c8y [extname]`, and can be provided by API specifications (api/), scripts
-(commands/), or a compiled binary declared in extension.yaml.
+The extension name is set by the "name" in its extension.yaml file, or else it's the
+repository name without the "c8y-" prefix (the repository name must then start with
+"c8y-"). Its commands are available under `c8y [extname]`, and can be provided by API
+specifications (api/), scripts (commands/), or a compiled binary declared in extension.yaml.
 
 Extensions are installed from git repositories, GitHub releases (binary extensions), or
 local folders. Extensions in system-wide folders (installed by package managers) are

@@ -72,6 +72,16 @@ func readManifest(dir string) (*ExtensionFile, error) {
 	return ext, nil
 }
 
+// readDeclaredName returns the name declared in the extension.yaml file in the given folder, as
+// written in the file. It returns an empty name if the file or the name doesn't exist
+func readDeclaredName(dir string) (string, error) {
+	file, err := readManifest(dir)
+	if err != nil {
+		return "", err
+	}
+	return file.Name, nil
+}
+
 func (e *Extension) loadManifest() *manifestCache {
 	if e.manifest == nil {
 		e.manifest = &manifestCache{}
