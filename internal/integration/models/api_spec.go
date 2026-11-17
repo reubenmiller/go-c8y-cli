@@ -65,6 +65,27 @@ type Command struct {
 	BodyTemplates      []BodyTemplate    `yaml:"bodyTemplates,omitempty"`
 	BodyRequiredKeys   []string          `yaml:"bodyRequiredKeys,omitempty"`
 	FlagMapping        map[string]string `yaml:"flagMapping"`
+	View               *CommandView      `yaml:"view,omitempty"`
+
+	// Extension is the name of the extension which provides the command.
+	// It is set when the command is loaded, and is not part of the specification
+	Extension string `yaml:"-"`
+}
+
+// CommandView is the default view which is used to display the command's output.
+// The view is only applied if the user does not select a view themselves.
+// Either the columns or the name of an existing view should be provided.
+type CommandView struct {
+	// Name of an existing view. Views from the command's extension are preferred
+	Name string `yaml:"name,omitempty"`
+
+	// Columns to display. Takes precedence over the name
+	Columns []string `yaml:"columns,omitempty"`
+}
+
+// IsEmpty checks if the view does not define any columns or view name
+func (v *CommandView) IsEmpty() bool {
+	return v == nil || (v.Name == "" && len(v.Columns) == 0)
 }
 
 func (c *Command) HasPreset() bool {

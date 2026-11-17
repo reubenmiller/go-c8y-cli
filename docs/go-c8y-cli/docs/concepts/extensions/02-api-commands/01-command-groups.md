@@ -193,3 +193,46 @@ What If: Sending [GET] request to [https://{host}/service/unicorns/paginated?lim
 
 ### GET /service/unicorns/paginated?limit=11
 ```
+
+### Example: Setting the default view of a command
+
+An API command can set the view which displays its output. This is useful when the response is specific to your extension, and you don't want a global view (for example, one which matches on `requestPath`) to also apply to other commands such as `c8y api`.
+
+The `view` property accepts either the columns to display, or the name of an existing view:
+
+```yaml title="file: api/analytics.yaml"
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
+---
+group:
+  name: analytics
+  description: Analytics commands
+
+commands:
+  - name: health
+    description: Get the health of the analytics service
+    method: GET
+    path: service/cep/health
+    view:
+      columns:
+        - status
+        - liveness state:components.livenessState
+        - readiness state:components.readinessState
+
+  - name: apps
+    description: List the analytics apps
+    method: GET
+    path: service/cep/apps
+    view:
+      name: cepApps    # <== Uses the cepApps view from the extension's views folder
+```
+
+The rules are:
+
+* `columns` takes precedence over `name`. The columns use the same syntax as the `--select` flag.
+* A view `name` is looked up in the views of the command's extension first, then in all other views. Use `<extension>::<name>` to pick a view from a specific extension.
+* If the view name does not exist, a warning is logged and the view is detected automatically.
+* The view is only used when the view option is `auto` (the default). The user can still choose a different view with `--view <name>`, turn off views with `--view off` (or the `defaults.view` setting), or select properties with `--select`.
+
+:::tip
+If a view in your extension's views folder is only meant for your commands, set `"autoMatch": false` in its definition. The view is then never picked by the automatic view detection, so it doesn't affect other commands. See [view matching](/docs/concepts/views/#view-matching).
+:::
