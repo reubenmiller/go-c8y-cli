@@ -226,3 +226,39 @@ tests:
         | row1       |          1 |
         | row2       |          0 |
         | row3       |         10 |
+
+  It shows arrays of simple values in a single column \#583:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+    command: |
+      printf '%s\n%s\n%s\n' '{"name":"device01","tags":["pump","site-a"],"values":[1,2.5],"items":[{"id":"1"}]}' '{"name":"device02","tags":["boiler"],"values":[],"items":[{"id":"2"}]}' '{"name":"device03"}' |
+        c8y util show --select "name,tags,values,items" -o table --noColor
+    exit-code: 0
+    stdout:
+      exactly: |
+        | name          | tags                | values        | items.0.id |
+        |:--------------|:--------------------|:--------------|:-----------|
+        | device01      | [pump, site-a]      | [1, 2.5]      | 1          |
+        | device02      | [boiler]            | []            | 2          |
+        | device03      |                     |               |            |
+
+  It shows an explicitly selected array element in its own column:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+    command: |
+      echo '{"name":"device01","tags":["pump","site-a"]}' |
+        c8y util show --select "name,tags.1" -o table --noColor
+    exit-code: 0
+    stdout:
+      exactly: |
+        | name          | tags.1      |
+        |:--------------|:------------|
+        | device01      | site-a      |
