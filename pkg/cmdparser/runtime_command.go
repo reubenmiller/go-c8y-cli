@@ -220,6 +220,10 @@ func (n *RuntimeCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	if err := ApplyCommandView(n.factory, cfg, n.options.Spec); err != nil {
+		return err
+	}
 	// Runtime flag options
 	flags.WithOptions(
 		cmd,

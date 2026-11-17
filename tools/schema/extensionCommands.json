@@ -545,6 +545,33 @@
                             ]
                         }
                     },
+                    "view": {
+                        "type": "object",
+                        "title": "Default view",
+                        "description": "View which is used to display the command's output when the user does not select a view (via --view or settings.defaults.view). Use 'columns' to define the view inline, or 'name' to use an existing view. A view name is looked up in the command's extension first",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "title": "View name",
+                                "description": "Name of an existing view. Views of the command's extension are preferred. Use '<extension>::<name>' to use a view from a specific extension",
+                                "minLength": 1
+                            },
+                            "columns": {
+                                "type": "array",
+                                "title": "Columns",
+                                "description": "Columns to display. These can use the same syntax as the --select flag. Takes precedence over 'name'",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "minItems": 1
+                            }
+                        },
+                        "additionalProperties": false,
+                        "anyOf": [
+                            {"required": ["name"]},
+                            {"required": ["columns"]}
+                        ]
+                    },
                     "flagMapping": {
                         "type": "object",
                         "title": "Custom flag mapping",

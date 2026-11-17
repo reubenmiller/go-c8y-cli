@@ -61,6 +61,12 @@
                     "minLength": 1,
                     "default": "tenant/tenants/\\w+/trusted-certificates/"
                 },
+                "autoMatch": {
+                    "type": "boolean",
+                    "title": "Use in automatic view detection",
+                    "description": "Set to false if the view should only be used by name, e.g. via --view <name>, or as the view of an extension API command",
+                    "default": true
+                },
                 "columns": {
                     "type": "array",
                     "title": "Columns to be displayed when the view is used",

@@ -33,6 +33,16 @@ type Definition struct {
 	ContentType   string   `json:"contentType,omitempty"`
 	Self          string   `json:"self,omitempty"`
 	Columns       []string `json:"columns,omitempty"`
+
+	// AutoMatch controls if the view is considered when automatically detecting a view.
+	// Set it to false for views which should only be used by name, e.g. via --view <name>,
+	// or from the view of an extension API command. Defaults to true
+	AutoMatch *bool `json:"autoMatch,omitempty"`
+}
+
+// IsAutoMatch checks if the view is considered when automatically detecting a view
+func (d *Definition) IsAutoMatch() bool {
+	return d.AutoMatch == nil || *d.AutoMatch
 }
 
 func (d *Definition) FQDN() string {
@@ -216,6 +226,28 @@ func (v *DataView) GetActiveView() *Definition {
 	return v.ActiveView
 }
 
+// SetActiveView sets the active view, so it is used regardless of the response contents
+func (v *DataView) SetActiveView(definition *Definition) {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	v.ActiveView = definition
+}
+
+// GetDefinitionByName get the first view definition which matches the name. Accepts wildcard name
+func (v *DataView) GetDefinitionByName(pattern string) (*Definition, error) {
+	err := v.LoadDefinitions()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, definition := range v.GetDefinitions() {
+		if match, _ := matcher.MatchWithWildcards(definition.FQDN(), pattern); match {
+			return &definition, nil
+		}
+	}
+	return nil, nil
+}
+
 // ClearActiveView clear the active view
 func (v *DataView) ClearActiveView() {
 	v.mu.Lock()
@@ -253,6 +285,9 @@ func (v *DataView) GetView(r *ViewData) ([]string, error) {
 
 	var matchingDefinition *Definition
 	for _, definition := range definitions {
+		if !definition.IsAutoMatch() {
+			continue
+		}
 		isMatch := true
 
 		for _, fragment := range definition.Fragments {

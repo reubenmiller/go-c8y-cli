@@ -657,6 +657,7 @@ func addExtensionAPICommands(f *cmdutil.Factory, log *logger.Logger, tree *cmdtr
 			if item.ShouldIgnore() {
 				continue
 			}
+			item.Extension = ext.Name()
 			tree.AddLeaf(append(slices.Clone(groupPath), item.Name), cmdtree.Leaf{
 				Source: cmdtree.SourceAPI,
 				Origin: origin,

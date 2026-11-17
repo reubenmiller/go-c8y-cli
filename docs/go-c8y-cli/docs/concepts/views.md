@@ -97,12 +97,18 @@ A view definition supports matching by the following criteria:
 * `requestPath` - Match the outgoing request PATH (supports regex)
 * `requestMethod` - Match the outgoing request Method (e.g. GET, POST etc.) (supports regex)
 
+Set `"autoMatch": false` to exclude a view from the automatic detection. The view can then only be used by name, either with `--view <name>` or as the [default view of an extension API command](/docs/concepts/extensions/api-commands/command-groups/#example-setting-the-default-view-of-a-command).
+
 :::note
 The matching criteria can be combined to provide more precise matching.
 ::: 
 
 :::note
 If two or more definitions match on the same data, then the view with the lowest `priority` number will be chosen.
+:::
+
+:::note
+An extension API command can set its own default view. That view takes precedence over the automatic detection, but not over a view chosen by the user with `--view`.
 :::
 
 ## Tab completion
