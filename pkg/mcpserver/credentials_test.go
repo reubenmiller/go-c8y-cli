@@ -53,7 +53,7 @@ func TestRunnerAddsBatchModeToDeviceShellCommands(t *testing.T) {
 		t.Fatal(err)
 	}
 	r := &Runner{Executable: script, BaseEnv: []string{"PATH=/usr/bin:/bin"}, SSHFallbackUser: "root"}
-	plan := &Plan{Segments: []Segment{{Args: []string{"remoteaccess", "connect", "ssh", "--device", "1", "--batch=false", "--", "uptime"}, DeviceShell: true}}}
+	plan := &Plan{Segments: []Segment{{Args: []string{"remoteaccess", "connect", "ssh", "--device", "1", "--batch=false", "--", "uptime"}, CommandPath: "remoteaccess connect ssh", DeviceShell: true}}}
 	result, err := r.Run(context.Background(), plan, "", "mcp:test", 10_000)
 	if err != nil {
 		t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
@@ -67,5 +67,25 @@ func TestRunnerAddsBatchModeToDeviceShellCommands(t *testing.T) {
 	result, _ = r.Run(context.Background(), plan, "", "mcp:test", 10_000)
 	if strings.Contains(result.Stdout, "--batch") || strings.Contains(result.Stdout, "--fallback-user") {
 		t.Errorf("expected no --batch for other commands, got %q", result.Stdout)
+	}
+
+	// A c8y_Command operation is a device shell command, but not an ssh one: the ssh
+	// flags would make "operations create" and "api" fail with "unknown flag"
+	for _, seg := range []Segment{
+		{Args: []string{"operations", "create", "--device", "1", "--data", "c8y_Command.text=uname"}, CommandPath: "operations create", DeviceShell: true},
+		{Args: []string{"api", "POST", "/devicecontrol/operations", "--data", "c8y_Command.text=uname"}, CommandPath: "api", DeviceShell: true},
+	} {
+		plan = &Plan{Segments: []Segment{seg}}
+		result, err = r.Run(context.Background(), plan, "", "mcp:test", 10_000)
+		if err != nil {
+			t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+		}
+		got := strings.TrimSpace(result.Stdout)
+		if strings.Contains(got, "--batch") || strings.Contains(got, "--fallback-user") {
+			t.Errorf("expected no ssh flags for %q, got %q", seg.CommandPath, got)
+		}
+		if !strings.HasSuffix(got, "--logMessage mcp:test --force") {
+			t.Errorf("expected the write flags for %q, got %q", seg.CommandPath, got)
+		}
 	}
 }
