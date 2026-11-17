@@ -265,6 +265,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().StringSlice("customQueryParam", nil, `add custom URL query parameters. i.e. --customQueryParam 'withCustomOption=true,myOtherOption=myvalue'`)
 
 	// help
+	newHelpFlag(cmd)
 	cmd.PersistentFlags().Bool("examples", false, "Show examples for the current command")
 
 	// Activity log
@@ -543,6 +544,10 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// Handle errors (not in cobra library)
 	cmd.SilenceErrors = true
+
+	// Group the global flags in the help, and support help levels, i.e. --help local
+	annotateHelpCategories(cmd.PersistentFlags())
+	cmd.SetUsageFunc(newHelpUsageFunc(f))
 
 	ccmd.Command = cmd
 	return ccmd
@@ -854,7 +859,7 @@ func isExtensionWithHelpFlags(cmd *cobra.Command, args []string) bool {
 	if !cmd.DisableFlagParsing {
 		return false
 	}
-	return slices.Contains(args, "--help") || slices.Contains(args, "-h") || slices.Contains(args, "--examples")
+	return slices.ContainsFunc(args, isHelpArg) || slices.Contains(args, "--examples")
 }
 
 func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {

@@ -209,7 +209,8 @@ func hasHelpFlag(args []string) bool {
 		switch arg {
 		case "--":
 			return false
-		case "-h", "--help", "--help=true":
+		}
+		if isHelpArg(arg) && arg != "--help=false" {
 			return true
 		}
 	}
