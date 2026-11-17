@@ -61,7 +61,6 @@ Login using a device certificate (mTLS); reads cert paths from the session file 
       --from-file string           Read session from a file
       --from-prompt[=true|false]   Read from user prompted input
       --from-stdin[=true|false]    Read from standard input
-  -h, --help[=true|false]          help for login
       --host string                Cumulocity host. Only used with the 'interactive' provider
       --loginType string           Login type preference, e.g. OAUTH2_INTERNAL, DEVICE (device flow), BROWSER (Authorization Code via browser), BASIC or CERTIFICATE (mTLS). OAUTH2 is a legacy alias for DEVICE. When set to BASIC, any existing token will be cleared
       --mode string                Session mode which controls which commands are allowed, e.g. dev, qual or prod
@@ -98,6 +97,7 @@ Login using a device certificate (mTLS); reads cert paths from the session file 
       --flatten[=true|false]             flatten json output by replacing nested json properties with properties where their names are represented by dot notation
   -f, --force[=true|false]               Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings                   custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"
+  -h, --help[=true|false]                Show help. Optionally give a level to limit the flags shown: all, local, global, category (list the categories), or one or more categories, i.e. --help local,output
       --includeAll[=true|false]          Include all results by iterating through each page
   -k, --insecure[=true|false]            Allow insecure server connections when using SSL
   -l, --logMessage string                Add custom message to the activity log
