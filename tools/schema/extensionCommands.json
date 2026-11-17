@@ -545,6 +545,16 @@
                             ]
                         }
                     },
+                    "filter": {
+                        "type": "array",
+                        "title": "Client side filter",
+                        "description": "Client side filters which are always applied to the response, using the same syntax as the --filter flag (e.g. 'nothas c8y_Template'). They are combined with any filters given by the user. Only use them when the server side API does not support the filtering: they are applied after the server has paginated the results, so a page can contain fewer items than the page size",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "minItems": 1
+                    },
                     "view": {
                         "type": "object",
                         "title": "Default view",

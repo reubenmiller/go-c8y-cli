@@ -253,6 +253,9 @@ func (n *RuntimeCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
+	if err := ApplyCommandFilter(commonOptions, n.options.Spec); err != nil {
+		return cmderrors.NewUserError(err)
+	}
 	commonOptions.AddQueryParametersWithMapping(query, n.options.Spec.FlagMapping)
 
 	queryValue, err := query.GetQueryUnescape(true)
