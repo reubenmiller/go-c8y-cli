@@ -343,6 +343,14 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"30m",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
+	// help
+	"defaults.help": {"defaults.help", "string", config.SettingsDefaultsHelp, []string{
+		"all\tShow all flags",
+		"local\tShow only the flags of the command",
+		"global\tShow only the global flags",
+		"local,output\tShow the flags of the command and the output related global flags",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
 	"cache.methods": {"cache.methods", "string", config.SettingsCacheMethods, []string{
 		"GET",
 		"GET PUT POST DELETE",

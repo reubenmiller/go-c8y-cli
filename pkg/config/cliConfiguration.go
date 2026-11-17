@@ -374,6 +374,9 @@ const (
 	// SettingsCacheBodyPaths include only specific json body paths in cache hashing calculation
 	SettingsCacheBodyPaths = "settings.defaults.cacheBodyPaths"
 
+	// SettingsDefaultsHelp default help level used by --help, i.e. all, local, global or a category of global flags
+	SettingsDefaultsHelp = "settings.defaults.help"
+
 	// SettingsDefaultsInsecure allow insecure SSL connections
 	SettingsDefaultsInsecure = "settings.defaults.insecure"
 
@@ -563,6 +566,7 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsActivityLogEnabled, true),
 		WithBindEnv(SettingsActivityLogPath, path.Join(c.GetSessionHomeDir(), ActivityLogDirName)),
 		WithBindEnv(SettingsActivityLogMethodFilter, "GET PUT POST DELETE"),
+		WithBindEnv(SettingsDefaultsHelp, ""),
 
 		// HTTP settings
 		WithBindEnv(SettingsUseCompression, true),
@@ -1765,6 +1769,16 @@ func (c *Config) ActivityLogEnabled() bool {
 }
 
 // GetActivityLogMethodFilter filters the activity log entries by a space delimited methods, i.e. GET POST PUT
+// GetDefaultHelpLevel returns the default help level used when --help is given without a value
+func (c *Config) GetDefaultHelpLevel() string {
+	value := strings.TrimSpace(c.viper.GetString(SettingsDefaultsHelp))
+	// Ignore the value of the bound --help flag (which is a boolean)
+	if value == "true" || value == "false" {
+		return ""
+	}
+	return value
+}
+
 func (c *Config) GetActivityLogMethodFilter() string {
 	return c.viper.GetString(SettingsActivityLogMethodFilter)
 }

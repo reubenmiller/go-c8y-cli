@@ -519,6 +519,92 @@ time,source,device_name,fragment.series,value,unit
 
 ---
 
+### help
+
+Show the help for the current command. By default, the help shows the command's own flags and all of the global flags, where the global flags are grouped by category.
+
+You can give an optional level to limit which flags are shown. The level can be given as a separate argument (`--help local`) or with an equals sign (`--help=local`).
+
+|Level|Description|
+|-----|-----------|
+|`all`|Show all flags (default)|
+|`local`|Show only the command's own flags|
+|`global`|Show only the global flags|
+|`category`|List the help levels and the categories of the global flags|
+|`<category>`|Show only the global flags in the given category|
+
+The categories of the global flags are:
+
+|Category|Description|
+|--------|-----------|
+|`session`|Session and authentication|
+|`output`|Output format, filtering and selection|
+|`pagination`|Paging through results|
+|`http`|HTTP requests (headers, proxy, timeouts and retries)|
+|`cache`|Response caching|
+|`dry`|Dry run (show requests without sending them)|
+|`pipeline`|Piped input, workers and batching|
+|`confirm`|Confirmation prompts|
+|`errors`|Error handling and exit codes|
+|`logging`|Logging and the activity log|
+|`help`|Help and examples|
+
+Levels can be combined using a comma separated list, i.e. `--help local,output` shows the command's own flags and the output related global flags.
+
+#### Example: Show only the command's own flags
+
+<CodeExample>
+
+```bash
+c8y devices list --help local
+```
+
+</CodeExample>
+
+#### Example: Show the command's flags and the output related global flags
+
+<CodeExample>
+
+```bash
+c8y devices list --help local,output
+```
+
+</CodeExample>
+
+#### Example: List the categories of the global flags
+
+<CodeExample>
+
+```bash
+c8y devices list --help category
+```
+
+</CodeExample>
+
+#### Example: Change the default help level
+
+The help level used when no value is given to `--help` can be changed using the [defaults.help](../configuration/settings#defaultshelp-string) setting, or the `C8Y_SETTINGS_DEFAULTS_HELP` environment variable. A level given on the command line overrides the setting.
+
+<CodeExample transform="false">
+
+```bash
+export C8Y_SETTINGS_DEFAULTS_HELP=local
+c8y devices list --help
+```
+
+```powershell
+$env:C8Y_SETTINGS_DEFAULTS_HELP = "local"
+c8y devices list --help
+```
+
+</CodeExample>
+
+:::info
+Extension commands which handle their own arguments (i.e. script based extensions) receive the `--help` flag unchanged, so the help levels are only supported if the extension implements them.
+:::
+
+---
+
 ### includeAll
 
 Include all results by iterating through each page

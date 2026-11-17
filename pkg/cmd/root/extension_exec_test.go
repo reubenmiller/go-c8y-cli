@@ -246,6 +246,8 @@ func TestHasHelpFlag(t *testing.T) {
 		"-h":                true,
 		"--status x --help": true,
 		"--help=true":       true,
+		"--help=local":      true,
+		"--help=false":      false,
 		"--status x":        false,
 		"-- --help":         false,
 		"":                  false,

@@ -114,6 +114,9 @@ func MainRun() {
 		return results, cobra.ShellCompDirectiveNoFileComp
 	}
 
+	// Support the help level as a separate argument, i.e. --help local
+	expandedArgs = root.NormalizeHelpArgs(rootCmd.Command, expandedArgs)
+
 	// Extension commands don't parse c8y flags, so handle them before running the command
 	expandedArgs = root.PrepareExtensionArgs(rootCmd.Command, expandedArgs)
 

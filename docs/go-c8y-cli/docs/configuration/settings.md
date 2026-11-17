@@ -306,6 +306,32 @@ When the setting is activated, then all requests which match the `cache.methods`
 
 Cache time-to-live (TTL) settings to control the maximum age that a cached response. If the cached response is older than the TTL settings, then the cached item will be ignored.
 
+### defaults.help: string
+
+Default help level used when the `--help` flag is given without a value. Defaults to `all`, which shows the command's own flags and all of the global flags.
+
+Valid values are `all`, `local`, `global`, `category`, or one or more categories of the global flags (i.e. `output`, `pagination`, `session`). Multiple values can be combined using a comma separated list, i.e. `local,output`. See the [help](../concepts/common-parameters#help) parameter for the full list of categories.
+
+A level given on the command line (i.e. `--help all`) overrides this setting.
+
+<CodeExample transform="false">
+
+```bash
+c8y settings update defaults.help local
+```
+
+```powershell
+c8y settings update defaults.help local
+```
+
+</CodeExample>
+
+Or set it using an environment variable:
+
+```bash
+export C8Y_SETTINGS_DEFAULTS_HELP=local
+```
+
 ### cache.keyauth: boolean
 
 Include the request's Authorization header value when generating the cache key. Defaults to `true`.
