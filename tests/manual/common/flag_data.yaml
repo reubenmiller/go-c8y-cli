@@ -70,3 +70,89 @@ tests:
     stderr:
       not-contains:
         - panic
+
+  # https://github.com/reubenmiller/go-c8y-cli/issues/432
+  It accepts a json array:
+    command: |
+      c8y api POST /example --data '[{"fragment": "myTemp", "series": "myT"}, {"fragment": "myWind", "series": "mySpeed"}]' --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        method: POST
+        path: /example
+        body.#: '2'
+        body.0.fragment: myTemp
+        body.0.series: myT
+        body.1.fragment: myWind
+        body.1.series: mySpeed
+
+  It accepts a json array from file:
+    command: |
+      c8y api POST /example --data testdata/data_array.json --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.#: '2'
+        body.0.fragment: myTemp
+        body.1.series: mySpeed
+
+  It accepts a json array of non-object values:
+    command: |
+      c8y api POST /example --data '["one", 2, true]' --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.#: '3'
+        body.0: one
+        body.1: '2'
+        body.2: 'true'
+
+  It applies a template on top of a json array:
+    command: |
+      c8y api POST /example --data '[{"a": 1}]' --template "[{b: 2}]" --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.#: '2'
+        body.0.a: '1'
+        body.1.b: '2'
+
+  It removes Cumulocity properties from json array items:
+    command: |
+      c8y inventory create --data '[{"id": "1", "self": "https://example.com", "name": "one"}]' --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.#: '1'
+        body.0.name: one
+      not-contains:
+        - '"id":'
+        - '"self":'
+
+  It sets a json array on a data flag with a destination property:
+    command: |
+      c8y bulkoperations create --group 1 --startDate 0s --creationRampSec 1 --operation '[1, 2]' --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.groupId: '1'
+        body.operationPrototype.#: '2'
+        body.operationPrototype.0: '1'
+
+  It does not merge a json array with other data values:
+    command: |
+      c8y api POST /example --data '[{"a": 1}]' --data "b=2" --dry
+    exit-code: 101
+    stderr:
+      contains:
+        - A json array can only be used on its own
+
+  It does not merge a json array with json object values:
+    command: |
+      c8y devices create --name test --data '[{"a": 1}]' --dry
+    exit-code: 101
+    stderr:
+      contains:
+        - A json array body can not be merged with json object values
+      not-contains:
+        - panic
