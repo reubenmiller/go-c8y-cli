@@ -109,11 +109,12 @@ func (s *Server) Instructions() string {
 		- Keep output small: use --select, --filter, --pageSize and --view off. Output is json by default.
 		- Pipe c8y commands with " | " (no shell is used, so jq, grep, &&, ; and redirects are not supported).
 		- Preview writes with --dry before running them with %s.
+		- Give a request body with --template rather than --data. --template takes JSON or jsonnet (a superset of JSON: unquoted keys, single-quoted strings, comments, expressions), so nested fragments, lists, numbers and booleans, and text with commas or "=" all work, e.g. --template "{type: 'c8y_Example', text: 'a, b = c', c8y_Example: {values: [1, 2], enabled: true}}". The --data shorthand (a.b=1,c=text) splits on commas and "=" and guesses types; use it only for a single simple value.
 		- To troubleshoot a device, you can run a shell command on it with %s, if the user enabled it (see deviceShell in %s). Both ways need a mode which allows creating data:
 		  - via ssh, if Cumulocity remote access is configured for the device: remoteaccess connect ssh --device <id> -- <command>
 		    Quote commands which use shell syntax, e.g. -- "sh -c 'ps | grep agent'". Interactive sessions are not supported.
 		    Only ssh keys are used (no passwords). Without --user, the default ssh user is tried first, then a fallback user (root unless the user changed it).
-		  - via a c8y_Command operation, if the device supports it: operations create --device <id> --description "<why>" --data 'c8y_Command.text=<command>' | operations wait --status SUCCESSFUL --status FAILED --duration 2m
+		  - via a c8y_Command operation, if the device supports it: operations create --device <id> --description "<why>" --template "{c8y_Command: {text: '<command>'}}" | operations wait --status SUCCESSFUL --status FAILED --duration 2m
 		    The output is in c8y_Command.result.
 	`, ToolRead, ToolWrite, ToolSession, ToolWrite, ToolWrite, ToolSession)
 }

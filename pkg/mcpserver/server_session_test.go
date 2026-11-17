@@ -56,3 +56,15 @@ func TestSetSessionChangesActiveSession(t *testing.T) {
 		t.Errorf("instructions should not include the tenant: %s", server.Instructions())
 	}
 }
+
+func TestInstructionsPreferTemplate(t *testing.T) {
+	// Request bodies are given with --template (jsonnet), which the --data shorthand
+	// can't express in general: nested values, lists, types, commas and "=" in text
+	instructions := (&Server{}).Instructions()
+	if !strings.Contains(instructions, "rather than --data") {
+		t.Errorf("expected the instructions to prefer --template over --data: %s", instructions)
+	}
+	if !strings.Contains(instructions, `--template "{c8y_Command: {text: '<command>'}}"`) {
+		t.Errorf("expected the c8y_Command example to use --template: %s", instructions)
+	}
+}
