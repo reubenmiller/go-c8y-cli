@@ -3,6 +3,7 @@ package flags
 import (
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -1062,9 +1063,27 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, raw bool, opts ...string) G
 			if err != nil {
 				return dst, "", fmt.Errorf("flag: %s. %w", src, err)
 			}
-			// data flag does not yet support arrays
+			// json arrays are supported, but they can not be merged with other values
 			if jsonUtilities.IsValidJSON([]byte(v)) && jsonUtilities.IsJSONArray([]byte(v)) {
-				return dst, "", fmt.Errorf("invalid data type (array) provided on the '%s' flag. Currently only key/value or json objects are supported. Hint: Try using the 'template' flag instead", src)
+				if len(values) > 1 {
+					return dst, "", fmt.Errorf("invalid '%s' flag. A json array can only be used on its own, it can not be merged with other '%s' values. Hint: Use the 'template' flag to build more complex bodies", src, src)
+				}
+				items, err := parseDataArray(v, stripCumulocityKeys)
+				if err != nil {
+					return dst, "", fmt.Errorf("json error: %s parameter does not contain a valid json array. %w", src, err)
+				}
+				if dst != "" {
+					// e.g. --operation '[...]' is set on its own body property
+					return dst, items, nil
+				}
+				// The array replaces the whole body, so it is passed on as the base
+				// template layer (json is valid jsonnet). A --template is then applied
+				// on top of it, e.g. --template "[{c: 3}]" appends another item
+				out, err := json.Marshal(items)
+				if err != nil {
+					return dst, "", err
+				}
+				return dst, DefaultTemplateString(out), nil
 			}
 			err = jsonUtilities.ParseJSON(v, data)
 			if err != nil {
@@ -1077,6 +1096,25 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, raw bool, opts ...string) G
 		}
 		return dst, data, nil
 	}
+}
+
+// parseDataArray parses a json array given on a data flag. Cumulocity properties
+// are removed from object items in the same way as when a json object is given
+func parseDataArray(v string, stripCumulocityKeys bool) ([]interface{}, error) {
+	items := []interface{}{}
+	decoder := json.NewDecoder(strings.NewReader(v))
+	decoder.UseNumber() // keep large numbers as-is
+	if err := decoder.Decode(&items); err != nil {
+		return nil, err
+	}
+	if stripCumulocityKeys {
+		for _, item := range items {
+			if obj, ok := item.(map[string]interface{}); ok {
+				c8ydata.RemoveCumulocityProperties(obj, true)
+			}
+		}
+	}
+	return items, nil
 }
 
 // WithCumulocityQuery build a Cumulocity Query Expression

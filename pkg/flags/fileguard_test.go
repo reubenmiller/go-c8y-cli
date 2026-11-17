@@ -57,3 +57,49 @@ func TestDataValueFromStringFlag(t *testing.T) {
 		t.Fatalf("unexpected value: dst=%s, value=%v", dst, value)
 	}
 }
+
+// A json array on the data flag forms the whole body (issue #432)
+func TestDataValueJSONArray(t *testing.T) {
+	cmd := &cobra.Command{}
+	cmd.Flags().StringArray("data", nil, "")
+	if err := cmd.Flags().Set("data", `[{"id": "1", "fragment": "myTemp"}, {"fragment": "myWind"}]`); err != nil {
+		t.Fatal(err)
+	}
+	_, value, err := WithDataValueAdvanced(true, false, "data", "")(cmd, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if v, ok := value.(DefaultTemplateString); !ok || string(v) != `[{"fragment":"myTemp"},{"fragment":"myWind"}]` {
+		t.Fatalf("unexpected value: %#v", value)
+	}
+}
+
+// A json array on a data flag with a destination is set on that property
+func TestDataValueJSONArrayWithDestination(t *testing.T) {
+	cmd := &cobra.Command{}
+	cmd.Flags().String("operation", "", "")
+	if err := cmd.Flags().Set("operation", `[1, 2]`); err != nil {
+		t.Fatal(err)
+	}
+	dst, value, err := WithDataValueAdvanced(false, false, "operation", "operationPrototype")(cmd, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if v, ok := value.([]interface{}); dst != "operationPrototype" || !ok || len(v) != 2 {
+		t.Fatalf("unexpected value: dst=%s, value=%#v", dst, value)
+	}
+}
+
+// A json array can not be merged with other data values
+func TestDataValueJSONArrayMixed(t *testing.T) {
+	cmd := &cobra.Command{}
+	cmd.Flags().StringArray("data", nil, "")
+	for _, v := range []string{`[1]`, `a=1`} {
+		if err := cmd.Flags().Set("data", v); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, _, err := WithDataValueAdvanced(true, false, "data", "")(cmd, nil); err == nil {
+		t.Fatal("expected an error")
+	}
+}
