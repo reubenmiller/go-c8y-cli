@@ -86,6 +86,12 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 			$ echo "{\"url\": \"/service/custom/endpoint\",\"body\":{\"name\": \"peter\"}}" | c8y api POST --template "input.value.body"
 			Build a custom request using piped json. The input url property will be mapped to the --url flag, and use
 			a template to also build the request's body from the piped input data.
+
+			$ c8y api POST /example -F file=@./mydevice01.pem -F parentAssetId=1111 -F assetTypeId=2222
+			Send a multipart form-data request with a file and custom form fields (similar to curl's -F option)
+
+			$ c8y api POST /example --form "file=@./data.bin;type=application/octet-stream;filename=custom.bin" --form "description=<./notes.txt"
+			Upload a file with a custom content type and filename, and set a form field to the contents of a file
 		`),
 		Args: cobra.MaximumNArgs(2),
 		RunE: ccmd.RunE,
@@ -97,6 +103,7 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 	cmd.Flags().String("accept", "", "accept (header)")
 	cmd.Flags().String("contentType", "", "content type (header)")
 	cmd.Flags().String("formdata", "", "form data (json or shorthand json)")
+	cmd.Flags().StringArrayP("form", "F", nil, "Multipart form field (curl style). Use name=value for text, name=@path[;type=mime/type][;filename=name] for a file, or name=<path for text read from a file. Can be used multiple times. Implies POST if no method is given")
 	cmd.Flags().BoolVar(&ccmd.keepProperties, "keepProperties", true, "Don't strip Cumulocity properties from the data property, i.e. source etc.")
 	cmd.Flags().StringVar(&ccmd.flagHost, "host", "", "host to use for the rest request. If empty, then the session's host will be used")
 
@@ -173,6 +180,20 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	} else if len(args) > 1 {
 		method = args[0]
 		uri = args[1]
+	}
+
+	// Use POST when sending form fields and no method was given (same as curl)
+	if cmd.Flags().Changed("form") && !cmd.Flags().Changed("method") && method == n.method {
+		hasMethodArg := false
+		for _, m := range allowedMethods {
+			if len(args) > 0 && strings.EqualFold(m, args[0]) {
+				hasMethodArg = true
+				break
+			}
+		}
+		if !hasMethodArg {
+			method = http.MethodPost
+		}
 	}
 
 	var host string
@@ -309,6 +330,15 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		ResponseData: nil,
 	}
 
+	if cmd.Flags().Changed("form") {
+		if !request.RequestSupportsBody(method) {
+			return cmderrors.NewUserError(fmt.Sprintf("--form can not be used with a %s request", strings.ToUpper(method)))
+		}
+		if cmd.Flags().Changed("template") || cmd.Flags().Changed("data") {
+			return cmderrors.NewUserError("--form can not be used together with --data or --template. Form data replaces the request body")
+		}
+	}
+
 	if request.RequestSupportsBody(method) {
 		body := mapbuilder.NewInitializedMapBuilder(!strings.EqualFold(method, "DELETE"))
 		err = flags.WithBody(
@@ -329,11 +359,8 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		req.PrepareRequest = c8ybinary.AddProgress(cmd, "file", cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY()))
-		// get file info
 		// form data
-		// BUG: Format data needs to be lazily loaded via the iterator so it can be re-read
-		// for each request
-		//
+		// Note: the form data is reopened by the request iterator for each request
 		formData := make(map[string]io.Reader)
 		err = flags.WithFormDataOptions(
 			cmd,
@@ -342,6 +369,12 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 			flags.WithFormDataFileAndInfo("file", "formdata")...,
 		)
 		if err != nil {
+			return cmderrors.NewUserError(err)
+		}
+		if err := flags.MakeFormDataReopenable(formData); err != nil {
+			return cmderrors.NewUserError(err)
+		}
+		if err := flags.WithFormFields(cmd, formData, "form"); err != nil {
 			return cmderrors.NewUserError(err)
 		}
 		req.FormData = formData

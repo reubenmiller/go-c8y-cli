@@ -79,6 +79,14 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		DryRunResponse:         r.Request.DryRunResponse,
 	}
 
+	// form data readers can only be consumed once, so create fresh readers for each request
+	if formData, err := flags.ReopenFormData(r.Request.FormData); err != nil {
+		r.setDone()
+		return nil, nil, err
+	} else {
+		req.FormData = formData
+	}
+
 	var inputLine interface{}
 	queryParts := make([]string, 0)
 
