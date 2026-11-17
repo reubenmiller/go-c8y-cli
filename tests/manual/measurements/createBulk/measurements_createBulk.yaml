@@ -52,14 +52,8 @@ tests:
               "body": {
                 "measurements": [
                   {
-                    "c8y_Temperature": {
-                      "T": {
-                        "value": 100
-                      }
-                    },
-                    "source": {
-                      "id": "11111"
-                    },
+                    "c8y_Temperature": { "T": { "value": 100 } },
+                    "source": { "id": "11111" },
                     "time": "2022-01-01T00:00:00Z",
                     "type": "exampleA"
                   }

@@ -56,9 +56,7 @@ tests:
       exactly: |
         {
           "body": {
-            "c8y_DownloadConfigFile": {
-              "url": "https://example.com"
-            },
+            "c8y_DownloadConfigFile": { "url": "https://example.com" },
             "deviceId": "12345",
             "other": "1"
           }
@@ -76,11 +74,7 @@ tests:
         c8y util show --select body --compact=false --output json
     stdout:
       exactly: |
-        {
-          "body": {
-            "deviceId": "1111"
-          }
-        }
+        { "body": { "deviceId": "1111" } }
   
   It provides a function to get the path and query from a full url:
     command: |
@@ -105,13 +99,7 @@ tests:
         c8y util show --select body --compact=false
     stdout:
       exactly: |
-        {
-          "body": {
-            "nestedProp": {
-              "othervalue": 1
-            }
-          }
-        }
+        { "body": { "nestedProp": { "othervalue": 1 } } }
   
   It provides a function to get an optional value - test:
       command: |
@@ -129,13 +117,7 @@ tests:
         c8y util show --select body --compact=false
     stdout:
       exactly: |
-        {
-          "body": {
-            "nestedProp2": {
-              "dummy": 2
-            }
-          }
-        }
+        { "body": { "nestedProp2": { "dummy": 2 } } }
 
   It handles large json values:
     config:
@@ -171,10 +153,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "name": "testName",
-          "value": 3
-        }
+        { "name": "testName", "value": 3 }
   
   It executes a jsonnet template with input values:
     command: |
@@ -192,10 +171,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "name": "myName2",
-          "value": 3
-        }
+        { "name": "myName2", "value": 3 }
   
   It executes a jsonnet template using pipeline input:
     command: |
@@ -215,16 +191,8 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "name": "name",
-          "type": "name_100",
-          "value": 3
-        }
-        {
-          "name": "name2",
-          "type": "name2_100",
-          "value": 3
-        }
+        { "name": "name", "type": "name_100", "value": 3 }
+        { "name": "name2", "type": "name2_100", "value": 3 }
 
   It produces non-json output - integer:
       command: |
@@ -294,13 +262,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "my": {
-            "value": 1
-          },
-          "name": "testdevice",
-          "prop2": false
-        }
+        { "my": { "value": 1 }, "name": "testdevice", "prop2": false }
 
   It suports encoding a string to a URL compatible string:
     command: |

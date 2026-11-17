@@ -17,7 +17,7 @@ tests:
         {
           "body": {
             "c8y_DeviceQueryString": "name eq 'my_devices'",
-            "c8y_IsDynamicGroup": {},
+            "c8y_IsDynamicGroup": { },
             "name": "my_devices",
             "type": "c8y_DynamicGroup"
           },
@@ -35,7 +35,7 @@ tests:
         {
           "body": {
             "c8y_DeviceQueryString": "name eq 'my_devices'",
-            "c8y_IsDynamicGroup": {},
+            "c8y_IsDynamicGroup": { },
             "name": "my_devices",
             "type": "c8y_DynamicGroup"
           },
@@ -53,7 +53,7 @@ tests:
         {
           "body": {
             "c8y_DeviceQueryString": "has(c8y_IsDevice)",
-            "c8y_IsDynamicGroup": {},
+            "c8y_IsDynamicGroup": { },
             "name": "my_devices",
             "type": "c8y_DynamicGroup"
           },

@@ -59,11 +59,7 @@ tests:
       exactly: |
         {
           "body": {
-            "c8y_Firmware": {
-              "name": "iot-linux",
-              "url": "",
-              "version": ""
-            },
+            "c8y_Firmware": { "name": "iot-linux", "url": "", "version": "" },
             "description": "Update firmware to: \"iot-linux\"",
             "deviceId": "1"
           },

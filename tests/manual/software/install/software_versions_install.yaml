@@ -18,12 +18,7 @@ tests:
         {
           "body": {
             "c8y_SoftwareUpdate": [
-              {
-                "action": "install",
-                "name": "userapp1",
-                "url": "",
-                "version": ""
-              }
+              { "action": "install", "name": "userapp1", "url": "", "version": "" }
             ],
             "description": "Installing software",
             "deviceId": "1"

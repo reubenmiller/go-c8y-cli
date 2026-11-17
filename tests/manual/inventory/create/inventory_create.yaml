@@ -18,11 +18,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "c8y_Kpi": {
-            "max": 1.91010101E20
-          }
-        }
+        { "c8y_Kpi": { "max": 1.91010101E20 } }
 
   It creates a managed object with escaped double quotes:
     command: |
@@ -36,11 +32,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "c8y_Kpi": {
-            "description": "some \"value\" ok"
-          }
-        }
+        { "c8y_Kpi": { "description": "some \"value\" ok" } }
 
   It creates a managed object from a json file:
     command: |
@@ -60,11 +52,7 @@ tests:
               "url": "https://example.com/myfile1.deb",
               "version": "1.0.0"
             },
-            {
-              "name": "app2",
-              "url": "https://example.com/myfile1.deb",
-              "version": "9"
-            },
+            { "name": "app2", "url": "https://example.com/myfile1.deb", "version": "9" },
             {
               "name": "app3 test",
               "url": "https://example.com/myfile1.deb",

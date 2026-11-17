@@ -12,9 +12,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "time": "2023-06-29T07:05:24.000Z"
-        }
+        { "time": "2023-06-29T07:05:24.000Z" }
 
   It supports adding a random offset in seconds (positive):
     command: |
@@ -23,9 +21,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "time": "2023-06-29T07:05:24.000Z"
-        }
+        { "time": "2023-06-29T07:05:24.000Z" }
 
   It supports adding a random offset in seconds (negative):
     command: |
@@ -34,9 +30,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "time": "2023-06-29T07:04:54.000Z"
-        }
+        { "time": "2023-06-29T07:04:54.000Z" }
 
   It supports subtracting a relative offset:
     command: |
@@ -45,9 +39,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "time": "2023-06-29T07:05:04.000Z"
-        }
+        { "time": "2023-06-29T07:05:04.000Z" }
   
   It supports custom time format string (go style):
     command: |
@@ -56,9 +48,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "time": "2023-05-30"
-        }
+        { "time": "2023-05-30" }
 
   It supports formatting as utc:
     command: |
@@ -67,9 +57,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "time": "2023-06-29T07:05:14.000Z"
-        }
+        { "time": "2023-06-29T07:05:14.000Z" }
 
   It supports linux timestamp in milliseconds and seconds:
     command: |

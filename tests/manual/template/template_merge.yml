@@ -25,11 +25,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "nestedProp": {
-            "inputList": ["newValue"]
-          }
-        }
+        { "nestedProp": { "inputList": ["newValue"] } }
 
   It merges arrays when array is immediate key:
     command: |
@@ -39,9 +35,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "c8y_SupportedOperations": ["newValue"]
-        }
+        { "c8y_SupportedOperations": ["newValue"] }
   
   It merges an array when existing value does not exist:
     command: |
@@ -51,9 +45,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "c8y_SupportedOperations": ["newValue"]
-        }
+        { "c8y_SupportedOperations": ["newValue"] }
   
   It removes a nested fragment:
     command: |
@@ -63,8 +55,4 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "c8y_Model": {
-            "serialNumber": "123456789"
-          }
-        }
+        { "c8y_Model": { "serialNumber": "123456789" } }

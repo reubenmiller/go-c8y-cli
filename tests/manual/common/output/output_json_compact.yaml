@@ -37,14 +37,8 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "id": "1",
-          "name": "device01"
-        }
-        {
-          "id": "2",
-          "name": "device02"
-        }
+        { "id": "1", "name": "device01" }
+        { "id": "2", "name": "device02" }
 
   It only returns properties for given fields and prints compact json:
     command: |
@@ -79,10 +73,4 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "managedObjects": [],
-          "statistics": {
-            "currentPage": 1,
-            "pageSize": 1
-          }
-        }
+        { "managedObjects": [], "statistics": { "currentPage": 1, "pageSize": 1 } }

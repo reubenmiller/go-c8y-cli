@@ -22,13 +22,7 @@ tests:
         {
           "body": {
             "c8y_Nested": {
-              "type1": {
-                "names": {
-                  "sorted": {
-                    "values": [1, 2, 3]
-                  }
-                }
-              }
+              "type1": { "names": { "sorted": { "values": [1, 2, 3] } } }
             },
             "description": "Restart device",
             "deviceId": "1234"
@@ -66,10 +60,7 @@ tests:
         {
           "body": {
             "deviceId": "12345",
-            "v": {
-              "c8y_Restart": {},
-              "deviceId": "12345"
-            }
+            "v": { "c8y_Restart": { }, "deviceId": "12345" }
           },
           "method": "POST",
           "pathEncoded": "/devicecontrol/operations"

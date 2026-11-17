@@ -129,11 +129,7 @@ tests:
     stdout:
       exactly: |
         {
-          "body": {
-            "key": "mynewapp-key",
-            "name": "mynewapp",
-            "type": "MICROSERVICE"
-          },
+          "body": { "key": "mynewapp-key", "name": "mynewapp", "type": "MICROSERVICE" },
           "path": "/application/applications"
         }
 
@@ -149,22 +145,12 @@ tests:
     stdout:
       exactly: |
         {
-          "body": {
-            "c8y_IsDevice": {},
-            "jobIndex": 1,
-            "jobValue": "11",
-            "name": "11"
-          },
+          "body": { "c8y_IsDevice": { }, "jobIndex": 1, "jobValue": "11", "name": "11" },
           "method": "POST",
           "path": "/inventory/managedObjects"
         }
         {
-          "body": {
-            "c8y_IsDevice": {},
-            "jobIndex": 2,
-            "jobValue": "12",
-            "name": "12"
-          },
+          "body": { "c8y_IsDevice": { }, "jobIndex": 2, "jobValue": "12", "name": "12" },
           "method": "POST",
           "path": "/inventory/managedObjects"
         }

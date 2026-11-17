@@ -16,9 +16,7 @@ tests:
     stdout:
       exactly: |
         {
-          "body": {
-            "name": "MyNewName"
-          },
+          "body": { "name": "MyNewName" },
           "method": "PUT",
           "pathEncoded": "/inventory/managedObjects/12345"
         }

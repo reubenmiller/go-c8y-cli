@@ -10,10 +10,7 @@ tests:
       exactly: |
         {
           "body": {
-            "nestedProp": {
-              "othervalue": 1,
-              "url": "https://anotherworld.com"
-            }
+            "nestedProp": { "othervalue": 1, "url": "https://anotherworld.com" }
           }
         }
 
@@ -23,11 +20,7 @@ tests:
         c8y template execute --template "_.RecurseReplace(input.value, null, 0)" -o json -c=false
     stdout:
       exactly: |
-        {
-          "value": {
-            "item": 0
-          }
-        }
+        { "value": { "item": 0 } }
 
   RecurseReplace replaces boolean values:
     command: |
@@ -35,11 +28,7 @@ tests:
         c8y template execute --template "_.RecurseReplace(input.value, false, true)" -o json -c=false
     stdout:
       exactly: |
-        {
-          "value": {
-            "item": true
-          }
-        }
+        { "value": { "item": true } }
 
   Recurse object and replace values matching a function:
     command: |
@@ -47,12 +36,7 @@ tests:
         c8y template execute --template "_.Recurse(input.value, std.isBoolean, function(x) if x == true then 1 else 0)" -o json -c=false
     stdout:
       exactly: |
-        {
-          "value": {
-            "item": 0,
-            "item2": 2
-          }
-        }
+        { "value": { "item": 0, "item2": 2 } }
 
   Recurse object and add 1 to all numbers:
     command: |
@@ -60,9 +44,4 @@ tests:
         c8y template execute --template "_.Recurse(input.value, std.isNumber, function(x) x + 1)" -o json -c=false
     stdout:
       exactly: |
-        {
-          "value": {
-            "item": false,
-            "item2": 3
-          }
-        }
+        { "value": { "item": false, "item2": 3 } }
