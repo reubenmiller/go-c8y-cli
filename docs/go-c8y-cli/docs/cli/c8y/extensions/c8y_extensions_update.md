@@ -11,8 +11,7 @@ c8y extensions update {<name> | --all} [flags]
 ### Options
 
 ```
-      --all[=true|false]    Update all extensions
-  -h, --help[=true|false]   help for update
+      --all[=true|false]   Update all extensions
 ```
 
 ### Options inherited from parent commands
@@ -38,6 +37,7 @@ c8y extensions update {<name> | --all} [flags]
       --flatten[=true|false]             flatten json output by replacing nested json properties with properties where their names are represented by dot notation
   -f, --force[=true|false]               Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings                   custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"
+  -h, --help[=true|false]                Show help. Optionally give a level to limit the flags shown: all, local, global, category (list the categories), or one or more categories, i.e. --help local,output
       --includeAll[=true|false]          Include all results by iterating through each page
   -k, --insecure[=true|false]            Allow insecure server connections when using SSL
   -l, --logMessage string                Add custom message to the activity log
