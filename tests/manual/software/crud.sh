@@ -88,6 +88,18 @@ echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.version" -
 echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.url" --output csv | grep "^https://test.com$"
 echo "$OPERATION" | c8y util show --select "body.extra" --output csv | grep "^stuff$"
 
+#
+# create versions from piped input, e.g. a device's c8y_SoftwareList (https://github.com/reubenmiller/go-c8y-cli/issues/378)
+# the software is looked up by name and the version is set via the template
+PIPED_VERSIONS=$(
+    printf '{"name":"%s","version":"20.0.0","url":"https://example.com/20"}\n{"name":"%s","version":"21.0.0","url":""}\n' "$NAME" "$NAME" \
+    | c8y software versions create --template "{c8y_Software:{version: input.value.version, url: input.value.url}}" --select "c8y_Software.version,c8y_Software.url" --output csv
+)
+echo "$PIPED_VERSIONS" | grep "^20.0.0,https://example.com/20$"
+echo "$PIPED_VERSIONS" | grep "^21.0.0,$"
+c8y software versions list --software "$NAME" --select "c8y_Software.version" --output csv | grep "^20.0.0$"
+c8y software versions list --software "$NAME" --select "c8y_Software.version" --output csv | grep "^21.0.0$"
+
 # list versions and delete them
 c8y software versions list --software "$ID" | c8y software versions delete
 

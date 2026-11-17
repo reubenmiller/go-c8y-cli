@@ -45,6 +45,9 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 
 			$ c8y software versions create --software 12345
 			Create a new version with an empty version number and url
+
+			$ echo '{"name":"my-app","version":"1.0.0","url":""}' | c8y software versions create --template "{c8y_Software:{version: input.value.version, url: input.value.url}}"
+			Create a new version from piped input, using the piped values in the template. The software is looked up by its name if no id is given
 			`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled(cmd)
@@ -69,7 +72,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("software", "software", false, "additionParents.references.0.managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("software", "software", false, "additionParents.references.0.managedObject.id", "id", "name"),
 	)
 
 	// Required flags
@@ -137,8 +140,6 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithStaticStringValue("c8y_Software.version", ""),
-		flags.WithStaticStringValue("c8y_Software.url", ""),
 		flags.WithDataFlagValue(),
 		flags.WithVersion("file", "version", "c8y_Software.version"),
 		flags.WithStringValue("url", "c8y_Software.url"),
@@ -146,7 +147,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 {type: 'c8y_SoftwareBinary', c8y_Global:{}}`),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "c8y_Software.version"),
+		flags.WithRequiredProperties("type"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -181,15 +182,27 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	bounded := inputIterators.Total > 0
 	// TODO: Use new generic worker setup and execute both path and body!
 	for {
-		softwareID, _, err := path.Execute(false)
+		softwareID, input, err := path.Execute(false)
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
 			return err
 		}
+
+		// Render the body per request so templates can reference the piped input, e.g. input.value.version.
+		// The empty version/url defaults are only applied if not set by the flags, --data or the template
+		requestBody, err := cmdutil.RenderBodyWithInput(
+			body,
+			input,
+			cmdutil.BodyDefault{Path: "c8y_Software.version", Value: ""},
+			cmdutil.BodyDefault{Path: "c8y_Software.url", Value: ""},
+		)
+		if err != nil {
+			return cmderrors.NewUserError(err)
+		}
 		if filename == "" {
-			_, resp, respErr = client.Inventory.CreateChildAddition(context.Background(), softwareID, body)
+			_, resp, respErr = client.Inventory.CreateChildAddition(context.Background(), softwareID, requestBody)
 		} else {
 			file, err := fileguard.Open(filename)
 			if err != nil {
@@ -215,8 +228,10 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 			}
 			_, resp, respErr = client.Inventory.CreateChildAdditionWithBinary(
 				context.Background(), softwareID, binaryFile, func(binaryURL string) interface{} {
-					_ = body.Set("c8y_Software.url", binaryURL)
-					return body
+					if out, err := cmdutil.SetBodyValue(requestBody, "c8y_Software.url", binaryURL); err == nil {
+						return out
+					}
+					return requestBody
 				}, func(r *http.Request) (*http.Request, error) {
 					if bar != nil {
 						r.Body = bar.ProxyReader(r.Body)

@@ -71,7 +71,7 @@ func NewCreatePatchCmd(f *cmdutil.Factory) *CreateCmd {
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("firmware", "firmware", false, "additionParents.references.0.managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("firmware", "firmware", false, "additionParents.references.0.managedObject.id", "id", "name"),
 	)
 
 	// Required flags
@@ -143,8 +143,6 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithStaticStringValue("c8y_Firmware.version", ""),
-		flags.WithStaticStringValue("c8y_Firmware.url", ""),
 		flags.WithDataFlagValue(),
 		flags.WithVersion("file", "version", "c8y_Firmware.version"),
 		flags.WithStringValue("url", "c8y_Firmware.url"),
@@ -153,7 +151,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 {type: 'c8y_FirmwareBinary', c8y_Global:{}}`),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "c8y_Firmware.version", "c8y_Patch.dependency"),
+		flags.WithRequiredProperties("type", "c8y_Patch.dependency"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -188,15 +186,27 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	bounded := inputIterators.Total > 0
 	for {
 
-		firmwareID, _, err := path.Execute(false)
+		firmwareID, input, err := path.Execute(false)
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
 			return err
 		}
+
+		// Render the body per request so templates can reference the piped input, e.g. input.value.version.
+		// The empty version/url defaults are only applied if not set by the flags, --data or the template
+		requestBody, err := cmdutil.RenderBodyWithInput(
+			body,
+			input,
+			cmdutil.BodyDefault{Path: "c8y_Firmware.version", Value: ""},
+			cmdutil.BodyDefault{Path: "c8y_Firmware.url", Value: ""},
+		)
+		if err != nil {
+			return cmderrors.NewUserError(err)
+		}
 		if filename == "" {
-			_, resp, respErr = client.Inventory.CreateChildAddition(context.Background(), firmwareID, body)
+			_, resp, respErr = client.Inventory.CreateChildAddition(context.Background(), firmwareID, requestBody)
 		} else {
 
 			file, err := fileguard.Open(filename)
@@ -223,8 +233,10 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 			}
 			_, resp, respErr = client.Inventory.CreateChildAdditionWithBinary(
 				context.Background(), firmwareID, binaryFile, func(binaryURL string) interface{} {
-					_ = body.Set("c8y_Firmware.url", binaryURL)
-					return body
+					if out, err := cmdutil.SetBodyValue(requestBody, "c8y_Firmware.url", binaryURL); err == nil {
+						return out
+					}
+					return requestBody
 				}, func(r *http.Request) (*http.Request, error) {
 					if bar != nil {
 						r.Body = bar.ProxyReader(r.Body)

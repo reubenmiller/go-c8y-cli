@@ -11,3 +11,13 @@ tests:
         stdout:
             exactly: |
                 {"body":{"c8y_Firmware":{"url":"","version":""},"c8y_Global":{},"type":"c8y_FirmwareBinary"},"method":"POST"}
+
+    It uses piped input in the template when creating firmware versions:
+        command: |
+            echo '{"id":"11","version":"1.0.0"}' |
+                c8y firmware versions create --template "{c8y_Firmware:{version: input.value.version}}" --dry |
+                c8y util show --select path,body -o json -c
+        exit-code: 0
+        stdout:
+            exactly: |
+                {"body":{"c8y_Firmware":{"url":"","version":"1.0.0"},"c8y_Global":{},"type":"c8y_FirmwareBinary"},"path":"/inventory/managedObjects/11/childAdditions"}
