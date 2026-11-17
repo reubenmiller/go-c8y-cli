@@ -44,3 +44,34 @@ tests:
     stdout:
       exactly: |
         {"body":{"c8y_Global":{},"c8y_Software":{"url":"","version":""},"type":"c8y_SoftwareBinary"},"method":"POST"}
+
+  # https://github.com/reubenmiller/go-c8y-cli/issues/378
+  It uses piped input in the template when creating software versions:
+    command: |
+      printf '{"id":"11","version":"1.0.0"}\n{"id":"22","version":"2.0.0","url":"https://example.com/app2"}\n' |
+        c8y software versions create --template "{c8y_Software:{version: input.value.version, url: std.get(input.value, 'url', '')}}" --dry |
+        c8y util show --select path,body -o json -c
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"c8y_Global":{},"c8y_Software":{"url":"","version":"1.0.0"},"type":"c8y_SoftwareBinary"},"path":"/inventory/managedObjects/11/childAdditions"}
+        {"body":{"c8y_Global":{},"c8y_Software":{"url":"https://example.com/app2","version":"2.0.0"},"type":"c8y_SoftwareBinary"},"path":"/inventory/managedObjects/22/childAdditions"}
+
+  It uses a template to set the software version:
+    command: |
+      c8y software versions create --software 1234 --template "{c8y_Software:{version: '9.9.9'}}" --dry |
+        c8y util show --select body -o json -c
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"c8y_Global":{},"c8y_Software":{"url":"","version":"9.9.9"},"type":"c8y_SoftwareBinary"}}
+
+  It prefers the version flag over piped values in the template:
+    command: |
+      echo '{"id":"11","version":"1.0.0"}' |
+        c8y software versions create --version 2.0.0 --url "https://example.com" --dry |
+        c8y util show --select body -o json -c
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"c8y_Global":{},"c8y_Software":{"url":"https://example.com","version":"2.0.0"},"type":"c8y_SoftwareBinary"}}
