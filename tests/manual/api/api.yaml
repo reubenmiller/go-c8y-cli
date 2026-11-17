@@ -351,3 +351,7 @@ tests:
     stderr:
       contains:
         - --form can not be used with a GET request
+
+  It uploads binaries using form fields against a live tenant:
+    command: ./manual/api/form_upload.sh
+    exit-code: 0
