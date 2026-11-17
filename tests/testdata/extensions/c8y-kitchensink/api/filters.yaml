@@ -18,3 +18,5 @@ commands:
       - name: type
         type: string
         description: Managed object type
+    filter:
+      - nothas c8y_Template
