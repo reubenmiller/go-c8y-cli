@@ -26,7 +26,7 @@ import (
 
 const (
 	// annotationExtension marks the root command of an extension (value is the extension name)
-	annotationExtension = "c8y.extension"
+	annotationExtension = extensions.CommandAnnotation
 
 	// manifestOrigin is the origin used in log messages for commands declared in the manifest
 	manifestOrigin = "extension.yaml"

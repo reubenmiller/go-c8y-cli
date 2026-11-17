@@ -1,6 +1,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extension.json
 version: v1
 
+# Name of the extension and its command (c8y [[.ExtName]]). Without it, the repository name
+# (without the "c8y-" prefix) is used
+name: [[.ExtName]]
+
 # The binary is mounted at the extension root. Arguments which do not match a declared
 # command (or an api/ or commands/ command) are passed to the binary
 binary:

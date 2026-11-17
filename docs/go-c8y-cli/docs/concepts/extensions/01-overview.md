@@ -14,7 +14,7 @@ By default extensions are accessible across all sessions. Though for scenarios w
 
 ## What is an extension?
 
-An extension is a git repository (or a GitHub release, or a folder installed by a package manager) which contains multiple files/folders which control what the extension has to offer. The extension creator is free to pick which elements should be included. By default all extensions start with `c8y-`. This is to make public extension easier to discover, however the `c8y-` prefix will be ignore when using the extension (to avoid unnecessary typing).
+An extension is a git repository (or a GitHub release, or a folder installed by a package manager) which contains multiple files/folders which control what the extension has to offer. The extension creator is free to pick which elements should be included. By default all extensions start with `c8y-`. This is to make public extension easier to discover, however the `c8y-` prefix will be ignore when using the extension (to avoid unnecessary typing). An extension can also declare its own name, see [extension name](#extension-name).
 
 The different elements of an extension and where they are stored within the extension repository are listed below:
 
@@ -52,6 +52,30 @@ c8y-myext/
     ├── devices.json
     └── applications.json
 ```
+
+### Extension name
+
+The extension name is the name of its command (`c8y <name>`), and the prefix of its templates and views. It's the first of:
+
+1. The `--name` flag of `c8y extensions install`
+2. The `name` in the extension's `extension.yaml`
+3. The repository name (or folder name for local extensions) without the `c8y-` prefix
+
+So a repository can have a descriptive name, and still give its command a short name:
+
+```yaml title="extension.yaml in the repository owner/c8y-cli-extension-analytics"
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extension.json
+version: v1
+name: analytics
+```
+
+The extension is installed as `c8y-analytics`, and its commands run with `c8y analytics ...`.
+
+The name is converted to lowercase, and a leading `c8y-` is removed. It can only contain letters, numbers, and `-`. The name can't be the name of a built-in command, or of another installed extension: use `--name` to install an extension under another name.
+
+If the extension doesn't declare a name, the repository name must start with `c8y-` (or contain it).
+
+Updates keep the installed name. If a new version declares another name, `c8y extensions update` shows the commands to install the extension under the new name.
 
 ## Extension contents and examples
 
@@ -316,7 +340,7 @@ Creating an extension requires `git` to already by installed.
 :::
 
 :::note
-The extension will be automatically prefixed with `c8y-` so that all extensions follow the same convention making them easier to find on GitHub.
+The extension will be automatically prefixed with `c8y-` so that all extensions follow the same convention making them easier to find on GitHub. The generated `extension.yaml` declares the name without the prefix, so you can rename the repository without changing the command name.
 :::
 
 ### Updating an extension

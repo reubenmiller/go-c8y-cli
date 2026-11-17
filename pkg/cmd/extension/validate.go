@@ -20,6 +20,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdparser"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions/cmdtree"
+	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 )
@@ -39,6 +40,7 @@ const (
 	CheckCommands = "commands"
 	CheckAPI      = "api"
 	CheckScripts  = "scripts"
+	CheckName     = "name"
 )
 
 // Finding is a problem found when validating an extension
@@ -63,6 +65,14 @@ type ValidateOptions struct {
 
 	// CompleteTimeout is the maximum duration to wait for the binary to list its flags
 	CompleteTimeout time.Duration
+
+	// RootCommand is the c8y root command, used to check that the name is not a built-in
+	// command. The check is skipped if nil
+	RootCommand *cobra.Command
+
+	// Installed is true if the extension is installed (and not a folder being developed), so its
+	// installed name can be compared with the declared name
+	Installed bool
 }
 
 // globalFlagsHandledByBinary are global flags which are still passed to declared binary commands
@@ -120,6 +130,7 @@ func ValidateExtension(ext extensions.Extension, opts ValidateOptions) []Finding
 	v := &validator{ext: ext, opts: opts}
 
 	manifest := v.checkManifest()
+	v.checkName(manifest)
 	commands := v.checkDeclaredCommands(manifest)
 	v.checkSessionProviders(manifest)
 	exe := v.checkBinary(manifest)
@@ -169,6 +180,29 @@ func (v *validator) checkManifest() *extensions.Manifest {
 		}
 	}
 	return &file.Manifest
+}
+
+// checkName checks the name declared in the manifest
+func (v *validator) checkName(manifest *extensions.Manifest) {
+	if manifest.Name == "" {
+		return
+	}
+	name, err := extensions.NormalizeName(manifest.Name)
+	if err != nil {
+		v.add(SeverityError, CheckName, fileAlias, "invalid name '%s', so the extension can't be installed. Use lowercase letters, numbers, and '-' (%s)", manifest.Name, extensions.NameFormat)
+		return
+	}
+	if manifest.Name != name {
+		v.add(SeverityWarning, CheckName, fileAlias, "the extension is installed as '%s'. Use 'name: %s'", name, name)
+	}
+	if root := v.opts.RootCommand; root != nil {
+		if isBuiltInCommand(root, name) {
+			v.add(SeverityError, CheckName, fileAlias, "name '%s' is a built-in command, so the extension can't be installed under it", name)
+		}
+	}
+	if v.opts.Installed && v.ext.Name() != name {
+		v.add(SeverityInfo, CheckName, fileAlias, "the extension is installed as '%s', but declares the name '%s'", v.ext.Name(), name)
+	}
 }
 
 // checkDeclaredCommands checks the declared binary commands, and returns the valid ones

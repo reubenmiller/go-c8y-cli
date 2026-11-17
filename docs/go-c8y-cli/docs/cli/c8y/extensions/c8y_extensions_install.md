@@ -19,6 +19,11 @@ using git. Set GH_TOKEN or GITHUB_TOKEN to avoid GitHub API rate limits.
 To install an extension in development from the current directory, use "." as the
 value of the repository argument.
 
+The extension is installed under the first of these names: the --name flag, the "name" in
+the extension's extension.yaml file, or the repository (or folder) name. Without --name or
+"name", the repository name must start with "c8y-". The name can't be the name of a
+built-in command or of another installed extension. Updates keep the installed name.
+
 See the list of available extensions at https://github.com/topics/c8y-extension
 
 
@@ -31,6 +36,7 @@ c8y extensions install <repository> [flags]
 ```
 $ c8y extensions install owner/c8y-extension
 $ c8y extensions install owner/c8y-extension --pin v1.2.0
+$ c8y extensions install owner/c8y-extension --name myextension
 $ c8y extensions install https://git.example.com/owner/c8y-extension
 $ c8y extensions install .
 
@@ -40,7 +46,7 @@ $ c8y extensions install .
 
 ```
   -h, --help[=true|false]   help for install
-      --name string         use custom name for the extension
+      --name string         use custom name for the extension, instead of the name in its extension.yaml or the repository name
       --pin string          pin extension to a release tag or commit ref
 ```
 

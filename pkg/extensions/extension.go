@@ -62,6 +62,10 @@ const (
 type Manifest struct {
 	Version string `json:"version,omitempty" yaml:"version,omitempty"`
 
+	// Name is the extension name (without the c8y- prefix), which is used when the extension is
+	// installed, unless the user passes --name. See NormalizeName
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
+
 	// Binary declares an executable provided by the extension
 	Binary *BinarySpec `json:"binary,omitempty" yaml:"binary,omitempty"`
 
@@ -249,11 +253,29 @@ type ExecOptions struct {
 	Stderr io.Writer
 }
 
+// InstallOptions are the options of an extension install
+type InstallOptions struct {
+	// Name set by the user (--name). It takes precedence over the name declared in
+	// extension.yaml and the repository or folder name
+	Name string
+
+	// Pin is the release tag or commit to install (remote installs only)
+	Pin string
+
+	// CheckName is called with the resolved name (without the c8y- prefix) before the
+	// extension is moved into place. The install fails if it returns an error
+	CheckName func(name string) error
+}
+
 //go:generate moq -rm -out manager_mock.go . ExtensionManager
 type ExtensionManager interface {
 	List() []Extension
-	Install(ghrepo.Interface, string, string) error
-	InstallLocal(dir string, name string) error
+
+	// Install installs an extension from a repository, and returns the name it was installed as
+	Install(repo ghrepo.Interface, opts InstallOptions) (string, error)
+
+	// InstallLocal installs an extension from a local folder, and returns the name it was installed as
+	InstallLocal(dir string, opts InstallOptions) (string, error)
 	Upgrade(name string, force bool) error
 	Remove(name string) error
 	Execute(opts ExecOptions) error

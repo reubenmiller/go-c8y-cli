@@ -204,6 +204,9 @@ It checks:
 |---|---|---|
 | `manifest` | error | `extension.yaml` is not valid YAML, has invalid values (`binary.completion`, `output`), or declares `commands` without a `binary` section, or the same command twice, or session providers which are ignored (no `binary` section, invalid or duplicate name, invalid format) |
 | `manifest` | warning | Unknown keys in `extension.yaml`, which usually are typos |
+| `name` | error | The declared `name` is invalid (only letters, numbers, and `-`), or is the name of a built-in command |
+| `name` | warning | The declared `name` has the `c8y-` prefix or uppercase letters, which are removed or converted |
+| `name` | info | An installed extension has another name than it declares, for example because it was installed with `--name` |
 | `binary` | error | The declared binary does not exist or is not executable |
 | `flags` | warning | A declared command has a flag with the name of a c8y global flag, so c8y handles it and the binary never receives it. This is checked when `binary.completion` is `cobra` |
 | `commands` | warning | A command is ignored because another source (API spec, binary, script) defines the same command |
@@ -265,6 +268,8 @@ def install
   (share/"c8y/extensions/c8y-myext/bin").install "c8y-myext"
 end
 ```
+
+The extension name is the name of the folder without the `c8y-` prefix. If `extension.yaml` declares a `name`, then use `c8y-<name>` as the folder name, so the extension has the same name as when it's installed with `c8y extensions install`.
 
 The folders can be changed with the `extensions.systemDirs` setting (a list separated by `:`, or `;` on Windows):
 

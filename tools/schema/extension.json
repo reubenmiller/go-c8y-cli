@@ -187,6 +187,15 @@
             "description": "Extension version. Reserved for future use",
             "default": "v1"
         },
+        "name": {
+            "type": "string",
+            "title": "Extension name",
+            "description": "Name of the extension, which is also the name of its command (c8y <name>). It's used when the extension is installed, unless the user sets --name; otherwise the repository or folder name is used. A leading 'c8y-' is removed and the name is converted to lowercase, for example 'analytics'",
+            "examples": [
+                "analytics"
+            ],
+            "pattern": "^(?:[cC]8[yY]-)?[A-Za-z0-9][A-Za-z0-9-]*$"
+        },
         "aliases": {
             "type": "array",
             "title": "Aliases",

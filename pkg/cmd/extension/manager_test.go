@@ -87,6 +87,9 @@ func (g *fakeGitHub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		writeRelease(rel)
+	case strings.Contains(r.URL.Path, "/commits/"):
+		// Commit SHA of a ref (git installs with --pin)
+		_, _ = w.Write([]byte("0123456789abcdef0123456789abcdef01234567"))
 	case strings.HasPrefix(r.URL.Path, "/assets/"):
 		parts := strings.SplitN(strings.TrimPrefix(r.URL.Path, "/assets/"), "/", 2)
 		rel, ok := g.releases[parts[0]]
@@ -189,7 +192,7 @@ func TestInstallBinaryArchive(t *testing.T) {
 	}, true)
 
 	repo := ghrepo.New("owner", "c8y-foo")
-	require.NoError(t, m.Install(repo, "c8y-foo", ""))
+	require.NoError(t, installRepo(m.Manager, repo, "c8y-foo", ""))
 
 	dir := filepath.Join(m.dataDir, "c8y-foo")
 	manifest := readBinManifest(t, dir)
@@ -224,7 +227,7 @@ func TestInstallBinaryPinnedAndUpgrade(t *testing.T) {
 	}, true)
 
 	repo := ghrepo.New("owner", "c8y-foo")
-	require.NoError(t, m.Install(repo, "c8y-foo", "v1.0.0"))
+	require.NoError(t, installRepo(m.Manager, repo, "c8y-foo", "v1.0.0"))
 
 	dir := filepath.Join(m.dataDir, "c8y-foo")
 	manifest := readBinManifest(t, dir)
@@ -237,7 +240,7 @@ func TestInstallBinaryPinnedAndUpgrade(t *testing.T) {
 	// Reinstall unpinned, then upgrade
 	require.NoError(t, m.Remove("foo"))
 	m.github.latest = "v1.0.0"
-	require.NoError(t, m.Install(repo, "c8y-foo", ""))
+	require.NoError(t, installRepo(m.Manager, repo, "c8y-foo", ""))
 	assert.Equal(t, "v1.0.0", readBinManifest(t, dir).Tag)
 
 	m.github.latest = "v2.0.0"
@@ -257,7 +260,7 @@ func TestInstallBinaryChecksumMismatchKeepsPreviousVersion(t *testing.T) {
 		"c8y-foo_1.0.0_linux_amd64.tar.gz": extensionArchive(t, "c8y-foo", "1.0.0"),
 	}, true)
 	repo := ghrepo.New("owner", "c8y-foo")
-	require.NoError(t, m.Install(repo, "c8y-foo", ""))
+	require.NoError(t, installRepo(m.Manager, repo, "c8y-foo", ""))
 
 	m.github.addRelease("v2.0.0", map[string][]byte{
 		"c8y-foo_2.0.0_linux_amd64.tar.gz": extensionArchive(t, "c8y-foo", "2.0.0"),
@@ -279,7 +282,7 @@ func TestInstallBinaryWithoutChecksums(t *testing.T) {
 	m.github.addRelease("v1.0.0", map[string][]byte{
 		"c8y-foo_1.0.0_linux_amd64.tar.gz": extensionArchive(t, "c8y-foo", "1.0.0"),
 	}, false)
-	require.NoError(t, m.Install(ghrepo.New("owner", "c8y-foo"), "c8y-foo", ""))
+	require.NoError(t, installRepo(m.Manager, ghrepo.New("owner", "c8y-foo"), "c8y-foo", ""))
 	assert.Empty(t, readBinManifest(t, filepath.Join(m.dataDir, "c8y-foo")).SHA256)
 	assert.Contains(t, m.io.ErrOut.(fmt.Stringer).String(), "not verified")
 }
@@ -289,7 +292,7 @@ func TestInstallBinaryMissingPlatform(t *testing.T) {
 	m.github.addRelease("v1.0.0", map[string][]byte{
 		"c8y-foo_1.0.0_linux_amd64.tar.gz": extensionArchive(t, "c8y-foo", "1.0.0"),
 	}, true)
-	err := m.Install(ghrepo.New("owner", "c8y-foo"), "c8y-foo", "")
+	err := installRepo(m.Manager, ghrepo.New("owner", "c8y-foo"), "c8y-foo", "")
 	assert.ErrorIs(t, err, ErrNoPlatformAsset)
 	assert.ErrorContains(t, err, "owner/c8y-foo")
 	assert.ErrorContains(t, err, "freebsd/amd64")
@@ -302,7 +305,7 @@ func TestInstallBinaryArchiveWithoutManifest(t *testing.T) {
 	b, _ := os.ReadFile(archive)
 	m.github.addRelease("v1.0.0", map[string][]byte{"c8y-foo_linux_amd64.tar.gz": b}, true)
 
-	err := m.Install(ghrepo.New("owner", "c8y-foo"), "c8y-foo", "")
+	err := installRepo(m.Manager, ghrepo.New("owner", "c8y-foo"), "c8y-foo", "")
 	assert.ErrorContains(t, err, "extension.yaml")
 	entries, _ := os.ReadDir(m.dataDir)
 	assert.Empty(t, entries)
@@ -314,7 +317,7 @@ func TestInstallBareBinary(t *testing.T) {
 		"c8y-foo-windows-amd64.exe": []byte("MZ binary"),
 		"c8y-foo-linux-amd64":       []byte("ELF binary"),
 	}, true)
-	require.NoError(t, m.Install(ghrepo.New("owner", "c8y-foo"), "c8y-foo", ""))
+	require.NoError(t, installRepo(m.Manager, ghrepo.New("owner", "c8y-foo"), "c8y-foo", ""))
 
 	dir := filepath.Join(m.dataDir, "c8y-foo")
 	assert.FileExists(t, filepath.Join(dir, "c8y-foo.exe"))
@@ -331,7 +334,7 @@ func TestInstallBinaryDryRun(t *testing.T) {
 		"c8y-foo_1.0.0_linux_amd64.tar.gz": extensionArchive(t, "c8y-foo", "1.0.0"),
 	}, true)
 	m.EnableDryRunMode()
-	require.NoError(t, m.Install(ghrepo.New("owner", "c8y-foo"), "c8y-foo", ""))
+	require.NoError(t, installRepo(m.Manager, ghrepo.New("owner", "c8y-foo"), "c8y-foo", ""))
 	out := m.io.Out.(fmt.Stringer).String()
 	assert.Contains(t, out, "c8y-foo_1.0.0_linux_amd64.tar.gz")
 	assert.Contains(t, out, "v1.0.0")
@@ -344,7 +347,7 @@ func TestInstallBinaryDryRun(t *testing.T) {
 
 func TestInstallWithoutReleaseUsesGit(t *testing.T) {
 	m := newTestManager(t, "linux", "amd64")
-	err := m.Install(ghrepo.New("owner", "c8y-foo"), "c8y-foo", "")
+	err := installRepo(m.Manager, ghrepo.New("owner", "c8y-foo"), "c8y-foo", "")
 	// git is not available in the test manager, so this shows git was used
 	assert.True(t, errors.Is(err, exec.ErrNotFound), "got %v", err)
 }
@@ -352,7 +355,7 @@ func TestInstallWithoutReleaseUsesGit(t *testing.T) {
 func TestInstallReleaseWithoutBinariesUsesGit(t *testing.T) {
 	m := newTestManager(t, "linux", "amd64")
 	m.github.addRelease("v1.0.0", map[string][]byte{"notes.md": []byte("x")}, false)
-	err := m.Install(ghrepo.New("owner", "c8y-foo"), "c8y-foo", "")
+	err := installRepo(m.Manager, ghrepo.New("owner", "c8y-foo"), "c8y-foo", "")
 	assert.True(t, errors.Is(err, exec.ErrNotFound), "got %v", err)
 }
 
@@ -481,7 +484,8 @@ func TestInstallLocalAddsPrefix(t *testing.T) {
 	}
 	m := newTestManager(t, "linux", "amd64")
 	src := writeSystemExtension(t, t.TempDir(), "c8y-foo")
-	require.NoError(t, m.InstallLocal(src, "custom"))
+	_, err := m.InstallLocal(src, extensions.InstallOptions{Name: "custom"})
+	require.NoError(t, err)
 
 	ext := findExtension(t, m.Manager, "custom")
 	assert.Equal(t, extensions.KindLocal, ext.Kind())
@@ -494,9 +498,15 @@ func TestInstallBinaryWithCustomName(t *testing.T) {
 		// extension.yaml uses the default binary path (bin/c8y-foo)
 		"c8y-foo_1.0.0_linux_amd64.tar.gz": extensionArchive(t, "c8y-foo", "1.0.0"),
 	}, true)
-	require.NoError(t, m.Install(ghrepo.New("owner", "c8y-foo"), "c8y-renamed", ""))
+	require.NoError(t, installRepo(m.Manager, ghrepo.New("owner", "c8y-foo"), "c8y-renamed", ""))
 
 	ext := findExtension(t, m.Manager, "renamed")
 	assert.Equal(t, filepath.Join(m.dataDir, "c8y-renamed", "bin", "c8y-foo"), ext.Executable())
 	assert.FileExists(t, ext.Executable())
+}
+
+// installRepo installs a repository with the given name (--name) and pin
+func installRepo(m *Manager, repo ghrepo.Interface, name string, pin string) error {
+	_, err := m.Install(repo, extensions.InstallOptions{Name: name, Pin: pin})
+	return err
 }
