@@ -32,9 +32,7 @@ tests:
       exactly: |
         {
           "body": {
-            "source": {
-              "id": "1234"
-            },
+            "source": { "id": "1234" },
             "text": "my custom text",
             "time": "2021-07-12T17:35:12Z",
             "type": "c8y_TestEvent"

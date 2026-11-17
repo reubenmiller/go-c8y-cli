@@ -32,12 +32,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "body": {
-            "enabled": false
-          },
-          "method": "PUT"
-        }
+        { "body": { "enabled": false }, "method": "PUT" }
 
   It enables an existing user:
     command: |
@@ -46,12 +41,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {
-          "body": {
-            "enabled": true
-          },
-          "method": "PUT"
-        }
+        { "body": { "enabled": true }, "method": "PUT" }
 
   Update the email field using a template:
     command: |

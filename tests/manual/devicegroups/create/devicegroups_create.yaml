@@ -19,7 +19,7 @@ tests:
       exactly: |
         {
           "body": {
-            "c8y_IsDeviceGroup": {},
+            "c8y_IsDeviceGroup": { },
             "name": "My Custom Group",
             "type": "c8y_DeviceGroup"
           },
@@ -38,7 +38,7 @@ tests:
       exactly: |
         {
           "body": {
-            "c8y_IsDeviceGroup": {},
+            "c8y_IsDeviceGroup": { },
             "name": "My Custom Sub Group",
             "type": "c8y_DeviceSubGroup"
           },
@@ -57,10 +57,8 @@ tests:
       exactly: |
         {
           "body": {
-            "c8y_IsDeviceGroup": {},
-            "myValue": {
-              "value1": true
-            },
+            "c8y_IsDeviceGroup": { },
+            "myValue": { "value1": true },
             "name": "My Custom Group",
             "type": "c8y_MyCustomGroup"
           },

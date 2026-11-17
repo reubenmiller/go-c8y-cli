@@ -9,11 +9,7 @@ tests:
         c8y util show --select body --compact=false
     stdout:
       exactly: |
-        {
-          "body": {
-            "othervalue": 1
-          }
-        }
+        { "body": { "othervalue": 1 } }
 
   It provides a function to get nested optional values:
     command: |
@@ -22,12 +18,7 @@ tests:
         c8y util show --select body --compact=false
     stdout:
       exactly: |
-        {
-          "body": {
-            "count": 1,
-            "defaultCount": -1
-          }
-        }
+        { "body": { "count": 1, "defaultCount": -1 } }
 
   It provides a function to get an optional value and returns a default value if not present:
     command: |
@@ -36,29 +27,21 @@ tests:
         c8y util show --select body --compact=false
     stdout:
       exactly: |
-        {
-          "body": {
-            "dummy": 2
-          }
-        }
+        { "body": { "dummy": 2 } }
 
   It safely access input if when there is no piped input:
     command: |
         c8y template execute --template "_.Get(input.value, 'nestedProp2', {dummy: 2})" -c=false -o json
     stdout:
       exactly: |
-        {
-          "dummy": 2
-        }
+        { "dummy": 2 }
 
   It safely access nested properties of input if when there is no piped input:
     command: |
         c8y template execute --template "_.Get(input, 'value.nestedProp2', {dummy: 2})" -c=false -o json
     stdout:
       exactly: |
-        {
-          "dummy": 2
-        }
+        { "dummy": 2 }
 
   It safely access nested properties of input if when there is piped input:
     command: |
@@ -66,9 +49,7 @@ tests:
         | c8y template execute --template "{output: _.Get(input, 'value.nestedProp2', {dummy: 2})}" -c=false -o json
     stdout:
       exactly: |
-        {
-          "output": 1
-        }
+        { "output": 1 }
   
   It safely checks for nested properties when there is piped input:
     command: |
@@ -76,15 +57,11 @@ tests:
         | c8y template execute --template "{output: _.Has(input, 'value.nestedProp2')}" -c=false -o json
     stdout:
       exactly: |
-        {
-          "output": true
-        }
+        { "output": true }
 
   It safely checks for nested properties when there is no piped input:
     command: |
         c8y template execute --template "{output: _.Has(input, 'value.nestedProp2')}" -c=false -o json
     stdout:
       exactly: |
-        {
-          "output": false
-        }
+        { "output": false }

@@ -69,9 +69,7 @@ tests:
         #### Body
 
         ```json
-        {
-          "name": "test01"
-        }
+        { "name": "test01" }
         ```
 
   It should support dry run on create commands when create is disabled:

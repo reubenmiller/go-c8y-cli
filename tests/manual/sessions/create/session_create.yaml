@@ -23,11 +23,7 @@ tests:
         {
           "host": "https://mytenant.iot.cumulocity.com",
           "password": "test",
-          "settings": {
-            "defaults": {
-              "insecure": true
-            }
-          },
+          "settings": { "defaults": { "insecure": true } },
           "username": "dummy"
         }
 

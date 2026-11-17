@@ -55,10 +55,8 @@ tests:
       exactly: |
         {
           "body": {
-            "c8y_IsDevice": {},
-            "my": {
-              "value": 1
-            },
+            "c8y_IsDevice": { },
+            "my": { "value": 1 },
             "name": "MyDevice",
             "prop2": false,
             "subtypes": ["linuxA", "linuxB"]
