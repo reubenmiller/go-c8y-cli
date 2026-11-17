@@ -304,3 +304,50 @@ tests:
       json:
         method: GET
         path: /service/example/foo/
+
+  It sends custom form fields and files using curl style --form flags:
+    command: |
+      c8y api /example -F file=@manual/extensions/file1.txt -F parentAssetId=1111 -F assetTypeId=2222 --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: POST
+        path: /example
+        headers.Content-Type: r/multipart/form-data
+        body: 'r/name="assetTypeId"\r?\n\r?\n2222(.|\n)*name="file"; filename="file1.txt"(.|\n)*one\ntwo\nthree(.|\n)*name="parentAssetId"\r?\n\r?\n1111'
+
+  It supports custom file options and file contents in form fields:
+    command: |
+      c8y api PUT /example --form "file=@manual/extensions/file1.txt;type=application/x-custom;filename=custom.txt" --form "notes=<manual/extensions/file1.txt" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: PUT
+        body: 'r/name="file"; filename="custom.txt"\r?\nContent-Type: application/x-custom(.|\n)*name="notes"\r?\n\r?\none\ntwo\nthree'
+
+  It sends the form data for every piped request:
+    command: |
+      printf "/a\n/b\n" | c8y api POST -F file=@manual/extensions/file1.txt -F name=example --dry --compact |
+        c8y util show --select path,body -o csv
+    exit-code: 0
+    stdout:
+      line-count: 2
+      lines:
+        1: 'r/^/a,.*three.*example'
+        2: 'r/^/b,.*three.*example'
+
+  It does not allow form fields to be used with a json body:
+    command: |
+      c8y api POST /example -F name=example --data "foo=bar" --dry
+    exit-code: 101
+    stderr:
+      contains:
+        - --form can not be used together with --data or --template
+
+  It does not allow form fields to be used with a GET request:
+    command: |
+      c8y api GET /example -F name=example --dry
+    exit-code: 101
+    stderr:
+      contains:
+        - --form can not be used with a GET request
