@@ -32,7 +32,7 @@ type Definition struct {
 	RequestMethod string   `json:"requestMethod,omitempty"`
 	ContentType   string   `json:"contentType,omitempty"`
 	Self          string   `json:"self,omitempty"`
-	Columns       []string `json:"columns,omitempty"`
+	Columns       Columns  `json:"columns,omitempty"`
 
 	// AutoMatch controls if the view is considered when automatically detecting a view.
 	// Set it to false for views which should only be used by name, e.g. via --view <name>,
@@ -192,7 +192,7 @@ func (v *DataView) GetViewByName(pattern string) ([]string, error) {
 		return nil, nil
 	}
 
-	return matchingDefinition.Columns, nil
+	return matchingDefinition.Columns.Selectors(), nil
 }
 
 // GetViews get a list of view names
@@ -265,7 +265,7 @@ type ViewData struct {
 func (v *DataView) GetView(r *ViewData) ([]string, error) {
 	if view := v.GetActiveView(); view != nil {
 		v.Logger.Debugf("Using already active view")
-		return view.Columns, nil
+		return view.Columns.Selectors(), nil
 	}
 
 	data := r.ResponseBody
@@ -354,7 +354,7 @@ func (v *DataView) GetView(r *ViewData) ([]string, error) {
 			v.Logger.Debugf("Found matching view: name=%s, file: %s", matchingDefinition.Name, matchingDefinition.Path)
 		}
 		v.ActiveView = matchingDefinition
-		return matchingDefinition.Columns, nil
+		return matchingDefinition.Columns.Selectors(), nil
 	}
 	v.Logger.Debug("No matching view found")
 	return nil, nil

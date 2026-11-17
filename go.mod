@@ -49,7 +49,7 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/mattn/go-runewidth v0.0.31
 	github.com/modelcontextprotocol/go-sdk v1.8.0
-	github.com/reubenmiller/go-c8y/v2 v2.0.0-20261005080355-282a2c252221
+	github.com/reubenmiller/go-c8y/v2 v2.0.0-20261117105304-37d0690c560d
 	golang.org/x/mod v0.42.0
 	golang.org/x/tools v0.52.0
 	mvdan.cc/sh/v3 v3.14.1

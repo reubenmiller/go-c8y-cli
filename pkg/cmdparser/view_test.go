@@ -54,7 +54,7 @@ func newViewTestFactory(t *testing.T, viewOption string) (*cmdutil.Factory, *dat
 
 func activeColumns(dv *dataview.DataView) []string {
 	if view := dv.GetActiveView(); view != nil {
-		return view.Columns
+		return view.Columns.Selectors()
 	}
 	return nil
 }
@@ -66,15 +66,15 @@ func TestApplyCommandView(t *testing.T) {
 		view       *models.CommandView
 		want       []string
 	}{
-		{name: "inline columns", viewOption: "auto", view: &models.CommandView{Columns: []string{"status"}}, want: []string{"status"}},
-		{name: "columns take precedence over name", viewOption: "auto", view: &models.CommandView{Name: "health", Columns: []string{"status"}}, want: []string{"status"}},
+		{name: "inline columns", viewOption: "auto", view: &models.CommandView{Columns: dataview.NewColumnSpecs("status")}, want: []string{"status"}},
+		{name: "columns take precedence over name", viewOption: "auto", view: &models.CommandView{Name: "health", Columns: dataview.NewColumnSpecs("status")}, want: []string{"status"}},
 		{name: "name prefers command's extension", viewOption: "auto", view: &models.CommandView{Name: "health"}, want: []string{"ext.status"}},
 		{name: "name with explicit namespace", viewOption: "auto", view: &models.CommandView{Name: "other::health"}, want: []string{"other.status"}},
 		{name: "name falls back to all views", viewOption: "auto", view: &models.CommandView{Name: "global"}, want: []string{"global.status"}},
 		{name: "unknown name uses auto detection", viewOption: "auto", view: &models.CommandView{Name: "unknown"}, want: nil},
 		{name: "no view", viewOption: "auto", view: nil, want: nil},
-		{name: "user turned views off", viewOption: "off", view: &models.CommandView{Columns: []string{"status"}}, want: nil},
-		{name: "user selected a view", viewOption: "global", view: &models.CommandView{Columns: []string{"status"}}, want: nil},
+		{name: "user turned views off", viewOption: "off", view: &models.CommandView{Columns: dataview.NewColumnSpecs("status")}, want: nil},
+		{name: "user selected a view", viewOption: "global", view: &models.CommandView{Columns: dataview.NewColumnSpecs("status")}, want: nil},
 	}
 
 	for _, tt := range tests {
@@ -115,7 +115,42 @@ commands:
 		t.Fatal(err)
 	}
 	view := spec.Commands[0].View
-	if view.IsEmpty() || len(view.Columns) != 2 || view.Columns[1] != "liveness state:components.livenessState" {
+	if view.IsEmpty() || len(view.Columns) != 2 || view.Columns[1].Selector() != "liveness state:components.livenessState" {
 		t.Errorf("unexpected view. got=%+v", view)
+	}
+}
+
+func TestParseSpecWithViewColumnWidths(t *testing.T) {
+	spec, err := ParseSpec(strings.NewReader(`
+group:
+  name: analytics
+commands:
+  - name: health
+    method: GET
+    path: /service/cep/health
+    view:
+      columns:
+        - status
+        - path: components.livenessState
+          name: liveness
+          width: 12
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	definition, err := ResolveCommandView(nil, spec.Commands[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if definition == nil {
+		t.Fatal("expected a view definition")
+	}
+	if got := definition.Columns.Selectors(); strings.Join(got, ",") != "status,liveness:components.livenessState" {
+		t.Errorf("unexpected selectors. got=%v", got)
+	}
+	rule, ok := definition.Columns.WidthRule("liveness")
+	if !ok || rule.Width != 12 {
+		t.Errorf("expected a fixed width of 12. got=%+v, ok=%v", rule, ok)
 	}
 }

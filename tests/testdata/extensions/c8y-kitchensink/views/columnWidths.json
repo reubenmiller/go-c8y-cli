@@ -1,0 +1,19 @@
+{
+    "$schema": "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/views.json",
+    "version": "v1",
+    "definitions": [
+        {
+            "name": "columnWidths",
+            "priority": 350,
+            "fragments": ["kitchensink_ColumnWidths"],
+            "autoMatch": false,
+            "columns": [
+                {"path": "id", "width": 8},
+                {"path": "description", "width": 12},
+                {"name": "model", "path": "c8y_Hardware.model", "minWidth": 14},
+                {"path": "tags.**", "maxWidth": 8},
+                "name"
+            ]
+        }
+    ]
+}

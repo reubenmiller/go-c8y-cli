@@ -31,6 +31,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonformatter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/tableviewer"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/pretty"
@@ -963,6 +964,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 						} else {
 							r.Logger.Infof("Detected view: %s", strings.Join(props, ", "))
 							commonOptions.Filters.Pluck = props
+							r.Console.SetColumnWidthRules(tableviewer.ColumnWidthRules(r.DataView.GetActiveView()))
 						}
 					default:
 						props, err := r.DataView.GetViewByName(view)
@@ -976,6 +978,9 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, in
 						} else {
 							r.Logger.Infof("Detected view: %s", strings.Join(props, ", "))
 							commonOptions.Filters.Pluck = props
+							if definition, err := r.DataView.GetDefinitionByName(view); err == nil {
+								r.Console.SetColumnWidthRules(tableviewer.ColumnWidthRules(definition))
+							}
 						}
 					}
 				}

@@ -56,7 +56,7 @@ func TestSetActiveViewTakesPrecedence(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	view.SetActiveView(&Definition{Name: "custom", Columns: []string{"status"}})
+	view.SetActiveView(&Definition{Name: "custom", Columns: NewColumnSpecs("status")})
 	data := gjson.Parse(`{"id": "1", "name": "test"}`)
 	columns, err := view.GetView(&ViewData{ResponseBody: &data})
 	if err != nil {
