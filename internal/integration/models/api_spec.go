@@ -1,6 +1,10 @@
 package models
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
+)
 
 type Specification struct {
 	Version  string    `yaml:"version"`
@@ -80,7 +84,7 @@ type CommandView struct {
 	Name string `yaml:"name,omitempty"`
 
 	// Columns to display. Takes precedence over the name
-	Columns []string `yaml:"columns,omitempty"`
+	Columns dataview.Columns `yaml:"columns,omitempty"`
 }
 
 // IsEmpty checks if the view does not define any columns or view name

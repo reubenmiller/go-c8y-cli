@@ -228,7 +228,7 @@ commands:
 
 The rules are:
 
-* `columns` takes precedence over `name`. The columns use the same syntax as the `--select` flag.
+* `columns` takes precedence over `name`. The columns use the same syntax as the `--select` flag. A column can also be an object which sets its width, e.g. `{path: components.livenessState, width: 12}`. See [column widths](/docs/concepts/views/#column-widths).
 * A view `name` is looked up in the views of the command's extension first, then in all other views. Use `<extension>::<name>` to pick a view from a specific extension.
 * If the view name does not exist, a warning is logged and the view is detected automatically.
 * The view is only used when the view option is `auto` (the default). The user can still choose a different view with `--view <name>`, turn off views with `--view off` (or the `defaults.view` setting), or select properties with `--select`.

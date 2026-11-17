@@ -2,6 +2,47 @@
     "$schema": "http://json-schema.org/schema",
     "type": "object",
     "definitions": {
+        "column": {
+            "type": "object",
+            "title": "Column with options",
+            "description": "Column which can also set its width in table output",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "title": "Path",
+                    "description": "Property to display. Uses the same syntax as the --select flag, e.g. 'c8y_Hardware.model' or 'tags.**'",
+                    "minLength": 1
+                },
+                "name": {
+                    "type": "string",
+                    "title": "Column name",
+                    "description": "Column name (alias) to display instead of the path",
+                    "minLength": 1
+                },
+                "width": {
+                    "type": "integer",
+                    "title": "Fixed width",
+                    "description": "Fixed column width in characters. Longer values are truncated or wrapped. Takes precedence over minWidth and maxWidth",
+                    "minimum": 1
+                },
+                "minWidth": {
+                    "type": "integer",
+                    "title": "Minimum width",
+                    "description": "Minimum column width in characters. Overrides settings.views.columnMinWidth for this column",
+                    "minimum": 1
+                },
+                "maxWidth": {
+                    "type": "integer",
+                    "title": "Maximum width",
+                    "description": "Maximum column width in characters. Overrides settings.views.columnMaxWidth for this column",
+                    "minimum": 1
+                }
+            },
+            "required": [
+                "path"
+            ],
+            "additionalProperties": false
+        },
         "view": {
             "type": "object",
             "properties": {
@@ -70,9 +111,18 @@
                 "columns": {
                     "type": "array",
                     "title": "Columns to be displayed when the view is used",
-                    "description": "List of columns which will be used in the view. These can use the same syntax as the --select flag",
+                    "description": "List of columns which will be used in the view. A column is either a string, which uses the same syntax as the --select flag, or an object which can also set the column width in table output",
                     "items": {
-                        "type": "string"
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "title": "Column",
+                                "description": "Property to display. Uses the same syntax as the --select flag"
+                            },
+                            {
+                                "$ref": "#/definitions/column"
+                            }
+                        ]
                     },
                     "minItems": 1,
                     "default": ["id", "type", "**.id"]

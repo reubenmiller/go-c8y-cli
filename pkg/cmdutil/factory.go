@@ -35,6 +35,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/tableviewer"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -830,6 +831,7 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 						} else {
 							logg.Infof("Detected view: %s", strings.Join(props, ", "))
 							commonOptions.Filters.Pluck = props
+							consol.SetColumnWidthRules(tableviewer.ColumnWidthRules(dataView.GetActiveView()))
 						}
 					default:
 						props, err := dataView.GetViewByName(view)
@@ -843,6 +845,9 @@ func (f *Factory) WriteOutputWithRows(output []byte, params OutputContext, commo
 						} else {
 							logg.Infof("Detected view: %s", strings.Join(props, ", "))
 							commonOptions.Filters.Pluck = props
+							if definition, err := dataView.GetDefinitionByName(view); err == nil {
+								consol.SetColumnWidthRules(tableviewer.ColumnWidthRules(definition))
+							}
 						}
 					}
 				}

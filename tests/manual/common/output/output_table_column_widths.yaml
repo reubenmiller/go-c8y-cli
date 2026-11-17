@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+    C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+    C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+    C8Y_SETTINGS_VIEWS_ROWMODE: truncate
+
+tests:
+  It applies the column widths of a view to the table output:
+    command: |
+      echo '{"id":"1","name":"dev","description":"a really long description that goes on","c8y_Hardware":{"model":"x"},"tags":["alpha","beta","gamma"]}' |
+        c8y util show --view kitchensink::columnWidths --output table
+    exit-code: 0
+    stdout:
+      exactly: |
+        | id       | description  | model          | tags     | name       |
+        |:---------|:-------------|:---------------|:---------|:-----------|
+        | 1        | a really lo… | x              | [alpha,… | dev        |
+
+  It wraps values to the fixed column width of a view:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_ROWMODE: wrap
+    command: |
+      echo '{"id":"1","name":"dev","description":"a really long description","c8y_Hardware":{"model":"x"},"tags":["a"]}' |
+        c8y util show --view kitchensink::columnWidths --output table
+    exit-code: 0
+    stdout:
+      exactly: |
+        | id       | description  | model          | tags     | name       |
+        |:---------|:-------------|:---------------|:---------|:-----------|
+        | 1        | a really     | x              | [a]      | dev        |
+        |          | long         |                |          |            |
+        |          | description  |                |          |            |
+
+  It ignores the view column widths when the columns are selected with --select:
+    command: |
+      echo '{"id":"1","name":"dev","description":"a really long description that goes on"}' |
+        c8y util show --view kitchensink::columnWidths --select id,description --output table
+    exit-code: 0
+    stdout:
+      exactly: |
+        | id         | description                                 |
+        |:-----------|:--------------------------------------------|
+        | 1          | a really long description that goes on      |
+
+  It does not change the json output of a view with column widths:
+    command: |
+      echo '{"id":"1","name":"dev","description":"a really long description that goes on"}' |
+        c8y util show --view kitchensink::columnWidths --output json
+    exit-code: 0
+    stdout:
+      json:
+        id: "1"
+        name: dev
+        description: a really long description that goes on

@@ -83,6 +83,46 @@ The following shows an example of a view definition.
 View files are defined in a json file, and can contain multiple view definitions.
 :::
 
+### Column widths
+
+By default, the width of each column is calculated from the sampled rows (see `settings.views.sampleSize`), and limited by the `settings.views.columnMinWidth` and `settings.views.columnMaxWidth` settings.
+
+A column can also be given as an object to control its width in the table output. String and object columns can be mixed in the same view.
+
+```json title="file: devices.json"
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "device/agent",
+            "priority": 400,
+            "fragments": ["c8y_IsDevice"],
+            "columns": [
+                {"path": "id", "width": 12},
+                "name",
+                {"path": "description", "maxWidth": 40},
+                {"name": "model", "path": "c8y_Hardware.model", "minWidth": 15},
+                {"path": "c8y_Availability.status", "minWidth": 12}
+            ]
+        }
+    ]
+}
+```
+
+A column object supports the following properties:
+
+* `path` - Property to display (required). Uses the same syntax as the `--select` flag, including wildcards such as `tags.**`
+* `name` - Column name to display instead of the path. `{"name": "model", "path": "c8y_Hardware.model"}` is the same as `"model:c8y_Hardware.model"`
+* `width` - Fixed column width in characters. Longer values are truncated or wrapped, depending on `settings.views.rowMode`. Takes precedence over `minWidth` and `maxWidth`
+* `minWidth` - Minimum column width in characters. Overrides `settings.views.columnMinWidth` for this column
+* `maxWidth` - Maximum column width in characters. Overrides `settings.views.columnMaxWidth` for this column
+
+If the `path` contains a wildcard, then the width applies to all of the columns which it selects.
+
+:::note
+Column widths only affect the table output, so other output formats (e.g. json or csv) are not changed. A column is never narrower than its header, and columns are still removed if the table is wider than the terminal. The column widths are not used when the columns are selected with `--select`.
+:::
+
 ### View matching
 
 The first response item is used in the view detection. If the response contains an array (i.e. `.managedObjects[]`) then the first item from the array will be used in the detection.

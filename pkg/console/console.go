@@ -43,6 +43,7 @@ type Console struct {
 	flushTimer    *time.Timer
 	table         *encode.Table
 	tableOptions  TableOptions
+	columnWidth   func(name string) encode.ColumnWidthRule
 	Colorized     bool
 	Compact       bool
 	Disabled      bool
@@ -180,11 +181,21 @@ func (c *Console) tableEngine() *encode.Table {
 				MaxColumnWidth:      maxColumnWidth,
 				ColumnPadding:       c.tableOptions.ColumnPadding,
 				MaxTableWidth:       tableviewer.TerminalWidth(DefaultTableMaxWidth),
+				ColumnWidth:         c.columnWidth,
 				Formatter:           tableviewer.CellFormatter(c.tableOptions.NumberFormatter),
 				Transform:           tableviewer.CellTransform(c.tableOptions.RowMode),
 			})
 	}
 	return c.table
+}
+
+// SetColumnWidthRules sets the per-column width rules (e.g. from the active view)
+// which are applied to the table output. It must be called before the first row
+// is written, and nil removes any rules.
+func (c *Console) SetColumnWidthRules(rules func(name string) encode.ColumnWidthRule) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.columnWidth = rules
 }
 
 // resolveTableColumns resolves the table columns from the header samples
