@@ -67,6 +67,12 @@ type Command struct {
 	FlagMapping        map[string]string `yaml:"flagMapping"`
 	View               *CommandView      `yaml:"view,omitempty"`
 
+	// Filter is a list of client side filters (same syntax as the --filter flag)
+	// which are always applied to the response, in addition to any filters
+	// provided by the user. Use it only when the server side API does not
+	// support the filtering, as it is applied after pagination
+	Filter []string `yaml:"filter,omitempty"`
+
 	// Extension is the name of the extension which provides the command.
 	// It is set when the command is loaded, and is not part of the specification
 	Extension string `yaml:"-"`

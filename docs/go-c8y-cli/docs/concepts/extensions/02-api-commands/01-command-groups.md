@@ -236,3 +236,35 @@ The rules are:
 :::tip
 If a view in your extension's views folder is only meant for your commands, set `"autoMatch": false` in its definition. The view is then never picked by the automatic view detection, so it doesn't affect other commands. See [view matching](/docs/concepts/views/#view-matching).
 :::
+
+### Example: Filtering the results on the client side
+
+Some APIs do not support the server side filtering which your command needs. An API command can set a `filter` property, which is a list of [client side filters](/docs/concepts/filtering/). The filters use the same syntax as the `--filter` flag and are always applied to the command's response.
+
+For example, the following command lists the Analytics Builder models, but excludes the template models, which only differ by the `c8y_Template` fragment:
+
+```yaml title="file: api/analytics.yaml"
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
+---
+group:
+  name: analytics
+  description: Analytics commands
+
+commands:
+  - name: listModels
+    description: List the Analytics Builder models (without templates)
+    method: GET
+    path: service/cep/analyticsbuilder
+    collectionProperty: analyticsBuilderModelRepresentations
+    filter:
+      - nothas c8y_Template
+```
+
+The rules are:
+
+* The filters are combined with the filters the user gives with `--filter`, so the user can only narrow down the results further.
+* The filters are only applied to JSON responses, and only to the command's output. They don't change the request which is sent to the server.
+
+:::caution
+Use server side filtering (query parameters) whenever the API supports it. Client side filters are applied after the server has paginated the results, so a page can contain fewer items than the `--pageSize`, or even no items. Use `--includeAll` if the user needs all of the matching items.
+:::
