@@ -842,6 +842,9 @@ func (b *MapBuilder) ApplyTemplates(existingJSON []byte, input []byte, appendTem
 	mergedJSON, err = evaluateJsonnet(imports, templates...)
 
 	if err != nil {
+		if strings.Contains(err.Error(), "Unexpected type object, expected array") || strings.Contains(err.Error(), "Unexpected type array, expected object") {
+			return nil, fmt.Errorf("failed to merge json. A json array body can not be merged with json object values (e.g. from other flags, --data or --template). %w", err)
+		}
 		return nil, fmt.Errorf("failed to merge json. %w", err)
 	}
 

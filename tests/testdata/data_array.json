@@ -1,0 +1,4 @@
+[
+  {"fragment": "myTemp", "series": "myT"},
+  {"fragment": "myWind", "series": "mySpeed"}
+]
