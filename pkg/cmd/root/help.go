@@ -271,21 +271,7 @@ func writeUsage(w io.Writer, c *cobra.Command, sel helpSelection) error {
 		}
 	}
 
-	hiddenGlobal := false
-	categories := append([]HelpCategory{}, HelpCategories...)
-	categories = append(categories, HelpCategory{Name: helpCategoryOther, Description: "Other"})
-	for _, category := range categories {
-		flags := filterFlags(global, func(flag *pflag.Flag) bool { return getHelpCategory(flag) == category.Name })
-		if !hasFlags(flags) {
-			continue
-		}
-		if !sel.showsCategory(category.Name) {
-			hiddenGlobal = true
-			continue
-		}
-		fmt.Fprintf(w, "\n\nGlobal Flags (%s):\n", category.Name)
-		fmt.Fprint(w, strings.TrimRight(flags.FlagUsages(), " \t\n"))
-	}
+	hiddenGlobal := writeGlobalFlags(w, global, sel)
 
 	if sel.listCategories {
 		fmt.Fprint(w, "\n")
@@ -308,6 +294,26 @@ func writeUsage(w io.Writer, c *cobra.Command, sel helpSelection) error {
 	}
 	fmt.Fprintln(w)
 	return nil
+}
+
+// writeGlobalFlags writes the global flags of the categories selected by the help level.
+// It returns true if some of the global flags were not shown
+func writeGlobalFlags(w io.Writer, global *pflag.FlagSet, sel helpSelection) (hiddenGlobal bool) {
+	categories := append([]HelpCategory{}, HelpCategories...)
+	categories = append(categories, HelpCategory{Name: helpCategoryOther, Description: "Other"})
+	for _, category := range categories {
+		flags := filterFlags(global, func(flag *pflag.Flag) bool { return getHelpCategory(flag) == category.Name })
+		if !hasFlags(flags) {
+			continue
+		}
+		if !sel.showsCategory(category.Name) {
+			hiddenGlobal = true
+			continue
+		}
+		fmt.Fprintf(w, "\n\nGlobal Flags (%s):\n", category.Name)
+		fmt.Fprint(w, strings.TrimRight(flags.FlagUsages(), " \t\n"))
+	}
+	return hiddenGlobal
 }
 
 func writeSubCommands(w io.Writer, c *cobra.Command) {

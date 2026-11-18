@@ -240,21 +240,88 @@ func TestIsExtensionCommand(t *testing.T) {
 	assert.False(t, IsExtensionCommand(devices))
 }
 
-func TestHasHelpFlag(t *testing.T) {
-	cases := map[string]bool{
-		"--help":            true,
-		"-h":                true,
-		"--status x --help": true,
-		"--help=true":       true,
-		"--help=local":      true,
-		"--help=false":      false,
-		"--status x":        false,
-		"-- --help":         false,
-		"":                  false,
+func TestParseExtensionHelpArgs(t *testing.T) {
+	cases := []struct {
+		args     string
+		help     bool
+		level    string
+		examples bool
+		rest     []string
+		err      bool
+	}{
+		{args: "--help", help: true},
+		{args: "-h", help: true},
+		{args: "--status x --help", help: true, rest: []string{"--status", "x"}},
+		{args: "--help=true", help: true},
+		{args: "--help=false"},
+		{args: "--help=local", help: true, level: "local"},
+		{args: "-h=output,session", help: true, level: "output,session"},
+		{args: "--help global --status x", help: true, level: "global", rest: []string{"--status", "x"}},
+		{args: "--help notalevel", help: true, rest: []string{"notalevel"}},
+		{args: "--help=notalevel", err: true},
+		{args: "--examples", examples: true},
+		{args: "--examples=false"},
+		{args: "--examples=nope", err: true},
+		{args: "--status x", rest: []string{"--status", "x"}},
+		{args: "-- --help --examples", rest: []string{"--", "--help", "--examples"}},
 	}
-	for args, want := range cases {
-		assert.Equal(t, want, hasHelpFlag(strings.Fields(args)), args)
+	for _, tc := range cases {
+		req, err := parseExtensionHelpArgs(strings.Fields(tc.args))
+		if tc.err {
+			assert.Error(t, err, tc.args)
+			continue
+		}
+		require.NoError(t, err, tc.args)
+		assert.Equal(t, tc.help, req.help, tc.args)
+		assert.Equal(t, tc.level, req.level, tc.args)
+		assert.Equal(t, tc.examples, req.examples, tc.args)
+		assert.Equal(t, tc.rest, req.args, tc.args)
 	}
+}
+
+func TestExtractHelpSection(t *testing.T) {
+	help := `Upload software
+
+Usage:
+  uploader upload [flags]
+
+Examples:
+  # Upload a file
+  uploader upload ./pkg.deb
+
+  # Upload a folder
+  uploader upload ./dist
+
+Flags:
+  -h, --help   help for upload
+`
+	assert.Equal(t, "  # Upload a file\n  uploader upload ./pkg.deb\n\n  # Upload a folder\n  uploader upload ./dist", extractHelpSection([]byte(help), "Examples"))
+	assert.Equal(t, "", extractHelpSection([]byte("Usage:\n  foo\n"), "Examples"))
+}
+
+func TestWriteDeclaredCommandUsage(t *testing.T) {
+	root, _ := newTestRoot()
+	annotateHelpCategories(root.PersistentFlags())
+	cmd, _, err := root.Find([]string{"foo", "services", "list"})
+	require.NoError(t, err)
+	binaryHelp := []byte("Usage:\n  hello services list [flags]\n\nFlags:\n      --status string\n")
+
+	var out strings.Builder
+	writeDeclaredCommandUsage(&out, cmd, binaryHelp, parseHelpLevel("local"))
+	assert.Contains(t, out.String(), "--status")
+	assert.NotContains(t, out.String(), "Global Flags")
+
+	out.Reset()
+	writeDeclaredCommandUsage(&out, cmd, nil, parseHelpLevel("output"))
+	assert.NotContains(t, out.String(), "--status")
+	assert.Contains(t, out.String(), "Global Flags (output)")
+	assert.NotContains(t, out.String(), "Global Flags (session)")
+
+	out.Reset()
+	writeDeclaredCommandUsage(&out, cmd, binaryHelp, parseHelpLevel(""))
+	assert.Contains(t, out.String(), "--status")
+	assert.Contains(t, out.String(), "Global Flags (output)")
+	assert.Contains(t, out.String(), "Global Flags (session)")
 }
 
 func TestDeclaredCommandCompletion(t *testing.T) {

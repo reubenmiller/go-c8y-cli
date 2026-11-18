@@ -37,6 +37,8 @@ func newServicesCmd() *cobra.Command {
 	list := &cobra.Command{
 		Use:   "list",
 		Short: "List services",
+		Example: `  c8y hello services list --status stopped
+  # List the stopped services`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			items := []Service{}
 			for _, s := range services {

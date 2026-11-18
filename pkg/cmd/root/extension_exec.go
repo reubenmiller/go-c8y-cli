@@ -272,9 +272,17 @@ func addExtensionBinaryCommands(f *cmdutil.Factory, log *logger.Logger, tree *cm
 					DisableFlagParsing: true,
 					Annotations:        map[string]string{},
 					RunE: func(cmd *cobra.Command, args []string) error {
-						binArgs := append(slices.Clone(item.ExecArgs()), args...)
-						// Help is text, so show it directly
-						if item.IsJSON() && !hasHelpFlag(args) {
+						// c8y handles --examples and the help levels (i.e. --help local), as the binary does not know them
+						helpReq, err := parseExtensionHelpArgs(args)
+						if err != nil {
+							return err
+						}
+						if helpReq.requested() {
+							return runDeclaredCommandHelp(f, cmd, ext, exe, append(slices.Clone(item.ExecArgs()), helpReq.args...), helpReq)
+						}
+						// --help=false and --examples=false are not passed on either
+						binArgs := append(slices.Clone(item.ExecArgs()), helpReq.args...)
+						if item.IsJSON() {
 							// c8y global flags have already been removed from the args (see PrepareExtensionArgs)
 							return runJSONExtensionCommand(f, cmd, ext, exe, binArgs)
 						}

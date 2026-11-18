@@ -203,20 +203,6 @@ func declaredCommandCompletion(binaryComplete cobra.CompletionFunc) cobra.Comple
 	}
 }
 
-// hasHelpFlag returns true if the arguments request help (-h or --help, before any "--")
-func hasHelpFlag(args []string) bool {
-	for _, arg := range args {
-		switch arg {
-		case "--":
-			return false
-		}
-		if isHelpArg(arg) && arg != "--help=false" {
-			return true
-		}
-	}
-	return false
-}
-
 // splitJSONValues splits the output of a command into json values. The output can be a json
 // array, a json object or newline delimited json values. ok is false if the output is not json
 func splitJSONValues(output []byte) (values [][]byte, isArray bool, ok bool) {
