@@ -49,6 +49,44 @@ tests:
       not-contains:
         - json
 
+  It shows the examples of a declared binary command:
+    command: |
+      c8y hello services list --examples
+    exit-code: 0
+    stdout:
+      exactly: |
+        c8y hello services list --status stopped
+          # List the stopped services
+
+  It shows only the local flags of a declared binary command with --help local:
+    command: |
+      c8y hello services list --help local
+    exit-code: 0
+    stdout:
+      contains:
+        - "--status"
+      not-contains:
+        - "Global Flags"
+
+  It shows only the selected global flags of a declared binary command:
+    command: |
+      c8y hello services list --help=output
+    exit-code: 0
+    stdout:
+      contains:
+        - "Global Flags (output):"
+      not-contains:
+        - "--status"
+        - "Global Flags (session):"
+
+  It rejects an invalid help level of a declared binary command:
+    command: |
+      c8y hello services list --help=notalevel
+    exit-code: 101
+    stderr:
+      contains:
+        - invalid help level
+
   It uses the view provided by the extension:
     command: |
       c8y hello services list -o table --view auto
