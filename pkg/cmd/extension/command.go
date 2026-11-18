@@ -181,7 +181,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 								successStr = "Would have installed"
 							}
 							cs := io.ColorScheme()
-							fmt.Fprintf(io.Out, "%s %s extension %s from %s\n", cs.SuccessIcon(), successStr, name, sourcePath)
+							fmt.Fprintf(io.Out, "%s %s extension %s%s from %s\n", cs.SuccessIcon(), successStr, name, versionSuffix(cs, installedVersion(m(), name)), sourcePath)
 						}
 						if !cfg.DryRun() {
 							printValidationSummary(m(), io, name)
@@ -227,7 +227,7 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						return nil
 					}
 					if io.IsStdoutTTY() {
-						fmt.Fprintf(io.Out, "%s Installed extension %s\n", cs.SuccessIcon(), extName)
+						fmt.Fprintf(io.Out, "%s Installed extension %s%s\n", cs.SuccessIcon(), extName, versionSuffix(cs, installedVersion(m(), extName)))
 						if pinFlag != "" {
 							fmt.Fprintf(io.Out, "%s Pinned extension at %s\n", cs.SuccessIcon(), cs.Cyan(pinFlag))
 						}
@@ -284,6 +284,10 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 						m().EnableDryRunMode()
 					}
 					cs := io.ColorScheme()
+					previousVersion := ""
+					if name != "" {
+						previousVersion = installedVersion(m(), name)
+					}
 					err := m().Upgrade(name, cfg.Force())
 					if err != nil && !errors.Is(err, ErrUpToDate) {
 						if name != "" {
@@ -302,9 +306,13 @@ func NewCmdExtension(f *cmdutil.Factory) *cobra.Command {
 							successStr = "Would have"
 						}
 						if errors.Is(err, ErrUpToDate) {
-							fmt.Fprintf(io.Out, "%s Extension already up to date\n", cs.SuccessIcon())
+							if name != "" {
+								fmt.Fprintf(io.Out, "%s Extension %s already up to date%s\n", cs.SuccessIcon(), name, versionSuffix(cs, previousVersion))
+							} else {
+								fmt.Fprintf(io.Out, "%s Extensions already up to date\n", cs.SuccessIcon())
+							}
 						} else if name != "" {
-							fmt.Fprintf(io.Out, "%s %s updated extension %s\n", cs.SuccessIcon(), successStr, name)
+							fmt.Fprintf(io.Out, "%s %s updated extension %s%s\n", cs.SuccessIcon(), successStr, name, versionChange(cs, previousVersion, installedVersion(m(), name), cfg.DryRun()))
 						} else {
 							fmt.Fprintf(io.Out, "%s %s updated extensions\n", cs.SuccessIcon(), successStr)
 						}
@@ -586,6 +594,44 @@ func displayExtensionVersion(ext extensions.Extension, version string) string {
 		return version[:8]
 	}
 	return version
+}
+
+// installedVersion returns the display version of an installed extension, or an empty string if
+// it is not installed or has no version (e.g. local extensions)
+func installedVersion(m extensions.ExtensionManager, name string) string {
+	ext := findInstalledExtension(m, name)
+	if ext == nil {
+		return ""
+	}
+	return displayExtensionVersion(ext, ext.CurrentVersion())
+}
+
+// versionSuffix formats a version to be appended to a message, e.g. " (v1.2.3)"
+func versionSuffix(cs *iostreams.ColorScheme, version string) string {
+	if version == "" {
+		return ""
+	}
+	return fmt.Sprintf(" (%s)", cs.Cyan(version))
+}
+
+// versionChange formats the version change of an update, e.g. " from v1.0.0 to v1.1.0".
+// In dry run mode the extension is not changed, so only the current version is known
+func versionChange(cs *iostreams.ColorScheme, from, to string, dryRun bool) string {
+	switch {
+	case from == "" && to == "":
+		return ""
+	case dryRun:
+		if from == "" {
+			return ""
+		}
+		return fmt.Sprintf(" (currently %s)", cs.Cyan(from))
+	case to == "" || from == to:
+		return versionSuffix(cs, from)
+	case from == "":
+		return fmt.Sprintf(" to %s", cs.Cyan(to))
+	default:
+		return fmt.Sprintf(" from %s to %s", cs.Cyan(from), cs.Cyan(to))
+	}
 }
 
 // findInstalledExtension returns the installed extension with the given name (with or without the c8y- prefix)

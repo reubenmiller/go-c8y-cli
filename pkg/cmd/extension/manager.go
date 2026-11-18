@@ -894,6 +894,9 @@ func (m *Manager) upgradeExtension(ext Extension, force bool) error {
 		return ErrPinnedExtensionUpgrade
 	}
 	if !ext.UpdateAvailable() {
+		if version := displayExtensionVersion(&ext, ext.currentVersion); version != "" {
+			return fmt.Errorf("%w (%s)", ErrUpToDate, version)
+		}
 		return ErrUpToDate
 	}
 	// The installed name is kept. If the update changes the declared name, users are told how to use it

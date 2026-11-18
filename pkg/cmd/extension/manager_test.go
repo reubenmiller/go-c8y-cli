@@ -251,7 +251,9 @@ func TestInstallBinaryPinnedAndUpgrade(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(b), "2.0.0")
 
-	assert.ErrorIs(t, m.Upgrade("foo", false), ErrUpToDate)
+	err = m.Upgrade("foo", false)
+	assert.ErrorIs(t, err, ErrUpToDate)
+	assert.Contains(t, err.Error(), "v2.0.0")
 }
 
 func TestInstallBinaryChecksumMismatchKeepsPreviousVersion(t *testing.T) {
