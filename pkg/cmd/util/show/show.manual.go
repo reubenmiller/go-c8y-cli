@@ -75,6 +75,11 @@ func (n *CmdShow) RunE(cmd *cobra.Command, args []string) error {
 	})(cmd, inputIterators)
 
 	if err != nil {
+		if iterator.IsEmptyPipeInputError(err) {
+			// Empty piped input means there is nothing to show. Pass the error on
+			// so the shared handling applies (exit 0, or an error with --allowEmptyPipe=false)
+			return err
+		}
 		return &flags.ParameterError{
 			Name: "input",
 			Err:  fmt.Errorf("Missing required parameter or pipeline input. %w", flags.ErrParameterMissing),
