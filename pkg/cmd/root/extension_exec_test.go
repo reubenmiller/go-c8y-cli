@@ -303,3 +303,35 @@ func TestDeclaredCommandCompletion(t *testing.T) {
 	assert.Contains(t, out, "--status")
 	assert.Equal(t, []string{"--name", "x", "--st"}, binaryArgs)
 }
+
+func TestMountCompletionWithoutSubcommands(t *testing.T) {
+	root := &cobra.Command{Use: "c8y", SilenceErrors: true, SilenceUsage: true}
+	mount := &cobra.Command{Use: "foo", Run: func(cmd *cobra.Command, args []string) {}}
+	mount.AddCommand(&cobra.Command{Use: "upload", Short: "Declared command", Aliases: []string{"up"}, Run: func(cmd *cobra.Command, args []string) {}})
+	mount.AddCommand(&cobra.Command{Use: "hidden", Hidden: true, Run: func(cmd *cobra.Command, args []string) {}})
+	root.AddCommand(mount)
+
+	var binaryArgs []string
+	mount.ValidArgsFunction = withoutSubcommandCompletions(func(cmd *cobra.Command, args []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
+		binaryArgs = append(append([]string{}, args...), toComplete)
+		return []cobra.Completion{"help\tHelp about any command", "upload\tFrom the binary", "up", "hidden", "report"}, cobra.ShellCompDirectiveNoFileComp
+	})
+
+	complete := func(args ...string) []string {
+		t.Helper()
+		var out strings.Builder
+		root.SetOut(&out)
+		root.SetArgs(append([]string{cobra.ShellCompRequestCmd, "foo"}, args...))
+		require.NoError(t, root.Execute())
+		lines := strings.Split(strings.TrimSpace(out.String()), "\n")
+		return lines[:len(lines)-1] // without the directive
+	}
+
+	// The declared command is completed once (by cobra), and hidden commands are still
+	// completed by the binary
+	assert.Equal(t, []string{"upload\tDeclared command", "help\tHelp about any command", "hidden", "report"}, complete(""))
+	assert.Equal(t, []string{""}, binaryArgs)
+
+	// Later arguments are not filtered, as cobra does not complete subcommands for them
+	assert.Equal(t, []string{"help\tHelp about any command", "upload\tFrom the binary", "up", "hidden", "report"}, complete("report", ""))
+}

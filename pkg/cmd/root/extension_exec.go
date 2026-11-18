@@ -171,6 +171,38 @@ func completeWithBinary(f *cmdutil.Factory, ext extensions.Extension, exe string
 	}
 }
 
+// withoutSubcommandCompletions removes the completions which have the name of a subcommand of the
+// completed command. cobra completes the subcommands of the mount (e.g. declared commands) itself,
+// and the binary usually also completes its own command with the same name, which would show
+// the command twice
+func withoutSubcommandCompletions(complete cobra.CompletionFunc) cobra.CompletionFunc {
+	return func(cmd *cobra.Command, args []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
+		completions, directive := complete(cmd, args, toComplete)
+		// cobra only completes subcommands for the first argument
+		if len(args) > 0 || !cmd.HasAvailableSubCommands() {
+			return completions, directive
+		}
+		names := map[string]bool{}
+		for _, sub := range cmd.Commands() {
+			if !sub.IsAvailableCommand() {
+				continue
+			}
+			names[sub.Name()] = true
+			for _, alias := range sub.Aliases {
+				names[alias] = true
+			}
+		}
+		filtered := make([]cobra.Completion, 0, len(completions))
+		for _, completion := range completions {
+			value, _, _ := strings.Cut(completion, "\t")
+			if !names[value] {
+				filtered = append(filtered, completion)
+			}
+		}
+		return filtered, directive
+	}
+}
+
 // parseCobraCompletion parses the output of a cobra __complete command
 func parseCobraCompletion(r io.Reader) ([]cobra.Completion, cobra.ShellCompDirective) {
 	lines := []string{}
@@ -275,7 +307,7 @@ func addExtensionBinaryCommands(f *cmdutil.Factory, log *logger.Logger, tree *cm
 				return runExtension(f, ext, exe, args, true, f.IOStreams.Out)
 			}
 			if binary.CompletionEnabled() {
-				cmd.ValidArgsFunction = completeWithBinary(f, ext, exe, nil)
+				cmd.ValidArgsFunction = withoutSubcommandCompletions(completeWithBinary(f, ext, exe, nil))
 			}
 			cmdutil.DisableAuthCheckForCommand(cmd)
 			return nil
