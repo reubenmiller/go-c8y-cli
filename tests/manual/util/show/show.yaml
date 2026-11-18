@@ -17,3 +17,12 @@ tests:
     exit-code: 0
     stdout:
       match-pattern: '^$'
+
+  It ignores empty piped input:
+    command: |
+      printf "" | c8y util show --select id,name
+    exit-code: 0
+    stdout:
+      match-pattern: ^$
+    stderr:
+      match-pattern: ^$
