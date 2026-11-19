@@ -1,6 +1,6 @@
 tests:
     measurements_getSeries_Get a list of series [app_Weather.temperature] and [app_Weather.barometer] for device 12345:
-        command: c8y measurements getSeries --device 12345 --series app_Weather.temperature --series app_Weather.barometer --dateFrom "-10min" --dateTo "0s"
+        command: c8y measurements getSeries --device 12345 --series app_Weather.temperature --series app_Weather.barometer --dateFrom "-10min"
         exit-code: 0
         stdout:
             json:
@@ -11,4 +11,29 @@ tests:
                 - series=app_Weather.temperature
                 - series=app_Weather.barometer
                 - dateFrom=
-                - dateTo=
+    measurements_getSeries_Get a list of series and calculate the average and use 1 week intervals:
+        command: c8y measurements getSeries --device 12345 --series app_Weather.barometer --aggregationFunction avg --aggregationInterval 1w
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /measurement/measurements/series
+            contains:
+                - source=12345
+                - series=app_Weather.barometer
+                - aggregationFunction=avg
+                - aggregationInterval=1w
+    measurements_getSeries_Get a list of series and calculate the average, count and sum and use 1 hour intervals:
+        command: c8y measurements getSeries --device 12345 --series app_Weather.temperature --aggregationFunction avg,count,sum --aggregationInterval 1h
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /measurement/measurements/series
+            contains:
+                - source=12345
+                - series=app_Weather.temperature
+                - aggregationFunction=avg
+                - aggregationFunction=count
+                - aggregationFunction=sum
+                - aggregationInterval=1h

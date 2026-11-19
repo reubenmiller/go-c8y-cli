@@ -35,8 +35,14 @@ func NewGetSeriesCmd(f *cmdutil.Factory) *GetSeriesCmd {
 		Short: "Get measurement series",
 		Long:  `Get a collection of measurements based on filter parameters`,
 		Example: heredoc.Doc(`
-$ c8y measurements getSeries --device 12345 --series app_Weather.temperature --series app_Weather.barometer --dateFrom "-10min" --dateTo "0s"
+$ c8y measurements getSeries --device 12345 --series app_Weather.temperature --series app_Weather.barometer --dateFrom "-10min"
 Get a list of series [app_Weather.temperature] and [app_Weather.barometer] for device 12345
+
+$ c8y measurements getSeries --device 12345 --series app_Weather.barometer --aggregationFunction avg --aggregationInterval 1w
+Get a list of series and calculate the average and use 1 week intervals
+
+$ c8y measurements getSeries --device 12345 --series app_Weather.temperature --aggregationFunction avg,count,sum --aggregationInterval 1h
+Get a list of series and calculate the average, count and sum and use 1 hour intervals
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -48,6 +54,8 @@ Get a list of series [app_Weather.temperature] and [app_Weather.barometer] for d
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
 	cmd.Flags().StringSlice("series", []string{""}, "measurement type and series name, e.g. c8y_AccelerationMeasurement.acceleration")
+	cmd.Flags().StringSlice("aggregationFunction", []string{""}, "(time series only) Selects aggregation functions that are calculated for each selected aggregation interval")
+	cmd.Flags().StringSlice("aggregationInterval", []string{""}, "(time series only) Fetch results are aggregated using a time interval specified by an integer followed by a unit. Available units of (s)econd, (m)inute, (h)our, (d)ay, week, (M)onth, (q)uarter and (y)ear")
 	cmd.Flags().String("aggregationType", "", "Fragment name from measurement.")
 	cmd.Flags().String("dateFrom", "-7d", "Start date or date and time of measurement occurrence. Defaults to last 7 days")
 	cmd.Flags().String("dateTo", "0s", "End date or date and time of measurement occurrence. Defaults to the current time")
@@ -56,6 +64,7 @@ Get a list of series [app_Weather.temperature] and [app_Weather.barometer] for d
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithDeviceMeasurementSeries("series", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("aggregationFunction", "min", "max", "avg", "sum", "count", "stdDevPop", "stdDevSamp"),
 		completion.WithValidateSet("aggregationType", "DAILY", "HOURLY", "MINUTELY"),
 	)
 
@@ -106,6 +115,8 @@ func (n *GetSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "source"),
 		flags.WithStringSliceValues("series", "series", ""),
+		flags.WithStringSliceValues("aggregationFunction", "aggregationFunction", ""),
+		flags.WithStringSliceValues("aggregationInterval", "aggregationInterval", ""),
 		flags.WithStringValue("aggregationType", "aggregationType"),
 		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom"),
 		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo"),
