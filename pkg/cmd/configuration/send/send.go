@@ -138,9 +138,8 @@ func (n *SendCmd) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, err
 		}
-		// Carry the (resolved) device id on the operation. ResolveBodyRef applies
-		// the CLI name-or-id convention and resolves the name against the real API
-		// even under --dry.
+		// Carry the device on the operation; go-c8y resolves a name to the id
+		// (even under --dry).
 		if body, err = sjson.SetBytes(body, "deviceId", device); err != nil {
 			return nil, err
 		}
