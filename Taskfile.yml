@@ -209,7 +209,7 @@ tasks:
   build-snapshot:
     desc: Build Snapshot
     cmds:
-      - goreleaser build --clean --snapshot {{.CLI_ARGS}}
+      - goreleaser build --clean --snapshot --timeout 2h {{.CLI_ARGS}}
 
   release-snapshot:
     desc: Release snapshot (useful to test building everything including the containers)
