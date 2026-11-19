@@ -107,6 +107,7 @@ func (s *Server) Instructions() string {
 		- Call %s first to see the tenant, the allowed mode and the command policy. The user can switch to another session at any time, so call it again if the tenant matters, e.g. before changing data.
 		- Discover commands and flags with "<command> --help" or "<command> --examples" instead of guessing.
 		- Keep output small: use --select, --filter, --pageSize and --view off. Output is json by default.
+		- To give the user a link to a web UI page, build it with "applications open --noBrowser" (it prints the address, and %s runs it) instead of writing the address yourself, e.g. applications open --device <id> --page device-info --noBrowser for a device's info page in Device management. See "applications open --help" for other applications and pages.
 		- Pipe c8y commands with " | " (no shell is used, so jq, grep, &&, ; and redirects are not supported).
 		- Preview writes with --dry before running them with %s.
 		- Give a request body with --template rather than --data. --template takes JSON or jsonnet (a superset of JSON: unquoted keys, single-quoted strings, comments, expressions), so nested fragments, lists, numbers and booleans, and text with commas or "=" all work, e.g. --template "{type: 'c8y_Example', text: 'a, b = c', c8y_Example: {values: [1, 2], enabled: true}}". The --data shorthand (a.b=1,c=text) splits on commas and "=" and guesses types; use it only for a single simple value.
@@ -116,7 +117,7 @@ func (s *Server) Instructions() string {
 		    Only ssh keys are used (no passwords). Without --user, the default ssh user is tried first, then a fallback user (root unless the user changed it).
 		  - via a c8y_Command operation, if the device supports it: operations create --device <id> --description "<why>" --template "{c8y_Command: {text: '<command>'}}" | operations wait --status SUCCESSFUL --status FAILED --duration 2m
 		    The output is in c8y_Command.result.
-	`, ToolRead, ToolWrite, ToolSession, ToolWrite, ToolWrite, ToolSession)
+	`, ToolRead, ToolWrite, ToolSession, ToolRead, ToolWrite, ToolWrite, ToolSession)
 }
 
 // New creates the MCP server

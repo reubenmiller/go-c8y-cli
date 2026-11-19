@@ -326,6 +326,29 @@ func isLetter(c byte) bool {
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
 }
 
+// BrowserCommands commands which open a page of the web UI in a browser. With
+// --noBrowser they only print the page's address, without a request to Cumulocity
+var BrowserCommands = []string{"applications open"}
+
+// PrintsURLOnly checks if a browser command was told to print the page's address
+// instead of opening a browser
+func PrintsURLOnly(commandPath string, args []string) bool {
+	if _, ok := matchAny(BrowserCommands, commandPath); !ok {
+		return false
+	}
+	noBrowser := false
+	args, _, _ = SplitAtTerminator(args)
+	for _, arg := range args {
+		switch strings.ToLower(arg) {
+		case "--nobrowser", "--nobrowser=true":
+			noBrowser = true
+		case "--nobrowser=false":
+			noBrowser = false
+		}
+	}
+	return noBrowser
+}
+
 // HasDryRun checks if the arguments activate the dry run mode
 func HasDryRun(args []string) bool {
 	dry := false
