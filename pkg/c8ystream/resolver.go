@@ -178,6 +178,27 @@ func (in *Resolver) ApplyOverrideSlice(body []byte, flag, path string) (json.Raw
 	return json.RawMessage(out), nil
 }
 
+// ApplyOverrideFirst sets path in body to the flag's first non-empty value
+// (FirstString) when the flag was set — the v1 FirstMatch behaviour of a
+// secondary reference flag that feeds a body property (e.g. operations create
+// --agent → agentId: one agent scopes the whole batch, extra values are
+// ignored). No-op (body returned unchanged) when the flag is unset or empty,
+// so a value carried by --data/--template or the piped input still wins.
+func (in *Resolver) ApplyOverrideFirst(body []byte, flag, path string) (json.RawMessage, error) {
+	if !in.r.Cmd.Flags().Changed(flag) {
+		return json.RawMessage(body), nil
+	}
+	v := in.FirstString(flag)
+	if v == "" {
+		return json.RawMessage(body), nil
+	}
+	out, err := sjson.SetBytes(body, path, v)
+	if err != nil {
+		return nil, err
+	}
+	return json.RawMessage(out), nil
+}
+
 // Bool returns a bool flag's value.
 func (in *Resolver) Bool(flag string) bool {
 	v, _ := in.r.Cmd.Flags().GetBool(flag)
@@ -206,6 +227,29 @@ func (in *Resolver) BoolPtrIfChanged(flag string) *bool {
 	}
 	v, _ := in.r.Cmd.Flags().GetBool(flag)
 	return &v
+}
+
+// FirstString returns the first non-empty value of a flag, resolving
+// `-`/`-.path` references against the current input item. For a slice flag
+// this is the v1 "FirstMatch" semantics of secondary reference flags: a
+// scoping lookup (e.g. `firmware versions get --firmware pkg`) takes exactly
+// one reference, and extra values are ignored — matching v1's
+// WithReferenceByNameFirstMatch, which resolved values[0]. For a plain string
+// flag it behaves like String.
+func (in *Resolver) FirstString(flag string) string {
+	f := in.r.Cmd.Flags().Lookup(flag)
+	if f == nil {
+		return ""
+	}
+	if !strings.Contains(f.Value.Type(), "Slice") {
+		return in.String(flag)
+	}
+	for _, v := range in.StringSlice(flag) {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 // StringSlice returns a string-slice flag's value, resolving any `-`/`-.path`
@@ -307,14 +351,66 @@ func gjsonFirst(raw []byte, paths []string) string {
 // NameOrID turns a CLI reference into a go-c8y resolver reference: an all-digit
 // value is an id (used as-is), anything else is a name to look up ("name:..."),
 // matching the smart resolvers in go-c8y. Empty in, empty out.
+//
+// A comma-joined value is split and the first id-looking part wins, falling
+// back to the first non-empty part as a name — the v1 fetcher semantics
+// (parseAndSanitizeIDs + FirstMatch), which let a piped csv line like
+// "83001,1.0.0" (id,version) resolve to the id.
 func NameOrID(value string) string {
 	if value == "" {
 		return ""
 	}
-	for _, r := range value {
-		if r < '0' || r > '9' {
-			return "name:" + value
+	if strings.Contains(value, ",") {
+		parts := strings.Split(strings.ReplaceAll(value, ", ", ","), ",")
+		name := ""
+		for _, p := range parts {
+			if p == "" {
+				continue
+			}
+			if isDigits(p) {
+				return p
+			}
+			if name == "" {
+				name = p
+			}
+		}
+		if name == "" {
+			return ""
+		}
+		return "name:" + name
+	}
+	if !isDigits(value) {
+		return "name:" + value
+	}
+	return value
+}
+
+// FirstID returns the first comma-separated all-digit part of a reference
+// value — the v1 fetcher semantics that let a piped csv line like
+// "83001,1.0.0" (id,version) resolve to the id — or the value unchanged when
+// no part looks like an id. Use it for reference builders that bypass
+// NameOrID (e.g. version/patch refs that take the raw value).
+func FirstID(value string) string {
+	if !strings.Contains(value, ",") {
+		return value
+	}
+	for _, p := range strings.Split(strings.ReplaceAll(value, ", ", ","), ",") {
+		if isDigits(p) {
+			return p
 		}
 	}
 	return value
+}
+
+// isDigits reports whether s is non-empty and all ASCII digits (an id).
+func isDigits(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }

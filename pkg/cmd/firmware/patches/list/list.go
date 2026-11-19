@@ -54,7 +54,7 @@ Get a list of firmware patches where the dependency version starts with '1.'
 	cmd.Flags().String("query", "", "Additional query filter")
 	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
 	cmd.Flags().String("orderBy", "creationTime.date desc", "Order by. e.g. _id asc or name asc or creationTime.date desc")
-	cmd.Flags().String("firmware", "", "Firmware package id or name (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("firmware", []string{""}, "Firmware package id or name (required) (accepts pipeline)")
 	cmd.Flags().String("dependency", "", "Patch dependency version")
 	cmd.Flags().String("version", "", "Patch version")
 	cmd.Flags().String("url", "", "Filter by url")

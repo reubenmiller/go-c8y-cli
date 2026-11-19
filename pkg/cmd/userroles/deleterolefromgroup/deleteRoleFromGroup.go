@@ -51,7 +51,7 @@ Remove a role from the given user group
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("role", []string{""}, "Role name, e.g. ROLE_TENANT_MANAGEMENT_ADMIN (required) (accepts pipeline)")
-	cmd.Flags().String("group", "", "Group id (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Group id (required)")
 	cmd.Flags().String("tenant", "", "Tenant")
 
 	completion.WithOptions(
@@ -100,7 +100,7 @@ func (n *DeleteRoleFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		if tenant == "" {
 			tenant = n.factory.GetTenant()
 		}
-		groupID, err := client.UserGroups.ResolveID(in.ResolveContext(), tenant, c8ystream.NameOrID(in.String("group")))
+		groupID, err := client.UserGroups.ResolveID(in.ResolveContext(), tenant, c8ystream.NameOrID(in.FirstString("group")))
 		if err != nil {
 			return nil, err
 		}

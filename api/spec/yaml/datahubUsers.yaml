@@ -5,7 +5,6 @@ group:
   description: Cumulocity DataHub Users
   descriptionLong: Cumulocity DataHub Users
   link: https://cumulocity.com/guides/datahub/datahub-overview/
-  skip: true
 
 commands:
   - name: list

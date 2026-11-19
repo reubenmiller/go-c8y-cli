@@ -5,7 +5,6 @@ group:
   description: Cumulocity DataHub Tenant information
   descriptionLong: Cumulocity DataHub Tenant information
   link: https://cumulocity.com/guides/datahub/datahub-overview/
-  skip: true
 
 commands:
   - name: get

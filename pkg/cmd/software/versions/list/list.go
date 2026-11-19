@@ -56,7 +56,7 @@ Get a list of software package versions from multiple software packages
 	cmd.Flags().String("query", "", "Additional query filter")
 	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
 	cmd.Flags().String("orderBy", "creationTime.date desc,creationTime desc", "Order by. e.g. _id asc or name asc or creationTime.date desc")
-	cmd.Flags().String("software", "", "Software package id or name (accepts pipeline)")
+	cmd.Flags().StringSlice("software", []string{""}, "Software package id or name (accepts pipeline)")
 	cmd.Flags().String("version", "", "Filter by version")
 	cmd.Flags().String("url", "", "Filter by url")
 	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")

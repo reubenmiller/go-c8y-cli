@@ -54,7 +54,7 @@ Delete a user from a user group (using pipeline)
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("user", []string{""}, "User id/username (required) (accepts pipeline)")
-	cmd.Flags().String("group", "", "Group ID (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Group ID (required)")
 	cmd.Flags().String("tenant", "", "Tenant")
 
 	completion.WithOptions(
@@ -102,7 +102,7 @@ func (n *DeleteUserFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		if tenant == "" {
 			tenant = n.factory.GetTenant()
 		}
-		groupID, err := client.UserGroups.ResolveID(in.ResolveContext(), tenant, c8ystream.NameOrID(in.String("group")))
+		groupID, err := client.UserGroups.ResolveID(in.ResolveContext(), tenant, c8ystream.NameOrID(in.FirstString("group")))
 		if err != nil {
 			return nil, err
 		}

@@ -53,7 +53,7 @@ Create a new event, resolving the device name to its id
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("device", "", "The ManagedObject which is the source of this event (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{}, "The ManagedObject which is the source of this event (accepts pipeline). Multiple devices fan out one event per device.")
 	cmd.Flags().String("time", "", "Time of the event. Defaults to current timestamp")
 	cmd.Flags().String("type", "", "Identifies the type of this event")
 	cmd.Flags().String("text", "", "Text description of the event")
@@ -93,7 +93,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = r.Body(
 		flags.WithOverrideValue("device", "source.id"),
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("device", "source.id"),
+		flags.WithSliceRefValue("device", "source.id"),
 		flags.WithRelativeTimestamp("time", "time"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("text", "text"),
@@ -120,6 +120,12 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		// Restore v1's multi-device fan-out: --device 1,2,3 zips one device per
+		// piped item (cycling), overriding the source.id seeded by WithOverrideValue.
+		body, err = in.ApplyOverrideSlice(body, "device", "source.id")
 		if err != nil {
 			return nil, err
 		}

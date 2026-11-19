@@ -58,7 +58,7 @@ Add a list of users to business and admins group (using pipeline)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("group", "", "Group ID (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Group ID (required)")
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().StringSlice("user", []string{""}, "User id (required) (accepts pipeline)")
 
@@ -122,7 +122,7 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		if tenant == "" {
 			tenant = n.factory.GetTenant()
 		}
-		groupID, err := client.UserGroups.ResolveID(in.ResolveContext(), tenant, c8ystream.NameOrID(in.String("group")))
+		groupID, err := client.UserGroups.ResolveID(in.ResolveContext(), tenant, c8ystream.NameOrID(in.FirstString("group")))
 		if err != nil {
 			return nil, err
 		}

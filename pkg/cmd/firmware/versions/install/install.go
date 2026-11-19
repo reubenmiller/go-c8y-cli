@@ -12,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
@@ -59,7 +60,7 @@ Install a firmware version with an explicit url
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("device", "", "Device or agent where the firmware should be installed (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{}, "Device or agent where the firmware should be installed (accepts pipeline). Multiple devices fan out one operation per device.")
 	cmd.Flags().String("firmware", "", "Firmware name (required)")
 	cmd.Flags().String("version", "", "Firmware version")
 	cmd.Flags().String("url", "", "Firmware url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository")
@@ -98,14 +99,12 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := r.Input(); err != nil {
+	if err := r.InputFlag("device"); err != nil {
 		return err
 	}
 
 	err = r.Body(
-		flags.WithOverrideValue("device", "deviceId"),
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("device", "deviceId"),
 		flags.WithStringValue("firmware", "c8y_Firmware.name"),
 		// version/url use WithAnyStringValue so an empty value is still written
 		// (c8y_Firmware.version: ""): v1 emitted all three keys via a computed
@@ -126,8 +125,9 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithTemplateVariablesValue(),
 		// version is intentionally not required: v1 emitted c8y_Firmware.version: ""
 		// via the computed firmwareDetails type and only checked key existence; an
-		// empty version is valid. The default is filled in below.
-		flags.WithRequiredProperties("deviceId", "c8y_Firmware.name"),
+		// empty version is valid. The default is filled in below. deviceId is
+		// checked explicitly in the builder (the driver supplies it per item).
+		flags.WithRequiredProperties("c8y_Firmware.name"),
 	)
 	if err != nil {
 		return err
@@ -143,8 +143,15 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		device := in.String("device")
+		if device == "" {
+			return nil, cmderrors.NewUserError("Body is missing required properties: deviceId")
+		}
 		body, err := in.Body()
 		if err != nil {
+			return nil, err
+		}
+		if body, err = sjson.SetBytes(body, "deviceId", device); err != nil {
 			return nil, err
 		}
 		if body, err = in.ResolveBodyRef(body, "deviceId", resolveDevice); err != nil {

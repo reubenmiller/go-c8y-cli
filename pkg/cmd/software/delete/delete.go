@@ -52,7 +52,7 @@ Delete a software package but keep all related versions
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Software Package (managedObject) id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Software Package (managedObject) id (required) (accepts pipeline)")
 	cmd.Flags().Bool("forceCascade", true, "Remove version and any related binaries")
 
 	completion.WithOptions(

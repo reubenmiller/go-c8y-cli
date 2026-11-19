@@ -3,8 +3,7 @@
     "name": "datahub/configuration",
     "description": "Cumulocity DataHub Configurations",
     "descriptionLong": "Cumulocity DataHub Configurations",
-    "link": "https://cumulocity.com/guides/datahub/datahub-overview/",
-    "skip": true
+    "link": "https://cumulocity.com/guides/datahub/datahub-overview/"
   },
   "commands": [
     {

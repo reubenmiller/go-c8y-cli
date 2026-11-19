@@ -59,6 +59,8 @@ Delete measurements with a given fragment and older than 10 days for a device
 	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
 	cmd.Flags().String("type", "", "Measurement type.")
 	cmd.Flags().String("fragmentType", "", "Fragment name from measurement")
+	cmd.Flags().String("valueFragmentType", "", "value fragment type")
+	cmd.Flags().String("valueFragmentSeries", "", "value fragment series")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of measurement occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of measurement occurrence.")
 
@@ -97,10 +99,12 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		opt := measurements.DeleteListOptions{
-			DateFrom:     in.TimeValue("dateFrom"),
-			DateTo:       in.TimeValue("dateTo"),
-			Type:         in.String("type"),
-			FragmentType: in.String("fragmentType"),
+			DateFrom:            in.TimeValue("dateFrom"),
+			DateTo:              in.TimeValue("dateTo"),
+			Type:                in.String("type"),
+			FragmentType:        in.String("fragmentType"),
+			ValueFragmentType:   in.String("valueFragmentType"),
+			ValueFragmentSeries: in.String("valueFragmentSeries"),
 		}
 		if device := in.String("device"); device != "" {
 			opt.Source = managedobjects.DeviceRef(c8ystream.NameOrID(device))

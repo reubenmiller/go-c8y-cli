@@ -74,6 +74,11 @@ func (r *Runner) toServerError(err error) error {
 // statusCode, c8yResponse) marshalled to JSON, so the output template and select
 // stages can shape it like any other document. Non-CommandError errors (which
 // have no structured body) are not emitted.
+//
+// When an output template is active it is applied here: success documents are
+// templated per job by the producer wrapper, which error documents bypass (the
+// collector emits them downstream), so without this the error would reach the
+// output unshaped.
 func (r *Runner) errorDocument(err error) (jsondoc.JSONDoc, bool) {
 	var ce cmderrors.CommandError
 	if !errors.As(r.toServerError(err), &ce) {
@@ -83,14 +88,29 @@ func (r *Runner) errorDocument(err error) (jsondoc.JSONDoc, bool) {
 	if marshalErr != nil {
 		return jsondoc.Empty(), false
 	}
+	if r.tmpl != nil {
+		var input any
+		if len(r.tmplInput) > 0 {
+			input = r.tmplInput
+		}
+		r.tmplMu.Lock()
+		reqData, respData := r.tmplRequest, r.tmplResponse
+		r.tmplMu.Unlock()
+		out, tmplErr := r.tmpl.Evaluate(raw, input, reqData, respData, r.tmplFlags)
+		if tmplErr != nil {
+			return jsondoc.Empty(), false
+		}
+		return jsondoc.New(unwrapTemplateString(out)), true
+	}
 	return jsondoc.New(raw), true
 }
 
 // collapseErrors reduces the collected item errors to the single command result
 // error, applying toServerError so the status code/exit code/body are present
 // for the downstream silent-status-code and exit-code handling. A batch with
-// more than one failure reports ExitCompletedWithErrors, carrying the first
-// (converted) error for context — matching the v1 worker aggregate.
+// more than one failure reports only the aggregate ("jobs completed with N
+// errors", exit 104) — the individual errors were already logged as they
+// occurred (ErrorCollector.Log), matching the v1 worker output shape.
 func (r *Runner) collapseErrors(errs []error) error {
 	switch len(errs) {
 	case 0:
@@ -98,10 +118,9 @@ func (r *Runner) collapseErrors(errs []error) error {
 	case 1:
 		return r.toServerError(errs[0])
 	default:
-		first := r.toServerError(errs[0])
 		return cmderrors.NewErrorWithExitCode(
 			cmderrors.ExitCompletedWithErrors,
-			first,
+			nil,
 			fmt.Sprintf("jobs completed with %d errors", len(errs)),
 		)
 	}

@@ -54,7 +54,7 @@ Add a role (ROLE_ALARM_READ) to a user
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().String("user", "", "User prefix or full username (required)")
+	cmd.Flags().StringSlice("user", []string{""}, "User prefix or full username (required)")
 	cmd.Flags().StringSlice("role", []string{""}, "User role id (accepts pipeline)")
 
 	completion.WithOptions(
@@ -116,7 +116,7 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		if tenant == "" {
 			tenant = n.factory.GetTenant()
 		}
-		user := in.String("user")
+		user := in.FirstString("user")
 		if user == "" {
 			return nil, cmderrors.NewUserError("Body is missing required properties: user")
 		}

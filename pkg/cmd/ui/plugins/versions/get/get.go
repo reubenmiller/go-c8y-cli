@@ -105,8 +105,10 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 			} else {
 				res = client.ApplicationVersions.ListByVersion(ctx, pluginID, version)
 			}
-			// collectionProperty "-": render the response as-is (no plucking).
-			return c8ystream.FromResponse(res)
+			// The SDK requests the single-version representation (the version/tag
+			// filter only works with that Accept header), so this renders exactly
+			// the matched version object — selectable via --select version, like v1.
+			return c8ystream.FromResult(res)
 		}, nil
 	})
 }

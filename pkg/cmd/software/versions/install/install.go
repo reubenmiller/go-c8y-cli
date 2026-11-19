@@ -65,7 +65,7 @@ Install a software package version with an explicit url
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("device", "", "Device or agent where the software should be installed (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{""}, "Device or agent where the software should be installed (accepts pipeline)")
 	cmd.Flags().String("software", "", "Software name (required)")
 	cmd.Flags().String("version", "", "Software version id or name")
 	cmd.Flags().String("url", "", "Software url. Leave blank to automatically set it if a matching software/version is found in the c8y software repository")

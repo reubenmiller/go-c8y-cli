@@ -61,6 +61,8 @@ Get number of active alarms which occurred in the last 10 minutes
 	cmd.Flags().StringSlice("status", []string{""}, "Comma separated alarm statuses, for example ACTIVE,CLEARED.")
 	cmd.Flags().String("severity", "", "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.")
 	cmd.Flags().Bool("resolved", false, "When set to true only resolved alarms will be counted (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.")
+	cmd.Flags().Bool("withSourceAssets", false, "When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.")
+	cmd.Flags().Bool("withSourceDevices", false, "When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.")
 
 	completion.WithOptions(
 		cmd,
@@ -99,9 +101,11 @@ func (n *CountCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		opt := alarms.CountOptions{
-			DateFrom: in.TimeValue("dateFrom"),
-			DateTo:   in.TimeValue("dateTo"),
-			Resolved: in.Bool("resolved"),
+			DateFrom:          in.TimeValue("dateFrom"),
+			DateTo:            in.TimeValue("dateTo"),
+			Resolved:          in.Bool("resolved"),
+			WithSourceAssets:  in.Bool("withSourceAssets"),
+			WithSourceDevices: in.Bool("withSourceDevices"),
 		}
 		if t := in.String("type"); t != "" {
 			opt.Type = []string{t}

@@ -650,6 +650,31 @@ func WithStringDefaultValue(defaultValue string, opts ...string) GetOption {
 	}
 }
 
+// WithSliceRefValue binds a `-`/`-.path` input reference held by a string or
+// string-slice flag into the body at dst, so a pipe-mapped value (e.g.
+// `alarms create --device -.custom.id`) reaches the body before
+// required-property validation runs. Literal flag values contribute nothing
+// here — they are seeded by WithOverrideValue and, for multi-valued slices,
+// applied per item by c8ystream's Resolver.ApplyOverrideSlice.
+func WithSliceRefValue(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		src, dst, format := UnpackGetterOptions("%s", opts...)
+		if cmd.Flag(src) == nil || inputIterators == nil {
+			return "", nil, nil
+		}
+		values, err := GetFlagStringValues(cmd, src)
+		if err != nil {
+			return dst, nil, err
+		}
+		for _, value := range values {
+			if iter, ok := inputIterators.inputRef(value, format); ok {
+				return dst, iter, nil
+			}
+		}
+		return "", nil, nil
+	}
+}
+
 // WithStringSliceValues adds a string slice from cli arguments
 func WithStringSliceValues(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {

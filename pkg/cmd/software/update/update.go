@@ -48,7 +48,7 @@ Update a software package
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Software package (managedObject) id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Software package (managedObject) id (required) (accepts pipeline)")
 	cmd.Flags().String("newName", "", "New software package name")
 	cmd.Flags().String("description", "", "Description of the software package")
 	cmd.Flags().String("softwareType", "", "Software type")

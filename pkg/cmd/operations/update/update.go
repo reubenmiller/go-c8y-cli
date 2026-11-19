@@ -55,7 +55,7 @@ Fail all pending operations of a device
 	cmd.Flags().StringSlice("id", []string{""}, "Operation id (required) (accepts pipeline)")
 	cmd.Flags().String("status", "", "Operation status, one of SUCCESSFUL, FAILED, EXECUTING or PENDING")
 	cmd.Flags().String("failureReason", "", "Reason for the failure. Use when setting status to FAILED")
-	cmd.Flags().String("agent", "", "Agent id or name")
+	cmd.Flags().StringSlice("agent", []string{""}, "Agent id or name")
 
 	completion.WithOptions(
 		cmd,
@@ -93,7 +93,6 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("status", "status"),
 		flags.WithStringValue("failureReason", "failureReason"),
-		flags.WithStringValue("agent", "agentId"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
@@ -114,6 +113,9 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		id := in.String("id")
 		body, err := in.Body()
 		if err != nil {
+			return nil, err
+		}
+		if body, err = in.ApplyOverrideFirst(body, "agent", "agentId"); err != nil {
 			return nil, err
 		}
 		if body, err = in.ResolveBodyRef(body, "agentId", resolveDevice); err != nil {

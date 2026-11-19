@@ -73,11 +73,11 @@ Send a custom configuration by manually providing the type and url
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("device", "", "Identifies the target device on which this operation should be performed. (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{""}, "Identifies the target device on which this operation should be performed. (accepts pipeline)")
 	cmd.Flags().String("description", "", "Text description of the operation.")
 	cmd.Flags().String("configurationType", "", "Configuration type. Leave blank to automatically set it if a matching configuration is found in the c8y configuration repository")
 	cmd.Flags().String("url", "", "Url to the configuration. Leave blank to automatically set it if a matching configuration is found in the c8y configuration repository")
-	cmd.Flags().String("configuration", "", "Configuration name or id")
+	cmd.Flags().StringSlice("configuration", []string{""}, "Configuration name or id")
 
 	completion.WithOptions(
 		cmd,
@@ -160,7 +160,7 @@ func (n *SendCmd) RunE(cmd *cobra.Command, args []string) error {
 		// description) from the repository when a configuration reference is given,
 		// matching v1. Explicit --url / --configurationType are otherwise used as-is.
 		var configName string
-		if ref := in.String("configuration"); ref != "" {
+		if ref := in.FirstString("configuration"); ref != "" {
 			res := client.Configuration.Get(in.ResolveContext(), configuration.ConfigurationRef(c8ystream.NameOrID(ref)), configuration.GetOptions{})
 			if res.Err != nil {
 				return nil, res.Err

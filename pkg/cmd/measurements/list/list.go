@@ -1,24 +1,29 @@
 // v2-based measurements list: fills the typed measurements.ListOptions from the
 // flags; the source device is resolved by go-c8y; time-keyset pagination.
-//
-// GAP: the legacy --csvFormat/--excelFormat/--unit options are not carried over
-// — the typed measurements.ListOptions does not expose them (they change the
-// Accept header / add a query param). They need a per-call request-modifier seam
-// on go-c8y; see proposals/CLI_CODEGEN_INVERSION.md. The deprecated --fragmentType
-// is dropped (use --valueFragmentType).
+// The legacy header parameters are carried via the request context (--unit →
+// X-Cumulocity-System-Of-Units) or a dedicated export call (--csvFormat /
+// --excelFormat → Accept-driven single-document download, no pagination); the
+// deprecated --fragmentType rides along as an extra query parameter.
 package list
 
 import (
+	"context"
+	"io"
+
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/measurements"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -57,12 +62,17 @@ List the last day of measurements for each piped device
 	cmd.Flags().String("type", "", "Measurement type")
 	cmd.Flags().String("valueFragmentType", "", "Value fragment type, e.g. c8y_Temperature")
 	cmd.Flags().String("valueFragmentSeries", "", "Value fragment series, e.g. T")
+	cmd.Flags().String("fragmentType", "", "Fragment name from measurement (deprecated)")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of measurement occurrence")
 	cmd.Flags().String("dateTo", "", "End date or date and time of measurement occurrence")
 	cmd.Flags().Bool("revert", false, "Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters")
+	cmd.Flags().Bool("csvFormat", false, "Results will be displayed in csv format. Note: -IncludeAll, is not supported when using using this parameter")
+	cmd.Flags().Bool("excelFormat", false, "Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter")
+	cmd.Flags().String("unit", "", "Every measurement fragment which contains 'unit' property will be transformed to use required system of units.")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithValidateSet("unit", "imperial", "metric"),
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
@@ -104,6 +114,22 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	rawOutput := r.Config.RawOutput()
 	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
 
+	// The export path streams a non-JSON payload, so capture the raw output
+	// destinations before the runner installs its own rawFileStage.
+	outputFileRaw := r.Config.GetOutputFileRaw()
+	stdout := cmd.OutOrStdout()
+
+	// v1 header parameters: --csvFormat/--excelFormat switch the Accept header
+	// (excel wins when both are given, matching the v1 getter order) and --unit
+	// selects the system of units.
+	exportAccept := ""
+	if in, _ := cmd.Flags().GetBool("csvFormat"); in {
+		exportAccept = "text/csv"
+	}
+	if in, _ := cmd.Flags().GetBool("excelFormat"); in {
+		exportAccept = "application/vnd.ms-excel"
+	}
+
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		opt := measurements.ListOptions{
 			Type:                in.String("type"),
@@ -124,6 +150,49 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			MaxItems:          r.Config.MaxItems(),
 			Strategy:          paginationStrategy,
 		}
-		return c8ystream.ListCall(rawOutput, opt, client.Measurements.ListAll), nil
+
+		unit := in.String("unit")
+		fragmentType := in.String("fragmentType")
+		withParams := func(ctx context.Context) context.Context {
+			ctx = c8ystream.WithHeaderParam(ctx, "X-Cumulocity-System-Of-Units", unit)
+			return c8ystream.WithQueryParam(ctx, "fragmentType", fragmentType)
+		}
+
+		if exportAccept != "" {
+			// CSV/Excel export: the server streams the whole matching collection
+			// as one non-JSON document, so bypass the paginated iterator and write
+			// the payload to --outputFileRaw (or stdout), yielding nothing — the
+			// runner's rawFileStage must not overwrite the file with rendered docs.
+			return func(ctx context.Context) output.Seq {
+				return func(yield func(jsondoc.JSONDoc, error) bool) {
+					res := client.Measurements.Export(withParams(ctx), opt, exportAccept)
+					if res.Err != nil {
+						yield(jsondoc.Empty(), res.Err)
+						return
+					}
+					// Under --dry the request has already been rendered; nothing to write.
+					if apiv2.IsDryRun(ctx) {
+						return
+					}
+					resp := res.Data
+					defer resp.Close()
+					if outputFileRaw != "" {
+						fields := map[string]string{"filename": resp.FileName()}
+						if _, err := fileutilities.WriteToFile(resp.Reader(), outputFileRaw, false, false, fields); err != nil {
+							yield(jsondoc.Empty(), err)
+						}
+						return
+					}
+					if _, err := io.Copy(stdout, resp.Reader()); err != nil {
+						yield(jsondoc.Empty(), err)
+					}
+				}
+			}, nil
+		}
+
+		call := c8ystream.ListCall(rawOutput, opt, client.Measurements.ListAll)
+		return func(ctx context.Context) output.Seq {
+			return call(withParams(ctx))
+		}, nil
 	})
 }

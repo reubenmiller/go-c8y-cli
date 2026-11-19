@@ -53,7 +53,7 @@ Add a role to the admin group
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().String("group", "", "Group ID (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Group ID (required)")
 	cmd.Flags().StringSlice("role", []string{""}, "User role id (required) (accepts pipeline)")
 
 	completion.WithOptions(
@@ -116,7 +116,7 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		if tenant == "" {
 			tenant = n.factory.GetTenant()
 		}
-		groupID, err := client.UserGroups.ResolveID(in.ResolveContext(), tenant, c8ystream.NameOrID(in.String("group")))
+		groupID, err := client.UserGroups.ResolveID(in.ResolveContext(), tenant, c8ystream.NameOrID(in.FirstString("group")))
 		if err != nil {
 			return nil, err
 		}

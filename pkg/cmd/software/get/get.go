@@ -49,7 +49,7 @@ Get a software package (using pipeline)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Software package (managedObject) id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Software package (managedObject) id (required) (accepts pipeline)")
 	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")
 	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
 	cmd.Flags().Bool("withChildrenCount", false, "When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)")

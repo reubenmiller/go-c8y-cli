@@ -51,7 +51,7 @@ Update a firmware package name (using pipeline)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Firmware package (managedObject) id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Firmware package (managedObject) id (required) (accepts pipeline)")
 	cmd.Flags().String("newName", "", "New firmware package name")
 	cmd.Flags().String("description", "", "Description of the firmware package")
 	cmd.Flags().String("deviceType", "", "Device type filter. Only allow firmware to be applied to devices of this type")

@@ -3,6 +3,7 @@ package c8ystream
 import (
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 )
@@ -27,6 +28,11 @@ type ErrorCollector struct {
 	// --withError behaviour: the error response body flows to stdout as a
 	// document. Returning ok=false suppresses emission for that error.
 	Emit func(error) (jsondoc.JSONDoc, bool)
+
+	// Log, when set, reports each collected item error as it occurs — v1
+	// logged every failed job to stderr immediately, with only the aggregate
+	// ("jobs completed with N errors") at the end.
+	Log func(error)
 }
 
 // Stage returns the stream stage that performs the collection.
@@ -41,6 +47,9 @@ func (c *ErrorCollector) Stage() output.Stage {
 					continue
 				}
 				c.Errors = append(c.Errors, err)
+				if c.Log != nil {
+					c.Log(err)
+				}
 				if c.Emit != nil {
 					if errDoc, ok := c.Emit(err); ok {
 						if !yield(errDoc, nil) {
@@ -49,7 +58,13 @@ func (c *ErrorCollector) Stage() output.Stage {
 					}
 				}
 				if c.Max > 0 && len(c.Errors) >= c.Max {
-					yield(jsondoc.Empty(), fmt.Errorf("aborted batch as the error count (%d) reached the limit: %w", len(c.Errors), err))
+					// --abortOnErrors: surface the dedicated aborted exit code (103),
+					// distinct from completed-with-errors (104), matching v1.
+					yield(jsondoc.Empty(), cmderrors.NewErrorWithExitCode(
+						cmderrors.ExitAbortedWithErrors,
+						nil,
+						fmt.Sprintf("aborted batch as the error count (%d) reached the limit", len(c.Errors)),
+					))
 					return
 				}
 			}

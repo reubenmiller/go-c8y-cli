@@ -90,6 +90,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = r.Body(
 		flags.WithOverrideValue("device", "source.id"),
 		flags.WithDataFlagValue(),
+		flags.WithSliceRefValue("device", "source.id"),
 		flags.WithRelativeTimestamp("time", "time"),
 		flags.WithStringValue("type", "type"),
 		cmdutil.WithTemplateValue(n.factory),

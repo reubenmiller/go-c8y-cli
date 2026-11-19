@@ -2,6 +2,7 @@ package c8ystream
 
 import (
 	"context"
+	"maps"
 	"net/url"
 	"strings"
 
@@ -49,6 +50,38 @@ func WithExtraRequestOptions(ctx context.Context, cfg *config.Config) context.Co
 		ctx = ctxhelpers.WithNoAccept(ctx, true)
 	}
 	return ctx
+}
+
+// WithQueryParam returns ctx with an additional query parameter for the
+// requests made under it, merging with (not replacing) any globally configured
+// --customQueryParam values. Use it for legacy CLI parameters that a typed SDK
+// options struct deliberately does not expose (e.g. measurements list
+// --fragmentType/--unit). An empty value is a no-op.
+func WithQueryParam(ctx context.Context, key, value string) context.Context {
+	if value == "" {
+		return ctx
+	}
+	merged := url.Values{}
+	for k, vs := range ctxhelpers.GetExtraQueryParams(ctx) {
+		merged[k] = append([]string(nil), vs...)
+	}
+	merged.Add(key, value)
+	return ctxhelpers.WithExtraQueryParams(ctx, merged)
+}
+
+// WithHeaderParam returns ctx with an additional request header for the
+// requests made under it, merging with (not replacing) any globally configured
+// --header values. Use it for legacy CLI parameters that map to a header the
+// typed SDK options deliberately do not expose (e.g. measurements list --unit →
+// X-Cumulocity-System-Of-Units). An empty value is a no-op.
+func WithHeaderParam(ctx context.Context, key, value string) context.Context {
+	if value == "" {
+		return ctx
+	}
+	merged := map[string]string{}
+	maps.Copy(merged, ctxhelpers.GetExtraHeaders(ctx))
+	merged[key] = value
+	return ctxhelpers.WithExtraHeaders(ctx, merged)
 }
 
 // parseKeyValues parses "Key: Value" entries (a single setting may carry several

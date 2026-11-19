@@ -52,8 +52,8 @@ Create an operation, resolving the device name to its id
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("device", "", "Identifies the target device on which this operation should be performed (accepts pipeline)")
-	cmd.Flags().String("agent", "", "Agent id or name")
+	cmd.Flags().StringSlice("device", []string{}, "Identifies the target device on which this operation should be performed (accepts pipeline). Multiple devices fan out one operation per device.")
+	cmd.Flags().StringSlice("agent", []string{}, "Agent id or name")
 	cmd.Flags().String("description", "", "Text description of the operation")
 
 	completion.WithOptions(
@@ -92,8 +92,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = r.Body(
 		flags.WithOverrideValue("device", "deviceId"),
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("device", "deviceId"),
-		flags.WithStringValue("agent", "agentId"),
+		flags.WithSliceRefValue("device", "deviceId"),
+		flags.WithSliceRefValue("agent", "agentId"),
 		flags.WithStringValue("description", "description"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
@@ -115,6 +115,15 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		body, err := in.Body()
 		if err != nil {
+			return nil, err
+		}
+		// Restore v1's multi-device fan-out: --device 1,2,3 zips one device per
+		// piped item (cycling), overriding the deviceId seeded by WithOverrideValue.
+		// The agent reference keeps v1's FirstMatch: one agent scopes the batch.
+		if body, err = in.ApplyOverrideSlice(body, "device", "deviceId"); err != nil {
+			return nil, err
+		}
+		if body, err = in.ApplyOverrideFirst(body, "agent", "agentId"); err != nil {
 			return nil, err
 		}
 		if body, err = in.ResolveBodyRef(body, "deviceId", resolveDevice); err != nil {

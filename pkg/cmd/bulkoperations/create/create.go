@@ -52,7 +52,7 @@ Create bulk operation for a group (using pipeline)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("group", "", "Identifies the target group on which this operation should be performed. (accepts pipeline)")
+	cmd.Flags().StringSlice("group", []string{}, "Identifies the target group on which this operation should be performed. (accepts pipeline) Multiple groups fan out one bulk operation per group.")
 	cmd.Flags().String("startDate", "", "Time when operations should be created. Defaults to 300s")
 	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation.")
 	cmd.Flags().String("operation", "", "Operation prototype to send to each device in the group")
@@ -92,7 +92,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = r.Body(
 		flags.WithOverrideValue("group", "groupId"),
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("group", "groupId"),
+		flags.WithSliceRefValue("group", "groupId"),
 		flags.WithRelativeTimestamp("startDate", "startDate"),
 		flags.WithFloatValue("creationRampSec", "creationRamp"),
 		flags.WithDataValue("operation", "operationPrototype"),
@@ -118,6 +118,11 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		body, err := in.Body()
 		if err != nil {
+			return nil, err
+		}
+		// Restore v1's multi-group fan-out: --group 1,2 zips one group per piped
+		// item (cycling), overriding the groupId seeded by WithOverrideValue.
+		if body, err = in.ApplyOverrideSlice(body, "group", "groupId"); err != nil {
 			return nil, err
 		}
 		if body, err = in.ResolveBodyRef(body, "groupId", resolveGroup); err != nil {

@@ -1,0 +1,40 @@
+tests:
+    datahub_configuration_list_List the datahub offloading configurations:
+        command: c8y datahub configuration list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /service/datahub/offloadingconfigurations
+                queryParams.locale.0: en
+    datahub_scheduler_list_List the datahub scheduled items:
+        command: c8y datahub scheduler list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /service/datahub/scheduler/latestjobs
+                queryParams.jobType.0: COMPACTION
+    datahub_scheduler_list_List the datahub scheduled items with offset:
+        command: c8y datahub scheduler list --offset 5 --pageSize 7
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /service/datahub/scheduler/latestjobs
+                queryParams.offset.0: "5"
+                queryParams.limit.0: "7"
+    datahub_tenant_get_Get datahub tenant configuration:
+        command: c8y datahub tenant get
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /service/datahub/tenant
+    datahub_users_list_List the datahub users:
+        command: c8y datahub users list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /service/datahub/dremio/users

@@ -3,8 +3,11 @@ package c8ystream
 import (
 	"io"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/encode"
@@ -111,11 +114,19 @@ func NewRenderer(out io.Writer, cfg *config.Config) (output.Renderer, error) {
 	}
 
 	if path := cfg.GetOutputFile(); path != "" {
-		f, err := os.Create(path)
-		if err != nil {
-			return nil, err
+		var fileRenderer output.Renderer
+		if strings.Contains(path, "{") && strings.Contains(path, "}") {
+			// {id}/{name}/{type}/{owner} placeholders are filled from the first
+			// document (v1 expanded them from the response body), so file creation
+			// must wait until a document arrives.
+			fileRenderer = &lazyFileRenderer{path: path}
+		} else {
+			f, err := createOutputFile(path)
+			if err != nil {
+				return nil, err
+			}
+			fileRenderer = &closingRenderer{Renderer: encode.NewJSONArray(f), closer: f}
 		}
-		var fileRenderer output.Renderer = &closingRenderer{Renderer: encode.NewJSONArray(f), closer: f}
 		// CSV/TSV + --select skips the generic selectStage, so the document
 		// reaching the renderer is unshaped. The --outputFile tee writes JSON, so
 		// shape it here (the same nested selection the json sink would have
@@ -155,6 +166,57 @@ func (m multiRenderer) Close() error {
 		}
 	}
 	return firstErr
+}
+
+// createOutputFile creates the --outputFile target, creating missing parent
+// directories first (v1's WriteToFile always ran MkdirAll on the dirname).
+func createOutputFile(path string) (*os.File, error) {
+	if dir := filepath.Dir(path); dir != "" {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			return nil, err
+		}
+	}
+	return os.Create(path)
+}
+
+// lazyFileRenderer defers the --outputFile creation until the first document
+// so {id}/{name}/{type}/{owner} placeholders in the path can be filled from
+// that document — the same fields (and value sanitisation) v1 extracted from
+// the response body. With no documents no file is created.
+type lazyFileRenderer struct {
+	path string
+	r    output.Renderer
+	f    *os.File
+}
+
+func (l *lazyFileRenderer) Write(doc jsondoc.JSONDoc) error {
+	if l.r == nil {
+		path := l.path
+		for _, field := range []string{"id", "name", "type", "owner"} {
+			placeholder := "{" + field + "}"
+			if strings.Contains(path, placeholder) {
+				path = strings.ReplaceAll(path, placeholder, fileutilities.SanitizeFileName(doc.Get(field).String()))
+			}
+		}
+		f, err := createOutputFile(path)
+		if err != nil {
+			return err
+		}
+		l.f = f
+		l.r = encode.NewJSONArray(f)
+	}
+	return l.r.Write(doc)
+}
+
+func (l *lazyFileRenderer) Close() error {
+	if l.r == nil {
+		return nil
+	}
+	err := l.r.Close()
+	if cerr := l.f.Close(); err == nil {
+		err = cerr
+	}
+	return err
 }
 
 // closingRenderer closes an underlying resource (e.g. the --outputFile

@@ -49,7 +49,7 @@ Remove a role from the given user
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("user", "", "User (required)")
+	cmd.Flags().StringSlice("user", []string{""}, "User (required)")
 	cmd.Flags().StringSlice("role", []string{""}, "Role name (required) (accepts pipeline)")
 	cmd.Flags().String("tenant", "", "Tenant")
 
@@ -100,7 +100,7 @@ func (n *DeleteRoleFromUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		opt := roleusers.UnassignRoleOptions{
 			TenantID: tenant,
-			UserID:   in.String("user"),
+			UserID:   in.FirstString("user"),
 			RoleID:   client.UserRoles.RoleID(in.String("role")),
 		}
 		return func(ctx context.Context) output.Seq {

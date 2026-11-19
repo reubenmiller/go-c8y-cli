@@ -59,7 +59,7 @@ Register a new device and assign to a group
 
 	cmd.Flags().StringSlice("id", []string{""}, "Device identifier. Max: 1000 characters. E.g. IMEI (required) (accepts pipeline)")
 	cmd.Flags().String("type", "", "Type of the device")
-	cmd.Flags().String("group", "", "Group to which the device will be assigned")
+	cmd.Flags().StringSlice("group", []string{""}, "Group to which the device will be assigned")
 
 	completion.WithOptions(
 		cmd,
@@ -96,7 +96,6 @@ func (n *RegisterCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = r.Body(
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("type", "type"),
-		flags.WithStringValue("group", "groupId"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
 	)
@@ -121,6 +120,9 @@ func (n *RegisterCmd) RunE(cmd *cobra.Command, args []string) error {
 		// The id flag is the iterating driver (a string slice), so carry its
 		// resolved value onto the body here rather than via a body getter.
 		if body, err = sjson.SetBytes(body, "id", in.String("id")); err != nil {
+			return nil, err
+		}
+		if body, err = in.ApplyOverrideFirst(body, "group", "groupId"); err != nil {
 			return nil, err
 		}
 		// Resolve the device-group reference (name -> id) the body carries.

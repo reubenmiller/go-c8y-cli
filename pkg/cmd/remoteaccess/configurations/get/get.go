@@ -48,7 +48,7 @@ Get existing remote access configuration
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("device", "", "Device")
+	cmd.Flags().StringSlice("device", []string{""}, "Device")
 	cmd.Flags().StringSlice("id", []string{""}, "Connection (accepts pipeline)")
 
 	completion.WithOptions(
@@ -86,7 +86,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		deviceID, err := client.ManagedObjects.ResolveID(in.ResolveContext(), c8ystream.NameOrID(in.String("device")), nil)
+		deviceID, err := client.ManagedObjects.ResolveID(in.ResolveContext(), c8ystream.NameOrID(in.FirstString("device")), nil)
 		if err != nil {
 			return nil, err
 		}

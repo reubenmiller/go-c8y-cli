@@ -51,8 +51,8 @@ Get a software package version using pipeline
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Software Package version id or name (required) (accepts pipeline)")
-	cmd.Flags().String("software", "", "Software package id or name (used to help completion be more accurate)")
+	cmd.Flags().StringSlice("id", []string{""}, "Software Package version id or name (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("software", []string{""}, "Software package id or name (used to help completion be more accurate)")
 	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")
 	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
 	cmd.Flags().Bool("withChildrenCount", false, "When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)")
@@ -94,7 +94,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		ref := versionRef(in.String("id"), in.String("software"))
+		ref := versionRef(c8ystream.FirstID(in.String("id")), in.FirstString("software"))
 		opt := softwareversions.GetOptions{
 			WithParents:       in.Bool("withParents"),
 			WithChildren:      in.Bool("withChildren"),

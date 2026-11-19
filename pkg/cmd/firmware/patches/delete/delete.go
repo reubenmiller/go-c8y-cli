@@ -53,8 +53,8 @@ Delete a firmware patch (but keep the related binary)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Firmware patch id or name (required) (accepts pipeline)")
-	cmd.Flags().String("firmware", "", "Firmware id or name (used to help completion be more accurate)")
+	cmd.Flags().StringSlice("id", []string{""}, "Firmware patch id or name (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("firmware", []string{""}, "Firmware id or name (used to help completion be more accurate)")
 	cmd.Flags().Bool("forceCascade", true, "Remove version and any related binaries")
 
 	completion.WithOptions(
@@ -92,7 +92,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		ref := patchRef(in.String("id"), in.String("firmware"))
+		ref := patchRef(c8ystream.FirstID(in.String("id")), in.FirstString("firmware"))
 		opt := firmwarepatches.DeleteOptions{ForceCascade: in.Bool("forceCascade")}
 		return func(ctx context.Context) output.Seq {
 			return c8ystream.SubmitStatus(ctx, func(ctx context.Context) op.Result[core.NoContent] {

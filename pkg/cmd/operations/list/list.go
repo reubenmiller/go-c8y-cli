@@ -51,7 +51,7 @@ List executing operations for each piped device
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device id (accepts pipeline)")
-	cmd.Flags().String("agent", "", "Agent id")
+	cmd.Flags().StringSlice("agent", []string{""}, "Agent id")
 	cmd.Flags().String("fragmentType", "", "The type of fragment that must be part of the operation, e.g. c8y_Restart")
 	cmd.Flags().String("status", "", "Operation status, one of SUCCESSFUL, FAILED, EXECUTING or PENDING")
 	cmd.Flags().String("bulkOperationId", "", "Only retrieve operations related to the given bulk operation id")
@@ -115,7 +115,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		if device := in.String("device"); device != "" {
 			opt.DeviceID = managedobjects.DeviceRef(c8ystream.NameOrID(device))
 		}
-		if agent := in.String("agent"); agent != "" {
+		if agent := in.FirstString("agent"); agent != "" {
 			opt.AgentID = managedobjects.DeviceRef(c8ystream.NameOrID(agent))
 		}
 		if v := in.String("bulkOperationId"); v != "" {

@@ -52,7 +52,7 @@ Delete a firmware package but keep the binaries
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Firmware Package (managedObject) id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Firmware Package (managedObject) id (required) (accepts pipeline)")
 	cmd.Flags().Bool("forceCascade", true, "Remove version and any related binaries")
 
 	completion.WithOptions(
