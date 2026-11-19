@@ -121,6 +121,7 @@ func (s *Server) Instructions() string {
 		    Only ssh keys are used (no passwords). Without --user, the default ssh user is tried first, then a fallback user (root unless the user changed it).
 		  - via a c8y_Command operation, if the device supports it: operations create --device <id> --description "<why>" --template "{c8y_Command: {text: '<command>'}}" | operations wait --status SUCCESSFUL --status FAILED --duration 2m
 		    The output is in c8y_Command.result.
+		- If c8y or this server gets in the way (a command or flag is missing or behaves wrongly, a read is rejected as a write, or these instructions led you astray), tell the user and offer to draft an issue for https://github.com/reubenmiller/go-c8y-cli/issues. Include the command you ran, the output or error, what you expected instead, and the c8y version (from "version"). Leave out tenant names, device ids, credentials and other private data, and only open the issue if the user approves.
 	`, ToolRead, ToolWrite, ToolSession, ToolRead, ToolWrite, ToolWrite, ToolSession)
 }
 
@@ -287,7 +288,7 @@ func (s *Server) handleRead(ctx context.Context, req *mcp.CallToolRequest, in Co
 		if plan.HasDeviceShell() {
 			return errorResult("%q runs a command on the device, which may change it, so it can't be run with %s. Use %s instead", strings.Join(writes, ", "), ToolRead, ToolWrite), nil, nil
 		}
-		return errorResult("%q may change data so it can't be run with %s. Use %s instead (or add --dry to preview the requests)", strings.Join(writes, ", "), ToolRead, ToolWrite), nil, nil
+		return errorResult("%q may change data so it can't be run with %s. Use %s instead (or add --dry to preview the requests). If it only reads data, offer the user to report it (see the server instructions)", strings.Join(writes, ", "), ToolRead, ToolWrite), nil, nil
 	}
 	_, runner := s.Active()
 	return s.run(ctx, runner, plan, in, ToolRead)
