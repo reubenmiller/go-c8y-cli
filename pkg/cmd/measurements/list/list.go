@@ -8,20 +8,16 @@ package list
 
 import (
 	"context"
-	"io"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/measurements"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/spf13/cobra"
 )
 
@@ -109,11 +105,6 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// The export path streams a non-JSON payload, so capture the raw output
-	// destinations before the runner installs its own rawFileStage.
-	outputFileRaw := r.Config.GetOutputFileRaw()
-	stdout := cmd.OutOrStdout()
-
 	// v1 header parameters: --csvFormat/--excelFormat switch the Accept header
 	// (excel wins when both are given, matching the v1 getter order) and --unit
 	// selects the system of units.
@@ -152,29 +143,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			// the payload to --outputFileRaw (or stdout), yielding nothing — the
 			// runner's rawFileStage must not overwrite the file with rendered docs.
 			return func(ctx context.Context) any {
-				return func(yield func(jsondoc.JSONDoc, error) bool) {
-					res := client.Measurements.Export(withParams(ctx), opt, exportAccept)
-					if res.Err != nil {
-						yield(jsondoc.Empty(), res.Err)
-						return
-					}
-					// Under --dry the request has already been rendered; nothing to write.
-					if apiv2.IsDryRun(ctx) {
-						return
-					}
-					resp := res.Data
-					defer resp.Close()
-					if outputFileRaw != "" {
-						fields := map[string]string{"filename": resp.FileName()}
-						if _, err := fileutilities.WriteToFile(resp.Reader(), outputFileRaw, false, false, fields); err != nil {
-							yield(jsondoc.Empty(), err)
-						}
-						return
-					}
-					if _, err := io.Copy(stdout, resp.Reader()); err != nil {
-						yield(jsondoc.Empty(), err)
-					}
-				}
+				return client.Measurements.Export(withParams(ctx), opt, exportAccept)
 			}, nil
 		}
 

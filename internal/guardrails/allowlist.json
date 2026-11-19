@@ -1,17 +1,7 @@
 {
-  "cli-body-ref": [
-    "pkg/cmd/bulkoperations/create/create.go",
-    "pkg/cmd/deviceregistration/register/register.go",
-    "pkg/cmd/notification2/subscriptions/create/create.go",
-    "pkg/cmd/operations/update/update.go"
-  ],
   "dry-run-check": [
-    "pkg/cmd/alarms/count/count.go",
-    "pkg/cmd/binaries/get/get.go",
     "pkg/cmd/deviceregistration/registerBulk/utils.go",
-    "pkg/cmd/devices/enroll/enroll.manual.go",
-    "pkg/cmd/events/downloadbinary/downloadBinary.go",
-    "pkg/cmd/measurements/list/list.go"
+    "pkg/cmd/devices/enroll/enroll.manual.go"
   ],
   "flag-type-device": [
     "alarms subscribe (string, expected stringSlice)",

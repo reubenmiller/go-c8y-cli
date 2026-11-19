@@ -634,10 +634,11 @@ func (r *Runner) producer(build Build) Producer {
 				}
 			}), nil
 		}
+		item := in.primary
 		job := Job(func(ctx context.Context) output.Seq {
 			// One approval scope per input item: an item whose call sends
 			// several requests (upload then update, ...) is confirmed once.
-			return r.adapt(call(apiv2.WithApprovalScope(ctx)))
+			return r.adaptItem(call(apiv2.WithApprovalScope(ctx)), item)
 		})
 		if r.submission != nil {
 			job = r.submission.withDelays(job)
