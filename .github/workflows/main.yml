@@ -44,6 +44,10 @@ jobs:
       uses: actions/setup-go@v6
       with:
         go-version-file: go.mod
+        # The build job owns the cache for go.sum (it holds every cross-compiled
+        # target); saving a smaller cache under the same key here would win the
+        # race and leave the build job cold on every run
+        cache: false
 
     # Scaffold binary extensions, build them against the local SDK, and check that the
     # GoReleaser archives match the format which "c8y extensions install" expects
@@ -130,6 +134,19 @@ jobs:
       uses: actions/setup-go@v6
       with:
         go-version-file: go.mod
+        # Not the shared setup-go cache: the build job owns that key (see
+        # test-extensions). This job keeps its own, smaller cache.
+        cache: false
+
+    - name: Go cache (test-offline)
+      uses: actions/cache@v6
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: test-offline-${{ runner.os }}-${{ hashFiles('go.sum') }}
+        restore-keys: |
+          test-offline-${{ runner.os }}-
 
     - name: Install Task
       uses: go-task/setup-task@v1
