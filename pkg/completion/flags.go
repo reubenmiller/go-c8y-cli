@@ -8,6 +8,12 @@ import (
 	"github.com/spf13/pflag"
 )
 
+// AnnotationValidateSet is the flag annotation that records the static
+// validation set of a flag. It lets projectors (PowerShell, docs) read the
+// enum values declaratively without invoking the completion closure. Only set
+// for static sets (WithValidateSet), never for dynamic lookups.
+const AnnotationValidateSet = "c8y:validateSet"
+
 // Option adds flags to a given command
 type Option func(*cobra.Command) *cobra.Command
 
@@ -36,6 +42,11 @@ func WithValidateSet(flagName string, values ...string) Option {
 			}
 			return formattedValues, cobra.ShellCompDirectiveDefault
 		})
+		// Record the set declaratively so projectors (PowerShell/docs) can read
+		// the enum values without calling the completion closure. Ignore the
+		// error: if the flag is not yet declared the annotation is simply
+		// skipped (same tolerance as RegisterFlagCompletionFunc above).
+		_ = cmd.Flags().SetAnnotation(flagName, AnnotationValidateSet, values)
 		return cmd
 	}
 }

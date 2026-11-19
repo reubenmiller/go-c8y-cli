@@ -1,0 +1,42 @@
+// Package firmware wires the `c8y firmware` command and its CRUD subcommands.
+// The subcommands are hand-written v2 c8ystream commands backed by the go-c8y v2
+// Repository.Firmware service, so this group command is itself hand-written
+// rather than generated. The versions and patches subgroups (and their create
+// commands) are attached in pkg/cmd/root/root.go.
+package firmware
+
+import (
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/list"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/spf13/cobra"
+)
+
+type SubCmdFirmware struct {
+	*subcommand.SubCommand
+}
+
+func NewSubCommand(f *cmdutil.Factory) *SubCmdFirmware {
+	ccmd := &SubCmdFirmware{}
+
+	cmd := &cobra.Command{
+		Use:   "firmware",
+		Short: "Cumulocity firmware management",
+		Long:  `Firmware management to create/list/delete packages, versions and patches`,
+	}
+
+	// Subcommands
+	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
+	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
+	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
+	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
+	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
+
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+
+	return ccmd
+}

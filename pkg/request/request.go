@@ -169,16 +169,17 @@ func isInventoryQuery(r *c8y.RequestOptions) bool {
 }
 
 type RequestDetails struct {
-	URL         string            `json:"url,omitempty"`
-	Host        string            `json:"host,omitempty"`
-	PathEncoded string            `json:"pathEncoded,omitempty"`
-	Path        string            `json:"path,omitempty"`
-	Query       string            `json:"query,omitempty"`
-	Method      string            `json:"method,omitempty"`
-	Headers     map[string]string `json:"headers,omitempty"`
-	Body        interface{}       `json:"body,omitempty"`
-	Shell       string            `json:"shell,omitempty"`
-	PowerShell  string            `json:"powershell,omitempty"`
+	URL         string              `json:"url,omitempty"`
+	Host        string              `json:"host,omitempty"`
+	PathEncoded string              `json:"pathEncoded,omitempty"`
+	Path        string              `json:"path,omitempty"`
+	Query       string              `json:"query,omitempty"`
+	QueryParams map[string][]string `json:"queryParams,omitempty"`
+	Method      string              `json:"method,omitempty"`
+	Headers     map[string]string   `json:"headers,omitempty"`
+	Body        interface{}         `json:"body,omitempty"`
+	Shell       string              `json:"shell,omitempty"`
+	PowerShell  string              `json:"powershell,omitempty"`
 }
 
 func (r *RequestHandler) DumpRequest(w io.Writer, req *http.Request) {
@@ -222,6 +223,12 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	// strip headers which are not useful to anyone
 	req.Header.Del("User-Agent")
 	req.Header.Del("X-Application")
+	// resty's v2 transport sets Accept-Encoding ("gzip, deflate") on every
+	// request; v1 relied on http.DefaultTransport adding it transparently at
+	// send time, so it never appeared in the dry-run output. Drop it here so the
+	// rendered request (json/markdown/curl) matches the v1 behaviour. Display
+	// only — the real request is unaffected.
+	req.Header.Del("Accept-Encoding")
 	headers := map[string]string{}
 	for key := range req.Header {
 		headers[key] = r.HideSensitive(r.Client, req.Header.Get(key))
@@ -275,6 +282,18 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 
 	shell, pwsh, dummyFiles, _ := r.GetCurlCommands(requestOptions, req)
 
+	// queryParams is the decoded form of Query as a map, so consumers (e.g. test
+	// assertions, --select) can address a single parameter by name instead of
+	// substring-matching the raw string. It is url.Values (map[string][]string)
+	// so a parameter repeated in the query — "status=ACTIVE&status=ACKNOWLEDGED"
+	// — is preserved as ["ACTIVE","ACKNOWLEDGED"] rather than being collapsed,
+	// which a plain map[string]string could not represent. nil (omitted) when the
+	// request carries no query string.
+	var queryParams map[string][]string
+	if values := req.URL.Query(); len(values) > 0 {
+		queryParams = values
+	}
+
 	details := &RequestDetails{
 		URL:         fullURL,
 		Host:        req.URL.Scheme + "://" + req.URL.Host, // Include host port number
@@ -282,6 +301,7 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 		Method:      req.Method,
 		Headers:     headers,
 		Query:       TryUnescapeURL(req.URL.RawQuery),
+		QueryParams: queryParams,
 		Body:        requestBody,
 		Shell:       shell,
 		PowerShell:  pwsh,
@@ -290,10 +310,17 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	compactJSON := r.Config.CompactJSON()
 
 	if format == "json" {
-		out, err := json.Marshal(details)
-		if err != nil {
+		// Encode without HTML escaping so query strings keep their literal
+		// '&'/'<'/'>' (e.g. "pageSize=1&withTotalPages=true") instead of
+		// & etc. This matches the CLI's JSON output convention, which the
+		// downstream consumers (util show, --select) expect.
+		var buf bytes.Buffer
+		enc := json.NewEncoder(&buf)
+		enc.SetEscapeHTML(false)
+		if err := enc.Encode(details); err != nil {
 			return
 		}
+		out := bytes.TrimRight(buf.Bytes(), "\n")
 		if !compactJSON {
 			out = pretty.Pretty(out)
 		}

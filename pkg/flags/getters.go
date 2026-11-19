@@ -407,6 +407,11 @@ func WithStringValue(opts ...string) GetOption {
 		if err != nil {
 			return dst, value, err
 		}
+		// `_`/`_.path` resolves from the shared input item per iteration so
+		// multiple flags can read the same piped object.
+		if iter, ok := inputIterators.inputRef(value, format); ok {
+			return dst, iter, nil
+		}
 		if value == "" {
 			// don't assign the value anywhere
 			dst = ""
@@ -589,6 +594,17 @@ func WithOverrideValue(opts ...string) GetOption {
 			value = fValue[0]
 			err = nil
 		}
+		// A `-`/`-.path` value reads from the shared input item per iteration
+		// (e.g. `alarms create --device -.custom.id`). Skip it here and let the
+		// paired WithStringValue getter resolve the reference — as the
+		// high-precedence "override" getter, WithOverrideValue would otherwise
+		// write the literal "-.custom.id" and shadow the resolved value (and
+		// binding it here too would duplicate the input value).
+		if inputIterators != nil {
+			if _, ok := inputIterators.inputRef(value, format); ok {
+				return "", "", nil
+			}
+		}
 		if value == "" {
 			// don't assign the value anywhere
 			dst = ""
@@ -633,6 +649,31 @@ func WithStringDefaultValue(defaultValue string, opts ...string) GetOption {
 			return dst, defaultValue, nil
 		}
 		return dst, applyFormatter(format, value), err
+	}
+}
+
+// WithSliceRefValue binds a `-`/`-.path` input reference held by a string or
+// string-slice flag into the body at dst, so a pipe-mapped value (e.g.
+// `alarms create --device -.custom.id`) reaches the body before
+// required-property validation runs. Literal flag values contribute nothing
+// here — they are seeded by WithOverrideValue and, for multi-valued slices,
+// applied per item by c8ystream's Resolver.ApplyOverrideSlice.
+func WithSliceRefValue(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		src, dst, format := UnpackGetterOptions("%s", opts...)
+		if cmd.Flag(src) == nil || inputIterators == nil {
+			return "", nil, nil
+		}
+		values, err := GetFlagStringValues(cmd, src)
+		if err != nil {
+			return dst, nil, err
+		}
+		for _, value := range values {
+			if iter, ok := inputIterators.inputRef(value, format); ok {
+				return dst, iter, nil
+			}
+		}
+		return "", nil, nil
 	}
 }
 
@@ -804,6 +845,25 @@ func NewTimestampFromRelative(encode bool, utc bool, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
+
+		// A `-`/`-.path` value reads the timestamp from the shared input item per
+		// iteration (e.g. `alarms create --time -`), converting the relative value
+		// just like a literal flag would. Mirrors WithStringValue's inputRef
+		// handling, which the timestamp getter previously lacked.
+		if inputIterators != nil && inputIterators.InputCursor != nil {
+			if path, ok := iterator.InputReference(value); ok {
+				return dst, iterator.NewInputRefFuncIterator(inputIterators.InputCursor, path, func(v string) (string, error) {
+					datetime, terr := timestamp.TryGetTimestamp(v, encode, utc)
+					if terr != nil {
+						datetime = v // leave a non-timestamp value untouched
+					}
+					if format != "" {
+						return fmt.Sprintf(format, datetime), nil
+					}
+					return datetime, nil
+				}), nil
+			}
+		}
 
 		if inputIterators != nil {
 			if inputIterators.PipeOptions.Name == src {
@@ -1290,4 +1350,24 @@ type RequestInputIterators struct {
 	Body        *mapbuilder.MapBuilder
 	Query       *QueryTemplate
 	PipeOptions *PipelineOptions
+
+	// InputCursor, when set, enables `_`/`_.path` flag values to resolve from
+	// a single shared input item rather than the legacy single-flag pipe
+	// binding, so several flags can read the same piped item. Set by the
+	// streamer's input source; nil for legacy commands.
+	InputCursor *iterator.InputCursor
+}
+
+// inputRef returns an input-reference iterator for the flag value when an
+// input cursor is active and value is an `_`/`_.path` reference. The second
+// result reports whether the value was an input reference.
+func (r *RequestInputIterators) inputRef(value, format string) (iterator.Iterator, bool) {
+	if r == nil || r.InputCursor == nil {
+		return nil, false
+	}
+	path, ok := iterator.InputReference(value)
+	if !ok {
+		return nil, false
+	}
+	return iterator.NewInputRefIterator(r.InputCursor, path, format), true
 }

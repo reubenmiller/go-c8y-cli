@@ -9,7 +9,9 @@ config:
 tests:
   It installs plugins using a template:
     command: |
-      c8y ui applications plugins install --application cockpit --template "{config:{remotes:{'manualplugin@1.0.0':['Module1','Module2']}}}" --dry --dryFormat json
+      # </dev/null: an empty piped stdin (e.g. from the test runner) binds the pipeline
+      # to --application and yields zero items, so no request would be sent (v1 parity)
+      c8y ui applications plugins install --application cockpit --template "{config:{remotes:{'manualplugin@1.0.0':['Module1','Module2']}}}" --dry --dryFormat json </dev/null
     exit-code: 0
     stdout:
       json:

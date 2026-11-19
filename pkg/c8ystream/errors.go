@@ -1,0 +1,127 @@
+package c8ystream
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+)
+
+// toServerError turns a go-c8y v2 HTTP error into a cmderrors.CommandError that
+// carries the HTTP status code and the mapped exit code, the way the v1 request
+// handler did with NewServerError. Without this, the streaming path surfaced a
+// raw core.Error which the final error handler treated as an unexpected error
+// (always exit 100, status-code-blind), so --silentStatusCodes never matched
+// and the exit code never reflected the actual HTTP status.
+//
+// Non-HTTP errors (resolution failures, validation, etc.) are returned
+// unchanged so the generic handling still applies.
+func (r *Runner) toServerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	// A request that exceeded --timeout surfaces as a context deadline. Map it to
+	// the dedicated timeout exit code (106) and the stable "command timed out"
+	// message, matching v1's NewServerError. The sentinel error is used as Err so
+	// it serialises to "error":{} rather than leaking the wrapped *url.Error.
+	if errors.Is(err, context.DeadlineExceeded) {
+		return cmderrors.CommandError{
+			Message:   "command timed out",
+			ErrorType: cmderrors.ErrTypeCommand,
+			ExitCode:  cmderrors.ExitTimeout,
+			Err:       context.DeadlineExceeded,
+			IO:        r.Factory.IOStreams,
+		}
+	}
+	var apiErr *core.Error
+	if !errors.As(err, &apiErr) {
+		return err
+	}
+	status := apiErr.StatusCode()
+	if status < 100 {
+		// Code is a sentinel (ErrorFromError/String/...), not an HTTP status.
+		return err
+	}
+
+	var body json.RawMessage
+	if apiErr.MessageRaw != "" && json.Valid([]byte(apiErr.MessageRaw)) {
+		body = json.RawMessage(apiErr.MessageRaw)
+	}
+	url := ""
+	if apiErr.Response != nil && apiErr.Response.Request != nil {
+		url = apiErr.Response.Request.URL.Path
+	}
+
+	return cmderrors.CommandError{
+		Message:         apiErr.Message,
+		ErrorType:       cmderrors.ErrTypeServer,
+		StatusCode:      status,
+		ExitCode:        cmderrors.ExitCodeFromStatusCode(status),
+		URL:             url,
+		CumulocityError: body,
+		Err:             err,
+		WithRawMessage:  r.Config.WithError(),
+		IO:              r.Factory.IOStreams,
+	}
+}
+
+// errorDocument converts an item error into the JSON document emitted to stdout
+// under --withError: the status-aware CommandError (errorType, message,
+// statusCode, c8yResponse) marshalled to JSON, so the output template and select
+// stages can shape it like any other document. Non-CommandError errors (which
+// have no structured body) are not emitted.
+//
+// When an output template is active it is applied here: success documents are
+// templated per job by the producer wrapper, which error documents bypass (the
+// collector emits them downstream), so without this the error would reach the
+// output unshaped.
+func (r *Runner) errorDocument(err error) (jsondoc.JSONDoc, bool) {
+	var ce cmderrors.CommandError
+	if !errors.As(r.toServerError(err), &ce) {
+		return jsondoc.Empty(), false
+	}
+	raw, marshalErr := json.Marshal(ce)
+	if marshalErr != nil {
+		return jsondoc.Empty(), false
+	}
+	if r.tmpl != nil {
+		var input any
+		if len(r.tmplInput) > 0 {
+			input = r.tmplInput
+		}
+		r.tmplMu.Lock()
+		reqData, respData := r.tmplRequest, r.tmplResponse
+		r.tmplMu.Unlock()
+		out, tmplErr := r.tmpl.Evaluate(raw, input, reqData, respData, r.tmplFlags)
+		if tmplErr != nil {
+			return jsondoc.Empty(), false
+		}
+		return jsondoc.New(unwrapTemplateString(out)), true
+	}
+	return jsondoc.New(raw), true
+}
+
+// collapseErrors reduces the collected item errors to the single command result
+// error, applying toServerError so the status code/exit code/body are present
+// for the downstream silent-status-code and exit-code handling. A batch with
+// more than one failure reports only the aggregate ("jobs completed with N
+// errors", exit 104) — the individual errors were already logged as they
+// occurred (ErrorCollector.Log), matching the v1 worker output shape.
+func (r *Runner) collapseErrors(errs []error) error {
+	switch len(errs) {
+	case 0:
+		return nil
+	case 1:
+		return r.toServerError(errs[0])
+	default:
+		return cmderrors.NewErrorWithExitCode(
+			cmderrors.ExitCompletedWithErrors,
+			nil,
+			fmt.Sprintf("jobs completed with %d errors", len(errs)),
+		)
+	}
+}

@@ -5,7 +5,6 @@ group:
   description: Cumulocity DataHub Scheduler
   descriptionLong: Cumulocity DataHub Scheduler
   link: https://cumulocity.com/guides/datahub/datahub-overview/
-  skip: true
 
 commands:
   - name: list

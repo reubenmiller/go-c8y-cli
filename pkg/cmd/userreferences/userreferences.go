@@ -1,0 +1,37 @@
+// Package userreferences wires the `c8y userreferences` command group: user
+// group membership — adding a user to a group, removing a user from a group, and
+// listing the users in a group. Every subcommand is a hand-written v2 c8ystream
+// command backed by the typed go-c8y v2 UserGroups.Users service.
+package userreferences
+
+import (
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	cmdAddUserToGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences/addusertogroup"
+	cmdDeleteUserFromGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences/deleteuserfromgroup"
+	cmdListGroupMembership "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences/listgroupmembership"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/spf13/cobra"
+)
+
+type SubCmdUserreferences struct {
+	*subcommand.SubCommand
+}
+
+func NewSubCommand(f *cmdutil.Factory) *SubCmdUserreferences {
+	ccmd := &SubCmdUserreferences{}
+
+	cmd := &cobra.Command{
+		Use:   "userreferences",
+		Short: "Cumulocity user references",
+		Long:  `REST endpoint to interact with Cumulocity user references`,
+	}
+
+	// Subcommands
+	cmd.AddCommand(cmdAddUserToGroup.NewAddUserToGroupCmd(f).GetCommand())
+	cmd.AddCommand(cmdDeleteUserFromGroup.NewDeleteUserFromGroupCmd(f).GetCommand())
+	cmd.AddCommand(cmdListGroupMembership.NewListGroupMembershipCmd(f).GetCommand())
+
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+
+	return ccmd
+}

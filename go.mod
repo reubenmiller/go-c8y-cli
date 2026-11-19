@@ -5,25 +5,32 @@ require (
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/charmbracelet/glamour v1.0.0
+	github.com/cli/browser v1.3.0
 	github.com/cli/safeexec v1.0.1
 	github.com/cpuguy83/go-md2man/v2 v2.0.7
+	github.com/dustin/go-humanize v1.1.0
 	github.com/fatih/color v1.19.0
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/go-jsonnet v0.22.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/gorilla/websocket v1.5.3
+	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/karrick/tparse/v2 v2.8.2
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-colorable v0.1.16
 	github.com/mattn/go-isatty v0.0.24
+	github.com/mattn/go-runewidth v0.0.31
 	github.com/mdp/qrterminal/v3 v3.2.1
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/muesli/termenv v0.16.0
-	github.com/obeattie/ohmyglob v0.0.0-20150811221449-290764208a0d // indirect
 	github.com/olekukonko/tablewriter v1.1.5
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.5.0
 	github.com/reubenmiller/go-c8y v0.38.0
+	github.com/reubenmiller/go-c8y/v2 v2.0.0-20261119064753-3d2e6729d3e0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.1.0
@@ -35,23 +42,10 @@ require (
 	github.com/vbauerster/mpb/v6 v6.0.4
 	go.uber.org/zap v1.28.0
 	golang.org/x/crypto v0.59.0
-	golang.org/x/term v0.48.0
-	gopkg.in/yaml.v3 v3.0.1
-)
-
-require github.com/hashicorp/go-version v1.9.0 // indirect
-
-require (
-	github.com/cli/browser v1.3.0
-	github.com/dustin/go-humanize v1.1.0
-	github.com/golang-jwt/jwt/v5 v5.3.1
-	github.com/hashicorp/go-retryablehttp v0.7.8
-	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/mattn/go-runewidth v0.0.31
-	github.com/modelcontextprotocol/go-sdk v1.8.0
-	github.com/reubenmiller/go-c8y/v2 v2.0.0-20261117105304-37d0690c560d
 	golang.org/x/mod v0.42.0
+	golang.org/x/term v0.48.0
 	golang.org/x/tools v0.52.0
+	gopkg.in/yaml.v3 v3.0.1
 	mvdan.cc/sh/v3 v3.14.1
 )
 
@@ -83,6 +77,7 @@ require (
 	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
+	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
@@ -91,6 +86,7 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/multiformats/go-multistream v0.6.1 // indirect
 	github.com/multiformats/go-varint v0.0.6 // indirect
+	github.com/obeattie/ohmyglob v0.0.0-20150811221449-290764208a0d // indirect
 	github.com/olekukonko/cat v0.0.0-20250911104152-50322a0618f6 // indirect
 	github.com/olekukonko/errors v1.2.0 // indirect
 	github.com/olekukonko/ll v0.1.6 // indirect
@@ -123,9 +119,9 @@ require (
 	golang.org/x/text v0.44.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637 // indirect
-	resty.dev/v3 v3.0.0-beta.6.0.20260128173335-37296c9841e6 // indirect
+	resty.dev/v3 v3.0.0-rc.4 // indirect
 	rsc.io/qr v0.2.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
-go 1.26.0
+go 1.27.0

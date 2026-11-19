@@ -5,18 +5,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/internal/clibuild"
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/docs"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/factory"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/root"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
-	"go.uber.org/zap/zapcore"
 )
 
 func main() {
@@ -44,10 +35,13 @@ func main() {
 		fatal("no dir set")
 	}
 
-	rootCmd := createCmdRoot()
+	rootCmd, err := clibuild.NewRootCommand()
+	if err != nil {
+		fatal(err)
+	}
 	rootCmd.InitDefaultHelpCmd()
 
-	err := os.MkdirAll(*dir, 0755)
+	err = os.MkdirAll(*dir, 0755)
 	if err != nil {
 		fatal(err)
 	}
@@ -93,67 +87,7 @@ func linkHandler(name string, opts ...string) string {
 	return fmt.Sprintf("./%s", strings.TrimSuffix(name, ".md"))
 }
 
-func fatal(msg interface{}) {
+func fatal(msg any) {
 	fmt.Fprintln(os.Stderr, msg)
 	os.Exit(1)
-}
-
-func createCmdRoot() *root.CmdRoot {
-	var client *c8y.Client
-	var dataView *dataview.DataView
-	var consoleHandler *console.Console
-	var logHandler *logger.Logger
-	var activityLoggerHandler *activitylogger.ActivityLogger
-	var configHandler = config.NewConfig(viper.GetViper())
-
-	// init logger
-	logHandler = logger.NewLogger("", logger.Options{
-		Level: zapcore.WarnLevel,
-		Debug: false,
-	})
-
-	if _, err := configHandler.ReadConfigFiles(nil); err != nil {
-		logHandler.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
-	}
-
-	// cmd factory
-	configFunc := func() (*config.Config, error) {
-		if configHandler == nil {
-			return nil, fmt.Errorf("config is missing")
-		}
-		return configHandler, nil
-	}
-	clientFunc := func() (*c8y.Client, error) {
-		if client == nil {
-			return nil, fmt.Errorf("client is missing")
-		}
-		return client, nil
-	}
-	loggerFunc := func() (*logger.Logger, error) {
-		if logHandler == nil {
-			return nil, fmt.Errorf("logger is missing")
-		}
-		return logHandler, nil
-	}
-	activityLoggerFunc := func() (*activitylogger.ActivityLogger, error) {
-		if activityLoggerHandler == nil {
-			return nil, fmt.Errorf("activityLogger is missing")
-		}
-		return activityLoggerHandler, nil
-	}
-	dataViewFunc := func() (*dataview.DataView, error) {
-		if dataView == nil {
-			return nil, fmt.Errorf("dataView is missing")
-		}
-		return dataView, nil
-	}
-	consoleFunc := func() (*console.Console, error) {
-		if consoleHandler == nil {
-			return nil, fmt.Errorf("console is missing")
-		}
-		return consoleHandler, nil
-	}
-	cmdFactory := factory.New("", "", configFunc, clientFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
-
-	return root.NewCmdRoot(cmdFactory, "", "")
 }

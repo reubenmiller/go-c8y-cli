@@ -81,7 +81,11 @@ type CommandError struct {
 	Err             error                `json:"error,omitempty"`
 	Processed       bool                 `json:"-"`
 	WithRawMessage  bool                 `json:"-"`
-	IO              *iostreams.IOStreams `json:"-"`
+	// OutputEmitted marks that the error body was already written to stdout as a
+	// document by the command's output pipeline (the v2 --withError path), so the
+	// post-command handler must not write it a second time.
+	OutputEmitted bool                 `json:"-"`
+	IO            *iostreams.IOStreams `json:"-"`
 }
 
 func (c CommandError) Unwrap() error {
@@ -262,6 +266,18 @@ var httpStatusCodeToExitCode = map[int]ExitCode{
 	506: ExitVariantAlsoNegotiates506,
 	507: ExitInsufficientStorage507,
 	508: ExitLoopDetected508,
+}
+
+// ExitCodeFromStatusCode maps an HTTP status code to the corresponding CLI
+// exit code, returning ExitUnknownError when the status is not specifically
+// mapped. Exposed so callers that already hold the status (e.g. the v2
+// streaming path, whose error type carries the code directly rather than a
+// *c8y.Response) can build a CommandError with the right exit code.
+func ExitCodeFromStatusCode(statusCode int) ExitCode {
+	if v, ok := httpStatusCodeToExitCode[statusCode]; ok {
+		return v
+	}
+	return ExitUnknownError
 }
 
 // NewServerError creates a server error from a Cumulocity response

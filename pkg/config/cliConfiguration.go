@@ -100,6 +100,9 @@ const (
 	// SettingsIncludeAll include all available results
 	SettingsIncludeAll = "settings.defaults.includeAll"
 
+	// SettingsPaginationStrategy controls how results are iterated (auto, offset, id, time)
+	SettingsPaginationStrategy = "settings.defaults.paginationStrategy"
+
 	// SettingsIncludeAllDelayMS delay in milliseconds between retrieving the next page when using include all
 	SettingsIncludeAllDelayMS = "settings.includeAll.delayMS"
 
@@ -191,6 +194,10 @@ const (
 
 	// SettingsConfirmText custom confirmation text to use to prompt the user of an action
 	SettingsConfirmText = "settings.defaults.confirmText"
+
+	// SettingsProcessingMode default Cumulocity processing mode applied to
+	// requests when the --processingMode flag is not given
+	SettingsProcessingMode = "settings.defaults.processingMode"
 
 	// SettingsJSONFlatten flatten nested json using dot notation
 	SettingsJSONFlatten = "settings.defaults.flatten"
@@ -561,6 +568,7 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsStorageStorePassword, true),
 		WithBindEnv(SettingsStorageStoreToken, true),
 		WithBindEnv(SettingsModeConfirmation, "PUT POST DELETE"),
+		WithBindEnv(SettingsProcessingMode, nil),
 
 		WithBindEnv(SettingsEncryptionEnabled, true),
 		WithBindEnv(SettingsActivityLogEnabled, true),
@@ -1249,6 +1257,23 @@ func (c *Config) IncludeAll() bool {
 	return c.viper.GetBool(SettingsIncludeAll)
 }
 
+// PaginationStrategy returns the configured pagination strategy used when
+// iterating results: "" (auto), "offset", "id" or "time". Empty means the SDK
+// picks the optimal strategy per entity.
+func (c *Config) PaginationStrategy() string {
+	return c.viper.GetString(SettingsPaginationStrategy)
+}
+
+func (c *Config) MaxItems() int64 {
+	if c.IncludeAll() {
+		return 0
+	}
+	if totalPages := c.GetTotalPages(); totalPages > 0 {
+		return totalPages * int64(c.GetPageSize())
+	}
+	return int64(c.GetPageSize())
+}
+
 // GetIncludeAllDelay include all delay in milliseconds
 func (c *Config) GetIncludeAllDelay() int64 {
 	return c.viper.GetInt64(SettingsIncludeAllDelayMS)
@@ -1512,6 +1537,13 @@ func (c *Config) FlattenJSON() bool {
 // ConfirmText custom confirmation text to use to prompt the user of an action
 func (c *Config) ConfirmText() string {
 	return c.viper.GetString(SettingsConfirmText)
+}
+
+// GetProcessingMode returns the session/default Cumulocity processing mode
+// (uppercased), applied to requests when the --processingMode flag is not
+// given. Empty when no default is configured.
+func (c *Config) GetProcessingMode() string {
+	return strings.ToUpper(c.viper.GetString(SettingsProcessingMode))
 }
 
 // StoreToken controls if the tokens are saved to the session file or not
@@ -2036,7 +2068,9 @@ func (c *Config) GetJSONSelect() []string {
 		item = strings.Trim(item, "[]")
 		item = strings.Trim(item, "\"")
 		if item != "" {
-			allitems = append(allitems, item)
+			for v := range strings.SplitSeq(item, ",") {
+				allitems = append(allitems, strings.TrimSpace(v))
+			}
 		}
 	}
 

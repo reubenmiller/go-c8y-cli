@@ -121,6 +121,13 @@ func Generate(specDir string) ([]GeneratedFile, error) {
 		all = append(all, files...)
 	}
 
+	return reduceFiles(all), nil
+}
+
+// reduceFiles collapses a sequence of file operations to the final state per
+// path: when several operations target the same RelPath, the last one wins
+// (matching the sequential file writes of the original script).
+func reduceFiles(all []GeneratedFile) []GeneratedFile {
 	last := map[string]int{}
 	for i, file := range all {
 		last[file.RelPath] = i
@@ -131,5 +138,5 @@ func Generate(specDir string) ([]GeneratedFile, error) {
 			reduced = append(reduced, file)
 		}
 	}
-	return reduced, nil
+	return reduced
 }

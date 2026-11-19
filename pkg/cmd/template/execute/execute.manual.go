@@ -1,17 +1,21 @@
+// Prototype of a v2-based local (non-API) command: the jsonnet template is
+// evaluated per input item entirely client-side, and the results flow through
+// the same output pipeline as API commands, so --filter, --select,
+// --outputTemplate and --outputFile behave identically.
 package execute
 
 import (
 	"bytes"
+	"context"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -31,23 +35,16 @@ func NewCmdExecute(f *cmdutil.Factory) *CmdExecute {
 		Short: "Execute a jsonnet template",
 		Long:  `Execute a jsonnet template and return the output. Useful when creating new templates`,
 		Example: heredoc.Doc(`
-Example 1:
-$ c8y template execute --template ./mytemplate.jsonnet
-
+$ c8y template Execute --template ./mytemplate.jsonnet
 Verify a jsonnet template and show the output after it is evaluated
 
-Example 2:
-$ c8y template execute --template ./mytemplate.jsonnet --templateVars "name=testme" --data "name=myDeviceName"
-
-Verify a jsonnet template and specify input data to be used as the input when evaluating the template
-
-Example 3:
-$ echo '{"name": "external_source"}' | c8y template execute --template "{name: input.value.name, nestedValues: input.value}"
-$ => {"name":"external_source","nestedValues":{"name":"external_source"}}
-
+$ echo '{"name": "external_source"}' | c8y template Execute --template "{name: input.value.name}"
 Pass external json data into the template, and reference it via the "input.value" variable
+
+$ c8y devices list | c8y template Execute --template "{id: input.value.id}" --select id --outputFile ids.json
+Evaluate a template per piped device and tee the results to a file
 		`),
-		RunE: ccmd.newTemplate,
+		RunE: ccmd.RunE,
 	}
 
 	cmdutil.DisableEncryptionCheck(cmd)
@@ -68,6 +65,47 @@ Pass external json data into the template, and reference it via the "input.value
 	return ccmd
 }
 
+func (n *CmdExecute) RunE(cmd *cobra.Command, args []string) error {
+	if !cmd.Flags().Changed(flags.FlagDataTemplateName) {
+		return &flags.ParameterError{
+			Name: flags.FlagDataTemplateName,
+			Err:  flags.ErrParameterMissing,
+		}
+	}
+
+	r, err := c8ystream.NewRunner(cmd, n.factory)
+	if err != nil {
+		return err
+	}
+	if err := r.Input(); err != nil {
+		return err
+	}
+
+	// body: the jsonnet template plus any bound pipeline input
+	err = r.Body(
+		flags.WithOverrideValue("input", "input"),
+		flags.WithDataFlagValue(),
+		cmdutil.WithTemplateValue(n.factory),
+		flags.WithTemplateVariablesValue(),
+		flags.WithStringValue("input", "input", ""),
+	)
+	if err != nil {
+		return err
+	}
+
+	// No API client: the template result is yielded as a document directly,
+	// so everything downstream is shared with API commands.
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		return func(context.Context) output.Seq {
+			return c8ystream.FromDocs(jsondoc.New(formatOutput(body)))
+		}, nil
+	})
+}
+
 func formatOutput(response []byte) []byte {
 	// Strip trailing newline (if present)
 	if bytes.HasSuffix(response, []byte("\n")) {
@@ -81,60 +119,4 @@ func formatOutput(response []byte) []byte {
 		}
 	}
 	return response
-}
-
-func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
-
-	if !cmd.Flags().Changed(flags.FlagDataTemplateName) {
-		return &flags.ParameterError{
-			Name: flags.FlagDataTemplateName,
-			Err:  flags.ErrParameterMissing,
-		}
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-		flags.WithOverrideValue("input", "input"),
-		flags.WithDataFlagValue(),
-		cmdutil.WithTemplateValue(n.factory),
-		flags.WithTemplateVariablesValue(),
-		flags.WithStringValue("input", "input", ""),
-	)
-
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	var iter iterator.Iterator
-	if inputIterators.Total > 0 {
-		iter = mapbuilder.NewMapBuilderIterator(body)
-	} else {
-		iter = iterator.NewBoundIterator(mapbuilder.NewMapBuilderIterator(body), 1)
-	}
-
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return err
-	}
-	commonOptions.DisableResultPropertyDetection()
-
-	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
-		output := formatOutput(j.Value.([]byte))
-		err := n.factory.WriteOutput(output, cmdutil.OutputContext{
-			Input: j.Input,
-		}, &commonOptions)
-		return nil, err
-	}, nil)
 }

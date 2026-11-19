@@ -13,6 +13,11 @@ type NumberFormatter interface {
 type RawNumber struct{}
 
 func (rawNum *RawNumber) Display(v float64, raw string, unit string) string {
+	// "none" formatting shows the number exactly as it appeared in the source
+	// document: 0.000000000001 stays 0.000000000001, not 1e-12. raw is the
+	// original JSON token (node.Raw), so re-marshalling the parsed float — which
+	// would switch large/small magnitudes to scientific notation — must be
+	// avoided.
 	return raw
 }
 

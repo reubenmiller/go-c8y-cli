@@ -3,8 +3,7 @@
     "name": "datahub/users",
     "description": "Cumulocity DataHub Users",
     "descriptionLong": "Cumulocity DataHub Users",
-    "link": "https://cumulocity.com/guides/datahub/datahub-overview/",
-    "skip": true
+    "link": "https://cumulocity.com/guides/datahub/datahub-overview/"
   },
   "commands": [
     {
