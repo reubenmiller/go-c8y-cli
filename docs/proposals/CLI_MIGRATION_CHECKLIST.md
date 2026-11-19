@@ -1,5 +1,11 @@
 # CLI service migration — handoff checklist
 
+> **Superseded.** The command port is finished (no `*.auto.go` left). The
+> current plan, and what has been done on the `v3` branch, is in
+> [`V2_ADOPTION_ASSESSMENT.md`](V2_ADOPTION_ASSESSMENT.md). The recipe below
+> describes the old command shape (`Submit`, `ListCall`, pagination literals),
+> which the guardrail tests in `internal/guardrails` now reject.
+
 Goal: migrate go-c8y-cli commands from spec-generated `*.auto.go` to hand-written
 `c8ystream.Runner` commands against the **go-c8y v2 SDK**, carrying the
 annotations that let the tree project to PowerShell/docs.

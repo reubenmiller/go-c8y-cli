@@ -5,6 +5,7 @@
 package list
 
 import (
+	"context"
 	"strconv"
 	"strings"
 
@@ -16,7 +17,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/applications"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 )
 
@@ -102,13 +102,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
 
-	rawOutput := r.Config.RawOutput()
-	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
 	hasVersionsChanged := cmd.Flags().Changed("hasVersions")
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
@@ -125,14 +123,9 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		if hasVersionsChanged {
 			opt.HasVersions = strconv.FormatBool(in.Bool("hasVersions"))
 		}
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-			Strategy:          paginationStrategy,
-		}
-		return c8ystream.ListCall(rawOutput, opt, client.Applications.ListAll), nil
+		opt.PaginationOptions = paging
+		return func(ctx context.Context) any {
+			return client.Applications.ListAll(ctx, opt)
+		}, nil
 	})
 }

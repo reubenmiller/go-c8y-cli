@@ -85,7 +85,7 @@ func (n *ListApplicationBinariesCmd) RunE(cmd *cobra.Command, args []string) err
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		ref := c8ystream.NameOrID(in.String("id"))
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			return output.FromIterator(client.Applications.ListBinaries(ctx, ref).Items())
 		}, nil
 	})

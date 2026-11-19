@@ -94,7 +94,7 @@ func (n *GetStatusCmd) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, err
 		}
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			return output.FromIterator(client.Microservices.GetStatus(ctx, id).Items())
 		}, nil
 	})

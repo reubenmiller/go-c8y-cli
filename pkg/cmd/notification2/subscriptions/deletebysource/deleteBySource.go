@@ -13,10 +13,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/notification2"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -93,10 +90,8 @@ func (n *DeleteBySourceCmd) RunE(cmd *cobra.Command, args []string) error {
 		if device := in.String("device"); device != "" {
 			opt.Source = c8ystream.NameOrID(device)
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.SubmitStatus(ctx, func(ctx context.Context) op.Result[core.NoContent] {
-				return client.Notification2.DeleteBySource(ctx, opt)
-			})
+		return func(ctx context.Context) any {
+			return client.Notification2.DeleteBySource(ctx, opt)
 		}, nil
 	})
 }

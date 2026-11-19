@@ -17,10 +17,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -116,10 +112,6 @@ func (n *UninstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	resolveDevice := func(ctx context.Context, ref string) (string, error) {
-		return client.Operations.DeviceResolver.ResolveID(ctx, managedobjects.DeviceRef(ref), nil)
-	}
-
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		device := in.String("device")
 		if device == "" {
@@ -132,18 +124,13 @@ func (n *UninstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		if body, err = sjson.SetBytes(body, "deviceId", device); err != nil {
 			return nil, err
 		}
-		if body, err = in.ResolveBodyRef(body, "deviceId", resolveDevice); err != nil {
-			return nil, err
-		}
 
 		if err := requireBodyKeys(body, "deviceId", "c8y_SoftwareUpdate.0.name", "c8y_SoftwareUpdate.0.action"); err != nil {
 			return nil, err
 		}
 
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.Operation] {
-				return client.Operations.CreateRaw(ctx, body)
-			})
+		return func(ctx context.Context) any {
+			return client.Operations.CreateRaw(ctx, body)
 		}, nil
 	})
 }

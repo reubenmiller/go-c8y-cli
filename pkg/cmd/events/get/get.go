@@ -11,7 +11,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -78,8 +77,8 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		id := in.String("id")
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.FromResult(client.Events.Get(ctx, id))
+		return func(ctx context.Context) any {
+			return client.Events.Get(ctx, id)
 		}, nil
 	})
 }

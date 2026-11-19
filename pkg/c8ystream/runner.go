@@ -84,7 +84,14 @@ func (g *gunzipReadCloser) Close() error {
 // Call is one service invocation. It is built (with its arguments already
 // resolved) on the serial input-draining goroutine and executed later,
 // possibly on a worker pool, so it must not read the runner's per-item state.
-type Call func(ctx context.Context) output.Seq
+//
+// A Call returns whatever the service method returned: an op.Result, a
+// pagination iterator (any op.DocumentSource), or an output.Seq for local
+// documents. The Runner turns it into documents in one place (see adapt), so a
+// command never chooses how to confirm, page or render its result:
+//
+//	return func(ctx context.Context) any { return client.Events.Delete(ctx, id) }, nil
+type Call func(ctx context.Context) any
 
 // Build maps the resolved values of one input item to the service call that
 // uses them. Resolution (the Resolver methods) happens while Build runs — on
@@ -477,6 +484,20 @@ func (r *Runner) Run(build Build) error {
 	// prompt counter and "all" answers span the whole batch.
 	r.submission = r.newSubmission()
 	ctx = withSubmission(ctx, r.submission)
+	if r.submission != nil && r.submission.confirmActive() {
+		// Confirmation is a property of the request, not of the command: the SDK
+		// asks the approver for every request that changes data, after names
+		// are resolved and right before it is sent. No command can skip it.
+		ctx = apiv2.WithRequestApprover(ctx, func(req *http.Request) (bool, error) {
+			ok, err := r.submission.confirm(req)
+			if err != nil {
+				// Mark the prompt's own error so adapt can report it as is,
+				// without the transport/HTTP wrapping it picks up on the way.
+				return false, approvalError{err}
+			}
+			return ok, nil
+		})
+	}
 
 	r.runCtx = ctx
 
@@ -614,7 +635,9 @@ func (r *Runner) producer(build Build) Producer {
 			}), nil
 		}
 		job := Job(func(ctx context.Context) output.Seq {
-			return call(ctx)
+			// One approval scope per input item: an item whose call sends
+			// several requests (upload then update, ...) is confirmed once.
+			return r.adapt(call(apiv2.WithApprovalScope(ctx)))
 		})
 		if r.submission != nil {
 			job = r.submission.withDelays(job)

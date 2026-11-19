@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -82,7 +81,7 @@ func (n *CmdShow) RunE(cmd *cobra.Command, args []string) error {
 	// Non-object lines are skipped (matching the v1 behaviour).
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		line := in.Input()
-		return func(context.Context) output.Seq {
+		return func(context.Context) any {
 			if !jsonUtilities.IsJSONObject(line) {
 				return c8ystream.FromDocs()
 			}

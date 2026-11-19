@@ -16,7 +16,6 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/measurements"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/model"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -102,8 +101,8 @@ func (n *GetSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 		if device := in.String("device"); device != "" {
 			opt.Source = managedobjects.DeviceRef(c8ystream.NameOrID(device))
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.FromResult(client.Measurements.ListSeries(ctx, opt))
+		return func(ctx context.Context) any {
+			return client.Measurements.ListSeries(ctx, opt)
 		}, nil
 	})
 }

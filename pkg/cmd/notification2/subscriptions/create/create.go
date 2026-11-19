@@ -16,9 +16,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
 )
@@ -155,10 +152,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		if body, err = in.ResolveSourceID(body, resolveDevice); err != nil {
 			return nil, err
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.Notification2Subscription] {
-				return client.Notification2.CreateRaw(ctx, body)
-			})
+		return func(ctx context.Context) any {
+			return client.Notification2.CreateRaw(ctx, body)
 		}, nil
 	})
 }

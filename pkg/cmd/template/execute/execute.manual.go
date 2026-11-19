@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -100,7 +99,7 @@ func (n *CmdExecute) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, err
 		}
-		return func(context.Context) output.Seq {
+		return func(context.Context) any {
 			return c8ystream.FromDocs(jsondoc.New(formatOutput(body)))
 		}, nil
 	})

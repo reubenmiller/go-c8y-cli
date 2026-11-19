@@ -83,7 +83,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		key := in.String("key")
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			return output.FromIterator(client.Features.Tenants.List(ctx, key).Items())
 		}, nil
 	})

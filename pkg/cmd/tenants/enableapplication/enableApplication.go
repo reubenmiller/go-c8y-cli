@@ -17,9 +17,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
 )
@@ -129,10 +126,8 @@ func (n *EnableApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 		if tenant == "" {
 			tenant = n.factory.GetTenant()
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.ApplicationReference] {
-				return client.Tenants.SubscribeApplication(ctx, tenant, body)
-			})
+		return func(ctx context.Context) any {
+			return client.Tenants.SubscribeApplication(ctx, tenant, body)
 		}, nil
 	})
 }

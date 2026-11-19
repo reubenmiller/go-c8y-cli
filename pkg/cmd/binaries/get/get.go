@@ -17,7 +17,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -97,7 +96,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		id := in.String("id")
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			return func(yield func(jsondoc.JSONDoc, error) bool) {
 				res := client.Binaries.Get(ctx, id)
 				if res.Err != nil {

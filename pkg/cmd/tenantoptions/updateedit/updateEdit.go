@@ -13,9 +13,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants/tenantoptions"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -93,10 +90,8 @@ func (n *UpdateEditCmd) RunE(cmd *cobra.Command, args []string) error {
 			Key:      in.String("key"),
 			Editable: in.String("editable") == "true",
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.TenantOption] {
-				return client.Tenants.Options.UpdateEditableFlag(ctx, opt)
-			})
+		return func(ctx context.Context) any {
+			return client.Tenants.Options.UpdateEditableFlag(ctx, opt)
 		}, nil
 	})
 }

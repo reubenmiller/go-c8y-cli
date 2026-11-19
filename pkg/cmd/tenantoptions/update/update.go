@@ -13,9 +13,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants/tenantoptions"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -105,10 +102,8 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 			Key:  decodePathSegment(in.String("key")),
 			Body: body,
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.TenantOption] {
-				return client.Tenants.Options.Update(ctx, opt)
-			})
+		return func(ctx context.Context) any {
+			return client.Tenants.Options.Update(ctx, opt)
 		}, nil
 	})
 }

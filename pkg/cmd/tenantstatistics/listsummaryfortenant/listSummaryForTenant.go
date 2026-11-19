@@ -11,7 +11,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants/usagestatistics"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -77,8 +76,8 @@ func (n *ListSummaryForTenantCmd) RunE(cmd *cobra.Command, args []string) error 
 			DateFrom: in.TimeValue("dateFrom"),
 			DateTo:   in.TimeValue("dateTo"),
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.FromResult(client.Tenants.UsageStatistics.ListSummary(ctx, opt))
+		return func(ctx context.Context) any {
+			return client.Tenants.UsageStatistics.ListSummary(ctx, opt)
 		}, nil
 	})
 }

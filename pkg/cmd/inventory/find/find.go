@@ -5,6 +5,7 @@
 package find
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 
@@ -17,7 +18,6 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/model"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 )
 
@@ -119,16 +119,13 @@ func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
-	rawOutput := r.Config.RawOutput()
 
 	queryTemplate := cmd.Flag("queryTemplate").Value.String()
 	orderBy := cmd.Flag("orderBy").Value.String()
-
-	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		q := model.NewInventoryQuery()
@@ -185,15 +182,10 @@ func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 		opt.WithGroups = in.Bool("withGroups")
 		opt.WithParents = in.Bool("withParents")
 		opt.WithLatestValues = in.Bool("withLatestValues")
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-			Strategy:          paginationStrategy,
-		}
-		return c8ystream.ListCall(rawOutput, opt, client.ManagedObjects.ListAll), nil
+		opt.PaginationOptions = paging
+		return func(ctx context.Context) any {
+			return client.ManagedObjects.ListAll(ctx, opt)
+		}, nil
 	})
 }
 

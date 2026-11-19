@@ -7,7 +7,6 @@ package create
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
@@ -18,9 +17,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/firmware/firmwareversions"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -122,10 +118,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		if file != "" {
 			opt.File = firmwareversions.UploadFileOptions{FilePath: file}
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.SubmitUpload(ctx, http.MethodPost, fwID, func(ctx context.Context) op.Result[jsonmodels.FirmwareVersion] {
-				return client.Repository.Firmware.Versions.Create(ctx, fwID, opt)
-			})
+		return func(ctx context.Context) any {
+			return client.Repository.Firmware.Versions.Create(ctx, fwID, opt)
 		}, nil
 	})
 }

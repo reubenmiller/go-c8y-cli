@@ -90,7 +90,7 @@ func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 				},
 			},
 		}
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			return output.FromIterator(client.Identity.Search(ctx, opts).Items())
 		}, nil
 	})

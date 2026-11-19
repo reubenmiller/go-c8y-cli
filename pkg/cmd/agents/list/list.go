@@ -6,6 +6,7 @@
 package list
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -118,7 +119,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
@@ -126,7 +127,6 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	queryTemplate := cmd.Flag("queryTemplate").Value.String()
 	orderBy := cmd.Flag("orderBy").Value.String()
 
-	rawOutput := r.Config.RawOutput()
 	includeAll := r.Config.IncludeAll()
 
 	// Pagination strategy mirrors devices list: auto by default; a full walk
@@ -143,6 +143,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if paginationStrategy == pagination.StrategyIDKeyset {
 		orderByValue = ""
 	}
+
+	paging.Strategy = paginationStrategy
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		q := model.NewInventoryQuery()
@@ -188,15 +190,10 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		opt.WithChildrenCount = in.Bool("withChildrenCount")
 		opt.WithParents = in.Bool("withParents")
 		opt.WithLatestValues = in.Bool("withLatestValues")
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-			Strategy:          paginationStrategy,
-		}
-		return c8ystream.ListCall(rawOutput, opt, client.Agents.ListAll), nil
+		opt.PaginationOptions = paging
+		return func(ctx context.Context) any {
+			return client.Agents.ListAll(ctx, opt)
+		}, nil
 	})
 }
 

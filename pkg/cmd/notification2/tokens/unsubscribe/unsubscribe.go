@@ -10,10 +10,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/notification2"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -83,10 +79,8 @@ func (n *UnsubscribeCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		token := in.String("token")
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.SubmitValue(ctx, apiv2.IsDryRun(ctx), func(ctx context.Context) op.Result[notification2.UnsubscribeResponse] {
-				return client.Notification2.UnsubscribeSubscriber(ctx, token)
-			})
+		return func(ctx context.Context) any {
+			return client.Notification2.UnsubscribeSubscriber(ctx, token)
 		}, nil
 	})
 }

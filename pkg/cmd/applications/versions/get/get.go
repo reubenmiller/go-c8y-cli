@@ -16,7 +16,6 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -96,7 +95,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		version := in.String("version")
 		tag := in.String("tag")
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			var res op.Result[jsonmodels.ApplicationVersion]
 			if tag != "" {
 				res = client.ApplicationVersions.ListByTag(ctx, appID, tag)
@@ -106,7 +105,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 			// The SDK requests the single-version representation (the version/tag
 			// filter only works with that Accept header), so this renders exactly
 			// the matched version object — selectable via --select version, like v1.
-			return c8ystream.FromResult(res)
+			return res
 		}, nil
 	})
 }

@@ -11,9 +11,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants/tenantoptions"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -82,8 +80,8 @@ func (n *GetForCategoryCmd) RunE(cmd *cobra.Command, args []string) error {
 		opt := tenantoptions.ListByCategoryOptions{
 			Category: in.String("category"),
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.FromJSONValue(client.Tenants.Options.ListByCategory(ctx, opt), apiv2.IsDryRun(ctx))
+		return func(ctx context.Context) any {
+			return client.Tenants.Options.ListByCategory(ctx, opt)
 		}, nil
 	})
 }

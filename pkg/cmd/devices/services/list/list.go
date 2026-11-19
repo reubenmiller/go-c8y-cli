@@ -99,11 +99,10 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
-	rawOutput := r.Config.RawOutput()
 
 	orderBy := cmd.Flag("orderBy").Value.String()
 
@@ -124,17 +123,13 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		q.AddOrderBy(orderBy)
 
 		opt := childadditions.ListOptions{Query: q.Build()}
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-		}
+		opt.PaginationOptions = paging
 
 		listAll := func(ctx context.Context, o childadditions.ListOptions) *pagination.Iterator[jsonmodels.ManagedObject] {
 			return client.ManagedObjects.ChildAdditions.ListAll(ctx, parentID, o)
 		}
-		return c8ystream.ListCall(rawOutput, opt, listAll), nil
+		return func(ctx context.Context) any {
+			return listAll(ctx, opt)
+		}, nil
 	})
 }

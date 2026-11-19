@@ -88,11 +88,10 @@ func (n *ListChildrenCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
-	rawOutput := r.Config.RawOutput()
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		parentID, err := client.ManagedObjects.ResolveID(in.ResolveContext(), c8ystream.NameOrID(in.String("device")), nil)
@@ -102,17 +101,13 @@ func (n *ListChildrenCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		opt := childdevices.ListOptions{}
 		opt.WithChildren = in.Bool("withChildren")
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-		}
+		opt.PaginationOptions = paging
 
 		listAll := func(ctx context.Context, o childdevices.ListOptions) *pagination.Iterator[jsonmodels.ManagedObject] {
 			return client.ManagedObjects.ChildDevices.ListAll(ctx, parentID, o)
 		}
-		return c8ystream.ListCall(rawOutput, opt, listAll), nil
+		return func(ctx context.Context) any {
+			return listAll(ctx, opt)
+		}, nil
 	})
 }

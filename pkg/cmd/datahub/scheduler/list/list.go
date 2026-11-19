@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/datahub"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -97,8 +96,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			NextOffset: nextOffset,
 			Limit:      common.PageSize,
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.FromResult(client.DataHub.ListLatestJobs(ctx, opt))
+		return func(ctx context.Context) any {
+			return client.DataHub.ListLatestJobs(ctx, opt)
 		}, nil
 	})
 }

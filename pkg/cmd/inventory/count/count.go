@@ -13,9 +13,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -121,8 +119,8 @@ func (n *CountCmd) RunE(cmd *cobra.Command, args []string) error {
 			ChildAssetID:    in.String("childAssetId"),
 			ChildDeviceID:   childDeviceID,
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.FromJSONValue(client.ManagedObjects.Count(ctx, opt), apiv2.IsDryRun(ctx))
+		return func(ctx context.Context) any {
+			return client.ManagedObjects.Count(ctx, opt)
 		}, nil
 	})
 }

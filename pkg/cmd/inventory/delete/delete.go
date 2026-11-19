@@ -11,10 +11,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -95,10 +92,8 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 			WithDeviceUser: in.Bool("withDeviceUser"),
 		}
 		ref := c8ystream.NameOrID(in.String("id"))
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.SubmitStatus(ctx, func(ctx context.Context) op.Result[core.NoContent] {
-				return client.ManagedObjects.Delete(ctx, ref, opt)
-			})
+		return func(ctx context.Context) any {
+			return client.ManagedObjects.Delete(ctx, ref, opt)
 		}, nil
 	})
 }

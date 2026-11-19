@@ -27,10 +27,10 @@ func ListCall[T jsondoc.Unwrapper, O any](
 	opt O,
 	all func(context.Context, O) *pagination.Iterator[T],
 ) Call {
-	return func(ctx context.Context) output.Seq {
+	return func(ctx context.Context) any {
 		it := all(ctx, opt)
 		if raw {
-			return output.FromIterator(it.Pages())
+			return output.Seq(it.Pages())
 		}
 		return output.FromIterator(it.Items())
 	}

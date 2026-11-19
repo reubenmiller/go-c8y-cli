@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -102,8 +101,8 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 		childID := childref.First(in.StringSlice("child"))
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.FromResult(svc.Get(ctx, parentID, childID))
+		return func(ctx context.Context) any {
+			return svc.Get(ctx, parentID, childID)
 		}, nil
 	})
 }

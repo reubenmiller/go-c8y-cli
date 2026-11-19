@@ -18,9 +18,6 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	roleusers "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/userroles/users"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
 )
@@ -135,10 +132,8 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 			TenantID: tenant,
 			UserID:   user,
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.RoleReference] {
-				return client.UserRoles.Users.AssignRole(apiv2.WithTenant(ctx, tenant), opt, body)
-			})
+		return func(ctx context.Context) any {
+			return client.UserRoles.Users.AssignRole(apiv2.WithTenant(ctx, tenant), opt, body)
 		}, nil
 	})
 }

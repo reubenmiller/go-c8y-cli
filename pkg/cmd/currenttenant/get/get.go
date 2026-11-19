@@ -12,7 +12,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants/currenttenant"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -77,8 +76,8 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		opt := currenttenant.GetOptions{
 			WithParent: in.Bool("withParent"),
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.FromResult(client.Tenants.Current.Get(ctx, opt))
+		return func(ctx context.Context) any {
+			return client.Tenants.Current.Get(ctx, opt)
 		}, nil
 	})
 }

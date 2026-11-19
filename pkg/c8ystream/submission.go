@@ -13,7 +13,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
-	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
@@ -92,17 +91,6 @@ func (s *submission) confirmActive() bool {
 // hasDelays reports whether any inter-request delay is configured.
 func (s *submission) hasDelays() bool {
 	return s.delay > 0 || s.delayBefore > 0
-}
-
-// prepareContext returns a context that makes the next service call build and
-// return its prepared *http.Request without sending it (deferred execution).
-// A no-op dry-run handler is attached so the transport's dry-run path stays
-// silent during this prepare-only round (the real --dry handler, when set,
-// already lives on the run context and confirmation is disabled under --dry).
-func (s *submission) prepareContext(ctx context.Context) context.Context {
-	ctx = apiv2.WithDeferredExecution(ctx, true)
-	ctx = apiv2.WithDryRunHandler(ctx, func(*http.Request) {})
-	return ctx
 }
 
 // confirm prompts for the prepared request and reports whether to proceed. It
@@ -213,99 +201,35 @@ func sleep(ctx context.Context, d time.Duration) bool {
 	}
 }
 
-// Submit runs one single-result service call with the confirmation lifecycle.
-// When confirmation is inactive it is the plain FromResult fast path. When
-// active it prepares the request (deferred execution, no send), prompts
-// serially, and only then executes for real — so the mutating request is never
-// sent before the user agrees.
+// Submit runs one single-result service call and renders its result.
+//
+// Deprecated: return the service result from the Call instead
+// (`return client.X.Create(ctx, body)`). Confirmation now happens in the SDK
+// transport through the Runner's request approver, for every request.
 func Submit[T jsondoc.Unwrapper](ctx context.Context, call func(context.Context) op.Result[T]) output.Seq {
-	s := submissionFrom(ctx)
-	if s == nil || !s.confirmActive() {
-		return FromResult(call(ctx))
-	}
-	prep := call(s.prepareContext(ctx))
-	proceed, err := s.confirm(prep.Request)
-	if err != nil {
-		return errSeq(err)
-	}
-	if !proceed {
-		return emptySeq
-	}
-	if prep.IsDeferred() {
-		return FromResult(prep.Execute(ctx))
-	}
-	return FromResult(prep)
-}
-
-// SubmitUpload is Submit for streaming/multipart uploads. Submit prepares the
-// request via deferred execution to show it in the confirmation prompt, but a
-// multipart/streaming body is encoded through an io.Pipe that has no reader
-// during the prepare-only round (its dry-run handler is a no-op), so the writer
-// blocks and the command hangs before the prompt ever appears. SubmitUpload
-// instead confirms from a lightweight request built from the known method and
-// resource id (no body), then runs the real upload only if the user agrees.
-// Pass id="" for create (POST to a collection) and the resource id for update.
-func SubmitUpload[T jsondoc.Unwrapper](ctx context.Context, method, id string, call func(context.Context) op.Result[T]) output.Seq {
-	s := submissionFrom(ctx)
-	if s == nil || !s.confirmActive() {
-		return FromResult(call(ctx))
-	}
-	// A minimal request carries just the method (drives ShouldConfirm) and the
-	// id in the path (shown in the prompt) — never the body.
-	req, _ := http.NewRequest(method, "/"+id, nil)
-	proceed, err := s.confirm(req)
-	if err != nil {
-		return errSeq(err)
-	}
-	if !proceed {
-		return emptySeq
-	}
 	return FromResult(call(ctx))
 }
 
-// SubmitStatus is Submit for calls with no renderable body (e.g. Delete
-// returning NoContent): same confirmation lifecycle, FromStatus rendering.
-func SubmitStatus[T any](ctx context.Context, call func(context.Context) op.Result[T]) output.Seq {
-	s := submissionFrom(ctx)
-	if s == nil || !s.confirmActive() {
-		return FromStatus(call(ctx))
-	}
-	prep := call(s.prepareContext(ctx))
-	proceed, err := s.confirm(prep.Request)
-	if err != nil {
-		return errSeq(err)
-	}
-	if !proceed {
-		return emptySeq
-	}
-	if prep.IsDeferred() {
-		return FromStatus(prep.Execute(ctx))
-	}
-	return FromStatus(prep)
+// SubmitUpload is Submit for streaming/multipart uploads.
+//
+// Deprecated: return the service result from the Call instead. The request
+// approver sees the real upload request before its body is streamed.
+func SubmitUpload[T jsondoc.Unwrapper](ctx context.Context, method, id string, call func(context.Context) op.Result[T]) output.Seq {
+	return FromResult(call(ctx))
 }
 
-// SubmitValue is Submit for calls whose body is a plain Go value rather than a
-// jsondoc model (e.g. notification2 unsubscribe's {result}): same confirmation
-// lifecycle as Submit, FromJSONValue rendering. Pass dry=apiv2.IsDryRun(ctx) so
-// the prepared request — already shown by the dry-run handler — is not echoed as
-// a zero-value result.
+// SubmitStatus is Submit for calls with no renderable body.
+//
+// Deprecated: return the service result from the Call instead.
+func SubmitStatus[T any](ctx context.Context, call func(context.Context) op.Result[T]) output.Seq {
+	return FromStatus(call(ctx))
+}
+
+// SubmitValue is Submit for calls whose body is a plain Go value.
+//
+// Deprecated: return the service result from the Call instead.
 func SubmitValue[T any](ctx context.Context, dry bool, call func(context.Context) op.Result[T]) output.Seq {
-	s := submissionFrom(ctx)
-	if s == nil || !s.confirmActive() {
-		return FromJSONValue(call(ctx), dry)
-	}
-	prep := call(s.prepareContext(ctx))
-	proceed, err := s.confirm(prep.Request)
-	if err != nil {
-		return errSeq(err)
-	}
-	if !proceed {
-		return emptySeq
-	}
-	if prep.IsDeferred() {
-		return FromJSONValue(prep.Execute(ctx), dry)
-	}
-	return FromJSONValue(prep, dry)
+	return FromJSONValue(call(ctx), dry)
 }
 
 // errSeq yields a single error into the stream.

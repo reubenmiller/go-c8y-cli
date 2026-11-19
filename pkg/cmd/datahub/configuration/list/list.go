@@ -84,7 +84,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			Locale:              in.String("locale"),
 			Limit:               int(common.PageSize),
 		}
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			return output.FromIterator(client.DataHub.ListOffloadingConfigurations(ctx, opt).Items())
 		}, nil
 	})

@@ -97,7 +97,7 @@ func (n *QueryCmd) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, err
 		}
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			return output.FromIterator(client.DataHub.Query(ctx, version, body).Items())
 		}, nil
 	})

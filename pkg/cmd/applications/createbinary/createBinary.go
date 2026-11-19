@@ -8,7 +8,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -18,9 +17,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/applications"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -117,10 +113,8 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 			_ = json.Unmarshal(body, &properties)
 		}
 		opt := applications.UploadFileOptions{FilePath: file, Properties: properties}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.SubmitUpload(ctx, http.MethodPost, "", func(ctx context.Context) op.Result[jsonmodels.Application] {
-				return client.Applications.Upload(ctx, ref, opt)
-			})
+		return func(ctx context.Context) any {
+			return client.Applications.Upload(ctx, ref, opt)
 		}, nil
 	})
 }

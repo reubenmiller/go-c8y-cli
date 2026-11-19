@@ -7,7 +7,6 @@ package create
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -16,9 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -113,13 +109,11 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		// Merge the deprecated --tags alias with --tag (both map to the version
 		// tags); drop the empty entries the cobra StringSlice default carries.
 		tags := nonEmpty(append(in.StringSlice("tags"), in.StringSlice("tag")...))
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			// SubmitUpload (not Submit): the multipart body can't be prepared for
 			// the confirmation prompt without blocking. CreateFromFile opens the
 			// local path / downloads the URL when the call runs.
-			return c8ystream.SubmitUpload(ctx, http.MethodPost, "", func(ctx context.Context) op.Result[jsonmodels.ApplicationVersion] {
-				return client.ApplicationVersions.CreateFromFile(ctx, pluginID, file, version, tags)
-			})
+			return client.ApplicationVersions.CreateFromFile(ctx, pluginID, file, version, tags)
 		}, nil
 	})
 }

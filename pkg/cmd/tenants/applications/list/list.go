@@ -85,13 +85,10 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
-
-	rawOutput := r.Config.RawOutput()
-	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		tenant := in.String("tenant")
@@ -99,17 +96,12 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			tenant = n.factory.GetTenant()
 		}
 		opt := tenants.ListApplicationReferencesOptions{}
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-			Strategy:          paginationStrategy,
-		}
+		opt.PaginationOptions = paging
 		all := func(ctx context.Context, o tenants.ListApplicationReferencesOptions) *pagination.Iterator[jsonmodels.ApplicationReference] {
 			return client.Tenants.ListAllApplicationReferences(ctx, tenant, o)
 		}
-		return c8ystream.ListCall(rawOutput, opt, all), nil
+		return func(ctx context.Context) any {
+			return all(ctx, opt)
+		}, nil
 	})
 }

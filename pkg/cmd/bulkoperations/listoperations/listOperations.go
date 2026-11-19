@@ -5,6 +5,8 @@
 package listoperations
 
 import (
+	"context"
+
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
@@ -12,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/bulkoperations"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 )
 
@@ -90,13 +91,10 @@ func (n *ListOperationsCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
-
-	rawOutput := r.Config.RawOutput()
-	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		opt := bulkoperations.ListOperationsOptions{
@@ -106,14 +104,9 @@ func (n *ListOperationsCmd) RunE(cmd *cobra.Command, args []string) error {
 			Status:          in.String("status"),
 			Revert:          in.Bool("revert"),
 		}
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-			Strategy:          paginationStrategy,
-		}
-		return c8ystream.ListCall(rawOutput, opt, client.BulkOperations.ListAllOperations), nil
+		opt.PaginationOptions = paging
+		return func(ctx context.Context) any {
+			return client.BulkOperations.ListAllOperations(ctx, opt)
+		}, nil
 	})
 }

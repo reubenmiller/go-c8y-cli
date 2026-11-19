@@ -13,9 +13,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -85,10 +82,8 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		ref := c8ystream.NameOrID(in.String("id"))
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.SubmitStatus(ctx, func(ctx context.Context) op.Result[core.NoContent] {
-				return client.UIPlugins.Delete(ctx, ref)
-			})
+		return func(ctx context.Context) any {
+			return client.UIPlugins.Delete(ctx, ref)
 		}, nil
 	})
 }

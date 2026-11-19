@@ -13,7 +13,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -82,8 +81,8 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		if tenant == "" {
 			tenant = n.factory.GetTenant()
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.FromResult(client.Tenants.GetTFA(ctx, tenant))
+		return func(ctx context.Context) any {
+			return client.Tenants.GetTFA(ctx, tenant)
 		}, nil
 	})
 }

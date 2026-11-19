@@ -90,7 +90,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, err
 		}
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			return output.FromIterator(client.Identity.List(ctx, deviceID).Items())
 		}, nil
 	})

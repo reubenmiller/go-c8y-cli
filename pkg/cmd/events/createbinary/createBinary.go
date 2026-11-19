@@ -7,7 +7,6 @@ package createbinary
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -15,9 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/events/eventbinaries"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -104,12 +100,10 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 			Name:        in.String("name"),
 			ContentType: in.String("type"),
 		}
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			// SubmitUpload (not Submit): the multipart body can't be prepared for
 			// the confirmation prompt without blocking.
-			return c8ystream.SubmitUpload(ctx, http.MethodPost, id, func(ctx context.Context) op.Result[jsonmodels.EventBinary] {
-				return client.Events.Binaries.Create(ctx, id, opt)
-			})
+			return client.Events.Binaries.Create(ctx, id, opt)
 		}, nil
 	})
 }

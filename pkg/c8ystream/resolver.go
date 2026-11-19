@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/source"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
@@ -41,12 +43,12 @@ func (in *Resolver) Index() int64 { return in.index }
 // assembling the typed call.
 func (in *Resolver) Context() context.Context { return in.ctx }
 
-// ResolveContext is the run context with dry-run disabled, for reference
-// lookups (name -> id) that must hit the real API even under --dry so the
-// dry-run report shows the actually-resolved request, matching v1.
+// ResolveContext is the run context prepared for a reference lookup that a
+// command makes itself (name -> id): the SDK's own resolution context, so the
+// lookup hits the real API even under --dry and keeps the session's request
+// options. Prefer passing the reference to the SDK method, which resolves it.
 func (in *Resolver) ResolveContext() context.Context {
-	ctx := apiv2.WithDryRun(in.ctx, false)
-	return apiv2.WithMockResponses(ctx, false)
+	return apiv2.ResolutionContext(in.ctx)
 }
 
 // Input returns the raw current input item (the piped line), or nil.
@@ -348,41 +350,12 @@ func gjsonFirst(raw []byte, paths []string) string {
 	return ""
 }
 
-// NameOrID turns a CLI reference into a go-c8y resolver reference: an all-digit
-// value is an id (used as-is), anything else is a name to look up ("name:..."),
-// matching the smart resolvers in go-c8y. Empty in, empty out.
-//
-// A comma-joined value is split and the first id-looking part wins, falling
-// back to the first non-empty part as a name — the v1 fetcher semantics
-// (parseAndSanitizeIDs + FirstMatch), which let a piped csv line like
-// "83001,1.0.0" (id,version) resolve to the id.
+// NameOrID turns a CLI reference into a go-c8y resolver reference using the
+// SDK convention (source.ParseRef): all digits is an id, a scheme prefix
+// (name:, ext:, query:, id:) is kept, anything else is a name. A comma list
+// picks its first id, else its first part as a name. Empty in, empty out.
 func NameOrID(value string) string {
-	if value == "" {
-		return ""
-	}
-	if strings.Contains(value, ",") {
-		parts := strings.Split(strings.ReplaceAll(value, ", ", ","), ",")
-		name := ""
-		for _, p := range parts {
-			if p == "" {
-				continue
-			}
-			if isDigits(p) {
-				return p
-			}
-			if name == "" {
-				name = p
-			}
-		}
-		if name == "" {
-			return ""
-		}
-		return "name:" + name
-	}
-	if !isDigits(value) {
-		return "name:" + value
-	}
-	return value
+	return source.ParseRef(value)
 }
 
 // FirstID returns the first comma-separated all-digit part of a reference

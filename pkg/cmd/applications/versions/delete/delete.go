@@ -14,9 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -95,13 +92,11 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		version := in.String("version")
 		tag := in.String("tag")
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.SubmitStatus(ctx, func(ctx context.Context) op.Result[core.NoContent] {
-				if tag != "" {
-					return client.ApplicationVersions.DeleteByTag(ctx, appID, tag)
-				}
-				return client.ApplicationVersions.DeleteByVersion(ctx, appID, version)
-			})
+		return func(ctx context.Context) any {
+			if tag != "" {
+				return client.ApplicationVersions.DeleteByTag(ctx, appID, tag)
+			}
+			return client.ApplicationVersions.DeleteByVersion(ctx, appID, version)
 		}, nil
 	})
 }

@@ -16,7 +16,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	appversions "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/applications/versions"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 )
 
@@ -88,13 +87,10 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
-
-	rawOutput := r.Config.RawOutput()
-	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		pluginID, err := client.UIPlugins.ResolveID(in.ResolveContext(), c8ystream.NameOrID(in.String("plugin")), nil)
@@ -102,17 +98,12 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 		opt := appversions.ListOptions{}
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-			Strategy:          paginationStrategy,
-		}
+		opt.PaginationOptions = paging
 		listAll := func(ctx context.Context, o appversions.ListOptions) *appversions.VersionIterator {
 			return client.ApplicationVersions.ListAll(ctx, pluginID, o)
 		}
-		return c8ystream.ListCall(rawOutput, opt, listAll), nil
+		return func(ctx context.Context) any {
+			return listAll(ctx, opt)
+		}, nil
 	})
 }

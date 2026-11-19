@@ -82,7 +82,7 @@ func (n *ListResultsCmd) RunE(cmd *cobra.Command, args []string) error {
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		id := in.String("id")
 		opt := jobs.ResultsOptions{Offset: offset}
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			return output.FromIterator(client.DataHub.Jobs.GetResults(ctx, id, opt).Items())
 		}, nil
 	})

@@ -21,9 +21,7 @@ import (
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/measurements"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -106,13 +104,10 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
-
-	rawOutput := r.Config.RawOutput()
-	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
 
 	// The export path streams a non-JSON payload, so capture the raw output
 	// destinations before the runner installs its own rawFileStage.
@@ -142,14 +137,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		if device := in.String("device"); device != "" {
 			opt.Source = managedobjects.DeviceRef(c8ystream.NameOrID(device))
 		}
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-			Strategy:          paginationStrategy,
-		}
+		opt.PaginationOptions = paging
 
 		unit := in.String("unit")
 		fragmentType := in.String("fragmentType")
@@ -163,7 +151,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			// as one non-JSON document, so bypass the paginated iterator and write
 			// the payload to --outputFileRaw (or stdout), yielding nothing — the
 			// runner's rawFileStage must not overwrite the file with rendered docs.
-			return func(ctx context.Context) output.Seq {
+			return func(ctx context.Context) any {
 				return func(yield func(jsondoc.JSONDoc, error) bool) {
 					res := client.Measurements.Export(withParams(ctx), opt, exportAccept)
 					if res.Err != nil {
@@ -190,9 +178,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			}, nil
 		}
 
-		call := c8ystream.ListCall(rawOutput, opt, client.Measurements.ListAll)
-		return func(ctx context.Context) output.Seq {
-			return call(withParams(ctx))
+		return func(ctx context.Context) any {
+			return client.Measurements.ListAll(withParams(ctx), opt)
 		}, nil
 	})
 }

@@ -5,6 +5,7 @@
 package list
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -129,7 +130,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	// Pagination follows the v1 rules: page size is only sent when it differs
 	// from the server default, total page/element counts and the current page
 	// only when explicitly requested, and --includeAll raises the page size.
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
@@ -137,9 +138,6 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	queryTemplate := cmd.Flag("queryTemplate").Value.String()
 	orderBy := cmd.Flag("orderBy").Value.String()
 
-	// --raw emits per-page envelopes; otherwise the extracted items. Dry-run
-	// is handled by the transport, so it needs no branch here.
-	rawOutput := r.Config.RawOutput()
 	includeAll := r.Config.IncludeAll()
 
 	// Pagination strategy: auto by default. A full walk (--includeAll) defaults
@@ -157,6 +155,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if paginationStrategy == pagination.StrategyIDKeyset {
 		orderByValue = "" // the SDK forces "$orderby=_id asc"; a name order would conflict
 	}
+
+	paging.Strategy = paginationStrategy
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		// Per item: read each flag as a plain value (with -.path input refs) and
@@ -201,18 +201,12 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		opt.WithChildrenCount = in.Bool("withChildrenCount")
 		opt.WithParents = in.Bool("withParents")
 		opt.WithLatestValues = in.Bool("withLatestValues")
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-			Strategy:          paginationStrategy,
-			FullWalk:          includeAll,
-		}
+		opt.PaginationOptions = paging
 		// Shared --raw / default (and transparent dry-run) routing from a
 		// single paginating method, identical across all list commands.
-		return c8ystream.ListCall(rawOutput, opt, client.Devices.ListAll), nil
+		return func(ctx context.Context) any {
+			return client.Devices.ListAll(ctx, opt)
+		}, nil
 	})
 }
 

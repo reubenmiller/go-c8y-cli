@@ -8,7 +8,6 @@ package update
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -18,9 +17,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/configuration"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -120,18 +116,15 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, err
 		}
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			if file != "" {
-				return c8ystream.SubmitUpload(ctx, http.MethodPut, string(ref), func(ctx context.Context) op.Result[jsonmodels.ManagedObject] {
-					return client.Configuration.Update(ctx, ref, configuration.UpdateOptions{
-						Body: body,
-						File: configuration.UploadFileOptions{FilePath: file},
-					})
+				return client.Configuration.Update(ctx, ref, configuration.UpdateOptions{
+					Body: body,
+					File: configuration.UploadFileOptions{FilePath: file},
 				})
+
 			}
-			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.ManagedObject] {
-				return client.Configuration.UpdateRaw(ctx, ref, body)
-			})
+			return client.Configuration.UpdateRaw(ctx, ref, body)
 		}, nil
 	})
 }

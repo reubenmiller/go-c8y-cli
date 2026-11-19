@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/trustedcertificates"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -99,8 +98,8 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 		opt := trustedcertificates.GetOptions{TenantID: tenant, Fingerprint: fingerprint}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.FromResult(client.TrustedCertificates.Get(ctx, opt))
+		return func(ctx context.Context) any {
+			return client.TrustedCertificates.Get(ctx, opt)
 		}, nil
 	})
 }

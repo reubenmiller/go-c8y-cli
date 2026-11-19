@@ -7,6 +7,7 @@
 package list
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -17,7 +18,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/software/softwareversions"
 	"github.com/spf13/cobra"
 )
@@ -99,14 +99,12 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
 
 	queryTemplate := cmd.Flag("queryTemplate").Value.String()
-	rawOutput := r.Config.RawOutput()
-	paginationStrategy := pagination.StrategyKind(r.Config.PaginationStrategy())
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		// Resolve the software reference to an id under a real (dry-disabled)
@@ -142,15 +140,10 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		opt.WithChildrenCount = in.Bool("withChildrenCount")
 		opt.WithGroups = in.Bool("withGroups")
 		opt.WithParents = in.Bool("withParents")
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-			Strategy:          paginationStrategy,
-		}
-		return c8ystream.ListCall(rawOutput, opt, client.Repository.Software.Versions.ListAll), nil
+		opt.PaginationOptions = paging
+		return func(ctx context.Context) any {
+			return client.Repository.Software.Versions.ListAll(ctx, opt)
+		}, nil
 	})
 }
 

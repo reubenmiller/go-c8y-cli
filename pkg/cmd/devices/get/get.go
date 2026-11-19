@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -103,8 +102,8 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 			WithParents:       in.Bool("withParents"),
 			WithLatestValues:  in.Bool("withLatestValues"),
 		}
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.FromResult(client.Devices.Get(ctx, ref, opt))
+		return func(ctx context.Context) any {
+			return client.Devices.Get(ctx, ref, opt)
 		}, nil
 	})
 }

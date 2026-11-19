@@ -14,9 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -94,10 +91,8 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		version := in.String("version")
 		tags := in.StringSlice("tag")
-		return func(ctx context.Context) output.Seq {
-			return c8ystream.Submit(ctx, func(ctx context.Context) op.Result[jsonmodels.ApplicationVersion] {
-				return client.ApplicationVersions.Update(ctx, appID, version, tags)
-			})
+		return func(ctx context.Context) any {
+			return client.ApplicationVersions.Update(ctx, appID, version, tags)
 		}, nil
 	})
 }

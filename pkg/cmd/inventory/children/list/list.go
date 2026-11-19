@@ -6,6 +6,7 @@
 package list
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -17,7 +18,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects/child"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/model"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 )
 
@@ -96,11 +96,10 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	common, err := r.Config.GetOutputCommonOptions(cmd)
+	paging, err := r.Pagination()
 	if err != nil {
 		return err
 	}
-	rawOutput := r.Config.RawOutput()
 
 	queryTemplate := cmd.Flag("queryTemplate").Value.String()
 	orderBy := cmd.Flag("orderBy").Value.String()
@@ -123,14 +122,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		opt := child.ListOptions{Query: q.Build()}
 		opt.WithChildren = in.Bool("withChildren")
 		opt.WithChildrenCount = in.Bool("withChildrenCount")
-		opt.PaginationOptions = pagination.PaginationOptions{
-			PageSize:          common.PageSize,
-			WithTotalPages:    common.WithTotalPages,
-			WithTotalElements: common.WithTotalElements,
-			CurrentPage:       int(common.CurrentPage),
-			MaxItems:          r.Config.MaxItems(),
-		}
-		return c8ystream.ListCall(rawOutput, opt, childref.ListAll(client, childType, parentID)), nil
+		opt.PaginationOptions = paging
+		list := childref.ListAll(client, childType, parentID)
+		return func(ctx context.Context) any {
+			return list(ctx, opt)
+		}, nil
 	})
 }
 

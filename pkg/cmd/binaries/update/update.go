@@ -5,7 +5,6 @@ package update
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -13,9 +12,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/binaries"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -90,12 +86,10 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, fmt.Errorf("--file is required")
 		}
 		opt := binaries.UploadFileOptions{FilePath: file}
-		return func(ctx context.Context) output.Seq {
+		return func(ctx context.Context) any {
 			// SubmitUpload (not Submit): the upload body can't be prepared for the
 			// confirmation prompt without blocking.
-			return c8ystream.SubmitUpload(ctx, http.MethodPut, id, func(ctx context.Context) op.Result[jsonmodels.Binary] {
-				return client.Binaries.Update(ctx, id, opt)
-			})
+			return client.Binaries.Update(ctx, id, opt)
 		}, nil
 	})
 }
