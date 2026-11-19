@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -34,6 +35,11 @@ var ciEnvVars = []string{
 // EnvDeniedPaths environment variable which sets the settings.files.deniedPaths
 // setting of the commands, so they can't read files in the denied paths
 const EnvDeniedPaths = "C8Y_SETTINGS_FILES_DENIEDPATHS"
+
+// EnvForce environment variable which sets the settings.defaults.force setting. It is
+// only set for approved extension writes, so the c8y commands run by the extension
+// don't ask for a confirmation
+const EnvForce = "C8Y_SETTINGS_DEFAULTS_FORCE"
 
 // controlledEnvPrefixes environment variables which control settings the MCP
 // server is responsible for
@@ -284,6 +290,12 @@ func (r *Runner) Run(ctx context.Context, plan *Plan, stdin string, tag string, 
 			// reject the unknown flags. c8y parses the flags before the command name and
 			// removes them, so the activity log and the force mode still apply
 			args = prependFlags(seg.Args, injected...)
+			if !seg.Read {
+				// The approval covers the whole extension command, including the c8y
+				// commands it runs itself, which inherit the environment. They can't
+				// ask for a confirmation, as there is no terminal
+				env = append(slices.Clone(env), EnvForce+"=true")
+			}
 		}
 		cmd := exec.CommandContext(ctx, r.Executable, args...)
 		cmd.Env = env

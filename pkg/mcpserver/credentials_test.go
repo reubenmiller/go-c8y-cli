@@ -127,3 +127,45 @@ func TestRunnerAddsFlagsBeforeExtensionCommands(t *testing.T) {
 		}
 	}
 }
+
+func TestRunnerSetsForceEnvForExtensionWrites(t *testing.T) {
+	// A fake c8y which prints the force setting from the environment
+	script := filepath.Join(t.TempDir(), "c8y")
+	if err := os.WriteFile(script, []byte("#!/bin/sh\necho \"force=${C8Y_SETTINGS_DEFAULTS_FORCE:-unset}\"\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	// an inherited value is never used
+	r := &Runner{Executable: script, BaseEnv: []string{"PATH=/usr/bin:/bin", "C8Y_SETTINGS_DEFAULTS_FORCE=true"}}
+
+	cases := []struct {
+		seg  Segment
+		want string
+	}{
+		{Segment{Args: []string{"tedge", "demo", "start", "x"}, CommandPath: "tedge demo start", Extension: true}, "force=true"},
+		{Segment{Args: []string{"tedge", "demo", "list"}, CommandPath: "tedge demo list", Extension: true, Read: true}, "force=unset"},
+		{Segment{Args: []string{"devices", "delete", "--id", "1"}, CommandPath: "devices delete"}, "force=unset"},
+		{Segment{Args: []string{"devices", "list"}, CommandPath: "devices list", Read: true}, "force=unset"},
+	}
+	for _, tc := range cases {
+		result, err := r.Run(context.Background(), &Plan{Segments: []Segment{tc.seg}}, "", "mcp:test", 10_000)
+		if err != nil {
+			t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+		}
+		if got := strings.TrimSpace(result.Stdout); got != tc.want {
+			t.Errorf("%q: got %q, want %q", tc.seg.CommandPath, got, tc.want)
+		}
+	}
+
+	// the env of a write extension command does not leak into the other segments
+	plan := &Plan{Segments: []Segment{
+		{Args: []string{"tedge", "demo", "start", "x"}, CommandPath: "tedge demo start", Extension: true},
+		{Args: []string{"devices", "update"}, CommandPath: "devices update"},
+	}}
+	result, err := r.Run(context.Background(), plan, "", "mcp:test", 10_000)
+	if err != nil {
+		t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+	}
+	if got := strings.TrimSpace(result.Stdout); got != "force=unset" {
+		t.Errorf("expected no force env in the next segment, got %q", got)
+	}
+}
