@@ -105,6 +105,9 @@ func extensionEnv(f *cmdutil.Factory, ext extensions.Extension) []string {
 		if cfg.SkipSSLVerify() {
 			set[extensions.EnvSettingsInsecure] = "true"
 		}
+		if cfg.DisableStdin() {
+			set[extensions.EnvNullInput] = "true"
+		}
 	}
 
 	for key, value := range extensions.Variables(ext, f.Executable) {

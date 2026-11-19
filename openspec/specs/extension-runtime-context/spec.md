@@ -35,6 +35,12 @@ The system SHALL set `C8Y_EXTENSION_NAME` (name without `c8y-`), `C8Y_EXTENSION_
 ### Requirement: Global settings are passed
 The system SHALL set `C8Y_SETTINGS_DEFAULTS_DRY=true` when dry run is active, `C8Y_SETTINGS_DEFAULTS_INSECURE=true` when TLS verification is turned off, and `C8Y_SETTINGS_MODE` and `C8Y_MODE` to the effective session mode for every extension command. c8y flags placed before the extension name (for example `c8y --session prod.json --dry foo list`) SHALL be applied by c8y and SHALL NOT be passed to the extension as arguments.
 
+The system SHALL set `C8Y_EXTENSION_NULL_INPUT=true` when the null input mode (`--nullInput` or `-n`) is active, so the extension does not read stdin. c8y commands SHALL NOT read this variable, so pipes between c8y commands within an extension are not affected. Extension commands started by an extension SHALL inherit it.
+
+#### Scenario: Null input propagates to nested extension commands
+- **WHEN** the c8y MCP server runs `c8y -n foo start` without input, and the extension runs `c8y foo bootstrap`
+- **THEN** `C8Y_EXTENSION_NULL_INPUT` is `true` for both extension commands, and a pipe such as `c8y identity get | c8y devices delete` within the extension still passes the input
+
 #### Scenario: Dry run propagates
 - **WHEN** the user runs `c8y --dry foo cleanup` and the extension calls `c8y devices delete`
 - **THEN** the inner command runs in dry run mode

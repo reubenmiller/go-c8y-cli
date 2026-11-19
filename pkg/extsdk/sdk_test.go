@@ -41,8 +41,11 @@ func TestFromEnvironment(t *testing.T) {
 	if ctx.Host != "https://example.com" || ctx.Tenant != "t123" || ctx.Username != "user1" || ctx.Mode != "dev" {
 		t.Errorf("unexpected session values: %+v", ctx)
 	}
-	if !ctx.DryRun() || ctx.Insecure {
-		t.Errorf("unexpected settings: dry=%v insecure=%v", ctx.DryRun(), ctx.Insecure)
+	if !ctx.DryRun() || ctx.Insecure || ctx.NullInput() {
+		t.Errorf("unexpected settings: dry=%v insecure=%v nullInput=%v", ctx.DryRun(), ctx.Insecure, ctx.NullInput())
+	}
+	if ctx, err := FromEnvironment(testEnv("C8Y_EXTENSION_NULL_INPUT=true")); err != nil || !ctx.NullInput() {
+		t.Errorf("expected null input. err=%v", err)
 	}
 	if !ctx.HasSession() {
 		t.Error("expected a session")

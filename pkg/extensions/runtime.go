@@ -20,6 +20,11 @@ const (
 	EnvSettingsDryRun   = "C8Y_SETTINGS_DEFAULTS_DRY"
 	EnvSettingsMode     = "C8Y_SETTINGS_MODE"
 	EnvSettingsInsecure = "C8Y_SETTINGS_DEFAULTS_INSECURE"
+
+	// EnvNullInput is "true" when the extension should not read stdin, e.g. to detect piped
+	// input (set by --nullInput/-n). c8y commands don't use it, so the pipes within a script
+	// still work, but it is inherited by the extension commands which the extension runs
+	EnvNullInput = "C8Y_EXTENSION_NULL_INPUT"
 )
 
 // Variables returns the extension variables (name, folder, path to c8y, and context version).

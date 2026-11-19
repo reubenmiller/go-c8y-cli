@@ -53,6 +53,7 @@ var controlledEnvPrefixes = []string{
 	"C8Y_SETTINGS_DEFAULTS_DRY",
 	"C8Y_SETTINGS_LOGGER_HIDESENSITIVE=",
 	"C8Y_SETTINGS_DEFAULTS_INSECURE=",
+	"C8Y_EXTENSION_NULL_INPUT=",
 	EnvDeniedPaths + "=",
 }
 
@@ -267,7 +268,7 @@ func (r *Runner) Run(ctx context.Context, plan *Plan, stdin string, tag string, 
 
 	cmds := make([]*exec.Cmd, 0, len(plan.Segments))
 	stderrs := make([]*bytes.Buffer, 0, len(plan.Segments))
-	for _, seg := range plan.Segments {
+	for i, seg := range plan.Segments {
 		injected := []string{"--logMessage", tag}
 		env := readEnv
 		if !seg.Read {
@@ -289,7 +290,13 @@ func (r *Runner) Run(ctx context.Context, plan *Plan, stdin string, tag string, 
 			// Extension commands (e.g. scripts) get their arguments as they are, and may
 			// reject the unknown flags. c8y parses the flags before the command name and
 			// removes them, so the activity log and the force mode still apply
-			args = prependFlags(seg.Args, injected...)
+			if i == 0 && stdin == "" {
+				// The command has no terminal, but no input either. Scripts often treat a
+				// stdin which isn't a terminal as piped input, so tell them not to read it
+				args = prependFlags(seg.Args, append(injected, "-n")...)
+			} else {
+				args = prependFlags(seg.Args, injected...)
+			}
 			if !seg.Read {
 				// The approval covers the whole extension command, including the c8y
 				// commands it runs itself, which inherit the environment. They can't

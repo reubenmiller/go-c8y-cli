@@ -104,12 +104,13 @@ func TestRunnerAddsFlagsBeforeExtensionCommands(t *testing.T) {
 	}{
 		{
 			// c8y parses the flags before the command name, and does not pass them to the extension
+			// -n: there is no input, so the extension should not read stdin
 			seg:  Segment{Args: []string{"tedge", "demo", "start", "tedge_mux_test", "--skip-website"}, CommandPath: "tedge demo start", Extension: true},
-			want: "--logMessage mcp:test --force tedge demo start tedge_mux_test --skip-website",
+			want: "--logMessage mcp:test --force -n tedge demo start tedge_mux_test --skip-website",
 		},
 		{
 			seg:  Segment{Args: []string{"tedge", "demo", "list"}, CommandPath: "tedge demo list", Extension: true, Read: true},
-			want: "--logMessage mcp:test tedge demo list",
+			want: "--logMessage mcp:test -n tedge demo list",
 		},
 		{
 			// built-in commands are unchanged
@@ -125,6 +126,36 @@ func TestRunnerAddsFlagsBeforeExtensionCommands(t *testing.T) {
 		if got := strings.TrimSpace(result.Stdout); got != tc.want {
 			t.Errorf("%q: got %q, want %q", tc.seg.CommandPath, got, tc.want)
 		}
+	}
+}
+
+func TestRunnerNullInputOnlyWithoutInput(t *testing.T) {
+	// A fake c8y which prints its arguments and its input
+	script := filepath.Join(t.TempDir(), "c8y")
+	if err := os.WriteFile(script, []byte("#!/bin/sh\necho \"$@\" null=${C8Y_EXTENSION_NULL_INPUT:-unset} input=$(cat | tr '\\n' ' ')\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	// an inherited value is never used
+	r := &Runner{Executable: script, BaseEnv: []string{"PATH=/usr/bin:/bin", "C8Y_EXTENSION_NULL_INPUT=true"}}
+	ext := Segment{Args: []string{"tedge", "bootstrap-container"}, CommandPath: "tedge bootstrap-container", Extension: true}
+
+	// input from the agent
+	result, err := r.Run(context.Background(), &Plan{Segments: []Segment{ext}}, "tedge\n", "mcp:test", 10_000)
+	if err != nil {
+		t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+	}
+	if got := strings.TrimSpace(result.Stdout); got != "--logMessage mcp:test --force tedge bootstrap-container null=unset input=tedge" {
+		t.Errorf("expected no -n with input, got %q", got)
+	}
+
+	// input from the previous command
+	plan := &Plan{Segments: []Segment{{Args: []string{"devices", "list"}, CommandPath: "devices list", Read: true}, ext}}
+	result, err = r.Run(context.Background(), plan, "", "mcp:test", 10_000)
+	if err != nil {
+		t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+	}
+	if got := strings.TrimSpace(result.Stdout); strings.Contains(got, "-n tedge") || !strings.HasPrefix(got, "--logMessage mcp:test --force tedge bootstrap-container null=unset input=devices list") {
+		t.Errorf("expected no -n for a piped command, got %q", got)
 	}
 }
 
