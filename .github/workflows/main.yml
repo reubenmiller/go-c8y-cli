@@ -39,6 +39,12 @@ jobs:
         version: '~> v2'
         install-only: true
 
+    # The extension SDK has its own (older) go version; the cli module needs its own
+    - name: Set up Go (cli)
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
+
     # Scaffold binary extensions, build them against the local SDK, and check that the
     # GoReleaser archives match the format which "c8y extensions install" expects
     - name: Test binary extension install and scaffolding

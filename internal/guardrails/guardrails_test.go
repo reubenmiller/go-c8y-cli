@@ -172,6 +172,13 @@ func TestCommandSource(t *testing.T) {
 
 func commandTree(t *testing.T) *cobra.Command {
 	t.Helper()
+	// Build only the built-in commands: no installed extensions (user or
+	// system wide) and no user settings, so the result is the same on every
+	// machine.
+	empty := t.TempDir()
+	t.Setenv("C8Y_SESSION_HOME", empty)
+	t.Setenv("C8Y_SETTINGS_EXTENSIONS_DATADIR", empty)
+	t.Setenv("C8Y_SETTINGS_EXTENSIONS_SYSTEMDIRS", empty)
 	root, err := clibuild.NewRootCommand()
 	if err != nil {
 		t.Fatal(err)
