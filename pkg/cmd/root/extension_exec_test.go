@@ -30,6 +30,8 @@ func newTestRoot() (*cobra.Command, *[]string) {
 	root.PersistentFlags().BoolP("noColor", "M", false, "")
 	root.PersistentFlags().IntP("pageSize", "p", 5, "")
 	root.PersistentFlags().Bool("examples", false, "")
+	root.PersistentFlags().StringP("logMessage", "l", "", "")
+	root.PersistentFlags().BoolP("force", "f", false, "")
 
 	root.AddCommand(&cobra.Command{Use: "devices", RunE: record})
 
@@ -142,6 +144,13 @@ func TestPrepareExtensionArgs(t *testing.T) {
 			args:      "foo services list --help --examples",
 			want:      "foo services list --help --examples",
 			wantFlags: map[string]string{"examples": "false"},
+		},
+		{
+			// The MCP server adds its flags before the command name, as scripts reject unknown flags
+			name:      "flags before the command name of a mount are parsed and removed",
+			args:      "--logMessage mcp:test --force foo demo start x --skip-website",
+			want:      "foo demo start x --skip-website",
+			wantFlags: map[string]string{"logMessage": "mcp:test", "force": "true"},
 		},
 		{
 			name:      "global flags of mounts are passed on",

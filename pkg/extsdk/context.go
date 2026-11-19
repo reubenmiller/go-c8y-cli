@@ -27,6 +27,7 @@ const (
 	EnvSettingsMode         = "C8Y_SETTINGS_MODE"
 	EnvSettingsDryRun       = "C8Y_SETTINGS_DEFAULTS_DRY"
 	EnvSettingsInsecure     = "C8Y_SETTINGS_DEFAULTS_INSECURE"
+	EnvNullInput            = "C8Y_EXTENSION_NULL_INPUT"
 	EnvCertificate          = "C8Y_CERTIFICATE"
 	EnvCertificateKey       = "C8Y_CERTIFICATE_KEY"
 	EnvCumulocityVersion    = "C8Y_VERSION"
@@ -71,8 +72,9 @@ type Context struct {
 	// Insecure is true if TLS certificates should not be verified
 	Insecure bool
 
-	dryRun bool
-	env    []string
+	dryRun    bool
+	nullInput bool
+	env       []string
 }
 
 // FromEnv reads the runtime context from the environment variables set by c8y
@@ -118,6 +120,7 @@ func FromEnvironment(environ []string) (*Context, error) {
 		Mode:                env[EnvSettingsMode],
 		Insecure:            parseBool(env[EnvSettingsInsecure]),
 		dryRun:              parseBool(env[EnvSettingsDryRun]),
+		nullInput:           parseBool(env[EnvNullInput]),
 		env:                 append([]string{}, environ...),
 	}, nil
 }
@@ -131,6 +134,12 @@ func parseBool(v string) bool {
 // change any data in dry run mode
 func (c *Context) DryRun() bool {
 	return c.dryRun
+}
+
+// NullInput returns true if the extension should not read stdin (--nullInput/-n), e.g.
+// because stdin is not a terminal, but no input is piped to the command either
+func (c *Context) NullInput() bool {
+	return c.nullInput
 }
 
 // ExtensionFile returns the path to a file in the extension's folder, e.g. "templates/device.jsonnet"

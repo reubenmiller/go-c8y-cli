@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kballard/go-shellquote"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -24,6 +25,10 @@ type Segment struct {
 	// DeviceShell true if the command runs a shell command on a device. It has no
 	// dry run mode, so no preview can be shown
 	DeviceShell bool
+
+	// Extension true if the command is provided by an extension. Extension commands
+	// (e.g. scripts) are passed the arguments as they are, and may reject unknown flags
+	Extension bool
 }
 
 // MarkDeviceCommands marks the segments which send a c8y_Command operation (a shell
@@ -172,6 +177,7 @@ func (c *Classifier) classify(args []string) (*Segment, error) {
 	seg := &Segment{
 		Args:        args,
 		CommandPath: commandPath,
+		Extension:   isExtensionCommand(cmd),
 	}
 
 	_, _, hasTerminator := SplitAtTerminator(args)
@@ -204,6 +210,17 @@ func (c *Classifier) classify(args []string) (*Segment, error) {
 		seg.Read = c.Policy.IsReadCommand(commandPath)
 	}
 	return seg, nil
+}
+
+// isExtensionCommand returns true if the command is provided by an extension, i.e. the
+// command or one of its parents is the root command of an extension
+func isExtensionCommand(cmd *cobra.Command) bool {
+	for c := cmd; c != nil; c = c.Parent() {
+		if c.Annotations[extensions.CommandAnnotation] != "" {
+			return true
+		}
+	}
+	return false
 }
 
 // classifyAPI checks the method used by the generic "c8y api" command

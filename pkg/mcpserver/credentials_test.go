@@ -89,3 +89,114 @@ func TestRunnerAddsBatchModeToDeviceShellCommands(t *testing.T) {
 		}
 	}
 }
+
+func TestRunnerAddsFlagsBeforeExtensionCommands(t *testing.T) {
+	// A fake c8y which prints its arguments
+	script := filepath.Join(t.TempDir(), "c8y")
+	if err := os.WriteFile(script, []byte("#!/bin/sh\necho \"$@\"\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	r := &Runner{Executable: script, BaseEnv: []string{"PATH=/usr/bin:/bin"}, SSHFallbackUser: "root"}
+
+	cases := []struct {
+		seg  Segment
+		want string
+	}{
+		{
+			// c8y parses the flags before the command name, and does not pass them to the extension
+			// -n: there is no input, so the extension should not read stdin
+			seg:  Segment{Args: []string{"tedge", "demo", "start", "tedge_mux_test", "--skip-website"}, CommandPath: "tedge demo start", Extension: true},
+			want: "--logMessage mcp:test --force -n tedge demo start tedge_mux_test --skip-website",
+		},
+		{
+			seg:  Segment{Args: []string{"tedge", "demo", "list"}, CommandPath: "tedge demo list", Extension: true, Read: true},
+			want: "--logMessage mcp:test -n tedge demo list",
+		},
+		{
+			// built-in commands are unchanged
+			seg:  Segment{Args: []string{"devices", "delete", "--id", "1"}, CommandPath: "devices delete"},
+			want: "devices delete --id 1 --logMessage mcp:test --force",
+		},
+	}
+	for _, tc := range cases {
+		result, err := r.Run(context.Background(), &Plan{Segments: []Segment{tc.seg}}, "", "mcp:test", 10_000)
+		if err != nil {
+			t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+		}
+		if got := strings.TrimSpace(result.Stdout); got != tc.want {
+			t.Errorf("%q: got %q, want %q", tc.seg.CommandPath, got, tc.want)
+		}
+	}
+}
+
+func TestRunnerNullInputOnlyWithoutInput(t *testing.T) {
+	// A fake c8y which prints its arguments and its input
+	script := filepath.Join(t.TempDir(), "c8y")
+	if err := os.WriteFile(script, []byte("#!/bin/sh\necho \"$@\" null=${C8Y_EXTENSION_NULL_INPUT:-unset} input=$(cat | tr '\\n' ' ')\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	// an inherited value is never used
+	r := &Runner{Executable: script, BaseEnv: []string{"PATH=/usr/bin:/bin", "C8Y_EXTENSION_NULL_INPUT=true"}}
+	ext := Segment{Args: []string{"tedge", "bootstrap-container"}, CommandPath: "tedge bootstrap-container", Extension: true}
+
+	// input from the agent
+	result, err := r.Run(context.Background(), &Plan{Segments: []Segment{ext}}, "tedge\n", "mcp:test", 10_000)
+	if err != nil {
+		t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+	}
+	if got := strings.TrimSpace(result.Stdout); got != "--logMessage mcp:test --force tedge bootstrap-container null=unset input=tedge" {
+		t.Errorf("expected no -n with input, got %q", got)
+	}
+
+	// input from the previous command
+	plan := &Plan{Segments: []Segment{{Args: []string{"devices", "list"}, CommandPath: "devices list", Read: true}, ext}}
+	result, err = r.Run(context.Background(), plan, "", "mcp:test", 10_000)
+	if err != nil {
+		t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+	}
+	if got := strings.TrimSpace(result.Stdout); strings.Contains(got, "-n tedge") || !strings.HasPrefix(got, "--logMessage mcp:test --force tedge bootstrap-container null=unset input=devices list") {
+		t.Errorf("expected no -n for a piped command, got %q", got)
+	}
+}
+
+func TestRunnerSetsForceEnvForExtensionWrites(t *testing.T) {
+	// A fake c8y which prints the force setting from the environment
+	script := filepath.Join(t.TempDir(), "c8y")
+	if err := os.WriteFile(script, []byte("#!/bin/sh\necho \"force=${C8Y_SETTINGS_DEFAULTS_FORCE:-unset}\"\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	// an inherited value is never used
+	r := &Runner{Executable: script, BaseEnv: []string{"PATH=/usr/bin:/bin", "C8Y_SETTINGS_DEFAULTS_FORCE=true"}}
+
+	cases := []struct {
+		seg  Segment
+		want string
+	}{
+		{Segment{Args: []string{"tedge", "demo", "start", "x"}, CommandPath: "tedge demo start", Extension: true}, "force=true"},
+		{Segment{Args: []string{"tedge", "demo", "list"}, CommandPath: "tedge demo list", Extension: true, Read: true}, "force=unset"},
+		{Segment{Args: []string{"devices", "delete", "--id", "1"}, CommandPath: "devices delete"}, "force=unset"},
+		{Segment{Args: []string{"devices", "list"}, CommandPath: "devices list", Read: true}, "force=unset"},
+	}
+	for _, tc := range cases {
+		result, err := r.Run(context.Background(), &Plan{Segments: []Segment{tc.seg}}, "", "mcp:test", 10_000)
+		if err != nil {
+			t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+		}
+		if got := strings.TrimSpace(result.Stdout); got != tc.want {
+			t.Errorf("%q: got %q, want %q", tc.seg.CommandPath, got, tc.want)
+		}
+	}
+
+	// the env of a write extension command does not leak into the other segments
+	plan := &Plan{Segments: []Segment{
+		{Args: []string{"tedge", "demo", "start", "x"}, CommandPath: "tedge demo start", Extension: true},
+		{Args: []string{"devices", "update"}, CommandPath: "devices update"},
+	}}
+	result, err := r.Run(context.Background(), plan, "", "mcp:test", 10_000)
+	if err != nil {
+		t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+	}
+	if got := strings.TrimSpace(result.Stdout); got != "force=unset" {
+		t.Errorf("expected no force env in the next segment, got %q", got)
+	}
+}

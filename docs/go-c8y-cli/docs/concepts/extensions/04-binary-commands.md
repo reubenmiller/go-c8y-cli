@@ -100,6 +100,7 @@ c8y passes the following environment variables to all extension commands (binari
 | `C8Y_BIN` | Path to the c8y executable which started the command. Use it to call other c8y commands |
 | `C8Y_SETTINGS_DEFAULTS_DRY` | `true` when dry run is active (`--dry`) |
 | `C8Y_SETTINGS_DEFAULTS_INSECURE` | `true` when TLS verification is turned off (`--insecure`) |
+| `C8Y_EXTENSION_NULL_INPUT` | `true` when the extension should not read stdin (`--nullInput` or `-n`). See [Detecting piped input](#detecting-piped-input) |
 | `C8Y_SETTINGS_MODE`, `C8Y_MODE` | Session mode, for example `dev` or `prod` (respects `--sessionMode`) |
 | `C8Y_EXTENSION_CONTEXT_VERSION` | Version of this list of variables (currently `1`) |
 
@@ -119,6 +120,25 @@ The password of the session is not passed to extensions. Use the token, the auth
 :::caution
 Extensions run with your session's credentials, the same as any command you run in your shell after `set-session`. Only install extensions that you trust.
 :::
+
+### Detecting piped input
+
+A command which accepts piped input often checks whether stdin is a terminal, for example `[ ! -t 0 ]` in a shell script. That check also matches when there is no terminal and no input either, for example in a cron job, or when the c8y MCP server runs the command. c8y sets `C8Y_EXTENSION_NULL_INPUT=true` when it is run with `--nullInput` (or `-n`), so check it before reading stdin:
+
+<CodeExample>
+
+```sh
+if [ ! -t 0 ] && [ "$C8Y_EXTENSION_NULL_INPUT" != "true" ]; then
+    # read the piped input
+    while IFS= read -r item; do
+        echo "$item"
+    done
+fi
+```
+
+</CodeExample>
+
+c8y commands ignore this variable, so pipes between c8y commands within the extension still work. Extension commands which the extension runs inherit it. The c8y MCP server sets `-n` when it runs an extension command without input.
 
 ## Tab completion
 

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/spf13/cobra"
 )
 
@@ -52,7 +53,38 @@ func newTestRoot() *cobra.Command {
 	api.Flags().String("url", "", "")
 	api.Flags().String("data", "", "")
 	root.AddCommand(api)
+
+	// extension commands, e.g. scripts which parse their own arguments
+	tedge := &cobra.Command{Use: "tedge", Annotations: map[string]string{extensions.CommandAnnotation: "tedge"}}
+	demo := &cobra.Command{Use: "demo"}
+	demo.AddCommand(&cobra.Command{Use: "start", RunE: noop, DisableFlagParsing: true})
+	demo.AddCommand(&cobra.Command{Use: "list", RunE: noop, DisableFlagParsing: true})
+	tedge.AddCommand(demo)
+	tedge.AddCommand(&cobra.Command{Use: "bootstrap-container", RunE: noop, DisableFlagParsing: true})
+	root.AddCommand(tedge)
 	return root
+}
+
+func TestPlanMarksExtensionCommands(t *testing.T) {
+	c := newTestClassifier()
+	cases := []struct {
+		command   string
+		extension bool
+	}{
+		{"devices list", false},
+		{"remoteaccess connect ssh --device 1 -- uptime", false},
+		{"tedge demo start tedge_mux_test --skip-website", true},
+		{"tedge bootstrap-container tedge_mux_test", true},
+	}
+	for _, tc := range cases {
+		plan, err := c.Plan(tc.command)
+		if err != nil {
+			t.Fatalf("%q: unexpected error: %s", tc.command, err)
+		}
+		if got := plan.Segments[0].Extension; got != tc.extension {
+			t.Errorf("%q: extension=%v, want %v", tc.command, got, tc.extension)
+		}
+	}
 }
 
 func newTestClassifier(mutate ...func(p *Policy)) *Classifier {

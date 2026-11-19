@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -35,6 +36,11 @@ var ciEnvVars = []string{
 // setting of the commands, so they can't read files in the denied paths
 const EnvDeniedPaths = "C8Y_SETTINGS_FILES_DENIEDPATHS"
 
+// EnvForce environment variable which sets the settings.defaults.force setting. It is
+// only set for approved extension writes, so the c8y commands run by the extension
+// don't ask for a confirmation
+const EnvForce = "C8Y_SETTINGS_DEFAULTS_FORCE"
+
 // controlledEnvPrefixes environment variables which control settings the MCP
 // server is responsible for
 var controlledEnvPrefixes = []string{
@@ -47,6 +53,7 @@ var controlledEnvPrefixes = []string{
 	"C8Y_SETTINGS_DEFAULTS_DRY",
 	"C8Y_SETTINGS_LOGGER_HIDESENSITIVE=",
 	"C8Y_SETTINGS_DEFAULTS_INSECURE=",
+	"C8Y_EXTENSION_NULL_INPUT=",
 	EnvDeniedPaths + "=",
 }
 
@@ -161,6 +168,16 @@ func injectFlags(args []string, flags ...string) []string {
 	return out
 }
 
+// prependFlags adds flags before the arguments (i.e. before the command name). c8y
+// handles these flags itself for extension commands, and does not pass them on to the
+// extension
+func prependFlags(args []string, flags ...string) []string {
+	out := make([]string, 0, len(args)+len(flags))
+	out = append(out, flags...)
+	out = append(out, args...)
+	return out
+}
+
 // Result output of the executed command(s)
 type Result struct {
 	Stdout   string
@@ -251,7 +268,7 @@ func (r *Runner) Run(ctx context.Context, plan *Plan, stdin string, tag string, 
 
 	cmds := make([]*exec.Cmd, 0, len(plan.Segments))
 	stderrs := make([]*bytes.Buffer, 0, len(plan.Segments))
-	for _, seg := range plan.Segments {
+	for i, seg := range plan.Segments {
 		injected := []string{"--logMessage", tag}
 		env := readEnv
 		if !seg.Read {
@@ -268,7 +285,26 @@ func (r *Runner) Run(ctx context.Context, plan *Plan, stdin string, tag string, 
 				injected = append(injected, "--fallback-user", r.SSHFallbackUser)
 			}
 		}
-		cmd := exec.CommandContext(ctx, r.Executable, injectFlags(seg.Args, injected...)...)
+		args := injectFlags(seg.Args, injected...)
+		if seg.Extension {
+			// Extension commands (e.g. scripts) get their arguments as they are, and may
+			// reject the unknown flags. c8y parses the flags before the command name and
+			// removes them, so the activity log and the force mode still apply
+			if i == 0 && stdin == "" {
+				// The command has no terminal, but no input either. Scripts often treat a
+				// stdin which isn't a terminal as piped input, so tell them not to read it
+				args = prependFlags(seg.Args, append(injected, "-n")...)
+			} else {
+				args = prependFlags(seg.Args, injected...)
+			}
+			if !seg.Read {
+				// The approval covers the whole extension command, including the c8y
+				// commands it runs itself, which inherit the environment. They can't
+				// ask for a confirmation, as there is no terminal
+				env = append(slices.Clone(env), EnvForce+"=true")
+			}
+		}
+		cmd := exec.CommandContext(ctx, r.Executable, args...)
 		cmd.Env = env
 		if err := passCredentials(cmd, credentials); err != nil {
 			return nil, err
