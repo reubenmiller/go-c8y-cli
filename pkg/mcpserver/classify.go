@@ -210,6 +210,9 @@ func (c *Classifier) classify(args []string) (*Segment, error) {
 	case HasDryRun(args):
 		// dry run mode does not send any write requests
 		seg.Read = true
+	case PrintsURLOnly(commandPath, args):
+		// only prints the address of a web UI page
+		seg.Read = true
 	case commandPath == "api":
 		read, err := classifyAPI(cmd, args)
 		if err != nil {
