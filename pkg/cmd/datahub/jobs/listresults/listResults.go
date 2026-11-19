@@ -44,7 +44,7 @@ Get the result rows of a completed Dremio job
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "The unique identifier of a Dremio job (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "The unique identifier of a Dremio job (required) (accepts pipeline)")
 	cmd.Flags().Int("offset", 0, "The offset of the paginated results")
 
 	flags.WithOptions(

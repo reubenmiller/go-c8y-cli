@@ -47,7 +47,7 @@ Get ui plugin by name
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Plugin (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Plugin (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,

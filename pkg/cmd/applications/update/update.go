@@ -45,7 +45,7 @@ Update an application's availability
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Application id (required) (accepts pipeline)")
 	cmd.Flags().String("name", "", "Name of application")
 	cmd.Flags().String("key", "", "Shared secret of application")
 	cmd.Flags().String("availability", "", "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)")

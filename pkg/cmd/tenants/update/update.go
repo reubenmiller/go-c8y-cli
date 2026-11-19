@@ -42,7 +42,7 @@ Update a tenant by name (from the management tenant)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Tenant id (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Tenant id (accepts pipeline)")
 	cmd.Flags().String("company", "", "Company name. Maximum 256 characters")
 	cmd.Flags().String("name", "", "Company name. Maximum 256 characters")
 	cmd.Flags().String("domain", "", "Domain name to be used for the tenant. Maximum 256 characters")

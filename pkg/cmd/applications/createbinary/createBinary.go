@@ -48,7 +48,7 @@ Upload an application binary
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Application id (required) (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
 	_ = cmd.MarkFlagRequired("file")
 

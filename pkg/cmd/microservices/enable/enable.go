@@ -55,7 +55,7 @@ Enable (subscribe) to a microservice by name
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant id")
-	cmd.Flags().String("id", "", "Microservice id (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Microservice id (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,

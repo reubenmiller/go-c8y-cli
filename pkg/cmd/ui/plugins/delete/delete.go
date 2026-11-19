@@ -44,7 +44,7 @@ Remove UI plugin
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Plugin (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Plugin (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
