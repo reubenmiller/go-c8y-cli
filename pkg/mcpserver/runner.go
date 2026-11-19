@@ -161,6 +161,16 @@ func injectFlags(args []string, flags ...string) []string {
 	return out
 }
 
+// prependFlags adds flags before the arguments (i.e. before the command name). c8y
+// handles these flags itself for extension commands, and does not pass them on to the
+// extension
+func prependFlags(args []string, flags ...string) []string {
+	out := make([]string, 0, len(args)+len(flags))
+	out = append(out, flags...)
+	out = append(out, args...)
+	return out
+}
+
 // Result output of the executed command(s)
 type Result struct {
 	Stdout   string
@@ -268,7 +278,14 @@ func (r *Runner) Run(ctx context.Context, plan *Plan, stdin string, tag string, 
 				injected = append(injected, "--fallback-user", r.SSHFallbackUser)
 			}
 		}
-		cmd := exec.CommandContext(ctx, r.Executable, injectFlags(seg.Args, injected...)...)
+		args := injectFlags(seg.Args, injected...)
+		if seg.Extension {
+			// Extension commands (e.g. scripts) get their arguments as they are, and may
+			// reject the unknown flags. c8y parses the flags before the command name and
+			// removes them, so the activity log and the force mode still apply
+			args = prependFlags(seg.Args, injected...)
+		}
+		cmd := exec.CommandContext(ctx, r.Executable, args...)
 		cmd.Env = env
 		if err := passCredentials(cmd, credentials); err != nil {
 			return nil, err

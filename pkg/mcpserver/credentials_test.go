@@ -89,3 +89,41 @@ func TestRunnerAddsBatchModeToDeviceShellCommands(t *testing.T) {
 		}
 	}
 }
+
+func TestRunnerAddsFlagsBeforeExtensionCommands(t *testing.T) {
+	// A fake c8y which prints its arguments
+	script := filepath.Join(t.TempDir(), "c8y")
+	if err := os.WriteFile(script, []byte("#!/bin/sh\necho \"$@\"\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	r := &Runner{Executable: script, BaseEnv: []string{"PATH=/usr/bin:/bin"}, SSHFallbackUser: "root"}
+
+	cases := []struct {
+		seg  Segment
+		want string
+	}{
+		{
+			// c8y parses the flags before the command name, and does not pass them to the extension
+			seg:  Segment{Args: []string{"tedge", "demo", "start", "tedge_mux_test", "--skip-website"}, CommandPath: "tedge demo start", Extension: true},
+			want: "--logMessage mcp:test --force tedge demo start tedge_mux_test --skip-website",
+		},
+		{
+			seg:  Segment{Args: []string{"tedge", "demo", "list"}, CommandPath: "tedge demo list", Extension: true, Read: true},
+			want: "--logMessage mcp:test tedge demo list",
+		},
+		{
+			// built-in commands are unchanged
+			seg:  Segment{Args: []string{"devices", "delete", "--id", "1"}, CommandPath: "devices delete"},
+			want: "devices delete --id 1 --logMessage mcp:test --force",
+		},
+	}
+	for _, tc := range cases {
+		result, err := r.Run(context.Background(), &Plan{Segments: []Segment{tc.seg}}, "", "mcp:test", 10_000)
+		if err != nil {
+			t.Fatalf("unexpected error: %s (stderr: %s)", err, result.Stderr)
+		}
+		if got := strings.TrimSpace(result.Stdout); got != tc.want {
+			t.Errorf("%q: got %q, want %q", tc.seg.CommandPath, got, tc.want)
+		}
+	}
+}
