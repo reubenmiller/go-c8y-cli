@@ -4,7 +4,6 @@
 package users
 
 import (
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/users/list"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -24,7 +23,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdUsers {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

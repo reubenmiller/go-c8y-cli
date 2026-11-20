@@ -7,15 +7,6 @@
 package microservices
 
 import (
-	cmdCreateBinary "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/createbinary"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/delete"
-	cmdDisable "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/disable"
-	cmdEnable "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/enable"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/get"
-	cmdGetBootstrapUser "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/getbootstrapuser"
-	cmdGetStatus "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/getstatus"
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/update"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -35,15 +26,15 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdMicroservices {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
-	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
-	cmd.AddCommand(cmdCreateBinary.NewCreateBinaryCmd(f).GetCommand())
-	cmd.AddCommand(cmdGetBootstrapUser.NewGetBootstrapUserCmd(f).GetCommand())
-	cmd.AddCommand(cmdEnable.NewEnableCmd(f).GetCommand())
-	cmd.AddCommand(cmdDisable.NewDisableCmd(f).GetCommand())
-	cmd.AddCommand(cmdGetStatus.NewGetStatusCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewDeleteCmd(f).GetCommand())
+	cmd.AddCommand(NewUpdateCmd(f).GetCommand())
+	cmd.AddCommand(NewCreateBinaryCmd(f).GetCommand())
+	cmd.AddCommand(NewGetBootstrapUserCmd(f).GetCommand())
+	cmd.AddCommand(NewEnableCmd(f).GetCommand())
+	cmd.AddCommand(NewDisableCmd(f).GetCommand())
+	cmd.AddCommand(NewGetStatusCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

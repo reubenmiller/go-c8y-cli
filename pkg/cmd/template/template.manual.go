@@ -2,7 +2,6 @@ package template
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	cmdExecute "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/template/execute"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +20,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdTemplate {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdExecute.NewCmdExecute(f).GetCommand())
+	cmd.AddCommand(NewCmdExecute(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

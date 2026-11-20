@@ -5,9 +5,6 @@ package applications
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	cmdDisable "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/applications/disable"
-	cmdEnable "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/applications/enable"
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/applications/list"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -26,9 +23,9 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdApplications {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdEnable.NewEnableCmd(f).GetCommand())
-	cmd.AddCommand(cmdDisable.NewDisableCmd(f).GetCommand())
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewEnableCmd(f).GetCommand())
+	cmd.AddCommand(NewDisableCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

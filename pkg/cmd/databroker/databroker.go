@@ -4,9 +4,6 @@
 package databroker
 
 import (
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker/update"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -26,9 +23,9 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdDatabroker {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewUpdateCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

@@ -1,0 +1,116 @@
+// v2-based retention rules update: the id flag drives iteration (pipe or --id
+// slice) and the body builder is evaluated per item, then both feed
+// RetentionRules.Update. Rules are addressed by id (passed through unresolved).
+
+package retentionrules
+
+import (
+	"context"
+
+	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/spf13/cobra"
+)
+
+// UpdateCmd command
+type UpdateCmd struct {
+	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+}
+
+// NewUpdateCmd creates a command to Update retention rule
+func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
+	ccmd := &UpdateCmd{
+		factory: f,
+	}
+	cmd := &cobra.Command{
+		Use:   "update",
+		Short: "Update retention rule",
+		Long:  `Update an existing retention rule, i.e. change maximum number of days or the data type.`,
+		Example: heredoc.Doc(`
+$ c8y retentionrules update --id 12345 --maximumAge 90
+Update a retention rule
+        `),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return f.UpdateModeEnabled(cmd)
+		},
+		RunE: ccmd.RunE,
+	}
+
+	cmd.SilenceUsage = true
+
+	cmd.Flags().StringSlice("id", []string{""}, "Retention rule id (required) (accepts pipeline)")
+	cmd.Flags().String("dataType", "", "RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].")
+	cmd.Flags().String("fragmentType", "", "RetentionRule will be applied to documents with fragmentType.")
+	cmd.Flags().String("type", "", "RetentionRule will be applied to documents with type.")
+	cmd.Flags().String("source", "", "RetentionRule will be applied to documents with source.")
+	cmd.Flags().Int("maximumAge", 0, "Maximum age of document in days.")
+	cmd.Flags().Bool("editable", false, "Whether the rule is editable. Can be updated only by management tenant.")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("dataType", "ALARM", "AUDIT", "EVENT", "MEASUREMENT", "OPERATION", "*"),
+	)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithProcessingMode(),
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
+		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPowershellName("Update-RetentionRule"),
+		flags.WithOutputType("application/vnd.com.nsn.cumulocity.retentionRule+json", ""),
+	)
+
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+
+	return ccmd
+}
+
+// RunE executes the command
+func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
+	r, err := c8ystream.NewRunner(cmd, n.factory)
+	if err != nil {
+		return err
+	}
+
+	if err := r.InputFlag("id"); err != nil {
+		return err
+	}
+
+	err = r.Body(
+		flags.WithDataFlagValue(),
+		flags.WithStringValue("dataType", "dataType"),
+		flags.WithStringValue("fragmentType", "fragmentType"),
+		flags.WithStringValue("type", "type"),
+		flags.WithStringValue("source", "source"),
+		flags.WithIntValue("maximumAge", "maximumAge"),
+		flags.WithBoolValue("editable", "editable", ""),
+		cmdutil.WithTemplateValue(n.factory),
+		flags.WithTemplateVariablesValue(),
+	)
+	if err != nil {
+		return err
+	}
+
+	client, err := r.Client()
+	if err != nil {
+		return err
+	}
+
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		id := in.String("id")
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context) any {
+			return client.RetentionRules.Update(ctx, id, body)
+		}, nil
+	})
+}

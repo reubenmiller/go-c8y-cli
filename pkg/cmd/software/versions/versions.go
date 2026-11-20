@@ -6,11 +6,6 @@
 package versions
 
 import (
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/get"
-	cmdInstall "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/install"
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/list"
-	cmdUninstall "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/uninstall"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -30,11 +25,11 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdVersions {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
-	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
-	cmd.AddCommand(cmdInstall.NewInstallCmd(f).GetCommand())
-	cmd.AddCommand(cmdUninstall.NewUninstallCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewDeleteCmd(f).GetCommand())
+	cmd.AddCommand(NewInstallCmd(f).GetCommand())
+	cmd.AddCommand(NewUninstallCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

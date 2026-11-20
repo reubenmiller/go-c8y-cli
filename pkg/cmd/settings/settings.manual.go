@@ -1,8 +1,6 @@
 package settings
 
 import (
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/settings/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/settings/update"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 
@@ -23,8 +21,8 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdSettings {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewCmdList(f).GetCommand())
-	cmd.AddCommand(cmdUpdate.NewCmdUpdate(f).GetCommand())
+	cmd.AddCommand(NewCmdList(f).GetCommand())
+	cmd.AddCommand(NewCmdUpdate(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

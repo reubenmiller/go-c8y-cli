@@ -1,7 +1,6 @@
 package assert
 
 import (
-	cmdText "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/assert/text"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -21,7 +20,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdAssert {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdText.NewCmdText(f).GetCommand())
+	cmd.AddCommand(NewCmdText(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
