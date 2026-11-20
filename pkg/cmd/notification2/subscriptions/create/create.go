@@ -1,7 +1,7 @@
 // v2-based notification2 subscription create: the CLI builds the body
 // (subscription/context, the subscriptionFilter apis/typeFilter via a jsonnet
 // template, plus --data/--template), the device flag drives iteration and its
-// value is resolved (name -> id) into the body's source.id before the raw
+// value goes into the body's source.id, which go-c8y resolves (name -> id) in the raw
 // create call — so the same subscription can be created for many piped devices.
 package create
 
@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
 )
@@ -131,26 +130,18 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	resolveDevice := func(ctx context.Context, ref string) (string, error) {
-		return client.Notification2.DeviceResolver.ResolveID(ctx, managedobjects.DeviceRef(ref), nil)
-	}
-
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		body, err := in.Body()
 		if err != nil {
 			return nil, err
 		}
-		// Carry the (resolved) source id on the subscription. The device value
-		// comes from the driver so a piped device populates it; ResolveSourceID
-		// applies the name-or-id convention and resolves the name against the real
-		// API even under --dry. No device -> no source (e.g. tenant context).
+		// Carry the device on the subscription. The value comes from the driver,
+		// so a piped device populates it; go-c8y resolves a name to the id (even
+		// under --dry). No device -> no source (e.g. tenant context).
 		if device := in.String("device"); device != "" {
 			if body, err = sjson.SetBytes(body, "source.id", device); err != nil {
 				return nil, err
 			}
-		}
-		if body, err = in.ResolveSourceID(body, resolveDevice); err != nil {
-			return nil, err
 		}
 		return func(ctx context.Context) any {
 			return client.Notification2.CreateRaw(ctx, body)

@@ -45,7 +45,7 @@ Delete an application
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Application id (required) (accepts pipeline)")
 	cmd.Flags().Bool("unsubscribeAll", false, "Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.")
 
 	completion.WithOptions(

@@ -41,7 +41,7 @@ Get the status of a Dremio job
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "The unique identifier of a Dremio job (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "The unique identifier of a Dremio job (required) (accepts pipeline)")
 
 	flags.WithOptions(
 		cmd,

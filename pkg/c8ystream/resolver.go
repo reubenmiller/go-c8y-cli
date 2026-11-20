@@ -108,46 +108,6 @@ func (in *Resolver) TimeValue(flag string) time.Time {
 	return time.Time{}
 }
 
-// ResolveSourceID resolves a device reference held in the body's "source.id"
-// (a name -> id lookup; plain ids pass through) using resolve, returning the
-// body with source.id replaced. A body with no non-empty source.id is returned
-// unchanged. The CLI owns the name convention (NameOrID); go-c8y performs the
-// lookup, and it runs against the real API even under --dry (ResolveContext).
-//
-// This is the create/update bridge for source-bearing resources (events,
-// alarms, measurements): the command builds the full body with the CLI's body
-// machinery (--data/--template/typed flags), then this resolves the device
-// reference the body carries before the raw create call.
-func (in *Resolver) ResolveSourceID(body []byte, resolve func(context.Context, string) (string, error)) (json.RawMessage, error) {
-	return in.ResolveBodyRef(body, "source.id", resolve)
-}
-
-// ResolveBodyRef resolves a device reference held at the given JSON path in the
-// body (name -> id; plain ids pass through) using resolve, returning the body
-// with that path replaced. A missing/empty value at path leaves the body
-// unchanged. Use it for resources whose device reference is not at source.id
-// (e.g. operations: deviceId / agentId). Call once per reference; the result
-// chains (each call takes and returns the body). Runs under ResolveContext so it
-// hits the real API even under --dry.
-func (in *Resolver) ResolveBodyRef(body []byte, path string, resolve func(context.Context, string) (string, error)) (json.RawMessage, error) {
-	ref := gjson.GetBytes(body, path).String()
-	if ref == "" {
-		return json.RawMessage(body), nil
-	}
-	id, err := resolve(in.ResolveContext(), NameOrID(ref))
-	if err != nil {
-		return nil, err
-	}
-	if id == ref {
-		return json.RawMessage(body), nil // plain id passed through unchanged
-	}
-	out, err := sjson.SetBytes(body, path, id)
-	if err != nil {
-		return nil, err
-	}
-	return json.RawMessage(out), nil
-}
-
 // ApplyOverrideSlice sets path in body to a multi-valued flag's value for the
 // current item, cycling through the supplied values one per piped item — the v1
 // StringSlice + override-iterator fan-out (e.g. `--device 11111,22222` piped two

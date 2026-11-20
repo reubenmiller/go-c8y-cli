@@ -50,7 +50,7 @@ Get microservice status (using pipeline)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Microservice id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Microservice id (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,

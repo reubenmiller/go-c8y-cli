@@ -5,7 +5,6 @@ package count
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -14,11 +13,9 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/alarms"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/model"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/spf13/cobra"
 )
 
@@ -121,19 +118,7 @@ func (n *CountCmd) RunE(cmd *cobra.Command, args []string) error {
 			opt.Source = managedobjects.DeviceRef(c8ystream.NameOrID(device))
 		}
 		return func(ctx context.Context) any {
-			return func(yield func(jsondoc.JSONDoc, error) bool) {
-				res := client.Alarms.Count(ctx, opt)
-				if res.Err != nil {
-					yield(jsondoc.Empty(), res.Err)
-					return
-				}
-				// Under --dry the request has already been rendered by the dry-run
-				// handler; don't also emit a placeholder zero.
-				if apiv2.IsDryRun(ctx) {
-					return
-				}
-				yield(jsondoc.New([]byte(strconv.FormatInt(res.Data, 10))), nil)
-			}
+			return client.Alarms.Count(ctx, opt)
 		}, nil
 	})
 }

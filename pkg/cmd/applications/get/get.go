@@ -47,7 +47,7 @@ Get an application by name
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Application id (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,

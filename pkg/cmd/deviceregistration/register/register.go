@@ -1,8 +1,8 @@
 // v2-based device registration register: the id flag drives iteration (pipe or
 // --id), so the same registration can be applied to many device ids. The body
 // carries the device id (set from the driver), an optional type, and an optional
-// device-group reference (group), which is resolved (name -> id) into groupId
-// before the create call via Devices.Registration.CreateRaw.
+// device-group reference (group) in groupId, which go-c8y resolves (name -> id)
+// in Devices.Registration.CreateRaw.
 package register
 
 import (
@@ -105,10 +105,6 @@ func (n *RegisterCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	resolveGroup := func(ctx context.Context, ref string) (string, error) {
-		return client.DeviceGroups.ResolveID(ctx, ref, nil)
-	}
-
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		body, err := in.Body()
 		if err != nil {
@@ -120,10 +116,6 @@ func (n *RegisterCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 		if body, err = in.ApplyOverrideFirst(body, "group", "groupId"); err != nil {
-			return nil, err
-		}
-		// Resolve the device-group reference (name -> id) the body carries.
-		if body, err = in.ResolveBodyRef(body, "groupId", resolveGroup); err != nil {
 			return nil, err
 		}
 		return func(ctx context.Context) any {

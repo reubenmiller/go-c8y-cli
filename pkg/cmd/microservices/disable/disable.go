@@ -49,7 +49,7 @@ Disable (unsubscribe) to a microservice
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Microservice id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Microservice id (required) (accepts pipeline)")
 	cmd.Flags().String("tenant", "", "Tenant id")
 
 	completion.WithOptions(

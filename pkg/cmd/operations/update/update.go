@@ -1,7 +1,7 @@
 // v2-based operations update: the id flag drives iteration and the body builder
 // is evaluated per item (status/failureReason/agent), then both feed
 // Operations.Update. The id is an operation id (no name resolution); the agent
-// reference in the body is resolved (name -> id).
+// reference in the body is resolved (name -> id) by go-c8y.
 package update
 
 import (
@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
 	"github.com/spf13/cobra"
 )
 
@@ -102,10 +101,6 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	resolveDevice := func(ctx context.Context, ref string) (string, error) {
-		return client.Operations.DeviceResolver.ResolveID(ctx, managedobjects.DeviceRef(ref), nil)
-	}
-
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		id := in.String("id")
 		body, err := in.Body()
@@ -113,9 +108,6 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 		if body, err = in.ApplyOverrideFirst(body, "agent", "agentId"); err != nil {
-			return nil, err
-		}
-		if body, err = in.ResolveBodyRef(body, "agentId", resolveDevice); err != nil {
 			return nil, err
 		}
 		return func(ctx context.Context) any {

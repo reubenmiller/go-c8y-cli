@@ -1,6 +1,6 @@
 // v2-based bulk operations create: the CLI builds the full body (operation
 // prototype, schedule), then the device-group reference the body carries
-// (groupId) is resolved (name -> id) via the device-groups resolver before the
+// (groupId) is resolved (name -> id) by go-c8y as part of the
 // create call. A bulk operation targets a single group, so the group flag is a
 // scalar string (a body getter cannot bind a string slice).
 package create
@@ -108,10 +108,6 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	resolveGroup := func(ctx context.Context, ref string) (string, error) {
-		return client.DeviceGroups.ResolveID(ctx, ref, nil)
-	}
-
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		body, err := in.Body()
 		if err != nil {
@@ -120,9 +116,6 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		// Restore v1's multi-group fan-out: --group 1,2 zips one group per piped
 		// item (cycling), overriding the groupId seeded by WithOverrideValue.
 		if body, err = in.ApplyOverrideSlice(body, "group", "groupId"); err != nil {
-			return nil, err
-		}
-		if body, err = in.ResolveBodyRef(body, "groupId", resolveGroup); err != nil {
 			return nil, err
 		}
 		return func(ctx context.Context) any {

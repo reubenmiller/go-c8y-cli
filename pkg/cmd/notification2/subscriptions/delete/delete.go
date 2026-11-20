@@ -49,7 +49,7 @@ Delete all subscriptions which share the same subscription name (using client si
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Unique identifier of the notification subscription. (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Unique identifier of the notification subscription. (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
