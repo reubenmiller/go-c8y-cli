@@ -18,7 +18,7 @@ import (
 // pageSource is a paginating result that can also yield whole pages (the
 // response envelopes), used for --raw.
 type pageSource interface {
-	PageDocuments() iter.Seq2[jsondoc.JSONDoc, error]
+	Pages() iter.Seq2[jsondoc.JSONDoc, error]
 }
 
 // adapt turns the value a Call returned into the document stream every command
@@ -53,11 +53,11 @@ func (r *Runner) adaptItem(v any, item string) output.Seq {
 		seq = errSeq(x)
 	case pageSource:
 		if r.Config.RawOutput() {
-			seq = output.Seq(x.PageDocuments())
+			seq = output.Seq(x.Pages())
 		} else if ds, ok := v.(op.DocumentSource); ok {
 			seq = output.Seq(ds.Documents())
 		} else {
-			seq = output.Seq(x.PageDocuments())
+			seq = output.Seq(x.Pages())
 		}
 	case op.DocumentSource:
 		seq = output.Seq(x.Documents())
