@@ -2,9 +2,6 @@ package alias
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
-	deleteCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alias/delete"
-	listCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alias/list"
-	setCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alias/set"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 
 	"github.com/spf13/cobra"
@@ -22,9 +19,9 @@ func NewCmdAlias(f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.DisableAuthCheck(cmd)
 
-	cmd.AddCommand(listCmd.NewCmdList(f, nil))
-	cmd.AddCommand(setCmd.NewCmdSet(f, nil))
-	cmd.AddCommand(deleteCmd.NewCmdDelete(f, nil))
+	cmd.AddCommand(NewCmdList(f, nil))
+	cmd.AddCommand(NewCmdSet(f, nil))
+	cmd.AddCommand(NewCmdDelete(f, nil))
 
 	return cmd
 }

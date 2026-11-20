@@ -5,7 +5,6 @@
 package statistics
 
 import (
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/statistics/list"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -28,7 +27,7 @@ Device statistics are counted with daily and monthly rate. All requests are cons
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

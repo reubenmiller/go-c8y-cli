@@ -7,7 +7,6 @@ package datahub
 import (
 	cmdConfiguration "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/configuration"
 	cmdJobs "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/jobs"
-	cmdQuery "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/query"
 	cmdScheduler "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/scheduler"
 	cmdTenant "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/tenant"
 	cmdUsers "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/datahub/users"
@@ -30,7 +29,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdDatahub {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdQuery.NewQueryCmd(f).GetCommand())
+	cmd.AddCommand(NewQueryCmd(f).GetCommand())
 	cmd.AddCommand(cmdConfiguration.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(cmdJobs.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(cmdScheduler.NewSubCommand(f).GetCommand())

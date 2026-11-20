@@ -5,11 +5,6 @@
 package identity
 
 import (
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity/delete"
-	cmdFind "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity/find"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity/list"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -32,11 +27,11 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdIdentity {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
-	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
-	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
-	cmd.AddCommand(cmdFind.NewFindCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewDeleteCmd(f).GetCommand())
+	cmd.AddCommand(NewCreateCmd(f).GetCommand())
+	cmd.AddCommand(NewFindCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

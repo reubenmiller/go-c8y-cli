@@ -1,7 +1,6 @@
 package mcp
 
 import (
-	cmdServe "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/mcp/serve"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -20,7 +19,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdMCP {
 		Long:  `Run an MCP server which gives AI agents controlled access to a Cumulocity tenant using go-c8y-cli commands`,
 	}
 
-	cmd.AddCommand(cmdServe.NewCmdServe(f).GetCommand())
+	cmd.AddCommand(NewCmdServe(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

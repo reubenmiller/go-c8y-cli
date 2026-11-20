@@ -6,12 +6,6 @@
 package measurements
 
 import (
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/delete"
-	cmdDeleteCollection "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/deletecollection"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/get"
-	cmdGetSeries "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/getseries"
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/list"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -34,12 +28,12 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdMeasurements {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdGetSeries.NewGetSeriesCmd(f).GetCommand())
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
-	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
-	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
-	cmd.AddCommand(cmdDeleteCollection.NewDeleteCollectionCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewGetSeriesCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewCreateCmd(f).GetCommand())
+	cmd.AddCommand(NewDeleteCmd(f).GetCommand())
+	cmd.AddCommand(NewDeleteCollectionCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
