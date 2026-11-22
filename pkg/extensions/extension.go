@@ -99,6 +99,21 @@ type SessionProvider struct {
 
 	// Format of the provider output: json, dotenv or auto (default)
 	Format string `json:"format,omitempty" yaml:"format,omitempty"`
+
+	// List are the arguments which make the binary print the provider's sessions as a json
+	// array, without secrets and without user interaction. It is used to show the sessions in
+	// other pickers, e.g. the browser session picker of "c8y mcp serve". Requires Select
+	List []string `json:"list,omitempty" yaml:"list,omitempty"`
+
+	// Select are the arguments which make the binary print one session, given by its
+	// sessionUri (which is appended to the arguments), without user interaction. Requires List
+	Select []string `json:"select,omitempty" yaml:"select,omitempty"`
+}
+
+// CanList returns true if the provider can list its sessions and select one by its sessionUri
+// without user interaction
+func (p *SessionProvider) CanList() bool {
+	return len(p.List) > 0 && len(p.Select) > 0
 }
 
 // OutputFormat returns the declared output format, or an empty string for automatic detection
@@ -133,6 +148,12 @@ func (m *Manifest) ValidSessionProviders() ([]SessionProvider, []string) {
 		case provider.Format != "" && provider.OutputFormat() != "" && provider.OutputFormat() != ProviderFormatJSON && provider.OutputFormat() != ProviderFormatDotenv:
 			warnings = append(warnings, fmt.Sprintf("session provider is ignored as the format is invalid. name=%s, format=%s", provider.Name, provider.Format))
 		default:
+			if (len(provider.List) > 0) != (len(provider.Select) > 0) {
+				// the provider still works interactively
+				warnings = append(warnings, fmt.Sprintf("session provider can't list sessions as only one of list and select is set. name=%s", provider.Name))
+				provider.List = nil
+				provider.Select = nil
+			}
 			seen[provider.Name] = true
 			providers = append(providers, provider)
 		}

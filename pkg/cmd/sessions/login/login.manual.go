@@ -3,6 +3,7 @@ package login
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -44,6 +45,10 @@ type CmdLogin struct {
 
 	// FromExtension is the session provider of an extension (<provider> or <extension>/<provider>)
 	FromExtension string
+
+	// Select is the sessionUri of the session which the extension session provider returns,
+	// without user interaction (see the provider's select command)
+	Select string
 
 	// Login options
 	LoginType          string
@@ -96,6 +101,9 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 			$ eval "$( c8y sessions login --from-extension bitwarden )"
 			Set a session using the session provider "bitwarden" of an installed extension
 
+			$ eval "$( c8y sessions login --from-extension bitwarden --select "bitwarden://3f0b9d4e-1c2a-4f5b-9e8d-7a6b5c4d3e2f" )"
+			Set a session from the session provider "bitwarden" without selecting it interactively (the provider must declare list and select)
+
 			$ eval "$( c8y sessions login --from-prompt --host example.cumulocity.com)"
 
 			$ eval "$( c8y sessions login --from-file .env --loginType DEVICE )"
@@ -119,6 +127,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 	cmd.Flags().StringVar(&ccmd.File, "from-file", "", "Read session from a file")
 	cmd.Flags().StringVar(&ccmd.Exec, "from-cmd", "", "External command to execute to get the log in details")
 	cmd.Flags().StringVar(&ccmd.FromExtension, "from-extension", "", "Session provider of an installed extension, i.e. <provider> or <extension>/<provider>")
+	cmd.Flags().StringVar(&ccmd.Select, "select", "", "sessionUri of the session to use from the extension session provider, without user interaction. Only valid with from-extension (or the extension provider type)")
 	cmd.Flags().BoolVar(&ccmd.Env, "from-env", false, "Read from environment variables")
 	cmd.Flags().BoolVar(&ccmd.Stdin, "from-stdin", false, "Read from standard input")
 	cmd.Flags().BoolVar(&ccmd.Prompt, "from-prompt", false, "Read from user prompted input")
@@ -333,6 +342,11 @@ func readSecrets(cfg *config.Config, keys []string) []string {
 // runProvider runs a session provider command and parses the session which it writes to stdout.
 // stdin and stderr are connected so the provider can interact with the user
 func (n *CmdLogin) runProvider(argv []string, env []string, format string) (*c8ysession.CumulocitySession, error) {
+	return n.runProviderWithStdin(argv, env, format, os.Stdin)
+}
+
+// runProviderWithStdin runs a session provider command with the given stdin (nil for none)
+func (n *CmdLogin) runProviderWithStdin(argv []string, env []string, format string, stdin io.Reader) (*c8ysession.CumulocitySession, error) {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return nil, err
@@ -344,7 +358,7 @@ func (n *CmdLogin) runProvider(argv []string, env []string, format string) (*c8y
 
 	cmd := exec.Command(argv[0], argv[1:]...)
 	cmd.Env = env
-	cmd.Stdin = os.Stdin
+	cmd.Stdin = stdin
 	cmd.Stderr = os.Stderr
 
 	log.Infof("Executing session provider: %s", shellquote.Join(argv...))
@@ -445,41 +459,126 @@ func extensionProviderEnv(cfg *config.Config, provider *extensions.InstalledSess
 	return extensions.MergeEnv(env, secretSet, nil)
 }
 
+// resolveExtensionProvider finds the extension session provider, and checks that its binary exists
+func resolveExtensionProvider(f *cmdutil.Factory, cfg *config.Config, ref string) (*extensions.InstalledSessionProvider, string, error) {
+	if strings.TrimSpace(ref) == "" {
+		return nil, "", cmderrors.NewUserError("no extension session provider is set. Use --from-extension <provider>, or set it using 'c8y settings update session.provider.extension <provider>'")
+	}
+
+	providers := extensions.ListSessionProviders(f.ExtensionManager().List(), func(ext extensions.Extension, msg string) {
+		cfg.Logger.Warnf("%s. extension=%s", msg, ext.Name())
+	})
+	provider, err := extensions.ResolveSessionProvider(providers, ref)
+	if err != nil {
+		return nil, "", cmderrors.NewUserError(err)
+	}
+
+	exe := provider.Extension.Executable()
+	if _, err := os.Stat(exe); err != nil {
+		return nil, "", cmderrors.NewUserError(fmt.Sprintf("the binary of extension %s was not found (%s). Reinstall or update the extension using 'c8y extensions update %s'", provider.Extension.Name(), exe, provider.Extension.Name()))
+	}
+	return provider, exe, nil
+}
+
 // FromExtensionProvider gets the session from a session provider of an installed extension
 func (n *CmdLogin) FromExtensionProvider(ref string, args []string) (*c8ysession.CumulocitySession, error) {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return nil, err
 	}
-	if strings.TrimSpace(ref) == "" {
-		return nil, cmderrors.NewUserError("no extension session provider is set. Use --from-extension <provider>, or set it using 'c8y settings update session.provider.extension <provider>'")
-	}
-
-	providers := extensions.ListSessionProviders(n.factory.ExtensionManager().List(), func(ext extensions.Extension, msg string) {
-		cfg.Logger.Warnf("%s. extension=%s", msg, ext.Name())
-	})
-	provider, err := extensions.ResolveSessionProvider(providers, ref)
+	provider, exe, err := resolveExtensionProvider(n.factory, cfg, ref)
 	if err != nil {
-		return nil, cmderrors.NewUserError(err)
+		return nil, err
 	}
-
-	exe := provider.Extension.Executable()
-	if _, err := os.Stat(exe); err != nil {
-		return nil, cmderrors.NewUserError(fmt.Sprintf("the binary of extension %s was not found (%s). Reinstall or update the extension using 'c8y extensions update %s'", provider.Extension.Name(), exe, provider.Extension.Name()))
-	}
-
-	argv := []string{exe}
-	argv = append(argv, provider.Provider.Exec...)
-	argv = append(argv, n.providerFlags(cfg)...)
-	argv = append(argv, args...)
 
 	format := n.Format
 	if format == "" {
 		format = provider.Provider.OutputFormat()
 	}
-
 	env := extensionProviderEnv(cfg, provider, n.factory.Executable, n.Secrets)
+
+	argv := []string{exe}
+	if n.Select != "" {
+		// Select the session without user interaction
+		if !provider.Provider.CanList() {
+			return nil, cmderrors.NewUserError(fmt.Sprintf("session provider %s does not support --select, as it does not declare the list and select commands", provider.Ref()))
+		}
+		argv = append(argv, provider.Provider.Select...)
+		argv = append(argv, n.providerFlags(cfg)...)
+		argv = append(argv, args...)
+		argv = append(argv, n.Select)
+		return n.runProviderWithStdin(argv, env, format, nil)
+	}
+
+	argv = append(argv, provider.Provider.Exec...)
+	argv = append(argv, n.providerFlags(cfg)...)
+	argv = append(argv, args...)
 	return n.runProvider(argv, env, format)
+}
+
+// DefaultListTimeout is the maximum duration of a session provider's list command
+const DefaultListTimeout = 30 * time.Second
+
+// ListExtensionSessions runs the list command of an extension session provider, and returns the
+// provider and its sessions (without secrets). The provider gets the same environment and
+// secrets as when logging in, but no stdin, so it can't interact with the user. args are passed
+// to the list command, and secrets are additional secrets to pass to the provider
+func ListExtensionSessions(ctx context.Context, f *cmdutil.Factory, ref string, args []string, secrets []string) (*extensions.InstalledSessionProvider, []extensions.ProviderSession, error) {
+	cfg, err := f.Config()
+	if err != nil {
+		return nil, nil, err
+	}
+	provider, exe, err := resolveExtensionProvider(f, cfg, ref)
+	if err != nil {
+		return nil, nil, err
+	}
+	if !provider.Provider.CanList() {
+		return provider, nil, cmderrors.NewUserError(fmt.Sprintf("session provider %s can't list its sessions, as it does not declare the list and select commands", provider.Ref()))
+	}
+
+	argv := append([]string{exe}, provider.Provider.List...)
+	argv = append(argv, args...)
+
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if _, hasDeadline := ctx.Deadline(); !hasDeadline {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, DefaultListTimeout)
+		defer cancel()
+	}
+	cmd := exec.CommandContext(ctx, argv[0], argv[1:]...)
+	cmd.Env = extensionProviderEnv(cfg, provider, f.Executable, secrets)
+	stderr := &bytes.Buffer{}
+	cmd.Stderr = stderr
+	cfg.Logger.Infof("Listing sessions of session provider: %s", shellquote.Join(argv...))
+	output, err := cmd.Output()
+	if err != nil {
+		if ctx.Err() != nil {
+			return provider, nil, fmt.Errorf("listing the sessions of %s timed out", provider.Ref())
+		}
+		// cobra based providers prefix the error with "Error: "
+		if reason := strings.TrimPrefix(lastLine(stderr.String()), "Error: "); reason != "" {
+			return provider, nil, fmt.Errorf("%s", reason)
+		}
+		return provider, nil, err
+	}
+	sessions, warnings, err := extensions.ParseProviderSessions(output)
+	for _, w := range warnings {
+		cfg.Logger.Warnf("%s. provider=%s", w, provider.Ref())
+	}
+	return provider, sessions, err
+}
+
+// lastLine returns the last non-empty line of the text
+func lastLine(text string) string {
+	lines := strings.Split(text, "\n")
+	for i := len(lines) - 1; i >= 0; i-- {
+		if line := strings.TrimSpace(lines[i]); line != "" {
+			return line
+		}
+	}
+	return ""
 }
 
 func (n *CmdLogin) FromViper(v *viper.Viper) (*c8ysession.CumulocitySession, error) {
@@ -652,6 +751,10 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		} else if n.factory.IOStreams.HasStdin() {
 			n.Provider = config.ProviderTypeStdin
 		}
+	}
+
+	if n.Select != "" && !strings.EqualFold(n.Provider, config.ProviderTypeExtension) {
+		return cmderrors.NewUserError("--select is only valid with an extension session provider (--from-extension)")
 	}
 
 	var session *c8ysession.CumulocitySession

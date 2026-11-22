@@ -129,3 +129,34 @@ func TestVariables(t *testing.T) {
 		t.Errorf("unexpected variables: %v", vars)
 	}
 }
+
+func TestValidSessionProvidersListAndSelect(t *testing.T) {
+	m := &Manifest{Binary: &BinarySpec{}, SessionProviders: []SessionProvider{
+		{Name: "both", List: []string{"list"}, Select: []string{"get"}},
+		{Name: "listonly", List: []string{"list"}},
+		{Name: "none"},
+	}}
+	providers, warnings := m.ValidSessionProviders()
+	if len(providers) != 3 {
+		t.Fatalf("all providers should still be usable: %+v", providers)
+	}
+	if !providers[0].CanList() || providers[1].CanList() || providers[2].CanList() {
+		t.Errorf("unexpected CanList: %+v", providers)
+	}
+	if len(warnings) != 1 || !strings.Contains(warnings[0], "listonly") {
+		t.Errorf("expected a warning for the provider with only list: %v", warnings)
+	}
+}
+
+func TestParseProviderSessions(t *testing.T) {
+	sessions, warnings, err := ParseProviderSessions([]byte(`[{"sessionUri":"a://1","host":"https://a","token":"x","password":"y"},{"host":"https://b"}]`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(sessions) != 1 || sessions[0].SessionURI != "a://1" || len(warnings) != 1 {
+		t.Errorf("unexpected result: %+v %v", sessions, warnings)
+	}
+	if _, _, err := ParseProviderSessions([]byte(`{"host":"https://a"}`)); err == nil {
+		t.Errorf("an object should not be accepted")
+	}
+}

@@ -52,7 +52,29 @@ type SessionChoice struct {
 	// NeedsCode true if a two-factor authentication code is expected, e.g. because the
 	// last login needed one. The code field is also shown when the login asks for it
 	NeedsCode bool
+
+	// Source where the session comes from, shown as the heading of its group, e.g.
+	// "Bitwarden". Empty for session files
+	Source string
+
+	// Provider extension session provider which listed the session, and URI its sessionUri.
+	// Both are empty for session files
+	Provider string
+	URI      string
+
+	// Group optional grouping within the source, e.g. the folder of a vault
+	Group string
 }
+
+// SourceError a source of sessions (e.g. a session provider) which could not list its
+// sessions. It is shown in the picker instead of the source's sessions
+type SourceError struct {
+	Source  string
+	Message string
+}
+
+// SessionFilesSource heading of the sessions from session files
+const SessionFilesSource = "Session files"
 
 // LoginFunc logs in to the selected session with the secrets entered on the page. The
 // passphrase is only set for sessions which need it (see SessionChoice.NeedsPassphrase).
@@ -108,28 +130,80 @@ type pickerResult struct {
 
 // Pick shows the sessions in the browser and returns the one the user selected (and
 // logged in to, if Login is set)
-func (w *WebPicker) Pick(ctx context.Context, title string, choices []SessionChoice) (*Selection, error) {
+func (w *WebPicker) Pick(ctx context.Context, title string, choices []SessionChoice, problems ...SourceError) (*Selection, error) {
 	if len(choices) == 0 {
+		if len(problems) > 0 {
+			messages := make([]string, 0, len(problems))
+			for _, p := range problems {
+				messages = append(messages, p.Source+": "+p.Message)
+			}
+			return nil, fmt.Errorf("no sessions were found. %s", strings.Join(messages, "; "))
+		}
 		return nil, errors.New("no sessions were found. Create a session with \"c8y sessions create\" first")
 	}
-	return w.run(ctx, title, "", choices, false)
+	return w.run(ctx, title, "", choices, problems, false)
+}
+
+// pickerGroup sessions of one source shown in the picker
+type pickerGroup struct {
+	Label string
+	Error string
+	Items []pickerItem
+}
+
+// pickerItem a session and its index in the list of choices
+type pickerItem struct {
+	Index  int
+	Choice SessionChoice
+}
+
+// groupChoices groups the sessions by their source, in the order of the choices. Sources
+// which could not list their sessions are added with their error
+func groupChoices(choices []SessionChoice, problems []SourceError) []pickerGroup {
+	groups := []pickerGroup{}
+	find := func(label string) int {
+		for i := range groups {
+			if groups[i].Label == label {
+				return i
+			}
+		}
+		groups = append(groups, pickerGroup{Label: label})
+		return len(groups) - 1
+	}
+	for i, c := range choices {
+		label := c.Source
+		if label == "" {
+			label = SessionFilesSource
+		}
+		g := find(label)
+		groups[g].Items = append(groups[g].Items, pickerItem{Index: i, Choice: c})
+	}
+	for _, p := range problems {
+		g := find(p.Source)
+		groups[g].Error = p.Message
+	}
+	return groups
 }
 
 // Unlock asks the user to log in to a single session again, e.g. to enter the
 // passphrase when the token expires
 func (w *WebPicker) Unlock(ctx context.Context, title string, message string, choice SessionChoice) (*Selection, error) {
-	return w.run(ctx, title, message, []SessionChoice{choice}, true)
+	return w.run(ctx, title, message, []SessionChoice{choice}, nil, true)
 }
 
 // pickerView data of the page
 type pickerView struct {
-	Title     string
-	Message   string
-	Nonce     string
-	CSRF      string
-	Timeout   int
-	Choices   []SessionChoice
-	CanGoBack bool
+	Title   string
+	Message string
+	Nonce   string
+	CSRF    string
+	Timeout int
+	Choices []SessionChoice
+	// Groups the choices grouped by source. ShowGroups is true if there is more than
+	// one source (or a source has an error), so the headings are shown
+	Groups     []pickerGroup
+	ShowGroups bool
+	CanGoBack  bool
 
 	// Unlock the session for which the passphrase or code is entered
 	Unlock      *SessionChoice
@@ -143,7 +217,7 @@ type pickerView struct {
 	Cancelled bool
 }
 
-func (w *WebPicker) run(ctx context.Context, title string, message string, choices []SessionChoice, unlockOnly bool) (*Selection, error) {
+func (w *WebPicker) run(ctx context.Context, title string, message string, choices []SessionChoice, problems []SourceError, unlockOnly bool) (*Selection, error) {
 	timeout := w.Timeout
 	if timeout <= 0 {
 		timeout = DefaultPickerTimeout
@@ -234,7 +308,14 @@ func (w *WebPicker) run(ctx context.Context, title string, message string, choic
 		if unlockOnly {
 			return unlockViewFor(0, "")
 		}
-		return pickerView{Choices: choices}
+		groups := groupChoices(choices, problems)
+		showGroups := len(groups) > 1
+		for _, g := range groups {
+			if g.Error != "" {
+				showGroups = true
+			}
+		}
+		return pickerView{Choices: choices, Groups: groups, ShowGroups: showGroups}
 	}
 
 	// checkRequest rejects requests which don't come from the page opened by the user
@@ -520,6 +601,11 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
     max-height: min(52vh, 460px); overflow-y: auto;
   }
   .sessions li + li { border-top: 1px solid var(--line-2); }
+  .sessions li.group {
+    position: sticky; top: 0; z-index: 1; padding: 8px 16px; font-size: .7rem; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--faint); background: var(--surface-2);
+  }
+  .sessions li.problem { padding: 10px 16px; font-size: .85rem; color: var(--error); overflow-wrap: anywhere; }
   .session {
     width: 100%; display: grid; gap: 4px; text-align: left; padding: 12px 16px; cursor: pointer;
     background: none; border: 0; color: inherit; font: inherit; transition: background .15s;
@@ -586,7 +672,7 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
 </head>
 <body>
 {{define "session"}}
-  <span class="row"><span class="name">{{.Name}}</span>{{if .Current}}<span class="pill accent">current</span>{{end}}{{if .NeedsPassphrase}}<span class="pill">encrypted</span>{{end}}</span>
+  <span class="row"><span class="name">{{.Name}}</span>{{if .Current}}<span class="pill accent">current</span>{{end}}{{if .NeedsPassphrase}}<span class="pill">encrypted</span>{{end}}{{if .Group}}<span class="pill">{{.Group}}</span>{{end}}</span>
   <span class="details">{{.Host}}{{if .Tenant}} · {{.Tenant}}{{end}}{{if .Username}} · {{.Username}}{{end}}</span>
   {{if .ModeInfo}}<span class="mode">Agent can {{.ModeInfo}} ({{.Mode}})</span>{{end}}
 {{end}}
@@ -671,10 +757,14 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   <form method="post" action="/select" class="login">
     <input type="hidden" name="csrf" value="{{.CSRF}}">
     <ul class="sessions" id="sessions">
-    {{range $i, $s := .Choices}}
-      <li data-search="{{$s.Name}} {{$s.Host}} {{$s.Tenant}} {{$s.Username}}">
-        <button class="session" type="submit" name="session" value="{{$i}}">{{template "session" $s}}</button>
+    {{range $g, $group := .Groups}}
+      {{if $.ShowGroups}}<li class="group" data-group="{{$g}}">{{$group.Label}}</li>{{end}}
+      {{if $group.Error}}<li class="problem" data-group="{{$g}}">{{$group.Error}}</li>{{end}}
+      {{range $group.Items}}
+      <li class="item" data-group="{{$g}}" data-search="{{.Choice.Name}} {{.Choice.Host}} {{.Choice.Tenant}} {{.Choice.Username}} {{.Choice.Group}} {{$group.Label}}">
+        <button class="session" type="submit" name="session" value="{{.Index}}">{{template "session" .Choice}}</button>
       </li>
+      {{end}}
     {{end}}
     </ul>
     <div class="empty" id="empty">No sessions match the filter.</div>
@@ -689,14 +779,20 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
 <script nonce="{{.Nonce}}">
   const filter = document.getElementById("filter");
   if (filter) {
-    const items = Array.from(document.querySelectorAll("#sessions li"));
+    const items = Array.from(document.querySelectorAll("#sessions li.item"));
+    const headings = Array.from(document.querySelectorAll("#sessions li.group, #sessions li.problem"));
     filter.addEventListener("input", () => {
       const terms = filter.value.toLowerCase().split(/\s+/).filter(Boolean);
       let shown = 0;
+      const shownGroups = new Set();
       for (const item of items) {
         const match = terms.every(t => item.dataset.search.toLowerCase().includes(t));
         item.hidden = !match;
-        if (match) shown++;
+        if (match) { shown++; shownGroups.add(item.dataset.group); }
+      }
+      // hide the headings (and errors) of sources without matching sessions while filtering
+      for (const heading of headings) {
+        heading.hidden = terms.length > 0 && !shownGroups.has(heading.dataset.group);
       }
       document.getElementById("empty").style.display = shown ? "none" : "block";
     });
