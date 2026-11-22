@@ -49,11 +49,11 @@ Create device group with custom properties
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("name", "", "Device group name (accepts pipeline)")
-	cmd.Flags().String("type", "", "Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubGroup (sub folder)). Defaults to c8y_DeviceGroup")
+	cmd.Flags().String("type", "", "Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubgroup (sub folder)). Defaults to c8y_DeviceGroup")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("type", "c8y_DeviceGroup", "c8y_DeviceSubGroup"),
+		completion.WithValidateSet("type", "c8y_DeviceGroup", "c8y_DeviceSubgroup"),
 	)
 
 	flags.WithOptions(
