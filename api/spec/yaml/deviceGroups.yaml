@@ -314,9 +314,9 @@ commands:
           - "name"
 
       - name: type
-        description: Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubGroup (sub folder)). Defaults to c8y_DeviceGroup
+        description: Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubgroup (sub folder)). Defaults to c8y_DeviceGroup
         type: string
-        validationSet: [c8y_DeviceGroup, c8y_DeviceSubGroup]
+        validationSet: [c8y_DeviceGroup, c8y_DeviceSubgroup]
 
       - name: data
         type: json

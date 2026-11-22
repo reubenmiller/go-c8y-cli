@@ -32,7 +32,7 @@ Create device group with custom properties
       --processingMode string      Cumulocity processing mode
       --template string            Body template
       --templateVars stringArray   Body template variables
-      --type string                Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubGroup (sub folder)). Defaults to c8y_DeviceGroup
+      --type string                Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubgroup (sub folder)). Defaults to c8y_DeviceGroup
 ```
 
 ### Options inherited from parent commands

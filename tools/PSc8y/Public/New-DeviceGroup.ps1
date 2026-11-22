@@ -34,9 +34,9 @@ Create device group with custom properties
         [object[]]
         $Name,
 
-        # Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubGroup (sub folder)). Defaults to c8y_DeviceGroup
+        # Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubgroup (sub folder)). Defaults to c8y_DeviceGroup
         [Parameter()]
-        [ValidateSet('c8y_DeviceGroup','c8y_DeviceSubGroup')]
+        [ValidateSet('c8y_DeviceGroup','c8y_DeviceSubgroup')]
         [string]
         $Type
     )
