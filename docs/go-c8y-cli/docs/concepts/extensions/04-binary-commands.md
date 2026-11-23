@@ -155,7 +155,7 @@ binary:
   path: bin/c8y-session-bitwarden
 
 sessionProviders:
-  - name: bitwarden                  # lower case letters, numbers and "-"
+  - name: bitwarden                  # lower case letters, numbers and "-" ("file" is reserved)
     description: Select a session from a Bitwarden folder
     exec: [list]                     # arguments before the c8y provider flags
     secrets: [BW_SESSION]            # environment variables the provider needs
@@ -189,6 +189,55 @@ return extsdk.PrintSession(extsdk.Session{
     Authorized: &authorized, // only if the credentials are verified
 })
 ```
+
+### Listing sessions for other pickers
+
+A provider can also declare `list` and `select` commands, which run without user interaction. c8y then shows the provider's sessions in its own pickers, for example the browser session picker of [`c8y mcp serve`](/docs/concepts/ai-agents), and logs in to a session without asking the provider to show its own picker.
+
+```yaml title="file: extension.yaml"
+sessionProviders:
+  - name: bitwarden
+    exec: [list]            # interactive
+    list: [list, --json]    # prints the sessions as a json array, without secrets
+    select: [get]           # followed by the sessionUri, prints the session (like exec)
+    secrets: [BW_SESSION]
+    format: json
+```
+
+Both must be set. c8y runs them with the same environment and secrets as `exec`, but without stdin, so they must not prompt the user. If they fail, they should exit with a non-zero exit code and write the reason as the last line of stderr, which is shown to the user.
+
+The `list` command gets the arguments the user configured for the provider (for example `c8y mcp serve --sessionProvider "bitwarden --folder c8y"`), and prints a json array:
+
+```json
+[
+  {
+    "sessionUri": "bitwarden://3f0b9d4e-1c2a-4f5b-9e8d-7a6b5c4d3e2f",
+    "name": "Production",
+    "host": "https://example.cumulocity.com",
+    "tenant": "t12345",
+    "username": "jdoe",
+    "mode": "prod",
+    "loginType": "OAUTH2_INTERNAL",
+    "group": "c8y"
+  }
+]
+```
+
+`sessionUri` and `host` are required, and `group` is an optional grouping shown to the user, such as a folder. Secret properties (for example `password` or `token`) are ignored.
+
+The `select` command gets the login flags (see above), the arguments the user gave after `--`, and the `sessionUri` as the last argument. It prints the session with its secrets, like `exec`. When the token expires, `c8y mcp serve` runs it again, so a provider which returns a TOTP code provides a new code. You can run it with:
+
+```sh
+c8y sessions login --from-extension bitwarden --select "bitwarden://3f0b9d4e-1c2a-4f5b-9e8d-7a6b5c4d3e2f"
+```
+
+Check the output of the `list` command with:
+
+```sh
+c8y sessions list --from-extension bitwarden -- --folder c8y
+```
+
+With the [Go SDK](#go-sdk), use `extsdk.PrintSessions` with `extsdk.SessionSummary` items for the `list` command, and `extsdk.PrintSession` for the `select` command.
 
 ## Go SDK
 

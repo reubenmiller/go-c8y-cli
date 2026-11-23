@@ -256,3 +256,22 @@ func TestFprintSession(t *testing.T) {
 		t.Errorf("unexpected session json:\n%s\nwant:\n%s", buf.String(), want)
 	}
 }
+
+func TestFprintSessions(t *testing.T) {
+	buf := &bytes.Buffer{}
+	if err := FprintSessions(buf, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.TrimSpace(buf.String()); got != "[]" {
+		t.Fatalf("expected an empty array, got %s", got)
+	}
+
+	buf.Reset()
+	err := FprintSessions(buf, []SessionSummary{{SessionUri: "vault://1", Host: "https://a.example.com", Name: "a&b"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.TrimSpace(buf.String()); got != `[{"sessionUri":"vault://1","name":"a&b","host":"https://a.example.com"}]` {
+		t.Fatalf("unexpected output: %s", got)
+	}
+}

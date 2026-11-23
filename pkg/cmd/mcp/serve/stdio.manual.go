@@ -9,18 +9,21 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/login"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/selectsession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mcpserver"
 )
 
 // runStdio runs the server over stdin/stdout, where the MCP client starts the server
 // and there is no terminal
-func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcpserver.Server, executable string, host string, sessionFile string, sessionModeName string) error {
+func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcpserver.Server, executable string, host string, sessionFile string, sessionModeName string, sources []providerSource) error {
 	log, err := n.factory.Logger()
 	if err != nil {
 		return err
@@ -65,6 +68,15 @@ func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcp
 		tempDir:    tempDir,
 		stderr:     n.factory.IOStreams.ErrOut,
 		picker:     &mcpserver.WebPicker{},
+		sources:    sources,
+		listProviderSessions: func(ctx context.Context, ref string, args []string) (string, []extensions.ProviderSession, error) {
+			provider, sessions, err := login.ListExtensionSessions(ctx, n.factory, ref, args, cfg.SessionProviderSecrets())
+			name := ref
+			if provider != nil {
+				name = provider.Provider.Name
+			}
+			return name, sessions, err
+		},
 	}
 	if !n.noNotify {
 		sessions.picker.Notify = func(message string) {
@@ -91,7 +103,7 @@ func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcp
 	}
 	server.SwitchSession = sessions.startSwitch
 
-	log.Infof("Starting MCP server (stdio). session=%s, approval=%s", sessionFile, server.Policy.Approval)
+	log.Infof("Starting MCP server (stdio). session=%s, sessionProviders=%v, approval=%s", sessionFile, providerRefs(sources), server.Policy.Approval)
 	return runStdioServer(ctx, server)
 }
 
@@ -113,9 +125,19 @@ type stdioSessions struct {
 	stderr     io.Writer
 	picker     *mcpserver.WebPicker
 
+	// sources of the sessions shown in the picker, in the order they are shown: session
+	// files (see FileSessionSource) and extension session providers
+	sources []providerSource
+	// listProviderSessions lists the sessions of a provider, and returns the provider's name
+	listProviderSessions func(ctx context.Context, ref string, args []string) (string, []extensions.ProviderSession, error)
+
 	// mu is held while a session is selected, so tool calls wait for the selection
-	mu      sync.Mutex
+	mu sync.Mutex
+	// current key of the session which is used (see choiceKey)
 	current string
+	// listed sessions of the providers, by key (see choiceKey)
+	listedMu sync.Mutex
+	listed   map[string]extensions.ProviderSession
 	// startup session given with --session, which needs the passphrase from the browser
 	startup string
 
@@ -128,7 +150,45 @@ type stdioSessions struct {
 type pendingSession struct {
 	info   mcpserver.SessionInfo
 	runner *mcpserver.Runner
-	path   string
+	// key identifies the session (see choiceKey)
+	key string
+}
+
+// FileSessionSource reserved session provider name of the session files in the session home folder
+const FileSessionSource = extensions.FileSessionProvider
+
+// providerSource a source of the sessions shown in the picker: the session files (Ref is
+// FileSessionSource), or an extension session provider and the arguments passed to its list
+// command
+type providerSource struct {
+	Ref  string
+	Args []string
+}
+
+// IsFiles returns true if the source is the session files
+func (p providerSource) IsFiles() bool {
+	return p.Ref == FileSessionSource
+}
+
+func providerRefs(providers []providerSource) []string {
+	refs := make([]string, 0, len(providers))
+	for _, p := range providers {
+		refs = append(refs, p.Ref)
+	}
+	return refs
+}
+
+// choiceKey identifies a session: the path of a session file, or the provider and the
+// sessionUri of a provider session
+func choiceKey(choice mcpserver.SessionChoice) string {
+	if choice.Provider != "" {
+		return providerKey(choice.Provider, choice.URI)
+	}
+	return choice.Path
+}
+
+func providerKey(provider string, uri string) string {
+	return "provider:" + provider + "\x00" + uri
 }
 
 // newSession prepares the login to a session file. The login happens when the
@@ -153,10 +213,10 @@ func (s *stdioSessions) newSession(sessionFile string) (*pendingSession, *mcpser
 		TempDir:     tempDir,
 		// log in again when the token expires, asking for the passphrase or the
 		// two-factor code in the browser if needed
-		Renew: s.renew(sessionFile),
+		Renew: s.renew(sessionFile, func() mcpserver.SessionChoice { return s.choice(sessionFile) }),
 	}
 	return &pendingSession{
-		path: sessionFile,
+		key: sessionFile,
 		info: mcpserver.SessionInfo{
 			Host:        details.host,
 			Tenant:      details.tenant,
@@ -175,16 +235,72 @@ func (s *stdioSessions) newSession(sessionFile string) (*pendingSession, *mcpser
 	}, login, nil
 }
 
+// newProviderSession prepares the login to a session of an extension session provider. The
+// provider returns the session (with its secrets) without user interaction, also when the
+// token is renewed
+func (s *stdioSessions) newProviderSession(choice mcpserver.SessionChoice) (*pendingSession, *mcpserver.InteractiveLogin, error) {
+	key := choiceKey(choice)
+	s.listedMu.Lock()
+	listed, ok := s.listed[key]
+	s.listedMu.Unlock()
+	if !ok {
+		return nil, nil, fmt.Errorf("unknown session %s of session provider %s", choice.URI, choice.Provider)
+	}
+	sessionMode, effectiveMode := capMode(s.log, s.server.Policy.Mode, listed.Mode)
+
+	login := &mcpserver.InteractiveLogin{
+		Executable:  s.executable,
+		Provider:    choice.Provider,
+		SessionURI:  choice.URI,
+		SessionMode: sessionMode.String(),
+		Stderr:      s.stderr,
+		Renew: s.renew(key, func() mcpserver.SessionChoice {
+			c := choice
+			c.Current = false
+			c.NeedsCode = s.needsCodeFor(key)
+			return c
+		}),
+	}
+	return &pendingSession{
+		key: key,
+		info: mcpserver.SessionInfo{
+			Host:        listed.Host,
+			Tenant:      listed.Tenant,
+			Username:    listed.Username,
+			SessionName: listed.DisplayName(),
+			SessionMode: sessionMode.String(),
+			Provider:    choice.Provider,
+		},
+		runner: &mcpserver.Runner{
+			Executable:      s.executable,
+			Mode:            effectiveMode,
+			Auth:            login,
+			DeniedPaths:     deniedPaths(s.cfg, s.server.Policy, ""),
+			SSHFallbackUser: sshFallbackUser(s.cfg),
+		},
+	}, login, nil
+}
+
 // use makes the session the one used by new commands
 func (s *stdioSessions) use(session *pendingSession) {
 	s.server.SetSession(session.info, session.runner)
-	s.current = session.path
+	s.current = session.key
 	s.startup = ""
 }
 
 // login is called by the picker when the user selects a session, so the user sees
 // straight away whether the session works
 func (s *stdioSessions) login(ctx context.Context, choice mcpserver.SessionChoice, secrets mcpserver.LoginSecrets) (any, error) {
+	if choice.Provider != "" {
+		session, login, err := s.newProviderSession(choice)
+		if err != nil {
+			return nil, err
+		}
+		if err := s.loginWith(ctx, session.key, login.LoginWith, secrets); err != nil {
+			return nil, err
+		}
+		return session, nil
+	}
 	if choice.NeedsPassphrase {
 		// check the passphrase first, for a clear message if it is wrong
 		if err := s.checkPassphrase(choice.Path, secrets.Passphrase); err != nil {
@@ -203,32 +319,33 @@ func (s *stdioSessions) login(ctx context.Context, choice mcpserver.SessionChoic
 
 // loginWith logs in, and remembers whether the session needs a two-factor code, so
 // the code field is shown straight away the next time
-func (s *stdioSessions) loginWith(ctx context.Context, sessionFile string, login func(context.Context, mcpserver.LoginSecrets) error, secrets mcpserver.LoginSecrets) error {
+func (s *stdioSessions) loginWith(ctx context.Context, key string, login func(context.Context, mcpserver.LoginSecrets) error, secrets mcpserver.LoginSecrets) error {
 	err := login(ctx, secrets)
 	if errors.Is(err, mcpserver.ErrTOTPRequired) || (err == nil && secrets.TOTPCode != "") {
 		s.codeMu.Lock()
 		if s.needsCode == nil {
 			s.needsCode = map[string]bool{}
 		}
-		s.needsCode[sessionFile] = true
+		s.needsCode[key] = true
 		s.codeMu.Unlock()
 	}
 	return err
 }
 
-func (s *stdioSessions) needsCodeFor(sessionFile string) bool {
+func (s *stdioSessions) needsCodeFor(key string) bool {
 	s.codeMu.Lock()
 	defer s.codeMu.Unlock()
-	return s.needsCode[sessionFile]
+	return s.needsCode[key]
 }
 
 // renew returns a function which logs in again, e.g. when the token expires. It logs
-// in without user input if possible (e.g. with the pin entry command), and otherwise
-// asks for the passphrase or the two-factor code in the browser
-func (s *stdioSessions) renew(sessionFile string) func(context.Context, func(context.Context, mcpserver.LoginSecrets) error) error {
+// in without user input if possible (e.g. with the pin entry command, or a session
+// provider), and otherwise asks for the passphrase or the two-factor code in the browser.
+// key identifies the session, and choice returns its current details
+func (s *stdioSessions) renew(key string, choice func() mcpserver.SessionChoice) func(context.Context, func(context.Context, mcpserver.LoginSecrets) error) error {
 	return func(ctx context.Context, login func(context.Context, mcpserver.LoginSecrets) error) error {
-		if !s.needsPassphrase(sessionFile) && !s.needsCodeFor(sessionFile) {
-			err := s.loginWith(ctx, sessionFile, login, mcpserver.LoginSecrets{})
+		if !choice().NeedsPassphrase && !s.needsCodeFor(key) {
+			err := s.loginWith(ctx, key, login, mcpserver.LoginSecrets{})
 			if !errors.Is(err, mcpserver.ErrTOTPRequired) {
 				return err
 			}
@@ -236,13 +353,13 @@ func (s *stdioSessions) renew(sessionFile string) func(context.Context, func(con
 		picker := *s.picker
 		picker.Login = func(ctx context.Context, choice mcpserver.SessionChoice, secrets mcpserver.LoginSecrets) (any, error) {
 			if choice.NeedsPassphrase {
-				if err := s.checkPassphrase(sessionFile, secrets.Passphrase); err != nil {
+				if err := s.checkPassphrase(choice.Path, secrets.Passphrase); err != nil {
 					return nil, err
 				}
 			}
-			return nil, s.loginWith(ctx, sessionFile, login, secrets)
+			return nil, s.loginWith(ctx, key, login, secrets)
 		}
-		_, err := picker.Unlock(ctx, "Log in to the Cumulocity session", "", s.choice(sessionFile))
+		_, err := picker.Unlock(ctx, "Log in to the Cumulocity session", "", choice())
 		return err
 	}
 }
@@ -302,7 +419,34 @@ func modeLabel(mode config.SessionMode) string {
 	}
 }
 
-func (s *stdioSessions) choices() ([]mcpserver.SessionChoice, error) {
+// choices returns the sessions shown in the picker, in the order of the sources: the session
+// files and the sessions of the session providers. Sources which can't list their sessions are
+// returned as problems
+func (s *stdioSessions) choices(ctx context.Context) ([]mcpserver.SessionChoice, []mcpserver.SourceError, error) {
+	listed := s.providerChoices(ctx)
+	choices := []mcpserver.SessionChoice{}
+	problems := []mcpserver.SourceError{}
+	for i, source := range s.sources {
+		if !source.IsFiles() {
+			choices = append(choices, listed[i].choices...)
+			problems = append(problems, listed[i].problems...)
+			continue
+		}
+		fileChoices, err := s.fileChoices()
+		if err != nil {
+			if len(s.sources) == 1 {
+				return nil, nil, err
+			}
+			problems = append(problems, mcpserver.SourceError{Source: mcpserver.SessionFilesSource, Message: err.Error()})
+			continue
+		}
+		choices = append(choices, fileChoices...)
+	}
+	return choices, problems, nil
+}
+
+// fileChoices returns the sessions of the session files in the session home folder
+func (s *stdioSessions) fileChoices() ([]mcpserver.SessionChoice, error) {
 	list, err := selectsession.ListSessions(s.cfg, s.log)
 	if err != nil {
 		return nil, err
@@ -324,6 +468,92 @@ func (s *stdioSessions) choices() ([]mcpserver.SessionChoice, error) {
 	return choices, nil
 }
 
+// providerListTimeout maximum duration to list the sessions of a session provider
+const providerListTimeout = 20 * time.Second
+
+// sourceChoices the sessions of a source, or the reason why they could not be listed
+type sourceChoices struct {
+	choices  []mcpserver.SessionChoice
+	problems []mcpserver.SourceError
+}
+
+// providerChoices lists the sessions of the session providers (in parallel). The result has
+// one item per source (empty for the session files)
+func (s *stdioSessions) providerChoices(ctx context.Context) []sourceChoices {
+	type result struct {
+		name     string
+		sessions []extensions.ProviderSession
+		err      error
+	}
+	results := make([]result, len(s.sources))
+	var wg sync.WaitGroup
+	for i, provider := range s.sources {
+		if provider.IsFiles() {
+			continue
+		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			listCtx, cancel := context.WithTimeout(ctx, providerListTimeout)
+			defer cancel()
+			name, sessions, err := s.listProviderSessions(listCtx, provider.Ref, provider.Args)
+			results[i] = result{name: name, sessions: sessions, err: err}
+		}()
+	}
+	wg.Wait()
+
+	out := make([]sourceChoices, len(s.sources))
+	listed := map[string]extensions.ProviderSession{}
+	for i, r := range results {
+		provider := s.sources[i]
+		if provider.IsFiles() {
+			continue
+		}
+		source := r.name
+		if source == "" {
+			source = provider.Ref
+		}
+		if r.err != nil {
+			s.log.Warnf("Could not list the sessions of session provider %s. %s", provider.Ref, r.err)
+			out[i].problems = append(out[i].problems, mcpserver.SourceError{Source: source, Message: r.err.Error()})
+			continue
+		}
+		if len(r.sessions) == 0 {
+			out[i].problems = append(out[i].problems, mcpserver.SourceError{Source: source, Message: "The session provider did not return any sessions."})
+			continue
+		}
+		for _, session := range r.sessions {
+			key := providerKey(provider.Ref, session.SessionURI)
+			listed[key] = session
+			mode := mcpserver.CapMode(s.server.Policy.Mode, config.SessionModeUnset.FromString(session.Mode, false))
+			out[i].choices = append(out[i].choices, mcpserver.SessionChoice{
+				Name:      session.DisplayName(),
+				Host:      strings.TrimRight(session.Host, "/"),
+				Tenant:    session.Tenant,
+				Username:  session.Username,
+				Mode:      mode.String(),
+				ModeInfo:  modeLabel(mode),
+				NeedsCode: s.needsCodeFor(key),
+				Current:   s.current == key,
+				Source:    source,
+				Provider:  provider.Ref,
+				URI:       session.SessionURI,
+				Group:     session.Group,
+			})
+		}
+	}
+	s.listedMu.Lock()
+	if s.listed == nil {
+		s.listed = map[string]extensions.ProviderSession{}
+	}
+	// keep the sessions which were listed before, e.g. the current session
+	for key, session := range listed {
+		s.listed[key] = session
+	}
+	s.listedMu.Unlock()
+	return out
+}
+
 // pickerWithLogin returns the picker, which logs in to the selected session
 func (s *stdioSessions) pickerWithLogin() *mcpserver.WebPicker {
 	picker := *s.picker
@@ -334,11 +564,11 @@ func (s *stdioSessions) pickerWithLogin() *mcpserver.WebPicker {
 // pick lets the user select a session in the browser and log in. It must be called
 // with mu held
 func (s *stdioSessions) pick(ctx context.Context, title string) error {
-	choices, err := s.choices()
+	choices, problems, err := s.choices(ctx)
 	if err != nil {
 		return err
 	}
-	selection, err := s.pickerWithLogin().Pick(ctx, title, choices)
+	selection, err := s.pickerWithLogin().Pick(ctx, title, choices, problems...)
 	if err != nil {
 		return err
 	}

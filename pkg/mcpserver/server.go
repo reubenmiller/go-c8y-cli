@@ -29,6 +29,8 @@ type SessionInfo struct {
 	Username    string `json:"username,omitempty"`
 	SessionName string `json:"session,omitempty"`
 	SessionMode string `json:"sessionMode"`
+	// Provider extension session provider which provides the session (if any)
+	Provider string `json:"provider,omitempty"`
 }
 
 // Server MCP server which exposes go-c8y-cli to an agent

@@ -94,9 +94,15 @@ type InteractiveLogin struct {
 	// Executable path to the c8y binary
 	Executable string
 
-	// SessionFile session file to log in with. If empty, the session is read
-	// from environment variables
+	// SessionFile session file to log in with. If empty (and no Provider is set), the
+	// session is read from environment variables
 	SessionFile string
+
+	// Provider extension session provider to log in with (<provider> or
+	// <extension>/<provider>), and SessionURI the session it returns. The provider is run
+	// without user interaction (its select command), also when the token is renewed
+	Provider   string
+	SessionURI string
 
 	// SessionMode mode passed to the login command (to avoid the mode prompt)
 	SessionMode string
@@ -138,9 +144,12 @@ func (l *InteractiveLogin) LoginWith(ctx context.Context, secrets LoginSecrets) 
 
 func (l *InteractiveLogin) login(ctx context.Context, secrets LoginSecrets) error {
 	args := []string{"sessions", "login", "--output-format", "dotenv", "--no-banner"}
-	if l.SessionFile != "" {
+	switch {
+	case l.Provider != "":
+		args = append(args, "--from-extension", l.Provider, "--select", l.SessionURI)
+	case l.SessionFile != "":
 		args = append(args, "--from-file", l.SessionFile)
-	} else {
+	default:
 		args = append(args, "--from-env")
 	}
 	if l.SessionMode != "" {
