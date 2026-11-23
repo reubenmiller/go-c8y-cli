@@ -291,9 +291,9 @@ The `v3` branch of go-c8y-cli starts from `origin/v2`, merged with the v2 SDK mi
 The allowlist in `internal/guardrails/allowlist.json` is the worklist. Each entry disappears when it is fixed.
 
 - `go-c8y-v1` (257 files) and `v1-worker` (33): completion callbacks and the v1 holdouts (C6, C7).
-- `flag-type-*`: `--id` is a single value in 63 commands; `--device`/`--group`/`--agent` differ in 11 (C3).
+- `flag-type-*`: `--id` is a single value in 33 commands; `--device`/`--group` differ in 10 (C3).
 - `cli-body-ref` (4): bulk operations and device registration (group ids), notification2 subscriptions, operations update.
 - `dry-run-check` (6): binary downloads and counts that write files or print a total.
-- `mode-guard` (15): local commands (alias, cache, sessions, settings, extensions, tedge, fdo); most are probably legitimate exceptions to mark as such.
+- `mode-guard` (9): local commands (alias, cache, sessions, settings, extensions); probably legitimate exceptions to mark as such.
 - C5 (`r.Body` defaults), S4 (request formatters in the SDK), S6 (method signatures), S9, S10.
 - The `--template` piped-input fix for software/firmware version create from `origin/v2` (#378) is not yet ported to the Runner commands.

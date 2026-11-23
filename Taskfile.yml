@@ -209,7 +209,7 @@ tasks:
   build-snapshot:
     desc: Build Snapshot
     cmds:
-      - goreleaser build --clean --snapshot {{.CLI_ARGS}}
+      - goreleaser build --clean --snapshot --timeout 2h {{.CLI_ARGS}}
 
   release-snapshot:
     desc: Release snapshot (useful to test building everything including the containers)
@@ -351,6 +351,20 @@ tasks:
     cmds:
       - env PATH="$LOCAL_PATH" ./tests/scripts/setup.sh
       - env PATH="$LOCAL_PATH" ./tests/run-auto.sh {{.CLI_ARGS}}
+
+  test-cli-offline:
+    desc: Run the dry-run cli tests against the go-c8y fake server (no tenant needed)
+    summary: |
+      Builds c8y and the go-c8y fake server (cmd/c8y-fakeserver, from the go-c8y
+      version in go.mod), creates the test data on the fake server and runs
+      tests/auto against it.
+
+      Additional arguments can be run using
+      task test-cli-offline -- software
+    deps: [install-test-dependencies]
+    cmds:
+      - go build -o .bin/c8y ./cmd/c8y
+      - env PATH="$LOCAL_PATH" ./tests/run-offline.sh {{.CLI_ARGS}}
 
   build-extension-fixtures:
     desc: Build the binary extension used by the extension tests (pkg/extsdk/examples/c8y-hello)
