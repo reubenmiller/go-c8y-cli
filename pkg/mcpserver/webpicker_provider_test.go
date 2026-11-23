@@ -77,3 +77,24 @@ func TestWebPickerOnlyProblems(t *testing.T) {
 		t.Errorf("expected the provider error, got %v", err)
 	}
 }
+
+func TestShowGroupHeadings(t *testing.T) {
+	files := SessionChoice{Name: "dev", Path: "/s/dev.json"}
+	provider := SessionChoice{Name: "vault", Source: "bitwarden", Provider: "bitwarden", URI: "bitwarden://1"}
+	cases := []struct {
+		name     string
+		choices  []SessionChoice
+		problems []SourceError
+		want     bool
+	}{
+		{name: "only session files", choices: []SessionChoice{files}, want: false},
+		{name: "only one provider", choices: []SessionChoice{provider}, want: true},
+		{name: "files and provider", choices: []SessionChoice{files, provider}, want: true},
+		{name: "files and failed provider", choices: []SessionChoice{files}, problems: []SourceError{{Source: "bitwarden", Message: "locked"}}, want: true},
+	}
+	for _, tc := range cases {
+		if got := showGroupHeadings(groupChoices(tc.choices, tc.problems)); got != tc.want {
+			t.Errorf("%s: got %v, want %v", tc.name, got, tc.want)
+		}
+	}
+}

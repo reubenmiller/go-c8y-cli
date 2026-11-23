@@ -157,6 +157,21 @@ type pickerItem struct {
 	Choice SessionChoice
 }
 
+// showGroupHeadings returns true if the headings of the groups are shown: if there is more than
+// one source, a source has an error, or a session provider is used, so the user can see where
+// the sessions come from. Only session files are shown without a heading
+func showGroupHeadings(groups []pickerGroup) bool {
+	if len(groups) > 1 {
+		return true
+	}
+	for _, g := range groups {
+		if g.Error != "" || g.Label != SessionFilesSource {
+			return true
+		}
+	}
+	return false
+}
+
 // groupChoices groups the sessions by their source, in the order of the choices. Sources
 // which could not list their sessions are added with their error
 func groupChoices(choices []SessionChoice, problems []SourceError) []pickerGroup {
@@ -309,13 +324,7 @@ func (w *WebPicker) run(ctx context.Context, title string, message string, choic
 			return unlockViewFor(0, "")
 		}
 		groups := groupChoices(choices, problems)
-		showGroups := len(groups) > 1
-		for _, g := range groups {
-			if g.Error != "" {
-				showGroups = true
-			}
-		}
-		return pickerView{Choices: choices, Groups: groups, ShowGroups: showGroups}
+		return pickerView{Choices: choices, Groups: groups, ShowGroups: showGroupHeadings(groups)}
 	}
 
 	// checkRequest rejects requests which don't come from the page opened by the user
