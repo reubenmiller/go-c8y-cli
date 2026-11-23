@@ -121,6 +121,8 @@ func TestPlanReadWriteClassification(t *testing.T) {
 		{"api --method=DELETE /inventory/managedObjects/1", false},
 		{"api DELETE /inventory/managedObjects/1", false},
 		{"api POST", false},
+		{"devices", true},
+		{"devices --select id", true},
 	}
 
 	c := newTestClassifier()
@@ -153,6 +155,10 @@ func TestPlanRejections(t *testing.T) {
 		{"devices list > out.json", "shell operator"},
 		{"devices list | jq .id", "unknown c8y command"},
 		{"foo bar", "unknown c8y command"},
+		{"devices count", `"devices" has no sub command "count"`},
+		{"devices --select id count", "Available sub commands: create, delete"},
+		{"remoteaccess connect foo", `"remoteaccess connect" has no sub command "foo"`},
+		{"tedge unknown", `"tedge" has no sub command "unknown"`},
 		{"--select id", "must start with a c8y command"},
 		{"api --url https://example.com/x", "absolute urls"},
 		{"api GET https://example.com/x", "absolute urls"},
