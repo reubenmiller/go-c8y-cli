@@ -33,6 +33,12 @@ func newTestRoot() *cobra.Command {
 	group("microservices", "list", "getBootstrapUser")
 	group("operations", "wait", "list", "create")
 	group("template", "execute")
+	applications := group("applications", "list")
+	open := &cobra.Command{Use: "open", RunE: noop}
+	open.Flags().Bool("noBrowser", false, "")
+	open.Flags().StringSlice("device", nil, "")
+	open.Flags().String("page", "", "")
+	applications.AddCommand(open)
 
 	remoteAccess := &cobra.Command{Use: "remoteaccess"}
 	connect := &cobra.Command{Use: "connect"}
@@ -123,6 +129,12 @@ func TestPlanReadWriteClassification(t *testing.T) {
 		{"api POST", false},
 		{"devices", true},
 		{"devices --select id", true},
+		{"applications open --device 1 --page device-info --noBrowser", true},
+		{"applications open --device 1 --noBrowser=true", true},
+		{"applications open --device 1", false},
+		{"applications open --device 1 --noBrowser=false", false},
+		{"devices list --noBrowser", true},
+		{"devices delete --id 1 --noBrowser", false},
 	}
 
 	c := newTestClassifier()
