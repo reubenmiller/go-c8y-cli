@@ -161,11 +161,20 @@ func (c *Classifier) classify(args []string) (*Segment, error) {
 		return nil, fmt.Errorf("command must start with a c8y command name, e.g. \"devices list\", got %q. Non-c8y commands (jq, grep etc.) are not supported", args[0])
 	}
 
-	cmd, _, err := c.Root.Find(args)
+	cmd, rest, err := c.Root.Find(args)
 	if err != nil || cmd == nil || cmd == c.Root {
 		return nil, fmt.Errorf("unknown c8y command %q. Use \"c8y <command> --help\" to discover commands", strings.Join(args, " "))
 	}
 	commandPath := strings.TrimSpace(strings.TrimPrefix(cmd.CommandPath(), c.Root.Name()))
+
+	// A command group (e.g. "devices") doesn't run anything itself. cobra resolves an
+	// unknown sub command (e.g. "devices count") to the group, so reject it here
+	// rather than classifying the group
+	if !cmd.Runnable() && cmd.HasAvailableSubCommands() {
+		if name := firstPositional(cmd, rest); name != "" {
+			return nil, fmt.Errorf("unknown c8y command %q: %q has no sub command %q. Available sub commands: %s. Use \"c8y %s --help\" to discover commands", strings.Join(args, " "), commandPath, name, strings.Join(availableSubCommands(cmd), ", "), commandPath)
+		}
+	}
 
 	if err := c.Policy.CheckCommand(commandPath); err != nil {
 		return nil, err
@@ -187,7 +196,8 @@ func (c *Classifier) classify(args []string) (*Segment, error) {
 	}
 
 	switch {
-	case IsHelp(args):
+	case IsHelp(args), !cmd.Runnable():
+		// a command group only shows its help
 		seg.Read = true
 	case deviceShell:
 		// Always a write: the shell command can change anything on the device, and
@@ -210,6 +220,45 @@ func (c *Classifier) classify(args []string) (*Segment, error) {
 		seg.Read = c.Policy.IsReadCommand(commandPath)
 	}
 	return seg, nil
+}
+
+// firstPositional returns the first argument which isn't a flag or a flag's value
+func firstPositional(cmd *cobra.Command, args []string) string {
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+		if arg == "--" {
+			return ""
+		}
+		if !strings.HasPrefix(arg, "-") || len(arg) == 1 {
+			return arg
+		}
+		name, _, hasValue := strings.Cut(strings.TrimLeft(arg, "-"), "=")
+		if hasValue {
+			continue
+		}
+		var flag *pflag.Flag
+		if strings.HasPrefix(arg, "--") {
+			flag = cmd.Flags().Lookup(name)
+		} else if len(name) == 1 {
+			flag = cmd.Flags().ShorthandLookup(name)
+		}
+		if flag != nil && flag.NoOptDefVal == "" {
+			// skip the flag's value
+			i++
+		}
+	}
+	return ""
+}
+
+// availableSubCommands returns the names of the visible sub commands
+func availableSubCommands(cmd *cobra.Command) []string {
+	names := []string{}
+	for _, sub := range cmd.Commands() {
+		if sub.IsAvailableCommand() {
+			names = append(names, sub.Name())
+		}
+	}
+	return names
 }
 
 // isExtensionCommand returns true if the command is provided by an extension, i.e. the

@@ -107,6 +107,7 @@ func (s *Server) Instructions() string {
 		- Call %s first to see the tenant, the allowed mode and the command policy. The user can switch to another session at any time, so call it again if the tenant matters, e.g. before changing data.
 		- Discover commands and flags with "<command> --help" or "<command> --examples" instead of guessing.
 		- Keep output small: use --select, --filter, --pageSize and --view off. Output is json by default.
+		- To count things, use a list command with --withTotalElements --pageSize 1 --raw --select statistics.totalElements, e.g. "devices list --withTotalElements --pageSize 1 --raw --select statistics.totalElements". The count is in statistics.totalElements.
 		- Pipe c8y commands with " | " (no shell is used, so jq, grep, &&, ; and redirects are not supported).
 		- Preview writes with --dry before running them with %s.
 		- Give a request body with --template rather than --data. --template takes JSON or jsonnet (a superset of JSON: unquoted keys, single-quoted strings, comments, expressions), so nested fragments, lists, numbers and booleans, and text with commas or "=" all work, e.g. --template "{type: 'c8y_Example', text: 'a, b = c', c8y_Example: {values: [1, 2], enabled: true}}". The --data shorthand (a.b=1,c=text) splits on commas and "=" and guesses types; use it only for a single simple value.
