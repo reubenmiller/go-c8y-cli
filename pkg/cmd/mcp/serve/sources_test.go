@@ -46,6 +46,9 @@ func TestProviderSources(t *testing.T) {
 		{name: "provider only", flags: []string{"bitwarden"}, want: []providerSource{{Ref: "bitwarden", Args: []string{}}}},
 		{name: "provider first", flags: []string{"bitwarden --folder 'my c8y'", "file"}, want: []providerSource{{Ref: "bitwarden", Args: []string{"--folder", "my c8y"}}, {Ref: "file"}}},
 		{name: "file only", flags: []string{"file"}, want: []providerSource{{Ref: "file"}}},
+		{name: "comma separated", flags: []string{"bitwarden,file"}, want: []providerSource{{Ref: "bitwarden", Args: []string{}}, {Ref: "file"}}},
+		{name: "comma separated and repeated", flags: []string{"file, bitwarden --folder 'a,b'"}, want: []providerSource{{Ref: "file"}, {Ref: "bitwarden", Args: []string{"--folder", "a,b"}}}},
+		{name: "escaped comma", flags: []string{`bitwarden --folder a\,b`, "file"}, want: []providerSource{{Ref: "bitwarden", Args: []string{"--folder", "a,b"}}, {Ref: "file"}}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -94,6 +97,9 @@ func TestProviderSourcesErrors(t *testing.T) {
 	cases := map[string][]string{
 		"does not accept arguments": {"file --folder x"},
 		"more than once":            {"file", "file"},
+		"given more than once":      {"file,bitwarden,file"},
+		"empty value":               {"bitwarden,"},
+		"unterminated quote":        {"bitwarden --folder 'c8y,file"},
 		"can't list its sessions":   {"interactive"},
 		"unknown session provider":  {"keepass"},
 		// the extension's provider named "file" is ignored, as the name is reserved
@@ -104,6 +110,27 @@ func TestProviderSourcesErrors(t *testing.T) {
 		_, err := n.providerSources(cfg)
 		if err == nil || !strings.Contains(err.Error(), want) {
 			t.Errorf("flags %v: expected an error containing %q, got %v", flags, want, err)
+		}
+	}
+}
+
+func TestSplitSources(t *testing.T) {
+	cases := map[string][]string{
+		"bitwarden":                        {"bitwarden"},
+		"bitwarden,file":                   {"bitwarden", "file"},
+		" bitwarden , file ":               {"bitwarden", "file"},
+		`bitwarden --folder "a,b",file`:    {`bitwarden --folder "a,b"`, "file"},
+		`bitwarden --folder 'it"s,x',file`: {`bitwarden --folder 'it"s,x'`, "file"},
+	}
+	for input, want := range cases {
+		got, err := splitSources(input)
+		if err != nil || !reflect.DeepEqual(got, want) {
+			t.Errorf("splitSources(%q) = %q, %v; want %q", input, got, err, want)
+		}
+	}
+	for _, input := range []string{"", ",file", "file,,bitwarden", `bitwarden "x`} {
+		if _, err := splitSources(input); err == nil {
+			t.Errorf("splitSources(%q) should fail", input)
 		}
 	}
 }
