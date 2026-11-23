@@ -125,8 +125,11 @@
                 "name": {
                     "type": "string",
                     "title": "Provider name",
-                    "description": "Name used to select the provider, e.g. 'c8y sessions login --from-extension <name>'",
+                    "description": "Name used to select the provider, e.g. 'c8y sessions login --from-extension <name>'. The name 'file' is reserved for the session files",
                     "pattern": "^[a-z][a-z0-9-]*$",
+                    "not": {
+                        "const": "file"
+                    },
                     "examples": [
                         "bitwarden"
                     ]

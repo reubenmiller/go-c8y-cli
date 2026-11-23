@@ -160,3 +160,14 @@ func TestParseProviderSessions(t *testing.T) {
 		t.Errorf("an object should not be accepted")
 	}
 }
+
+func TestValidSessionProvidersReservedName(t *testing.T) {
+	m := &Manifest{Binary: &BinarySpec{}, SessionProviders: []SessionProvider{{Name: FileSessionProvider}, {Name: "files"}}}
+	providers, warnings := m.ValidSessionProviders()
+	if len(providers) != 1 || providers[0].Name != "files" {
+		t.Errorf("the reserved name should be ignored: %+v", providers)
+	}
+	if len(warnings) != 1 || !strings.Contains(warnings[0], "reserved") {
+		t.Errorf("expected a warning for the reserved name: %v", warnings)
+	}
+}

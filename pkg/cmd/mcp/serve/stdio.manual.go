@@ -23,7 +23,7 @@ import (
 
 // runStdio runs the server over stdin/stdout, where the MCP client starts the server
 // and there is no terminal
-func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcpserver.Server, executable string, host string, sessionFile string, sessionModeName string, providers []providerSource) error {
+func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcpserver.Server, executable string, host string, sessionFile string, sessionModeName string, sources []providerSource) error {
 	log, err := n.factory.Logger()
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcp
 		tempDir:    tempDir,
 		stderr:     n.factory.IOStreams.ErrOut,
 		picker:     &mcpserver.WebPicker{},
-		providers:  providers,
+		sources:    sources,
 		listProviderSessions: func(ctx context.Context, ref string, args []string) (string, []extensions.ProviderSession, error) {
 			provider, sessions, err := login.ListExtensionSessions(ctx, n.factory, ref, args, cfg.SessionProviderSecrets())
 			name := ref
@@ -103,7 +103,7 @@ func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcp
 	}
 	server.SwitchSession = sessions.startSwitch
 
-	log.Infof("Starting MCP server (stdio). session=%s, sessionProviders=%v, approval=%s", sessionFile, providerRefs(providers), server.Policy.Approval)
+	log.Infof("Starting MCP server (stdio). session=%s, sessionProviders=%v, approval=%s", sessionFile, providerRefs(sources), server.Policy.Approval)
 	return runStdioServer(ctx, server)
 }
 
@@ -125,8 +125,9 @@ type stdioSessions struct {
 	stderr     io.Writer
 	picker     *mcpserver.WebPicker
 
-	// providers extension session providers whose sessions are shown in the picker
-	providers []providerSource
+	// sources of the sessions shown in the picker, in the order they are shown: session
+	// files (see FileSessionSource) and extension session providers
+	sources []providerSource
 	// listProviderSessions lists the sessions of a provider, and returns the provider's name
 	listProviderSessions func(ctx context.Context, ref string, args []string) (string, []extensions.ProviderSession, error)
 
@@ -153,11 +154,20 @@ type pendingSession struct {
 	key string
 }
 
-// providerSource an extension session provider whose sessions are shown in the picker, and
-// the arguments passed to its list command
+// FileSessionSource reserved session provider name of the session files in the session home folder
+const FileSessionSource = extensions.FileSessionProvider
+
+// providerSource a source of the sessions shown in the picker: the session files (Ref is
+// FileSessionSource), or an extension session provider and the arguments passed to its list
+// command
 type providerSource struct {
 	Ref  string
 	Args []string
+}
+
+// IsFiles returns true if the source is the session files
+func (p providerSource) IsFiles() bool {
+	return p.Ref == FileSessionSource
 }
 
 func providerRefs(providers []providerSource) []string {
@@ -409,16 +419,37 @@ func modeLabel(mode config.SessionMode) string {
 	}
 }
 
-// choices returns the sessions shown in the picker: the session files, and the sessions of the
-// session providers. Sources which can't list their sessions are returned as problems
+// choices returns the sessions shown in the picker, in the order of the sources: the session
+// files and the sessions of the session providers. Sources which can't list their sessions are
+// returned as problems
 func (s *stdioSessions) choices(ctx context.Context) ([]mcpserver.SessionChoice, []mcpserver.SourceError, error) {
+	listed := s.providerChoices(ctx)
+	choices := []mcpserver.SessionChoice{}
 	problems := []mcpserver.SourceError{}
+	for i, source := range s.sources {
+		if !source.IsFiles() {
+			choices = append(choices, listed[i].choices...)
+			problems = append(problems, listed[i].problems...)
+			continue
+		}
+		fileChoices, err := s.fileChoices()
+		if err != nil {
+			if len(s.sources) == 1 {
+				return nil, nil, err
+			}
+			problems = append(problems, mcpserver.SourceError{Source: mcpserver.SessionFilesSource, Message: err.Error()})
+			continue
+		}
+		choices = append(choices, fileChoices...)
+	}
+	return choices, problems, nil
+}
+
+// fileChoices returns the sessions of the session files in the session home folder
+func (s *stdioSessions) fileChoices() ([]mcpserver.SessionChoice, error) {
 	list, err := selectsession.ListSessions(s.cfg, s.log)
 	if err != nil {
-		if len(s.providers) == 0 {
-			return nil, nil, err
-		}
-		problems = append(problems, mcpserver.SourceError{Source: mcpserver.SessionFilesSource, Message: err.Error()})
+		return nil, err
 	}
 	current := s.current
 	if resolved, err := filepath.EvalSymlinks(current); err == nil {
@@ -434,24 +465,32 @@ func (s *stdioSessions) choices(ctx context.Context) ([]mcpserver.SessionChoice,
 		choice.Current = current != "" && path == current
 		choices = append(choices, choice)
 	}
-
-	providerChoices, providerProblems := s.providerChoices(ctx)
-	return append(choices, providerChoices...), append(problems, providerProblems...), nil
+	return choices, nil
 }
 
 // providerListTimeout maximum duration to list the sessions of a session provider
 const providerListTimeout = 20 * time.Second
 
-// providerChoices lists the sessions of the session providers (in parallel)
-func (s *stdioSessions) providerChoices(ctx context.Context) ([]mcpserver.SessionChoice, []mcpserver.SourceError) {
+// sourceChoices the sessions of a source, or the reason why they could not be listed
+type sourceChoices struct {
+	choices  []mcpserver.SessionChoice
+	problems []mcpserver.SourceError
+}
+
+// providerChoices lists the sessions of the session providers (in parallel). The result has
+// one item per source (empty for the session files)
+func (s *stdioSessions) providerChoices(ctx context.Context) []sourceChoices {
 	type result struct {
 		name     string
 		sessions []extensions.ProviderSession
 		err      error
 	}
-	results := make([]result, len(s.providers))
+	results := make([]result, len(s.sources))
 	var wg sync.WaitGroup
-	for i, provider := range s.providers {
+	for i, provider := range s.sources {
+		if provider.IsFiles() {
+			continue
+		}
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -463,29 +502,31 @@ func (s *stdioSessions) providerChoices(ctx context.Context) ([]mcpserver.Sessio
 	}
 	wg.Wait()
 
-	choices := []mcpserver.SessionChoice{}
-	problems := []mcpserver.SourceError{}
+	out := make([]sourceChoices, len(s.sources))
 	listed := map[string]extensions.ProviderSession{}
 	for i, r := range results {
-		provider := s.providers[i]
+		provider := s.sources[i]
+		if provider.IsFiles() {
+			continue
+		}
 		source := r.name
 		if source == "" {
 			source = provider.Ref
 		}
 		if r.err != nil {
 			s.log.Warnf("Could not list the sessions of session provider %s. %s", provider.Ref, r.err)
-			problems = append(problems, mcpserver.SourceError{Source: source, Message: r.err.Error()})
+			out[i].problems = append(out[i].problems, mcpserver.SourceError{Source: source, Message: r.err.Error()})
 			continue
 		}
 		if len(r.sessions) == 0 {
-			problems = append(problems, mcpserver.SourceError{Source: source, Message: "The session provider did not return any sessions."})
+			out[i].problems = append(out[i].problems, mcpserver.SourceError{Source: source, Message: "The session provider did not return any sessions."})
 			continue
 		}
 		for _, session := range r.sessions {
 			key := providerKey(provider.Ref, session.SessionURI)
 			listed[key] = session
 			mode := mcpserver.CapMode(s.server.Policy.Mode, config.SessionModeUnset.FromString(session.Mode, false))
-			choices = append(choices, mcpserver.SessionChoice{
+			out[i].choices = append(out[i].choices, mcpserver.SessionChoice{
 				Name:      session.DisplayName(),
 				Host:      strings.TrimRight(session.Host, "/"),
 				Tenant:    session.Tenant,
@@ -510,7 +551,7 @@ func (s *stdioSessions) providerChoices(ctx context.Context) ([]mcpserver.Sessio
 		s.listed[key] = session
 	}
 	s.listedMu.Unlock()
-	return choices, problems
+	return out
 }
 
 // pickerWithLogin returns the picker, which logs in to the selected session

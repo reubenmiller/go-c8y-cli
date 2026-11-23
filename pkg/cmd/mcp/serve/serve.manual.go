@@ -78,11 +78,13 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			  link which the server opens in the browser. The link is never shown to the agent.
 			* The passphrase and code are passed to the login via a pipe, and aren't kept. When the token
 			  expires, the page opens again if they are needed.
-			* Sessions of extension session providers (e.g. a password manager) are shown next to the
-			  session files with --session-provider <provider>, or by default the provider set with
-			  "c8y settings update session.provider.extension <provider>" (if session.provider.type is
-			  extension). The provider must declare the list and select commands in its extension.yaml.
-			  Its secrets are read from the environment, otherwise with the pin entry command. When the
+			* The picker shows the session files, and the sessions of the extension session provider set
+			  with "c8y settings update session.provider.extension <provider>" (if session.provider.type
+			  is extension). --sessionProvider replaces these sources: the picker only shows the listed
+			  sources, in the given order. Use "file" for the session files, e.g.
+			  --sessionProvider file --sessionProvider bitwarden. An extension session provider (e.g. a
+			  password manager) must declare the list and select commands in its extension.yaml. Its
+			  secrets are read from the environment, otherwise with the pin entry command. When the
 			  token expires, the provider is asked for the session again (e.g. for a new TOTP code).
 
 			For automation and CI, set C8Y_HOST, C8Y_TENANT, C8Y_USER and C8Y_PASSWORD or C8Y_TOKEN in the MCP
@@ -134,11 +136,11 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			$ claude mcp add --scope user c8y -- c8y mcp serve --deny "users" --deny "tenants" --approval elicit
 			Deny user and tenant management, and always ask the user to approve writes
 
-			$ claude mcp add --scope user c8y -- c8y mcp serve --session-provider bitwarden
-			Also show the sessions of the "bitwarden" extension session provider in the session picker
+			$ claude mcp add --scope user c8y -- c8y mcp serve --sessionProvider bitwarden
+			Only show the sessions of the "bitwarden" extension session provider in the session picker
 
-			$ claude mcp add --scope user c8y -- c8y mcp serve --session-provider "bitwarden --folder c8y"
-			Pass arguments to the session provider's list command
+			$ claude mcp add --scope user c8y -- c8y mcp serve --sessionProvider file --sessionProvider "bitwarden --folder c8y"
+			Show the session files and the "bitwarden" sessions, and pass arguments to the provider's list command
 
 			$ claude mcp add c8y -e C8Y_HOST=https://example.cumulocity.com -e C8Y_USER=ci -e C8Y_PASSWORD=... -- c8y mcp serve
 			Use credentials from environment variables (e.g. for CI)
@@ -163,9 +165,11 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 	cmd.Flags().BoolVar(&ccmd.allowDeviceShell, "allowDeviceShell", false, "Allow the agent to run shell commands on devices (remoteaccess connect ssh and c8y_Command operations). Needs --mode qual or dev")
 	cmd.Flags().BoolVar(&ccmd.confirmDeviceShell, "confirmDeviceShell", false, "Ask for confirmation of each command run on a device in a native dialog, in addition to the normal approval")
 	cmd.Flags().BoolVar(&ccmd.noNotify, "noNotify", false, "Don't show a desktop notification when the session picker opens in the browser")
-	cmd.Flags().StringArrayVar(&ccmd.sessionProviders, "session-provider", nil, "Extension session provider whose sessions are shown in the session picker, i.e. <provider> or <extension>/<provider>, optionally followed by arguments for its list command. Can be used multiple times. Default: session.provider.extension (if session.provider.type is extension)")
-	_ = cmd.RegisterFlagCompletionFunc("session-provider", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return extensions.SessionProviderCompletions(listableProviders(f)), cobra.ShellCompDirectiveNoFileComp
+	cmd.Flags().StringArrayVar(&ccmd.sessionProviders, "sessionProvider", nil, "Source of the sessions shown in the session picker: \"file\" for the session files, or an extension session provider (<provider> or <extension>/<provider>, optionally followed by arguments for its list command). Can be used multiple times. Replaces the default sources: the session files, and session.provider.extension (if session.provider.type is extension)")
+	_ = cmd.RegisterFlagCompletionFunc("sessionProvider", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		values := []string{FileSessionSource + "\tSession files in the session home folder"}
+		values = append(values, extensions.SessionProviderCompletions(listableProviders(f))...)
+		return values, cobra.ShellCompDirectiveNoFileComp
 	})
 	cmd.Flags().BoolVar(&ccmd.noDefaultDeny, "noDefaultDeny", false, fmt.Sprintf("Don't include the default deny list: %s", strings.Join(mcpserver.DefaultDenyCommands, ", ")))
 
@@ -337,27 +341,41 @@ func listableProviders(f *cmdutil.Factory) []extensions.InstalledSessionProvider
 	return providers
 }
 
-// providerSources returns the session providers whose sessions are shown in the picker: the
-// providers given with --session-provider, otherwise the configured extension provider (if it
-// can list its sessions)
+// providerSources returns the sources of the sessions shown in the picker, in the order they
+// are shown: the sources given with --sessionProvider, otherwise the session files and the
+// configured extension provider (if it can list its sessions)
 func (n *CmdServe) providerSources(cfg *config.Config) ([]providerSource, error) {
 	values := n.sessionProviders
 	fromConfig := false
-	if len(values) == 0 && strings.EqualFold(cfg.SessionProvider(), config.ProviderTypeExtension) && cfg.SessionProviderExtension() != "" {
-		values = []string{cfg.SessionProviderExtension()}
-		fromConfig = true
-	}
 	if len(values) == 0 {
-		return nil, nil
+		values = []string{FileSessionSource}
+		if strings.EqualFold(cfg.SessionProvider(), config.ProviderTypeExtension) && cfg.SessionProviderExtension() != "" {
+			values = append(values, cfg.SessionProviderExtension())
+			fromConfig = true
+		}
 	}
 
 	installed := extensions.ListSessionProviders(n.factory.ExtensionManager().List(), nil)
 	sources := make([]providerSource, 0, len(values))
+	seen := map[string]bool{}
 	for _, value := range values {
 		parts, err := shellquote.Split(value)
 		if err != nil || len(parts) == 0 {
 			return nil, cmderrors.NewUserError(fmt.Sprintf("invalid session provider: %q", value))
 		}
+		if seen[parts[0]] {
+			return nil, cmderrors.NewUserError(fmt.Sprintf("session provider %q is given more than once", parts[0]))
+		}
+		seen[parts[0]] = true
+
+		if parts[0] == FileSessionSource {
+			if len(parts) > 1 {
+				return nil, cmderrors.NewUserError(fmt.Sprintf("the %q session provider does not accept arguments: %q", FileSessionSource, value))
+			}
+			sources = append(sources, providerSource{Ref: FileSessionSource})
+			continue
+		}
+
 		provider, err := extensions.ResolveSessionProvider(installed, parts[0])
 		if err == nil && !provider.Provider.CanList() {
 			err = fmt.Errorf("session provider %s can't list its sessions, as it does not declare the list and select commands in its extension.yaml", provider.Ref())

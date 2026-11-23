@@ -19,7 +19,8 @@ func TestProviderChoices(t *testing.T) {
 		server: &mcpserver.Server{Policy: policy},
 		cfg:    cfg,
 		log:    cfg.Logger,
-		providers: []providerSource{
+		sources: []providerSource{
+			{Ref: FileSessionSource},
 			{Ref: "bitwarden", Args: []string{"--folder", "c8y"}},
 			{Ref: "session-op/onepassword"},
 		},
@@ -38,9 +39,14 @@ func TestProviderChoices(t *testing.T) {
 	}
 	s.current = providerKey("bitwarden", "bitwarden://2")
 
-	choices, problems := s.providerChoices(context.Background())
-	if len(choices) != 2 || len(problems) != 1 {
-		t.Fatalf("unexpected result: %+v %+v", choices, problems)
+	listed := s.providerChoices(context.Background())
+	if len(listed) != 3 || len(listed[0].choices) != 0 || len(listed[0].problems) != 0 {
+		t.Fatalf("the result should have one item per source, and none for the session files: %+v", listed)
+	}
+	choices := listed[1].choices
+	problems := listed[2].problems
+	if len(choices) != 2 || len(problems) != 1 || len(listed[1].problems) != 0 || len(listed[2].choices) != 0 {
+		t.Fatalf("unexpected result: %+v", listed)
 	}
 	dev := choices[0]
 	if dev.Source != "bitwarden" || dev.Provider != "bitwarden" || dev.URI != "bitwarden://1" || dev.Host != "https://dev.example.com" || dev.Group != "c8y" {
@@ -69,5 +75,35 @@ func TestProviderChoices(t *testing.T) {
 
 	if _, _, err := s.newProviderSession(mcpserver.SessionChoice{Provider: "bitwarden", URI: "bitwarden://unknown"}); err == nil {
 		t.Errorf("unlisted sessions should be rejected")
+	}
+}
+
+func TestChoicesFollowSourceOrder(t *testing.T) {
+	v := viper.New()
+	v.Set("settings.session.home", t.TempDir())
+	cfg := config.NewConfig(v)
+	newSessions := func(sources ...providerSource) *stdioSessions {
+		return &stdioSessions{
+			server:  &mcpserver.Server{Policy: mcpserver.DefaultPolicy()},
+			cfg:     cfg,
+			log:     cfg.Logger,
+			sources: sources,
+			listProviderSessions: func(ctx context.Context, ref string, args []string) (string, []extensions.ProviderSession, error) {
+				return ref, []extensions.ProviderSession{{SessionURI: ref + "://1", Host: "https://" + ref + ".example.com"}}, nil
+			},
+		}
+	}
+
+	choices, problems, err := newSessions(providerSource{Ref: "vault-b"}, providerSource{Ref: "vault-a"}).choices(context.Background())
+	if err != nil || len(problems) != 0 {
+		t.Fatal(err, problems)
+	}
+	if len(choices) != 2 || choices[0].Provider != "vault-b" || choices[1].Provider != "vault-a" {
+		t.Errorf("the sessions should be in the order of the sources: %+v", choices)
+	}
+	for _, c := range choices {
+		if c.Path != "" {
+			t.Errorf("session files should not be listed without the file source: %+v", c)
+		}
 	}
 }

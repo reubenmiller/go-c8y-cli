@@ -126,6 +126,11 @@ func (p *SessionProvider) OutputFormat() string {
 
 var sessionProviderName = regexp.MustCompile(`^[a-z][a-z0-9-]*$`)
 
+// FileSessionProvider is a reserved session provider name, which refers to the session files in
+// the session home folder (the same name as the "file" session provider type), e.g. in
+// "c8y mcp serve --sessionProvider file"
+const FileSessionProvider = "file"
+
 // ValidSessionProviders returns the usable session providers of the manifest, and warnings for
 // providers which are ignored: all providers if no binary is declared, providers with an invalid
 // name or format, and duplicate names (the first one is used)
@@ -143,6 +148,8 @@ func (m *Manifest) ValidSessionProviders() ([]SessionProvider, []string) {
 		switch {
 		case !sessionProviderName.MatchString(provider.Name):
 			warnings = append(warnings, fmt.Sprintf("session provider is ignored as the name is invalid. name=%q, expected=%s", provider.Name, sessionProviderName.String()))
+		case provider.Name == FileSessionProvider:
+			warnings = append(warnings, fmt.Sprintf("session provider is ignored as the name is reserved for the session files. name=%s", provider.Name))
 		case seen[provider.Name]:
 			warnings = append(warnings, fmt.Sprintf("duplicate session provider is ignored. name=%s", provider.Name))
 		case provider.Format != "" && provider.OutputFormat() != "" && provider.OutputFormat() != ProviderFormatJSON && provider.OutputFormat() != ProviderFormatDotenv:

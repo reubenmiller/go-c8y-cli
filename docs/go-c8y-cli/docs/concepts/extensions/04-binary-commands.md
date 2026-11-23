@@ -155,7 +155,7 @@ binary:
   path: bin/c8y-session-bitwarden
 
 sessionProviders:
-  - name: bitwarden                  # lower case letters, numbers and "-"
+  - name: bitwarden                  # lower case letters, numbers and "-" ("file" is reserved)
     description: Select a session from a Bitwarden folder
     exec: [list]                     # arguments before the c8y provider flags
     secrets: [BW_SESSION]            # environment variables the provider needs
@@ -206,7 +206,7 @@ sessionProviders:
 
 Both must be set. c8y runs them with the same environment and secrets as `exec`, but without stdin, so they must not prompt the user. If they fail, they should exit with a non-zero exit code and write the reason as the last line of stderr, which is shown to the user.
 
-The `list` command gets the arguments the user configured for the provider (for example `c8y mcp serve --session-provider "bitwarden --folder c8y"`), and prints a json array:
+The `list` command gets the arguments the user configured for the provider (for example `c8y mcp serve --sessionProvider "bitwarden --folder c8y"`), and prints a json array:
 
 ```json
 [
