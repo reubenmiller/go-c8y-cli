@@ -306,7 +306,7 @@ Importing the go-c8y v2 `api` package makes every importing package compile the 
 | `origin/v2` (go-c8y v1) | 128 |
 | v3 before | 914 |
 | go-c8y#200 | 727 |
-| go-cli#777 | 313 |
+| go-c8y-cli#777 | 313 |
 | both | 237 |
 
 The guardrail tests make the per-package cost visible again if new command packages are added; further gains would come from fewer pagination iterator and realtime stream methods (about 400 functions per importer).
