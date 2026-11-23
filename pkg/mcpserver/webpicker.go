@@ -611,8 +611,8 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   }
   .sessions li + li { border-top: 1px solid var(--line-2); }
   .sessions li.group {
-    position: sticky; top: 0; z-index: 1; padding: 8px 16px; font-size: .7rem; font-weight: 600; letter-spacing: .08em;
-    text-transform: uppercase; color: var(--faint);
+    /* the source is shown as written, e.g. the provider name */
+    position: sticky; top: 0; z-index: 1; padding: 8px 16px; font-size: .78rem; font-weight: 600; color: var(--faint);
     /* opaque (the list's colour on the card), as the sessions scroll underneath the heading */
     background: #22262b; border-bottom: 1px solid var(--line-2);
   }
