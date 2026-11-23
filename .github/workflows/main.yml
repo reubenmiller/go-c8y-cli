@@ -161,6 +161,11 @@ jobs:
       shell: bash
       timeout-minutes: 30
 
+    - name: Realtime cli tests against the fake server
+      run: task test-cli-offline-realtime
+      shell: bash
+      timeout-minutes: 15
+
   test-examples:
     runs-on: ${{ matrix.os }}
     needs: [build]

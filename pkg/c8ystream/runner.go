@@ -25,6 +25,7 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"log/slog"
 )
 
 // roundTripperFunc adapts a function to http.RoundTripper.
@@ -253,8 +254,10 @@ func (r *Runner) InputFlag(name string) error {
 	if err != nil {
 		return err
 	}
-	if pipeOpts == nil {
-		pipeOpts = &flags.PipelineOptions{Name: name, Property: name, Required: true}
+	if pipeOpts == nil || pipeOpts.Name == "" {
+		// No pipeline annotation: the flag itself drives the loop and piped
+		// items are read by the flag's own name.
+		pipeOpts = &flags.PipelineOptions{Name: name, Property: name}
 	}
 	iter, err := flags.NewFlagWithPipeIterator(r.Cmd, pipeOpts, true)
 	if err != nil {
@@ -446,6 +449,13 @@ func (r *Runner) Client() (*apiv2.Client, error) {
 	}
 
 	client := apiv2.NewClient(opts)
+	// The realtime client logs every websocket frame at info level; show that
+	// only with --verbose/--debug, like the request logging above.
+	level := slog.LevelWarn
+	if r.Config.Verbose() || r.Config.Debug() {
+		level = slog.LevelDebug
+	}
+	client.Realtime().SetLogger(slog.New(slog.NewTextHandler(r.Factory.IOStreams.ErrOut, &slog.HandlerOptions{Level: level})).With("component", "realtime"))
 	if err := r.installActivityLog(client); err != nil {
 		return nil, err
 	}

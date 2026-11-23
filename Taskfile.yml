@@ -366,6 +366,16 @@ tasks:
       - go build -o .bin/c8y ./cmd/c8y
       - env PATH="$LOCAL_PATH" ./tests/run-offline.sh {{.CLI_ARGS}}
 
+  test-cli-offline-realtime:
+    desc: Run the realtime (subscribe) cli tests against the go-c8y fake server
+    deps: [install-test-dependencies]
+    cmds:
+      - go build -o .bin/c8y ./cmd/c8y
+      - |
+        for suite in alarms/subscribe events/subscribe measurements/subscribe inventory/subscribe realtime; do
+          env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
+        done
+
   build-extension-fixtures:
     desc: Build the binary extension used by the extension tests (pkg/extsdk/examples/c8y-hello)
     dir: pkg/extsdk/examples/c8y-hello

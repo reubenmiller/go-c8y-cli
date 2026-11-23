@@ -8,7 +8,10 @@
 # usual test data is created on it first with tests/scripts/setup.sh.
 #
 # Usage:
-#   tests/run-offline.sh [auto-test-folder] [commander args...]
+#   tests/run-offline.sh [test-folder] [commander args...]
+#
+# C8Y_OFFLINE_SUITE=manual runs a tests/manual folder instead of tests/auto
+# (for manual tests that the fake server supports, e.g. alarms/subscribe).
 #
 # The c8y binary under test is the first one on PATH.
 set -euo pipefail
@@ -66,4 +69,12 @@ if ! "$SCRIPT_DIR/scripts/setup.sh" >"$WORK_DIR/setup.log" 2>&1 </dev/null; then
     exit 1
 fi
 
-"$SCRIPT_DIR/run-auto.sh" "$@" </dev/null
+if [ "${C8Y_OFFLINE_SUITE:-auto}" = manual ]; then
+    folder="${1:-}"
+    [ $# -gt 0 ] && shift
+    cd "$SCRIPT_DIR"
+    export TEST_SHELL=bash
+    commander test --config ./config.manual.yaml "$@" --dir "manual/$folder" </dev/null
+else
+    "$SCRIPT_DIR/run-auto.sh" "$@" </dev/null
+fi
