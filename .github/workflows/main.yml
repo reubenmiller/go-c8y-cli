@@ -64,10 +64,12 @@ jobs:
       with:
         tool-cache: false
         android: true
-        dotnet: false
+        # dotnet, docker images and large packages are not used by this job;
+        # a cold build of every target needs the space for the go build cache
+        dotnet: true
         haskell: true
-        large-packages: false
-        docker-images: false
+        large-packages: true
+        docker-images: true
         swap-storage: true
     - uses: actions/checkout@v6
 

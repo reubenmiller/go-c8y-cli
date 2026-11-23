@@ -30,7 +30,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.5.0
 	github.com/reubenmiller/go-c8y v0.38.0
-	github.com/reubenmiller/go-c8y/v2 v2.0.0-20261123012527-ceca7690caed
+	github.com/reubenmiller/go-c8y/v2 v2.0.0-20261123235129-815a6aba772c
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.1.0
