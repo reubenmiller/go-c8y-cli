@@ -298,7 +298,9 @@ The `v3` branch of go-c8y-cli starts from `origin/v2`, merged with the v2 SDK mi
 | reubenmiller/go-c8y-cli#782 | realtime subscribe commands on the Runner, subscribe tests run offline |
 | reubenmiller/go-c8y-cli#787 | wait and assert commands on the Runner and go-c8y v2 |
 | reubenmiller/go-c8y#207 | certificate authority `Update`, create settings, complete dry runs; `*core.Error` fixes |
-| go-c8y-cli `feat/v3-certificate-authority` | certificate authority commands on the Runner (stacked on #787) |
+| reubenmiller/go-c8y-cli#788 | certificate authority commands on the Runner (stacked on #787) |
+| reubenmiller/go-c8y#208 | fake server: `withParents` on a managed object |
+| go-c8y-cli `feat/v3-inventory-parents` | `inventory parents get` on the Runner (stacked on #788) |
 
 Merged: go-c8y #199 (SDK seams), #200 (`op.Result` with 15 instead of 30 methods, the method/function rule and a compile-cost budget test), #202 (committed binaries removed), #204 (`ClientOptions.Logger`), #205 (fake server removes `null` fragments); go-c8y-cli #775 (CI for `v3`).
 
@@ -320,7 +322,7 @@ The guardrail tests make the per-package cost visible again if new command packa
 
 The allowlist in `internal/guardrails/allowlist.json` is the worklist. Each entry disappears when it is fixed. After the PRs above:
 
-- `go-c8y-v1` (mostly completion callbacks) and `v1-worker`: bulk registration, enroll, hosted applications, microservice create, ui plugins, `api`, `assert text`, inventory parents, measurements create bulk, remote access, sessions (C6, C7).
+- `go-c8y-v1` (mostly completion callbacks) and `v1-worker`: bulk registration, enroll, hosted applications, microservice create, ui plugins, `api`, `assert text`, measurements create bulk, remote access, sessions (C6, C7).
 - `alarms assert count --fragmentType` is ignored: `alarms.ListOptions` has no fragment type (the alarm API does not document one).
 - The fake server reports `totalPages: 1` for an empty collection (Cumulocity reports 0). The count asserts now use `totalElements`, so they are not affected.
 - `flag-type-*`: `--id` differs in 3 commands (tenants create is intentional), `--group` in 3 (bulk registration), `--device` in 1 (remote access configurations update).
