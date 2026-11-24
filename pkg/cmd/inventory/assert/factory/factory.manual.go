@@ -1,191 +1,165 @@
+// Package factory builds the assert commands (inventory, devices, alarms,
+// events, measurements, operations and tenants assert ...). They share their
+// flags and behavior; each command only says what it checks.
 package factory
 
 import (
+	"context"
 	"time"
 
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywait"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/desiredstate"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/gjson"
 )
 
-type StateChecker interface {
-	GetStateHandler(*cobra.Command, *c8y.Client) desiredstate.StateDefiner
-	GetValue(interface{}, interface{}) []byte
+// Target is the flag that names what is checked.
+type Target int
+
+const (
+	// ManagedObject is checked by --id.
+	ManagedObject Target = iota
+	// Device is checked by --device.
+	Device
+	// Tenant is checked by --tenant.
+	Tenant
+)
+
+// Check builds the state check of one item. ref is the value of the target
+// flag (a managed object reference or a tenant id).
+type Check func(client *apiv2.Client, in *c8ystream.Resolver, ref string) c8ywait.Check
+
+// Assert describes one assert command.
+type Assert struct {
+	Target Target
+	// PassState outputs the current state of the object when the assertion
+	// holds. Otherwise the item's input is passed on untouched.
+	PassState bool
+	Check     Check
 }
 
-func NewAssertCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker) *cobra.Command {
-	cmd.Flags().StringSlice("id", []string{""}, "Inventory id (required) (accepts pipeline)")
+// New adds the shared assert flags to cmd and runs it.
+//
+// When the assertion holds, the item is passed on, so the passing items can
+// be piped to another command. A failed assertion outputs nothing and is not
+// an error unless --strict is set. Errors exit with code 112.
+func New(cmd *cobra.Command, f *cmdutil.Factory, a Assert) *cobra.Command {
+	flag := "id"
+	switch a.Target {
+	case Device:
+		flag = "device"
+		cmd.Flags().StringSlice(flag, []string{""}, "Device id or name (accepts pipeline)")
+		completion.WithOptions(cmd, completion.WithDevice(flag, func() (*c8y.Client, error) { return f.Client() }))
+		flags.WithOptions(cmd, flags.WithExtendedPipelineSupport(flag, flag, false, "deviceId", "source.id", "managedObject.id", "id"))
+	case Tenant:
+		flag = "tenant"
+		cmd.Flags().StringSlice(flag, []string{}, "Tenant id (accepts pipeline)")
+		completion.WithOptions(cmd, completion.WithTenantID(flag, func() (*c8y.Client, error) { return f.Client() }))
+		flags.WithOptions(cmd, flags.WithExtendedPipelineSupport(flag, flag, false, "tenantId", "id", "owner.tenant.id", "tenant"))
+	default:
+		cmd.Flags().StringSlice(flag, []string{""}, "Inventory id (required) (accepts pipeline)")
+		flags.WithOptions(cmd, flags.WithExtendedPipelineSupport(flag, flag, true, "deviceId", "source.id", "managedObject.id", "id"))
+	}
 	cmd.Flags().String("duration", "30s", "Timeout duration. i.e. 30s or 1m (1 minute)")
 	cmd.Flags().String("interval", "5s", "Interval to check on the status, i.e. 10s or 1min")
 	cmd.Flags().Int64("attempts", -1, "Number of attempts before giving up per id (-1 = unlimited)")
 	cmd.Flags().Bool("strict", false, "Strict mode, fail if no match is found")
-	flags.WithOptions(
-		cmd,
-		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
-	)
-
 	cmd.SilenceUsage = true
 
-	completion.WithOptions(
-		cmd,
-	)
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
-		cfg, err := f.Config()
+		opts, err := WaitOptions(cmd)
 		if err != nil {
 			return err
 		}
-		client, err := f.Client()
+		strict, err := cmd.Flags().GetBool("strict")
 		if err != nil {
 			return err
 		}
-
-		inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+		r, err := c8ystream.NewRunner(cmd, f)
 		if err != nil {
 			return err
 		}
-
-		duration, err := flags.GetDurationFlag(cmd, "duration", true, time.Second)
+		if err := r.InputFlag(flag); err != nil {
+			return err
+		}
+		client, err := r.Client()
 		if err != nil {
 			return err
 		}
-
-		interval, err := flags.GetDurationFlag(cmd, "interval", true, time.Second)
-		if err != nil {
-			return err
-		}
-
-		attempts, err := cmd.Flags().GetInt64("attempts")
-		if err != nil {
-			return err
-		}
-
-		strictMode, err := cmd.Flags().GetBool("strict")
-		if err != nil {
-			return err
-		}
-
-		// path parameters
-		path := flags.NewStringTemplate("{id}")
-		err = flags.WithParameters(
-			cmd,
-			path,
-			inputIterators,
-			c8yfetcher.WithIDSlice(args, "id", "id"),
-		)
-		if err != nil {
-			return err
-		}
-
-		return f.RunWithGenericWorkers(cmd, inputIterators, path, func(j worker.Job) (any, error) {
-			state := h.GetStateHandler(cmd, client)
-
-			itemID := gjson.ParseBytes(j.Value.([]byte))
-			input := j.Input
-
-			// Skip checking if the input has errors
-			_ = state.SetValue(itemID.String())
-			result, err := desiredstate.WaitForWithRetries(attempts, interval, duration, state)
-			if err == nil {
-				outValue := h.GetValue(result, input)
-				_ = f.WriteOutputWithoutPropertyGuess(outValue, cmdutil.OutputContext{})
+		r.Assert(strict)
+		return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+			ref := in.String(flag)
+			if a.Target != Tenant {
+				ref = c8ystream.NameOrID(ref)
 			}
-			return nil, err
-		}, cmdutil.ProcessAssertError(f, strictMode))
+			check := a.Check(client, in, ref)
+			input := in.Input()
+			if len(input) == 0 {
+				input = []byte(in.String(flag))
+			}
+			return func(ctx context.Context) any {
+				doc, err := c8ywait.Until(ctx, opts, check)
+				if err != nil {
+					return c8ywait.Seq(jsondoc.Empty(), err)
+				}
+				if a.PassState || len(input) == 0 {
+					return c8ywait.Seq(doc, nil)
+				}
+				return c8ywait.Seq(jsondoc.New(input), nil)
+			}, nil
+		})
 	}
 	return cmd
 }
 
-func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker) *cobra.Command {
-	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this event. (accepts pipeline)")
-	cmd.Flags().String("duration", "30s", "Timeout duration. i.e. 30s or 1m (1 minute)")
-	cmd.Flags().String("interval", "5s", "Interval to check on the status, i.e. 10s or 1min")
-	cmd.Flags().Int64("attempts", -1, "Number of attempts before giving up per id (-1 = unlimited)")
-	cmd.Flags().Bool("strict", false, "Strict mode, fail if no match is found")
-	flags.WithOptions(
-		cmd,
-		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
-	)
-
-	cmd.SilenceUsage = true
-
-	completion.WithOptions(
-		cmd,
-		completion.WithDevice("device", func() (*c8y.Client, error) { return f.Client() }),
-	)
-
-	flags.WithOptions(
-		cmd,
-		flags.WithExtendedPipelineSupport("device", "device", false, "deviceId", "source.id", "managedObject.id", "id"),
-	)
-
-	cmd.RunE = func(cmd *cobra.Command, args []string) error {
-		cfg, err := f.Config()
-		if err != nil {
-			return err
-		}
-		client, err := f.Client()
-		if err != nil {
-			return err
-		}
-
-		inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-		if err != nil {
-			return err
-		}
-
-		duration, err := flags.GetDurationFlag(cmd, "duration", true, time.Second)
-		if err != nil {
-			return err
-		}
-
-		interval, err := flags.GetDurationFlag(cmd, "interval", true, time.Second)
-		if err != nil {
-			return err
-		}
-
-		attempts, err := cmd.Flags().GetInt64("attempts")
-		if err != nil {
-			return err
-		}
-
-		strictMode, err := cmd.Flags().GetBool("strict")
-		if err != nil {
-			return err
-		}
-
-		// path parameters
-		path := flags.NewStringTemplate("{device}")
-		err = flags.WithParameters(
-			cmd,
-			path,
-			inputIterators,
-			c8yfetcher.WithDeviceByNameFirstMatch(f, args, "device", "device"),
-		)
-		if err != nil {
-			return err
-		}
-
-		return f.RunWithGenericWorkers(cmd, inputIterators, path, func(j worker.Job) (any, error) {
-			state := h.GetStateHandler(cmd, client)
-
-			itemID := gjson.ParseBytes(j.Value.([]byte))
-			input := j.Input
-
-			// Skip checking if the input has errors
-			_ = state.SetValue(itemID.String())
-			result, err := desiredstate.WaitForWithRetries(attempts, interval, duration, state)
-			if err == nil {
-				outValue := h.GetValue(result, input)
-				_ = f.WriteOutputWithoutPropertyGuess(outValue, cmdutil.OutputContext{})
-			}
-			return nil, err
-		}, cmdutil.ProcessAssertError(f, strictMode))
+// WaitOptions reads the --duration, --interval and --attempts flags.
+func WaitOptions(cmd *cobra.Command) (c8ywait.Options, error) {
+	var opts c8ywait.Options
+	var err error
+	if opts.Timeout, err = flags.GetDurationFlag(cmd, "duration", true, time.Second); err != nil {
+		return opts, err
 	}
-	return cmd
+	if cmd.Flags().Lookup("interval") != nil {
+		if opts.Interval, err = flags.GetDurationFlag(cmd, "interval", true, time.Second); err != nil {
+			return opts, err
+		}
+	}
+	if cmd.Flags().Lookup("attempts") != nil {
+		if opts.Attempts, err = cmd.Flags().GetInt64("attempts"); err != nil {
+			return opts, err
+		}
+	}
+	return opts, nil
+}
+
+// RunWait runs a wait command (operations wait, inventory wait): each item
+// named by flag is checked until it reaches the wanted state, and its last
+// state is output, also when the wait fails.
+func RunWait(cmd *cobra.Command, f *cmdutil.Factory, flag string, check Check) error {
+	opts, err := WaitOptions(cmd)
+	if err != nil {
+		return err
+	}
+	r, err := c8ystream.NewRunner(cmd, f)
+	if err != nil {
+		return err
+	}
+	if err := r.InputFlag(flag); err != nil {
+		return err
+	}
+	client, err := r.Client()
+	if err != nil {
+		return err
+	}
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		state := check(client, in, in.String(flag))
+		return func(ctx context.Context) any {
+			return c8ywait.Seq(c8ywait.Until(ctx, opts, state))
+		}, nil
+	})
 }

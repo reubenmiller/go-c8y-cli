@@ -285,17 +285,21 @@ The `v3` branch of go-c8y-cli starts from `origin/v2`, merged with the v2 SDK mi
 | Uploads are confirmed against the real request (no `SubmitUpload` stub, no hang) | fixed by S1 and C1 |
 | `NameOrID` and `ResolveContext` delegate to the SDK (`ParseRef`, `ResolutionContext`); scheme prefixes such as `ext:` are now kept | `pkg/c8ystream/resolver.go` |
 | Commands that hand a file path to the SDK check `C8Y_DENIED_PATHS` (`Resolver.File`) | `pkg/c8ystream/resolver.go` |
+| Wait and assert commands (14) on the Runner: one polling helper, `Runner.Assert` for pass-through, `--strict` and exit code 112, one shared assert factory (`pkg/c8ywaiter`, `pkg/desiredstate` and the duplicate devices factory removed) | `pkg/c8ywait`, `pkg/c8ystream/assert.go`, `pkg/cmd/inventory/assert/factory` |
+| The SDK's HTTP layer logs through `ClientOptions.Logger`; its warnings (credentials over plain HTTP) only show with `--verbose` | go-c8y `api/resty_logger.go`, `pkg/c8ystream/runner.go` |
 
 ### Pull requests (in review)
 
 | PR | What |
 |---|---|
-| reubenmiller/go-c8y#199 | SDK seams: request approver, `Documents`, `ParseRef`, body references (events, alarms, measurements, operations, bulk operations, device registration, notification2, operation update), realtime `Documents`/`SubscribeStream`, fake server realtime publishing |
-| reubenmiller/go-c8y#200 | `op.Result` has 12 instead of 30 methods (stacked on #199): importers of the SDK compile 37% fewer functions |
-| reubenmiller/go-c8y-cli#775 | CI: build and test `v3`, offline tests against the go-c8y fake server, build cache and disk fixes |
+| reubenmiller/go-c8y#204 | `ClientOptions.Logger` for the HTTP layer's messages |
+| reubenmiller/go-c8y#205 | fake server: a fragment set to `null` on update is removed |
 | reubenmiller/go-c8y-cli#776 | body references and binary downloads handled by the SDK/Runner, `--id` takes several values everywhere |
 | reubenmiller/go-c8y-cli#777 | one Go package per command group (359 packages merged into 87), no surface change |
 | reubenmiller/go-c8y-cli#782 | realtime subscribe commands on the Runner, subscribe tests run offline |
+| go-c8y-cli `feat/v3-wait-assert` | wait and assert commands on the Runner and go-c8y v2 |
+
+Merged: go-c8y #199 (SDK seams), #200 (`op.Result` with 15 instead of 30 methods, the method/function rule and a compile-cost budget test), #202 (committed binaries removed); go-c8y-cli #775 (CI for `v3`).
 
 ### Build time
 
@@ -305,7 +309,7 @@ Importing the go-c8y v2 `api` package makes every importing package compile the 
 |---|---:|
 | `origin/v2` (go-c8y v1) | 128 |
 | v3 before | 914 |
-| go-c8y#200 | 727 |
+| go-c8y#200 (as first proposed, 12 methods) | 727 |
 | go-c8y-cli#777 | 313 |
 | both | 237 |
 
@@ -315,7 +319,9 @@ The guardrail tests make the per-package cost visible again if new command packa
 
 The allowlist in `internal/guardrails/allowlist.json` is the worklist. Each entry disappears when it is fixed. After the PRs above:
 
-- `go-c8y-v1` (256 files, mostly completion callbacks) and `v1-worker` (27): wait, assert, certificate authority, bulk registration, enroll, hosted applications, microservice create, ui plugins, `api`, remote access, sessions (C6, C7).
+- `go-c8y-v1` (mostly completion callbacks) and `v1-worker`: certificate authority, bulk registration, enroll, hosted applications, microservice create, ui plugins, `api`, `assert text`, inventory parents, measurements create bulk, remote access, sessions (C6, C7).
+- `alarms assert count --fragmentType` is ignored: `alarms.ListOptions` has no fragment type (the alarm API does not document one).
+- The fake server reports `totalPages: 1` for an empty collection (Cumulocity reports 0). The count asserts now use `totalElements`, so they are not affected.
 - `flag-type-*`: `--id` differs in 3 commands (tenants create is intentional), `--group` in 3 (bulk registration), `--device` in 1 (remote access configurations update).
 - `dry-run-check` (2): bulk registration and enroll, both still v1.
 - `mode-guard` (9): local commands (alias, cache, sessions, settings, extensions); probably legitimate exceptions to mark as such.

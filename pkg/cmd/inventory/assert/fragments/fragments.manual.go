@@ -2,32 +2,15 @@ package fragments
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywaiter"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywait"
 	assertFactory "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assert/factory"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/desiredstate"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/spf13/cobra"
 )
-
-type AssertFragment struct{}
-
-func (a *AssertFragment) GetStateHandler(cmd *cobra.Command, client *c8y.Client) desiredstate.StateDefiner {
-	fragments, _ := cmd.Flags().GetStringSlice("fragments")
-	return &c8ywaiter.InventoryState{
-		Client:    client,
-		Fragments: fragments,
-	}
-}
-
-func (a *AssertFragment) GetValue(v interface{}, input interface{}) []byte {
-	if mo, ok := v.(*c8y.ManagedObject); ok {
-		return []byte(mo.Item.Raw)
-	}
-	return nil
-}
 
 type CmdFragments struct {
 	*subcommand.SubCommand
@@ -74,8 +57,14 @@ func NewCmdFragments(f *cmdutil.Factory) *CmdFragments {
 		cmd,
 	)
 
-	assertFragment := &AssertFragment{}
-	ccmd.SubCommand = subcommand.NewSubCommand(assertFactory.NewAssertCmdFactory(cmd, f, assertFragment))
+	ccmd.SubCommand = subcommand.NewSubCommand(assertFactory.New(cmd, f, assertFactory.Assert{
+		Target:    assertFactory.ManagedObject,
+		PassState: true,
+		Check: func(client *apiv2.Client, in *c8ystream.Resolver, ref string) c8ywait.Check {
+			fragments, _ := cmd.Flags().GetStringSlice("fragments")
+			return c8ywait.Fragments(client, ref, fragments)
+		},
+	}))
 
 	return ccmd
 }
