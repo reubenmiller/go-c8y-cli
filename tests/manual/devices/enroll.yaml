@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  It registers and enrolls a device and saves its key and certificate:
+    command: |
+      cd "$(mktemp -d)"
+      id="enroll_$(c8y template execute --template "_.Char(10)")"
+      c8y devices enroll --id "$id" --type thin-edge.io |
+        c8y template execute --template "input.value + {id: 'x', key: std.endsWith(input.value.key, '.key'), certificate: std.endsWith(input.value.certificate, '.crt')}"
+      head -n 1 "$id.key" "$id.crt"
+      c8y devices delete --id "$id" --silentStatusCodes 404 >/dev/null
+    exit-code: 0
+    stdout:
+      contains:
+        - '"alreadyRegistered":false'
+        - '"deviceType":"thin-edge.io"'
+        - '"key":true'
+        - '"certificate":true'
+        - "-----BEGIN PRIVATE KEY-----"
+        - "-----BEGIN CERTIFICATE-----"
+
+  It uses the certificate of an enrolled device:
+    command: |
+      cd "$(mktemp -d)"
+      id="enroll_$(c8y template execute --template "_.Char(10)")"
+      c8y devices enroll --id "$id" >/dev/null
+      c8y devices enroll --id "$id" --select alreadyRegistered
+      c8y devices delete --id "$id" --silentStatusCodes 404 >/dev/null
+    exit-code: 0
+    stdout:
+      json:
+        alreadyRegistered: "true"
+
+  It enrolls a device which a user registered:
+    command: |
+      cd "$(mktemp -d)"
+      id="enroll_$(c8y template execute --template "_.Char(10)")"
+      c8y deviceregistration register-ca --id "$id" --one-time-password "Enroll-Pass-123" >/dev/null
+      c8y devices enroll --id "$id" --mode manual --one-time-password "Enroll-Pass-123" --retry-every 100ms --select alreadyRegistered 2>/dev/null
+      c8y devices delete --id "$id" --silentStatusCodes 404 >/dev/null
+    exit-code: 0
+    stdout:
+      json:
+        alreadyRegistered: "false"
+
+  It shows the registration url while it waits for a user:
+    command: |
+      cd "$(mktemp -d)"
+      c8y devices enroll --id enroll_waiting --mode manual --one-time-password "Enroll-Pass-123" --retry-every 100ms --timeout 1s 2>&1 >/dev/null |
+        grep "deviceregistration"
+    exit-code: 0
+    stdout:
+      contains:
+        - "#/deviceregistration?externalId=enroll_waiting&one-time-password=Enroll-Pass-123"
+
+  It times out when the device is not registered and leaves no files:
+    command: |
+      cd "$(mktemp -d)"
+      c8y devices enroll --id enroll_timeout --mode manual --retry-every 100ms --timeout 1s 2>/dev/null
+      echo "exit=$?"
+      ls
+    exit-code: 0
+    stdout:
+      exactly: exit=106
+
+  It enrolls piped devices:
+    command: |
+      cd "$(mktemp -d)"
+      suffix="$(c8y template execute --template "_.Char(10)")"
+      c8y util repeat 2 |
+        c8y devices enroll --template "{id: 'pipe_${suffix}_' + input.index}" --select id,alreadyRegistered
+      ls | wc -l | tr -d ' '
+    exit-code: 0
+    stdout:
+      line-count: 3
+      contains:
+        - '"alreadyRegistered":false'
+        - "4"
+
+  It shows the requests in a dry run and writes no files:
+    command: |
+      cd "$(mktemp -d)"
+      c8y devices enroll --id enroll_dry --dry --select method,path 2>&1 | c8y util show --select method,path -o csv
+      ls
+    exit-code: 0
+    stdout:
+      exactly: |
+        DELETE,/devicecontrol/newDeviceRequests/enroll_dry
+        POST,/devicecontrol/bulkNewDeviceRequests
+        POST,/.well-known/est/simpleenroll
+
+  It enrolls with another host without the session's credentials:
+    command: |
+      cd "$(mktemp -d)"
+      c8y devices enroll --id enroll_host --host example.com --show-url=false --dry 2>/dev/null | c8y util show --select method,url -o csv
+    exit-code: 0
+    stdout:
+      exactly: POST,https://example.com/.well-known/est/simpleenroll
