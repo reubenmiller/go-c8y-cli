@@ -1,18 +1,19 @@
 package open
 
 import (
+	"context"
 	"fmt"
-	"io"
 	"net/url"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/spf13/cobra"
 )
 
@@ -114,88 +115,66 @@ Open a multiple web browser tabs for a list of device groups in the cockpit appl
 
 // RunE executes the command
 func (n *OpenCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-	client, err := n.factory.Client()
+	if err := r.InputFlag("device"); err != nil {
+		return err
+	}
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
+	cfg := r.Config
+	baseURL := strings.TrimSuffix(client.BaseURL.String(), "/")
 
-	// path parameters: Use placeholder and set template later
-	path := flags.NewStringTemplate("")
-	path.SetAllowEmptyValues(true)
-	path.SetVariable("page", "")
-
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-		flags.WithStringValue("page", "page"),
-		flags.WithStringValue("application", "application"),
-		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
-	)
-	if err != nil {
-		return err
-	}
-
-	bounded := inputIterators.Total > 0
-
-	// Update template based on application
-	pathTemplate := ""
-	switch {
-	case strings.Contains(n.application, "devicemanagement"):
-		if bounded {
-			pathTemplate = "/apps/{application}/index.html#/device/{device}/{page}"
-		} else {
-			pathTemplate = "/apps/{application}/index.html#/{page}"
-		}
-
-	case strings.Contains(n.application, "cockpit"), strings.Contains(n.application, "administration"):
-		pathTemplate = "/apps/{application}/index.html"
-	}
-
-	if n.path != "" {
-		pathTemplate = n.path
-	}
-
-	path.SetTemplate(pathTemplate)
-
-	for {
-		currentPath, _, err := path.GetNext()
-		if err != nil {
-			if err == io.EOF {
-				break
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		device := in.String("device")
+		return func(ctx context.Context) any {
+			if device != "" {
+				id, err := client.ManagedObjects.ResolveID(in.ResolveContext(), c8ystream.NameOrID(device), nil)
+				if err != nil {
+					return err
+				}
+				device = id
 			}
-			return err
-		}
-
-		currentURL, err := url.Parse(strings.TrimSuffix(client.BaseURL.String(), "/") + "/" + strings.TrimPrefix(string(currentPath), "/"))
-
-		if err != nil {
-			return err
-		}
-
-		if n.noBrowser {
-			fmt.Fprintf(n.factory.IOStreams.Out, "%s\n", currentURL.String())
-		} else if cfg.DryRun() {
-			fmt.Fprintf(n.factory.IOStreams.Out, "WHATIF: open %s in default browser\n", currentURL.String())
-		} else {
-			cfg.Logger.Infof("Opening web app: %s", currentURL.String())
-			if err := n.factory.Browser.Browse(currentURL.String()); err != nil {
+			target, err := url.Parse(baseURL + "/" + strings.TrimPrefix(n.pagePath(device), "/"))
+			if err != nil {
 				return err
 			}
-		}
+			switch {
+			case n.noBrowser:
+				return c8ystream.FromDocs(jsondoc.New([]byte(target.String())))
+			case cfg.DryRun():
+				fmt.Fprintf(n.factory.IOStreams.Out, "WHATIF: open %s in default browser\n", target)
+				return nil
+			}
+			cfg.Logger.Infof("Opening web app: %s", target)
+			return n.factory.Browser.Browse(target.String())
+		}, nil
+	})
+}
 
-		if !bounded {
-			break
+// pagePath returns the application path for the device (which may be empty),
+// from --path or a default for the application.
+func (n *OpenCmd) pagePath(device string) string {
+	template := n.path
+	if template == "" {
+		switch {
+		case strings.Contains(n.application, "devicemanagement"):
+			if device != "" {
+				template = "/apps/{application}/index.html#/device/{device}/{page}"
+			} else {
+				template = "/apps/{application}/index.html#/{page}"
+			}
+		case strings.Contains(n.application, "cockpit"), strings.Contains(n.application, "administration"):
+			template = "/apps/{application}/index.html"
 		}
 	}
-
-	return nil
+	return strings.NewReplacer(
+		"{application}", n.application,
+		"{device}", device,
+		"{page}", n.page,
+	).Replace(template)
 }

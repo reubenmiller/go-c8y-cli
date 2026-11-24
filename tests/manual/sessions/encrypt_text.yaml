@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It encrypts and decrypts text:
+    command: |
+      c8y sessions encryptText --text "Hello World" --passphrase "test-pass" |
+        c8y sessions decryptText --passphrase "test-pass"
+    exit-code: 0
+    stdout:
+      exactly: Hello World
+
+  It encrypts text with the encryption prefix:
+    command: |
+      c8y sessions encryptText --text "Hello World" --passphrase "test-pass"
+    exit-code: 0
+    stdout:
+      contains:
+        - "{encrypted}"
+
+  It encrypts and decrypts each piped line:
+    command: |
+      printf 'one\ntwo\n' |
+        c8y sessions encryptText --passphrase "test-pass" |
+        c8y sessions decryptText --passphrase "test-pass"
+    exit-code: 0
+    stdout:
+      exactly: |
+        one
+        two
+
+  It passes on text that is not encrypted:
+    command: |
+      c8y sessions decryptText --text "plain text" --passphrase "test-pass"
+    exit-code: 0
+    stdout:
+      exactly: plain text
+
+  It fails to decrypt with the wrong passphrase:
+    command: |
+      c8y sessions encryptText --text "Hello World" --passphrase "test-pass" |
+        c8y sessions decryptText --passphrase "other-pass"
+    exit-code: 108

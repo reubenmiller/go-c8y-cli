@@ -2,18 +2,19 @@ package json
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	"github.com/spf13/cobra"
 )
@@ -72,52 +73,20 @@ func NewCmdText(f *cmdutil.Factory) *CmdText {
 }
 
 func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
-
-	var iter iterator.Iterator
-	_, input, err := flags.WithPipelineIterator(&flags.PipelineOptions{
-		Name:        "input",
-		InputFilter: func(b []byte) bool { return true },
-		Disabled:    inputIterators.PipeOptions.Disabled,
-		Required:    false,
-	})(cmd, inputIterators)
-
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	switch v := input.(type) {
-	case iterator.Iterator:
-		iter = v
-	default:
-		// use a single input iterator
-		iter = iterator.NewRepeatIterator("", 1)
-	}
-
 	var schema *jsonschema.Schema
+	var err error
 	if n.schema != "" {
 		if strings.HasPrefix(n.schema, "{") {
-			// Load schema from
 			schema, err = jsonschema.CompileString("string://schema.json", n.schema)
 		} else {
 			schema, err = jsonschema.Compile(n.schema)
 		}
-
 		if err != nil {
 			return err
 		}
 	}
 
 	var pattern *regexp.Regexp
-
 	if n.regex != "" {
 		pattern, err = regexp.Compile("(?ms)" + n.regex)
 		if err != nil {
@@ -125,49 +94,49 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	writeOutput := func(output []byte) {
-		_ = n.factory.WriteOutputWithoutPropertyGuess(output, cmdutil.OutputContext{})
+	r, err := c8ystream.NewRunner(cmd, n.factory)
+	if err != nil {
+		return err
 	}
+	err = r.InputPipeline(flags.PipelineOptions{
+		Name:        "input",
+		InputFilter: func(b []byte) bool { return true },
+	})
+	if err != nil {
+		return cmderrors.NewUserError(err)
+	}
+	r.Assert(n.strictMode)
 
-	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
-		var err error
-		input := j.Value.([]byte)
-
-		// schema match
-		if schema != nil {
-			var val interface{}
-			_ = json.Unmarshal(input, &val)
-			err = schema.Validate(val)
-
-			if err == nil {
-				writeOutput(input)
-			} else {
-				err = fmt.Errorf("%w. input does not match json schema. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.schema)
+	// No client: each item is checked and passed on as it is.
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		input := in.Input()
+		return func(context.Context) any {
+			if err := n.check(input, schema, pattern); err != nil {
+				return err
 			}
-		}
-
-		// regex match
-		if pattern != nil {
-			if err == nil {
-				if !pattern.Match(input) {
-					err = fmt.Errorf("%w. input does not match pattern. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.regex)
-				} else {
-					writeOutput(input)
-				}
+			if schema == nil && pattern == nil && n.exact == "" {
+				return nil
 			}
-		}
+			return c8ystream.FromDocs(jsondoc.New(input))
+		}, nil
+	})
+}
 
-		// exact match
-		if err == nil {
-			if n.exact != "" {
-				if !bytes.Equal(input, []byte(n.exact)) {
-					err = fmt.Errorf("%w. input does not match. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.exact)
-				} else {
-					writeOutput(input)
-				}
-			}
+// check reports an assertion error when the input does not match all of the
+// given conditions.
+func (n *CmdText) check(input []byte, schema *jsonschema.Schema, pattern *regexp.Regexp) error {
+	if schema != nil {
+		var val any
+		_ = json.Unmarshal(input, &val)
+		if err := schema.Validate(val); err != nil {
+			return fmt.Errorf("%w. input does not match json schema. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.schema)
 		}
-		return nil, err
-	}, cmdutil.ProcessAssertError(n.factory, n.strictMode))
-
+	}
+	if pattern != nil && !pattern.Match(input) {
+		return fmt.Errorf("%w. input does not match pattern. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.regex)
+	}
+	if n.exact != "" && !bytes.Equal(input, []byte(n.exact)) {
+		return fmt.Errorf("%w. input does not match. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.exact)
+	}
+	return nil
 }

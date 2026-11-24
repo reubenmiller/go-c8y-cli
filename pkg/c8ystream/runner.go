@@ -337,6 +337,27 @@ func (r *Runner) InputRaw(name string) error {
 	return nil
 }
 
+// InputPipeline makes a flag the iterating driver with the given pipeline
+// options, for commands that read their input as text rather than as JSON
+// items (a line filter, a formatter or a text mode). Piped lines feed the
+// flag; without a pipe the flag's own values (or a file it names) do. With no
+// input and Required unset, the command runs once with an empty input. Read
+// the item back in Build with in.Input().
+func (r *Runner) InputPipeline(opts flags.PipelineOptions) error {
+	if r.InputIterators.PipeOptions != nil && r.InputIterators.PipeOptions.Disabled {
+		opts.Disabled = true
+	}
+	iter, err := flags.NewFlagWithPipeIterator(r.Cmd, &opts, true)
+	if err != nil {
+		return err
+	}
+	if iter != nil {
+		r.driver = iter
+	}
+	r.primaryName = opts.Name
+	return nil
+}
+
 // Query configures the Cumulocity query expression assembled from the given
 // flag options (e.g. flags.WithCumulocityQuery). Evaluate it per item in Build
 // with in.Query().
