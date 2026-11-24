@@ -3,6 +3,7 @@ package mcpserver
 import (
 	"os"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
@@ -344,4 +345,32 @@ func TestLimitedWriter(t *testing.T) {
 	if buf.String() != "hello" || !w.truncated {
 		t.Errorf("unexpected output %q, truncated=%v", buf.String(), w.truncated)
 	}
+}
+
+// Tool calls are handled concurrently, and cobra changes the command tree while
+// finding a command, so the classifier must serialize the lookups. Run with -race
+func TestPlanConcurrent(t *testing.T) {
+	c := newTestClassifier()
+	commands := []string{
+		"devices list --select id,name",
+		"devices create --dry",
+		"inventory get --select id",
+		"applications open --device 1 --page device-info --noBrowser",
+		"remoteaccess connect ssh --device 1 -- uptime",
+		"api --url /inventory/managedObjects | devices get --select id",
+		"tedge demo start tedge_mux_test --skip-website",
+	}
+	var wg sync.WaitGroup
+	for i := 0; i < 50; i++ {
+		for _, command := range commands {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				if _, err := c.Plan(command); err != nil {
+					t.Errorf("%q: unexpected error: %s", command, err)
+				}
+			}()
+		}
+	}
+	wg.Wait()
 }
