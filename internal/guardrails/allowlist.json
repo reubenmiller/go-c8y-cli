@@ -281,7 +281,6 @@
     "pkg/cmd/devices/enroll/enroll.manual.go",
     "pkg/cmd/measurements/createBulk/createBulk.manual.go",
     "pkg/cmd/microservices/create/create.manual.go",
-    "pkg/cmd/microservices/serviceuser/get/get.manual.go",
     "pkg/cmd/remoteaccess/connect/run/run.manual.go",
     "pkg/cmd/remoteaccess/connect/ssh/ssh.manual.go",
     "pkg/cmd/remoteaccess/server/server.manual.go",
