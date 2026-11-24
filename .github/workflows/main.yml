@@ -168,8 +168,8 @@ jobs:
       shell: bash
       timeout-minutes: 15
 
-    - name: Wait and assert cli tests against the fake server
-      run: task test-cli-offline-wait-assert
+    - name: Manual cli tests against the fake server
+      run: task test-cli-offline-manual
       shell: bash
       timeout-minutes: 15
 

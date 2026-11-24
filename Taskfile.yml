@@ -376,13 +376,13 @@ tasks:
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
 
-  test-cli-offline-wait-assert:
-    desc: Run the wait and assert cli tests against the go-c8y fake server
+  test-cli-offline-manual:
+    desc: Run the manual cli tests that the go-c8y fake server supports (wait, assert, certificate authority)
     deps: [install-test-dependencies]
     cmds:
       - go build -o .bin/c8y ./cmd/c8y
       - |
-        for suite in operations/wait inventory/wait.yaml inventory/assert devices/assert alarms/assert events/assert measurements/assert operations/assert tenants/assert; do
+        for suite in operations/wait inventory/wait.yaml inventory/assert devices/assert alarms/assert events/assert measurements/assert operations/assert tenants/assert devicemanagement/certificate-authority; do
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
 

@@ -2,13 +2,13 @@ package delete
 
 import (
 	"context"
-	"fmt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/trustedcertificates/certificateauthority"
 	"github.com/spf13/cobra"
 )
 
@@ -59,26 +59,17 @@ Delete certificate authority
 
 // RunE executes the command
 func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, cfgErr := n.factory.Config()
-	if cfgErr != nil {
-		return cfgErr
-	}
-
-	cs := n.factory.IOStreams.ColorScheme()
-	client, err := n.factory.Client()
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-
-	return n.factory.RunWithGenericWorkers(cmd, nil, nil, func(j worker.Job) (any, error) {
-		_, err = client.CertificateAuthority.Delete(context.Background(), "")
-		if err != nil {
-			return nil, err
-		}
-		if cfg.DryRun() {
-			return nil, nil
-		}
-		_, err = fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Deleted certificate-authority for tenant %s\n", cs.SuccessIconWithColor(cs.Red), client.GetTenantName(context.Background()))
-		return nil, err
-	}, nil)
+	client, err := r.Client()
+	if err != nil {
+		return err
+	}
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		return func(ctx context.Context) any {
+			return client.TrustedCertificates.CertificateAuthority.Delete(ctx, certificateauthority.DeleteOptions{})
+		}, nil
+	})
 }

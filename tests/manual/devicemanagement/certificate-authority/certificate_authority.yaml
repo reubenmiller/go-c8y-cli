@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+#
+# Only reads and dry runs, so the tests are safe on a real tenant. They
+# assume the tenant has a certificate authority (the fake server has one).
+
+tests:
+  It gets the certificate authority:
+    command: c8y devicemanagement certificate-authority get --select fingerprint,tenantCertificateAuthority -o json
+    exit-code: 0
+    stdout:
+      json:
+        fingerprint: r/^[\w-]+$
+        tenantCertificateAuthority: "true"
+
+  It shows the create request in a dry run:
+    command: c8y devicemanagement certificate-authority create --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        method: POST
+        path: /certificate-authority
+
+  It shows the update request with the fingerprint in a dry run:
+    command: c8y devicemanagement certificate-authority update --status DISABLED --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        method: PUT
+        path: r/^/tenant/tenants/\w+/trusted-certificates/[\w-]+$
+        body.status: DISABLED
+
+  It includes --template values in the update body:
+    command: 'c8y devicemanagement certificate-authority update --template "{autoRegistrationEnabled: true}" --dry --dryFormat json'
+    exit-code: 0
+    stdout:
+      json:
+        method: PUT
+        body.autoRegistrationEnabled: "true"
+
+  It shows the delete request with the fingerprint in a dry run:
+    command: c8y devicemanagement certificate-authority delete --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        method: DELETE
+        path: r/^/tenant/tenants/\w+/trusted-certificates/[\w-]+$
