@@ -292,14 +292,12 @@ The `v3` branch of go-c8y-cli starts from `origin/v2`, merged with the v2 SDK mi
 
 | PR | What |
 |---|---|
-| reubenmiller/go-c8y#204 | `ClientOptions.Logger` for the HTTP layer's messages |
-| reubenmiller/go-c8y#205 | fake server: a fragment set to `null` on update is removed |
 | reubenmiller/go-c8y-cli#776 | body references and binary downloads handled by the SDK/Runner, `--id` takes several values everywhere |
 | reubenmiller/go-c8y-cli#777 | one Go package per command group (359 packages merged into 87), no surface change |
 | reubenmiller/go-c8y-cli#782 | realtime subscribe commands on the Runner, subscribe tests run offline |
 | go-c8y-cli `feat/v3-wait-assert` | wait and assert commands on the Runner and go-c8y v2 |
 
-Merged: go-c8y #199 (SDK seams), #200 (`op.Result` with 15 instead of 30 methods, the method/function rule and a compile-cost budget test), #202 (committed binaries removed); go-c8y-cli #775 (CI for `v3`).
+Merged: go-c8y #199 (SDK seams), #200 (`op.Result` with 15 instead of 30 methods, the method/function rule and a compile-cost budget test), #202 (committed binaries removed), #204 (`ClientOptions.Logger`), #205 (fake server removes `null` fragments); go-c8y-cli #775 (CI for `v3`).
 
 ### Build time
 

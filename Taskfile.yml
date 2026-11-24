@@ -382,8 +382,7 @@ tasks:
     cmds:
       - go build -o .bin/c8y ./cmd/c8y
       - |
-        # inventory wait needs a fake server that removes null fragments (go-c8y #205)
-        for suite in operations/wait inventory/assert devices/assert alarms/assert events/assert measurements/assert operations/assert tenants/assert; do
+        for suite in operations/wait inventory/wait.yaml inventory/assert devices/assert alarms/assert events/assert measurements/assert operations/assert tenants/assert; do
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
 
