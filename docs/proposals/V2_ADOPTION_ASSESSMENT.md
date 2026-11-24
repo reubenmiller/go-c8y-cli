@@ -323,7 +323,8 @@ The guardrail tests make the per-package cost visible again if new command packa
 
 The allowlist in `internal/guardrails/allowlist.json` is the worklist. Each entry disappears when it is fixed. After the PRs above:
 
-- `go-c8y-v1` (mostly completion callbacks) and `v1-worker`: bulk registration, enroll, hosted applications, microservice create, ui plugins, `api`, `assert text`, measurements create bulk, remote access, sessions (C6, C7).
+- `go-c8y-v1` (mostly completion callbacks) and `v1-worker`: bulk registration, enroll, hosted applications, microservice create, ui plugins, `api`, `assert text`, remote access, sessions (C6, C7).
+- `measurements createBulk` groups several piped items into one request. The Runner makes one request per item, so it needs a batching option in the Runner first.
 - `alarms assert count --fragmentType` is ignored: `alarms.ListOptions` has no fragment type (the alarm API does not document one).
 - The fake server reports `totalPages: 1` for an empty collection (Cumulocity reports 0). The count asserts now use `totalElements`, so they are not affected.
 - `flag-type-*`: `--id` differs in 3 commands (tenants create is intentional), `--group` in 3 (bulk registration), `--device` in 1 (remote access configurations update).
