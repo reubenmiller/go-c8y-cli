@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  It registers a device with username and password:
+    command: |
+      id="basic_$(c8y template execute --template "_.Char(10)")"
+      c8y deviceregistration register-basic --id "$id" --password "Device-Pass-123" --select externalId,authType,password,name,externalType,username |
+        c8y template execute --template "input.value + {externalId: 'x'}"
+      c8y devices delete --id "$id" --silentStatusCodes 404 >/dev/null
+    exit-code: 0
+    stdout:
+      json:
+        externalId: x
+        authType: BASIC
+        password: Device-Pass-123
+        name: r/^basic_
+        externalType: c8y_Serial
+        username: r/^t\d+/device_basic_
+
+  It registers a device for the Cumulocity certificate authority:
+    command: |
+      id="ca_$(c8y template execute --template "_.Char(10)")"
+      c8y deviceregistration register-ca --id "$id" --one-time-password "LookHowSecretThisIs1337" --name "My device" --select authType,password,name,id
+      c8y devices delete --id "$id" --silentStatusCodes 404 >/dev/null
+    exit-code: 0
+    stdout:
+      json:
+        authType: CERTIFICATES
+        password: LookHowSecretThisIs1337
+        name: My device
+        id: r/^\d+$
+
+  It registers a device with an external certificate authority:
+    command: |
+      id="extca_$(c8y template execute --template "_.Char(10)")"
+      c8y deviceregistration register-external-ca --id "$id" --select authType,password,id -o json -c
+      c8y devices delete --id "$id" --silentStatusCodes 404 >/dev/null
+    exit-code: 0
+    stdout:
+      json:
+        authType: CERTIFICATES
+        id: r/^\d+$
+      not-contains:
+        - password
+
+  It generates a password when none is given:
+    command: |
+      id="gen_$(c8y template execute --template "_.Char(10)")"
+      c8y deviceregistration register-basic --id "$id" --select password -o csv
+      c8y devices delete --id "$id" --silentStatusCodes 404 >/dev/null
+    exit-code: 0
+    stdout:
+      line-count: 1
+
+  It registers each piped device:
+    command: |
+      prefix="pipe_$(c8y template execute --template "_.Char(8)")"
+      printf '%s\n' "${prefix}_1" "${prefix}_2" | c8y deviceregistration register-basic --select externalId -o csv
+      c8y devices list --name "${prefix}_*" --select id -o csv | c8y devices delete >/dev/null
+    exit-code: 0
+    stdout:
+      line-count: 2
+
+  It fails for a device that exists:
+    command: |
+      id="dup_$(c8y template execute --template "_.Char(10)")"
+      c8y deviceregistration register-basic --id "$id" >/dev/null
+      c8y deviceregistration register-basic --id "$id"
+      code=$?
+      c8y devices delete --id "$id" --silentStatusCodes 404 >/dev/null
+      exit $code
+    exit-code: 101
+    stderr:
+      contains:
+        - already exists
+
+  It only shows the registration request in a dry run:
+    command: |
+      c8y deviceregistration register-basic --id dryrun01 --password abc --dry |
+        c8y util show --select method,path -o csv
+    exit-code: 0
+    stdout:
+      exactly: POST,/devicecontrol/bulkNewDeviceRequests

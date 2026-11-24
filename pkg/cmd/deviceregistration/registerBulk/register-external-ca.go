@@ -3,13 +3,11 @@ package registerBulk
 import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devices/registration"
 	"github.com/spf13/cobra"
 )
 
@@ -83,37 +81,10 @@ func NewRegisterExternalCACmd(f *cmdutil.Factory) *RegisterExternalCACmd {
 
 // RunE executes the command
 func (n *RegisterExternalCACmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-
-	llog, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
-
-	c8yclient, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-		flags.WithOverrideValue("id", "id"),
+	return run(cmd, n.factory, registration.AuthTypeCertificates, noSecret,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("type", "type"),
-		flags.WithStaticStringValue("authType", "CERTIFICATES"),
 		flags.WithStaticStringValue("isAgent", "true"),
 		flags.WithStringValue("external-type", "external-type"),
 		flags.WithStringValue("iccid", "iccid"),
@@ -121,43 +92,5 @@ func (n *RegisterExternalCACmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("group", "group"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-		flags.WithStringValue("id", "id", ""),
 	)
-
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	var iter iterator.Iterator
-	if inputIterators.Total > 0 {
-		iter = mapbuilder.NewMapBuilderIterator(body)
-	} else {
-		iter = iterator.NewBoundIterator(mapbuilder.NewMapBuilderIterator(body), 1)
-	}
-
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return err
-	}
-	commonOptions.DisableResultPropertyDetection()
-
-	mappings := []PayloadMapping{
-		{CSVHeader: "ID", Properties: WithValue("id"), Output: WithValue("externalId")},
-		{CSVHeader: "AUTH_TYPE", Properties: WithValue("authType"), Output: WithValue("authType")},
-		{CSVHeader: "NAME", Properties: WithValue("name", "id"), Output: WithValue("name")},
-		{CSVHeader: "TYPE", Properties: WithValue("type"), Output: WithValue("type")},
-		{CSVHeader: "IDTYPE", Properties: WithValue("external-type"), Output: WithValue("externalType")},
-		{CSVHeader: "ICCID", Properties: WithValue("iccid")},
-		{CSVHeader: "TENANT", Properties: WithValue("tenant"), Output: WithValue("tenant")},
-		{CSVHeader: "PATH", Properties: WithValue("group")},
-		{CSVHeader: "com_cumulocity_model_Agent.active", Properties: WithValue("isAgent")},
-	}
-
-	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, RunBulkRegistrationJob(cmd, &RegistrationOptions{
-		Config:        cfg,
-		Log:           llog,
-		Client:        c8yclient,
-		Factory:       n.factory,
-		CommonOptions: commonOptions,
-	}, mappings), nil)
 }

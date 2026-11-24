@@ -1,13 +1,14 @@
 package encrypttext
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/spf13/cobra"
 )
 
@@ -71,48 +72,30 @@ func (n *CmdEncryptText) RunE(cmd *cobra.Command, args []string) error {
 		n.passphrase = string(inputPassphrase)
 	}
 
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-
-	var iter iterator.Iterator
-	_, input, err := flags.WithPipelineIterator(&flags.PipelineOptions{
-		Name:     "text",
-		Disabled: inputIterators.PipeOptions.Disabled,
-		Required: true,
-	})(cmd, inputIterators)
-
-	if err != nil {
+	if err := r.InputPipeline(flags.PipelineOptions{Name: "text", Required: true}); err != nil {
 		return &flags.ParameterError{
 			Name: "text",
 			Err:  fmt.Errorf("missing required parameter or pipeline input. %w", flags.ErrParameterMissing),
 		}
 	}
 
-	switch v := input.(type) {
-	case iterator.Iterator:
-		iter = v
-	default:
-		// use a single input iterator
-		iter = iterator.NewRepeatIterator("", 1)
-	}
-
-	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
-		if v, ok := j.Value.([]byte); ok {
-			encryptedText := v
-			if cfg.SecureData.IsEncrypted(string(encryptedText)) != 1 {
-				data, err := cfg.SecureData.EncryptString(string(encryptedText), n.passphrase)
-				if err != nil {
-					return nil, err
-				}
-				encryptedText = []byte(data)
-			} else {
+	// No client: each item is encrypted locally.
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		text := string(in.Input())
+		return func(context.Context) any {
+			if cfg.SecureData.IsEncrypted(text) == 1 {
 				log.Info("Text is already encrypted")
+				return c8ystream.FromDocs(jsondoc.New([]byte(text)))
 			}
-
-			err = n.factory.WriteOutputWithoutPropertyGuess(encryptedText, cmdutil.OutputContext{})
-		}
-		return "", nil
-	}, nil)
+			data, err := cfg.SecureData.EncryptString(text, n.passphrase)
+			if err != nil {
+				return err
+			}
+			return c8ystream.FromDocs(jsondoc.New([]byte(data)))
+		}, nil
+	})
 }

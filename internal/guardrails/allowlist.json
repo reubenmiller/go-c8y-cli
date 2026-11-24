@@ -1,6 +1,5 @@
 {
   "dry-run-check": [
-    "pkg/cmd/deviceregistration/registerBulk/utils.go",
     "pkg/cmd/devices/enroll/enroll.manual.go"
   ],
   "flag-type-device": [
@@ -78,7 +77,6 @@
     "pkg/cmd/deviceregistration/registerBulk/register-basic.manual.go",
     "pkg/cmd/deviceregistration/registerBulk/register-ca.manual.go",
     "pkg/cmd/deviceregistration/registerBulk/register-external-ca.go",
-    "pkg/cmd/deviceregistration/registerBulk/utils.go",
     "pkg/cmd/devices/assignchild/assignChild.go",
     "pkg/cmd/devices/availability/get/get.go",
     "pkg/cmd/devices/availability/set/set.go",
@@ -270,17 +268,10 @@
   ],
   "v1-worker": [
     "pkg/cmd/api/api.manual.go",
-    "pkg/cmd/applications/open/open.manual.go",
-    "pkg/cmd/assert/text/text.manual.go",
-    "pkg/cmd/deviceregistration/registerBulk/register-basic.manual.go",
-    "pkg/cmd/deviceregistration/registerBulk/register-ca.manual.go",
-    "pkg/cmd/deviceregistration/registerBulk/register-external-ca.go",
     "pkg/cmd/devices/enroll/enroll.manual.go",
     "pkg/cmd/measurements/createBulk/createBulk.manual.go",
     "pkg/cmd/remoteaccess/connect/run/run.manual.go",
     "pkg/cmd/remoteaccess/connect/ssh/ssh.manual.go",
-    "pkg/cmd/remoteaccess/server/server.manual.go",
-    "pkg/cmd/sessions/decrypttext/decryptText.manual.go",
-    "pkg/cmd/sessions/encrypttext/encryptText.manual.go"
+    "pkg/cmd/remoteaccess/server/server.manual.go"
   ]
 }
