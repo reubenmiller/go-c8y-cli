@@ -1,17 +1,7 @@
 {
-  "cli-body-ref": [
-    "pkg/cmd/bulkoperations/create/create.go",
-    "pkg/cmd/deviceregistration/register/register.go",
-    "pkg/cmd/notification2/subscriptions/create/create.go",
-    "pkg/cmd/operations/update/update.go"
-  ],
   "dry-run-check": [
-    "pkg/cmd/alarms/count/count.go",
-    "pkg/cmd/binaries/get/get.go",
     "pkg/cmd/deviceregistration/registerBulk/utils.go",
-    "pkg/cmd/devices/enroll/enroll.manual.go",
-    "pkg/cmd/events/downloadbinary/downloadBinary.go",
-    "pkg/cmd/measurements/list/list.go"
+    "pkg/cmd/devices/enroll/enroll.manual.go"
   ],
   "flag-type-device": [
     "alarms subscribe (string, expected stringSlice)",
@@ -28,39 +18,9 @@
     "deviceregistration register-external-ca (string, expected stringSlice)"
   ],
   "flag-type-id": [
-    "applications copy (string, expected stringSlice)",
-    "applications createBinary (string, expected stringSlice)",
-    "applications delete (string, expected stringSlice)",
-    "applications get (string, expected stringSlice)",
-    "applications listApplicationBinaries (string, expected stringSlice)",
-    "applications update (string, expected stringSlice)",
-    "datahub jobs cancel (string, expected stringSlice)",
-    "datahub jobs cancel (string, expected stringSlice)",
-    "datahub jobs get (string, expected stringSlice)",
-    "datahub jobs get (string, expected stringSlice)",
-    "datahub jobs listResults (string, expected stringSlice)",
-    "datahub jobs listResults (string, expected stringSlice)",
     "devices enroll (string, expected stringSlice)",
-    "microservices createBinary (string, expected stringSlice)",
-    "microservices delete (string, expected stringSlice)",
-    "microservices disable (string, expected stringSlice)",
-    "microservices enable (string, expected stringSlice)",
-    "microservices get (string, expected stringSlice)",
-    "microservices getBootstrapUser (string, expected stringSlice)",
-    "microservices getStatus (string, expected stringSlice)",
     "microservices serviceusers get (string, expected stringSlice)",
-    "microservices update (string, expected stringSlice)",
-    "notification2 subscriptions delete (string, expected stringSlice)",
-    "notification2 subscriptions get (string, expected stringSlice)",
-    "tenants create (string, expected stringSlice)",
-    "tenants delete (string, expected stringSlice)",
-    "tenants disable (string, expected stringSlice)",
-    "tenants enable (string, expected stringSlice)",
-    "tenants get (string, expected stringSlice)",
-    "tenants update (string, expected stringSlice)",
-    "ui plugins delete (string, expected stringSlice)",
-    "ui plugins get (string, expected stringSlice)",
-    "ui plugins update (string, expected stringSlice)"
+    "tenants create (string, expected stringSlice)"
   ],
   "go-c8y-v1": [
     "pkg/cmd/agents/delete/delete.go",

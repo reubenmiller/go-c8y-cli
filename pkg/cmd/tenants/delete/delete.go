@@ -43,7 +43,7 @@ Delete a tenant by name (from the management tenant)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Tenant id (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Tenant id (accepts pipeline)")
 
 	flags.WithOptions(
 		cmd,

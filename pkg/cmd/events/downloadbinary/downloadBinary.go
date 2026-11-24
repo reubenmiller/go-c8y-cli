@@ -8,16 +8,12 @@ package downloadbinary
 
 import (
 	"context"
-	"io"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/spf13/cobra"
 )
 
@@ -88,36 +84,10 @@ func (n *DownloadBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Command-level output config, captured once: where each binary is written.
-	outputFileRaw := r.Config.GetOutputFileRaw()
-	stdout := cmd.OutOrStdout()
-
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		id := in.String("id")
 		return func(ctx context.Context) any {
-			return func(yield func(jsondoc.JSONDoc, error) bool) {
-				res := client.Events.Binaries.Get(ctx, id)
-				if res.Err != nil {
-					yield(jsondoc.Empty(), res.Err)
-					return
-				}
-				// Under --dry the request has already been rendered; nothing to write.
-				if apiv2.IsDryRun(ctx) {
-					return
-				}
-				resp := res.Data
-				defer resp.Close()
-				if outputFileRaw != "" {
-					fields := map[string]string{"id": id, "filename": resp.FileName()}
-					if _, err := fileutilities.WriteToFile(resp.Reader(), outputFileRaw, false, false, fields); err != nil {
-						yield(jsondoc.Empty(), err)
-					}
-					return
-				}
-				if _, err := io.Copy(stdout, resp.Reader()); err != nil {
-					yield(jsondoc.Empty(), err)
-				}
-			}
+			return client.Events.Binaries.Get(ctx, id)
 		}, nil
 	})
 }

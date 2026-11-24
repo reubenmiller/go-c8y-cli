@@ -45,7 +45,7 @@ Update plugin availability to SHARED
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Plugin (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Plugin (required) (accepts pipeline)")
 	cmd.Flags().String("name", "", "Name of the plugin")
 	cmd.Flags().String("key", "", "Shared secret of the plugin")
 	cmd.Flags().String("availability", "", "Access level for other tenants")

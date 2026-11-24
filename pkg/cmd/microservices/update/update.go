@@ -46,7 +46,7 @@ Update microservice availability to MARKET
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Microservice id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Microservice id (required) (accepts pipeline)")
 	cmd.Flags().String("key", "", "Shared secret of microservice")
 	cmd.Flags().String("availability", "", "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)")
 	cmd.Flags().String("contextPath", "", "contextPath of the hosted application")

@@ -56,7 +56,7 @@ Upload microservice binary
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Microservice id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Microservice id (required) (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
 	_ = cmd.MarkFlagRequired("file")
 
