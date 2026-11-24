@@ -2,12 +2,10 @@ package get
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
@@ -62,80 +60,21 @@ Get application service user by app name
 }
 
 func (n *CmdGet) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-	client, err := n.factory.Client()
+	if err := r.InputFlag("id"); err != nil {
+		return err
+	}
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
-	// path parameters
-	appIDs := []string{}
-
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("{id}")
-	err = flags.WithParameters(
-		cmd,
-		path,
-		inputIterators,
-		c8yfetcher.WithMicroserviceByNameFirstMatch(n.factory, args, "id", "id"),
-	)
-	if err != nil {
-		return err
-	}
-
-	remainingJobs := cfg.GetMaxJobs()
-
-	for {
-		v, _, err := path.Execute(false)
-
-		if len(v) > 0 {
-			appIDs = append(appIDs, v)
-		}
-
-		if err != nil {
-			break
-		}
-
-		remainingJobs--
-		if remainingJobs <= 0 {
-			break
-		}
-	}
-
-	handler, err := n.factory.GetRequestHandler()
-	if err != nil {
-		return err
-	}
-
-	for _, appID := range appIDs {
-		// get bootstrap user
-		ctx, cancel := handler.GetTimeoutContext()
-		defer cancel()
-		bootstrapUser, _, err := client.Application.GetApplicationUser(ctx, appID)
-		if err != nil {
-			return cmderrors.NewUserError(err)
-		}
-
-		auth := c8y.NewBasicAuthString(bootstrapUser.Tenant, bootstrapUser.Username, bootstrapUser.Password)
-		bootstrapCtx := context.WithValue(context.Background(), c8y.GetContextAuthTokenKey(), auth)
-
-		_, resp, err := client.Application.GetCurrentApplicationSubscriptions(bootstrapCtx)
-		if _, err := handler.ProcessResponse(resp, err, nil, commonOptions); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		ref := c8ystream.NameOrID(in.String("id"))
+		return func(ctx context.Context) any {
+			return client.Microservices.ListServiceUsers(ctx, ref)
+		}, nil
+	})
 }

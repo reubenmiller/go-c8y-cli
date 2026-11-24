@@ -2,13 +2,13 @@ package get
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/trustedcertificates/certificateauthority"
 	"github.com/spf13/cobra"
 )
 
@@ -59,31 +59,17 @@ Get certificate authority to allow auto registration
 
 // RunE executes the command
 func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, cfgErr := n.factory.Config()
-	if cfgErr != nil {
-		return cfgErr
-	}
-
-	client, err := n.factory.Client()
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-
-	return n.factory.RunWithGenericWorkers(cmd, nil, nil, func(j worker.Job) (any, error) {
-		cert, err := client.CertificateAuthority.Get(context.Background())
-		if err != nil {
-			return nil, err
-		}
-		if cfg.DryRun() {
-			return nil, nil
-		}
-
-		b, err := json.Marshal(cert)
-		if err != nil {
-			return nil, err
-		}
-
-		err = n.factory.WriteOutputWithoutPropertyGuess(b, cmdutil.OutputContext{})
-		return nil, err
-	}, nil)
+	client, err := r.Client()
+	if err != nil {
+		return err
+	}
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		return func(ctx context.Context) any {
+			return client.TrustedCertificates.CertificateAuthority.Get(ctx, certificateauthority.GetOptions{})
+		}, nil
+	})
 }

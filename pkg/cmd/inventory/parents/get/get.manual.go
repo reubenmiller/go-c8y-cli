@@ -1,20 +1,20 @@
 package get
 
 import (
+	"context"
 	"fmt"
-	"io"
-	"net/http"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
 	"github.com/spf13/cobra"
 )
 
@@ -96,132 +96,77 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 
 // RunE executes the command
 func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
-
 	if n.Type == "" {
 		return &flags.ParameterError{
 			Name: "type",
 			Err:  flags.ErrParameterMissing,
 		}
 	}
+	path := parentsPath(n.Type, n.All, n.Reverse, n.Level)
 
-	// Change collection based on options
-
-	property := ""
-
-	if n.All {
-		if n.Reverse {
-			property = fmt.Sprintf("%sParents.references|@reverse|#.managedObject", strings.ToLower(n.Type))
-		} else {
-			property = fmt.Sprintf("%sParents.references.#.managedObject", strings.ToLower(n.Type))
-		}
-	} else {
-		if n.Level == 0 {
-			property = ""
-		} else if n.Level > 0 {
-			property = fmt.Sprintf("%sParents.references.%d.managedObject", strings.ToLower(n.Type), n.Level-1)
-		} else {
-			// Support python style indexing (-1 = last index, -2 = second last)
-			property = fmt.Sprintf("%sParents.references|@reverse|%d.managedObject", strings.ToLower(n.Type), (-1*n.Level)-1)
-		}
-	}
-
-	flags.WithOptions(
-		cmd,
-		flags.WithCollectionProperty(property),
-	)
-
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithDefaultBoolValue("withParents", "withParents", ""),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
-
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{id}")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-		c8yfetcher.WithIDSlice(args, "id", "id"),
-	)
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-
-	req := c8y.RequestOptions{
-		Method:       "GET",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	if err := r.InputFlag("id"); err != nil {
+		return err
 	}
+	client, err := r.Client()
+	if err != nil {
+		return err
+	}
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		ref := c8ystream.NameOrID(in.String("id"))
+		return func(ctx context.Context) any {
+			res := client.ManagedObjects.Get(ctx, ref, managedobjects.GetOptions{WithParents: true})
+			return parents(res, path)
+		}, nil
+	})
+}
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+// parentsPath is the path of the wanted parents in a managed object fetched
+// with withParents, e.g. "assetParents.references.0.managedObject" for the
+// first asset parent. An empty path is the managed object itself.
+func parentsPath(typ string, all, reverse bool, level int64) string {
+	refs := strings.ToLower(typ) + "Parents.references"
+	switch {
+	case all && reverse:
+		return refs + "|@reverse|#.managedObject"
+	case all:
+		return refs + ".#.managedObject"
+	case level == 0:
+		return ""
+	case level > 0:
+		return fmt.Sprintf("%s.%d.managedObject", refs, level-1)
+	default:
+		// Python style indexing: -1 is the last parent, -2 the one before.
+		return fmt.Sprintf("%s|@reverse|%d.managedObject", refs, -level-1)
+	}
+}
+
+// parents yields the managed objects at path in the result (one per element
+// when it is a list). A dry run yields nothing.
+func parents(res op.Result[jsonmodels.ManagedObject], path string) func(yield func(jsondoc.JSONDoc, error) bool) {
+	return func(yield func(jsondoc.JSONDoc, error) bool) {
+		if res.Err != nil {
+			yield(jsondoc.Empty(), res.Err)
+			return
+		}
+		if res.Request != nil || res.IsDeferred() {
+			return
+		}
+		value := res.Data.GetJSONDoc().Get(path)
+		if !value.Exists() {
+			return
+		}
+		if value.IsArray() {
+			for _, item := range value.Array() {
+				if !yield(jsondoc.New([]byte(item.Raw)), nil) {
+					return
+				}
+			}
+			return
+		}
+		yield(jsondoc.New([]byte(value.Raw)), nil)
+	}
 }

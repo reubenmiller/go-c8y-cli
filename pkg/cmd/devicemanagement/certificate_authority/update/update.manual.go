@@ -2,15 +2,14 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/trustedcertificates/certificateauthority"
 	"github.com/spf13/cobra"
 )
 
@@ -75,41 +74,31 @@ Disable certificate authority
 
 // RunE executes the command
 func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, cfgErr := n.factory.Config()
-	if cfgErr != nil {
-		return cfgErr
-	}
-
-	client, err := n.factory.Client()
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-
-	certOptions := c8y.NewCertificate()
-
-	if cmd.Flags().Changed("status") {
-		certOptions.WithStatus(n.Status)
+	err = r.Body(
+		flags.WithDataFlagValue(),
+		flags.WithStringValue("status", "status"),
+		flags.WithBoolValue("autoRegistrationEnabled", "autoRegistrationEnabled"),
+		cmdutil.WithTemplateValue(n.factory),
+		flags.WithTemplateVariablesValue(),
+	)
+	if err != nil {
+		return err
 	}
-
-	if cmd.Flags().Changed("autoRegistrationEnabled") {
-		certOptions.WithAutoRegistration(n.AutoRegistrationEnabled)
+	client, err := r.Client()
+	if err != nil {
+		return err
 	}
-
-	return n.factory.RunWithGenericWorkers(cmd, nil, nil, func(j worker.Job) (any, error) {
-		cert, _, err := client.CertificateAuthority.Update(context.Background(), "", certOptions)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		body, err := in.Body()
 		if err != nil {
 			return nil, err
 		}
-		if cfg.DryRun() {
-			return nil, nil
-		}
-
-		b, err := json.Marshal(cert)
-		if err != nil {
-			return nil, err
-		}
-
-		err = n.factory.WriteOutputWithoutPropertyGuess(b, cmdutil.OutputContext{})
-		return nil, err
-	}, nil)
+		return func(ctx context.Context) any {
+			return client.TrustedCertificates.CertificateAuthority.Update(ctx, certificateauthority.UpdateOptions{}, body)
+		}, nil
+	})
 }
