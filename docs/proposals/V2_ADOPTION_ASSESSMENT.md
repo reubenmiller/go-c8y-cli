@@ -286,14 +286,39 @@ The `v3` branch of go-c8y-cli starts from `origin/v2`, merged with the v2 SDK mi
 | `NameOrID` and `ResolveContext` delegate to the SDK (`ParseRef`, `ResolutionContext`); scheme prefixes such as `ext:` are now kept | `pkg/c8ystream/resolver.go` |
 | Commands that hand a file path to the SDK check `C8Y_DENIED_PATHS` (`Resolver.File`) | `pkg/c8ystream/resolver.go` |
 
+### Pull requests (in review)
+
+| PR | What |
+|---|---|
+| reubenmiller/go-c8y#199 | SDK seams: request approver, `Documents`, `ParseRef`, body references (events, alarms, measurements, operations, bulk operations, device registration, notification2, operation update), realtime `Documents`/`SubscribeStream`, fake server realtime publishing |
+| reubenmiller/go-c8y#200 | `op.Result` has 12 instead of 30 methods (stacked on #199): importers of the SDK compile 37% fewer functions |
+| reubenmiller/go-c8y-cli#775 | CI: build and test `v3`, offline tests against the go-c8y fake server, build cache and disk fixes |
+| reubenmiller/go-c8y-cli#776 | body references and binary downloads handled by the SDK/Runner, `--id` takes several values everywhere |
+| reubenmiller/go-c8y-cli#777 | one Go package per command group (359 packages merged into 87), no surface change |
+| reubenmiller/go-c8y-cli#782 | realtime subscribe commands on the Runner, subscribe tests run offline |
+
+### Build time
+
+Importing the go-c8y v2 `api` package makes every importing package compile the methods of every `op.Result[T]` and iterator instantiation (Go compiles generic instantiations per package). With about 300 command packages a cold build was 7 times slower than with go-c8y v1. Cold `go build -trimpath ./cmd/c8y`, one target:
+
+| | CPU-seconds |
+|---|---:|
+| `origin/v2` (go-c8y v1) | 128 |
+| v3 before | 914 |
+| go-c8y#200 | 727 |
+| go-c8y-cli#777 | 313 |
+| both | 237 |
+
+The guardrail tests make the per-package cost visible again if new command packages are added; further gains would come from fewer pagination iterator and realtime stream methods (about 400 functions per importer).
+
 ### Still open
 
-The allowlist in `internal/guardrails/allowlist.json` is the worklist. Each entry disappears when it is fixed.
+The allowlist in `internal/guardrails/allowlist.json` is the worklist. Each entry disappears when it is fixed. After the PRs above:
 
-- `go-c8y-v1` (257 files) and `v1-worker` (33): completion callbacks and the v1 holdouts (C6, C7).
-- `flag-type-*`: `--id` is a single value in 33 commands; `--device`/`--group` differ in 10 (C3).
-- `cli-body-ref` (4): bulk operations and device registration (group ids), notification2 subscriptions, operations update.
-- `dry-run-check` (6): binary downloads and counts that write files or print a total.
+- `go-c8y-v1` (256 files, mostly completion callbacks) and `v1-worker` (27): wait, assert, certificate authority, bulk registration, enroll, hosted applications, microservice create, ui plugins, `api`, remote access, sessions (C6, C7).
+- `flag-type-*`: `--id` differs in 3 commands (tenants create is intentional), `--group` in 3 (bulk registration), `--device` in 1 (remote access configurations update).
+- `dry-run-check` (2): bulk registration and enroll, both still v1.
 - `mode-guard` (9): local commands (alias, cache, sessions, settings, extensions); probably legitimate exceptions to mark as such.
 - C5 (`r.Body` defaults), S4 (request formatters in the SDK), S6 (method signatures), S9, S10.
 - The `--template` piped-input fix for software/firmware version create from `origin/v2` (#378) is not yet ported to the Runner commands.
+- Several piped devices on `subscribe` are subscribed to one after the other; subscribing to all of them on one stream would match the intent better.

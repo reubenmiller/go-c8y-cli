@@ -4,12 +4,6 @@
     "pkg/cmd/devices/enroll/enroll.manual.go"
   ],
   "flag-type-device": [
-    "alarms subscribe (string, expected stringSlice)",
-    "events subscribe (string, expected stringSlice)",
-    "inventory subscribe (string, expected stringSlice)",
-    "measurements subscribe (string, expected stringSlice)",
-    "operations subscribe (string, expected stringSlice)",
-    "realtime subscribeAll (string, expected stringSlice)",
     "remoteaccess configurations update (string, expected stringSlice)"
   ],
   "flag-type-group": [
@@ -197,7 +191,6 @@
     "pkg/cmd/operations/subscribe/subscribe.manual.go",
     "pkg/cmd/operations/update/update.go",
     "pkg/cmd/operations/wait/wait.manual.go",
-    "pkg/cmd/realtime/subscribe/subscribe.manual.go",
     "pkg/cmd/realtime/subscribeall/subscribeall.manual.go",
     "pkg/cmd/remoteaccess/configurations/create_passthrough/createPassthrough.go",
     "pkg/cmd/remoteaccess/configurations/create_telnet/createTelnet.go",
@@ -293,7 +286,6 @@
     "settings update"
   ],
   "v1-worker": [
-    "pkg/cmd/alarms/subscribe/subscribe.manual.go",
     "pkg/cmd/api/api.manual.go",
     "pkg/cmd/applications/createhostedapplication/createHostedApplication.manual.go",
     "pkg/cmd/applications/open/open.manual.go",
@@ -307,18 +299,13 @@
     "pkg/cmd/deviceregistration/registerBulk/register-external-ca.go",
     "pkg/cmd/devices/assert/factory/factory.manual.go",
     "pkg/cmd/devices/enroll/enroll.manual.go",
-    "pkg/cmd/events/subscribe/subscribe.manual.go",
     "pkg/cmd/inventory/assert/factory/factory.manual.go",
     "pkg/cmd/inventory/parents/get/get.manual.go",
-    "pkg/cmd/inventory/subscribe/subscribe.manual.go",
     "pkg/cmd/inventory/wait/wait.manual.go",
     "pkg/cmd/measurements/createBulk/createBulk.manual.go",
-    "pkg/cmd/measurements/subscribe/subscribe.manual.go",
     "pkg/cmd/microservices/create/create.manual.go",
     "pkg/cmd/microservices/serviceuser/get/get.manual.go",
-    "pkg/cmd/operations/subscribe/subscribe.manual.go",
     "pkg/cmd/operations/wait/wait.manual.go",
-    "pkg/cmd/realtime/subscribeall/subscribeall.manual.go",
     "pkg/cmd/remoteaccess/connect/run/run.manual.go",
     "pkg/cmd/remoteaccess/connect/ssh/ssh.manual.go",
     "pkg/cmd/remoteaccess/server/server.manual.go",
