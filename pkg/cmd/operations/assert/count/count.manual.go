@@ -1,60 +1,23 @@
 package count
 
 import (
+	"context"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"strconv"
+
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywaiter"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywait"
 	assertFactory "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assert/factory"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/desiredstate"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/operations"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/types"
 	"github.com/spf13/cobra"
 )
-
-type AssertCount struct{}
-
-func (a *AssertCount) GetStateHandler(cmd *cobra.Command, client *c8y.Client) desiredstate.StateDefiner {
-	operationCount := &c8ywaiter.OperationCount{
-		Client: client,
-	}
-	if v, err := cmd.Flags().GetInt64("minimum"); err == nil {
-		operationCount.Minimum = v
-	}
-
-	if v, err := cmd.Flags().GetInt64("maximum"); err == nil {
-		operationCount.Maximum = v
-	}
-
-	if v, err := cmd.Flags().GetString("dateFrom"); err == nil {
-		operationCount.DateFrom = v
-	}
-
-	if v, err := cmd.Flags().GetString("dateTo"); err == nil {
-		operationCount.DateTo = v
-	}
-
-	if v, err := cmd.Flags().GetString("fragmentType"); err == nil {
-		operationCount.FragmentType = v
-	}
-
-	if v, err := cmd.Flags().GetString("status"); err == nil {
-		operationCount.Status = v
-	}
-
-	if v, err := cmd.Flags().GetString("bulkOperationId"); err == nil {
-		operationCount.BulkOperationId = v
-	}
-
-	return operationCount
-}
-
-func (a *AssertCount) GetValue(v interface{}, input interface{}) []byte {
-	if raw, ok := input.([]byte); ok {
-		return raw
-	}
-	return nil
-}
 
 type CmdExists struct {
 	*subcommand.SubCommand
@@ -108,8 +71,30 @@ func NewCmdCount(f *cmdutil.Factory) *CmdExists {
 		completion.WithValidateSet("status", "PENDING", "EXECUTING", "SUCCESSFUL", "FAILED"),
 	)
 
-	assert := &AssertCount{}
-	ccmd.SubCommand = subcommand.NewSubCommand(assertFactory.NewAssertDeviceCmdFactory(cmd, f, assert))
+	ccmd.SubCommand = subcommand.NewSubCommand(assertFactory.New(cmd, f, assertFactory.Assert{
+		Target:    assertFactory.Device,
+		PassState: false,
+		Check: func(client *apiv2.Client, in *c8ystream.Resolver, ref string) c8ywait.Check {
+			minimum, _ := cmd.Flags().GetInt64("minimum")
+			maximum, _ := cmd.Flags().GetInt64("maximum")
+			opt := operations.ListOptions{
+				DateFrom:     in.TimeValue("dateFrom"),
+				DateTo:       in.TimeValue("dateTo"),
+				FragmentType: in.String("fragmentType"),
+				Status:       types.OperationStatus(in.String("status")),
+			}
+			if v := in.String("bulkOperationId"); v != "" {
+				opt.BulkOperationID, _ = strconv.Atoi(v)
+			}
+			opt.PageSize = 1
+			opt.WithTotalElements = true
+			return c8ywait.Count(client, ref, cmderrors.OperationCount, minimum, maximum, func(ctx context.Context, id string) (int64, error) {
+				opt := opt
+				opt.DeviceID = managedobjects.DeviceRef(id)
+				return c8ywait.Total(client.Operations.List(ctx, opt))
+			})
+		},
+	}))
 
 	return ccmd
 }

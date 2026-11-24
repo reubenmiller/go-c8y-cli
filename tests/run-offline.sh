@@ -10,8 +10,9 @@
 # Usage:
 #   tests/run-offline.sh [test-folder] [commander args...]
 #
-# C8Y_OFFLINE_SUITE=manual runs a tests/manual folder instead of tests/auto
-# (for manual tests that the fake server supports, e.g. alarms/subscribe).
+# C8Y_OFFLINE_SUITE=manual runs a tests/manual folder or file instead of
+# tests/auto (for manual tests that the fake server supports, e.g.
+# alarms/subscribe or inventory/wait.yaml).
 #
 # The c8y binary under test is the first one on PATH.
 set -euo pipefail
@@ -74,7 +75,11 @@ if [ "${C8Y_OFFLINE_SUITE:-auto}" = manual ]; then
     [ $# -gt 0 ] && shift
     cd "$SCRIPT_DIR"
     export TEST_SHELL=bash
-    commander test --config ./config.manual.yaml "$@" --dir "manual/$folder" </dev/null
+    if [ -f "manual/$folder" ]; then
+        commander test --config ./config.manual.yaml "$@" "manual/$folder" </dev/null
+    else
+        commander test --config ./config.manual.yaml "$@" --dir "manual/$folder" </dev/null
+    fi
 else
     "$SCRIPT_DIR/run-auto.sh" "$@" </dev/null
 fi

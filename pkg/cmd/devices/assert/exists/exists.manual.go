@@ -2,32 +2,14 @@ package exists
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywaiter"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywait"
 	assertFactory "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assert/factory"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/desiredstate"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/spf13/cobra"
 )
-
-type AssertExists struct{}
-
-func (a *AssertExists) GetStateHandler(cmd *cobra.Command, client *c8y.Client) desiredstate.StateDefiner {
-	negate, err := cmd.Flags().GetBool("not")
-	_ = err
-	return &c8ywaiter.InventoryExistence{
-		Client: client,
-		Negate: negate,
-	}
-}
-
-func (a *AssertExists) GetValue(v interface{}, input interface{}) []byte {
-	if raw, ok := input.([]byte); ok {
-		return raw
-	}
-	return nil
-}
 
 type CmdExists struct {
 	*subcommand.SubCommand
@@ -72,8 +54,13 @@ func NewCmdExists(f *cmdutil.Factory) *CmdExists {
 
 	cmd.Flags().Bool("not", false, "Negate the match")
 
-	assertExists := &AssertExists{}
-	ccmd.SubCommand = subcommand.NewSubCommand(assertFactory.NewAssertDeviceCmdFactory(cmd, f, assertExists))
+	ccmd.SubCommand = subcommand.NewSubCommand(assertFactory.New(cmd, f, assertFactory.Assert{
+		Target:    assertFactory.Device,
+		PassState: false,
+		Check: func(client *apiv2.Client, in *c8ystream.Resolver, ref string) c8ywait.Check {
+			return c8ywait.ManagedObjectExists(client, ref, in.Bool("not"))
+		},
+	}))
 
 	return ccmd
 }

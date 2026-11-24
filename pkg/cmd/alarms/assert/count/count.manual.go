@@ -1,68 +1,23 @@
 package count
 
 import (
+	"context"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"strings"
+
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywaiter"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywait"
 	assertFactory "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assert/factory"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/desiredstate"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/alarms"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/model"
 	"github.com/spf13/cobra"
 )
-
-type AssertCount struct{}
-
-func (a *AssertCount) GetStateHandler(cmd *cobra.Command, client *c8y.Client) desiredstate.StateDefiner {
-	alarmCount := &c8ywaiter.AlarmCount{
-		Client: client,
-	}
-	if v, err := cmd.Flags().GetInt64("minimum"); err == nil {
-		alarmCount.Minimum = v
-	}
-
-	if v, err := cmd.Flags().GetInt64("maximum"); err == nil {
-		alarmCount.Maximum = v
-	}
-
-	if v, err := cmd.Flags().GetString("dateFrom"); err == nil {
-		alarmCount.DateFrom = v
-	}
-
-	if v, err := cmd.Flags().GetString("dateTo"); err == nil {
-		alarmCount.DateTo = v
-	}
-
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		alarmCount.Type = v
-	}
-
-	if v, err := cmd.Flags().GetString("fragmentType"); err == nil {
-		alarmCount.FragmentType = v
-	}
-
-	if v, err := cmd.Flags().GetString("status"); err == nil {
-		alarmCount.Status = v
-	}
-
-	if v, err := cmd.Flags().GetString("severity"); err == nil {
-		alarmCount.Severity = v
-	}
-
-	if v, err := cmd.Flags().GetBool("resolved"); err == nil {
-		alarmCount.Resolved = v
-	}
-
-	return alarmCount
-}
-
-func (a *AssertCount) GetValue(v interface{}, input interface{}) []byte {
-	if raw, ok := input.([]byte); ok {
-		return raw
-	}
-	return nil
-}
 
 type CmdExists struct {
 	*subcommand.SubCommand
@@ -119,8 +74,38 @@ func NewCmdCount(f *cmdutil.Factory) *CmdExists {
 		completion.WithValidateSet("severity", "CRITICAL", "MAJOR", "MINOR", "WARNING"),
 	)
 
-	assert := &AssertCount{}
-	ccmd.SubCommand = subcommand.NewSubCommand(assertFactory.NewAssertDeviceCmdFactory(cmd, f, assert))
+	ccmd.SubCommand = subcommand.NewSubCommand(assertFactory.New(cmd, f, assertFactory.Assert{
+		Target:    assertFactory.Device,
+		PassState: false,
+		Check: func(client *apiv2.Client, in *c8ystream.Resolver, ref string) c8ywait.Check {
+			minimum, _ := cmd.Flags().GetInt64("minimum")
+			maximum, _ := cmd.Flags().GetInt64("maximum")
+			opt := alarms.ListOptions{
+				DateFrom: in.TimeValue("dateFrom"),
+				DateTo:   in.TimeValue("dateTo"),
+				Resolved: in.Bool("resolved"),
+			}
+			opt.PageSize = 1
+			opt.WithTotalElements = true
+			if v := in.String("type"); v != "" {
+				opt.Type = []string{v}
+			}
+			for _, v := range strings.Split(in.String("status"), ",") {
+				if v = strings.TrimSpace(v); v != "" {
+					opt.Status = append(opt.Status, model.AlarmStatus(v))
+				}
+			}
+			if v := in.String("severity"); v != "" {
+				opt.Severity = []model.AlarmSeverity{model.AlarmSeverity(v)}
+			}
+			// GAP: --fragmentType has no field in alarms.ListOptions (the alarm API does not document it).
+			return c8ywait.Count(client, ref, cmderrors.AlarmCount, minimum, maximum, func(ctx context.Context, id string) (int64, error) {
+				opt := opt
+				opt.Source = managedobjects.DeviceRef(id)
+				return c8ywait.Total(client.Alarms.List(ctx, opt))
+			})
+		},
+	}))
 
 	return ccmd
 }

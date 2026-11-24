@@ -1,60 +1,22 @@
 package count
 
 import (
+	"context"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywaiter"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywait"
 	assertFactory "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assert/factory"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/desiredstate"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/measurements"
 	"github.com/spf13/cobra"
 )
-
-type AssertCount struct{}
-
-func (a *AssertCount) GetStateHandler(cmd *cobra.Command, client *c8y.Client) desiredstate.StateDefiner {
-	measurementCount := &c8ywaiter.MeasurementCount{
-		Client: client,
-	}
-	if v, err := cmd.Flags().GetInt64("minimum"); err == nil {
-		measurementCount.Minimum = v
-	}
-
-	if v, err := cmd.Flags().GetInt64("maximum"); err == nil {
-		measurementCount.Maximum = v
-	}
-
-	if v, err := cmd.Flags().GetString("dateFrom"); err == nil {
-		measurementCount.DateFrom = v
-	}
-
-	if v, err := cmd.Flags().GetString("dateTo"); err == nil {
-		measurementCount.DateTo = v
-	}
-
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		measurementCount.Type = v
-	}
-
-	if v, err := cmd.Flags().GetString("valueFragmentType"); err == nil {
-		measurementCount.ValueFragmentType = v
-	}
-
-	if v, err := cmd.Flags().GetString("valueFragmentSeries"); err == nil {
-		measurementCount.ValueFragmentSeries = v
-	}
-
-	return measurementCount
-}
-
-func (a *AssertCount) GetValue(v interface{}, input interface{}) []byte {
-	if raw, ok := input.([]byte); ok {
-		return raw
-	}
-	return nil
-}
 
 type CmdExists struct {
 	*subcommand.SubCommand
@@ -109,8 +71,28 @@ func NewCmdCount(f *cmdutil.Factory) *CmdExists {
 		completion.WithDeviceMeasurementValueFragmentSeries("valueFragmentSeries", "device", "valueFragmentType", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
-	assert := &AssertCount{}
-	ccmd.SubCommand = subcommand.NewSubCommand(assertFactory.NewAssertDeviceCmdFactory(cmd, f, assert))
+	ccmd.SubCommand = subcommand.NewSubCommand(assertFactory.New(cmd, f, assertFactory.Assert{
+		Target:    assertFactory.Device,
+		PassState: false,
+		Check: func(client *apiv2.Client, in *c8ystream.Resolver, ref string) c8ywait.Check {
+			minimum, _ := cmd.Flags().GetInt64("minimum")
+			maximum, _ := cmd.Flags().GetInt64("maximum")
+			opt := measurements.ListOptions{
+				DateFrom:            in.TimeValue("dateFrom"),
+				DateTo:              in.TimeValue("dateTo"),
+				Type:                in.String("type"),
+				ValueFragmentType:   in.String("valueFragmentType"),
+				ValueFragmentSeries: in.String("valueFragmentSeries"),
+			}
+			opt.PageSize = 1
+			opt.WithTotalElements = true
+			return c8ywait.Count(client, ref, cmderrors.MeasurementCount, minimum, maximum, func(ctx context.Context, id string) (int64, error) {
+				opt := opt
+				opt.Source = managedobjects.DeviceRef(id)
+				return c8ywait.Total(client.Measurements.List(ctx, opt))
+			})
+		},
+	}))
 
 	return ccmd
 }

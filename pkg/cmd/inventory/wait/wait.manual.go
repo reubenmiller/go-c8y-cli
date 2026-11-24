@@ -1,20 +1,16 @@
 package wait
 
 import (
-	"fmt"
-	"io"
-	"time"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywait"
+	assertFactory "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assert/factory"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ywaiter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/desiredstate"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -72,76 +68,7 @@ func NewCmdWait(f *cmdutil.Factory) *CmdWait {
 }
 
 func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
-	if err != nil {
-		return err
-	}
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
-
-	duration, err := flags.GetDurationFlag(cmd, "duration", true, time.Second)
-	if err != nil {
-		return err
-	}
-
-	interval, err := flags.GetDurationFlag(cmd, "interval", true, time.Second)
-	if err != nil {
-		return err
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate("{id}")
-	err = flags.WithParameters(
-		cmd,
-		path,
-		inputIterators,
-		c8yfetcher.WithIDSlice(args, "id", "id"),
-	)
-	if err != nil {
-		return err
-	}
-
-	state := &c8ywaiter.InventoryState{
-		Client:    client,
-		Fragments: n.ExpectedFragments,
-	}
-
-	totalErrors := 0
-	var lastErr error
-	for {
-		itemID, _, inputErr := path.Execute(false)
-
-		if inputErr == io.EOF {
-			break
-		}
-
-		if totalErrors >= cfg.AbortOnErrorCount() {
-			msg := fmt.Sprintf("Too many errors. total=%d, max=%d. lastError=%s", totalErrors, cfg.AbortOnErrorCount(), lastErr)
-			return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAbortedWithErrors, msg)
-		}
-
-		state.ID = itemID
-		result, err := desiredstate.WaitFor(interval, duration, state)
-
-		if v, ok := result.(*c8y.ManagedObject); ok {
-			_ = n.factory.WriteOutputWithoutPropertyGuess([]byte(v.Item.Raw), cmdutil.OutputContext{})
-		}
-
-		if err != nil {
-			totalErrors++
-			cfg.Logger.Infof("%s", err)
-			lastErr = err
-		}
-	}
-	if totalErrors > 0 {
-		return lastErr
-	}
-	return nil
+	return assertFactory.RunWait(cmd, n.factory, "id", func(client *apiv2.Client, in *c8ystream.Resolver, ref string) c8ywait.Check {
+		return c8ywait.Fragments(client, c8ystream.NameOrID(ref), n.ExpectedFragments)
+	})
 }

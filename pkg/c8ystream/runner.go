@@ -119,6 +119,7 @@ type Runner struct {
 	body         *mapbuilder.MapBuilder
 	runCtx       context.Context // set in Run; exposed to Build via Resolver.Context
 	submission   *submission     // confirmation + delays; nil when neither applies
+	assert       *assertion      // set by Assert; nil for other commands
 	index        int64
 
 	// tmplInput is the current item's raw input, kept pointed at the item being
@@ -448,14 +449,18 @@ func (r *Runner) Client() (*apiv2.Client, error) {
 		})
 	}
 
-	client := apiv2.NewClient(opts)
-	// The realtime client logs every websocket frame at info level; show that
-	// only with --verbose/--debug, like the request logging above.
+	// The SDK's HTTP layer logs its warnings (e.g. credentials over plain
+	// HTTP) at info level and the realtime client logs every websocket frame
+	// at info level: show them only with --verbose/--debug.
 	level := slog.LevelWarn
 	if r.Config.Verbose() || r.Config.Debug() {
 		level = slog.LevelDebug
 	}
-	client.Realtime().SetLogger(slog.New(slog.NewTextHandler(r.Factory.IOStreams.ErrOut, &slog.HandlerOptions{Level: level})).With("component", "realtime"))
+	logger := slog.New(slog.NewTextHandler(r.Factory.IOStreams.ErrOut, &slog.HandlerOptions{Level: level}))
+	opts.Logger = logger
+
+	client := apiv2.NewClient(opts)
+	client.Realtime().SetLogger(logger.With("component", "realtime"))
 	if err := r.installActivityLog(client); err != nil {
 		return nil, err
 	}
@@ -582,7 +587,7 @@ func (r *Runner) Run(build Build) error {
 		// A stream-level abort (e.g. --abortOnErrors reached, exit 103) — the item
 		// errors themselves were already reported by collector.Log; run the abort
 		// through the post-command handling for its message and exit code.
-		return r.Factory.CheckPostCommandError(err)
+		return r.finish(err)
 	}
 	// Reduce the collected item errors to the command result. A single failure
 	// resolves to its already-processed error (printed by collector.Log, exit
@@ -606,7 +611,16 @@ func (r *Runner) Run(build Build) error {
 			finalErr = ce
 		}
 	}
-	return r.Factory.CheckPostCommandError(finalErr)
+	return r.finish(finalErr)
+}
+
+// finish runs the command's final error through the post-command handling.
+func (r *Runner) finish(err error) error {
+	err = r.Factory.CheckPostCommandError(err)
+	if r.assert != nil {
+		return r.assert.exitCode(err)
+	}
+	return err
 }
 
 // producer drains one input item, resolves it into a Call via build, and
@@ -648,7 +662,11 @@ func (r *Runner) producer(build Build) Producer {
 		job := Job(func(ctx context.Context) output.Seq {
 			// One approval scope per input item: an item whose call sends
 			// several requests (upload then update, ...) is confirmed once.
-			return r.adaptItem(call(apiv2.WithApprovalScope(ctx)), item)
+			seq := r.adaptItem(call(apiv2.WithApprovalScope(ctx)), item)
+			if r.assert != nil {
+				seq = r.assert.filter(seq)
+			}
+			return seq
 		})
 		if r.submission != nil {
 			job = r.submission.withDelays(job)
