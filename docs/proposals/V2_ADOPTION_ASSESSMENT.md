@@ -301,10 +301,9 @@ The `v3` branch of go-c8y-cli starts from `origin/v2`, merged with the v2 SDK mi
 | reubenmiller/go-c8y-cli#788 | certificate authority commands on the Runner (stacked on #787) |
 | reubenmiller/go-c8y-cli#789 | `inventory parents get` on the Runner (stacked on #788) |
 | reubenmiller/go-c8y-cli#790 | `microservices serviceusers get` on the Runner (stacked on #789) |
-| reubenmiller/go-c8y#211 | `UIApplicationPlugins` manages `config.remotes` (the model the UI uses) |
-| go-c8y-cli `feat/v3-ui-plugins` | `ui applications plugins` list, install, delete, replace and update on the Runner (stacked on #790) |
+| reubenmiller/go-c8y-cli#791 | `ui applications plugins` list, install, delete, replace and update on the Runner (stacked on #790) |
 
-Merged: go-c8y #199 (SDK seams), #200 (`op.Result` with 15 instead of 30 methods, the method/function rule and a compile-cost budget test), #202 (committed binaries removed), #204 (`ClientOptions.Logger`), #205 (fake server removes `null` fragments), #207 (certificate authority), #208 (fake server `withParents`), #209 (`ListServiceUsers`, collection results yield their items); go-c8y-cli #775 (CI for `v3`).
+Merged: go-c8y #199 (SDK seams), #200 (`op.Result` with 15 instead of 30 methods, the method/function rule and a compile-cost budget test), #202 (committed binaries removed), #204 (`ClientOptions.Logger`), #205 (fake server removes `null` fragments), #207 (certificate authority), #208 (fake server `withParents`), #209 (`ListServiceUsers`, collection results yield their items), #211 (`UIApplicationPlugins` manages `config.remotes`); go-c8y-cli #775 (CI for `v3`).
 
 ### Build time
 
