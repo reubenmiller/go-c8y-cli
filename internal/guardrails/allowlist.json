@@ -285,7 +285,6 @@
     "pkg/cmd/remoteaccess/connect/ssh/ssh.manual.go",
     "pkg/cmd/remoteaccess/server/server.manual.go",
     "pkg/cmd/sessions/decrypttext/decryptText.manual.go",
-    "pkg/cmd/sessions/encrypttext/encryptText.manual.go",
-    "pkg/cmd/ui/applications/plugins/list/list.manual.go"
+    "pkg/cmd/sessions/encrypttext/encryptText.manual.go"
   ]
 }

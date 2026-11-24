@@ -301,6 +301,8 @@ The `v3` branch of go-c8y-cli starts from `origin/v2`, merged with the v2 SDK mi
 | reubenmiller/go-c8y-cli#788 | certificate authority commands on the Runner (stacked on #787) |
 | reubenmiller/go-c8y-cli#789 | `inventory parents get` on the Runner (stacked on #788) |
 | reubenmiller/go-c8y-cli#790 | `microservices serviceusers get` on the Runner (stacked on #789) |
+| reubenmiller/go-c8y#211 | `UIApplicationPlugins` manages `config.remotes` (the model the UI uses) |
+| go-c8y-cli `feat/v3-ui-plugins` | `ui applications plugins` list, install, delete, replace and update on the Runner (stacked on #790) |
 
 Merged: go-c8y #199 (SDK seams), #200 (`op.Result` with 15 instead of 30 methods, the method/function rule and a compile-cost budget test), #202 (committed binaries removed), #204 (`ClientOptions.Logger`), #205 (fake server removes `null` fragments), #207 (certificate authority), #208 (fake server `withParents`), #209 (`ListServiceUsers`, collection results yield their items); go-c8y-cli #775 (CI for `v3`).
 
@@ -322,8 +324,7 @@ The guardrail tests make the per-package cost visible again if new command packa
 
 The allowlist in `internal/guardrails/allowlist.json` is the worklist. Each entry disappears when it is fixed. After the PRs above:
 
-- `go-c8y-v1` (mostly completion callbacks) and `v1-worker`: bulk registration, enroll, hosted applications, microservice create, ui plugins, `api`, `assert text`, remote access, sessions (C6, C7).
-- UI plugin commands (`ui applications plugins *`) use `pkg/c8yextensions/plugins` on go-c8y v1 and read the plugins from `config.remotes`; go-c8y v2's `ui/applicationplugins` uses `applicationBuilder.plugins`. Which model is current must be settled before porting them.
+- `go-c8y-v1` (mostly completion callbacks) and `v1-worker`: bulk registration, enroll, hosted applications, microservice create, `api`, `assert text`, remote access, sessions (C6, C7).
 - `measurements createBulk` groups several piped items into one request. The Runner makes one request per item, so it needs a batching option in the Runner first.
 - `alarms assert count --fragmentType` is ignored: `alarms.ListOptions` has no fragment type (the alarm API does not document one).
 - The fake server reports `totalPages: 1` for an empty collection (Cumulocity reports 0). The count asserts now use `totalElements`, so they are not affected.

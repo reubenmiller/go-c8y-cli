@@ -35,7 +35,7 @@ func NewCmdUpdate(f *cmdutil.Factory) *plugins.PluginCmd {
 	}
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
-		return plugins.NewPluginRunner(cmd, args, f, ccmd)()
+		return ccmd.Run(cmd)
 	}
 
 	cmd.SilenceUsage = true
