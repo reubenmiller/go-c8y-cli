@@ -176,6 +176,7 @@ Create a session with SSO / OAUTH2 Device Flow (RFC 8628)
 
 	flags.MarkDeprecated(cmd, "type", "please use 'mode' instead")
 
+	cmdutil.MarkLocalCommand(cmd)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd

@@ -96,6 +96,7 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 	// Disable the encryption check, as the login handler will take care
 	// of checking the encryption
 	cmdutil.DisableEncryptionCheck(cmd)
+	cmdutil.MarkLocalCommand(cmd)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
