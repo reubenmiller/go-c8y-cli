@@ -23,7 +23,8 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/loginoptions"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -164,13 +165,13 @@ Create a session with SSO / OAUTH2 Device Flow (RFC 8628)
 		),
 		completion.WithValidateSet(
 			"loginType",
-			c8y.LoginTypeBasic,
-			c8y.LoginTypeOAuth2Internal,
-			c8y.LoginTypeOAuth2,
+			logintype.Basic,
+			logintype.OAuth2Internal,
+			logintype.OAuth2,
 			logintype.Browser,
 			logintype.Device,
 			logintype.Certificate,
-			c8y.LoginTypeNone,
+			logintype.None,
 		),
 	)
 
@@ -198,7 +199,6 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	c8y.Logger = log
 	prompter := prompt.NewPrompt(log)
 
 	if !cmd.Flags().Changed("host") {
@@ -211,20 +211,23 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 	}
 
 	if !cmd.Flags().Changed("loginType") {
-		localClient := c8y.NewClientFromOptions(nil, c8y.ClientOptions{
-			BaseURL: n.host,
+		// Note: Self-signed certificates have always been accepted when looking up the login options
+		localClient := apiv2.NewClient(apiv2.ClientOptions{
+			BaseURL:            n.host,
+			InsecureSkipVerify: true,
+			SkipTenantLookup:   true,
 		})
-		loginOptions, _, loginOptionsErr := localClient.Tenant.GetLoginOptions(context.Background())
-		if loginOptionsErr != nil {
-			return loginOptionsErr
+		loginOptions := localClient.LoginOptions.ListNoAuth(context.Background(), loginoptions.ListOptions{})
+		if loginOptions.Err != nil {
+			return loginOptions.Err
 		}
 
-		loginOptionsForUsers := make([]string, 0, len(loginOptions.LoginOptions))
+		loginOptionsForUsers := make([]string, 0)
 		loginOptionsForUsers = append(loginOptionsForUsers, "auto\tUse tenant default")
 		hasOAuth2 := false
-		for _, option := range loginOptions.LoginOptions {
-			loginOptionsForUsers = append(loginOptionsForUsers, option.Type)
-			if strings.EqualFold(option.Type, logintype.OAuth2) {
+		for option := range loginOptions.Seq() {
+			loginOptionsForUsers = append(loginOptionsForUsers, option.Type())
+			if strings.EqualFold(option.Type(), logintype.OAuth2) {
 				hasOAuth2 = true
 			}
 		}
@@ -282,7 +285,7 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 
 func requiresUsername(loginType string) bool {
 	switch strings.ToUpper(loginType) {
-	case c8y.LoginTypeNone, c8y.LoginTypeOAuth2, logintype.Browser, logintype.Device, logintype.Certificate:
+	case logintype.None, logintype.OAuth2, logintype.Browser, logintype.Device, logintype.Certificate:
 		return false
 	}
 	return true

@@ -1,7 +1,6 @@
 package login
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -13,7 +12,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -74,7 +72,6 @@ func newTestLogin(t *testing.T, v *viper.Viper, exts ...extensions.Extension) *C
 		Executable: "c8y",
 		Config:     func() (*config.Config, error) { return cfg, nil },
 		Logger:     func() (*logger.Logger, error) { return cfg.Logger, nil },
-		Client:     func() (*c8y.Client, error) { return nil, errors.New("no client in tests") },
 		ExtensionManager: func() extensions.ExtensionManager {
 			return &extensions.ExtensionManagerMock{ListFunc: func() []extensions.Extension { return exts }}
 		},

@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+# The login types of the tenant (BASIC and OAUTH2_INTERNAL) for 'sessions login' and 'sessions set'
+
+tests:
+  It logs in using the BASIC login type without requesting a token:
+    command: |
+      env -i PATH="$PATH" C8Y_HOST="$C8Y_HOST" C8Y_USERNAME="${C8Y_USERNAME:-$C8Y_USER}" C8Y_PASSWORD="$C8Y_PASSWORD" \
+        c8y sessions login --from-env --loginType BASIC --output-format json --no-banner
+    exit-code: 0
+    stdout:
+      json:
+        host: r/^.+$
+        tenant: r/^.+$
+        version: r/^.+$
+        username: r/^.+$
+        loginType: BASIC
+      not-contains:
+        - '"token"'
+
+  It logs in using the OAUTH2_INTERNAL login option of the tenant:
+    command: |
+      env -i PATH="$PATH" C8Y_HOST="$C8Y_HOST" C8Y_USERNAME="${C8Y_USERNAME:-$C8Y_USER}" C8Y_PASSWORD="$C8Y_PASSWORD" \
+        c8y sessions login --from-env --loginType OAUTH2_INTERNAL --output-format json --no-banner
+    exit-code: 0
+    stdout:
+      json:
+        host: r/^.+$
+        tenant: r/^.+$
+        version: r/^.+$
+        username: r/^.+$
+        token: r/^.+$
+        loginType: OAUTH2_INTERNAL
+
+  It shows the authorization type of the login in the session banner:
+    command: |
+      env -i PATH="$PATH" C8Y_HOST="$C8Y_HOST" C8Y_USERNAME="${C8Y_USERNAME:-$C8Y_USER}" C8Y_PASSWORD="$C8Y_PASSWORD" \
+        c8y sessions login --from-env --loginType BASIC 2>&1 >/dev/null
+    exit-code: 0
+    stdout:
+      contains:
+        - "authType     : BASIC (loginType=BASIC)"
+
+  It sets a session using the OAUTH2_INTERNAL login option of the tenant:
+    config:
+      env:
+        C8Y_SESSION_HOME: /tmp
+        C8Y_SESSION: ''
+        C8Y_SETTINGS_ENCRYPTION_ENABLED: false
+    command: |
+      c8y template execute --template "{host: '$C8Y_HOST', username: '${C8Y_USERNAME:-$C8Y_USER}', password: '$C8Y_PASSWORD'}" > /tmp/session_login_oauth2.json
+
+      c8y sessions set --session /tmp/session_login_oauth2.json --output json --no-banner
+      rm -f /tmp/session_login_oauth2.json
+    exit-code: 0
+    stdout:
+      json:
+        host: r/^.+$
+        tenant: r/t[0-9]+$
+        token: r/^.+$
+        loginType: OAUTH2_INTERNAL
+
+  It sets a session using the BASIC login type:
+    config:
+      env:
+        C8Y_SESSION_HOME: /tmp
+        C8Y_SESSION: ''
+        C8Y_SETTINGS_ENCRYPTION_ENABLED: false
+    command: |
+      c8y template execute --template "{host: '$C8Y_HOST', username: '${C8Y_USERNAME:-$C8Y_USER}', password: '$C8Y_PASSWORD'}" > /tmp/session_login_basic.json
+
+      c8y sessions set --session /tmp/session_login_basic.json --loginType BASIC --output json --no-banner
+      rm -f /tmp/session_login_basic.json
+    exit-code: 0
+    stdout:
+      json:
+        host: r/^.+$
+        tenant: r/t[0-9]+$
+        loginType: BASIC
+      not-contains:
+        - '"token"'

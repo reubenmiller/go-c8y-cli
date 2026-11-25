@@ -2,6 +2,7 @@ package sessions
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"slices"
 	"strings"
@@ -10,7 +11,6 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ylogin"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/factory"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/selectsession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -19,8 +19,10 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type CmdSet struct {
@@ -91,7 +93,7 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("shell", shell.SupportedShells(shell.ShellAuto)...),
-		completion.WithValidateSet("loginType", c8y.LoginTypeOAuth2Internal, c8y.LoginTypeBasic, c8y.LoginTypeNone, c8y.LoginTypeOAuth2, logintype.Device, logintype.Browser, logintype.Certificate),
+		completion.WithValidateSet("loginType", logintype.OAuth2Internal, logintype.Basic, logintype.None, logintype.OAuth2, logintype.Device, logintype.Browser, logintype.Certificate),
 	)
 	// Disable the encryption check, as the login handler will take care
 	// of checking the encryption
@@ -102,7 +104,7 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 	return ccmd
 }
 
-func (n *CmdSet) onSave(client *c8y.Client) {
+func (n *CmdSet) onSave(client *config.ClientSession) {
 	cfg, _ := n.factory.Config()
 	log, _ := n.factory.Logger()
 
@@ -211,8 +213,8 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		n.LoginType = strings.ToUpper(n.LoginType)
 	}
 	if n.LoginType != "" && n.LoginType != logintype.Browser && n.LoginType != logintype.Certificate && n.LoginType != logintype.Device {
-		// ParseLoginType only knows v1 types; skip it for v2-only values.
-		if v, err := c8y.ParseLoginType(n.LoginType); err != nil {
+		// ParseLoginType only knows the types of the SDK; skip it for the CLI only values.
+		if v, err := authentication.ParseLoginType(n.LoginType); err != nil {
 			log.Warnf("Could not parse auth method: value=%s", err)
 		} else {
 			n.LoginType = v
@@ -222,13 +224,22 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	if n.LoginType != "" {
 		cfg.SetLoginType(n.LoginType)
 	}
-	client, err := factory.CreateCumulocityClient(n.factory, "", "", "", true)()
+	// Note: Always bind the environment variables of the session, even if the session was selected
+	if err := cfg.BindAuthorization(); err != nil {
+		log.Warnf("Failed to bind to authorization variables. %s", err)
+	}
+	clientOpts, err := n.factory.ClientOptionsV2(true)
 	if err != nil {
 		return err
 	}
+	baseURL, _ := url.Parse(clientOpts.BaseURL)
+	client := config.NewClientSession(baseURL, clientOpts.Auth, "")
+	if viper.IsSet("useTenantPrefix") {
+		client.OmitTenant = !viper.GetBool("useTenantPrefix")
+	}
 
-	if n.LoginType != c8y.LoginTypeNone {
-		if err := utilities.CheckEncryption(n.factory.IOStreams, cfg, client); err != nil {
+	if n.LoginType != logintype.None {
+		if err := utilities.CheckEncryption(n.factory.IOStreams, cfg, &client); err != nil {
 			return err
 		}
 	}
@@ -236,12 +247,13 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	// Note: Decrypt after checking for encryption
 	token := cfg.MustGetToken(true)
 	if n.ClearToken {
-		client.ClearToken()
+		client.Token = ""
 		cfg.ClearToken()
 	} else if c8ysession.ShouldReuseToken(cfg, log, token, n.LoginType) {
-		client.SetToken(token)
+		client.Token = token
+		client.AuthType = authentication.AuthTypeBearer
 	} else {
-		client.ClearToken()
+		client.Token = ""
 		cfg.ClearToken()
 	}
 
@@ -253,65 +265,61 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	var (
-		handlerLoginType string
-		handlerC8Yclient *c8y.Client
+	if n.TFACode == "" {
+		if code, err := cfg.GetTOTP(time.Now()); err == nil {
+			cfg.Logger.Infof("Setting totp code: %s", code)
+			n.TFACode = code
+		}
+	}
+
+	var handler *c8ylogin.LoginHandlerV2
+	handler = c8ylogin.NewLoginHandlerV2(
+		n.factory.IOStreams,
+		apiv2.ClientOptions{
+			BaseURL: clientOpts.BaseURL,
+			Auth: authentication.AuthOptions{
+				Tenant:   client.Tenant,
+				Username: client.Username,
+				Password: client.Password,
+				Token:    client.Token,
+				AuthType: []authentication.AuthType{client.AuthType},
+			},
+			InsecureSkipVerify: clientOpts.InsecureSkipVerify,
+			Transport:          clientOpts.Transport,
+		},
+		cmd.ErrOrStderr(),
+		func() {
+			session := handler.Session()
+			session.OmitTenant = client.OmitTenant
+			n.onSave(&session)
+		},
 	)
-	if n.LoginType == logintype.Browser || n.LoginType == logintype.Certificate || n.LoginType == logintype.Device {
-		v2handler := c8ylogin.NewLoginHandlerV2(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {
-			n.onSave(client)
-		})
-		v2handler.LoginType = n.LoginType
-		v2handler.CertificatePath = cfg.GetCertificate()
-		v2handler.CertificateKeyPath = cfg.GetCertificateKey()
-		v2handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
-		v2handler.SSO.Scopes = cfg.SSOScopes()
-		v2handler.TOTPSecret = n.TFACode
-		v2handler.BrowserCallbackURL = n.BrowserCallbackURL
-		if v2handler.BrowserCallbackURL == "" {
-			v2handler.BrowserCallbackURL = cfg.BrowserCallbackURL()
-		}
-		v2handler.SetLogger(log)
-		if v2handler.LoginType == "" {
-			log.Infof("User preference for login type: %s", "not-set")
-		} else {
-			log.Infof("User preference for login type: %s", v2handler.LoginType)
-		}
-		err = v2handler.Run()
-		if err != nil {
-			return err
-		}
-		handlerLoginType = v2handler.LoginType
-		handlerC8Yclient = v2handler.C8Yclient
+	handler.LoginType = n.LoginType
+	if n.LoginType != "" {
+		handler.AllowedLoginTypes = strings.Split(n.LoginType, ",")
+	}
+	handler.CertificatePath = cfg.GetCertificate()
+	handler.CertificateKeyPath = cfg.GetCertificateKey()
+	handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
+	handler.SSO.Scopes = cfg.SSOScopes()
+	handler.BrowserCallbackURL = n.BrowserCallbackURL
+	if handler.BrowserCallbackURL == "" {
+		handler.BrowserCallbackURL = cfg.BrowserCallbackURL()
+	}
+	handler.TOTPCode = n.TFACode
+	handler.SetLogger(log)
+	if handler.LoginType == "" {
+		log.Infof("User preference for login type: %s", "not-set")
 	} else {
-		handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {
-			n.onSave(client)
-		})
-		handler.LoginType = n.LoginType
-		if n.LoginType != "" {
-			handler.AllowedLoginTypes = strings.Split(n.LoginType, ",")
-		}
-		handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
-		handler.SSO.Scopes = cfg.SSOScopes()
-		if handler.LoginType == "" {
-			log.Infof("User preference for login type: %s", "not-set")
-		} else {
-			log.Infof("User preference for login type: %s", handler.LoginType)
-		}
-		if n.TFACode == "" {
-			if code, err := cfg.GetTOTP(time.Now()); err == nil {
-				cfg.Logger.Infof("Setting totp code: %s", code)
-				n.TFACode = code
-			}
-		}
-		handler.TFACode = n.TFACode
-		handler.SetLogger(log)
-		err = handler.Run()
-		if err != nil {
-			return err
-		}
-		handlerLoginType = handler.LoginType
-		handlerC8Yclient = handler.C8Yclient
+		log.Infof("User preference for login type: %s", handler.LoginType)
+	}
+	if err := handler.Run(); err != nil {
+		return err
+	}
+	handlerLoginType := handler.LoginType
+	client = handler.Session()
+	if viper.IsSet("useTenantPrefix") {
+		client.OmitTenant = !viper.GetBool("useTenantPrefix")
 	}
 
 	mode := cfg.SessionMode(config.SessionModeUnset).String()
@@ -321,22 +329,22 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		cfg.Logger.Debugf("Detected legacy mode. mode=%s", mode)
 	}
 
-	if hasChanged(handlerC8Yclient, cfg) {
+	if hasChanged(&client, cfg) {
 		log.Infof("Saving tenant name")
-		n.onSave(handlerC8Yclient)
+		n.onSave(&client)
 	}
 
 	// include scheme so the user is aware if they are using http or https
-	formatURL := strings.TrimSuffix(c8y.FormatBaseURL(handlerC8Yclient.BaseURL.String()), "/")
+	formatURL := strings.TrimSuffix(apiv2.FormatBaseURL(client.URL), "/")
 	session := &c8ysession.CumulocitySession{
 		Path:       cfg.GetSessionFile(),
 		SessionUri: "file://" + cfg.GetSessionFile(),
 		Host:       formatURL,
-		Password:   handlerC8Yclient.Password,
-		Token:      handlerC8Yclient.Token,
+		Password:   client.Password,
+		Token:      client.Token,
 		Tenant:     cfg.GetTenant(),
 		Version:    cfg.GetCumulocityVersion(),
-		Username:   handlerC8Yclient.Username,
+		Username:   client.Username,
 		Mode:       mode,
 	}
 	// Don't trigger another login afterwards
@@ -356,7 +364,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 			fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is not active (see previous warning)\n", cs.WarningIcon())
 		}
 		if !n.NoBanner {
-			c8ysession.PrintSessionInfo(n.factory.IOStreams.ErrOut, client, cfg, *session)
+			c8ysession.PrintSessionInfo(n.factory.IOStreams.ErrOut, &client, cfg, *session)
 		}
 	}
 
@@ -375,11 +383,11 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 
 	// Write session details to stdout (for machines)
 	cfg.Logger.Infof("c8y sessions set: isAuthorized: %v", session.IsAuthorized())
-	return c8ysession.WriteOutput(n.GetCommand().OutOrStdout(), client, cfg, session, outputFormat)
+	return c8ysession.WriteOutput(n.GetCommand().OutOrStdout(), &client, cfg, session, outputFormat)
 }
 
-func hasChanged(client *c8y.Client, cfg *config.Config) bool {
-	if client.TenantName != "" && client.TenantName != cfg.GetTenant() {
+func hasChanged(client *config.ClientSession, cfg *config.Config) bool {
+	if client.Tenant != "" && client.Tenant != cfg.GetTenant() {
 		return true
 	}
 

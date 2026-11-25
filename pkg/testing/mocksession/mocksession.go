@@ -10,7 +10,9 @@ import (
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/loginoptions"
 	"github.com/stretchr/testify/assert"
 	"github.com/tidwall/gjson"
 )
@@ -81,35 +83,44 @@ func getPassword() string {
 }
 
 func CreateSessionWithOAuth2Internal() (*c8ysession.CumulocitySession, error) {
-	client := c8y.NewClientFromOptions(nil, c8y.ClientOptions{
-		BaseURL:  getHost(),
+	ctx := context.Background()
+	client := apiv2.NewClient(apiv2.ClientOptions{
+		BaseURL:            getHost(),
+		InsecureSkipVerify: true,
+		SkipTenantLookup:   true,
+	})
+	client.SetAuth(authentication.AuthOptions{
 		Username: getUsername(),
 		Password: getPassword(),
 	})
-	loginOptions, _, err := client.Tenant.GetLoginOptions(context.Background())
-	if err != nil {
-		return nil, err
+
+	loginOptions := client.LoginOptions.ListNoAuth(ctx, loginoptions.ListOptions{})
+	if loginOptions.Err != nil {
+		return nil, loginOptions.Err
 	}
 
-	initRequest := ""
-	for _, option := range loginOptions.LoginOptions {
-		if strings.EqualFold(option.Type, c8y.LoginTypeOAuth2Internal) {
-			initRequest = option.InitRequest
+	found := false
+	for option := range loginOptions.Seq() {
+		if strings.EqualFold(option.Type(), authentication.LoginTypeOAuth2Internal) {
+			found = true
 			break
 		}
 	}
-	if initRequest == "" {
+	if !found {
 		return nil, fmt.Errorf("tenant does not have the oauth2_internal login type enabled")
 	}
 
-	if err := client.LoginUsingOAuth2(context.Background(), initRequest); err != nil {
+	token, err := client.LoginWithOptions(ctx, apiv2.LoginOptions{
+		Method: authentication.LoginMethodOAuth2Internal,
+	})
+	if err != nil {
 		return nil, err
 	}
 
 	return &c8ysession.CumulocitySession{
 		Host:     client.BaseURL.String(),
-		Username: client.Username,
-		Password: client.Password,
-		Token:    client.Token,
+		Username: client.Auth.Username,
+		Password: client.Auth.Password,
+		Token:    token,
 	}, nil
 }

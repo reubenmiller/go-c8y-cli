@@ -1,36 +1,16 @@
-// Package c8ylogin provides authentication flows for Cumulocity IoT.
+// Package c8ylogin provides the authentication flows for Cumulocity.
 //
-// This file (loginv2.go) integrates the go-c8y v2 SDK's authentication
-// mechanisms into the CLI while keeping full compatibility with the existing
-// *c8y.Client type used throughout the rest of the codebase.
+// All flows use the go-c8y v2 SDK (pkg/c8y/api). The handler supports:
 //
-// Both modules coexist in go.mod:
+//   - BASIC and OAUTH2_INTERNAL (OAI-Secure tokens, including TOTP/SMS two-factor
+//     authentication and forced password changes), where the tenant's login options
+//     decide which login type is used (see legacyflow.go)
+//   - OAUTH2 (device flow with the legacy login type)
+//   - DEVICE: OAuth2 device flow
+//   - BROWSER: OAuth2 authorization code flow via the system browser
+//   - CERTIFICATE: mTLS device-certificate authentication (no username / password)
 //
-//	github.com/reubenmiller/go-c8y       – existing client (pkg/c8y)
-//	github.com/reubenmiller/go-c8y/v2    – new auth API   (pkg/c8y/api)
-//
-// The *c8y.Client field on LoginHandlerV2 uses the old module so that call
-// sites need only change the constructor; all field accesses remain identical.
-// Once the full migration to the v2 module is complete, the old dependency
-// can be dropped and the two imports collapsed into one.
-//
-// To add the v2 module:
-//
-//	go get github.com/reubenmiller/go-c8y/v2
-//
-// # New capabilities unlocked by the v2 SDK
-//
-//   - CERTIFICATE: mTLS device-certificate authentication (no username / password).
-//     The client exchanges a PEM certificate + private key for a short-lived
-//     bearer token via the Cumulocity /devicecontrol/deviceAccessToken endpoint.
-//
-//   - OAUTH2_BROWSER_FLOW: Authorization Code flow (RFC 6749) via the system
-//     browser. A local callback server is started automatically; the browser is
-//     opened to the IdP login page; the returned code is exchanged for a token.
-//     Supports PKCE (RFC 7636) for future compatibility.
-//
-//   - OAUTH2_DEVICE_FLOW: unchanged semantics compared to v1, but now uses
-//     auto-discovery of OAuth2 endpoints via OpenID Connect configuration.
+// Further capabilities of the SDK which are used by the flows:
 //
 //   - Automatic TOTP (TOTPSecret field): CI / automation scenarios can supply a
 //     base-32 TOTP secret so that two-factor codes are generated automatically
@@ -53,8 +33,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/cli/browser"
 	"github.com/fatih/color"
@@ -67,11 +49,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"golang.org/x/term"
 
-	// pkg/c8y – the existing c8y.Client type used throughout the CLI.
-	// Uses the old module so *c8y.Client remains type-compatible with call sites.
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
-
-	// pkg/c8y/api – the new authentication API introduced in the v2 SDK.
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	authv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants/currenttenant"
@@ -80,18 +57,10 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/oauth/device"
 )
 
-// LoginHandlerV2 is a drop-in replacement for LoginHandler that drives all
-// login flows through the go-c8y v2 SDK. It supports every authentication
-// method of the original handler and additionally exposes:
-//
-//   - Certificate (mTLS device-certificate)
-//   - OAUTH2 Browser Flow (Authorization Code via system browser)
-//   - Automatic TOTP code generation from a pre-shared secret
-//   - Structured callbacks for every interactive prompt
-//
-// After a successful login the obtained bearer token is synced back into the
-// existing *c8y.Client so that the rest of the CLI continues working without
-// modification.
+var (
+	// Timeout in milliseconds used for all Server requests
+	Timeout int = 30000
+)
 
 // LoginTypeBrowser, LoginTypeDevice and LoginTypeCertificate are re-exported
 // from pkg/logintype for the convenience of callers that already import c8ylogin
@@ -102,49 +71,42 @@ const (
 	LoginTypeCertificate = logintype.Certificate
 )
 
-// # Minimal call-site migration from LoginHandler
+// LoginHandlerV2 drives all login flows through the go-c8y v2 SDK.
 //
-//	// Before (v1)
-//	handler := c8ylogin.NewLoginHandler(io, client, w, onSave)
+// Usage:
+//
+//	handler := c8ylogin.NewLoginHandlerV2(io, apiv2.ClientOptions{BaseURL: host, Auth: auth}, w, onSave)
 //	handler.LoginType = loginType           // e.g. "OAUTH2_INTERNAL"
 //	handler.SSO = ssoSettings
 //	err = handler.Run()
-//	session.Username  = handler.C8Yclient.Username
-//	session.LoginType = handler.LoginType
-//
-//	// After (v2)
-//	handler := c8ylogin.NewLoginHandlerV2(io, client, w, onSave)
-//	handler.LoginType = loginType           // same string, automatically converted
-//	handler.SSO = ssoSettings
-//	err = handler.Run()
-//	session.Username  = handler.C8Yclient.Username  // unchanged – same v1 field name
-//	session.LoginType = handler.LoginType           // updated after login
+//	session := handler.Session()            // the credentials after the login
+//	session.LoginType = handler.LoginType   // updated after login
 type LoginHandlerV2 struct {
 	IO     *iostreams.IOStreams
 	Writer io.Writer
 	Logger *logger.Logger
 
 	// V2Client is the go-c8y v2 api.Client used for all login operations.
-	// Created automatically by NewLoginHandlerV2; can be replaced for testing.
+	// It is created by NewLoginHandlerV2 and is replaced when the authorization of
+	// the handler changes, so don't keep a reference to it. Use Session() to get the
+	// credentials after the login.
 	V2Client *apiv2.Client
-
-	// C8Yclient is the existing c8y.Client (pkg/c8y) used throughout the CLI,
-	// kept under the same field name as LoginHandler so call sites can read
-	// handler.C8Yclient.Username / .BaseURL / .Token after Run() without any
-	// changes. After a successful login its Token field is updated with the
-	// newly obtained token so subsequent API calls keep working.
-	C8Yclient *c8y.Client
 
 	// LoginType is the login type string (e.g. "OAUTH2_INTERNAL",
 	// "BASIC", "OAUTH2"). It is:
 	//   - accepted as input and auto-converted to LoginMethod / LoginTypePreference
 	//   - updated after a successful Run() to reflect the method that was used
 	//
-	// v2-only methods:
+	// Additional methods:
 	//   "DEVICE"       → LoginMethodOAuth2DeviceFlow  (explicit alias; "OAUTH2" also accepted)
 	//   "BROWSER"      → LoginMethodOAuth2BrowserFlow
 	//   "CERTIFICATE"  → LoginMethodCertificate
 	LoginType string
+
+	// AllowedLoginTypes is a user defined list of the allowed login types (from their perspective).
+	// It limits the login options of the tenant which are tried. This is only used for the
+	// BASIC / OAUTH2_INTERNAL / OAUTH2 login types.
+	AllowedLoginTypes []string
 
 	// LoginMethod enforces a specific login flow. When set it takes precedence
 	// over LoginTypePreference. Leave empty to use the tenant's advertised
@@ -199,52 +161,161 @@ type LoginHandlerV2 struct {
 	TOTPSecret string
 
 	// TOTPCode optional two-factor code entered by the user elsewhere (e.g. in the
-	// browser by the MCP server). It is used once instead of a prompt
+	// browser by the MCP server, or by the --tfaCode flag). It is used once instead
+	// of a prompt
 	TOTPCode     string
 	totpCodeUsed bool
 
 	onSave func()
+
+	// clientOpts are the options used to (re)create the client
+	clientOpts apiv2.ClientOptions
+
+	// auth the credentials of the session
+	auth authv2.AuthOptions
+
+	// authType the authorization which is used for the requests
+	authType authv2.AuthType
+
+	// version the Cumulocity version
+	version string
+
+	// state of the login flow for the BASIC / OAUTH2_INTERNAL / OAUTH2 login types
+	loginOptions    []loginOption
+	attempts        int
+	authorized      bool
+	tfaCodeRequired bool
+	loginAttempted  bool
+
+	// abortErr is the error of a prompt that must stop the login (e.g. no terminal)
+	abortErr error
 }
 
-// NewLoginHandlerV2 creates a LoginHandlerV2 from an existing *c8y.Client.
-// It constructs an api.Client (pkg/c8y/api) using the same host, tenant,
-// username, password, and token so both clients share the same session context.
+// NewLoginHandlerV2 creates a LoginHandlerV2 which uses a go-c8y v2 client created from the given options.
+// The credentials of the options (opts.Auth) are used as the session credentials, and opts.Auth.AuthType
+// selects the authorization which is used for the requests.
+//
+// The client is created without the credentials, so no token is requested before the login
+// starts. Set opts.Transport / opts.InsecureSkipVerify to control the connection.
 func NewLoginHandlerV2(
 	IO *iostreams.IOStreams,
-	v1 *c8y.Client,
+	opts apiv2.ClientOptions,
 	w io.Writer,
 	onSave func(),
 ) *LoginHandlerV2 {
 	h := &LoginHandlerV2{
-		IO:        IO,
-		C8Yclient: v1,
-		Writer:    w,
-		onSave:    onSave,
-		Logger:    logger.NewDummyLogger("c8yloginv2"),
+		IO:     IO,
+		Writer: w,
+		onSave: onSave,
+		Logger: logger.NewDummyLogger("c8yloginv2"),
+	}
+	if h.onSave == nil {
+		h.onSave = func() {}
 	}
 
-	h.V2Client = apiv2.NewClient(apiv2.ClientOptions{
-		BaseURL: v1.BaseURL.String(),
-		Auth: authv2.AuthOptions{
-			Tenant:   v1.TenantName,
-			Username: v1.Username,
-			Password: v1.Password,
-			Token:    v1.Token,
-		},
-	})
+	h.auth = opts.Auth
+	h.authType = opts.Auth.GetAuthTypes()[0]
 
+	// The credentials are applied after the client is created. Otherwise the client requests a
+	// token as soon as it has a username and password, before the login flow had a chance to
+	// handle two-factor authentication.
+	opts.Auth = authv2.AuthOptions{Tenant: opts.Auth.Tenant}
+	opts.SkipTenantLookup = true
+	if opts.Timeout == 0 {
+		opts.Timeout = time.Duration(Timeout) * time.Millisecond
+	}
+	if opts.Logger == nil {
+		var errOut io.Writer = io.Discard
+		if IO != nil && IO.ErrOut != nil {
+			errOut = IO.ErrOut
+		}
+		opts.Logger = slog.New(slog.NewTextHandler(errOut, &slog.HandlerOptions{Level: slog.LevelWarn}))
+	}
+	h.clientOpts = opts
+	h.applyAuth(h.requestAuth())
 	return h
 }
 
 // SetLogger replaces the no-op logger with a real one.
 func (h *LoginHandlerV2) SetLogger(l *logger.Logger) { h.Logger = l }
 
-// Run performs the full login flow and syncs the resulting token back into
-// the v1 client. It is a drop-in replacement for LoginHandler.Run.
+// Session returns the credentials of the session. The values are updated by the login,
+// e.g. with the token and the tenant.
+func (h *LoginHandlerV2) Session() config.ClientSession {
+	session := config.NewClientSession(h.V2Client.BaseURL, h.auth, h.version)
+	session.AuthType = h.authType
+	return session
+}
+
+// applyAuth replaces the client with a new client which uses the given authorization
+func (h *LoginHandlerV2) applyAuth(auth authv2.AuthOptions) {
+	client := apiv2.NewClient(h.clientOpts)
+	client.SetAuth(auth)
+	h.V2Client = client
+}
+
+// requestAuth returns the authorization which is used for requests, based on the authorization type
+func (h *LoginHandlerV2) requestAuth() authv2.AuthOptions {
+	auth := authv2.AuthOptions{
+		Tenant: h.auth.Tenant,
+	}
+	authType := h.authType
+	if authType == authv2.AuthTypeUnset {
+		if h.auth.Token != "" {
+			authType = authv2.AuthTypeBearer
+		} else if h.auth.Username != "" && h.auth.Password != "" {
+			authType = authv2.AuthTypeBasic
+		}
+	}
+	switch authType {
+	case authv2.AuthTypeBearer:
+		auth.Token = h.auth.Token
+	case authv2.AuthTypeBasic:
+		auth.Username = h.auth.Username
+		auth.Password = h.auth.Password
+	}
+	return auth
+}
+
+// syncAuth updates the client after the credentials or the authorization type has changed
+func (h *LoginHandlerV2) syncAuth() {
+	h.applyAuth(h.requestAuth())
+}
+
+// ctx returns the context used for requests
+func (h *LoginHandlerV2) ctx() context.Context {
+	return context.Background()
+}
+
+// isSDKFlow checks if the login is done using the login flows of the SDK
+// (instead of the login options of the tenant)
+func (h *LoginHandlerV2) isSDKFlow() bool {
+	if h.LoginMethod != "" || len(h.LoginTypePreference) > 0 {
+		return true
+	}
+	switch strings.ToUpper(h.LoginType) {
+	case logintype.Browser, logintype.Certificate, logintype.Device:
+		return true
+	}
+	return false
+}
+
+// Run performs the full login flow and stores the resulting credentials in the handler.
+// Use Session() to get the credentials after the login.
 //
-// LoginType (v1-style string) is resolved to Method / Preference just before
+// LoginType (string) is resolved to Method / Preference just before
 // the login attempt so callers can set either field.
 func (h *LoginHandlerV2) Run() error {
+	if h.isSDKFlow() {
+		return h.runSDKFlow()
+	}
+	return h.runTenantFlow()
+}
+
+func (h *LoginHandlerV2) runSDKFlow() error {
+	// The login needs the credentials, and not only the ones used by the authorization type
+	h.applyAuth(h.auth)
+
 	// Resolve LoginType string → v2 method / preference.
 	// LoginMethod takes precedence; otherwise derive from LoginType string.
 	method := h.LoginMethod
@@ -281,28 +352,28 @@ func (h *LoginHandlerV2) Run() error {
 		OnSuccess: func(m authv2.LoginMethod) {
 			h.Logger.Infof("Login succeeded. method=%s", m)
 			h.LastUsedMethod = m
-			// Update the v1-style LoginType string so call sites that read
+			// Update the LoginType string so call sites that read
 			// handler.LoginType after Run() see the correct value.
 			h.LoginType = loginTypeFromMethod(m)
 		},
 	}
 
-	token, err := h.V2Client.LoginWithOptions(context.Background(), opts)
+	token, err := h.V2Client.LoginWithOptions(h.ctx(), opts)
 	if err != nil {
 		return fmt.Errorf("login failed: %w", err)
 	}
 
-	// Sync token into C8Yclient so the rest of the CLI works as
-	// before without any change to code outside this package.
-	if token != "" && h.C8Yclient != nil {
-		h.C8Yclient.SetToken(token)
+	// Keep the credentials which the login has set (e.g. the token, or credentials from the prompts)
+	h.auth = h.V2Client.Auth
+	if token != "" {
+		h.auth.Token = token
 	}
 
 	// Populate the tenantID so it is exposed in the env
-	tenantResult := h.V2Client.Tenants.Current.Get(context.Background(), currenttenant.GetOptions{})
+	tenantResult := h.V2Client.Tenants.Current.Get(h.ctx(), currenttenant.GetOptions{})
 	if tenantResult.Err == nil {
 		if tenantName := tenantResult.Data.Name(); tenantName != "" {
-			h.C8Yclient.TenantName = tenantName
+			h.auth.Tenant = tenantName
 		}
 	}
 
@@ -310,14 +381,14 @@ func (h *LoginHandlerV2) Run() error {
 	return nil
 }
 
-// loginTypeFromMethod converts a v2 LoginMethod back to the v1-style string so
+// loginTypeFromMethod converts a v2 LoginMethod back to the login type string so
 // that existing call-site code that reads handler.LoginType continues working.
 func loginTypeFromMethod(m authv2.LoginMethod) string {
 	switch m {
 	case authv2.LoginMethodBasic:
-		return c8y.LoginTypeBasic
+		return logintype.Basic
 	case authv2.LoginMethodOAuth2Internal:
-		return c8y.LoginTypeOAuth2Internal
+		return logintype.OAuth2Internal
 	case authv2.LoginMethodOAuth2DeviceFlow:
 		return logintype.Device
 	case authv2.LoginMethodCertificate:
@@ -329,7 +400,7 @@ func loginTypeFromMethod(m authv2.LoginMethod) string {
 	}
 }
 
-// preferenceFromLoginType converts a v1-style login type string (e.g.
+// PreferenceFromLoginType converts a login type string (e.g.
 // "OAUTH2_INTERNAL") into an ordered v2 LoginMethod preference list. This
 // makes it easy to migrate existing --loginType flag values to v2.
 //
@@ -341,22 +412,20 @@ func loginTypeFromMethod(m authv2.LoginMethod) string {
 //	"NONE"             → [BASIC]   (NONE means no SSO; fall back to BASIC)
 //	"DEVICE"           → [OAUTH2_DEVICE_FLOW]   (preferred explicit name)
 //	"OAUTH2"           → [OAUTH2_DEVICE_FLOW]   (legacy alias for DEVICE)
-//	"CERTIFICATE"      → [CERTIFICATE]           (new in v2)
-//	"BROWSER"          → [OAUTH2_BROWSER_FLOW]   (new in v2)
+//	"CERTIFICATE"      → [CERTIFICATE]
+//	"BROWSER"          → [OAUTH2_BROWSER_FLOW]
 func PreferenceFromLoginType(loginType string) []authv2.LoginMethod {
 	switch loginType {
-	case c8y.LoginTypeOAuth2Internal:
+	case logintype.OAuth2Internal:
 		return []authv2.LoginMethod{authv2.LoginMethodOAuth2Internal}
-	case c8y.LoginTypeBasic, c8y.LoginTypeNone:
+	case logintype.Basic, logintype.None:
 		return []authv2.LoginMethod{authv2.LoginMethodBasic}
-	case logintype.Device, c8y.LoginTypeOAuth2:
+	case logintype.Device, logintype.OAuth2:
 		// logintype.Device is the preferred explicit name; "OAUTH2" kept as a legacy alias.
 		return []authv2.LoginMethod{authv2.LoginMethodOAuth2DeviceFlow}
 	case logintype.Certificate:
-		// New auth type – not present in v1 constants.
 		return []authv2.LoginMethod{authv2.LoginMethodCertificate}
 	case logintype.Browser:
-		// New auth type – not present in v1 constants.
 		return []authv2.LoginMethod{authv2.LoginMethodOAuth2BrowserFlow}
 	default:
 		return nil
@@ -440,18 +509,28 @@ func (h *LoginHandlerV2) deviceFlowOptions() *apiv2.DeviceFlowOptions {
 // promptTOTPCode is called by the SDK whenever a TOTP code is needed (either
 // for first-time enrollment verification or for a regular login challenge).
 func (h *LoginHandlerV2) promptTOTPCode(_ context.Context, challenge totp.TOTPChallenge) (string, error) {
+	// a code which was given by the user (e.g. via a flag, or by the MCP server) is only used once,
+	// so a rejected code isn't sent again. It can't be used to verify the setup, as the secret is new.
+	if h.TOTPCode != "" && !h.totpCodeUsed && !challenge.IsSetup {
+		h.totpCodeUsed = true
+		return h.TOTPCode, nil
+	}
+
 	if !term.IsTerminal(int(os.Stdin.Fd())) {
 		if challenge.IsSetup {
-			return "", errors.New(config.TOTPSetupRequiredMessage)
+			h.abortErr = errors.New(config.TOTPSetupRequiredMessage)
+		} else {
+			h.abortErr = errors.New(config.TOTPCodeRequiredMessage)
 		}
-		// a code given by the MCP server is only used once, so a rejected code
-		// isn't sent again
-		if h.TOTPCode != "" && !h.totpCodeUsed {
-			h.totpCodeUsed = true
-			return h.TOTPCode, nil
-		}
-		return "", errors.New(config.TOTPCodeRequiredMessage)
+		return "", h.abortErr
 	}
+
+	if !challenge.IsSetup {
+		h.Logger.Infof("TFA code is required")
+		session := h.Session()
+		os.Stderr.WriteString(fmt.Sprintf("Session details:\nHost=%s, username=%s\n", session.Host, session.Username))
+	}
+
 	label := "Enter Two-Factor code"
 	if challenge.IsSetup {
 		label = "Verify TOTP setup – enter the code shown in your authenticator app"
@@ -463,13 +542,18 @@ func (h *LoginHandlerV2) promptTOTPCode(_ context.Context, challenge totp.TOTPCh
 		HideEntered: true,
 		Label:       label,
 		Validate: func(input string) error {
-			if len(input) < 6 {
+			if len(strings.ReplaceAll(input, " ", "")) < 6 {
 				return fmt.Errorf("code must be at least 6 digits")
 			}
 			return nil
 		},
 	}
-	return p.Run()
+	code, err := p.Run()
+	if err != nil {
+		h.abortErr = fmt.Errorf("User cancelled login")
+		return "", h.abortErr
+	}
+	return code, nil
 }
 
 // displayTOTPQRCode is called during first-time TOTP enrollment so the user
@@ -542,7 +626,8 @@ func (h *LoginHandlerV2) promptCredentials(_ context.Context, method authv2.Logi
 		if auth.Username == "" {
 			username, err := prompter.Username("Enter username", " ")
 			if err != nil {
-				return fmt.Errorf("user cancelled username prompt")
+				h.abortErr = fmt.Errorf("user cancelled username prompt")
+				return h.abortErr
 			}
 			auth.Username = username
 		}

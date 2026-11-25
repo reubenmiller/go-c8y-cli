@@ -132,7 +132,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap/zapcore"
@@ -154,7 +153,6 @@ type CmdRoot struct {
 
 	Factory *cmdutil.Factory
 
-	client      *c8y.Client
 	log         *logger.Logger
 	activitylog *activitylogger.ActivityLogger
 	dataview    *dataview.DataView
@@ -793,7 +791,6 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 		}
 
 		customLogger := logger.NewLogger("c8y", logOptions)
-		c8y.Logger = customLogger
 		cfg.SetLogger(customLogger)
 		c.log = customLogger
 		return customLogger, nil
@@ -840,25 +837,8 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 	consoleHandler.Compact = cfg.CompactJSON()
 	consoleHandler.Disabled = cfg.ShowProgress() && c.Factory.IOStreams.IsStdoutTTY()
 
-	// Update client
-
-	c.Factory.Client = func() (*c8y.Client, error) {
-		c.mu.Lock()
-		defer c.mu.Unlock()
-
-		if c.client != nil {
-			return c.client, nil
-		}
-		client, err := factory.CreateCumulocityClient(c.Factory, c.SessionFile, c.SessionUsername, c.SessionPassword, disableEncryptionCheck)()
-
-		if c.log != nil {
-			c8y.Logger = c.log
-		} else {
-			c8y.Logger = logger.NewDummyLogger("c8y")
-		}
-		c.client = client
-		return client, err
-	}
+	// Update client (legacy go-c8y v1 client for the commands which have not been migrated yet)
+	c.Factory.Client = factory.NewLegacyClient(c.Factory, c.SessionFile, c.SessionUsername, c.SessionPassword, disableEncryptionCheck)
 	return nil
 }
 
@@ -880,7 +860,7 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	client, err := c.Factory.Client()
+	client, err := c.Factory.ClientSession()
 	if err != nil {
 		return err
 	}
@@ -896,7 +876,7 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	// print log information
 	sessionFile := cfg.GetSessionFile()
 	if sessionFile != "" {
-		log.Infof("Loading session from file: %s", cfg.HideSensitiveInformationIfActive(client, sessionFile))
+		log.Infof("Loading session from file: %s", cfg.HideSensitiveInformationIfActive(&client, sessionFile))
 		if _, err := os.Stat(sessionFile); err != nil {
 			if c8ysession.IsSessionFilePath(sessionFile) {
 				log.Warnf("Failed to verify session file. %s", err)
@@ -904,7 +884,7 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 				log.Infof("Given file is not a session file. %s", err)
 			}
 		} else {
-			log.Infof("Loaded session: %s", cfg.HideSensitiveInformationIfActive(client, sessionFile))
+			log.Infof("Loaded session: %s", cfg.HideSensitiveInformationIfActive(&client, sessionFile))
 		}
 	}
 
@@ -954,10 +934,7 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if client == nil {
-		return cmderrors.NewSystemError("Client failed to load")
-	}
-	if client.BaseURL == nil || client.BaseURL.Host == "" {
+	if client.Host == "" {
 		return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitNoSession, "A c8y session has not been loaded. Please create or activate a session and try again")
 	}
 

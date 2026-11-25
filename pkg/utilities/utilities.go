@@ -12,7 +12,6 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 // GetFileContentType TODO: Fix mime detection because it currently returns only application/octet-stream
@@ -136,7 +135,9 @@ func ClearProcessEnvironment(variables []string) {
 	}
 }
 
-func CheckEncryption(IO *iostreams.IOStreams, cfg *config.Config, client *c8y.Client) error {
+// CheckEncryption checks that the session can be decrypted (prompting for the passphrase if needed),
+// and sets the decrypted password and token on the given client session values
+func CheckEncryption(IO *iostreams.IOStreams, cfg *config.Config, client *config.ClientSession) error {
 	encryptionEnabled := cfg.IsEncryptionEnabled()
 	decryptSession := false
 	if !encryptionEnabled && cfg.IsPasswordEncrypted() {
@@ -168,7 +169,7 @@ func CheckEncryption(IO *iostreams.IOStreams, cfg *config.Config, client *c8y.Cl
 		if err != nil {
 			return err
 		}
-		client.SetToken(clienttoken)
+		client.Token = clienttoken
 
 		// decrypt settings
 		if decryptSession {
