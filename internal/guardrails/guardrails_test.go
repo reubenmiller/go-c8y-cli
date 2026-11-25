@@ -15,6 +15,7 @@ package guardrails
 import (
 	"encoding/json"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -72,6 +73,17 @@ var singleValuedFlags = map[string]map[string]string{
 		"deviceregistration register-ca":          "a group path (main_group/sub_group), created if it does not exist; a list would split names with commas",
 		"deviceregistration register-external-ca": "a group path (main_group/sub_group), created if it does not exist; a list would split names with commas",
 	},
+}
+
+// localCommandGroups are the top-level command groups which only manage local
+// state, so their commands may be marked with cmdutil.MarkLocalCommand (and
+// are then exempt from the session mode check).
+var localCommandGroups = map[string]bool{
+	"alias":      true,
+	"cache":      true,
+	"extensions": true,
+	"sessions":   true,
+	"settings":   true,
 }
 
 type allowlist map[string][]string
@@ -226,6 +238,12 @@ func TestMutatingCommandsAreModeGuarded(t *testing.T) {
 	found := map[string][]string{"mode-guard": {}}
 	walk(commandTree(t), func(c *cobra.Command) {
 		if cmdutil.IsLocalCommand(c) {
+			// The annotation skips this check, so it must not become a way
+			// around the ratchet: only the command groups which manage local
+			// state may use it.
+			if group, _, _ := strings.Cut(path(c), " "); !localCommandGroups[group] {
+				t.Errorf("%s: only commands in %v may be marked with cmdutil.MarkLocalCommand; check the session mode instead", path(c), slices.Sorted(maps.Keys(localCommandGroups)))
+			}
 			return
 		}
 		method := c.Annotations["semanticMethod"]
