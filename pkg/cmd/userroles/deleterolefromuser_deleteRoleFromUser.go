@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	roleusers "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/userroles/users"
 	"github.com/spf13/cobra"
 )
@@ -53,9 +52,9 @@ Remove a role from the given user
 
 	completion.WithOptions(
 		cmd,
-		completion.WithUser("user", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithUserRole("role", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUser("user", ccmd.factory.ClientV2),
+		completion.WithUserRole("role", ccmd.factory.ClientV2),
+		completion.WithTenantID("tenant", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

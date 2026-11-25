@@ -1,11 +1,9 @@
 package c8ystream
 
 import (
-	"compress/gzip"
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -18,15 +16,12 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/stream"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/filter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"log/slog"
 )
 
 // roundTripperFunc adapts a function to http.RoundTripper.
@@ -34,53 +29,6 @@ type roundTripperFunc func(*http.Request) (*http.Response, error)
 
 func (f roundTripperFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return f(req)
-}
-
-// decompressTransport gunzips gzip-encoded response bodies (removing the
-// Content-Encoding header) so layers above it — most importantly the response
-// cache, whose entries are shared with the v1-path commands — always see the
-// decoded body, matching what Go's transport produces when no explicit
-// Accept-Encoding header suppresses its transparent gzip handling.
-type decompressTransport struct {
-	base http.RoundTripper
-}
-
-func (t decompressTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	resp, err := t.base.RoundTrip(req)
-	if err != nil || resp == nil {
-		return resp, err
-	}
-	if strings.EqualFold(resp.Header.Get("Content-Encoding"), "gzip") {
-		gz, gzErr := gzip.NewReader(resp.Body)
-		if gzErr != nil {
-			// Leave the response untouched (e.g. an empty body); the caller's
-			// own decoding will surface any real corruption.
-			return resp, nil
-		}
-		resp.Body = &gunzipReadCloser{gz: gz, raw: resp.Body}
-		resp.Header.Del("Content-Encoding")
-		resp.Header.Del("Content-Length")
-		resp.ContentLength = -1
-		resp.Uncompressed = true
-	}
-	return resp, nil
-}
-
-// gunzipReadCloser reads decompressed content and closes both the gzip reader
-// and the underlying network body.
-type gunzipReadCloser struct {
-	gz  *gzip.Reader
-	raw io.ReadCloser
-}
-
-func (g *gunzipReadCloser) Read(p []byte) (int, error) { return g.gz.Read(p) }
-
-func (g *gunzipReadCloser) Close() error {
-	err := g.gz.Close()
-	if rawErr := g.raw.Close(); err == nil {
-		err = rawErr
-	}
-	return err
 }
 
 // Call is one service invocation. It is built (with its arguments already
@@ -411,107 +359,15 @@ func (r *Runner) Body(getters ...flags.GetOption) error {
 	return nil
 }
 
-// Client builds a go-c8y v2 client from the session via the legacy factory
-// client, which owns credential resolution (encrypted session decryption,
-// passphrase prompting, token refresh), so both clients always agree.
-// --verbose/--debug enable the v2 client's request/response logging.
+// Client builds the go-c8y v2 client for this command (see
+// cmdutil.Factory.ClientV2, which shell completion shares) and installs the
+// Runner's middleware: activity log, --outputTemplate capture and the silent
+// success message.
 func (r *Runner) Client() (*apiv2.Client, error) {
-	legacy, err := r.Factory.Client()
+	client, err := r.Factory.ClientV2()
 	if err != nil {
 		return nil, err
 	}
-	opts := apiv2.ClientOptions{
-		BaseURL: legacy.BaseURL.String(),
-		Auth: authentication.AuthOptions{
-			Tenant:   legacy.TenantName,
-			Username: legacy.Username,
-			Password: legacy.Password,
-			Token:    legacy.Token,
-		},
-		Debug:   r.Config.Verbose() || r.Config.Debug(),
-		Timeout: r.Config.RequestTimeout(),
-	}
-
-	// Mirror the legacy client's negotiated authorization method. Without this
-	// a password-only session makes the v2 client exchange the password for a
-	// bearer token (POST /tenant/oauth/token) on EVERY command, where v1 sent
-	// Authorization: Basic directly — slower, chattier, and a poisoning hazard
-	// when the exchange is replayed (revoked tokens). Bearer sessions keep the
-	// token-source behaviour so expired tokens still refresh.
-	switch legacy.AuthorizationType {
-	case c8y.AuthTypeBasic:
-		opts.Auth.AuthType = []authentication.AuthType{authentication.AuthTypeBasic}
-	case c8y.AuthTypeBearer:
-		opts.Auth.AuthType = []authentication.AuthType{authentication.AuthTypeBearer}
-	}
-
-	// Install the HTTP response cache exactly as the legacy factory client does
-	// (pkg/cmd/factory/c8yclient.go). The cache is a RoundTripper wrapper, so it
-	// becomes the v2 client's base transport; apiv2.NewClient further wraps it in
-	// DryRunTransport, giving DryRun -> cache -> network ordering (a dry run
-	// short-circuits before ever touching the cache). Without this the v2 path
-	// silently skipped caching entirely.
-	if r.Config.CacheEnabled() && r.Config.CacheTTL() > 0 {
-		cachableMethods := r.Config.CacheMethods()
-		// The cache must store DECODED bodies. The v2 resty client sends an
-		// explicit Accept-Encoding header, which disables Go's transparent gzip
-		// handling, so responses reach this transport still compressed with
-		// Content-Encoding: gzip. Cached as-is they poison the shared cache dir:
-		// the v1-path commands (whose transport decompresses transparently before
-		// their cache wrapper) replay the entry without decompressing and parse
-		// gzip bytes as JSON. decompressTransport normalises the response before
-		// the cache sees it.
-		opts.Transport = c8y.CacheResponse(
-			r.Config.CacheTTL(),
-			r.Config.CacheDir(),
-			func(req *http.Request) bool {
-				// Never cache authentication requests. The v2 client acquires
-				// bearer tokens through this same transport (v1 never did), and
-				// a cached token response outlives revocation: the token-source
-				// refresh POST is then also served from the cache, so the client
-				// re-fetches the same revoked token and every request 401s until
-				// the cache TTL expires.
-				if strings.Contains(req.URL.Path, "/tenant/oauth") {
-					return false
-				}
-				return strings.Contains(cachableMethods, req.Method)
-			},
-			c8y.CacheOptions{
-				ExcludeAuth: !r.Config.CacheKeyIncludeAuth(),
-				ExcludeHost: !r.Config.CacheKeyIncludeHost(),
-				Mode:        r.Config.CacheMode(),
-				BodyKeys:    r.Config.CacheBodyKeys(),
-			},
-		)(decompressTransport{base: http.DefaultTransport})
-	}
-
-	// v1's SDK logged "Sending request: <method> <url>" (session values masked)
-	// before every send. Wrap the transport outside the cache so the line also
-	// appears for cache hits, exactly as v1's pre-transport log did; dry runs
-	// still skip it because DryRunTransport short-circuits before this layer.
-	if logg, logErr := r.Factory.Logger(); logErr == nil && logg != nil {
-		base := opts.Transport
-		if base == nil {
-			base = http.DefaultTransport
-		}
-		opts.Transport = roundTripperFunc(func(req *http.Request) (*http.Response, error) {
-			logg.Infof("Sending request: %s %s", req.Method, r.Config.HideSensitiveInformationIfActive(legacy, req.URL.String()))
-			return base.RoundTrip(req)
-		})
-	}
-
-	// The SDK's HTTP layer logs its warnings (e.g. credentials over plain
-	// HTTP) at info level and the realtime client logs every websocket frame
-	// at info level: show them only with --verbose/--debug.
-	level := slog.LevelWarn
-	if r.Config.Verbose() || r.Config.Debug() {
-		level = slog.LevelDebug
-	}
-	logger := slog.New(slog.NewTextHandler(r.Factory.IOStreams.ErrOut, &slog.HandlerOptions{Level: level}))
-	opts.Logger = logger
-
-	client := apiv2.NewClient(opts)
-	client.Realtime().SetLogger(logger.With("component", "realtime"))
 	if err := r.installActivityLog(client); err != nil {
 		return nil, err
 	}

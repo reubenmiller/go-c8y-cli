@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devices/registration"
 	"github.com/spf13/cobra"
 )
 
 // WithDeviceRegistrationRequest device registration request completion
-func WithDeviceRegistrationRequest(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithDeviceRegistrationRequest(flagName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -18,12 +18,12 @@ func WithDeviceRegistrationRequest(flagName string, clientFunc func() (*c8y.Clie
 			}
 
 			pattern := "*" + toComplete + "*"
-			items, _, err := client.DeviceCredentials.GetNewDeviceRequests(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				&c8y.NewDeviceRequestOptions{
-					PaginationOptions: *c8y.NewPaginationOptions(100),
+			items, err := client.Devices.Registration.List(
+				context.Background(),
+				registration.ListOptions{
+					PaginationOptions: pageSize(100),
 				},
-			)
+			).Collect()
 
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
@@ -31,9 +31,9 @@ func WithDeviceRegistrationRequest(flagName string, clientFunc func() (*c8y.Clie
 			}
 			values := []string{}
 
-			for _, item := range items.NewDeviceRequests {
-				if toComplete == "" || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s | creationTime: %s", item.ID, item.Status, item.CreationTime))
+			for _, item := range items {
+				if toComplete == "" || MatchString(pattern, item.ID()) {
+					values = append(values, fmt.Sprintf("%s\t%s | creationTime: %s", item.ID(), item.Status(), item.Get("creationTime").String()))
 				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp

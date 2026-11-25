@@ -16,7 +16,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/microservices"
 	"github.com/spf13/cobra"
 )
@@ -63,7 +62,7 @@ Upload microservice binary
 
 	completion.WithOptions(
 		cmd,
-		completion.WithMicroservice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithMicroservice("id", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
 )
@@ -64,8 +63,8 @@ Create a subscription which groups all devices in a single subscription name
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithNotification2SubscriptionName("name", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", ccmd.factory.ClientV2),
+		completion.WithNotification2SubscriptionName("name", ccmd.factory.ClientV2),
 		completion.WithValidateSet("context", "mo", "tenant"),
 		completion.WithValidateSet("apiFilter", "alarms", "alarmsWithChildren", "events", "eventsWithChildren", "managedobjects", "measurements", "operations", "*"),
 	)

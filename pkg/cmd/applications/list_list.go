@@ -16,7 +16,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/applications"
 	"github.com/spf13/cobra"
 )
@@ -65,12 +64,12 @@ Get hosted applications
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("type", "APAMA_CEP_RULE", "EXTERNAL", "HOSTED", "MICROSERVICE"),
-		completion.WithApplication("name", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithTenantID("owner", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithTenantID("providedFor", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithTenantID("subscriber", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithUser("user", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithApplication("name", ccmd.factory.ClientV2),
+		completion.WithTenantID("owner", ccmd.factory.ClientV2),
+		completion.WithTenantID("providedFor", ccmd.factory.ClientV2),
+		completion.WithTenantID("subscriber", ccmd.factory.ClientV2),
+		completion.WithUser("user", ccmd.factory.ClientV2),
+		completion.WithTenantID("tenant", ccmd.factory.ClientV2),
 		completion.WithValidateSet("availability", "SHARED", "PRIVATE", "MARKET"),
 	)
 

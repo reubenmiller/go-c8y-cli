@@ -6,12 +6,37 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/applications"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/applications/versions"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
 	"github.com/spf13/cobra"
 )
 
+const applicationAvailabilityShared = "SHARED"
+
+// listUIPlugins returns the hosted applications with versions (UI plugins) of
+// the current tenant followed by the shared ones.
+func listUIPlugins(client *apiv2.Client) (owned []jsonmodels.Application, shared []jsonmodels.Application, err error) {
+	opt := applications.ListOptions{
+		Type:        applicationTypeHosted,
+		HasVersions: "true",
+	}
+	owned, err = listApplications(client, opt)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	opt.Availability = applicationAvailabilityShared
+	shared, err = listApplications(client, opt)
+	if err != nil {
+		return nil, nil, err
+	}
+	return owned, shared, nil
+}
+
 // WithUIPlugin UI extension completion
-func WithUIPlugin(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithUIPlugin(flagName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -19,46 +44,16 @@ func WithUIPlugin(flagName string, clientFunc func() (*c8y.Client, error)) Optio
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
 
-			hasVersions := true
-			items, _, err := client.Application.GetApplications(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				&c8y.ApplicationOptions{
-					Type:              c8y.ApplicationTypeHosted,
-					HasVersions:       &hasVersions,
-					PaginationOptions: *c8y.NewPaginationOptions(2000),
-				},
-			)
-
+			owned, shared, err := listUIPlugins(client)
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
 				return values, cobra.ShellCompDirectiveError
 			}
 			values := []string{}
 			pattern := "*" + toComplete + "*"
-			for _, item := range items.Applications {
-				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
-				}
-			}
-
-			// Lookup shared extensions
-			// Shared extensions
-			items, _, err = client.Application.GetApplications(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				&c8y.ApplicationOptions{
-					Type:              c8y.ApplicationTypeHosted,
-					HasVersions:       &hasVersions,
-					Availability:      c8y.ApplicationAvailabilityShared,
-					PaginationOptions: *c8y.NewPaginationOptions(2000),
-				},
-			)
-			if err != nil {
-				values := []string{fmt.Sprintf("error. %s", err)}
-				return values, cobra.ShellCompDirectiveError
-			}
-			for _, item := range items.Applications {
-				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+			for _, item := range append(owned, shared...) {
+				if toComplete == "" || MatchString(pattern, item.Name()) || MatchString(pattern, item.ID()) {
+					values = append(values, formatApplication(item))
 				}
 			}
 
@@ -68,39 +63,39 @@ func WithUIPlugin(flagName string, clientFunc func() (*c8y.Client, error)) Optio
 	}
 }
 
-func formatUIPluginValues(items *c8y.ApplicationCollection, toComplete string) []string {
+func formatUIPluginValues(items []jsonmodels.Application, toComplete string) []string {
 	values := []string{}
 	pattern := "*" + toComplete + "*"
 
 	withVersions := strings.Contains(toComplete, "@")
 
-	for i, app := range items.Applications {
-
+	for _, app := range items {
+		appVersions := app.Get("applicationVersions").Array()
 		if withVersions {
 			// Show name@version
-			for _, appVersion := range app.ApplicationVersions {
-				value := fmt.Sprintf("%s@%s", app.Name, appVersion.Version)
-				if toComplete == "" || MatchString(pattern, value) || MatchString(pattern, app.ID) {
-					tags := strings.Join(appVersion.Tags, ",")
+			for _, appVersion := range appVersions {
+				version := appVersion.Get("version").String()
+				value := fmt.Sprintf("%s@%s", app.Name(), version)
+				if toComplete == "" || MatchString(pattern, value) || MatchString(pattern, app.ID()) {
+					tagValues := []string{}
+					for _, tag := range appVersion.Get("tags").Array() {
+						tagValues = append(tagValues, tag.String())
+					}
+					tags := strings.Join(tagValues, ",")
 					if tags == "" {
 						tags = "-"
 					}
-					values = append(values, fmt.Sprintf("%s\t%s | id: %s, version: %s, tags: [%s]", value, app.Type, app.ID, appVersion.Version, tags))
+					values = append(values, fmt.Sprintf("%s\t%s | id: %s, version: %s, tags: [%s]", value, app.Type(), app.ID(), version, tags))
 				}
 			}
 		} else {
 			// Show just names
-			if toComplete == "" || MatchString(pattern, app.Name) || MatchString(pattern, app.ID) {
-				// tags := strings.Join(appVersion.Tags, ",")
-				// if tags == "" {
-				// 	tags = "-"
-				// }
-				description := items.Items[i].Get("manifest.description").String()
+			if toComplete == "" || MatchString(pattern, app.Name()) || MatchString(pattern, app.ID()) {
+				description := app.Get("manifest.description").String()
 				if description == "" {
 					description = "<no description>"
 				}
-				totalVersions := len(app.ApplicationVersions)
-				values = append(values, fmt.Sprintf("%s\t%s | id: %s, versions: %d, desc: %s", app.Name, app.Type, app.ID, totalVersions, description))
+				values = append(values, fmt.Sprintf("%s\t%s | id: %s, versions: %d, desc: %s", app.Name(), app.Type(), app.ID(), len(appVersions), description))
 			}
 		}
 	}
@@ -109,7 +104,7 @@ func formatUIPluginValues(items *c8y.ApplicationCollection, toComplete string) [
 
 // WithUIPluginWithVersions UI plugin with version completion
 // Values are returned in the format of name@version
-func WithUIPluginWithVersions(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithUIPluginWithVersions(flagName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -117,48 +112,21 @@ func WithUIPluginWithVersions(flagName string, clientFunc func() (*c8y.Client, e
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
 
-			values := []string{}
-
-			hasVersions := true
-
-			// Extensions in current tenant
-			items, _, err := client.Application.GetApplications(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				&c8y.ApplicationOptions{
-					Type:              c8y.ApplicationTypeHosted,
-					HasVersions:       &hasVersions,
-					PaginationOptions: *c8y.NewPaginationOptions(2000),
-				},
-			)
+			owned, shared, err := listUIPlugins(client)
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
 				return values, cobra.ShellCompDirectiveError
 			}
-			values = append(values, formatUIPluginValues(items, toComplete)...)
-
-			// Shared extensions
-			items, _, err = client.Application.GetApplications(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				&c8y.ApplicationOptions{
-					Type:              c8y.ApplicationTypeHosted,
-					HasVersions:       &hasVersions,
-					Availability:      c8y.ApplicationAvailabilityShared,
-					PaginationOptions: *c8y.NewPaginationOptions(2000),
-				},
-			)
-			if err != nil {
-				values := []string{fmt.Sprintf("error. %s", err)}
-				return values, cobra.ShellCompDirectiveError
-			}
-			values = append(values, formatUIPluginValues(items, toComplete)...)
+			values := formatUIPluginValues(owned, toComplete)
+			values = append(values, formatUIPluginValues(shared, toComplete)...)
 			return values, cobra.ShellCompDirectiveNoFileComp
 		})
 		return cmd
 	}
 }
 
-// Complete UI extension versions
-func WithUIPluginVersion(flagVersion string, flagExtension string, clientFunc func() (*c8y.Client, error)) Option {
+// WithUIPluginVersion UI extension version completion (requires the plugin)
+func WithUIPluginVersion(flagVersion string, flagExtension string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagVersion, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -181,16 +149,16 @@ func WithUIPluginVersion(flagVersion string, flagExtension string, clientFunc fu
 					extensionID = name
 				} else {
 					// Lookup by name
-					col, _, err := client.UIExtension.GetExtensions(context.Background(), &c8y.ExtensionOptions{
+					items, err := listApplications(client, applications.ListOptions{
 						Name:              name,
-						HasVersions:       true,
-						PaginationOptions: *c8y.NewPaginationOptions(100),
+						HasVersions:       "true",
+						PaginationOptions: pageSize(100),
 					})
 					if err != nil {
 						return values, cobra.ShellCompDirectiveNoFileComp
 					}
-					if len(col.Applications) > 0 {
-						extensionID = col.Applications[0].ID
+					if len(items) > 0 {
+						extensionID = items[0].ID()
 					}
 				}
 			}
@@ -200,18 +168,19 @@ func WithUIPluginVersion(flagVersion string, flagExtension string, clientFunc fu
 			}
 
 			// Get versions
-			col, _, err := client.ApplicationVersions.GetVersions(context.Background(), extensionID, &c8y.ApplicationVersionsOptions{
-				PaginationOptions: *c8y.NewPaginationOptions(100),
-			})
+			items, err := client.ApplicationVersions.List(context.Background(), extensionID, versions.ListOptions{
+				PaginationOptions: pageSize(100),
+			}).Collect()
 			if err != nil {
 				return values, cobra.ShellCompDirectiveNoFileComp
 			}
 
 			pattern := "*" + toComplete + "*"
 
-			for _, item := range col.Versions {
-				if toComplete == "" || MatchString(pattern, item.Version) || MatchString(pattern, item.BinaryID) {
-					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Version, strings.Join(item.Tags, ","), item.BinaryID))
+			for _, item := range items {
+				version, binaryID := item.Version(), item.BinaryID()
+				if toComplete == "" || MatchString(pattern, version) || MatchString(pattern, binaryID) {
+					values = append(values, fmt.Sprintf("%s\t%s | id: %s", version, strings.Join(item.Tags(), ","), binaryID))
 				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp

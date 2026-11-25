@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/spf13/cobra"
 )
@@ -67,7 +66,7 @@ Create a user using a template
 
 	completion.WithOptions(
 		cmd,
-		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithTenantID("tenant", ccmd.factory.ClientV2),
 		completion.WithValidateSet("sendPasswordResetEmail", "true", "false"),
 	)
 

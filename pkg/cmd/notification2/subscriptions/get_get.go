@@ -12,7 +12,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +50,7 @@ Get an existing subscription (using pipeline)
 
 	completion.WithOptions(
 		cmd,
-		completion.WithNotification2SubscriptionId("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithNotification2SubscriptionId("id", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

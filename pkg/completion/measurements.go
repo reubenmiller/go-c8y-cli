@@ -6,13 +6,13 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/spf13/cobra"
 )
 
 var ErrNotFound = errors.New("not found")
 
-func getSupportedSeries(cmd *cobra.Command, flagNameDevice string, client *c8y.Client, toComplete string, formatFunc func(string) string) ([]string, error) {
+func getSupportedSeries(cmd *cobra.Command, flagNameDevice string, client *apiv2.Client, toComplete string, formatFunc func(string) string) ([]string, error) {
 	deviceID, err := cmd.Flags().GetString(flagNameDevice)
 	if err != nil {
 		// try getting a slice (only the first one is supported)
@@ -26,35 +26,27 @@ func getSupportedSeries(cmd *cobra.Command, flagNameDevice string, client *c8y.C
 	}
 
 	if !c8ydata.IsID(deviceID) {
-		matchingDevices, _, err := client.Inventory.GetDevicesByName(
-			c8y.WithDisabledDryRunContext(context.Background()),
-			deviceID,
-			c8y.NewPaginationOptions(1),
-		)
+		matchingDevices, err := findDevicesByName(client, deviceID, 1)
 		if err != nil {
 			return nil, err
 		}
-		if len(matchingDevices.ManagedObjects) == 0 {
+		if len(matchingDevices) == 0 {
 			return nil, ErrNotFound
 		}
-		deviceID = matchingDevices.ManagedObjects[0].ID
+		deviceID = matchingDevices[0].ID()
 	}
 
 	pattern := "*" + toComplete + "*"
-	items, _, err := client.Inventory.GetSupportedSeries(
-		c8y.WithDisabledDryRunContext(context.Background()),
-		deviceID,
-	)
-
+	series, err := client.ManagedObjects.ListSupportedSeries(context.Background(), deviceID).Unwrap()
 	if err != nil {
 		return nil, err
 	}
 	values := []string{}
-	for _, item := range items.SupportedSeries {
+	for _, item := range series.Values() {
 		if toComplete == "" || MatchString(pattern, item) {
 			fValue := formatFunc(item)
 			if fValue != "" {
-				values = append(values, formatFunc(item))
+				values = append(values, fValue)
 			}
 		}
 	}
@@ -63,7 +55,7 @@ func getSupportedSeries(cmd *cobra.Command, flagNameDevice string, client *c8y.C
 }
 
 // WithDeviceMeasurementSeries supported measurement series completion (requires device)
-func WithDeviceMeasurementSeries(flagName string, flagNameDevice string, clientFunc func() (*c8y.Client, error)) Option {
+func WithDeviceMeasurementSeries(flagName string, flagNameDevice string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -82,7 +74,7 @@ func WithDeviceMeasurementSeries(flagName string, flagNameDevice string, clientF
 }
 
 // WithDeviceMeasurementValueFragmentType supported measurement value fragment types completion (requires device)
-func WithDeviceMeasurementValueFragmentType(flagName string, flagNameDevice string, clientFunc func() (*c8y.Client, error)) Option {
+func WithDeviceMeasurementValueFragmentType(flagName string, flagNameDevice string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -107,7 +99,7 @@ func WithDeviceMeasurementValueFragmentType(flagName string, flagNameDevice stri
 }
 
 // WithDeviceMeasurementValueFragmentSeries supported measurement value fragment types completion (requires device)
-func WithDeviceMeasurementValueFragmentSeries(flagName string, flagNameDevice string, flagNameValueFragmentType string, clientFunc func() (*c8y.Client, error)) Option {
+func WithDeviceMeasurementValueFragmentSeries(flagName string, flagNameDevice string, flagNameValueFragmentType string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()

@@ -12,7 +12,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -193,65 +192,65 @@ func GetCompletionOptions(cmd *CmdOptions, p *models.Parameter, factory *cmdutil
 	// Internal flags
 	switch p.Type {
 	case "application", "applicationname":
-		return completion.WithApplication(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithApplication(p.Name, factory.ClientV2)
 	case "hostedapplication":
-		return completion.WithHostedApplication(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithHostedApplication(p.Name, factory.ClientV2)
 	case "microservice":
-		return completion.WithMicroservice(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithMicroservice(p.Name, factory.ClientV2)
 	case "microservicename":
-		return completion.WithMicroservice(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithMicroservice(p.Name, factory.ClientV2)
 	case "microserviceinstance":
-		return completion.WithMicroserviceInstance(p.Name, p.GetDependentProperty(0, "id"), func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithMicroserviceInstance(p.Name, p.GetDependentProperty(0, "id"), factory.ClientV2)
 	case "feature":
-		return completion.WithFeature(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithFeature(p.Name, factory.ClientV2)
 	case "uiplugin":
-		return completion.WithUIPlugin(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithUIPlugin(p.Name, factory.ClientV2)
 	case "uipluginversion":
-		return completion.WithUIPluginVersion(p.Name, p.GetDependentProperty(0, "plugin"), func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithUIPluginVersion(p.Name, p.GetDependentProperty(0, "plugin"), factory.ClientV2)
 	case "role[]", "roleself[]":
-		return completion.WithUserRole(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithUserRole(p.Name, factory.ClientV2)
 	case "devicerequest", "devicerequest[]":
-		return completion.WithDeviceRegistrationRequest(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithDeviceRegistrationRequest(p.Name, factory.ClientV2)
 	case "user[]", "userself[]":
-		return completion.WithUser(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithUser(p.Name, factory.ClientV2)
 	case "usergroup[]":
-		return completion.WithUserGroup(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithUserGroup(p.Name, factory.ClientV2)
 	case "devicegroup[]":
-		return completion.WithDeviceGroup(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithDeviceGroup(p.Name, factory.ClientV2)
 	case "smartgroup[]":
-		return completion.WithSmartGroup(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithSmartGroup(p.Name, factory.ClientV2)
 	case "tenant":
-		return completion.WithTenantID(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithTenantID(p.Name, factory.ClientV2)
 	case "tenantname":
-		return completion.WithTenantID(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithTenantID(p.Name, factory.ClientV2)
 	case "device[]":
-		return completion.WithDevice(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithDevice(p.Name, factory.ClientV2)
 	case "agent[]":
-		return completion.WithAgent(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithAgent(p.Name, factory.ClientV2)
 	case "software[]", "softwareName":
-		return completion.WithSoftware(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithSoftware(p.Name, factory.ClientV2)
 	case "softwareversion[]", "softwareversionName", "softwareDetails":
-		return completion.WithSoftwareVersion(p.Name, p.GetDependentProperty(0, "software"), func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithSoftwareVersion(p.Name, p.GetDependentProperty(0, "software"), factory.ClientV2)
 	case "firmware[]":
-		return completion.WithFirmware(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithFirmware(p.Name, factory.ClientV2)
 	case "firmwareversion[]", "firmwareversionName", "firmwareDetails":
-		return completion.WithFirmwareVersion(p.Name, p.GetDependentProperty(0, "firmware"), func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithFirmwareVersion(p.Name, p.GetDependentProperty(0, "firmware"), factory.ClientV2)
 	case "firmwarepatch[]", "firmwarepatchName":
-		return completion.WithFirmwarePatch(p.Name, p.GetDependentProperty(0, "firmware"), func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithFirmwarePatch(p.Name, p.GetDependentProperty(0, "firmware"), factory.ClientV2)
 	case "configuration[]", "configurationDetails":
-		return completion.WithConfiguration(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithConfiguration(p.Name, factory.ClientV2)
 	case "deviceprofile[]":
-		return completion.WithDeviceProfile(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithDeviceProfile(p.Name, factory.ClientV2)
 	case "deviceservice[]":
-		return completion.WithDeviceService(p.Name, p.GetDependentProperty(0, "device"), func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithDeviceService(p.Name, p.GetDependentProperty(0, "device"), factory.ClientV2)
 	case "certificate[]":
-		return completion.WithDeviceCertificate(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithDeviceCertificate(p.Name, factory.ClientV2)
 	case "subscriptionName":
-		return completion.WithNotification2SubscriptionName(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithNotification2SubscriptionName(p.Name, factory.ClientV2)
 	case "subscriptionId":
-		return completion.WithNotification2SubscriptionId(p.Name, func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithNotification2SubscriptionId(p.Name, factory.ClientV2)
 	case "remoteaccessconfiguration":
-		return completion.WithRemoteAccessConfiguration(p.Name, p.GetDependentProperty(0, "device"), func() (*c8y.Client, error) { return factory.Client() })
+		return completion.WithRemoteAccessConfiguration(p.Name, p.GetDependentProperty(0, "device"), factory.ClientV2)
 	}
 	return nil
 }
@@ -679,7 +678,7 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 		cmd.Completion = append(
 			cmd.Completion,
 			completion.WithValidateSet("availability", "AVAILABLE", "UNAVAILABLE", "MAINTENANCE"),
-			completion.WithDeviceGroup("group", func() (*c8y.Client, error) { return factory.Client() }),
+			completion.WithDeviceGroup("group", factory.ClientV2),
 		)
 
 		c8yQueryOptions := []flags.GetOption{

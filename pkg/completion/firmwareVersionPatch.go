@@ -1,16 +1,15 @@
 package completion
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
 	"github.com/spf13/cobra"
 )
 
 // WithFirmwarePatch firmware patch version completion (requires category)
-func WithFirmwarePatch(flagVersion string, flagNameFirmware string, clientFunc func() (*c8y.Client, error)) Option {
+func WithFirmwarePatch(flagVersion string, flagNameFirmware string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagVersion, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -23,11 +22,11 @@ func WithFirmwarePatch(flagVersion string, flagNameFirmware string, clientFunc f
 			// query
 			versionType := "c8y_FirmwareBinary"
 			versionPattern := "*" + toComplete + "*"
-			opt := &c8y.ManagedObjectOptions{
+			opt := managedobjects.ListOptions{
 				// Only filter by version name
 				Query:             fmt.Sprintf("(type eq '%s') and has(c8y_Patch) and (c8y_Firmware.version eq '%s')", versionType, versionPattern),
-				WithParents:       true,
-				PaginationOptions: *c8y.NewPaginationOptions(100),
+				GetOptions:        managedobjects.GetOptions{WithParents: true},
+				PaginationOptions: pageSize(100),
 			}
 
 			firmwareNames, err := cmd.Flags().GetStringSlice(flagNameFirmware)
@@ -45,49 +44,33 @@ func WithFirmwarePatch(flagVersion string, flagNameFirmware string, clientFunc f
 					)
 				} else {
 					// Lookup by name
-					packages, _, err := client.Inventory.GetManagedObjects(
-						c8y.WithDisabledDryRunContext(context.Background()),
-						&c8y.ManagedObjectOptions{
-							Query: fmt.Sprintf("(type eq '%s') and name eq '%s'", "c8y_Firmware", firmwareName),
-						},
-					)
-					if err == nil && len(packages.ManagedObjects) > 0 {
+					packages, err := listManagedObjects(client, managedobjects.ListOptions{
+						Query: fmt.Sprintf("(type eq '%s') and name eq '%s'", "c8y_Firmware", firmwareName),
+					})
+					if err == nil && len(packages) > 0 {
 						opt.Query = fmt.Sprintf(
 							"(type eq '%s') and (has(c8y_Patch)) and (c8y_Firmware.version eq '%v') and (bygroupid(%s))",
-							versionType, versionPattern, packages.ManagedObjects[0].ID)
+							versionType, versionPattern, packages[0].ID())
 					}
 				}
 			}
 
-			items, _, err := client.Inventory.GetManagedObjects(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				opt,
-			)
+			items, err := listManagedObjects(client, opt)
 
 			if err != nil {
 				values = append(values, fmt.Sprintf("error. %s", err))
 				return values, cobra.ShellCompDirectiveError
 			}
 
-			for i, item := range items.ManagedObjects {
-				version := ""
-				dependency := ""
-				if v := items.Items[i].Get("c8y_Firmware.version"); v.Exists() {
-					version = v.String()
-				}
-				if v := items.Items[i].Get("c8y_Patch.dependency"); v.Exists() {
-					dependency = v.String()
-				}
+			for _, item := range items {
+				version := item.Get("c8y_Firmware.version").String()
+				dependency := item.Get("c8y_Patch.dependency").String()
 				if version == "" {
 					continue
 				}
 				if toComplete == "" || MatchString(versionPattern, version) {
-
-					versionParent := ""
-					if v := items.Items[i].Get("additionParents.references.0.managedObject.name"); v.Exists() {
-						versionParent = v.String()
-					}
-					values = append(values, fmt.Sprintf("%s\t%s (dependency: %s) | id: %s", version, versionParent, dependency, item.ID))
+					versionParent := item.Get("additionParents.references.0.managedObject.name").String()
+					values = append(values, fmt.Sprintf("%s\t%s (dependency: %s) | id: %s", version, versionParent, dependency, item.ID()))
 				}
 			}
 

@@ -13,7 +13,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/operations"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/types"
@@ -63,8 +62,8 @@ List executing operations for each piped device
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("status", "PENDING", "EXECUTING", "SUCCESSFUL", "FAILED"),
-		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithDevice("agent", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", ccmd.factory.ClientV2),
+		completion.WithDevice("agent", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

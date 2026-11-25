@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants/tenantoptions"
 	"github.com/spf13/cobra"
 )
 
 // WithTenantOptionCategory tenant option category completion
-func WithTenantOptionCategory(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithTenantOptionCategory(flagName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -18,10 +18,10 @@ func WithTenantOptionCategory(flagName string, clientFunc func() (*c8y.Client, e
 			}
 
 			pattern := "*" + toComplete + "*"
-			items, _, err := client.TenantOptions.GetOptions(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				c8y.NewPaginationOptions(200),
-			)
+			items, err := client.Tenants.Options.List(
+				context.Background(),
+				tenantoptions.ListOptions{PaginationOptions: pageSize(200)},
+			).Collect()
 
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
@@ -29,11 +29,12 @@ func WithTenantOptionCategory(flagName string, clientFunc func() (*c8y.Client, e
 			}
 			values := []string{}
 			keys := make(map[string]interface{})
-			for _, item := range items.Options {
-				if toComplete == "" || MatchString(pattern, item.Category) {
-					if _, ok := keys[item.Category]; !ok {
-						values = append(values, item.Category)
-						keys[item.Category] = struct{}{}
+			for _, item := range items {
+				category := item.Category()
+				if toComplete == "" || MatchString(pattern, category) {
+					if _, ok := keys[category]; !ok {
+						values = append(values, category)
+						keys[category] = struct{}{}
 					}
 				}
 			}
@@ -45,7 +46,7 @@ func WithTenantOptionCategory(flagName string, clientFunc func() (*c8y.Client, e
 }
 
 // WithTenantOptionKey tenant option key completion (requires category)
-func WithTenantOptionKey(flagName string, flagNameCategory string, clientFunc func() (*c8y.Client, error)) Option {
+func WithTenantOptionKey(flagName string, flagNameCategory string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -58,10 +59,10 @@ func WithTenantOptionKey(flagName string, flagNameCategory string, clientFunc fu
 			}
 
 			pattern := "*" + toComplete + "*"
-			items, _, err := client.TenantOptions.GetOptions(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				c8y.NewPaginationOptions(200),
-			)
+			items, err := client.Tenants.Options.List(
+				context.Background(),
+				tenantoptions.ListOptions{PaginationOptions: pageSize(200)},
+			).Collect()
 
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
@@ -69,14 +70,15 @@ func WithTenantOptionKey(flagName string, flagNameCategory string, clientFunc fu
 			}
 			values := []string{}
 			keys := make(map[string]interface{})
-			for _, item := range items.Options {
-				if item.Category != category {
+			for _, item := range items {
+				if item.Category() != category {
 					continue
 				}
-				if toComplete == "" || MatchString(pattern, item.Key) {
-					if _, ok := keys[item.Key]; !ok {
-						values = append(values, item.Key)
-						keys[item.Key] = struct{}{}
+				key := item.Key()
+				if toComplete == "" || MatchString(pattern, key) {
+					if _, ok := keys[key]; !ok {
+						values = append(values, key)
+						keys[key] = struct{}{}
 					}
 				}
 			}

@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devicegroups"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devices"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/model"
@@ -84,7 +83,7 @@ Bind several filters to properties of the same piped object
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("availability", "AVAILABLE", "UNAVAILABLE", "MAINTENANCE"),
-		completion.WithDeviceGroup("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDeviceGroup("group", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

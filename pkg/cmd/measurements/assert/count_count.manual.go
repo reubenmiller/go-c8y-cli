@@ -3,7 +3,6 @@ package assert
 import (
 	"context"
 
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -68,8 +67,8 @@ func NewCmdCount(f *cmdutil.Factory) *CmdExists {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDeviceMeasurementValueFragmentType("valueFragmentType", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithDeviceMeasurementValueFragmentSeries("valueFragmentSeries", "device", "valueFragmentType", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDeviceMeasurementValueFragmentType("valueFragmentType", "device", ccmd.factory.ClientV2),
+		completion.WithDeviceMeasurementValueFragmentSeries("valueFragmentSeries", "device", "valueFragmentType", ccmd.factory.ClientV2),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(assertFactory.New(cmd, f, assertFactory.Assert{

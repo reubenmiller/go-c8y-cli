@@ -17,7 +17,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/firmware/firmwareversions"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
@@ -65,9 +64,9 @@ Install a firmware version with an explicit url
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithFirmware("firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithFirmwareVersion("version", "firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", ccmd.factory.ClientV2),
+		completion.WithFirmware("firmware", ccmd.factory.ClientV2),
+		completion.WithFirmwareVersion("version", "firmware", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

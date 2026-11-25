@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	racfg "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/remoteaccess/remoteaccess_configurations"
 	"github.com/spf13/cobra"
 )
@@ -65,7 +64,7 @@ Create a webssh configuration with a custom hostname and port (with ssh key auth
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", ccmd.factory.ClientV2),
 		completion.WithValidateSet("credentialsType", "USER_PASS", "KEY_PAIR", "CERTIFICATE"),
 		completion.WithValidateSet("protocol", "SSH"),
 	)

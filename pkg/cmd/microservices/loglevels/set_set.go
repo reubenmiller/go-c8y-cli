@@ -13,7 +13,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -59,8 +58,8 @@ Set log level of microservice for a specific class
 
 	completion.WithOptions(
 		cmd,
-		completion.WithMicroservice("name", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithMicroserviceLoggers("loggerName", "name", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithMicroservice("name", ccmd.factory.ClientV2),
+		completion.WithMicroserviceLoggers("loggerName", "name", ccmd.factory.ClientV2),
 		completion.WithValidateSet("logLevel", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "OFF"),
 	)
 

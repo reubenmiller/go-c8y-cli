@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/firmware/firmwarepatches"
 	"github.com/spf13/cobra"
 )
@@ -57,8 +56,8 @@ Delete a firmware patch (but keep the related binary)
 
 	completion.WithOptions(
 		cmd,
-		completion.WithFirmwarePatch("id", "firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithFirmware("firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmwarePatch("id", "firmware", ccmd.factory.ClientV2),
+		completion.WithFirmware("firmware", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

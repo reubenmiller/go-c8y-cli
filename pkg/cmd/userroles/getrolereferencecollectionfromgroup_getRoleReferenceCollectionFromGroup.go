@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	roleusergroups "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/userroles/usergroups"
 	"github.com/spf13/cobra"
 )
@@ -53,8 +52,8 @@ Get a list of role references for a user group
 
 	completion.WithOptions(
 		cmd,
-		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithUserGroup("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithTenantID("tenant", ccmd.factory.ClientV2),
+		completion.WithUserGroup("group", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

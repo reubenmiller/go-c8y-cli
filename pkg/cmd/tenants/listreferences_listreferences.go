@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
@@ -55,7 +54,7 @@ Get a list of referenced applications on a given tenant (from management tenant)
 
 	completion.WithOptions(
 		cmd,
-		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithTenantID("tenant", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(
