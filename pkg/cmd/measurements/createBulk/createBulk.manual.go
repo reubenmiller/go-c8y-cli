@@ -1,17 +1,15 @@
 package createBulk
 
 import (
-	"io"
-	"net/http"
+	"context"
+	"encoding/json"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -84,77 +82,17 @@ func NewCreateBulkCmd(f *cmdutil.Factory) *CreateBulkCmd {
 
 // RunE executes the command
 func (n *CreateBulkCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-	client, err := n.factory.Client()
-	if err != nil {
+	if err := r.Input(); err != nil {
 		return err
 	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
-
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithStaticStringValue("Content-Type", "application/vnd.com.nsn.cumulocity.measurementcollection+json"),
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
-
-	// Wrap body around an nested array. It will be used
-	// when the body is marshalled
-	body.ArraySize = n.batchSize
-	body.ArrayPrefix = `{"measurements":[`
-	body.ArraySuffix = `]}`
-
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
+	err = r.Body(
+		flags.WithOverrideValue("device", "source.id"),
 		flags.WithDataFlagValue(),
-		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "source.id"),
+		flags.WithSliceRefValue("device", "source.id"),
 		flags.WithRelativeTimestamp("time", "time", ""),
 		flags.WithStringValue("type", "type"),
 		flags.WithDefaultTemplateString(`{time: _.Now('0s')} + (if std.isObject(input.value) then input.value else {source:{id:input.value}}) + {id:: '', 'self':: ''}`),
@@ -163,30 +101,29 @@ func (n *CreateBulkCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithRequiredProperties("type", "time", "source.id"),
 	)
 	if err != nil {
-		return cmderrors.NewUserError(err)
+		return err
 	}
-
-	// path parameters
-	path := flags.NewStringTemplate("measurement/measurements")
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-	)
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "POST",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-	}
-
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	return r.RunBatch(n.batchSize,
+		func(in *c8ystream.Resolver) (json.RawMessage, error) {
+			body, err := in.Body()
+			if err != nil {
+				return nil, err
+			}
+			// One device for every measurement (the first --device value). The
+			// SDK resolves a device name
+			return in.ApplyOverrideFirst(body, "device", "source.id")
+		},
+		func(items []json.RawMessage) c8ystream.Call {
+			return func(ctx context.Context) any {
+				return client.Measurements.CreateList(ctx, map[string]any{
+					"measurements": items,
+				})
+			}
+		},
+	)
 }

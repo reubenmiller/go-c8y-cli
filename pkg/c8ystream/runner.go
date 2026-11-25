@@ -497,6 +497,12 @@ func (r *Runner) Client() (*apiv2.Client, error) {
 // --output encoding (teed to --outputFile). The returned error reflects
 // item-level failures so the exit code is non-zero on partial failure.
 func (r *Runner) Run(build Build) error {
+	return r.run(func() Producer { return r.producer(build) })
+}
+
+// run runs the jobs of the producer which newProducer returns (once the run
+// context is set) through the standard pipeline.
+func (r *Runner) run(newProducer func() Producer) error {
 	cfg := r.Config
 
 	ctx := r.Cmd.Context()
@@ -600,7 +606,7 @@ func (r *Runner) Run(build Build) error {
 	}
 	pipeline = append(pipeline, stages...)
 
-	err = output.Render(ctx, Stream(ctx, cfg.GetWorkers(), r.producer(build)), renderer, pipeline...)
+	err = output.Render(ctx, Stream(ctx, cfg.GetWorkers(), newProducer()), renderer, pipeline...)
 	if progress != nil {
 		progress.done()
 	}
@@ -649,21 +655,10 @@ func (r *Runner) finish(err error) error {
 // --maxJobs; with no driver the command runs exactly once.
 func (r *Runner) producer(build Build) Producer {
 	produce := Producer(func() (Job, error) {
-		in := &Resolver{r: r, ctx: r.runCtx, index: r.index}
-		if r.driver != nil {
-			value, raw, err := r.driver.GetNext()
-			if err != nil {
-				return nil, err
-			}
-			in.input = toBytes(raw)
-			in.primary = string(value)
-			r.cursor.Set(in.input)
+		in, err := r.nextItem()
+		if err != nil {
+			return nil, err
 		}
-		// Point the output-template input at this item. In the serial pipeline
-		// (workers<=1) the item's documents are rendered before the next item is
-		// produced, so the stage reads the matching input.
-		r.tmplInput = in.input
-		r.index++
 
 		call, err := build(in)
 		if err != nil {
@@ -702,6 +697,28 @@ func (r *Runner) producer(build Build) Producer {
 		return Limit(produce, r.Config.GetMaxJobs())
 	}
 	return Limit(produce, 1)
+}
+
+// nextItem reads the next input item from the driver (io.EOF when there is
+// none left) and returns its resolver. Without a driver it returns an item
+// with no input; the caller decides how often to run.
+func (r *Runner) nextItem() (*Resolver, error) {
+	in := &Resolver{r: r, ctx: r.runCtx, index: r.index}
+	if r.driver != nil {
+		value, raw, err := r.driver.GetNext()
+		if err != nil {
+			return nil, err
+		}
+		in.input = toBytes(raw)
+		in.primary = string(value)
+		r.cursor.Set(in.input)
+	}
+	// Point the output-template input at this item. In the serial pipeline
+	// (workers<=1) the item's documents are rendered before the next item is
+	// produced, so the stage reads the matching input.
+	r.tmplInput = in.input
+	r.index++
+	return in, nil
 }
 
 func toBytes(v any) []byte {
