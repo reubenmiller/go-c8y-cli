@@ -321,7 +321,7 @@ tests:
         - 'name="object"'
 
   binaryUploadURL:
-    # File does not get deleted after test and dry mode does not work here
+    # Covered by body_details_tests.yaml (the upload is skipped in dry mode)
     skip: true
     command: |
       c8y kitchensink body binaryUploadURL --file dummyfile

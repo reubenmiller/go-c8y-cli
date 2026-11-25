@@ -2,14 +2,16 @@ package serviceuser
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/spf13/cobra"
 )
 
@@ -58,14 +60,22 @@ Create new application service user
 	return ccmd
 }
 
-func (n *CmdCreate) getApplicationDetails() *c8y.Application {
+// applicationDetails is the body of the new application. It is a struct (not a
+// map) to keep the order of the properties.
+type applicationDetails struct {
+	Key           string   `json:"key,omitempty"`
+	Name          string   `json:"name,omitempty"`
+	Type          string   `json:"type,omitempty"`
+	ContextPath   string   `json:"contextPath,omitempty"`
+	RequiredRoles []string `json:"requiredRoles,omitempty"`
+}
 
-	app := c8y.Application{}
-
-	// Set application properties
-	app.Name = n.name
-	app.Key = app.Name + "-key"
-	app.Type = "MICROSERVICE"
+func (n *CmdCreate) getApplicationDetails() *applicationDetails {
+	app := applicationDetails{
+		Name: n.name,
+		Key:  n.name + "-key",
+		Type: "MICROSERVICE",
+	}
 	app.ContextPath = app.Name
 
 	if len(n.roles) > 0 {
@@ -75,12 +85,14 @@ func (n *CmdCreate) getApplicationDetails() *c8y.Application {
 	return &app
 }
 
+// RunE creates the application, and subscribes the tenants to it. The
+// application is the result of the command.
 func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-	client, err := n.factory.Client()
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
@@ -88,47 +100,42 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	var application *c8y.Application
-	var response *c8y.Response
 
-	applicationDetails := n.getApplicationDetails()
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		details := n.getApplicationDetails()
+		if details.Name == "" {
+			return nil, cmderrors.NewUserError("Could not detect application name for the given input")
+		}
+		body, err := json.Marshal(details)
+		if err != nil {
+			return nil, err
+		}
 
-	if applicationDetails.Name == "" {
-		return cmderrors.NewUserError("Could not detect application name for the given input")
-	}
+		return func(ctx context.Context) any {
+			return func(yield func(jsondoc.JSONDoc, error) bool) {
+				log.Info("Creating new application")
+				app := client.Applications.Create(ctx, body)
+				if app.Err != nil {
+					yield(jsondoc.Empty(), fmt.Errorf("failed to create microservice. %w", app.Err))
+					return
+				}
 
-	log.Info("Creating new application")
-	application, response, err = client.Application.Create(context.Background(), applicationDetails)
+				// Subscribe the tenants (in a dry run too, to show the requests)
+				for _, tenant := range n.tenants {
+					log.Infof("Subscribing to application in tenant %s", tenant)
+					// An existing subscription (409) is not an error
+					if sub := client.Applications.Subscribe(ctx, tenant, app.Data.Self()); sub.Err != nil {
+						yield(jsondoc.Empty(), fmt.Errorf("Failed to subscribe to application. %w", sub.Err))
+						return
+					}
+				}
 
-	if err != nil {
-		return fmt.Errorf("failed to create microservice. %s", err)
-	}
-
-	// App subscription
-	if len(n.tenants) > 0 {
-		for _, tenant := range n.tenants {
-			log.Infof("Subscribing to application in tenant %s", tenant)
-			_, resp, err := client.Tenant.AddApplicationReference(context.Background(), tenant, application.Self)
-
-			if err != nil {
-				if resp != nil && resp.StatusCode() == 409 {
-					log.Infof("microservice is already enabled")
-				} else {
-					return fmt.Errorf("Failed to subscribe to application. %s", err)
+				for doc, err := range app.Documents() {
+					if !yield(doc, err) {
+						return
+					}
 				}
 			}
-		}
-	}
-
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return err
-	}
-
-	handler, err := n.factory.GetRequestHandler()
-	if err != nil {
-		return err
-	}
-	_, err = handler.ProcessResponse(response, err, nil, commonOptions)
-	return err
+		}, nil
+	})
 }

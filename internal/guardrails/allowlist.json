@@ -1,8 +1,5 @@
 {
   "go-c8y-v1": [
-    "pkg/cmd/factory/c8yclient.go",
-    "pkg/cmd/microservices/serviceuser/create_create.manual.go",
-    "pkg/cmd/notification2/subscriptions/subscribe/subscribe.manual.go",
-    "pkg/cmd/ui/plugins/create/create.manual.go"
+    "pkg/cmd/factory/c8yclient.go"
   ]
 }
