@@ -8,6 +8,7 @@ import (
 )
 
 func Test_PipingNamesToCommandExpectingIds(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, stderr, err := command.ExecuteCmdWithOutputs(
 		command.NewMockCommand(),
 		`c8y events get --dry`,
@@ -20,6 +21,7 @@ func Test_PipingNamesToCommandExpectingIds(t *testing.T) {
 }
 
 func Test_PipingWithoutLookup(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, stderr, err := command.ExecuteCmdWithOutputs(
 		command.NewMockCommand(),
 		`c8y inventory get --dry`,
@@ -32,6 +34,7 @@ func Test_PipingWithoutLookup(t *testing.T) {
 }
 
 func Test_PipingWithLookup(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, stderr, err := command.ExecuteCmdWithOutputs(
 		command.NewMockCommand(),
 		`c8y devices get --dry`,
@@ -44,6 +47,7 @@ func Test_PipingWithLookup(t *testing.T) {
 }
 
 func Test_PipingWithObjectPipe(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, stderr, err := command.ExecuteCmdWithOutputs(
 		command.NewMockCommand(),
 		`c8y devices get --dry`,

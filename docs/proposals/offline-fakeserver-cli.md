@@ -169,3 +169,18 @@ drives the manual suite today; the fake only checks that an `Authorization` head
    reset, weighed against suite runtime and cross-test coupling.
 4. **Fixture source of truth:** `setup.sh`-against-fake (proposed, reuses existing
    provisioning) vs richer built-in seed data in the fake. The former keeps one definition.
+
+## How the suites run today (v3)
+
+| What | Command | Where |
+|---|---|---|
+| Go tests (`go test ./...`; `cmd/tests` against the fake server) | `task test-go-offline` | CI `test-offline` |
+| Dry-run tests (`tests/auto`) | `task test-cli-offline` | CI `test-offline` |
+| Realtime tests | `task test-cli-offline-realtime` | CI `test-offline` |
+| Manual tests the fake server supports | `task test-cli-offline-manual` | CI `test-offline` |
+| Live tenant (auto, manual, `cmd/tests`) | `gh workflow run test-live.yml --ref v3` | `.github/workflows/test-live.yml`, on demand |
+
+`cmd/tests` skips when `C8Y_HOST` is not set (`command.RequireTenant`), so a plain
+`go test ./...` without a tenant passes. `tests/run-offline.sh` with
+`C8Y_OFFLINE_SUITE=go` starts the fake server, creates the test data with
+`tests/scripts/setup.sh` and runs `go test` with the fake server configured.

@@ -8,6 +8,7 @@ import (
 )
 
 func Test_CreateInventoryDryRun(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, stderr, err := command.ExecuteCmdWithOutputs(
 		command.NewMockCommand(),
 		`c8y inventory create -n --name testme --dry`,
@@ -19,6 +20,7 @@ func Test_CreateInventoryDryRun(t *testing.T) {
 }
 
 func Test_CreateInventoryDryRunWithLargeNumbers(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, stderr, err := command.ExecuteCmdWithOutputs(
 		command.NewMockCommand(),
 		`c8y inventory create -n --name testme --type ci_Test --data '{
@@ -36,6 +38,7 @@ func Test_CreateInventoryDryRunWithLargeNumbers(t *testing.T) {
 }
 
 func Test_CreateManagedObjectViaPipeline(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, stderr, err := command.ExecuteCmdWithOutputs(
 		command.NewMockCommand(),
 		`c8y inventory create --dry`,

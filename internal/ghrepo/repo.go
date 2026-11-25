@@ -16,34 +16,74 @@ type Interface interface {
 	RepoURL() string
 }
 
+// NewRepoFromHost parses a repository reference in one of the formats
+// "OWNER/REPO", "HOST/OWNER/REPO", a full URL (e.g. https://HOST/OWNER/REPO.git) or
+// an scp-like SSH URL (e.g. git@HOST:OWNER/REPO.git). defaultHost is used when the
+// value does not include a host.
+//
+// A full URL may have a nested owner (e.g. a GitLab subgroup); it is kept as the
+// repository URL so that it can be cloned as given.
 func NewRepoFromHost(u string, defaultHost string) (*Repository, error) {
 	repo := Repository{
 		host: defaultHost,
 	}
+	invalidFormat := fmt.Errorf("expected the \"[HOST/]OWNER/REPO\" format, got %q", u)
 
-	parts := strings.Split(u, "/")
-	repoURL, err := url.Parse(u)
-
-	if err == nil {
-		if repoURL.Host != "" {
-			repo.host = repoURL.Host
+	var parts []string
+	if repoURL, err := url.Parse(u); err == nil && repoURL.Scheme != "" && repoURL.Host != "" {
+		// Full url, e.g. https://github.com/owner/repo.git
+		repo.host = repoURL.Host
+		repo.rawURL = u
+		parts = strings.Split(strings.TrimSuffix(strings.Trim(repoURL.Path, "/"), ".git"), "/")
+		if len(parts) < 2 {
+			return nil, invalidFormat
 		}
-		if repoURL.Scheme != "" {
-			repo.rawURL = u
+	} else if host, path, ok := parseSCPLikeURL(u); ok {
+		// SSH url, e.g. git@github.com:owner/repo.git
+		repo.host = host
+		repo.rawURL = u
+		parts = strings.Split(strings.TrimSuffix(strings.Trim(path, "/"), ".git"), "/")
+		if len(parts) < 2 {
+			return nil, invalidFormat
 		}
-		path := repoURL.Path
-		if repoURL.Host != "" {
-			// Full url, e.g. https://github.com/owner/repo.git
-			path = strings.TrimSuffix(strings.Trim(path, "/"), ".git")
+	} else {
+		parts = strings.Split(u, "/")
+		switch len(parts) {
+		case 2:
+		case 3:
+			repo.host = parts[0]
+			parts = parts[1:]
+		default:
+			return nil, invalidFormat
 		}
-		parts = strings.Split(path, "/")
 	}
 
-	if len(parts) >= 2 {
-		repo.owner = strings.Join(parts[0:len(parts)-1], "/")
-		repo.name = parts[len(parts)-1]
+	for _, part := range parts {
+		if part == "" {
+			return nil, invalidFormat
+		}
 	}
+	repo.owner = strings.Join(parts[0:len(parts)-1], "/")
+	repo.name = parts[len(parts)-1]
 	return &repo, nil
+}
+
+// parseSCPLikeURL parses the scp-like syntax used by git for ssh urls, e.g. "git@github.com:owner/repo.git"
+func parseSCPLikeURL(u string) (host string, path string, ok bool) {
+	if strings.Contains(u, "://") {
+		return "", "", false
+	}
+	userHost, path, found := strings.Cut(u, ":")
+	if !found || strings.Contains(userHost, "/") {
+		return "", "", false
+	}
+	if _, h, hasUser := strings.Cut(userHost, "@"); hasUser {
+		userHost = h
+	}
+	if userHost == "" || path == "" {
+		return "", "", false
+	}
+	return userHost, path, true
 }
 
 type Repository struct {

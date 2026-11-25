@@ -8,6 +8,7 @@ import (
 )
 
 func Test_GetAllDevices(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, stderr, err := command.ExecuteCmdWithOutputs(
 		command.NewMockCommand(),
 		`c8y devices list -n --includeAll`,

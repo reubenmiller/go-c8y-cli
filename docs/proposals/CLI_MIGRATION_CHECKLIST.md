@@ -167,6 +167,6 @@ Caveat: fakeserver CQL/`q` filtering is a subset — some `--query` results may 
 ### After enough coverage (end-state — separate work)
 - [ ] Point `gen-tests` at `clisurface` (tree-based test gen) so flipping doesn't lose the 281 Pester tests.
 - [ ] Flip `task build-powershell` to `--from-tree`; retire the spec PowerShell generator (`powershell.Generate(specDir)` + `GenerateSpecFile`).
-- [ ] Teach `gen-cli` (`internal/codegen`) to skip migrated commands — its golden (`TestGoldenSpecOutput`) reports "missing .auto.go" for every migrated command (cosmetic, accumulating).
+- [x] Teach `gen-cli` (`internal/codegen`) to skip migrated commands — its golden (`TestGoldenSpecOutput`) reports "missing .auto.go" for every migrated command (cosmetic, accumulating).
 - [ ] Add the per-call request-modifier seam to go-c8y (unblocks `--header`/`--customQueryParam`/`--csvFormat`/`--unit` gaps).
 - [ ] Decide on `go.mod`: published go-c8y/v2 version bump vs keeping the local replace.
