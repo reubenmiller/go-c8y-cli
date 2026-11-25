@@ -271,7 +271,7 @@ func (f *Factory) GetRequestHandler() (*request.RequestHandler, error) {
 		DataView:       dataview,
 		Console:        consol,
 		ActivityLogger: activityLogger,
-		HideSensitive:  cfg.HideSensitiveInformationIfActive,
+		HideSensitive:  HideSensitiveForLegacyClient(cfg),
 	}
 	return handler, nil
 }
@@ -308,7 +308,7 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 		DataView:       dataview,
 		Console:        consol,
 		ActivityLogger: activityLogger,
-		HideSensitive:  cfg.HideSensitiveInformationIfActive,
+		HideSensitive:  HideSensitiveForLegacyClient(cfg),
 	}
 	w, err := worker.NewWorker(log, cfg, f.IOStreams, client, activityLogger, handler.ProcessRequestAndResponse, f.CheckPostCommandError)
 

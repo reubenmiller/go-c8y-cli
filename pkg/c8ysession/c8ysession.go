@@ -15,7 +15,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
 )
 
 type CumulocitySessions struct {
@@ -126,7 +126,7 @@ func (s CumulocitySession) GetDomain() string {
 	return s.Host
 }
 
-func PrintSessionInfoAsJSON(w io.Writer, client *c8y.Client, cfg *config.Config, session CumulocitySession) error {
+func PrintSessionInfoAsJSON(w io.Writer, client *config.ClientSession, cfg *config.Config, session CumulocitySession) error {
 	out, err := json.Marshal(session)
 	if err != nil {
 		return err
@@ -136,12 +136,12 @@ func PrintSessionInfoAsJSON(w io.Writer, client *c8y.Client, cfg *config.Config,
 }
 
 // PrintSessionInfo print out the session information to writer (i.e. console or file)
-func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, session CumulocitySession) {
+func PrintSessionInfo(w io.Writer, client *config.ClientSession, cfg *config.Config, session CumulocitySession) {
 	labelS := color.New(color.FgWhite, color.Faint)
 	label := labelS.SprintfFunc()
 	value := color.New(color.FgWhite).SprintFunc()
 	header := color.New(color.FgCyan).SprintFunc()
-	maybeHideMessage := func(client *c8y.Client, message string) string {
+	maybeHideMessage := func(client *config.ClientSession, message string) string {
 		return message
 	}
 	hideInfo := cfg.HideSessionBanner()
@@ -182,16 +182,16 @@ func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, sessi
 	if client != nil {
 		var authTypeLogin string
 		if session.LoginType != "" {
-			authTypeLogin = fmt.Sprintf("%s (loginType=%s)", client.AuthorizationType.String(), session.LoginType)
+			authTypeLogin = fmt.Sprintf("%s (loginType=%s)", client.AuthType.String(), session.LoginType)
 		} else {
-			authTypeLogin = client.AuthorizationType.String()
+			authTypeLogin = client.AuthType.String()
 		}
 		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "authType")), value(authTypeLogin))
 	}
 	fmt.Fprintf(w, "\n")
 }
 
-func WriteOutput(w io.Writer, client *c8y.Client, cfg *config.Config, session *CumulocitySession, format string) error {
+func WriteOutput(w io.Writer, client *config.ClientSession, cfg *config.Config, session *CumulocitySession, format string) error {
 
 	shell, isShell := utilities.ShellType.Parse(utilities.ShellBash, format)
 	if isShell {
@@ -225,7 +225,7 @@ func WriteOutput(w io.Writer, client *c8y.Client, cfg *config.Config, session *C
 }
 
 // GetVariablesFromSession gets all the environment variables associated with the current session
-func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, client *c8y.Client, setPassword bool) map[string]interface{} {
+func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, client *config.ClientSession, setPassword bool) map[string]interface{} {
 	host := session.Host
 	domain := session.GetDomain()
 	tenant := session.Tenant
@@ -237,10 +237,8 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 	authHeaderValue := ""
 	authHeader := ""
 
-	if dummyReq, err := client.NewRequest("GET", "/", "", nil); err == nil {
-		authHeaderValue = dummyReq.Header.Get("Authorization")
-		authHeader = "Authorization: " + authHeaderValue
-	}
+	authHeaderValue = client.AuthorizationHeader()
+	authHeader = "Authorization: " + authHeaderValue
 
 	// hide password if it is not needed
 	if !setPassword && token != "" {
@@ -281,7 +279,7 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 		}
 	}
 
-	if client.AuthorizationType != c8y.AuthTypeBearer {
+	if client.AuthType != authentication.AuthTypeBearer {
 		output["C8Y_TOKEN"] = ""
 	}
 
@@ -294,7 +292,7 @@ func GetVariablesFromSession(session *CumulocitySession, cfg *config.Config, cli
 	return output
 }
 
-func ShowSessionEnvironmentVariables(session *CumulocitySession, cfg *config.Config, c8yclient *c8y.Client, shell utilities.ShellType) {
+func ShowSessionEnvironmentVariables(session *CumulocitySession, cfg *config.Config, c8yclient *config.ClientSession, shell utilities.ShellType) {
 	output := GetVariablesFromSession(session, cfg, c8yclient, cfg.AlwaysIncludePassword())
 	utilities.WriteShellVariables(os.Stdout, output, shell)
 }
@@ -409,8 +407,8 @@ func ShouldReuseToken(cfg *config.Config, log *logger.Logger, token string, logi
 
 // LoginTypeRequiresToken check if the given loginType requires a token for authorization
 func LoginTypeRequiresToken(loginType string) bool {
-	return strings.EqualFold(loginType, c8y.LoginTypeOAuth2) ||
-		strings.EqualFold(loginType, c8y.LoginTypeOAuth2Internal) ||
+	return strings.EqualFold(loginType, logintype.OAuth2) ||
+		strings.EqualFold(loginType, logintype.OAuth2Internal) ||
 		strings.EqualFold(loginType, logintype.Browser) ||
 		strings.EqualFold(loginType, logintype.Certificate) ||
 		strings.EqualFold(loginType, logintype.Device)

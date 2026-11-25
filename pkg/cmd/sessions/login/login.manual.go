@@ -7,10 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/kballard/go-shellquote"
@@ -26,7 +26,8 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logintype"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -151,7 +152,7 @@ func NewCmdLogin(f *cmdutil.Factory) *CmdLogin {
 			config.ProviderTypeExtension,
 		),
 		completion.WithValidateSet("format", "json", "yaml", "toml", "dotenv"),
-		completion.WithValidateSet("loginType", c8y.LoginTypeOAuth2Internal, c8y.LoginTypeBasic, c8y.LoginTypeNone, c8y.LoginTypeOAuth2, logintype.Device, logintype.Browser, logintype.Certificate),
+		completion.WithValidateSet("loginType", logintype.OAuth2Internal, logintype.Basic, logintype.None, logintype.OAuth2, logintype.Device, logintype.Browser, logintype.Certificate),
 		completion.WithValidateSet(
 			"mode",
 			config.GetSessionModeCompletionHelp()...,
@@ -364,9 +365,9 @@ func (n *CmdLogin) runProvider(argv []string, env []string, format string) (*c8y
 		}
 	}
 
-	if client, err := n.factory.Client(); err == nil {
+	if client, err := n.factory.ClientSession(); err == nil {
 		if cfg.HideSensitive() {
-			log.Infof("Parsing session provider output: %s", cfg.HideSensitiveInformation(client, strings.TrimSpace(string(output))))
+			log.Infof("Parsing session provider output: %s", cfg.HideSensitiveInformation(&client, strings.TrimSpace(string(output))))
 		} else {
 			log.Infof("Parsing session provider output: %s", strings.TrimSpace(string(output)))
 		}
@@ -578,8 +579,6 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	c8y.Logger = log
-
 	canChangeActiveSession := true
 	// Warn users if they try to use this command directly
 	if n.factory.IOStreams != nil {
@@ -693,9 +692,9 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 	if sessionContents, err := json.Marshal(session); err == nil {
 
-		if client, err := n.factory.Client(); err == nil {
+		if client, err := n.factory.ClientSession(); err == nil {
 			if cfg.HideSensitive() {
-				log.Infof("Received session from external source:\n%s\n", cfg.HideSensitiveInformation(client, string(sessionContents)))
+				log.Infof("Received session from external source:\n%s\n", cfg.HideSensitiveInformation(&client, string(sessionContents)))
 			} else {
 				cfg.Logger.Infof("Received session from external source:\n%s\n", sessionContents)
 			}
@@ -710,11 +709,22 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		cfg.SetSessionFile(session.Path)
 	}
 
-	client := c8y.NewClient(nil, session.Host, session.Tenant, session.Username, session.Password, true)
-
-	if session.Token != "" {
-		client.SetToken(session.Token)
+	// The credentials of the session, and the authorization which is used for requests
+	auth := authentication.AuthOptions{
+		Tenant:   session.Tenant,
+		Username: session.Username,
+		Password: session.Password,
 	}
+	authType := authentication.AuthTypeUnset
+	if session.Token != "" {
+		auth.Token = session.Token
+		authType = authentication.AuthTypeBearer
+	} else if session.Username != "" && session.Password != "" {
+		authType = authentication.AuthTypeBasic
+	}
+	baseURL, _ := url.Parse(apiv2.FormatBaseURL(session.Host))
+	client := config.NewClientSession(baseURL, auth, "")
+	client.AuthType = authType
 
 	if !session.IsAuthorized() {
 		loginType := strings.ToUpper(cfg.GetLoginTypeWithDefault())
@@ -728,102 +738,85 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 
 		// Set default auth mode based on login type
 		switch loginType {
-		case c8y.LoginTypeOAuth2Internal, c8y.LoginTypeOAuth2, logintype.Device, logintype.Browser, logintype.Certificate:
-			client.SetAuthorizationType(c8y.AuthTypeBearer)
-		case c8y.LoginTypeBasic:
-			client.SetAuthorizationType(c8y.AuthTypeBasic)
-		case c8y.LoginTypeNone:
-			client.SetAuthorizationType(c8y.AuthTypeNone)
+		case logintype.OAuth2Internal, logintype.OAuth2, logintype.Device, logintype.Browser, logintype.Certificate:
+			authType = authentication.AuthTypeBearer
+		case logintype.Basic:
+			authType = authentication.AuthTypeBasic
+		case logintype.None:
+			authType = authentication.AuthTypeNone
 		}
 
 		// SSO providers are in control of the token, so it should just be used as is
 		if !n.ClearToken && c8ysession.ShouldReuseToken(cfg, log, session.Token, loginType) {
-			client.SetToken(session.Token)
+			auth.Token = session.Token
+			authType = authentication.AuthTypeBearer
 		} else {
-			client.ClearToken()
+			auth.Token = ""
 		}
+		auth.AuthType = []authentication.AuthType{authType}
 
 		c8ysession.ClearProcessEnvironment()
 
-		var (
-			handlerLoginType string
-			handlerC8Yclient *c8y.Client
-		)
+		// The login type flows which are provided by the SDK use the connection settings. The other
+		// login types have always accepted self-signed certificates (e.g. for edge devices).
+		insecure := true
 		if loginType == logintype.Browser || loginType == logintype.Certificate || loginType == logintype.Device {
-			v2handler := c8ylogin.NewLoginHandlerV2(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {})
-			v2handler.LoginType = loginType
-			v2handler.CertificatePath = session.Certificate
-			v2handler.CertificateKeyPath = session.CertificateKey
-			v2handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
-			if len(n.SSOScopes) > 0 {
-				v2handler.SSO.Scopes = strings.Split(n.SSOScopes, " ")
-			} else {
-				v2handler.SSO.Scopes = cfg.SSOScopes()
-			}
-			v2handler.SSO.Audience = n.SSOAudience
-			v2handler.BrowserCallbackURL = n.BrowserCallbackURL
-			if v2handler.BrowserCallbackURL == "" {
-				v2handler.BrowserCallbackURL = session.BrowserCallbackURL
-			}
-			if v2handler.BrowserCallbackURL == "" {
-				v2handler.BrowserCallbackURL = cfg.BrowserCallbackURL()
-			}
-			v2handler.TOTPSecret = session.TOTP
-			v2handler.TOTPCode = cfg.TOTPCode
-			v2handler.SetLogger(log)
-			log.Infof("User preference for login type: %s", v2handler.LoginType)
-			err = v2handler.Run()
-			if err != nil {
-				return err
-			}
-			handlerLoginType = v2handler.LoginType
-			handlerC8Yclient = v2handler.C8Yclient
-		} else {
-			handler := c8ylogin.NewLoginHandler(n.factory.IOStreams, client, cmd.ErrOrStderr(), func() {})
-			handler.LoginType = loginType
-			if loginType != "" {
-				handler.AllowedLoginTypes = strings.Split(loginType, ",")
-			}
-			handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
-			if len(n.SSOScopes) > 0 {
-				handler.SSO.Scopes = strings.Split(n.SSOScopes, " ")
-			} else {
-				handler.SSO.Scopes = cfg.SSOScopes()
-			}
-			handler.SSO.Audience = n.SSOAudience
-			log.Infof("User preference for login type: %s", handler.LoginType)
-			handler.TFACode = session.TOTP
-			if cfg.TOTPCode != "" {
-				// entered by the user in the MCP server's session picker
-				handler.TFACode = cfg.TOTPCode
-			}
-			if n.TFACode == "" {
-				if code, err := cfg.GetTOTP(time.Now()); err == nil {
-					cfg.Logger.Infof("Setting totp code: %s", code)
-					n.TFACode = code
-				}
-			}
-			handler.SetLogger(log)
-			err = handler.Run()
-			if err != nil {
-				return err
-			}
-			handlerLoginType = handler.LoginType
-			handlerC8Yclient = handler.C8Yclient
+			insecure = cfg.SkipSSLVerify()
 		}
+		handler := c8ylogin.NewLoginHandlerV2(
+			n.factory.IOStreams,
+			apiv2.ClientOptions{
+				BaseURL:            session.Host,
+				Auth:               auth,
+				InsecureSkipVerify: insecure,
+			},
+			cmd.ErrOrStderr(),
+			func() {},
+		)
+		handler.LoginType = loginType
+		handler.CertificatePath = session.Certificate
+		handler.CertificateKeyPath = session.CertificateKey
+		if loginType != "" {
+			handler.AllowedLoginTypes = strings.Split(loginType, ",")
+		}
+		handler.SSO.DiscoveryURL = cfg.SSODiscoveryUrl()
+		if len(n.SSOScopes) > 0 {
+			handler.SSO.Scopes = strings.Split(n.SSOScopes, " ")
+		} else {
+			handler.SSO.Scopes = cfg.SSOScopes()
+		}
+		handler.SSO.Audience = n.SSOAudience
+		handler.BrowserCallbackURL = n.BrowserCallbackURL
+		if handler.BrowserCallbackURL == "" {
+			handler.BrowserCallbackURL = session.BrowserCallbackURL
+		}
+		if handler.BrowserCallbackURL == "" {
+			handler.BrowserCallbackURL = cfg.BrowserCallbackURL()
+		}
+		handler.TOTPSecret = session.TOTP
+		handler.TOTPCode = cfg.TOTPCode
+		if handler.TOTPCode == "" {
+			handler.TOTPCode = n.TFACode
+		}
+		handler.SetLogger(log)
+		log.Infof("User preference for login type: %s", handler.LoginType)
+		if err := handler.Run(); err != nil {
+			return err
+		}
+		client = handler.Session()
 
-		session.Username = handlerC8Yclient.Username
-		session.Host = handlerC8Yclient.BaseURL.String()
+		session.Username = client.Username
+		session.Host = client.URL
 
 		// Use the handler selected login type
-		session.LoginType = handlerLoginType
+		session.LoginType = handler.LoginType
 
 		if client.Version != "" {
 			session.Version = client.Version
 		}
 
-		if client.TenantName != "" {
-			session.Tenant = client.TenantName
+		if client.Tenant != "" {
+			session.Tenant = client.Tenant
 		}
 		session.Token = client.Token
 	}
@@ -851,7 +844,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Session is not active (see previous warning)\n", cs.WarningIcon())
 	}
 	if !n.NoBanner {
-		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, *session)
+		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), &client, cfg, *session)
 	}
 
 	outputFormat := n.OutputFormat
@@ -866,7 +859,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// Write session details to stdout (for machines)
-	return c8ysession.WriteOutput(n.GetCommand().OutOrStdout(), client, cfg, session, outputFormat)
+	return c8ysession.WriteOutput(n.GetCommand().OutOrStdout(), &client, cfg, session, outputFormat)
 }
 
 // decryptSession decrypts the password and token if they are encrypted (e.g. when read

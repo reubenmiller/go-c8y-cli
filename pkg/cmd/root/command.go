@@ -13,7 +13,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
@@ -99,7 +98,6 @@ func NewCommand(buildVersion, buildBranch string) (*CmdRoot, error) {
 		buildBranch = "unknown"
 	}
 
-	var client *c8y.Client
 	var dataView *dataview.DataView
 	var consoleHandler *console.Console
 	var logHandler *logger.Logger
@@ -127,12 +125,6 @@ func NewCommand(buildVersion, buildBranch string) (*CmdRoot, error) {
 		}
 		return configHandler, nil
 	}
-	clientFunc := func() (*c8y.Client, error) {
-		if client == nil {
-			return nil, fmt.Errorf("client is missing")
-		}
-		return client, nil
-	}
 	loggerFunc := func() (*logger.Logger, error) {
 		if logHandler == nil {
 			return nil, fmt.Errorf("logger is missing")
@@ -158,7 +150,7 @@ func NewCommand(buildVersion, buildBranch string) (*CmdRoot, error) {
 		}
 		return consoleHandler, nil
 	}
-	cmdFactory := factory.New(buildVersion, buildBranch, configFunc, clientFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
+	cmdFactory := factory.New(buildVersion, buildBranch, configFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
 
 	// Register the template resolver so the configuration can lookup values as needed
 	configHandler.RegisterTemplateResolver(cmdutil.NewTemplateResolver(cmdFactory))

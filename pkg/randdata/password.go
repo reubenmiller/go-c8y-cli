@@ -1,6 +1,6 @@
 package randdata
 
-import "github.com/reubenmiller/go-c8y/pkg/password"
+import "github.com/reubenmiller/go-c8y/v2/pkg/password"
 
 func Password(total int) string {
 	if total <= 8 {
