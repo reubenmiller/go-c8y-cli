@@ -23,7 +23,6 @@
     "pkg/cmd/alarms/list/list.go",
     "pkg/cmd/alarms/subscribe/subscribe.manual.go",
     "pkg/cmd/alarms/updatecollection/updateCollection.go",
-    "pkg/cmd/api/api.manual.go",
     "pkg/cmd/applications/copy/copy.go",
     "pkg/cmd/applications/createbinary/createBinary.go",
     "pkg/cmd/applications/delete/delete.go",
@@ -263,7 +262,6 @@
     "settings update"
   ],
   "v1-worker": [
-    "pkg/cmd/api/api.manual.go",
     "pkg/cmd/remoteaccess/connect/run/run.manual.go",
     "pkg/cmd/remoteaccess/connect/ssh/ssh.manual.go",
     "pkg/cmd/remoteaccess/server/server.manual.go"

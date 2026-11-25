@@ -1,24 +1,32 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
 	_url "github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/types"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 )
 
 type CmdAPI struct {
@@ -131,48 +139,10 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
-
 	method := n.method
-
-	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		flags.WithProcessingModeValue(),
-		flags.WithStringValue("accept", "Accept"),
-		flags.WithStringValue("contentType", "Content-Type"),
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
 	var uri string
 	if len(args) == 1 {
-		isMethod := false
-		for _, m := range allowedMethods {
-			if strings.EqualFold(m, args[0]) {
-				isMethod = true
-				break
-			}
-		}
-		if isMethod {
+		if isMethod(args[0]) {
 			method = args[0]
 		} else {
 			uri = args[0]
@@ -183,205 +153,293 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// Use POST when sending form fields and no method was given (same as curl)
-	if cmd.Flags().Changed("form") && !cmd.Flags().Changed("method") && method == n.method {
-		hasMethodArg := false
-		for _, m := range allowedMethods {
-			if len(args) > 0 && strings.EqualFold(m, args[0]) {
-				hasMethodArg = true
-				break
-			}
-		}
-		if !hasMethodArg {
-			method = http.MethodPost
-		}
+	if cmd.Flags().Changed("form") && !cmd.Flags().Changed("method") && !(len(args) > 0 && isMethod(args[0])) {
+		method = http.MethodPost
+	}
+	method = strings.ToUpper(method)
+	if !isMethod(method) {
+		return cmderrors.NewUserError(fmt.Sprintf("Invalid method. Only %s are accepted", strings.Join(allowedMethods, ", ")))
 	}
 
-	var host string
-	var fixedPathPrefix string
+	switch method {
+	case http.MethodPut:
+		err = n.factory.UpdateModeEnabled(cmd)
+	case http.MethodPost:
+		err = n.factory.CreateModeEnabled(cmd)
+	case http.MethodDelete:
+		err = n.factory.DeleteModeEnabled(cmd)
+	}
+	if err != nil {
+		return err
+	}
+
+	// --host sets the scheme and host, and its path prefixes the url
+	var host, pathPrefix string
 	if n.flagHost != "" {
 		u, err := _url.ParseURL(n.flagHost)
 		if err != nil {
 			return err
 		}
 		host = fmt.Sprintf("%s://%s", u.Scheme, u.Host)
-		if u.Path != "" {
-			fixedPathPrefix = u.Path
-		}
+		pathPrefix = u.Path
 	}
 
-	// path parameters
+	// The url template: '{url}' (or '%s') is replaced with the url of each
+	// input item (piped value or --url)
 	urlTemplate := "{url}"
 	if uri != "" {
 		urlTemplate = uri
 	}
+	// An explicit --url template takes each item's url from the piped item
+	urlFlagTemplate := false
 	if cmd.Flags().Changed("url") {
-		if v, err := cmd.Flags().GetString("url"); err == nil {
-			if !flags.IsRuntimePipelineProperty(v) {
+		if v, err := cmd.Flags().GetString("url"); err == nil && !flags.IsRuntimePipelineProperty(v) {
+			if _, isRef := iterator.InputReference(v); !isRef {
 				urlTemplate = v
+				urlFlagTemplate = true
 			}
 		}
 	}
-	if !strings.Contains(urlTemplate, "{url}") && strings.Contains(urlTemplate, "%s") {
-		urlTemplate = strings.Replace(urlTemplate, "%s", "{url}", -1)
-	}
-
-	var path *flags.StringTemplate
-	if fixedPathPrefix == "" {
-		path = flags.NewStringTemplate(urlTemplate)
-	} else {
-		path = flags.NewStringTemplate(fixedPathPrefix + "/" + strings.TrimLeft(urlTemplate, "/"))
-	}
-
-	// set a default uri to prevent unresolved template variables when
-	// stdin is not being used
-	path.SetVariable("url", uri)
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-		flags.WithStringValue("url", "url"),
-	)
-
-	// path.
-	if err != nil {
-		cfg.Logger.Warn("something is not being detected")
-		return err
-	}
-
-	method = strings.ToUpper(method)
-
-	validMethod := false
-	for _, m := range allowedMethods {
-		if strings.EqualFold(m, method) {
-			validMethod = true
-			break
-		}
-	}
-
-	if !validMethod {
-		return cmderrors.NewUserError(fmt.Sprintf("Invalid method. Only %s are accepted", strings.Join(allowedMethods, ", ")))
-	}
-
-	if strings.EqualFold(method, http.MethodPut) {
-		if err := n.factory.UpdateModeEnabled(cmd); err != nil {
-			return err
-		}
-	}
-
-	if strings.EqualFold(method, http.MethodPost) {
-		if err := n.factory.CreateModeEnabled(cmd); err != nil {
-			return err
-		}
-	}
-
-	if strings.EqualFold(method, http.MethodDelete) {
-		if err := n.factory.DeleteModeEnabled(cmd); err != nil {
-			return err
-		}
-	}
-
-	// query parameters
-	query := flags.NewQueryTemplate()
-	if baseURL, err := url.Parse(uri); err == nil {
-		for key, values := range baseURL.Query() {
-			query.SetVariable(key, values)
-		}
-	}
-
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-	)
-	if err != nil {
-		return nil
-	}
-
-	// Only add common query parameter (for paging) to GET requests
-	if strings.EqualFold(method, http.MethodGet) {
-		commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-		if err != nil {
-			return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-		}
-		commonOptions.AddQueryParameters(query)
-	}
-
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
-	// Get base path without query parameter (for when an iterator is not used)
-	urlPath := path.GetTemplate()
-	if i := strings.Index(path.GetTemplate(), "?"); i != -1 {
-		urlPath = path.GetTemplate()[0:i]
-	}
-
-	req := c8y.RequestOptions{
-		Method:       method,
-		Host:         host,
-		Path:         urlPath,
-		Query:        queryValue,
-		Header:       headers,
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		ResponseData: nil,
+	if !strings.Contains(urlTemplate, "{url}") {
+		urlTemplate = strings.ReplaceAll(urlTemplate, "%s", "{url}")
 	}
 
 	if cmd.Flags().Changed("form") {
 		if !request.RequestSupportsBody(method) {
-			return cmderrors.NewUserError(fmt.Sprintf("--form can not be used with a %s request", strings.ToUpper(method)))
+			return cmderrors.NewUserError(fmt.Sprintf("--form can not be used with a %s request", method))
 		}
 		if cmd.Flags().Changed("template") || cmd.Flags().Changed("data") {
 			return cmderrors.NewUserError("--form can not be used together with --data or --template. Form data replaces the request body")
 		}
 	}
 
-	if request.RequestSupportsBody(method) {
-		body := mapbuilder.NewInitializedMapBuilder(!strings.EqualFold(method, "DELETE"))
-		err = flags.WithBody(
-			cmd,
-			body,
-			inputIterators,
+	accept, _ := cmd.Flags().GetString("accept")
+	contentType, _ := cmd.Flags().GetString("contentType")
+
+	r, err := c8ystream.NewRunner(cmd, n.factory)
+	if err != nil {
+		return err
+	}
+	// The item's url comes from the pipe or --url, unless --url is the
+	// template: then each piped item gives the url
+	itemURL := func(in *c8ystream.Resolver) string { return in.String("url") }
+	if urlFlagTemplate {
+		if err := r.Input(); err != nil {
+			return err
+		}
+		pipeOpts, err := flags.GetPipeOptionsFromAnnotation(cmd)
+		if err != nil {
+			return err
+		}
+		itemURL = func(in *c8ystream.Resolver) string { return pipedURL(in.Input(), pipeOpts) }
+	} else if err := r.InputFlag("url"); err != nil {
+		return err
+	}
+
+	hasBody := request.RequestSupportsBody(method) && (cmd.Flags().Changed("template") || cmd.Flags().Changed("data"))
+	if hasBody {
+		headers := http.Header{}
+		if contentType != "" {
+			headers.Set("Content-Type", contentType)
+		}
+		if err := r.Body(
 			flags.WithDataValueAdvanced(!n.keepProperties, !request.HasJSONHeader(&headers), flags.FlagDataName, ""),
 			cmdutil.WithTemplateValue(n.factory),
 			flags.WithTemplateVariablesValue(),
-		)
+		); err != nil {
+			return err
+		}
+	}
 
+	// Form data (--file, --formdata and --form) is sent with every request
+	var form map[string]io.Reader
+	if request.RequestSupportsBody(method) {
+		form = make(map[string]io.Reader)
+		if err := flags.WithFormDataOptions(cmd, form, r.InputIterators, flags.WithFormDataFileAndInfo("file", "formdata")...); err != nil {
+			return cmderrors.NewUserError(err)
+		}
+		if err := flags.MakeFormDataReopenable(form); err != nil {
+			return cmderrors.NewUserError(err)
+		}
+		if err := flags.WithFormFields(cmd, form, "form"); err != nil {
+			return cmderrors.NewUserError(err)
+		}
+	}
+
+	var paging url.Values
+	if method == http.MethodGet {
+		common, err := cfg.GetOutputCommonOptions(cmd)
 		if err != nil {
-			return cmderrors.NewUserError(err)
+			return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 		}
+		paging = pagingParameters(common)
+	}
 
-		if cmd.Flags().Changed("template") || cmd.Flags().Changed("data") {
-			req.Body = body
-		}
+	progressBar := cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY())
+	addProgress := c8ybinary.AddProgress(cmd, "file", progressBar)
 
-		req.PrepareRequest = c8ybinary.AddProgress(cmd, "file", cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY()))
-		// form data
-		// Note: the form data is reopened by the request iterator for each request
-		formData := make(map[string]io.Reader)
-		err = flags.WithFormDataOptions(
-			cmd,
-			formData,
-			inputIterators,
-			flags.WithFormDataFileAndInfo("file", "formdata")...,
-		)
-		if err != nil {
-			return cmderrors.NewUserError(err)
-		}
-		if err := flags.MakeFormDataReopenable(formData); err != nil {
-			return cmderrors.NewUserError(err)
-		}
-		if err := flags.WithFormFields(cmd, formData, "form"); err != nil {
-			return cmderrors.NewUserError(err)
-		}
-		req.FormData = formData
+	client, err := r.Client()
+	if err != nil {
+		return err
 	}
 
 	// Hide usage for system errors
 	cmd.SilenceUsage = true
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		path, query, err := requestURL(urlTemplate, itemURL(in), pathPrefix)
+		if err != nil {
+			return nil, cmderrors.NewUserError(err)
+		}
+		for key, values := range paging {
+			// The url's own paging parameters win
+			if !query.Has(key) {
+				query[key] = values
+			}
+		}
+
+		opts := apiv2.RequestOptions{
+			Method:       method,
+			Host:         host,
+			Path:         path,
+			Query:        query,
+			Accept:       accept,
+			ContentType:  contentType,
+			IgnoreAccept: cfg.IgnoreAcceptHeader(),
+		}
+		if hasBody {
+			if raw, ok := in.RawBody(); ok {
+				opts.Body = raw
+			} else {
+				body, err := in.Body()
+				if err != nil {
+					return nil, cmderrors.NewUserError(err)
+				}
+				opts.Body = []byte(body)
+				if opts.ContentType == "" {
+					opts.ContentType = types.MimeTypeApplicationJSON
+				}
+			}
+		}
+		if len(form) > 0 {
+			formData, err := flags.ReopenFormData(form)
+			if err != nil {
+				return nil, cmderrors.NewUserError(err)
+			}
+			opts.FormData = formParts(formData)
+			opts.PrepareRequest = func(req *http.Request) error {
+				out, err := addProgress(req)
+				if err == nil && out != nil {
+					req.Body = out.Body
+				}
+				return err
+			}
+		}
+		return r.RequestCall(client, opts), nil
+	})
+}
+
+func isMethod(v string) bool {
+	for _, m := range allowedMethods {
+		if strings.EqualFold(m, v) {
+			return true
+		}
+	}
+	return false
+}
+
+// pipedURL returns the url of a piped item: a JSON object's pipeline property
+// (or the first of its aliases it has), or else the whole line.
+func pipedURL(input []byte, opts *flags.PipelineOptions) string {
+	raw := bytes.TrimSpace(input)
+	if !jsonUtilities.IsJSONObject(raw) {
+		return string(raw)
+	}
+	if opts == nil {
+		return ""
+	}
+	for _, property := range append([]string{opts.Property}, opts.Aliases...) {
+		if v := gjson.GetBytes(raw, property); property != "" && v.Exists() {
+			return v.String()
+		}
+	}
+	return ""
+}
+
+// requestURL returns the path and query of a request: the url template with
+// '{url}' replaced by the item's url, prefixed with the --host path. An
+// absolute url (e.g. a piped self link) is used without its host, so the
+// request goes to the session's (or --host's) host.
+func requestURL(template, itemURL, prefix string) (string, url.Values, error) {
+	if u, err := url.Parse(itemURL); err == nil && u.IsAbs() && u.Host != "" {
+		itemURL = u.RequestURI()
+	}
+	raw := strings.ReplaceAll(template, "{url}", itemURL)
+	path, rawQuery, _ := strings.Cut(raw, "?")
+	query, err := url.ParseQuery(rawQuery)
+	if err != nil {
+		return "", nil, fmt.Errorf("invalid query parameters. %w", err)
+	}
+	if prefix != "" {
+		path = strings.TrimRight(prefix, "/") + "/" + strings.TrimLeft(path, "/")
+	}
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+	return path, query, nil
+}
+
+// pagingParameters returns the query parameters of the paging flags
+// (--pageSize, --currentPage, --withTotalPages and --withTotalElements).
+func pagingParameters(common config.CommonCommandOptions) url.Values {
+	query := url.Values{}
+	if common.CurrentPage > 0 {
+		query.Set(flags.FlagCurrentPage, fmt.Sprintf("%d", common.CurrentPage))
+	}
+	if common.PageSize > 0 {
+		query.Set(flags.FlagPageSize, fmt.Sprintf("%d", common.PageSize))
+	}
+	if common.WithTotalPages {
+		query.Set(flags.FlagWithTotalPages, "true")
+	}
+	if common.WithTotalElements {
+		query.Set(flags.FlagWithTotalElements, "true")
+	}
+	return query
+}
+
+// formParts converts the form data to the go-c8y multipart parts: files are
+// sent as file parts (using the filename and contentType metadata values of
+// --form), every other value as a plain form field.
+func formParts(form map[string]io.Reader) map[string]io.Reader {
+	fileName := readFormText(form[flags.FormDataKeyFilename])
+	contentType := readFormText(form[flags.FormDataKeyContentType])
+	parts := make(map[string]io.Reader, len(form))
+	for name, value := range form {
+		switch name {
+		case flags.FormDataKeyFilename, flags.FormDataKeyContentType:
+			continue
+		}
+		if f, ok := value.(*os.File); ok {
+			part := &apiv2.FormFile{Reader: f, FileName: filepath.Base(f.Name()), ContentType: contentType}
+			if fileName != "" {
+				part.FileName = fileName
+			}
+			parts[name] = part
+			continue
+		}
+		parts[name] = &apiv2.FormField{Reader: value}
+	}
+	return parts
+}
+
+func readFormText(r io.Reader) string {
+	if r == nil {
+		return ""
+	}
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return ""
+	}
+	return string(b)
 }

@@ -267,6 +267,15 @@ func (in *Resolver) Body() (json.RawMessage, error) {
 	return json.RawMessage(raw), nil
 }
 
+// RawBody returns the body configured with Runner.Body when it is raw text
+// (e.g. --data with a non-JSON content type) rather than a JSON document.
+func (in *Resolver) RawBody() (string, bool) {
+	if in.r.body == nil || !in.r.body.HasRaw() {
+		return "", false
+	}
+	return in.r.body.GetRaw(), true
+}
+
 // refForFlag resolves a `-`/`-.path` flag reference against the current input
 // item, matching the v1 pipe-binding extraction:
 //   - bare `-`: a JSON object yields the flag's own property; a plain line is
