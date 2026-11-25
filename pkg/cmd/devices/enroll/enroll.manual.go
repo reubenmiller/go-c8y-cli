@@ -2,6 +2,7 @@ package enroll
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"crypto/x509"
 	"encoding/json"
@@ -9,25 +10,27 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
-
+	"net/url"
 	"os"
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/mdp/qrterminal/v3"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/progressbar"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/pkg/certutil"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devices"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devices/enrollment"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
+	"github.com/reubenmiller/go-c8y/v2/pkg/certutil"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )
@@ -127,39 +130,14 @@ func NewDeviceEnrollCmd(f *cmdutil.Factory) *DeviceEnrollCmd {
 
 // RunE executes the command
 func (n *DeviceEnrollCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-
-	llog, err := n.factory.Logger()
-	if err != nil {
+	if err := r.InputFlag("id"); err != nil {
 		return err
 	}
-	c8y.Logger = llog
-
-	c8yclient, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-
-	consol, err := n.factory.Console()
-	if err != nil {
-		return err
-	}
-
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
-
-	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-		flags.WithStringValue("id"),
+	if err := r.Body(
 		flags.WithStringValue("host"),
 		flags.WithStringValue("key"),
 		flags.WithStringValue("cert"),
@@ -173,278 +151,208 @@ func (n *DeviceEnrollCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDuration("retry-every"),
 		cmdutil.WithTemplateValue(n.factory),
 		flags.WithTemplateVariablesValue(),
-	)
-
-	if err != nil {
+	); err != nil {
 		return cmderrors.NewUserError(err)
 	}
-
-	var iter iterator.Iterator
-	if inputIterators.Total > 0 {
-		iter = mapbuilder.NewMapBuilderIterator(body)
-	} else {
-		iter = iterator.NewBoundIterator(mapbuilder.NewMapBuilderIterator(body), 1)
-	}
-
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	session, err := r.Client()
 	if err != nil {
 		return err
 	}
-	commonOptions.DisableResultPropertyDetection()
+	cfg := r.Config
+	errOut := n.factory.IOStreams.ErrOut
+	prog := progressbar.NewCountdownProgressBar(errOut, cfg.RequestTimeout(), "Enroll", n.factory.IOStreams.IsStderrTTY())
 
-	showUserMessage := func(format string, a ...any) {
-		cfg.Logger.Infof(format, a...)
-	}
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		raw, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		options := gjson.ParseBytes(raw)
 
-	prog := progressbar.NewCountdownProgressBar(n.factory.IOStreams.ErrOut, cfg.RequestTimeout(), "Enroll", true)
-
-	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
-		options := gjson.ParseBytes(j.Value.([]byte))
-
-		deviceID := options.Get("id").String()
-		if cmd.Flags().Changed("id") {
-			if v, err := cmd.Flags().GetString("id"); err == nil {
-				deviceID = v
-			}
+		// --id wins over the template, which wins over the piped value
+		deviceID := in.String("id")
+		if v := options.Get("id").String(); v != "" && !cmd.Flags().Changed("id") {
+			deviceID = v
+		}
+		if deviceID == "" {
+			return nil, cmderrors.NewUserError("missing device id")
 		}
 
-		host := options.Get("host").String()
-		deviceType := options.Get("type").String()
-		mode := options.Get("mode").String()
-		if mode == "" {
-			mode = "auto"
-		}
-		overwrite := options.Get("overwrite").Bool()
-		showQRCode := options.Get("show-qr").Bool()
-		showURL := options.Get("show-url").Bool()
-		keyFile := options.Get("key").String()
+		keyFile := cmp.Or(options.Get("key").String(), deviceID+".key")
+		certFile := cmp.Or(options.Get("cert").String(), deviceID+".crt")
 		csrFile := options.Get("csr").String()
-		certFile := options.Get("cert").String()
-		oneTimePassword := options.Get("one-time-password").String()
-
-		if keyFile == "" {
-			keyFile = fmt.Sprintf("%s.key", deviceID)
-		}
-		if certFile == "" {
-			certFile = fmt.Sprintf("%s.crt", deviceID)
-		}
-		// the files are read, written or removed, so they can't be in a denied location
+		// the files are read or written, so they can't be in a denied location
 		for _, p := range []string{keyFile, csrFile, certFile} {
 			if err := fileguard.Check(p); err != nil {
 				return nil, err
 			}
 		}
+		overwrite := options.Get("overwrite").Bool()
 
-		if oneTimePassword == "" {
-			if v, err := c8yclient.DeviceEnrollment.GenerateOneTimePassword(); err == nil {
-				// URL's with "." may not be clickable on some consoles so avoid it
-				oneTimePassword = strings.ReplaceAll(v, ".", "_")
+		// A device with a certificate is enrolled already
+		if !overwrite {
+			if certPEM, err := os.ReadFile(certFile); err == nil {
+				cert, err := certutil.ParseCertificatePEM(certPEM)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse certificate. file=%s, %w", certFile, err)
+				}
+				cfg.Logger.Infof("Using the existing device certificate. externalID=%s, key=%s, cert=%s", cert.Subject.CommonName, keyFile, certFile)
+				result := enrollmentResult(deviceID, options.Get("type").String(), keyFile, certFile, true)
+				return func(context.Context) any { return result }, nil
 			}
 		}
 
-		if host == "" {
-			host = c8yclient.GetHostname()
-		}
-
-		if host == "" {
-			return "", fmt.Errorf("host is not set")
-		}
-
-		// TODO: Allow users to change the host name
-		if err := c8yclient.SetBaseURL(host); err != nil {
-			return "", err
-		}
-
-		clientHasCredentials := c8yclient.GetHostname() != "" && (c8yclient.Token != "" || (c8yclient.Username != "" && c8yclient.Password != ""))
-		preRegister := (mode == "auto" && clientHasCredentials)
-
-		if clientHasCredentials {
-			if resp, err := c8yclient.DeviceCredentials.Delete(context.Background(), deviceID); err != nil {
-				if !resp.IsDryRun() && (resp.StatusCode() != 401 && resp.StatusCode() != 403 && resp.StatusCode() != 404) {
-					cfg.Logger.Infof("Could not remove existing device registration request. externalID=%s", deviceID)
-				}
-			} else {
-				cfg.Logger.Infof("Removed existing device registration request. externalID=%s", deviceID)
-			}
-		}
-
-		if preRegister {
-			// Check if the correct credentials are available or not
-			buf := bytes.NewBufferString("")
-			c8y.BulkRegistrationRecordWriter(buf,
-				c8y.BulkRegistrationRecord{
-					ID:            deviceID,
-					Name:          deviceID,
-					Type:          deviceType,
-					AuthType:      c8y.BulkRegistrationAuthTypeCertificates,
-					EnrollmentOTP: oneTimePassword,
-					IsAgent:       true,
-				},
-			)
-			if _, resp, err := c8yclient.DeviceCredentials.CreateBulk(context.Background(), buf); err != nil {
-				preRegister = false
-				if resp != nil {
-					if resp.StatusCode() != 401 && resp.StatusCode() != 403 && resp.StatusCode() != 404 {
-						cfg.Logger.Warnf("Could not pre-register device. statusCode=%s, error=%s", resp.Status(), err)
-					}
-				} else {
-					cfg.Logger.Warnf("Could not pre-register device. error=%s", err)
-				}
-			}
-		}
-
-		timeout := cfg.RequestTimeout()
-		retryEvery := time.Duration(options.Get("retry-every").Int())
-
-		// Create client that does not use any authentication
-		client := c8y.NewClientFromOptions(nil, c8y.ClientOptions{
-			BaseURL:       host,
-			Realtime:      false,
-			ShowSensitive: true,
-		})
-
-		client.SetRequestOptions(c8y.DefaultRequestOptions{
-			DryRun: cfg.DryRun(),
-			DryRunHandler: func(options *c8y.RequestOptions, req *http.Request) {
-				handler := &request.RequestHandler{
-					IsTerminal: n.factory.IOStreams.IsStdoutTTY(),
-					IO:         n.factory.IOStreams,
-					Client:     client,
-					Config:     cfg,
-					Logger:     llog,
-					Console:    consol,
-					HideSensitive: func(c *c8y.Client, s string) string {
-						return s
-					},
-				}
-				handler.DryRunHandler(n.factory.IOStreams, options, req)
-			},
-		})
-
-		if overwrite {
-			cfg.Logger.Info("Removing any existing private key, or certificate")
-			if err := os.Remove(keyFile); err != nil {
-				if !errors.Is(err, os.ErrNotExist) {
-					cfg.Logger.Warnf("Failed to remove private key. file=%s, error=%s", keyFile, err)
-				}
-			}
-			if err := os.Remove(certFile); err != nil {
-				if !errors.Is(err, os.ErrNotExist) {
-					cfg.Logger.Warnf("Failed to remove certificate. file=%s, error=%s", certFile, err)
-				}
-			}
-		}
-
-		// Create private key
-		keyPem, keyWasGenerated, err := certutil.LoadOrGenerateKeyFile(keyFile)
+		client, enrollOpt, err := enrollOptions(session, cfg.GetHost() != "", deviceID, options, cfg.RequestTimeout())
 		if err != nil {
-			return nil, fmt.Errorf("failed to load or create private key. %w", err)
+			return nil, err
 		}
-		if keyWasGenerated {
-			cfg.Logger.Infof("Created a new private key. file=%s", keyFile)
+
+		// The certificate signing request is given, or created with the
+		// device's key (an existing one, or a new one)
+		var newKey []byte
+		if csrFile != "" {
+			if enrollOpt.CSR, err = loadCSR(csrFile); err != nil {
+				return nil, err
+			}
 		} else {
-			cfg.Logger.Infof("Loaded an existing private key. file=%s", keyFile)
-		}
-
-		key, err := certutil.ParsePrivateKeyPEM(keyPem)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse private key. %w", err)
-		}
-
-		wasExisting := true
-
-		var cert *x509.Certificate
-		if _, err := os.Stat(certFile); overwrite || errors.Is(err, os.ErrNotExist) {
-
-			showUserMessage("\n📣 Starting device enrollment: externalID=%s\n", deviceID)
-
-			// Create/Load CSR
-			csr, err := LoadCertificateSigningRequest(
-				LoadCSRFromFile(csrFile),
-				GenerateCSRFromKey(client, deviceID, key),
-			)
+			keyPEM, err := os.ReadFile(keyFile)
+			if overwrite || errors.Is(err, os.ErrNotExist) {
+				if keyPEM, err = certutil.MakeEllipticPrivateKeyPEM(); err != nil {
+					return nil, err
+				}
+				newKey = keyPEM
+			} else if err != nil {
+				return nil, fmt.Errorf("failed to read private key. file=%s, %w", keyFile, err)
+			}
+			key, err := certutil.ParsePrivateKeyPEM(keyPEM)
 			if err != nil {
+				return nil, fmt.Errorf("failed to parse private key. file=%s, %w", keyFile, err)
+			}
+			if enrollOpt.CSR, err = client.Devices.Enrollment.CreateCertificateSigningRequest(deviceID, key); err != nil {
 				return nil, fmt.Errorf("failed to create certificate signing request. %w", err)
 			}
-
-			ctx := context.Background()
-
-			initDelay := 2 * time.Second
-			if cfg.DryRun() || preRegister {
-				initDelay = 0
-			}
-
-			// Enroll device
-			if !preRegister {
-				prog.Start()
-			}
-
-			result := <-client.DeviceEnrollment.PollEnroll(ctx, c8y.DeviceEnrollmentOption{
-				ExternalID:      deviceID,
-				OneTimePassword: oneTimePassword, // Generate random one-time password if empty
-
-				// Initial delay before the first download attempt
-				InitDelay: initDelay,
-
-				// Check every 5 seconds
-				Interval: retryEvery,
-
-				// Give up after 10 minutes
-				Timeout: timeout,
-
-				// Print enrollment information
-				Banner: &c8y.DeviceEnrollmentBannerOptions{
-					Enable:     !preRegister,
-					ShowQRCode: showQRCode,
-					ShowURL:    showURL,
-				},
-
-				CertificateSigningRequest: csr,
-			})
-			if result.Err != nil {
-				showUserMessage("🚫 Failed to download the device's certificate\n")
-				return nil, result.Err
-			}
-
-			if result.Certificate != nil {
-				showUserMessage("✅ Successfully downloaded the device's certificate. key=%s, cert=%s\n", keyFile, certFile)
-				cert = result.Certificate
-				certPEM := certutil.MarshalCertificateToPEM(cert.Raw)
-				os.WriteFile(certFile, certPEM, 0644)
-			}
-			wasExisting = false
-		} else {
-			certPEM, err := os.ReadFile(certFile)
-			if err != nil {
-				return nil, fmt.Errorf("failed to read certificate file. %w", err)
-			}
-
-			cert, err = certutil.ParseCertificatePEM(certPEM)
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse certificate. %w", err)
-			}
-			showUserMessage("\n📣 Using existing device certificate: externalID=%s, key=%s, cert=%s\n", cert.Subject.CommonName, keyFile, certFile)
 		}
 
-		result := EnrollmentResult{
-			Certificate:       certFile,
-			Key:               keyFile,
-			ID:                deviceID,
-			DeviceType:        deviceType,
-			AlreadyRegistered: wasExisting,
+		banner := enrollment.NewDeviceEnrollmentBannerOptions(options.Get("show-qr").Bool(), options.Get("show-url").Bool(), renderQRCode)
+		enrollOpt.OnRegistrationRequired = func(req devices.RegistrationRequired) {
+			if req.Err != nil {
+				logRegistrationError(cfg.Logger, req.Err)
+			}
+			if err := client.Devices.Enrollment.WriteBanner(errOut, req.ExternalID, req.OneTimePassword, *banner); err != nil {
+				cfg.Logger.Warnf("Could not show the registration url. %s", err)
+			}
+			prog.Start()
+		}
+		enrollOpt.OnAttemptError = func(err error) {
+			cfg.Logger.Debugf("The device's certificate is not available yet. externalID=%s, error=%s", deviceID, err)
 		}
 
-		outB, outErr := json.Marshal(result)
-		if outErr != nil {
-			return nil, outErr
+		return func(ctx context.Context) any {
+			cfg.Logger.Infof("Starting device enrollment. externalID=%s", deviceID)
+			result := client.Devices.Enroll(ctx, enrollOpt)
+			if result.Err != nil || result.Data.Certificate == nil {
+				// an error, or a dry run
+				return result
+			}
+			// The key is saved with the certificate, so a failed enrollment leaves no files
+			if newKey != nil {
+				if err := certutil.WriteKey(keyFile, newKey); err != nil {
+					return fmt.Errorf("failed to write private key. file=%s, %w", keyFile, err)
+				}
+			}
+			if err := os.WriteFile(certFile, certutil.MarshalCertificateToPEM(result.Data.Raw), 0644); err != nil {
+				return fmt.Errorf("failed to write certificate. file=%s, %w", certFile, err)
+			}
+			cfg.Logger.Infof("Downloaded the device's certificate. key=%s, cert=%s", keyFile, certFile)
+			if csrFile != "" && options.Get("key").String() == "" {
+				// The key of a given signing request is unknown
+				keyFile = ""
+			}
+			return enrollmentResult(deviceID, enrollOpt.Type, keyFile, certFile, false)
+		}, nil
+	})
+}
+
+// enrollOptions returns the client which enrolls the device and the options
+// to enroll it. A device is enrolled with the session's tenant, or with --host.
+// The session's credentials are only used for the session's host: there they
+// remove an old device request and, in auto mode, register the device.
+func enrollOptions(session *apiv2.Client, hasSession bool, deviceID string, options gjson.Result, timeout time.Duration) (*apiv2.Client, devices.EnrollOptions, error) {
+	opt := devices.EnrollOptions{
+		ExternalID:      deviceID,
+		Type:            options.Get("type").String(),
+		OneTimePassword: options.Get("one-time-password").String(),
+		Interval:        time.Duration(options.Get("retry-every").Int()),
+		Timeout:         timeout,
+	}
+
+	client := session
+	if host := options.Get("host").String(); host != "" {
+		u, err := url.Parse(apiv2.FormatBaseURL(host))
+		if err != nil || u.Host == "" {
+			return nil, opt, cmderrors.NewUserError(fmt.Sprintf("invalid host. %s", host))
 		}
+		if !hasSession || u.Host != session.BaseURL.Host {
+			// Another tenant: enroll without credentials
+			client = apiv2.NewClient(apiv2.ClientOptions{BaseURL: u.String(), Timeout: opt.Timeout})
+			hasSession = false
+		}
+	} else if !hasSession {
+		return nil, opt, cmderrors.NewUserError("host is not set. Use a session or --host")
+	}
 
-		n.factory.WriteOutput(outB, cmdutil.OutputContext{
-			Input: j.Input,
-		}, &commonOptions)
+	auth := session.Auth
+	hasCredentials := hasSession && (auth.Token != "" || (auth.Username != "" && auth.Password != ""))
+	opt.RemoveRequest = hasCredentials
+	opt.Register = hasCredentials && cmp.Or(options.Get("mode").String(), "auto") == "auto"
+	return client, opt, nil
+}
 
-		return nil, nil
-	}, nil)
+// logRegistrationError logs why the device could not be registered, so a user
+// has to register it. Missing permissions are expected.
+func logRegistrationError(log interface {
+	Infof(string, ...any)
+	Warnf(string, ...any)
+}, err error) {
+	var apiErr *core.Error
+	if errors.As(err, &apiErr) && (apiErr.Code == http.StatusUnauthorized || apiErr.Code == http.StatusForbidden || apiErr.Code == http.StatusNotFound) {
+		log.Infof("Could not register the device. %s", err)
+		return
+	}
+	log.Warnf("Could not register the device. %s", err)
+}
+
+func renderQRCode(url string) (string, error) {
+	var b bytes.Buffer
+	qrterminal.GenerateHalfBlock(url, qrterminal.L, &b)
+	return b.String(), nil
+}
+
+func loadCSR(path string) (*x509.CertificateRequest, error) {
+	contents, err := fileguard.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	block, _ := pem.Decode(contents)
+	if block == nil {
+		return nil, fmt.Errorf("the certificate signing request is not PEM encoded. file=%s", path)
+	}
+	csr, err := x509.ParseCertificateRequest(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse certificate signing request. file=%s, %w", path, err)
+	}
+	return csr, nil
+}
+
+func enrollmentResult(id, deviceType, key, cert string, existing bool) output.Seq {
+	b, _ := json.Marshal(EnrollmentResult{
+		Certificate:       cert,
+		Key:               key,
+		ID:                id,
+		DeviceType:        deviceType,
+		AlreadyRegistered: existing,
+	})
+	return c8ystream.FromDocs(jsondoc.New(b))
 }
 
 type EnrollmentResult struct {
@@ -453,50 +361,4 @@ type EnrollmentResult struct {
 	ID                string `json:"id,omitempty"`
 	DeviceType        string `json:"deviceType,omitempty"`
 	AlreadyRegistered bool   `json:"alreadyRegistered"`
-}
-
-type CSRSource func() (*x509.CertificateRequest, bool, error)
-
-func LoadCertificateSigningRequest(opts ...CSRSource) (*x509.CertificateRequest, error) {
-	for _, opt := range opts {
-		csr, ok, err := opt()
-		if ok {
-			return csr, err
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-	return nil, fmt.Errorf("no csr was generated")
-}
-
-func LoadCSRFromFile(path string) CSRSource {
-	return func() (*x509.CertificateRequest, bool, error) {
-		if path == "" {
-			return nil, false, nil
-		}
-		contents, err := fileguard.ReadFile(path)
-		if err != nil {
-			return nil, false, err
-		}
-		block, _ := pem.Decode(contents)
-		if block == nil {
-			return nil, false, err
-		}
-		csr, err := x509.ParseCertificateRequest(block.Bytes)
-		if err != nil {
-			return nil, false, err
-		}
-		return csr, true, nil
-	}
-}
-
-func GenerateCSRFromKey(client *c8y.Client, deviceID string, key any) CSRSource {
-	return func() (*x509.CertificateRequest, bool, error) {
-		csr, err := client.DeviceEnrollment.CreateCertificateSigningRequest(deviceID, key)
-		if err != nil {
-			return nil, false, fmt.Errorf("failed to create certificate signing request. %w", err)
-		}
-		return csr, true, nil
-	}
 }

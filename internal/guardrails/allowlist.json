@@ -1,7 +1,4 @@
 {
-  "dry-run-check": [
-    "pkg/cmd/devices/enroll/enroll.manual.go"
-  ],
   "flag-type-device": [
     "remoteaccess configurations update (string, expected stringSlice)"
   ],
@@ -86,7 +83,6 @@
     "pkg/cmd/devices/children/list/list.go",
     "pkg/cmd/devices/children/unassign/unassign.go",
     "pkg/cmd/devices/delete/delete.go",
-    "pkg/cmd/devices/enroll/enroll.manual.go",
     "pkg/cmd/devices/get/get.go",
     "pkg/cmd/devices/getchild/getChild.go",
     "pkg/cmd/devices/getsupportedmeasurements/getSupportedMeasurements.go",
@@ -268,7 +264,6 @@
   ],
   "v1-worker": [
     "pkg/cmd/api/api.manual.go",
-    "pkg/cmd/devices/enroll/enroll.manual.go",
     "pkg/cmd/measurements/createBulk/createBulk.manual.go",
     "pkg/cmd/remoteaccess/connect/run/run.manual.go",
     "pkg/cmd/remoteaccess/connect/ssh/ssh.manual.go",
