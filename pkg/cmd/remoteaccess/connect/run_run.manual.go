@@ -9,19 +9,15 @@ import (
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/remoteaccess/rasession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/reubenmiller/go-c8y/pkg/remoteaccess"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/gjson"
 )
 
 type CmdRun struct {
@@ -100,12 +96,28 @@ func NewCmdRun(f *cmdutil.Factory) *CmdRun {
 	return ccmd
 }
 
+// RunE starts a local proxy to each device's remote access passthrough
+// configuration, and runs the command given after "--" against it.
 func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
-	client, err := n.factory.Client()
+	// Build the command before connecting, so a missing one fails fast
+	run := ""
+	var runArgs []string
+	if dashIdx := cmd.ArgsLenAtDash(); dashIdx > -1 && dashIdx < len(args) {
+		run = args[dashIdx]
+		runArgs = args[dashIdx+1:]
+	}
+	if run == "" {
+		return cmderrors.NewUserError("Missing run command")
+	}
+
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-	cfg, err := n.factory.Config()
+	if err := r.InputFlag("device"); err != nil {
+		return err
+	}
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
@@ -114,136 +126,69 @@ func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
+	opts := rasession.Options{Configuration: n.configuration}
+	if cmd.Flags().Changed("multiplex") {
+		opts.Multiplex = &n.multiplex
 	}
 
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	body.SetApplyTemplateOnMarshalPreference(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
-	)
-	if err != nil {
-		return err
-	}
-
-	var iter iterator.Iterator
-	if inputIterators.Total > 0 {
-		iter = mapbuilder.NewMapBuilderIterator(body)
-	} else {
-		iter = iterator.NewBoundIterator(mapbuilder.NewMapBuilderIterator(body), 1)
-	}
-
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return err
-	}
-	commonOptions.DisableResultPropertyDetection()
-
-	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
-		item := gjson.ParseBytes(j.Value.([]byte))
-		device := item.Get("device").String()
-
-		craConfig, err := c8yfetcher.DetectRemoteAccessConfiguration(client, device, n.configuration)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		deviceID, err := client.ManagedObjects.ResolveID(in.ResolveContext(), c8ystream.NameOrID(in.String("device")), nil)
+		if err != nil {
+			return nil, err
+		}
+		opts := opts
+		opts.DeviceID = deviceID
+		config, err := rasession.Detect(in.ResolveContext(), client, opts)
 		if err != nil {
 			return nil, err
 		}
 
-		log.Debugf("Using remote access configuration: id=%s, name=%s", craConfig.ID, craConfig.Name)
+		return func(ctx context.Context) any {
+			session := rasession.New(client, opts, config)
+			log.Debugf("Using remote access configuration: id=%s, name=%s, multiplex=%v", config.ID(), config.Name(), session.Multiplex)
 
-		// Multiplex configurations named with the mux option (e.g. "http+mux:example"), unless
-		// the --multiplex flag was given explicitly
-		multiplex := n.multiplex
-		if !cmd.Flags().Changed("multiplex") {
-			if name, ok := remoteaccess.ParseConfigurationName(craConfig.Name); ok && name.Multiplex {
-				log.Debugf("Multiplexing as the configuration name has the mux option")
-				multiplex = true
+			// TCP / socket listener, served in the background
+			if err := session.Listen(n.listen); err != nil {
+				return err
 			}
-		}
+			go session.Serve()
+			host, port := session.HostPort()
 
-		// Lookup configuration
-		craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
-			ManagedObjectID: device,
-			RemoteAccessID:  craConfig.ID,
-			Multiplex:       multiplex,
-		})
-
-		// TCP / socket listener
-		if err := craClient.Listen(n.listen); err != nil {
-			return nil, err
-		}
-
-		localAddress := craClient.GetListenerAddress()
-		host, port, _ := strings.Cut(localAddress, ":")
-		if host == "" {
-			host = "127.0.0.1"
-		}
-
-		// Start in background
-		go craClient.Serve()
-
-		// Build ssh command
-		run := ""
-		runArgs := []string{}
-
-		dashIdx := cmd.ArgsLenAtDash()
-		if dashIdx > -1 {
-			run = args[dashIdx]
-			if dashIdx+1 < len(args) {
-				// Allow users to access port via variables (similar to what ssh does)
-				for _, v := range args[dashIdx+1:] {
-					expandedValue := v
-					expandedValue = strings.ReplaceAll(expandedValue, "%h", host)
-					expandedValue = strings.ReplaceAll(expandedValue, "%p", port)
-					runArgs = append(runArgs, expandedValue)
-				}
+			// Allow users to access the port via variables (similar to what ssh does)
+			expandedArgs := make([]string, 0, len(runArgs))
+			for _, v := range runArgs {
+				v = strings.ReplaceAll(v, "%h", host)
+				v = strings.ReplaceAll(v, "%p", port)
+				expandedArgs = append(expandedArgs, v)
 			}
-		}
 
-		if run == "" {
-			return nil, cmderrors.NewUserError("Missing run command")
-		}
+			runCmd := exec.CommandContext(ctx, run, expandedArgs...)
+			// Add the target and port to the environment, so they can be used by
+			// more complex scripts. WSLENV exposes them to WSL
+			runCmd.Env = append(os.Environ(),
+				"PORT="+port,
+				"TARGET="+host,
+				"DEVICE="+deviceID,
+				"WSLENV=PORT/u:TARGET/u:DEVICE/u:C8Y_HOST/u",
+			)
+			runCmd.Stdout = n.factory.IOStreams.Out
+			runCmd.Stdin = n.factory.IOStreams.In
+			runCmd.Stderr = n.factory.IOStreams.ErrOut
 
-		runCmd := exec.CommandContext(context.Background(), run, runArgs...)
-		runCmd.Env = append(runCmd.Env, os.Environ()...)
+			log.Infof("Executing command: %s %s\n", run, strings.Join(expandedArgs, " "))
 
-		// Add target and port to the environment variables so it can be easily accessed from more
-		// complex scripts
-		runCmd.Env = append(runCmd.Env, fmt.Sprintf("PORT=%s", port))
-		runCmd.Env = append(runCmd.Env, fmt.Sprintf("TARGET=%s", host))
-		runCmd.Env = append(runCmd.Env, fmt.Sprintf("DEVICE=%s", device))
+			cs := n.factory.IOStreams.ColorScheme()
+			fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting external command on %s (%s)\n", deviceID, rasession.CumulocityURL(client))))
 
-		// Support WSL environments and expose variables to WSL
-		runCmd.Env = append(runCmd.Env, "WSLENV=PORT/u:TARGET/u:DEVICE/u:C8Y_HOST/u")
+			start := time.Now()
+			runErr := runCmd.Run()
+			fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", time.Since(start).Truncate(time.Millisecond))
 
-		runCmd.Stdout = n.factory.IOStreams.Out
-		runCmd.Stdin = n.factory.IOStreams.In
-		runCmd.Stderr = n.factory.IOStreams.ErrOut
-
-		log.Infof("Executing command: %s %s\n", run, strings.Join(runArgs, " "))
-
-		cs := n.factory.IOStreams.ColorScheme()
-		fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting external command on %s (%s)\n", device, strings.TrimRight(client.BaseURL.String(), "/"))))
-
-		start := time.Now()
-		runErr := runCmd.Run()
-		duration := time.Since(start).Truncate(time.Millisecond)
-		fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", duration)
-
-		// Use exit code from the command
-		if runCmd.ProcessState != nil {
-			if runCmd.ProcessState.ExitCode() != 0 {
-				return nil, cmderrors.NewErrorWithExitCode(
-					cmderrors.ExitCode(runCmd.ProcessState.ExitCode()),
-					runErr,
-				)
+			// Use the exit code of the command
+			if runCmd.ProcessState != nil && runCmd.ProcessState.ExitCode() != 0 {
+				return cmderrors.NewErrorWithExitCode(cmderrors.ExitCode(runCmd.ProcessState.ExitCode()), runErr)
 			}
-		}
-
-		return nil, runErr
-	}, nil)
+			return runErr
+		}, nil
+	})
 }
