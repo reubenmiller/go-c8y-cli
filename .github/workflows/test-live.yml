@@ -1,0 +1,131 @@
+name: Live tests
+
+# Runs the cli tests against the Cumulocity test tenant (repository secrets).
+#
+# The v3 line (go-c8y v2 SDK) skips the live tests in main.yml (test-examples)
+# and is verified offline against the go-c8y fake server instead. Run this
+# workflow every now and then to find the live-tenant differences:
+#
+#   gh workflow run test-live.yml --ref v3
+#   gh workflow run test-live.yml --ref v3 -f suites=manual -f filter=inventory
+#
+# It is not a pull request check, so live failures never block a pull request.
+# GitHub only fires schedule triggers on the default branch, so a periodic run
+# needs a scheduled workflow on master which dispatches this one with --ref v3.
+on:
+  workflow_dispatch:
+    inputs:
+      suites:
+        description: Test suites to run
+        type: choice
+        default: all
+        options:
+          - all
+          - auto
+          - manual
+          - go
+      filter:
+        description: Only run this tests/auto or tests/manual folder (e.g. inventory)
+        type: string
+        default: ''
+  # Run once when this workflow changes on v3 (this also registers the workflow
+  # so that it can be dispatched for the v3 branch)
+  push:
+    branches: [v3]
+    paths:
+      - .github/workflows/test-live.yml
+
+# One run at a time per branch: the suites share the test tenant
+concurrency:
+  group: test-live-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test-live:
+    if: github.repository == 'reubenmiller/go-c8y-cli'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      C8Y_HOST: ${{ secrets.C8Y_HOST }}
+      C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
+      C8Y_USER: ${{ secrets.C8Y_USER }}
+      C8Y_USERNAME: ${{ secrets.C8Y_USER }}
+      C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
+      DEVICE_BOOTSTRAP_USER: ${{ secrets.DEVICE_BOOTSTRAP_USER }}
+      DEVICE_BOOTSTRAP_PASSWORD: ${{ secrets.DEVICE_BOOTSTRAP_PASSWORD }}
+      # Max timeout for each request (in milliseconds)
+      C8Y_SETTINGS_DEFAULTS_TIMEOUT: 30000
+      SUITES: ${{ inputs.suites || 'all' }}
+      FILTER: ${{ inputs.filter || '' }}
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
+
+    - name: Install Task
+      uses: go-task/setup-task@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build c8y
+      run: |
+        go build -o .bin/c8y ./cmd/c8y
+        echo "$PWD/.bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: Install test dependencies
+      run: task install-test-dependencies build-extension-fixtures
+      shell: bash
+
+    - name: Check the tenant
+      run: |
+        c8y version
+        c8y currentuser get --select id
+      shell: bash
+
+    - name: Create the test data
+      id: setup
+      run: ./tests/scripts/setup.sh
+      shell: bash
+
+    - name: Auto tests (tests/auto)
+      id: auto
+      if: env.SUITES == 'all' || env.SUITES == 'auto'
+      run: ./tests/run-auto.sh "$FILTER"
+      shell: bash
+      timeout-minutes: 60
+
+    - name: Manual tests (tests/manual)
+      id: manual
+      if: ${{ !cancelled() && steps.setup.outcome == 'success' && (env.SUITES == 'all' || env.SUITES == 'manual') }}
+      run: ./tests/run-manual.sh "$FILTER"
+      shell: bash
+      timeout-minutes: 60
+
+    - name: Go tests against the tenant (cmd/tests)
+      id: go
+      if: ${{ !cancelled() && steps.setup.outcome == 'success' && (env.SUITES == 'all' || env.SUITES == 'go') }}
+      run: go test ./cmd/tests/... </dev/null
+      shell: bash
+      timeout-minutes: 15
+
+    - name: Summary
+      if: always()
+      run: |
+        {
+          echo "### Live tests (${GITHUB_REF_NAME})"
+          echo
+          echo "| suite | result |"
+          echo "| --- | --- |"
+          echo "| auto | ${{ steps.auto.outcome }} |"
+          echo "| manual | ${{ steps.manual.outcome }} |"
+          echo "| go | ${{ steps.go.outcome }} |"
+        } >> "$GITHUB_STEP_SUMMARY"
+      shell: bash

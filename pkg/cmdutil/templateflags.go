@@ -181,10 +181,17 @@ func WithTemplateValue(factory *Factory) flags.GetOption {
 	return flags.WithTemplateValue(flags.FlagDataTemplateName, NewTemplateResolver(factory))
 }
 
+// NewTemplateResolver returns a resolver which looks up templates in the configured
+// template paths and the extensions' template paths. Without a factory (or when the
+// configuration can't be loaded) it only resolves file paths, so an inline template
+// still works.
 func NewTemplateResolver(factory *Factory) *TemplatePathResolver {
+	if factory == nil {
+		return &TemplatePathResolver{}
+	}
 	cfg, err := factory.Config()
 	if err != nil {
-		return nil
+		return &TemplatePathResolver{}
 	}
 	paths := cfg.GetTemplatePaths()
 

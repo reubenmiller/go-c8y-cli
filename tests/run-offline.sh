@@ -14,6 +14,10 @@
 # tests/auto (for manual tests that the fake server supports, e.g.
 # alarms/subscribe or inventory/wait.yaml).
 #
+# C8Y_OFFLINE_SUITE=go runs the go unit tests (go test, default ./...) with the
+# fake server configured, so the cmd/tests packages (which skip without
+# C8Y_HOST) run too. The arguments are passed to go test.
+#
 # The c8y binary under test is the first one on PATH.
 set -euo pipefail
 
@@ -82,7 +86,13 @@ if ! "$SCRIPT_DIR/scripts/setup.sh" >"$WORK_DIR/setup.log" 2>&1 </dev/null; then
     exit 1
 fi
 
-if [ "${C8Y_OFFLINE_SUITE:-auto}" = manual ]; then
+if [ "${C8Y_OFFLINE_SUITE:-auto}" = go ]; then
+    cd "$ROOT_DIR"
+    if [ $# -eq 0 ]; then
+        set -- ./...
+    fi
+    go test "$@" </dev/null
+elif [ "${C8Y_OFFLINE_SUITE:-auto}" = manual ]; then
     folder="${1:-}"
     [ $# -gt 0 ] && shift
     cd "$SCRIPT_DIR"

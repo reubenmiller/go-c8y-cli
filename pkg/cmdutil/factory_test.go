@@ -7,7 +7,6 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/assert"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	testify_assert "github.com/stretchr/testify/assert"
 	"github.com/tidwall/gjson"
@@ -21,7 +20,7 @@ func Test_HeaderFlags(t *testing.T) {
 	cmd.Flags().String("dateFrom", "", "Relative date")
 	cmd.Flags().Bool("csv", false, "Boolean type")
 
-	cmd.SetArgs([]string{"--output=csv", "--type", "myType", "--dateFrom", "0s"})
+	cmd.SetArgs([]string{"--csv", "--type", "myType", "--dateFrom", "0s"})
 	cmdErr := cmd.Execute()
 	assert.OK(t, cmdErr)
 
@@ -81,25 +80,23 @@ func Test_Body(t *testing.T) {
 	)
 	assert.OK(t, err)
 
-	bodyMap := body.GetMap()
-	assert.True(t, bodyMap["CountValue"].(int) == 2)
-	assert.True(t, bodyMap["editable"].(bool) == true)
-	assert.True(t, bodyMap["type"].(string) == "myType")
-	assert.True(t, bodyMap["typeMapping"].(string) == "text/myType")
-
-	childIds := bodyMap["managedObject"].(map[string]interface{})["id"].([]string)
-	assert.True(t, childIds[0] == "1111")
-	assert.True(t, len(childIds) == 1)
-
-	// iterator check
-	nextID := bodyMap["nextID"].(iterator.Iterator)
-	assert.True(t, nextID != nil)
-
+	// The body is built as json (since the map builder stores the raw json),
+	// and the iterator (nextID) gives the next value each time it is marshalled
 	body1, err := body.MarshalJSON()
 	assert.OK(t, err)
 	time.Sleep(1 * time.Millisecond)
 	body2, err := body.MarshalJSON()
 	assert.OK(t, err)
+
+	assert.True(t, gjson.GetBytes(body1, "CountValue").Raw == "2")
+	assert.True(t, gjson.GetBytes(body1, "editable").Raw == "true")
+	assert.True(t, gjson.GetBytes(body1, "type").String() == "myType")
+	assert.True(t, gjson.GetBytes(body1, "typeMapping").String() == "text/myType")
+	assert.True(t, gjson.GetBytes(body1, "managedObject.id").Raw == `["1111","2222"]`)
+
+	// iterator check
+	assert.True(t, gjson.GetBytes(body1, "nextID").String() == "7777")
+	assert.True(t, gjson.GetBytes(body2, "nextID").String() == "8888")
 
 	time1 := gjson.GetBytes(body1, "time").String()
 	time2 := gjson.GetBytes(body2, "time").String()

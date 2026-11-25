@@ -10,6 +10,7 @@ import (
 )
 
 func Test_LoginFromCommand(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, cmdErr := command.ExecuteCmdWithStandardOutput(
 		command.NewMockCommand(),
 		`c8y sessions login -n --from-cmd "c8y sessions login --from-env --output-format json --no-banner" --output-format json`,

@@ -8,6 +8,7 @@ import (
 )
 
 func Test_EventListWithoutDeviceIterator(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, stderr, err := command.ExecuteCmdWithOutputs(
 		command.NewMockCommand(),
 		`c8y events list -n --dateFrom=-10d --type=my_CustomType2`,
@@ -19,6 +20,7 @@ func Test_EventListWithoutDeviceIterator(t *testing.T) {
 }
 
 func Test_EventListWithPipedSourceID(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, stderr, err := command.ExecuteCmdWithOutputs(
 		command.NewMockCommand(),
 		`c8y events list --dry`,

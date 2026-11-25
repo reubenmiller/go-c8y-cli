@@ -43,5 +43,6 @@ func Test_WithTemplateValue(t *testing.T) {
 	)
 
 	assert.OK(t, err)
-	assert.EqualMarshalJSON(t, body, `{"value":"1"}`)
+	// input.index is a number (see tests/manual/pipeline/piping_devices.yaml)
+	assert.EqualMarshalJSON(t, body, `{"value":1}`)
 }

@@ -7,9 +7,10 @@ import (
 	"testing"
 )
 
-// TestGoldenSpecOutput verifies that the generator reproduces every committed
-// pkg/cmd/**/*.auto.go file byte-for-byte from the api/spec/json
-// specifications.
+// TestGoldenSpecOutput verifies that the generator runs for every
+// api/spec/json specification and reproduces every committed
+// pkg/cmd/**/*.auto.go file byte-for-byte. Commands which are migrated to
+// hand-written commands (no *.auto.go on disk, see IsMigrated) are skipped.
 func TestGoldenSpecOutput(t *testing.T) {
 	repoRoot := "../.."
 	specDir := filepath.Join(repoRoot, "api", "spec", "json")
@@ -25,6 +26,7 @@ func TestGoldenSpecOutput(t *testing.T) {
 
 	generated := map[string]bool{}
 	total := 0
+	migrated := 0
 	for _, specFile := range specFiles {
 		files, _, err := GenerateSpecFile(specFile, outputDir)
 		if err != nil {
@@ -33,10 +35,15 @@ func TestGoldenSpecOutput(t *testing.T) {
 		for _, file := range files {
 			total++
 			generated[filepath.ToSlash(file.RelPath)] = true
+			if IsMigrated(outputDir, file) {
+				// hand-written command (go-c8y v2 Runner), see IsMigrated
+				migrated++
+				continue
+			}
 			outPath := filepath.Join(outputDir, file.RelPath)
 			existing, err := os.ReadFile(outPath)
 			if err != nil {
-				t.Errorf("%s: generated file missing on disk: %s", specFile, err)
+				t.Errorf("%s: read generated file: %s", specFile, err)
 				continue
 			}
 			if !bytes.Equal(existing, file.Source) {
@@ -48,6 +55,7 @@ func TestGoldenSpecOutput(t *testing.T) {
 	if total == 0 {
 		t.Fatal("no files were generated")
 	}
+	t.Logf("generated %d files from the specs, %d of them are migrated to hand-written commands", total, migrated)
 
 	// Stale *.auto.go files no longer produced from the specs are reported so
 	// they are not silently shipped

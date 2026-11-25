@@ -125,8 +125,8 @@ jobs:
         if-no-files-found: error
 
   test-offline:
-    # Unit tests of the go-c8y v2 command layer, plus the dry-run cli tests
-    # (tests/auto) against the go-c8y fake server. Needs no tenant or secrets,
+    # The go unit tests, plus the dry-run cli tests (tests/auto) and the
+    # supported manual tests against the go-c8y fake server. Needs no tenant or secrets,
     # so it also runs for fork PRs.
     runs-on: ubuntu-latest
     steps:
@@ -155,8 +155,12 @@ jobs:
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Unit tests
-      run: go test ./pkg/c8ystream/... ./internal/guardrails/... ./internal/clisurface/...
+    # All go tests of the main module (go test ./...). The cmd/tests packages
+    # run against the fake server; they skip when C8Y_HOST is not set.
+    - name: Go unit tests
+      run: task test-go-offline
+      shell: bash
+      timeout-minutes: 20
 
     - name: Dry-run cli tests against the fake server
       run: task test-cli-offline

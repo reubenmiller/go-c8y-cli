@@ -366,6 +366,18 @@ tasks:
       - go build -o .bin/c8y ./cmd/c8y
       - env PATH="$LOCAL_PATH" ./tests/run-offline.sh {{.CLI_ARGS}}
 
+  test-go-offline:
+    desc: Run the go unit tests, including cmd/tests against the go-c8y fake server (no tenant needed)
+    summary: |
+      Runs go test (default ./...) with the go-c8y fake server and its test data
+      configured, so the cmd/tests packages (which skip without C8Y_HOST) run too.
+
+      Other packages or go test flags can be given using
+      task test-go-offline -- ./pkg/... -run Test_Body
+    cmds:
+      - go build -o .bin/c8y ./cmd/c8y
+      - env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=go ./tests/run-offline.sh {{.CLI_ARGS}}
+
   test-cli-offline-realtime:
     desc: Run the realtime (subscribe) cli tests against the go-c8y fake server
     deps: [install-test-dependencies]

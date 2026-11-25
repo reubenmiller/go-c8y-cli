@@ -10,6 +10,7 @@ import (
 )
 
 func Test_UpdateEventBinary(t *testing.T) {
+	command.RequireTenant(t)
 
 	f, err := os.CreateTemp(os.TempDir(), "eventBinary")
 	assert.Nil(t, err)

@@ -626,6 +626,16 @@ file: features.yaml
       flag: --user (stringSlice) default=[]
       flag: --usergroup (stringSlice) default=[]
       flag: --userself (stringSlice) default=[]
+file: filters.yaml
+  cmd: filters
+    short: Commands with client side filters
+    hidden: false
+    runnable: false
+    cmd: list
+      short: List managed objects which are not templates
+      hidden: false
+      runnable: true
+      flag: --type (string) default=
 file: hierarchy.yaml
   cmd: hierarchy
     short: Example of nested command groups

@@ -14,6 +14,16 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fakestdin"
 )
 
+// RequireTenant skips the test when no Cumulocity tenant is configured (C8Y_HOST).
+// CI runs these tests against the go-c8y fake server (see tests/run-offline.sh,
+// C8Y_OFFLINE_SUITE=go), which also creates the test data (e.g. agent01).
+func RequireTenant(t testing.TB) {
+	t.Helper()
+	if os.Getenv("C8Y_HOST") == "" {
+		t.Skip("C8Y_HOST is not set. Run with tests/run-offline.sh (C8Y_OFFLINE_SUITE=go) or against a tenant")
+	}
+}
+
 func NewMockCommand() *root.CmdRoot {
 	rootCmd, err := root.NewCommand("", "")
 	if err != nil {

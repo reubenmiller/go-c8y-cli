@@ -1,8 +1,10 @@
 package codegen
 
 import (
+	"errors"
 	"fmt"
 	"go/format"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -99,6 +101,16 @@ func GenerateSpecFile(specPath string, outputDir string) ([]GeneratedFile, []War
 		return nil, warnings, fmt.Errorf("%s: %w", specPath, err)
 	}
 	return files, warnings, nil
+}
+
+// IsMigrated reports whether a generated command has been migrated to a
+// hand-written command (on the go-c8y v2 c8ystream Runner). Migrated commands
+// have no *.auto.go file on disk; the command lives in a hand-written file
+// (often in the parent package), so the generated file must not be written
+// again or it would clash with it.
+func IsMigrated(outputDir string, file GeneratedFile) bool {
+	_, err := os.Stat(filepath.Join(outputDir, file.RelPath))
+	return errors.Is(err, fs.ErrNotExist)
 }
 
 // ListSpecFiles returns the json specification files of a directory in name
