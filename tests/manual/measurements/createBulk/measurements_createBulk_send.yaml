@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It creates the piped measurements in batches for a device given by name:
+    command: |
+      name="bulk_$(c8y template execute --template "_.Char(10)")"
+      id="$(c8y devices create --name "$name" --select id -o csv)"
+      c8y util repeat 5 |
+        c8y measurements createBulk --device "$name" --type bulkTest --batchSize 2 --template "{nx_T: {v: {value: input.index}}}" --select nx_T.v.value -o csv
+      c8y measurements list --device "$id" --type bulkTest --pageSize 100 --select id -o csv | wc -l | tr -d ' '
+      c8y devices delete --id "$id" >/dev/null
+    exit-code: 0
+    stdout:
+      exactly: |
+        1
+        2
+        3
+        4
+        5
+        5
+
+  It sends one request per batch:
+    command: |
+      c8y util repeat 5 |
+        c8y measurements createBulk --device 11111 --type bulkTest --batchSize 2 --dry 2>&1 |
+        c8y util show --select method -o csv
+    exit-code: 0
+    stdout:
+      exactly: |
+        POST
+        POST
+        POST
+
+  It limits the number of batches with maxJobs:
+    command: |
+      id="$(c8y devices create --name "bulk_maxjobs" --select id -o csv)"
+      c8y util repeat 5 |
+        c8y measurements createBulk --device "$id" --type bulkTest --batchSize 2 --maxJobs 1 --select id -o csv | wc -l | tr -d ' '
+      c8y devices delete --id "$id" >/dev/null
+    exit-code: 0
+    stdout:
+      exactly: "2"
+
+  It reports an invalid measurement and creates the others:
+    command: |
+      id="$(c8y devices create --name "bulk_invalid" --select id -o csv)"
+      printf '{"type":"a"}\n{"x":1}\n{"type":"c"}\n' |
+        c8y measurements createBulk --device "$id" --batchSize 5 --select type -o csv
+      echo "exit=$?"
+      c8y devices delete --id "$id" >/dev/null
+    exit-code: 0
+    stdout:
+      exactly: |
+        a
+        c
+        exit=101
+    stderr:
+      contains:
+        - "Body is missing required properties: type"

@@ -264,7 +264,6 @@
   ],
   "v1-worker": [
     "pkg/cmd/api/api.manual.go",
-    "pkg/cmd/measurements/createBulk/createBulk.manual.go",
     "pkg/cmd/remoteaccess/connect/run/run.manual.go",
     "pkg/cmd/remoteaccess/connect/ssh/ssh.manual.go",
     "pkg/cmd/remoteaccess/server/server.manual.go"
