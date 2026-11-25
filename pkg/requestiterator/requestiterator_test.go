@@ -49,13 +49,24 @@ func Test_RequestIteratorWithEscapedPathVariables(t *testing.T) {
 
 	var req *c8y.RequestOptions
 
+	// "#" is escaped (else it starts the url fragment), "/" is kept
 	req, _, err = requestIter.GetNext()
 	assert.OK(t, err)
-	assert.True(t, req.Path == "foo#bar/sub#other")
+	assert.EqualMarshalJSON(t, req.Path, `"foo%23bar/sub%23other"`)
 	assert.EqualMarshalJSON(t, req.Body, `{"nested":{"value":"1"}}`)
 
 	req, _, err = requestIter.GetNext()
 	assert.OK(t, err)
-	assert.True(t, req.Path == "foo#bar/sub#other")
+	assert.EqualMarshalJSON(t, req.Path, `"foo%23bar/sub%23other"`)
 	assert.EqualMarshalJSON(t, req.Body, `{"nested":{"value":"2"}}`)
+}
+
+func Test_RequestIteratorWithAlreadyEscapedPathVariables(t *testing.T) {
+	// A path which is already escaped is not escaped again
+	pathIter := iterator.NewRepeatIterator("foo%23bar/sub%23other", 1)
+	requestIter := NewRequestIterator(nil, c8y.RequestOptions{}, pathIter, nil, nil)
+
+	req, _, err := requestIter.GetNext()
+	assert.OK(t, err)
+	assert.EqualMarshalJSON(t, req.Path, `"foo%23bar/sub%23other"`)
 }

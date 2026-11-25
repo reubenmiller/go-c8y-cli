@@ -48,6 +48,7 @@ func NewCmdDelete(f *cmdutil.Factory) *CmdDelete {
 	cmd.SilenceUsage = true
 
 	cmdutil.DisableAuthCheck(cmd)
+	cmdutil.MarkLocalCommand(cmd)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd

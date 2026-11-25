@@ -1,14 +1,4 @@
 {
-  "flag-type-group": [
-    "deviceregistration register-basic (string, expected stringSlice)",
-    "deviceregistration register-ca (string, expected stringSlice)",
-    "deviceregistration register-external-ca (string, expected stringSlice)"
-  ],
-  "flag-type-id": [
-    "devices enroll (string, expected stringSlice)",
-    "microservices serviceusers get (string, expected stringSlice)",
-    "tenants create (string, expected stringSlice)"
-  ],
   "go-c8y-v1": [
     "pkg/cmd/agents/delete_delete.go",
     "pkg/cmd/agents/get_get.go",
@@ -246,16 +236,5 @@
     "pkg/cmd/users/resetuserpassword_resetUserPassword.go",
     "pkg/cmd/users/revoketotpsecret_revokeTOTPSecret.go",
     "pkg/cmd/users/update_update.go"
-  ],
-  "mode-guard": [
-    "alias delete",
-    "alias set",
-    "cache delete",
-    "extensions create",
-    "extensions delete",
-    "extensions update",
-    "sessions create",
-    "sessions set",
-    "settings update"
   ]
 }

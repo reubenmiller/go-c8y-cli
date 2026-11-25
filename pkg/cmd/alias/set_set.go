@@ -77,7 +77,7 @@ func NewCmdSet(f *cmdutil.Factory, runF func(*SetOptions) error) *cobra.Command 
 
 	cmd.Flags().BoolVarP(&opts.IsShell, "shell", "s", false, "Declare an alias to be passed through a shell interpreter")
 
-	return cmd
+	return cmdutil.MarkLocalCommand(cmd)
 }
 
 func setRun(opts *SetOptions) error {

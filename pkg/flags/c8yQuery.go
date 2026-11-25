@@ -31,6 +31,11 @@ func WithC8YQueryOptions(cmd *cobra.Command, inputIterators *RequestInputIterato
 			if v != "" {
 				queryParts = append(queryParts, v)
 			}
+		case AnyString:
+			// e.g. WithStaticStringValue
+			if v != "" {
+				queryParts = append(queryParts, string(v))
+			}
 		case iterator.Iterator:
 			nextvalue, _, err := v.GetNext()
 			if err != nil && err != io.EOF {

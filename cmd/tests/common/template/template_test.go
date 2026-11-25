@@ -8,6 +8,7 @@ import (
 )
 
 func Test_ExecuteTemplateIndexCommand(t *testing.T) {
+	command.RequireTenant(t)
 	stdout, stderr, err := command.ExecuteCmdWithOutputs(
 		command.NewMockCommand(),
 		`c8y inventory update -n --id 1234,4567 --template '{idx: input.index}' --dry`,

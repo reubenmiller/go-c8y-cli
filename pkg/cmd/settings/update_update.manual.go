@@ -547,6 +547,7 @@ func NewCmdUpdate(f *cmdutil.Factory) *UpdateSettingsCmd {
 
 	cmd.SilenceUsage = true
 	cmdutil.DisableAuthCheck(cmd)
+	cmdutil.MarkLocalCommand(cmd)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

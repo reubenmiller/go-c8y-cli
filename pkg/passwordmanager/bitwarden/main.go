@@ -126,7 +126,7 @@ func getBWItems(name ...string) []BWItem {
 func main() {
 
 	if err := checkBitwarden(); err != nil {
-		fmt.Printf(err.Error())
+		fmt.Print(err.Error())
 		return
 	}
 

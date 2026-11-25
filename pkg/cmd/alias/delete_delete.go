@@ -51,7 +51,7 @@ func NewCmdDelete(f *cmdutil.Factory, runF func(*DeleteOptions) error) *cobra.Co
 		},
 	}
 
-	return cmd
+	return cmdutil.MarkLocalCommand(cmd)
 }
 
 func deleteRun(opts *DeleteOptions) error {

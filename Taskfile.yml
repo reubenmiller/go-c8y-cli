@@ -366,6 +366,18 @@ tasks:
       - go build -o .bin/c8y ./cmd/c8y
       - env PATH="$LOCAL_PATH" ./tests/run-offline.sh {{.CLI_ARGS}}
 
+  test-go-offline:
+    desc: Run the go unit tests, including cmd/tests against the go-c8y fake server (no tenant needed)
+    summary: |
+      Runs go test (default ./...) with the go-c8y fake server and its test data
+      configured, so the cmd/tests packages (which skip without C8Y_HOST) run too.
+
+      Other packages or go test flags can be given using
+      task test-go-offline -- ./pkg/... -run Test_Body
+    cmds:
+      - go build -o .bin/c8y ./cmd/c8y
+      - env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=go ./tests/run-offline.sh {{.CLI_ARGS}}
+
   test-cli-offline-realtime:
     desc: Run the realtime (subscribe) cli tests against the go-c8y fake server
     deps: [install-test-dependencies]
@@ -377,12 +389,24 @@ tasks:
         done
 
   test-cli-offline-manual:
-    desc: Run the manual cli tests that the go-c8y fake server supports (wait, assert, certificate authority, parents, ui plugins, microservices, device registration, text commands, device enrollment, bulk measurements)
-    deps: [install-test-dependencies]
+    desc: Run the manual cli tests that pass against the go-c8y fake server (whole folders, plus single files of the other folders)
+    summary: |
+      The folders run in full. Of the other folders only the listed files or
+      sub folders pass against the fake server (the rest differ on v3 or need
+      a tenant feature the fake server does not have); the realtime folder runs
+      in test-cli-offline-realtime.
+    deps: [install-test-dependencies, build-extension-fixtures]
     cmds:
       - go build -o .bin/c8y ./cmd/c8y
       - |
-        for suite in operations/wait inventory/wait.yaml inventory/assert devices/assert alarms/assert events/assert measurements/assert operations/assert tenants/assert devicemanagement/certificate-authority inventory/parents ui/applications/plugins/plugins_install.yaml ui/applications/plugins/plugins_delete.yaml microservices/microservices.yaml deviceregistration assert/text applications/open sessions/encrypt_text.yaml devices/enroll.yaml measurements/createBulk; do
+        for suite in \
+          activitylog alarms alias assert auditrecords bulkoperations cache completion databroker \
+          devicegroups devicemanagement deviceregistration devices identity measurements microservices \
+          operations pipeline retentionrules settings smartgroups template tenantoptions tenants usergroups \
+          users util version \
+          inventory/wait.yaml inventory/assert inventory/parents events/assert \
+          ui/applications/plugins/plugins_install.yaml ui/applications/plugins/plugins_delete.yaml \
+          applications/open sessions/encrypt_text.yaml; do
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
 

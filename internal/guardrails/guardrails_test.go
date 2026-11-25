@@ -15,6 +15,7 @@ package guardrails
 import (
 	"encoding/json"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/clibuild"
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/clisurface"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
@@ -56,6 +58,33 @@ var sourceRules = []struct {
 // sharedFlagNames are flags that mean the same thing on every command, so they
 // must have the same type everywhere.
 var sharedFlagNames = []string{"device", "id", "group", "agent"}
+
+// singleValuedFlags are the commands where a shared flag name legitimately
+// takes a different type, because there it does not reference existing objects
+// (which is what the list type is for). Each entry says why. An entry which no
+// longer differs from the convention fails the test, so the list only shrinks.
+var singleValuedFlags = map[string]map[string]string{
+	"id": {
+		"tenants create": "the id of the tenant to create, not a reference",
+		"devices enroll": "the external id of the device to enroll, not a reference",
+	},
+	"group": {
+		"deviceregistration register-basic":       "a group path (main_group/sub_group), created if it does not exist; a list would split names with commas",
+		"deviceregistration register-ca":          "a group path (main_group/sub_group), created if it does not exist; a list would split names with commas",
+		"deviceregistration register-external-ca": "a group path (main_group/sub_group), created if it does not exist; a list would split names with commas",
+	},
+}
+
+// localCommandGroups are the top-level command groups which only manage local
+// state, so their commands may be marked with cmdutil.MarkLocalCommand (and
+// are then exempt from the session mode check).
+var localCommandGroups = map[string]bool{
+	"alias":      true,
+	"cache":      true,
+	"extensions": true,
+	"sessions":   true,
+	"settings":   true,
+}
 
 type allowlist map[string][]string
 
@@ -201,9 +230,22 @@ func path(cmd *cobra.Command) string {
 
 // TestMutatingCommandsAreModeGuarded checks that every command that changes
 // data checks the session mode (create/update/delete mode) before running.
+// Commands which only change local state (aliases, cache, extensions,
+// sessions, settings) are marked with cmdutil.MarkLocalCommand instead: the
+// mode protects tenant data, and e.g. switching sessions must work from a
+// read-only session.
 func TestMutatingCommandsAreModeGuarded(t *testing.T) {
 	found := map[string][]string{"mode-guard": {}}
 	walk(commandTree(t), func(c *cobra.Command) {
+		if cmdutil.IsLocalCommand(c) {
+			// The annotation skips this check, so it must not become a way
+			// around the ratchet: only the command groups which manage local
+			// state may use it.
+			if group, _, _ := strings.Cut(path(c), " "); !localCommandGroups[group] {
+				t.Errorf("%s: only commands in %v may be marked with cmdutil.MarkLocalCommand; check the session mode instead", path(c), slices.Sorted(maps.Keys(localCommandGroups)))
+			}
+			return
+		}
 		method := c.Annotations["semanticMethod"]
 		if method == "" {
 			method = clisurface.DeriveMethod(c.Name())
@@ -216,12 +258,13 @@ func TestMutatingCommandsAreModeGuarded(t *testing.T) {
 		}
 	})
 	ratchet(t, found, func(string) string {
-		return "add PreRunE: f.CreateModeEnabled/UpdateModeEnabled/DeleteModeEnabled"
+		return "add PreRunE: f.CreateModeEnabled/UpdateModeEnabled/DeleteModeEnabled (or cmdutil.MarkLocalCommand if it only changes local state)"
 	})
 }
 
 // TestSharedFlagTypes checks that flags which mean the same thing on every
-// command (device, id, group, agent) are declared with the same type.
+// command (device, id, group, agent) are declared with the same type, apart
+// from the documented exceptions in singleValuedFlags.
 func TestSharedFlagTypes(t *testing.T) {
 	types := map[string]map[string][]string{} // flag -> type -> commands
 	walk(commandTree(t), func(c *cobra.Command) {
@@ -247,12 +290,27 @@ func TestSharedFlagTypes(t *testing.T) {
 				major, n = typ, len(cmds)
 			}
 		}
+		exceptions := map[string]bool{}
 		for typ, cmds := range types[name] {
 			if typ == major {
+				for _, c := range cmds {
+					if _, ok := singleValuedFlags[name][c]; ok {
+						t.Errorf("%s: --%s is %s like the other commands now; remove it from singleValuedFlags", c, name, typ)
+					}
+				}
 				continue
 			}
 			for _, c := range cmds {
+				if _, ok := singleValuedFlags[name][c]; ok {
+					exceptions[c] = true
+					continue
+				}
 				found[rule] = append(found[rule], c+" ("+typ+", expected "+major+")")
+			}
+		}
+		for c := range singleValuedFlags[name] {
+			if !exceptions[c] && !slices.Contains(types[name][major], c) {
+				t.Errorf("%s: has no --%s flag any more; remove it from singleValuedFlags", c, name)
 			}
 		}
 	}
