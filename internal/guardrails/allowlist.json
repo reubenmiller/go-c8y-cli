@@ -1,7 +1,4 @@
 {
-  "flag-type-device": [
-    "remoteaccess configurations update (string, expected stringSlice)"
-  ],
   "flag-type-group": [
     "deviceregistration register-basic (string, expected stringSlice)",
     "deviceregistration register-ca (string, expected stringSlice)",
@@ -260,10 +257,5 @@
     "sessions create",
     "sessions set",
     "settings update"
-  ],
-  "v1-worker": [
-    "pkg/cmd/remoteaccess/connect/run_run.manual.go",
-    "pkg/cmd/remoteaccess/connect/ssh/ssh.manual.go",
-    "pkg/cmd/remoteaccess/server_server.manual.go"
   ]
 }
