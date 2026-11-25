@@ -15,6 +15,9 @@
 # alarms/subscribe or inventory/wait.yaml). The extensions/* tests use the
 # test extensions under tests/testdata (e.g. c8y-kitchensink).
 #
+# C8Y_OFFLINE_TLS=1 starts the fake server with --tls (self-signed) and sets
+# C8Y_SETTINGS_DEFAULTS_INSECURE=true.
+#
 # C8Y_OFFLINE_SUITE=go runs the go unit tests (go test, default ./...) with the
 # fake server configured, so the cmd/tests packages (which skip without
 # C8Y_HOST) run too. The arguments are passed to go test.
@@ -37,7 +40,13 @@ if ! command -v c8y >/dev/null; then
     exit 1
 fi
 
-"$FAKESERVER" --addr 127.0.0.1:0 >"$WORK_DIR/fakeserver.log" 2>&1 &
+# C8Y_OFFLINE_TLS=1 serves https with a self-signed certificate (for suites
+# which expect https self links), and makes the CLI accept it.
+FAKESERVER_ARGS=(--addr 127.0.0.1:0)
+if [ "${C8Y_OFFLINE_TLS:-}" = 1 ]; then
+    FAKESERVER_ARGS+=(--tls)
+fi
+"$FAKESERVER" "${FAKESERVER_ARGS[@]}" >"$WORK_DIR/fakeserver.log" 2>&1 &
 FAKESERVER_PID=$!
 cleanup() {
     kill "$FAKESERVER_PID" 2>/dev/null || true
@@ -64,7 +73,7 @@ echo "Fake server: $HOST"
 # the encryption passphrase), except the ones that configure this script.
 for name in $(env | sed -n 's/^\(C8Y_[A-Za-z0-9_]*\)=.*/\1/p'); do
     case "$name" in
-        C8Y_FAKESERVER|C8Y_OFFLINE_SUITE) ;;
+        C8Y_FAKESERVER|C8Y_OFFLINE_SUITE|C8Y_OFFLINE_TLS) ;;
         *) unset "$name" ;;
     esac
 done
@@ -77,8 +86,12 @@ mkdir -p "$C8Y_SETTINGS_EXTENSIONS_DATADIR" "$C8Y_SETTINGS_EXTENSIONS_SYSTEMDIRS
 export C8Y_HOST="$HOST"
 export C8Y_TENANT=t12345
 export C8Y_USER=admin
+export C8Y_USERNAME=admin
 export C8Y_PASSWORD=admin-pass
 export C8Y_SETTINGS_CI=true
+if [ "${C8Y_OFFLINE_TLS:-}" = 1 ]; then
+    export C8Y_SETTINGS_DEFAULTS_INSECURE=true
+fi
 
 echo "Creating test data"
 if ! "$SCRIPT_DIR/scripts/setup.sh" >"$WORK_DIR/setup.log" 2>&1 </dev/null; then

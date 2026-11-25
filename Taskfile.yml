@@ -392,36 +392,48 @@ tasks:
     desc: Run the manual cli tests that pass against the go-c8y fake server (whole folders, plus single files of the other folders)
     summary: |
       The folders run in full. Of the other folders only the listed files or
-      sub folders pass against the fake server (the rest differ on v3 or need
-      a tenant feature the fake server does not have); the realtime folder runs
-      in test-cli-offline-realtime.
+      sub folders pass against the fake server (the rest need a tenant feature
+      or a response which the fake server does not have, e.g. the platform's
+      error texts, devices-only queries or the allTenantsSummary array); the
+      realtime folder runs in test-cli-offline-realtime.
+
+      The suites in the second loop expect https self links and are run
+      against the fake server in TLS mode (C8Y_OFFLINE_TLS=1, self-signed).
     deps: [install-test-dependencies, build-extension-fixtures]
     cmds:
       - go build -o .bin/c8y ./cmd/c8y
       - |
         for suite in \
-          activitylog alarms alias assert auditrecords bulkoperations cache completion databroker \
-          devicegroups devicemanagement deviceregistration devices identity measurements microservices \
-          operations pipeline retentionrules settings smartgroups template tenantoptions tenants usergroups \
-          users util version \
-          inventory/wait.yaml inventory/assert inventory/parents events/assert \
-          ui/applications/plugins/plugins_install.yaml ui/applications/plugins/plugins_delete.yaml \
-          applications/open sessions/encrypt_text.yaml sessions/login/login_types.yaml; do
+          activitylog agents alarms alias applications assert auditrecords binaries bulkoperations cache completion databroker \
+          devicegroups devicemanagement deviceprofiles deviceregistration devices events fileguard firmware identity \
+          measurements microservices operations pipeline retentionrules sessions settings smartgroups software template \
+          tenantoptions tenants usergroups users util version \
+          inventory/wait.yaml inventory/assert inventory/parents inventory/find inventory/update inventory/additions \
+          ui; do
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
+        done
+      - |
+        for suite in \
+          configuration userreferences \
+          common/common.yaml common/disable_commands common/filter common/flag_customQuery.yaml common/flag_data.yaml \
+          common/flags common/output common/outputTemplate common/paging common/pipe common/pipe.yaml \
+          common/queryEncoding.yaml common/relative_datetime.yml common/errors/errors_command.yaml \
+          common/select/select_context_shaping.yaml common/select/select_special_cases.yaml; do
+          env PATH="$LOCAL_PATH" C8Y_OFFLINE_TLS=1 C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
 
   test-cli-offline-extensions:
     desc: Run the extension (runtime command) cli tests against the go-c8y fake server, using the c8y-kitchensink test extension
     summary: |
-      body_cumulocity_tests.yaml is not included: some of its lookups need data
-      which the fake server does not have (software/firmware details, roles
-      and microservice instances).
-    deps: [install-test-dependencies]
+      Runs every extensions suite in TLS mode (the userself/roleself tests expect
+      https self links). The binary extension tests use the c8y-hello fixture
+      (task build-extension-fixtures).
+    deps: [install-test-dependencies, build-extension-fixtures]
     cmds:
       - go build -o .bin/c8y ./cmd/c8y
       - |
-        for suite in extensions/example/body_basic_tests.yaml extensions/example/pipeline_tests.yaml extensions/example/extension_example.yaml extensions/example/extension_presets.yaml extensions/example/extension_required.yaml extensions/example/extension_types.yaml extensions/example/filters extensions/example/commands; do
-          env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
+        for suite in extensions/example extensions/binary extensions/validate extensions/name extensions/extensions_create.yaml; do
+          env PATH="$LOCAL_PATH" C8Y_OFFLINE_TLS=1 C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
 
   build-extension-fixtures:

@@ -12,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
@@ -70,7 +71,10 @@ type Runner struct {
 	submission   *submission     // confirmation + delays; nil when neither applies
 	assert       *assertion      // set by Assert; nil for other commands
 	filters      []string        // filters of the command itself (see Filter)
-	index        int64
+
+	viewDefinition  *dataview.Definition // the view applied to the output; its column widths apply to tables
+	consoleRenderer *consoleRenderer     // the table/json renderer; nil for csv/tsv
+	index           int64
 
 	// tmplInput is the current item's raw input, kept pointed at the item being
 	// produced so the --outputTemplate evaluation can bind it as input.value.
@@ -483,6 +487,8 @@ func (r *Runner) run(newProducer func() Producer) error {
 	if err != nil {
 		return err
 	}
+	r.consoleRenderer = findConsoleRenderer(renderer)
+	r.applyViewDefinition()
 
 	// --progress: count items as they flow to the renderer (stages run on the
 	// single consuming goroutine, so the bar needs no locking).

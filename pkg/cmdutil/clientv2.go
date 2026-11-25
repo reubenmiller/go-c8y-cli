@@ -214,6 +214,10 @@ func (f *Factory) ClientV2() (*apiv2.Client, error) {
 	}
 	logger := slog.New(slog.NewTextHandler(errOut, &slog.HandlerOptions{Level: level}))
 	opts.Logger = logger
+	// Parts of the SDK (e.g. the response cache: "Using cached response") log
+	// through the default slog logger instead of the client's logger, which
+	// would print info messages on stderr of every command.
+	slog.SetDefault(logger)
 
 	client := apiv2.NewClient(opts)
 	client.Realtime().SetLogger(logger.With("component", "realtime"))
