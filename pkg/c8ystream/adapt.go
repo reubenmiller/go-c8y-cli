@@ -114,11 +114,16 @@ func (r *Runner) binary(res op.Result[core.BinaryResponse], item string) output.
 			fields := map[string]string{"id": item, "filename": resp.FileName()}
 			if _, err := fileutilities.WriteToFile(resp.Reader(), path, false, false, fields); err != nil {
 				yield(jsondoc.Empty(), err)
+				return
 			}
+			// finish the download progress bar before anything else is printed
+			r.Factory.IOStreams.WaitForProgressIndicator()
 			return
 		}
 		if _, err := io.Copy(r.Cmd.OutOrStdout(), resp.Reader()); err != nil {
 			yield(jsondoc.Empty(), err)
+			return
 		}
+		r.Factory.IOStreams.WaitForProgressIndicator()
 	}
 }

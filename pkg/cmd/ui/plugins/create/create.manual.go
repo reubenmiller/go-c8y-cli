@@ -3,7 +3,6 @@ package create
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -13,14 +12,20 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/artifact"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/applications/versions"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/ui/plugins"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -105,22 +110,34 @@ func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 	return ccmd
 }
 
-func (n *CmdCreate) getApplicationDetails(client *c8y.Client, log *logger.Logger) (*c8y.UIExtension, error) {
+// getApplicationDetails returns the details of the plugin and the version of
+// the given file, which are read from the manifest of the plugin (and can be
+// overridden by the flags)
+func (n *CmdCreate) getApplicationDetails(file string) (*plugins.Plugin, *plugins.ManifestFile, error) {
 
 	// set default name to the file name
-	appNameFromFile := artifact.ParseName(n.file)
-	fileExt := filepath.Ext(n.file)
+	appNameFromFile := artifact.ParseName(file)
+	fileExt := filepath.Ext(file)
 
 	// Set application properties
-	app, err := client.UIExtension.NewUIExtensionFromFile(n.file)
-	if err != nil {
-		return nil, err
+	manifestFile := &plugins.ManifestFile{}
+	if err := plugins.GetManifestContents(file, manifestFile); err != nil {
+		return nil, nil, err
 	}
 
 	// Check if it is really a plugin!
 	allowedTypes := []string{"plugin", "blueprint"}
-	if !slices.Contains(allowedTypes, strings.ToLower(app.ManifestFile.Package)) {
-		return nil, fmt.Errorf("invalid file. The given file is not a UI plugin or blueprint (e.g. the manifest.package is not one of [%v]). file=%s", allowedTypes, n.file)
+	if !slices.Contains(allowedTypes, strings.ToLower(manifestFile.Package)) {
+		return nil, nil, fmt.Errorf("invalid file. The given file is not a UI plugin or blueprint (e.g. the manifest.package is not one of [%v]). file=%s", allowedTypes, file)
+	}
+
+	// The manifest is not part of the plugin which is created (it is read from
+	// the uploaded file by the platform)
+	app := &plugins.Plugin{
+		Name:        manifestFile.Name,
+		Key:         manifestFile.Key,
+		Type:        plugins.ApplicationTypeHosted,
+		ContextPath: manifestFile.ContextPath,
 	}
 
 	// Set application name using the following preferences (first match wins)
@@ -128,16 +145,14 @@ func (n *CmdCreate) getApplicationDetails(client *c8y.Client, log *logger.Logger
 	// 2. Name from file (if the given file is not a json file) - as this allows
 	//    overriding the app name by just changing the file name (and not requiring to edit it)
 	// 3. Name from manifest file
-	if app.ManifestFile.Name != "" {
-		app.Name = app.ManifestFile.Name
+	if manifestFile.Name != "" {
+		app.Name = manifestFile.Name
 	}
 
-	// Don't derive plugin name when using a url, as URL's generally aren't editable, and it
-	// is usually an official plugin, so it should not depend on the url, but rather only the manifest name
-	if !strings.Contains(n.file, "://") {
-		if !strings.EqualFold(fileExt, ".json") && strings.EqualFold(fileExt, ".zip") {
-			app.Name = appNameFromFile
-		}
+	// The file is always a local file here (a url was downloaded first), so the
+	// name of a downloaded plugin is derived from the name of the downloaded file
+	if !strings.EqualFold(fileExt, ".json") && strings.EqualFold(fileExt, ".zip") {
+		app.Name = appNameFromFile
 	}
 
 	if n.name != "" {
@@ -159,10 +174,10 @@ func (n *CmdCreate) getApplicationDetails(client *c8y.Client, log *logger.Logger
 	}
 
 	if n.version != "" {
-		app.ManifestFile.Version = n.version
+		manifestFile.Version = n.version
 	}
 
-	return app, nil
+	return app, manifestFile, nil
 }
 
 func IsValidFilename(v string) bool {
@@ -195,12 +210,15 @@ func DownloadFile(u string, log *logger.Logger) (string, error) {
 	return tmpFile, nil
 }
 
+// RunE uploads the plugin as a new version of the plugin, and creates the
+// plugin first if it does not exist yet. The new version is activated when it
+// is tagged as the latest version. The result is the new version.
 func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.factory.Config()
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-	client, err := n.factory.Client()
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
@@ -208,40 +226,69 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	progress := n.factory.IOStreams.ProgressIndicator()
 
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return err
-	}
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		plan, err := n.prepare(in, client, log)
+		if err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context) any {
+			return plan.upload(ctx, client, progress)
+		}, nil
+	})
+}
 
-	handler, err := n.factory.GetRequestHandler()
-	if err != nil {
-		return err
+// uploadPlan is everything which is needed to upload the plugin
+type uploadPlan struct {
+	file     string
+	plugin   *plugins.Plugin
+	existing string // id of the existing plugin
+	version  string
+	tags     []string
+	activate bool
+	cleanup  []func()
+}
+
+func (p *uploadPlan) close() {
+	for _, fn := range slices.Backward(p.cleanup) {
+		fn()
 	}
+	p.cleanup = nil
+}
+
+// prepare gets the plugin file (downloading it when it is a url), reads its
+// manifest and looks up the existing plugin
+func (n *CmdCreate) prepare(in *c8ystream.Resolver, client *apiv2.Client, log *logger.Logger) (*uploadPlan, error) {
+	plan := &uploadPlan{}
+	if err := n.prepareFile(in, client, log, plan); err != nil {
+		plan.close()
+		return nil, err
+	}
+	return plan, nil
+}
+
+func (n *CmdCreate) prepareFile(in *c8ystream.Resolver, client *apiv2.Client, log *logger.Logger, plan *uploadPlan) error {
+	file := n.file
 
 	// Check if file is a url
-	if ShouldDownload(n.file) {
-		if cfg.DryRun() {
-			fmt.Fprintf(n.factory.IOStreams.ErrOut, "DRY: Downloading plugin from url: %s\n", n.file)
-		} else {
-			localFile, downloadErr := DownloadFile(n.file, log)
-			if downloadErr != nil {
-				return fmt.Errorf("could not download plugin. %w", downloadErr)
-			}
-			log.Infof("Downloaded plugin to %s", localFile)
-			n.file = localFile
-
-			defer func() {
-				if err := os.Remove(localFile); err != nil {
-					log.Warnf("could not delete downloaded file. %w", err)
-				}
-			}()
+	if ShouldDownload(file) {
+		localFile, downloadErr := DownloadFile(file, log)
+		if downloadErr != nil {
+			return fmt.Errorf("could not download plugin. %w", downloadErr)
 		}
-
+		log.Infof("Downloaded plugin to %s", localFile)
+		file = localFile
+		plan.cleanup = append(plan.cleanup, func() {
+			if err := os.Remove(localFile); err != nil {
+				log.Warnf("could not delete downloaded file. %s", err)
+			}
+		})
+	} else if err := fileguard.Check(file); err != nil {
+		return err
 	}
 
-	dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
-	application, err := n.getApplicationDetails(client, log)
+	application, manifest, err := n.getApplicationDetails(file)
 	if err != nil {
 		return err
 	}
@@ -249,59 +296,116 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	// The file is not allowed to have any spaces in the filename
 	// as it will be rejected by the server
 	// Let's help users out and create a temp file fixing the names
-	filename := filepath.Base(n.file)
+	filename := filepath.Base(file)
 	if !IsValidFilename(filename) {
 		tmpFile := filepath.Join(os.TempDir(), strings.ReplaceAll(filename, " ", "_"))
 		log.Warnf("Plugin file contains a space, so creating a temp file without a space to avoid being rejected by the server. tmpfile=%s", tmpFile)
 
-		if err := fileutilities.CopyFile(tmpFile, n.file); err != nil {
+		if err := fileutilities.CopyFile(tmpFile, file); err != nil {
 			return fmt.Errorf("could not copy file to tmp directory. %w", err)
 		}
-		defer os.Remove(tmpFile)
-		n.file = tmpFile
-	}
-
-	ctx := c8y.WithCommonOptionsContext(context.Background(), c8y.CommonOptions{
-		DryRun:    dryRun,
-		WithError: commonOptions.WithError,
-	})
-
-	file, fileErr := fileguard.Open(n.file)
-	if fileErr != nil {
-		return fileErr
-	}
-	progress := n.factory.IOStreams.ProgressIndicator()
-	bar, barErr := c8ybinary.NewProgressBar(progress, n.file)
-	if barErr != nil {
-		return barErr
-	}
-
-	var fileReader io.ReadCloser
-	fileReader = file
-	if bar != nil {
-		fileReader = bar.ProxyReader(file)
+		plan.cleanup = append(plan.cleanup, func() { _ = os.Remove(tmpFile) })
+		file = tmpFile
 	}
 
 	// Activate the tag if a tag includes 'latest'
-	for _, tag := range n.tags {
-		if strings.EqualFold(tag, "latest") {
-			n.activate = true
-			break
-		}
-	}
+	plan.activate = plugins.HasTag(n.tags, plugins.ApplicationTagLatest)
+	plan.tags = append([]string{}, n.tags...)
 
-	_, response, err := client.UIExtension.CreateExtension(ctx, &application.Application, fileReader, c8y.UpsertOptions{
-		SkipActivation: !n.activate,
-		Version: &c8y.ApplicationVersion{
-			Version: application.ManifestFile.Version,
-			Tags:    n.tags,
-		},
-	})
+	// Only the plugins which are owned by the current tenant can be managed
+	matches, err := client.UIPlugins.List(in.ResolveContext(), plugins.ListOptions{
+		Name:        application.Name,
+		Owner:       client.Auth.Tenant,
+		HasVersions: true,
+	}).Collect()
 	if err != nil {
 		return err
 	}
-	n.factory.IOStreams.WaitForProgressIndicator()
-	commonOptions.ResultProperty = "-"
-	_, err = handler.ProcessResponse(response, err, nil, commonOptions)
-	return err
+	if len(matches) > 0 {
+		plan.existing = matches[0].ID()
+	} else {
+		// A new plugin must have its first version activated
+		plan.activate = true
+		if !plugins.HasTag(plan.tags, plugins.ApplicationTagLatest) {
+			plan.tags = append(plan.tags, plugins.ApplicationTagLatest)
+		}
+	}
+
+	plan.file = file
+	plan.plugin = application
+	plan.version = manifest.Version
+	return nil
+}
+
+// upload creates the plugin (if it does not exist), uploads the new version
+// and activates it. Only the new version is returned.
+func (p *uploadPlan) upload(ctx context.Context, client *apiv2.Client, progress *iostreams.Progress) output.Seq {
+	return func(yield func(jsondoc.JSONDoc, error) bool) {
+		defer p.close()
+		fail := func(err error) { yield(jsondoc.Empty(), err) }
+
+		appID := p.existing
+		if appID == "" {
+			created := client.UIPlugins.Create(ctx, p.plugin)
+			if created.Err != nil {
+				fail(created.Err)
+				return
+			}
+			if appID = created.Data.ID(); appID == "" {
+				// dry run: the plugin was not created, so there is no version to upload
+				return
+			}
+		} else if p.plugin.Availability != "" {
+			// Update the existing plugin
+			updated := client.UIPlugins.Update(ctx, appID, map[string]any{"availability": p.plugin.Availability})
+			if updated.Err != nil {
+				fail(updated.Err)
+				return
+			}
+		}
+
+		file, err := fileguard.Open(p.file)
+		if err != nil {
+			fail(err)
+			return
+		}
+		defer file.Close()
+
+		opts := versions.CreateOptions{
+			Version: p.version,
+			Tags:    p.tags,
+			File:    versions.UploadFileOptions{FilePath: p.file, Reader: file},
+		}
+		finish := func() {}
+		if progress.IsEnabled() {
+			fn, done, err := c8ybinary.NewUploadProgress(progress, p.file)
+			if err != nil {
+				fail(err)
+				return
+			}
+			opts.File.Progress = fn
+			finish = done
+		}
+		version := client.ApplicationVersions.Create(ctx, appID, opts)
+		finish()
+		progress.Wait()
+		if version.Err != nil {
+			fail(version.Err)
+			return
+		}
+
+		// Activate the version
+		if binaryID := version.Data.BinaryID(); p.activate && binaryID != "" {
+			if activated := client.UIPlugins.Activate(ctx, appID, binaryID); activated.Err != nil {
+				fail(activated.Err)
+				return
+			}
+		}
+
+		for doc, err := range version.Documents() {
+			if !yield(doc, err) {
+				return
+			}
+		}
+	}
 }

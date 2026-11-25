@@ -409,7 +409,7 @@ tasks:
           measurements microservices operations pipeline retentionrules sessions settings smartgroups software template \
           tenantoptions tenants usergroups users util version \
           inventory/wait.yaml inventory/assert inventory/parents inventory/find inventory/update inventory/additions \
-          ui; do
+          ui notification2/subscribe.yaml; do
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
       - |

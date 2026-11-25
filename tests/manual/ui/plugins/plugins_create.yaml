@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+tests:
+  It shows the request to create a new plugin in a dry run:
+    command: |
+      c8y ui plugins create --file testdata/ui-plugin/my-ui-plugin.zip --name dry-plugin --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      contains:
+        - '"path":"/application/applications"'
+        - '"body":{"contextPath":"dry-plugin","key":"dry-plugin-key","name":"dry-plugin","type":"HOSTED"}'
+
+  It creates a new plugin and activates its first version:
+    command: |
+      c8y ui plugins create --file testdata/ui-plugin/my-ui-plugin.zip --name my-plugin-1 --select version,tags &&
+      c8y ui plugins get --id my-plugin-1 --select name,key,contextPath,type,activeVersionId
+    exit-code: 0
+    stdout:
+      contains:
+        - '"version":"1.0.0"'
+        - '"tags":["latest"]'
+        - '"name":"my-plugin-1"'
+        - '"key":"my-plugin-1-key"'
+        - '"contextPath":"my-plugin-1"'
+        - '"type":"HOSTED"'
+        - '"activeVersionId":'
+
+  It adds a version to an existing plugin without activating it unless it is tagged as the latest:
+    command: |
+      c8y ui plugins create --file testdata/ui-plugin/my-ui-plugin.zip --name my-plugin-2 > /dev/null &&
+      ACTIVE_BEFORE=$(c8y ui plugins get --id my-plugin-2 --select activeVersionId -o csv) &&
+      c8y ui plugins create --file testdata/ui-plugin/my-ui-plugin.zip --name my-plugin-2 --version 1.0.1 --tag beta > /dev/null &&
+      ACTIVE_AFTER=$(c8y ui plugins get --id my-plugin-2 --select activeVersionId -o csv) &&
+      c8y ui plugins create --file testdata/ui-plugin/my-ui-plugin.zip --name my-plugin-2 --version 1.0.2 --tag latest > /dev/null &&
+      ACTIVE_LATEST=$(c8y ui plugins get --id my-plugin-2 --select activeVersionId -o csv) &&
+      [ "$ACTIVE_BEFORE" = "$ACTIVE_AFTER" ] && [ "$ACTIVE_BEFORE" != "$ACTIVE_LATEST" ] &&
+      c8y ui plugins versions list --plugin my-plugin-2 --select version -o csv
+    exit-code: 0
+    stdout:
+      contains:
+        - "1.0.0"
+        - "1.0.1"
+        - "1.0.2"
+
+  It uses the name of the manifest when no name is given:
+    command: |
+      c8y ui plugins create --file testdata/ui-plugin/my-ui-plugin.zip --select version -o csv &&
+      c8y ui plugins get --id my-ui-plugin --select name -o csv
+    exit-code: 0
+    stdout:
+      lines:
+        1: "1.0.0"
+        2: my-ui-plugin
+
+  It rejects a file which is not a plugin:
+    command: |
+      c8y ui plugins create --file testdata/ui-plugin/not-a-plugin.zip
+    exit-code: 101
+    stderr:
+      contains:
+        - The given file is not a UI plugin or blueprint
+
+  It fails when the file does not exist:
+    command: |
+      c8y ui plugins create --file testdata/ui-plugin/does-not-exist.zip
+    exit-code: 101

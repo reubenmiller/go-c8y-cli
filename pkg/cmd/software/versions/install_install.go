@@ -13,16 +13,13 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/software/softwareitems"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/software/softwareversions"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/repodetails"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -144,59 +141,33 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 
-		software := in.String("software")
-		version := in.String("version")
-		url := in.String("url")
-		softwareType := in.String("softwareType")
-
-		// Look up the software type from the software repository when not provided
-		// (matching v1). A missing software is not an error: the type stays unset.
-		if softwareType == "" && software != "" {
-			sres := client.Repository.Software.Get(in.ResolveContext(), c8ystream.NameOrID(software), softwareitems.GetOptions{})
-			if sres.Err != nil {
-				if !core.IsNotFound(sres.Err) {
-					return nil, sres.Err
-				}
-			} else if st := sres.Data.SoftwareType(); st != "" {
-				if body, err = sjson.SetBytes(body, "c8y_SoftwareUpdate.0.softwareType", st); err != nil {
-					return nil, err
-				}
-			}
+		// Look up the software type (when not provided) and the version url and
+		// software name (when no explicit url is provided and a version was
+		// given) from the repository, matching v1. A missing software is not an
+		// error: the type stays unset.
+		details, err := repodetails.LookupSoftware(in.ResolveContext(), client, repodetails.Software{
+			Name:    in.String("software"),
+			Version: in.String("version"),
+			URL:     in.String("url"),
+			Type:    in.String("softwareType"),
+		})
+		if err != nil {
+			return nil, err
 		}
-
-		// Look up the version url (and software name) from the repository when no
-		// explicit url is provided and a version was given, matching v1.
-		if !(version == "" || (software != "" && version != "" && url != "")) {
-			ref := softwareVersionRef(version, software)
-			vres := client.Repository.Software.Versions.Get(in.ResolveContext(), ref, softwareversions.GetOptions{WithParents: true})
-			if vres.Err != nil {
-				return nil, vres.Err
-			}
-			if v := vres.Data.Version(); v != "" {
-				if body, err = sjson.SetBytes(body, "c8y_SoftwareUpdate.0.version", v); err != nil {
-					return nil, err
-				}
-			}
-			if u := vres.Data.URL(); u != "" {
-				if body, err = sjson.SetBytes(body, "c8y_SoftwareUpdate.0.url", u); err != nil {
-					return nil, err
-				}
-			}
-			if name := vres.Data.SoftwareName(); name != "" {
-				if body, err = sjson.SetBytes(body, "c8y_SoftwareUpdate.0.name", name); err != nil {
-					return nil, err
-				}
-			}
-		}
-
 		// v1 always emitted c8y_SoftwareUpdate.0.version/url (defaulting to "") via
-		// the computed softwareDetails type. Fill the defaults so the body carries
-		// them even when the flags are unset.
-		for _, k := range []string{"c8y_SoftwareUpdate.0.version", "c8y_SoftwareUpdate.0.url"} {
-			if !gjson.GetBytes(body, k).Exists() {
-				if body, err = sjson.SetBytes(body, k, ""); err != nil {
-					return nil, err
-				}
+		// the computed softwareDetails type, so they are always set.
+		for _, kv := range [][2]string{
+			{"c8y_SoftwareUpdate.0.name", details.Name},
+			{"c8y_SoftwareUpdate.0.version", details.Version},
+			{"c8y_SoftwareUpdate.0.url", details.URL},
+		} {
+			if body, err = sjson.SetBytes(body, kv[0], kv[1]); err != nil {
+				return nil, err
+			}
+		}
+		if details.Type != "" {
+			if body, err = sjson.SetBytes(body, "c8y_SoftwareUpdate.0.softwareType", details.Type); err != nil {
+				return nil, err
 			}
 		}
 
@@ -210,19 +181,6 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 			return client.Operations.CreateRaw(ctx, body)
 		}, nil
 	})
-}
-
-// softwareVersionRef builds the version resolver reference for the software
-// repository lookup: a plain managed-object id (the version itself) is used
-// directly, otherwise the version is scoped to its software (by id or name).
-func softwareVersionRef(version, software string) string {
-	if version == "" || software == "" || c8ydata.IsID(version) {
-		return version
-	}
-	if c8ydata.IsID(software) {
-		return softwareversions.NewRef().ByVersion(version, software)
-	}
-	return softwareversions.NewRef().ByVersionAndName(version, software)
 }
 
 // requireBodyKeys returns a user error listing any of the given gjson paths that

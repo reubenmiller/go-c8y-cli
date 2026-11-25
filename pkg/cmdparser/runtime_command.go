@@ -283,7 +283,7 @@ type requestTemplate struct {
 	accept       string
 	contentType  string
 	ignoreAccept bool
-	progress     func(*http.Request) (*http.Request, error)
+	progress     func(*http.Request) error
 }
 
 type header struct {
@@ -483,14 +483,7 @@ func (t *requestTemplate) build(in *c8ystream.Resolver) (apiv2.RequestOptions, e
 	}
 
 	if t.progress != nil && (opts.Body != nil || len(opts.FormData) > 0) {
-		progress := t.progress
-		opts.PrepareRequest = func(req *http.Request) error {
-			out, err := progress(req)
-			if err == nil && out != nil {
-				req.Body = out.Body
-			}
-			return err
-		}
+		opts.PrepareRequest = t.progress
 	}
 	return opts, nil
 }
