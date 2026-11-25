@@ -9,7 +9,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
-	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
 	"github.com/spf13/cobra"
 )
@@ -88,12 +87,13 @@ func (n *CmdGetSession) RunE(cmd *cobra.Command, args []string) error {
 		cfg.Persistent.Set("username", username)
 
 		version := session.Version
-		if version == "" {
+		// a dry run does not send the request (the version stays unknown)
+		if version == "" && !cfg.ShouldUseDryRun(cmd.CommandPath()) {
 			client, err := n.factory.ClientV2()
 			if err != nil {
 				return err
 			}
-			res := client.Tenants.Current.GetVersion(apiv2.WithDryRun(context.Background(), false))
+			res := client.Tenants.Current.GetVersion(context.Background())
 			if res.Err != nil {
 				return res.Err
 			}
