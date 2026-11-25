@@ -2,6 +2,7 @@ package cmdparser
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -469,6 +470,11 @@ func (t *requestTemplate) build(in *c8ystream.Resolver) (apiv2.RequestOptions, e
 			return opts, cmderrors.NewUserError(err)
 		}
 		if len(contents) > 0 {
+			// the template output is indented; send it compact, as v1 did
+			var compact bytes.Buffer
+			if json.Compact(&compact, contents) == nil {
+				contents = compact.Bytes()
+			}
 			opts.Body = contents
 			if opts.ContentType == "" {
 				opts.ContentType = types.MimeTypeApplicationJSON
