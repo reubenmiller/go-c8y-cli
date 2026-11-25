@@ -173,7 +173,11 @@ func (r *Runner) Input() error {
 		r.InputIterators.PipeOptions.Name = ""
 		r.InputIterators.PipeOptions.Disabled = true
 	}
-	driver, err := iterator.NewJSONPipeIterator(r.Cmd.InOrStdin(), &iterator.PipeOptions{Mode: stream.ModeAuto})
+	var driver iterator.Iterator
+	err := iterator.ErrNoPipeInput
+	if !r.stdinDisabled() {
+		driver, err = iterator.NewJSONPipeIterator(r.Cmd.InOrStdin(), &iterator.PipeOptions{Mode: stream.ModeAuto})
+	}
 	switch {
 	case err == nil:
 		r.driver = driver
@@ -260,6 +264,7 @@ func (r *Runner) InputFlag(name string) error {
 		// items are read by the flag's own name.
 		pipeOpts = &flags.PipelineOptions{Name: name, Property: name}
 	}
+	pipeOpts.Disabled = pipeOpts.Disabled || r.stdinDisabled()
 	iter, err := flags.NewFlagWithPipeIterator(r.Cmd, pipeOpts, true)
 	if err != nil {
 		return err
@@ -279,6 +284,13 @@ func (r *Runner) InputFlag(name string) error {
 	r.primaryName = name
 	r.detectPipeOverride()
 	return nil
+}
+
+// stdinDisabled reports whether reading piped input from stdin is turned off
+// (--nullInput / settings.defaults.nullInput), e.g. because stdin carries a
+// proxied stream. The flags' own values still drive the command.
+func (r *Runner) stdinDisabled() bool {
+	return r.Config != nil && r.Config.DisableStdin()
 }
 
 // anyInputReference reports whether any value is a `-`/`-.path` pipe reference
@@ -326,6 +338,7 @@ func (r *Runner) InputRaw(name string) error {
 		Name:        name,
 		InputFilter: flags.FilterJsonLines,
 		Required:    true,
+		Disabled:    r.stdinDisabled(),
 	}, true)
 	if err != nil {
 		return err

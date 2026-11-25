@@ -11,6 +11,25 @@ tests:
         method: GET
         path: /inventory/managedObjects/0
 
+  It ignores piped input with nullInput:
+    command: |
+      printf '1' | c8y devices get --id 2 --nullInput --dry --dryFormat json |
+        c8y util show --select pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"pathEncoded":"/inventory/managedObjects/2"}
+
+  It ignores piped input with nullInput when the flag lists several values:
+    command: |
+      printf '1' | c8y events get --id 2,3 --nullInput --dry --dryFormat json |
+        c8y util show --select pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"pathEncoded":"/event/events/2"}
+        {"pathEncoded":"/event/events/3"}
+
   It supports pipe by id in get commands:
     command: |
       echo "1\n2" |

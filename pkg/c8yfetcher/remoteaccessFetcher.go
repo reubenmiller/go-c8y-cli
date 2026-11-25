@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/matcher"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -16,90 +14,6 @@ type RemoteAccessFetcher struct {
 	*CumulocityFetcher
 
 	ManagedObjectID string
-}
-
-func DetectRemoteAccessConfiguration(client *c8y.Client, mo_id string, name string) (*c8y.RemoteAccessConfiguration, error) {
-	if c8y.IsID(name) {
-		config, _, err := client.RemoteAccess.GetConfiguration(
-			c8y.WithDisabledDryRunContext(context.Background()),
-			mo_id,
-			name,
-		)
-		if err == nil {
-			return config, err
-		}
-		// Fall through if it could not be found (as the name might just look like an id)
-	}
-	configs, _, err := client.RemoteAccess.GetConfigurations(
-		c8y.WithDisabledDryRunContext(context.Background()),
-		mo_id,
-		&c8y.RemoteAccessCollectionOptions{
-			PaginationOptions: *c8y.NewPaginationOptions(50),
-		})
-
-	if err != nil {
-		return nil, err
-	}
-
-	passthroughConfigs := make([]c8y.RemoteAccessConfiguration, 0)
-
-	for _, config := range configs {
-		if strings.EqualFold(config.Protocol, c8y.RemoteAccessProtocolPassthrough) {
-			passthroughConfigs = append(passthroughConfigs, config)
-		}
-	}
-
-	if name != "" {
-		// Exact match
-		for _, config := range passthroughConfigs {
-			if strings.EqualFold(config.Name, name) {
-				return &config, nil
-			}
-		}
-
-		// Regex match
-		pattern, patternErr := matcher.ConvertWildcardToRegex(name)
-		if patternErr == nil {
-			// Match by regex
-			for _, config := range passthroughConfigs {
-				if pattern.MatchString(config.Name) {
-					return &config, nil
-				}
-			}
-		}
-
-		return nil, fmt.Errorf("configuration not found. name=%s", name)
-	}
-
-	if len(passthroughConfigs) == 0 {
-		return nil, fmt.Errorf("configuration not found. name=%s", name)
-	}
-
-	//
-	// Guess the configuration
-	//
-
-	// There is only one, so let's use that
-	if len(passthroughConfigs) == 1 {
-		return &passthroughConfigs[0], nil
-	}
-
-	// Use first match which uses port 22
-	for _, config := range passthroughConfigs {
-		if config.Port == 22 {
-			return &config, nil
-		}
-	}
-
-	// Use first match with ssh in its name
-	for _, config := range passthroughConfigs {
-		if strings.Contains(strings.ToLower(config.Name), "ssh") {
-			return &config, nil
-		}
-	}
-
-	// Finally just try the first
-	return &passthroughConfigs[0], nil
 }
 
 func NewRemoteAccessFetcher(factory *cmdutil.Factory, mo_id string) *RemoteAccessFetcher {
