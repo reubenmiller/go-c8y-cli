@@ -1330,6 +1330,13 @@ type PipelineOptions struct {
 	Format      string              `json:"-"`
 	InputFilter func([]byte) bool   `json:"-"`
 	PostActions []Action            `json:"-"`
+
+	// Source, when set, supplies the pipeline values instead of stdin or the
+	// flag's own values. A command whose input is read once by another driver
+	// (e.g. the c8ystream Runner) sets it to an iterator which yields the
+	// current item's value, so the flag getters bound to the pipeline read
+	// that value instead of reading stdin a second time.
+	Source iterator.Iterator `json:"-"`
 }
 
 // WithPipelineIterator adds pipeline support from cli arguments

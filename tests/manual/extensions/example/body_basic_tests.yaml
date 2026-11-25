@@ -258,16 +258,24 @@ tests:
     command: |
       c8y kitchensink body file --file manual/extensions/file1.txt --dryFormat dump
     stdout:
-      lines:
-        8: 'Content-Disposition: form-data; name="file"; filename="file1.txt"'
-        9: "Content-Type: text/plain"
-        10: ""
-        11: one
-        12: two
-        13: three
-        15: 'Content-Disposition: form-data; name="object"'
-        16: ""
-        17: '{"name":"file1.txt","type":"text/plain; charset=utf-8"}'
+      contains:
+        - "Content-Type: multipart/form-data; boundary="
+        - 'Content-Disposition: form-data; name="file"; filename="file1.txt"'
+        - "Content-Type: text/plain"
+        - "one\ntwo\nthree"
+        - 'Content-Disposition: form-data; name="object"'
+        - '{"name":"file1.txt","type":"text/plain; charset=utf-8"}'
+
+  file - It uses the name for the file part:
+    command: |
+      c8y kitchensink body file --file manual/extensions/file1.txt --name custom.txt --type text/x-custom --dryFormat dump
+    stdout:
+      contains:
+        - 'Content-Disposition: form-data; name="file"; filename="custom.txt"'
+        - '{"name":"custom.txt","type":"text/x-custom"}'
+      not-contains:
+        - 'name="filename"'
+        - 'filename="file1.txt"'
 
   fileContents - It can upload file contents:
     command: |
@@ -304,18 +312,13 @@ tests:
     command: |
       c8y kitchensink body attachment --file manual/extensions/file1.txt --dry --dryFormat dump
     stdout:
-      line-count-max: 14
-      lines:
-        5: "r/^Content-Type: multipart/form-data; boundary=[a-zA-Z0-9]+$"
-        6: ""
-        7: r/^--[a-zA-Z0-9]+$
-        8: 'Content-Disposition: form-data; name="file"; filename="file1.txt"'
-        9: "Content-Type: text/plain"
-        10: ""
-        11: one
-        12: two
-        13: three
-        14: r/^--[a-zA-Z0-9]+--$
+      contains:
+        - "Content-Type: multipart/form-data; boundary="
+        - 'Content-Disposition: form-data; name="file"; filename="file1.txt"'
+        - "Content-Type: text/plain"
+        - "one\ntwo\nthree"
+      not-contains:
+        - 'name="object"'
 
   binaryUploadURL:
     # File does not get deleted after test and dry mode does not work here

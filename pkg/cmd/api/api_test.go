@@ -1,15 +1,10 @@
 package api
 
 import (
-	"io"
 	"net/url"
-	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -42,26 +37,4 @@ func TestPipedURL(t *testing.T) {
 	assert.Equal(t, "12345", pipedURL([]byte(`{"url":"12345","self":"x"}`), opts))
 	assert.Equal(t, "https://h/fw", pipedURL([]byte(`{"c8y_Firmware":{"url":"https://h/fw"}}`), opts))
 	assert.Equal(t, "", pipedURL([]byte(`{"name":"x"}`), opts))
-}
-
-func TestFormParts(t *testing.T) {
-	file := filepath.Join(t.TempDir(), "data.bin")
-	require.NoError(t, os.WriteFile(file, []byte("x"), 0o600))
-	f, err := os.Open(file)
-	require.NoError(t, err)
-	defer f.Close()
-
-	parts := formParts(map[string]io.Reader{
-		"file":                       f,
-		"name":                       strings.NewReader("example"),
-		flags.FormDataKeyFilename:    strings.NewReader("custom.bin"),
-		flags.FormDataKeyContentType: strings.NewReader("application/x-custom"),
-	})
-	require.Len(t, parts, 2)
-	fileParts, ok := parts["file"].(*apiv2.FormFile)
-	require.True(t, ok)
-	assert.Equal(t, "custom.bin", fileParts.FileName)
-	assert.Equal(t, "application/x-custom", fileParts.ContentType)
-	_, ok = parts["name"].(*apiv2.FormField)
-	assert.True(t, ok)
 }

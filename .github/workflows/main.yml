@@ -177,6 +177,11 @@ jobs:
       shell: bash
       timeout-minutes: 30
 
+    - name: Extension cli tests against the fake server
+      run: task test-cli-offline-extensions
+      shell: bash
+      timeout-minutes: 15
+
   test-examples:
     runs-on: ${{ matrix.os }}
     needs: [build]

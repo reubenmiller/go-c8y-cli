@@ -410,6 +410,20 @@ tasks:
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
 
+  test-cli-offline-extensions:
+    desc: Run the extension (runtime command) cli tests against the go-c8y fake server, using the c8y-kitchensink test extension
+    summary: |
+      body_cumulocity_tests.yaml is not included: some of its lookups need data
+      which the fake server does not have (software/firmware details, roles
+      and microservice instances).
+    deps: [install-test-dependencies]
+    cmds:
+      - go build -o .bin/c8y ./cmd/c8y
+      - |
+        for suite in extensions/example/body_basic_tests.yaml extensions/example/pipeline_tests.yaml extensions/example/extension_example.yaml extensions/example/extension_presets.yaml extensions/example/extension_required.yaml extensions/example/extension_types.yaml extensions/example/filters extensions/example/commands; do
+          env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
+        done
+
   build-extension-fixtures:
     desc: Build the binary extension used by the extension tests (pkg/extsdk/examples/c8y-hello)
     dir: pkg/extsdk/examples/c8y-hello
