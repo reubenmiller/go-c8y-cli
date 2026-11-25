@@ -50,8 +50,8 @@ require (
 	github.com/mattn/go-runewidth v0.0.31
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/reubenmiller/go-c8y/v2 v2.0.0-20261117105304-37d0690c560d
-	golang.org/x/mod v0.42.0
-	golang.org/x/tools v0.52.0
+	golang.org/x/mod v0.43.0
+	golang.org/x/tools v0.53.0
 	mvdan.cc/sh/v3 v3.14.1
 )
 
@@ -116,7 +116,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b // indirect
-	golang.org/x/net v0.62.0 // indirect
+	golang.org/x/net v0.63.0 // indirect
 	golang.org/x/oauth2 v0.35.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
