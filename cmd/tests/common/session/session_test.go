@@ -11,6 +11,7 @@ import (
 )
 
 func Test_SetUsernamePassword(t *testing.T) {
+	command.RequireTenant(t)
 	tenant := "t12345"
 	username := "example"
 	password := "dummy"

@@ -1,18 +1,28 @@
 package cmdparser
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
+	pkgurl "github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/types"
 	"github.com/spf13/cobra"
 )
 
@@ -59,15 +69,12 @@ func NewRuntimeCmd(f *cmdutil.Factory, options *CmdOptions) *RuntimeCmd {
 	return ccmd
 }
 
+// Prepare adds the flag getters of the command's parameters (path, header,
+// query and body) to the command options.
 func (n *RuntimeCmd) Prepare(args []string) error {
 	item := n.options.Spec
 	subcmd := n.options
 	factory := n.factory
-
-	cfg, err := factory.Config()
-	if err != nil {
-		return err
-	}
 
 	// Presets
 	if subcmd.Spec.HasPreset() {
@@ -90,26 +97,13 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 	subcmd.Path.Template = item.Path
 
 	// header
-	subcmd.Header = append(subcmd.Header, flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"))
+	// Note: the custom headers (--header) and the processing mode are added by the runner
 	for _, p := range item.HeaderParameters {
 		subcmd.Header = append(subcmd.Header, GetOption(subcmd, &p, factory, args)...)
 	}
 
-	if subcmd.Spec.ContentType != "" {
-		subcmd.Header = append(subcmd.Header, flags.WithStaticStringValue("Content-Type", subcmd.Spec.ContentType))
-	}
-
-	if subcmd.Spec.Accept != "" {
-		subcmd.Header = append(subcmd.Header, flags.WithStaticStringValue("Accept", subcmd.Spec.Accept))
-	}
-
-	if item.SupportsProcessingMode() {
-		subcmd.Header = append(subcmd.Header, flags.WithProcessingModeValue())
-	}
-
 	// query
-	subcmd.QueryParameter = append(subcmd.QueryParameter, flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"))
-
+	// Note: the custom query parameters (--customQueryParam) are added by the runner
 	for _, p := range item.QueryParameters {
 		subcmd.QueryParameter = append(subcmd.QueryParameter, GetOption(subcmd, &p, factory, args)...)
 
@@ -209,147 +203,345 @@ func (n *RuntimeCmd) Prepare(args []string) error {
 	return nil
 }
 
-// RunE executes the command
+// RunE executes the command on the c8ystream runner: the pipeline flag (or
+// its values) drives the iteration, and each input item is sent as a request
+// with the go-c8y v2 client. The runner handles the dry run, confirmation,
+// workers and the output.
 func (n *RuntimeCmd) RunE(cmd *cobra.Command, args []string) error {
+	cfg, err := n.factory.Config()
+	if err != nil {
+		return err
+	}
+	if err := ApplyCommandView(n.factory, cfg, n.options.Spec); err != nil {
+		return err
+	}
+
+	r, err := c8ystream.NewRunner(cmd, n.factory)
+	if err != nil {
+		return err
+	}
+	if err := r.Filter(n.options.Spec.Filter...); err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("invalid filter in command '%s'. %s", n.options.Spec.Name, err))
+	}
+
+	// The pipeline flag drives the iteration (piped items, or the flag's own
+	// values). The flag getters read the item's value from the driver, so
+	// stdin is only read once.
+	current := &currentValue{}
+	pipeOpts := r.InputIterators.PipeOptions
+	if pipeOpts != nil && pipeOpts.Name != "" {
+		current.name = pipeOpts.Name
+		if err := r.InputFlag(pipeOpts.Name); err != nil {
+			if paramErr := new(flags.ParameterError); errors.As(err, &paramErr) {
+				return cmderrors.NewUserError(err)
+			}
+			return err
+		}
+		pipeOpts.Source = current
+	}
+
+	client, err := r.Client()
+	if err != nil {
+		return err
+	}
+	refs := n.options.refs
+	refs.client = client
+	refs.tenant = n.factory.GetTenant()
 
 	if err := n.Prepare(args); err != nil {
 		return err
 	}
 
-	cfg, err := n.factory.Config()
+	req, err := n.newRequestTemplate(cmd, r)
 	if err != nil {
 		return err
 	}
 
-	if err := ApplyCommandView(n.factory, cfg, n.options.Spec); err != nil {
-		return err
-	}
-	// Runtime flag options
-	flags.WithOptions(
-		cmd,
-		flags.WithRuntimePipelineProperty(),
-	)
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		current.in = in
+		refs.ctx = in.ResolveContext()
+		defer func() { refs.ctx = nil }()
+
+		opts, err := req.build(in)
+		if err != nil {
+			return nil, err
+		}
+		return r.RequestCall(client, opts), nil
+	})
+}
+
+// requestTemplate holds the parts of a runtime command's request. Parts which
+// depend on the input item are iterators, which are evaluated for each item.
+type requestTemplate struct {
+	method       string
+	path         *flags.StringTemplate
+	query        *flags.QueryTemplate
+	headers      []header
+	body         *mapbuilder.MapBuilder
+	isBinary     bool
+	formData     map[string]io.Reader
+	accept       string
+	contentType  string
+	ignoreAccept bool
+	progress     func(*http.Request) (*http.Request, error)
+}
+
+type header struct {
+	name  string
+	value any
+}
+
+// newRequestTemplate evaluates the command's flag getters
+func (n *RuntimeCmd) newRequestTemplate(cmd *cobra.Command, r *c8ystream.Runner) (*requestTemplate, error) {
+	cfg := r.Config
+	spec := n.options.Spec
+	inputIterators := r.InputIterators
+
+	req := &requestTemplate{
+		method:       spec.Method,
+		accept:       spec.Accept,
+		contentType:  spec.ContentType,
+		ignoreAccept: cfg.IgnoreAcceptHeader(),
+		isBinary:     n.options.Body.IsBinary,
 	}
 
 	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		n.options.QueryParameter...,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
+	req.query = flags.NewQueryTemplate()
+	if err := flags.WithQueryParameters(cmd, req.query, inputIterators, n.options.QueryParameter...); err != nil {
+		return nil, cmderrors.NewUserError(err)
 	}
 	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
 	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+		return nil, cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-	if err := ApplyCommandFilter(commonOptions, n.options.Spec); err != nil {
-		return cmderrors.NewUserError(err)
-	}
-	commonOptions.AddQueryParametersWithMapping(query, n.options.Spec.FlagMapping)
-
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
+	commonOptions.AddQueryParametersWithMapping(req.query, spec.FlagMapping)
 
 	// headers
-	headers := http.Header{}
-	err = flags.WithHeaders(
-		cmd,
-		headers,
-		inputIterators,
-		n.options.Header...,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
+	for _, opt := range n.options.Header {
+		name, value, err := opt(cmd, inputIterators)
+		if err != nil {
+			return nil, cmderrors.NewUserError(err)
+		}
+		if name != "" && value != nil {
+			req.headers = append(req.headers, header{name: name, value: value})
+		}
 	}
 
 	// form data
-	formData := make(map[string]io.Reader)
-	err = flags.WithFormDataOptions(
-		cmd,
-		formData,
-		inputIterators,
-		n.options.FormData...,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
+	req.formData = make(map[string]io.Reader)
+	if err := flags.WithFormDataOptions(cmd, req.formData, inputIterators, n.options.FormData...); err != nil {
+		return nil, cmderrors.NewUserError(err)
+	}
+	if err := flags.MakeFormDataReopenable(req.formData); err != nil {
+		return nil, cmderrors.NewUserError(err)
 	}
 
 	// body
-	var body *mapbuilder.MapBuilder
 	if len(n.options.Body.DefaultValue) > 0 {
-		body = mapbuilder.NewMapBuilderWithInit(n.options.Body.DefaultValue)
+		req.body = mapbuilder.NewMapBuilderWithInit(n.options.Body.DefaultValue)
 	} else {
-		body = mapbuilder.NewInitializedMapBuilder(n.options.Body.Initialize)
+		req.body = mapbuilder.NewInitializedMapBuilder(n.options.Body.Initialize)
 	}
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-		n.options.Body.Options...,
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
+	if err := flags.WithBody(cmd, req.body, inputIterators, n.options.Body.Options...); err != nil {
+		return nil, cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate(n.options.Path.Template)
-	err = flags.WithPathParameters(
-		cmd,
-		path,
-		inputIterators,
-		n.options.Path.Options...,
-	)
-	if err != nil {
-		return err
+	req.path = flags.NewStringTemplate(n.options.Path.Template)
+	if err := flags.WithPathParameters(cmd, req.path, inputIterators, n.options.Path.Options...); err != nil {
+		return nil, err
 	}
 
-	var req *c8y.RequestOptions
-	if n.options.Body.IsBinary {
-		req = &c8y.RequestOptions{
-			Method:       n.options.Spec.Method,
-			Path:         path.GetTemplate(),
-			Query:        queryValue,
-			Body:         body.GetFileContents(),
-			FormData:     formData,
-			Header:       headers,
-			IgnoreAccept: cfg.IgnoreAcceptHeader(),
-			DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-		}
-	} else {
-		req = &c8y.RequestOptions{
-			Method:       n.options.Spec.Method,
-			Path:         path.GetTemplate(),
-			Query:        queryValue,
-			Body:         body,
-			FormData:     formData,
-			Header:       headers,
-			IgnoreAccept: cfg.IgnoreAcceptHeader(),
-			DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-		}
-	}
-
-	// add upload progress bar
-	if n.options.Body.UploadProgressSource != "" {
-		req.PrepareRequest = c8ybinary.AddProgress(
+	// upload progress bar
+	if source := n.options.Body.UploadProgressSource; source != "" {
+		req.progress = c8ybinary.AddProgress(
 			cmd,
-			n.options.Body.UploadProgressSource,
+			source,
 			cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY()),
 		)
 	}
+	return req, nil
+}
 
-	return n.factory.RunWithWorkers(client, cmd, req, inputIterators)
+// build returns the request of one input item
+func (t *requestTemplate) build(in *c8ystream.Resolver) (apiv2.RequestOptions, error) {
+	opts := apiv2.RequestOptions{
+		Method:       t.method,
+		Accept:       t.accept,
+		ContentType:  t.contentType,
+		IgnoreAccept: t.ignoreAccept,
+	}
+
+	// path (and any query parameters or host in the path)
+	pathValue, _, err := t.path.GetNext()
+	if err != nil {
+		return opts, err
+	}
+	if hasUnresolvedVariables(pathValue) {
+		return opts, cmderrors.ErrNoMatchesFound
+	}
+	query := url.Values{}
+	u, err := parseURL(pkgurl.PathEscapePreserveQueryParameters(string(pathValue)))
+	if err != nil {
+		return opts, cmderrors.NewUserError(fmt.Sprintf("invalid path. %s", err))
+	}
+	if u.Host != "" {
+		opts.Host = u.Scheme + "://" + u.Host
+	}
+	opts.Path = u.EscapedPath()
+	if !strings.HasPrefix(opts.Path, "/") {
+		opts.Path = "/" + opts.Path
+	}
+	for key, values := range u.Query() {
+		query[key] = append(query[key], values...)
+	}
+
+	// query parameters. The flag getters pre-encode some values (for the raw
+	// v1 query), while the v2 client encodes the values itself, so they are
+	// decoded once.
+	values, _, err := t.query.Execute(false)
+	if err != nil {
+		return opts, err
+	}
+	for key, items := range values {
+		for _, item := range items {
+			if decoded, err := url.QueryUnescape(item); err == nil {
+				item = decoded
+			}
+			query.Add(key, item)
+		}
+	}
+	opts.Query = query
+
+	// headers
+	for _, h := range t.headers {
+		value, err := headerValue(h.value)
+		if err != nil {
+			return opts, err
+		}
+		switch {
+		case value == "":
+		case strings.EqualFold(h.name, "Content-Type"):
+			opts.ContentType = value
+		case strings.EqualFold(h.name, "Accept"):
+			opts.Accept = value
+		default:
+			if opts.Headers == nil {
+				opts.Headers = map[string]string{}
+			}
+			opts.Headers[h.name] = value
+		}
+	}
+
+	if !request.RequestSupportsBody(t.method) {
+		return opts, nil
+	}
+
+	// form data (the readers are recreated for each request). The file
+	// part is named by the form's filename value (e.g. --name), as in v1.
+	if len(t.formData) > 0 {
+		formData, err := flags.ReopenFormData(t.formData)
+		if err != nil {
+			return opts, cmderrors.NewUserError(err)
+		}
+		opts.FormData = c8ystream.FormParts(formData)
+	}
+
+	// body
+	switch {
+	case t.body.HasFile():
+		file, err := t.body.GetFile()
+		if err != nil {
+			return opts, cmderrors.NewUserError(err)
+		}
+		opts.Body = file
+	case t.isBinary:
+		// a binary body is only sent from a file
+	case t.body.HasRaw():
+		opts.Body = []byte(t.body.GetRaw())
+	default:
+		var contents []byte
+		if input := in.Input(); input != nil {
+			contents, err = t.body.MarshalJSONWithInput(input)
+		} else {
+			contents, err = t.body.MarshalJSON()
+		}
+		if err != nil {
+			return opts, cmderrors.NewUserError(err)
+		}
+		if len(contents) > 0 {
+			// the template output is indented; send it compact, as v1 did
+			var compact bytes.Buffer
+			if json.Compact(&compact, contents) == nil {
+				contents = compact.Bytes()
+			}
+			opts.Body = contents
+			if opts.ContentType == "" {
+				opts.ContentType = types.MimeTypeApplicationJSON
+			}
+		}
+	}
+
+	if t.progress != nil && (opts.Body != nil || len(opts.FormData) > 0) {
+		progress := t.progress
+		opts.PrepareRequest = func(req *http.Request) error {
+			out, err := progress(req)
+			if err == nil && out != nil {
+				req.Body = out.Body
+			}
+			return err
+		}
+	}
+	return opts, nil
+}
+
+// headerValue returns the value of a header for the current item
+func headerValue(value any) (string, error) {
+	switch v := value.(type) {
+	case iterator.Iterator:
+		b, _, err := v.GetNext()
+		if err != nil && !errors.Is(err, io.EOF) {
+			return "", err
+		}
+		return string(b), nil
+	case []string:
+		return strings.Join(v, ","), nil
+	case string:
+		return v, nil
+	default:
+		return fmt.Sprintf("%v", v), nil
+	}
+}
+
+// currentValue is the pipeline source of the flag getters: the value of the
+// pipeline flag for the item being built
+type currentValue struct {
+	name string
+	in   *c8ystream.Resolver
+}
+
+func (c *currentValue) GetNext() ([]byte, interface{}, error) {
+	if c.in == nil {
+		return nil, nil, io.EOF
+	}
+	return []byte(c.in.String(c.name)), c.in.Input(), nil
+}
+
+func (c *currentValue) IsBound() bool { return true }
+
+func (c *currentValue) MarshalJSON() ([]byte, error) { return iterator.MarshalJSON(c) }
+
+func hasUnresolvedVariables(v []byte) bool {
+	left := bytes.Index(v, []byte("{"))
+	right := bytes.Index(v, []byte("}"))
+	return left > -1 && right > -1 && right > left
+}
+
+func parseURL(s string) (*url.URL, error) {
+	// Default to https if a scheme is missing
+	rawURL := s
+	if p, err := url.Parse(s); err == nil && p.Host == "" && p.Scheme != "" {
+		rawURL = "https://" + s
+	}
+	return url.Parse(rawURL)
 }

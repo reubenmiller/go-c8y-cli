@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  It looks up a device name in a path parameter:
+    command: |
+      c8y kitchensink pipeline get --device device01 |
+        c8y util show --select method,path -o csv
+    exit-code: 0
+    stdout:
+      lines:
+        1: r/^GET,/inventory/managedObjects/\d+$
+
+  It looks up each piped device name:
+    command: |
+      printf "device01\ndevice02\n" |
+        c8y kitchensink pipeline get |
+        c8y util show --select path -o csv
+    exit-code: 0
+    stdout:
+      line-count: 2
+      lines:
+        1: r/^/inventory/managedObjects/\d+$
+        2: r/^/inventory/managedObjects/\d+$
+
+  It uses the id of piped json:
+    command: |
+      echo '{"id":"12345"}' |
+        c8y kitchensink pipeline get |
+        c8y util show --select path -o csv
+    exit-code: 0
+    stdout:
+      exactly: /inventory/managedObjects/12345
+
+  It sends one request per flag value:
+    command: |
+      c8y kitchensink pipeline get --device 1111,2222 |
+        c8y util show --select path -o csv
+    exit-code: 0
+    stdout:
+      exactly: |
+        /inventory/managedObjects/1111
+        /inventory/managedObjects/2222
+
+  It sets the body for each piped item:
+    command: |
+      printf "1111\n2222\n" |
+        c8y kitchensink pipeline update --newName renamed |
+        c8y util show --select method,path,body.name -o csv
+    exit-code: 0
+    stdout:
+      exactly: |
+        PUT,/inventory/managedObjects/1111,renamed
+        PUT,/inventory/managedObjects/2222,renamed
+
+  It sends the body compact:
+    command: |
+      c8y kitchensink pipeline update --device 1111 --newName renamed --template "{c8y_Info: {a: 1}}" --dryFormat curl
+    exit-code: 0
+    stdout:
+      contains:
+        - --data-raw '{"c8y_Info":{"a":1},"name":"renamed"}'
+
+  It maps a piped device to a body property:
+    command: |
+      echo '{"deviceId":"3333","name":"other"}' |
+        c8y kitchensink pipeline createEvent --text hello |
+        c8y util show --select body.source.id,body.text,body.type -o csv
+    exit-code: 0
+    stdout:
+      exactly: 3333,hello,ci_pipelineEvent
+
+  It looks up a device group name:
+    command: |
+      c8y kitchensink pipeline listGroupChildren --group "My Group" |
+        c8y util show --select path -o csv
+    exit-code: 0
+    stdout:
+      lines:
+        1: r/^/inventory/managedObjects/\d+/childAssets$
+
+  It reports a name which does not exist:
+    command: |
+      c8y kitchensink pipeline get --device "ci_doesNotExist_01"
+    exit-code: 4

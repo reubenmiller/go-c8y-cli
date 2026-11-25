@@ -19,6 +19,7 @@ import (
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/filter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -68,6 +69,7 @@ type Runner struct {
 	runCtx       context.Context // set in Run; exposed to Build via Resolver.Context
 	submission   *submission     // confirmation + delays; nil when neither applies
 	assert       *assertion      // set by Assert; nil for other commands
+	filters      []string        // filters of the command itself (see Filter)
 	index        int64
 
 	// tmplInput is the current item's raw input, kept pointed at the item being
@@ -121,7 +123,11 @@ func (r *Runner) Input() error {
 		r.InputIterators.PipeOptions.Name = ""
 		r.InputIterators.PipeOptions.Disabled = true
 	}
-	driver, err := iterator.NewJSONPipeIterator(r.Cmd.InOrStdin(), &iterator.PipeOptions{Mode: stream.ModeAuto})
+	var driver iterator.Iterator
+	err := iterator.ErrNoPipeInput
+	if !r.stdinDisabled() {
+		driver, err = iterator.NewJSONPipeIterator(r.Cmd.InOrStdin(), &iterator.PipeOptions{Mode: stream.ModeAuto})
+	}
 	switch {
 	case err == nil:
 		r.driver = driver
@@ -208,6 +214,7 @@ func (r *Runner) InputFlag(name string) error {
 		// items are read by the flag's own name.
 		pipeOpts = &flags.PipelineOptions{Name: name, Property: name}
 	}
+	pipeOpts.Disabled = pipeOpts.Disabled || r.stdinDisabled()
 	iter, err := flags.NewFlagWithPipeIterator(r.Cmd, pipeOpts, true)
 	if err != nil {
 		return err
@@ -227,6 +234,13 @@ func (r *Runner) InputFlag(name string) error {
 	r.primaryName = name
 	r.detectPipeOverride()
 	return nil
+}
+
+// stdinDisabled reports whether reading piped input from stdin is turned off
+// (--nullInput / settings.defaults.nullInput), e.g. because stdin carries a
+// proxied stream. The flags' own values still drive the command.
+func (r *Runner) stdinDisabled() bool {
+	return r.Config != nil && r.Config.DisableStdin()
 }
 
 // anyInputReference reports whether any value is a `-`/`-.path` pipe reference
@@ -274,6 +288,7 @@ func (r *Runner) InputRaw(name string) error {
 		Name:        name,
 		InputFilter: flags.FilterJsonLines,
 		Required:    true,
+		Disabled:    r.stdinDisabled(),
 	}, true)
 	if err != nil {
 		return err
@@ -314,6 +329,21 @@ func (r *Runner) Query(getters ...flags.GetOption) error {
 	if err := flags.WithQueryParameters(r.Cmd, r.query, r.InputIterators, getters...); err != nil {
 		return cmderrors.NewUserError(err)
 	}
+	return nil
+}
+
+// Filter adds client side filters which the command itself applies to its
+// output (e.g. the filter of an extension command), in addition to the
+// user's --filter values. Each expression uses the --filter syntax, and a
+// document must match all of them.
+func (r *Runner) Filter(expressions ...string) error {
+	if len(expressions) == 0 {
+		return nil
+	}
+	if _, err := filter.Parse(expressions...); err != nil {
+		return cmderrors.NewUserError(err)
+	}
+	r.filters = append(r.filters, expressions...)
 	return nil
 }
 
@@ -435,6 +465,13 @@ func (r *Runner) run(newProducer func() Producer) error {
 	stages, err := CommonStages(cfg, nil)
 	if err != nil {
 		return err
+	}
+	if len(r.filters) > 0 {
+		pred, err := filter.Parse(r.filters...)
+		if err != nil {
+			return err
+		}
+		stages = append([]output.Stage{output.Filter(pred)}, stages...)
 	}
 	// --view: when the user didn't select columns, restrict the documents to
 	// the detected/named view's columns (no-op for --view off / the non-TTY

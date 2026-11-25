@@ -1,22 +1,18 @@
 package remoteaccess
 
 import (
+	"context"
 	"fmt"
-	"strings"
 	"text/template"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/remoteaccess/rasession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
-	"github.com/reubenmiller/go-c8y/pkg/remoteaccess"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/gjson"
 )
 
 type CmdServer struct {
@@ -117,160 +113,111 @@ func NewCmdServer(f *cmdutil.Factory) *CmdServer {
 	return ccmd
 }
 
+// RunE starts a local proxy to each device's remote access passthrough
+// configuration, and serves it until the command is stopped.
 func (n *CmdServer) RunE(cmd *cobra.Command, args []string) error {
-	client, err := n.factory.Client()
+	// In stdio mode stdin carries the proxied stream, not pipeline input
+	if n.listen == "-" {
+		cfg, err := n.factory.Config()
+		if err != nil {
+			return err
+		}
+		cfg.SetDisableStdin(true)
+	}
+
+	r, err := c8ystream.NewRunner(cmd, n.factory)
 	if err != nil {
 		return err
 	}
-
-	cfg, err := n.factory.Config()
+	if err := r.InputFlag("device"); err != nil {
+		return err
+	}
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
-
 	log, err := n.factory.Logger()
 	if err != nil {
 		return err
 	}
 
-	// Disable if stdio mode is being used
-	if n.listen == "-" {
-		log.Debug("Disabling pipeline stdin parsing when in stdio mode")
-		cfg.SetDisableStdin(true)
+	opts := rasession.Options{Configuration: n.configuration}
+	if cmd.Flags().Changed("multiplex") {
+		opts.Multiplex = &n.multiplex
 	}
 
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
-	}
-
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	body.SetApplyTemplateOnMarshalPreference(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
-	)
-	if err != nil {
-		return err
-	}
-
-	var iter iterator.Iterator
-	if inputIterators.Total > 0 {
-		iter = mapbuilder.NewMapBuilderIterator(body)
-	} else {
-		iter = iterator.NewBoundIterator(mapbuilder.NewMapBuilderIterator(body), 1)
-	}
-
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return err
-	}
-	commonOptions.DisableResultPropertyDetection()
-
-	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
-		item := gjson.ParseBytes(j.Value.([]byte))
-		device := item.Get("device").String()
-
-		craConfig, err := c8yfetcher.DetectRemoteAccessConfiguration(client, device, n.configuration)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		deviceID, err := client.ManagedObjects.ResolveID(in.ResolveContext(), c8ystream.NameOrID(in.String("device")), nil)
+		if err != nil {
+			return nil, err
+		}
+		opts := opts
+		opts.DeviceID = deviceID
+		config, err := rasession.Detect(in.ResolveContext(), client, opts)
 		if err != nil {
 			return nil, err
 		}
 
-		log.Debugf("Using remote access configuration: id=%s, name=%s", craConfig.ID, craConfig.Name)
+		return func(ctx context.Context) any {
+			session := rasession.New(client, opts, config)
+			log.Debugf("Using remote access configuration: id=%s, name=%s, multiplex=%v", config.ID(), config.Name(), session.Multiplex)
 
-		// Multiplex configurations named with the mux option (e.g. "http+mux:example"), unless
-		// the --multiplex flag was given explicitly
-		multiplex := n.multiplex
-		if !cmd.Flags().Changed("multiplex") {
-			if name, ok := remoteaccess.ParseConfigurationName(craConfig.Name); ok && name.Multiplex {
-				log.Debugf("Multiplexing as the configuration name has the mux option")
-				multiplex = true
+			if n.listen == "-" {
+				log.Debugf("Listening to request from stdin")
+				return session.ListenServe(n.factory.IOStreams.In, n.factory.IOStreams.Out)
 			}
-		}
 
-		// Lookup configuration
-		craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
-			ManagedObjectID: device,
-			RemoteAccessID:  craConfig.ID,
-			Multiplex:       multiplex,
-		})
-
-		if n.listen == "-" {
-			log.Debugf("Listening to request from stdin")
-			serverErr := craClient.ListenServe(n.factory.IOStreams.In, n.factory.IOStreams.Out)
-			return nil, serverErr
-		}
-
-		// TCP / socket listener
-		if err := craClient.Listen(n.listen); err != nil {
-			return nil, err
-		}
-
-		localAddress := craClient.GetListenerAddress()
-		host, port, _ := strings.Cut(localAddress, ":")
-		if host == "" {
-			host = "127.0.0.1"
-		}
-
-		// Set the scheme to be used when opening a browser
-		switch n.browserScheme {
-		case "auto":
-			// Align to convention used by
-			// https://github.com/Cumulocity-IoT/cumulocity-remote-access-cloud-http-proxy
-			// (configuration names "<scheme>[+<option>...]:<label>", e.g. "https:Router", "https+mux:Router")
-			n.browserScheme = "http"
-			if name, ok := remoteaccess.ParseConfigurationName(craConfig.Name); ok {
-				n.browserScheme = name.Scheme
+			// TCP / socket listener
+			if err := session.Listen(n.listen); err != nil {
+				return err
 			}
-		}
+			host, port := session.HostPort()
+			scheme := session.BrowserScheme(n.browserScheme)
 
-		type ServerInfo struct {
-			Port          string
-			Host          string
-			Device        string
-			LocalAddress  string
-			User          string
-			CumulocityURL string
-			Scheme        string
-		}
+			t := template.Must(template.New("message").Parse(serverMessage))
+			_ = t.Execute(n.factory.IOStreams.ErrOut, serverInfo{
+				Host:          host,
+				Port:          port,
+				CumulocityURL: rasession.CumulocityURL(client),
+				LocalAddress:  session.GetListenerAddress(),
+				Device:        deviceID,
+				User:          "<device_username>",
+				Scheme:        scheme,
+			})
 
-		messageTmpl := heredoc.Doc(`
-			Listening for device ({{.Device}}) {{.CumulocityURL}} on {{.LocalAddress}}
-	
-			Proxy:     {{.LocalAddress}}
-	
-			Example clients:
-	
-				SSH:        ssh -p {{.Port}} {{.User}}@{{.Host}}
-	
-				Website:    {{.Scheme}}://{{.LocalAddress}}
-	
-			Press ctrl-c to shutdown the server
-		`)
+			if n.open {
+				go func() {
+					if err := n.factory.Browser.Browse(fmt.Sprintf("%s://%s:%s", scheme, host, port)); err != nil {
+						log.Warnf("%s", err)
+					}
+				}()
+			}
 
-		t := template.Must(template.New("message").Parse(messageTmpl))
-		t.Execute(n.factory.IOStreams.ErrOut, ServerInfo{
-			Host:          host,
-			Port:          port,
-			CumulocityURL: strings.TrimRight(client.BaseURL.String(), "/"),
-			LocalAddress:  localAddress,
-			Device:        device,
-			User:          "<device_username>",
-			Scheme:        n.browserScheme,
-		})
-
-		if n.open {
-			go func() {
-				targetURL := fmt.Sprintf("%s://%s:%s", n.browserScheme, host, port)
-				if err := n.factory.Browser.Browse(targetURL); err != nil {
-					cfg.Logger.Warnf("%s", err)
-				}
-			}()
-		}
-
-		serverErr := craClient.Serve()
-		return nil, serverErr
-	}, nil)
+			return session.Serve()
+		}, nil
+	})
 }
+
+type serverInfo struct {
+	Port          string
+	Host          string
+	Device        string
+	LocalAddress  string
+	User          string
+	CumulocityURL string
+	Scheme        string
+}
+
+var serverMessage = heredoc.Doc(`
+	Listening for device ({{.Device}}) {{.CumulocityURL}} on {{.LocalAddress}}
+
+	Proxy:     {{.LocalAddress}}
+
+	Example clients:
+
+		SSH:        ssh -p {{.Port}} {{.User}}@{{.Host}}
+
+		Website:    {{.Scheme}}://{{.LocalAddress}}
+
+	Press ctrl-c to shutdown the server
+`)

@@ -9,18 +9,14 @@ import (
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/remoteaccess/rasession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
-	"github.com/reubenmiller/go-c8y/pkg/remoteaccess"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/gjson"
 )
 
 type CmdSSH struct {
@@ -151,7 +147,18 @@ func (n *CmdSSH) GetPortForwarding() string {
 	return portMapping
 }
 func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
-	client, err := n.factory.Client()
+	if n.batch && n.preferredAuth != "" && n.preferredAuth != "publickey" {
+		return cmderrors.NewUserError(fmt.Sprintf("--preferred-auth %s can't be used with --batch, as batch mode only uses key-based authentication", n.preferredAuth))
+	}
+
+	r, err := c8ystream.NewRunner(cmd, n.factory)
+	if err != nil {
+		return err
+	}
+	if err := r.InputFlag("device"); err != nil {
+		return err
+	}
+	client, err := r.Client()
 	if err != nil {
 		return err
 	}
@@ -164,137 +171,94 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
-	if err != nil {
-		return err
+	user := n.user
+	if user == "" {
+		// Use default user (if set)
+		user = cfg.GetRemoteAccessDefaultSSHUser()
+	}
+	fallbackUser := n.fallbackUser
+	if !cmd.Flags().Changed("fallback-user") {
+		fallbackUser = cfg.GetRemoteAccessSSHFallbackUser()
+	}
+	users := SSHUsers(user, fallbackUser)
+	portForwarding := n.GetPortForwarding()
+	var command []string
+	if dashIdx := cmd.ArgsLenAtDash(); dashIdx > -1 {
+		command = args[dashIdx:]
 	}
 
-	body := mapbuilder.NewInitializedMapBuilder(true)
-	body.SetApplyTemplateOnMarshalPreference(true)
-	err = flags.WithBody(
-		cmd,
-		body,
-		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, "device", "device"),
-	)
-	if err != nil {
-		return err
-	}
+	// ssh sessions are not multiplexed
+	noMultiplex := false
+	opts := rasession.Options{Configuration: n.configuration, Multiplex: &noMultiplex}
 
-	var iter iterator.Iterator
-	if inputIterators.Total > 0 {
-		iter = mapbuilder.NewMapBuilderIterator(body)
-	} else {
-		iter = iterator.NewBoundIterator(mapbuilder.NewMapBuilderIterator(body), 1)
-	}
-
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return err
-	}
-	commonOptions.DisableResultPropertyDetection()
-
-	return n.factory.RunWithGenericWorkers(cmd, inputIterators, iter, func(j worker.Job) (any, error) {
-		item := gjson.ParseBytes(j.Value.([]byte))
-		device := item.Get("device").String()
-
-		craConfig, err := c8yfetcher.DetectRemoteAccessConfiguration(client, device, n.configuration)
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		deviceID, err := client.ManagedObjects.ResolveID(in.ResolveContext(), c8ystream.NameOrID(in.String("device")), nil)
+		if err != nil {
+			return nil, err
+		}
+		opts := opts
+		opts.DeviceID = deviceID
+		config, err := rasession.Detect(in.ResolveContext(), client, opts)
 		if err != nil {
 			return nil, err
 		}
 
-		log.Debugf("Using remote access configuration: id=%s, name=%s", craConfig.ID, craConfig.Name)
+		return func(ctx context.Context) any {
+			session := rasession.New(client, opts, config)
+			log.Debugf("Using remote access configuration: id=%s, name=%s", config.ID(), config.Name())
 
-		// Lookup configuration
-		craClient := remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
-			ManagedObjectID: device,
-			RemoteAccessID:  craConfig.ID,
-		})
+			// TCP / socket listener, served in the background
+			if err := session.Listen(n.listen); err != nil {
+				return err
+			}
+			go session.Serve()
+			host, port := session.HostPort()
 
-		// TCP / socket listener
-		if err := craClient.Listen(n.listen); err != nil {
-			return nil, err
-		}
+			cs := n.factory.IOStreams.ColorScheme()
+			if portForwarding != "" {
+				fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting interactive ssh session with %s (%s) with port-forwarding %s\n", deviceID, rasession.CumulocityURL(client), portForwarding)))
+			} else {
+				fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting interactive ssh session with %s (%s)\n", deviceID, rasession.CumulocityURL(client))))
+			}
 
-		localAddress := craClient.GetListenerAddress()
-		host, port, _ := strings.Cut(localAddress, ":")
-		if host == "" {
-			host = "127.0.0.1"
-		}
+			exitCode, sshErr := ConnectWithFallback(users, func(u string) (int, string, error) {
+				sshArgs := BuildSSHArgs(SSHOptions{
+					Host:           host,
+					Port:           port,
+					User:           u,
+					PreferredAuth:  n.preferredAuth,
+					Batch:          n.batch,
+					PortForwarding: portForwarding,
+					Command:        command,
+				})
 
-		// Start in background
-		go craClient.Serve()
+				stderr := &tailWriter{max: 4096}
+				sshCmd := exec.CommandContext(ctx, "ssh", sshArgs...)
+				sshCmd.Stdout = n.factory.IOStreams.Out
+				sshCmd.Stdin = n.factory.IOStreams.In
+				sshCmd.Stderr = io.MultiWriter(n.factory.IOStreams.ErrOut, stderr)
+				log.Infof("Executing command: ssh %s\n", strings.Join(sshArgs, " "))
 
-		if n.batch && n.preferredAuth != "" && n.preferredAuth != "publickey" {
-			return nil, cmderrors.NewUserError(fmt.Sprintf("--preferred-auth %s can't be used with --batch, as batch mode only uses key-based authentication", n.preferredAuth))
-		}
+				start := time.Now()
+				err := sshCmd.Run()
+				fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", time.Since(start).Truncate(time.Millisecond))
 
-		user := n.user
-		if user == "" {
-			// Use default user (if set)
-			user = cfg.GetRemoteAccessDefaultSSHUser()
-		}
-		fallbackUser := n.fallbackUser
-		if !cmd.Flags().Changed("fallback-user") {
-			fallbackUser = cfg.GetRemoteAccessSSHFallbackUser()
-		}
-		users := SSHUsers(user, fallbackUser)
-
-		portForwarding := n.GetPortForwarding()
-		var command []string
-		if dashIdx := cmd.ArgsLenAtDash(); dashIdx > -1 {
-			command = args[dashIdx:]
-		}
-
-		cs := n.factory.IOStreams.ColorScheme()
-		if portForwarding != "" {
-			fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting interactive ssh session with %s (%s) with port-forwarding %s\n", device, strings.TrimRight(client.BaseURL.String(), "/"), portForwarding)))
-		} else {
-			fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Green(fmt.Sprintf("Starting interactive ssh session with %s (%s)\n", device, strings.TrimRight(client.BaseURL.String(), "/"))))
-		}
-
-		exitCode, sshErr := ConnectWithFallback(users, func(u string) (int, string, error) {
-			sshArgs := BuildSSHArgs(SSHOptions{
-				Host:           host,
-				Port:           port,
-				User:           u,
-				PreferredAuth:  n.preferredAuth,
-				Batch:          n.batch,
-				PortForwarding: portForwarding,
-				Command:        command,
+				exitCode := 0
+				if sshCmd.ProcessState != nil {
+					exitCode = sshCmd.ProcessState.ExitCode()
+				}
+				return exitCode, stderr.String(), err
+			}, func(next string) {
+				fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Yellow(fmt.Sprintf("Authentication failed with the default user. Retrying with the %q user", next)))
 			})
 
-			stderr := &tailWriter{max: 4096}
-			sshCmd := exec.CommandContext(context.Background(), "ssh", sshArgs...)
-			sshCmd.Stdout = n.factory.IOStreams.Out
-			sshCmd.Stdin = n.factory.IOStreams.In
-			sshCmd.Stderr = io.MultiWriter(n.factory.IOStreams.ErrOut, stderr)
-			log.Infof("Executing command: ssh %s\n", strings.Join(sshArgs, " "))
-
-			start := time.Now()
-			err := sshCmd.Run()
-			duration := time.Since(start).Truncate(time.Millisecond)
-			fmt.Fprintf(n.factory.IOStreams.ErrOut, "Duration: %s\n", duration)
-
-			exitCode := 0
-			if sshCmd.ProcessState != nil {
-				exitCode = sshCmd.ProcessState.ExitCode()
+			// Use the exit code of ssh
+			if exitCode != 0 {
+				return cmderrors.NewErrorWithExitCode(cmderrors.ExitCode(exitCode), sshErr)
 			}
-			return exitCode, stderr.String(), err
-		}, func(next string) {
-			fmt.Fprintln(n.factory.IOStreams.ErrOut, cs.Yellow(fmt.Sprintf("Authentication failed with the default user. Retrying with the %q user", next)))
-		})
-
-		// Use exit code from the command
-		if exitCode != 0 {
-			return nil, cmderrors.NewErrorWithExitCode(
-				cmderrors.ExitCode(exitCode),
-				sshErr,
-			)
-		}
-
-		return nil, sshErr
-	}, nil)
+			return sshErr
+		}, nil
+	})
 }
 
 // ConnectWithFallback runs connect for each user until it succeeds, or fails for

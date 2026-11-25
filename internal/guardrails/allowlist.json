@@ -1,17 +1,4 @@
 {
-  "flag-type-device": [
-    "remoteaccess configurations update (string, expected stringSlice)"
-  ],
-  "flag-type-group": [
-    "deviceregistration register-basic (string, expected stringSlice)",
-    "deviceregistration register-ca (string, expected stringSlice)",
-    "deviceregistration register-external-ca (string, expected stringSlice)"
-  ],
-  "flag-type-id": [
-    "devices enroll (string, expected stringSlice)",
-    "microservices serviceusers get (string, expected stringSlice)",
-    "tenants create (string, expected stringSlice)"
-  ],
   "go-c8y-v1": [
     "pkg/cmd/factory/c8yclient.go",
     "pkg/cmd/factory/factory.go",
@@ -25,21 +12,5 @@
     "pkg/cmd/sessions/set_set.manual.go",
     "pkg/cmd/settings/update_update.manual.go",
     "pkg/cmd/ui/plugins/create/create.manual.go"
-  ],
-  "mode-guard": [
-    "alias delete",
-    "alias set",
-    "cache delete",
-    "extensions create",
-    "extensions delete",
-    "extensions update",
-    "sessions create",
-    "sessions set",
-    "settings update"
-  ],
-  "v1-worker": [
-    "pkg/cmd/remoteaccess/connect/run_run.manual.go",
-    "pkg/cmd/remoteaccess/connect/ssh/ssh.manual.go",
-    "pkg/cmd/remoteaccess/server_server.manual.go"
   ]
 }

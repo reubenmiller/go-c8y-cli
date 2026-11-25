@@ -378,12 +378,13 @@ func AddFlag(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory) err
 
 func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, args []string) []flags.GetOption {
 	targetProp := p.GetTargetProperty()
+	refs := cmd.refs
 
 	opts := []flags.GetOption{}
 
 	switch p.NamedLookup.Type {
 	case "external":
-		opts = append(opts, c8yfetcher.WithExternalCommandByNameFirstMatch(factory, args, p.NamedLookup.Command, p.NamedLookup.Options.IDPattern, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveExternal(p.NamedLookup.Command, p.NamedLookup.Options.IDPattern), args, p.Name, targetProp, p.Format))
 		return opts
 	}
 
@@ -463,19 +464,19 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 		opts = append(opts, c8yfetcher.WithIDSlice(args, p.Name, targetProp, p.Format))
 
 	case "application":
-		opts = append(opts, c8yfetcher.WithApplicationByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveApplication, args, p.Name, targetProp, p.Format))
 
 	case "hostedapplication":
-		opts = append(opts, c8yfetcher.WithHostedApplicationByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveApplication, args, p.Name, targetProp, p.Format))
 
 	case "microservice":
-		opts = append(opts, c8yfetcher.WithMicroserviceByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveMicroservice, args, p.Name, targetProp, p.Format))
 
 	case "uiplugin":
-		opts = append(opts, c8yfetcher.WithUIPluginByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveUIPlugin, args, p.Name, targetProp, p.Format))
 
 	case "software[]":
-		opts = append(opts, c8yfetcher.WithSoftwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveSoftware, args, p.Name, targetProp, p.Format))
 
 	case "softwareDetails":
 		opts = append(opts, c8yfetcher.WithSoftwareVersionData(factory, p.GetDependentProperty(0, "software"), p.Name, p.GetDependentProperty(1, "url"), p.GetDependentProperty(2, "softwareType"), args, "", targetProp, p.Format))
@@ -484,7 +485,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 		opts = append(opts, c8yfetcher.WithConfigurationFileData(factory, p.Name, p.GetDependentProperty(0, "configurationType"), p.GetDependentProperty(1, "url"), args, "", targetProp, p.Format))
 
 	case "softwareversion[]":
-		opts = append(opts, c8yfetcher.WithSoftwareVersionByNameFirstMatch(factory, p.GetDependentProperty(0, "software"), args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveSoftwareVersion(p.GetDependentProperty(0, "software")), args, p.Name, targetProp, p.Format))
 
 	case "deviceservice[]":
 		opts = append(opts, c8yfetcher.WithDeviceServiceByNameFirstMatch(factory, p.GetDependentProperty(0, "device"), args, p.Name, targetProp, p.Format))
@@ -492,52 +493,52 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "certificatefile":
 		opts = append(opts, flags.WithCertificateFile(p.Name, targetProp))
 	case "certificate[]":
-		opts = append(opts, c8yfetcher.WithCertificateByNameFirstMatch(factory, args, p.Name, targetProp))
+		opts = append(opts, refs.withReference(resolveCertificate, args, p.Name, targetProp))
 
 	case "firmware[]":
-		opts = append(opts, c8yfetcher.WithFirmwareByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveFirmware, args, p.Name, targetProp, p.Format))
 	case "firmwareversion[]":
-		opts = append(opts, c8yfetcher.WithFirmwareVersionByNameFirstMatch(factory, p.GetDependentProperty(0, "firmware"), args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveFirmwareVersion(p.GetDependentProperty(0, "firmware")), args, p.Name, targetProp, p.Format))
 	case "firmwareDetails":
 		opts = append(opts, c8yfetcher.WithFirmwareVersionData(factory, p.GetDependentProperty(0, "firmware"), p.Name, p.GetDependentProperty(1, "url"), args, "", targetProp))
 	case "firmwarepatch[]":
-		opts = append(opts, c8yfetcher.WithFirmwarePatchByNameFirstMatch(factory, p.GetDependentProperty(0, "firmware"), args, p.Name, targetProp))
+		opts = append(opts, refs.withReference(resolveFirmwarePatch(p.GetDependentProperty(0, "firmware")), args, p.Name, targetProp))
 
 	case "configuration[]":
-		opts = append(opts, c8yfetcher.WithConfigurationByNameFirstMatch(factory, args, p.Name, targetProp))
+		opts = append(opts, refs.withReference(resolveConfiguration, args, p.Name, targetProp))
 
 	case "deviceprofile[]":
-		opts = append(opts, c8yfetcher.WithDeviceProfileByNameFirstMatch(factory, args, p.Name, targetProp))
+		opts = append(opts, refs.withReference(resolveDeviceProfile, args, p.Name, targetProp))
 
 	case "device[]":
-		opts = append(opts, c8yfetcher.WithDeviceByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveManagedObject, args, p.Name, targetProp, p.Format))
 
 	case "agent[]":
-		opts = append(opts, c8yfetcher.WithAgentByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveAgent, args, p.Name, targetProp, p.Format))
 
 	case "devicegroup[]":
-		opts = append(opts, c8yfetcher.WithDeviceGroupByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveDeviceGroup, args, p.Name, targetProp, p.Format))
 
 	case "smartgroup[]":
-		opts = append(opts, c8yfetcher.WithSmartGroupByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveSmartGroup, args, p.Name, targetProp, p.Format))
 
 	case "user[]":
-		opts = append(opts, c8yfetcher.WithUserByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveUser, args, p.Name, targetProp, p.Format))
 
 	case "userself[]":
-		opts = append(opts, c8yfetcher.WithUserSelfByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveUserSelf, args, p.Name, targetProp, p.Format))
 
 	case "roleself[]":
-		opts = append(opts, c8yfetcher.WithRoleSelfByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveRoleSelf, args, p.Name, targetProp, p.Format))
 
 	case "role[]":
-		opts = append(opts, c8yfetcher.WithRoleByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveRole, args, p.Name, targetProp, p.Format))
 
 	case "usergroup[]":
-		opts = append(opts, c8yfetcher.WithUserGroupByNameFirstMatch(factory, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveUserGroup, args, p.Name, targetProp, p.Format))
 
 	case "remoteaccessconfiguration":
-		opts = append(opts, c8yfetcher.WithRemoteAccessConfigurationFirstMatch(factory, p.GetDependentProperty(0, "device"), args, p.Name, targetProp))
+		opts = append(opts, refs.withReference(resolveRemoteAccessConfiguration(p.GetDependentProperty(0, "device")), args, p.Name, targetProp))
 	}
 
 	return opts
@@ -693,7 +694,7 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 			flags.WithEncodedRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
 			flags.WithEncodedRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "(creationTime.date le '%s')"),
 			flags.WithEncodedRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "(creationTime.date ge '%s')"),
-			c8yfetcher.WithDeviceGroupByNameFirstMatch(factory, []string{}, "group", "group", "bygroupid(%s)"),
+			cmd.refs.withReference(resolveDeviceGroup, nil, "group", "group", "bygroupid(%s)"),
 		}
 
 		// Add extensions to cumulocity query builder
@@ -771,6 +772,10 @@ type CmdOptions struct {
 	Body           BodyOptions
 	Path           PathOptions
 	RequiredFlags  []string
+
+	// refs resolves the reference parameters (e.g. device names) when the
+	// command runs
+	refs *references
 }
 
 type BodyOptions struct {
@@ -801,6 +806,7 @@ func NewCommandWithOptions(cmd *cobra.Command, endpoint models.Command) *CmdOpti
 		Path: PathOptions{
 			Options: make([]flags.GetOption, 0),
 		},
+		refs: &references{},
 	}
 }
 

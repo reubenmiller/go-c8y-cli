@@ -165,6 +165,14 @@ func TestFromFullName(t *testing.T) {
 			wantErr:   nil,
 		},
 		{
+			name:      "full URL with nested owner",
+			input:     "https://gitlab.example.org/group/subgroup/REPO.git",
+			wantHost:  "gitlab.example.org",
+			wantOwner: "group/subgroup",
+			wantName:  "REPO",
+			wantErr:   nil,
+		},
+		{
 			name:      "SSH URL",
 			input:     "git@example.org:OWNER/REPO.git",
 			wantHost:  "example.org",
@@ -193,10 +201,13 @@ func TestFromFullName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var r Interface
+			var err error
 			if tt.hostOverride != "" {
-				t.Setenv("GH_HOST", tt.hostOverride)
+				r, err = FromFullNameWithHost(tt.input, tt.hostOverride)
+			} else {
+				r, err = FromFullName(tt.input)
 			}
-			r, err := FromFullName(tt.input)
 			if tt.wantErr != nil {
 				if err == nil {
 					t.Fatalf("no error in result, expected %v", tt.wantErr)

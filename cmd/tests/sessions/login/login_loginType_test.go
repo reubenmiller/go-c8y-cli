@@ -42,6 +42,7 @@ func createBasicWithTokenSession(t *testing.T) (string, string) {
 }
 
 func Test_LoginSwithFromTokenToBasicWithTokenPresent(t *testing.T) {
+	command.RequireTenant(t)
 	homeDir, sessionFile := createBasicWithTokenSession(t)
 	stdout, cmdErr := command.ExecuteCmdWithStandardOutput(
 		command.NewMockCommand(),
@@ -71,6 +72,7 @@ func Test_LoginSwithFromTokenToBasicWithTokenPresent(t *testing.T) {
 }
 
 func Test_LoginWithUserGivenLoginType_Default(t *testing.T) {
+	command.RequireTenant(t)
 	homeDir, sessionFile := createBasicSession(t)
 	stdout, cmdErr := command.ExecuteCmdWithStandardOutput(
 		command.NewMockCommand(),
@@ -101,6 +103,7 @@ func Test_LoginWithUserGivenLoginType_Default(t *testing.T) {
 }
 
 func Test_LoginWithUserGivenLoginType_OAuth2Internal(t *testing.T) {
+	command.RequireTenant(t)
 	homeDir, sessionFile := createBasicSession(t)
 	stdout, cmdErr := command.ExecuteCmdWithStandardOutput(
 		command.NewMockCommand(),
@@ -131,6 +134,7 @@ func Test_LoginWithUserGivenLoginType_OAuth2Internal(t *testing.T) {
 }
 
 func Test_LoginWithUserGivenLoginTypeBasic(t *testing.T) {
+	command.RequireTenant(t)
 	homeDir, sessionFile := createBasicSession(t)
 	stdout, cmdErr := command.ExecuteCmdWithStandardOutput(
 		command.NewMockCommand(),

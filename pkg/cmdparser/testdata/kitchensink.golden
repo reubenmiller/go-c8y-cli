@@ -626,6 +626,16 @@ file: features.yaml
       flag: --user (stringSlice) default=[]
       flag: --usergroup (stringSlice) default=[]
       flag: --userself (stringSlice) default=[]
+file: filters.yaml
+  cmd: filters
+    short: Commands with client side filters
+    hidden: false
+    runnable: false
+    cmd: list
+      short: List managed objects which are not templates
+      hidden: false
+      runnable: true
+      flag: --type (string) default=
 file: hierarchy.yaml
   cmd: hierarchy
     short: Example of nested command groups
@@ -646,6 +656,42 @@ file: hierarchy_items.yaml
       hidden: false
       runnable: true
       flag: --type (string) default=
+file: pipeline.yaml
+  cmd: pipeline
+    short: Commands which accept piped input and look up references
+    hidden: false
+    runnable: false
+    cmd: createEvent
+      short: Create an event on a device
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --device (stringSlice) default=[]
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
+      flag: --text (string) default=
+      flag: --type (string) default=
+    cmd: get
+      short: Get a device
+      hidden: false
+      runnable: true
+      flag: --device (stringSlice) default=[]
+    cmd: listGroupChildren
+      short: List the child assets of a device group
+      hidden: false
+      runnable: true
+      flag: --group (stringSlice) default=[]
+    cmd: update
+      short: Update a device
+      hidden: false
+      runnable: true
+      flag: --data (stringArray) default=[]
+      flag: --device (stringSlice) default=[]
+      flag: --newName (string) default=
+      flag: --processingMode (string) default=
+      flag: --template (string) default=
+      flag: --templateVars (stringArray) default=[]
 file: presets.yaml
   cmd: presets
     short: Example features
