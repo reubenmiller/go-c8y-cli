@@ -6,9 +6,6 @@ package userreferences
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	cmdAddUserToGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences/addusertogroup"
-	cmdDeleteUserFromGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences/deleteuserfromgroup"
-	cmdListGroupMembership "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences/listgroupmembership"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -27,9 +24,9 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdUserreferences {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdAddUserToGroup.NewAddUserToGroupCmd(f).GetCommand())
-	cmd.AddCommand(cmdDeleteUserFromGroup.NewDeleteUserFromGroupCmd(f).GetCommand())
-	cmd.AddCommand(cmdListGroupMembership.NewListGroupMembershipCmd(f).GetCommand())
+	cmd.AddCommand(NewAddUserToGroupCmd(f).GetCommand())
+	cmd.AddCommand(NewDeleteUserFromGroupCmd(f).GetCommand())
+	cmd.AddCommand(NewListGroupMembershipCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

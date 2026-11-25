@@ -5,14 +5,6 @@ package tenantoptions
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/get"
-	cmdGetForCategory "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/getforcategory"
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/update"
-	cmdUpdateBulk "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/updatebulk"
-	cmdUpdateEdit "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/updateedit"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -35,14 +27,14 @@ Any option of any tenant can be defined as "non-editable" by "management" tenant
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
-	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdateBulk.NewUpdateBulkCmd(f).GetCommand())
-	cmd.AddCommand(cmdGetForCategory.NewGetForCategoryCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdateEdit.NewUpdateEditCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewCreateCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewDeleteCmd(f).GetCommand())
+	cmd.AddCommand(NewUpdateCmd(f).GetCommand())
+	cmd.AddCommand(NewUpdateBulkCmd(f).GetCommand())
+	cmd.AddCommand(NewGetForCategoryCmd(f).GetCommand())
+	cmd.AddCommand(NewUpdateEditCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

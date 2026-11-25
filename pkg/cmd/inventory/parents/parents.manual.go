@@ -1,7 +1,6 @@
 package parents
 
 import (
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/parents/get"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -21,7 +20,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdParents {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

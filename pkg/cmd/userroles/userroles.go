@@ -6,13 +6,6 @@ package userroles
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	cmdAddRoleToGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/addroletogroup"
-	cmdAddRoleToUser "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/addroletouser"
-	cmdDeleteRoleFromGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/deleterolefromgroup"
-	cmdDeleteRoleFromUser "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/deleterolefromuser"
-	cmdGetRoleReferenceCollectionFromGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/getrolereferencecollectionfromgroup"
-	cmdGetRoleReferenceCollectionFromUser "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/getrolereferencecollectionfromuser"
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/list"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -31,13 +24,13 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdUserroles {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdAddRoleToUser.NewAddRoleToUserCmd(f).GetCommand())
-	cmd.AddCommand(cmdDeleteRoleFromUser.NewDeleteRoleFromUserCmd(f).GetCommand())
-	cmd.AddCommand(cmdAddRoleToGroup.NewAddRoleToGroupCmd(f).GetCommand())
-	cmd.AddCommand(cmdDeleteRoleFromGroup.NewDeleteRoleFromGroupCmd(f).GetCommand())
-	cmd.AddCommand(cmdGetRoleReferenceCollectionFromUser.NewGetRoleReferenceCollectionFromUserCmd(f).GetCommand())
-	cmd.AddCommand(cmdGetRoleReferenceCollectionFromGroup.NewGetRoleReferenceCollectionFromGroupCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewAddRoleToUserCmd(f).GetCommand())
+	cmd.AddCommand(NewDeleteRoleFromUserCmd(f).GetCommand())
+	cmd.AddCommand(NewAddRoleToGroupCmd(f).GetCommand())
+	cmd.AddCommand(NewDeleteRoleFromGroupCmd(f).GetCommand())
+	cmd.AddCommand(NewGetRoleReferenceCollectionFromUserCmd(f).GetCommand())
+	cmd.AddCommand(NewGetRoleReferenceCollectionFromGroupCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

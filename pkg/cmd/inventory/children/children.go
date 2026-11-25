@@ -5,11 +5,6 @@
 package children
 
 import (
-	cmdAssign "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/children/assign"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/children/create"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/children/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/children/list"
-	cmdUnassign "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/children/unassign"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -29,11 +24,11 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdChildren {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdAssign.NewAssignCmd(f).GetCommand())
-	cmd.AddCommand(cmdUnassign.NewUnassignCmd(f).GetCommand())
-	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewAssignCmd(f).GetCommand())
+	cmd.AddCommand(NewUnassignCmd(f).GetCommand())
+	cmd.AddCommand(NewCreateCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

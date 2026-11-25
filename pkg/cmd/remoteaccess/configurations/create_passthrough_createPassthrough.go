@@ -1,0 +1,137 @@
+// v2-based remote access passthrough configuration create: the device flag
+// drives iteration (pipe or --device); each device reference is resolved
+// (name -> id) and a PASSTHROUGH configuration (built from the typed flags plus
+// the credentialsType:'NONE' default) is created via
+// RemoteAccess.Configurations.Create.
+
+package configurations
+
+import (
+	"context"
+
+	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	racfg "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/remoteaccess/remoteaccess_configurations"
+	"github.com/spf13/cobra"
+)
+
+// CreatePassthroughCmd command
+type CreatePassthroughCmd struct {
+	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+}
+
+// NewCreatePassthroughCmd creates a command to Create passthrough configuration
+func NewCreatePassthroughCmd(f *cmdutil.Factory) *CreatePassthroughCmd {
+	ccmd := &CreatePassthroughCmd{
+		factory: f,
+	}
+	cmd := &cobra.Command{
+		Use:   "create-passthrough",
+		Short: "Create passthrough configuration",
+		Long: `Create a passthrough configuration which enables you to connect
+directly to the device (via Cumulocity) using a native client such as ssh.
+
+After a passthrough connection has been added, you can open a proxy to it using
+one of the following commands:
+
+  * c8y remoteaccess server
+  * c8y remoteaccess connect ssh
+`,
+		Example: heredoc.Doc(`
+$ c8y remoteaccess configurations create-passthrough --device device01
+Create a SSH passthrough configuration to the localhost
+
+$ c8y remoteaccess configurations create-passthrough --device device01 --hostname customhost --port 1234 --name "My custom configuration"
+Create a SSH passthrough configuration with custom details
+        `),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return f.CreateModeEnabled(cmd)
+		},
+		RunE: ccmd.RunE,
+	}
+
+	cmd.SilenceUsage = true
+
+	cmd.Flags().StringSlice("device", []string{""}, "Device (accepts pipeline)")
+	cmd.Flags().String("name", "passthrough", "Connection name")
+	cmd.Flags().String("hostname", "127.0.0.1", "Hostname")
+	cmd.Flags().Int("port", 22, "Port")
+	cmd.Flags().String("protocol", "PASSTHROUGH", "Protocol")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("protocol", "PASSTHROUGH"),
+	)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithProcessingMode(),
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
+		flags.WithExtendedPipelineSupport("device", "device", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPowershellName("New-RemoteAccessPassthroughConfiguration"),
+	)
+
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+
+	return ccmd
+}
+
+// RunE executes the command
+func (n *CreatePassthroughCmd) RunE(cmd *cobra.Command, args []string) error {
+	r, err := c8ystream.NewRunner(cmd, n.factory)
+	if err != nil {
+		return err
+	}
+
+	if err := r.InputFlag("device"); err != nil {
+		return err
+	}
+
+	err = r.Body(
+		flags.WithDataFlagValue(),
+		flags.WithStringValue("name", "name"),
+		flags.WithStringValue("hostname", "hostname"),
+		flags.WithIntValue("port", "port"),
+		flags.WithStringValue("protocol", "protocol"),
+		flags.WithDefaultTemplateString(`
+{credentialsType:'NONE'}`),
+		cmdutil.WithTemplateValue(n.factory),
+		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("hostname", "port", "protocol", "name"),
+	)
+	if err != nil {
+		return err
+	}
+
+	client, err := r.Client()
+	if err != nil {
+		return err
+	}
+
+	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
+		deviceID, err := client.ManagedObjects.ResolveID(in.ResolveContext(), c8ystream.NameOrID(in.String("device")), nil)
+		if err != nil {
+			return nil, err
+		}
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context) any {
+			return client.RemoteAccess.Configurations.Create(ctx, racfg.CreateOptions{
+				ManagedObjectID: deviceID,
+				Body:            body,
+			})
+		}, nil
+	})
+}

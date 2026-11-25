@@ -6,8 +6,6 @@
 package availability
 
 import (
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/availability/get"
-	cmdSet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/availability/set"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -27,8 +25,8 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdAvailability {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdSet.NewSetCmd(f).GetCommand())
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewSetCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
