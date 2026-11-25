@@ -298,10 +298,9 @@ The `v3` branch of go-c8y-cli starts from `origin/v2`, merged with the v2 SDK mi
 | PR | What |
 |---|---|
 | reubenmiller/go-c8y-cli#777 | one Go package per command group (359 packages merged into 87), no surface change |
-| reubenmiller/go-c8y#218 | `Measurements.CreateList` resolves device names; fake server creates each measurement of a collection |
 | reubenmiller/go-c8y-cli#796 | `measurements createBulk` on the Runner (`Runner.RunBatch`) |
 
-Merged: go-c8y #199 (SDK seams), #200 (`op.Result` with 15 instead of 30 methods, the method/function rule and a compile-cost budget test), #202 (committed binaries removed), #204 (`ClientOptions.Logger`), #205 (fake server removes `null` fragments), #207 (certificate authority), #208 (fake server `withParents`), #209 (`ListServiceUsers`, collection results yield their items), #211 (`UIApplicationPlugins` manages `config.remotes`), #213 (`Microservices.Deploy`), #216 (`Registration.Register`), #217 (`Devices.Enroll`); go-c8y-cli #775 (CI for `v3`), #776 (body references and binary downloads), #782 (realtime subscribe), #787 (wait and assert), #788 (certificate authority), #789 (inventory parents), #790 (service users), #791 (UI plugins), #792 (hosted application and microservice create), #793 (text commands, `applications open`, bulk registration), #794 (`devices enroll`).
+Merged: go-c8y #199 (SDK seams), #200 (`op.Result` with 15 instead of 30 methods, the method/function rule and a compile-cost budget test), #202 (committed binaries removed), #204 (`ClientOptions.Logger`), #205 (fake server removes `null` fragments), #207 (certificate authority), #208 (fake server `withParents`), #209 (`ListServiceUsers`, collection results yield their items), #211 (`UIApplicationPlugins` manages `config.remotes`), #213 (`Microservices.Deploy`), #216 (`Registration.Register`), #217 (`Devices.Enroll`), #218 (`CreateList` resolves device names); go-c8y-cli #775 (CI for `v3`), #776 (body references and binary downloads), #782 (realtime subscribe), #787 (wait and assert), #788 (certificate authority), #789 (inventory parents), #790 (service users), #791 (UI plugins), #792 (hosted application and microservice create), #793 (text commands, `applications open`, bulk registration), #794 (`devices enroll`).
 
 ### Build time
 
