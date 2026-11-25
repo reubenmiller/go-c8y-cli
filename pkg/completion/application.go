@@ -6,25 +6,50 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/applications"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )
 
+const (
+	applicationTypeHosted       = "HOSTED"
+	applicationTypeMicroservice = "MICROSERVICE"
+)
+
+// listApplications returns one page of the applications matching the options
+func listApplications(client *apiv2.Client, opt applications.ListOptions) ([]jsonmodels.Application, error) {
+	if opt.PageSize == 0 {
+		opt.PaginationOptions = pageSize(2000)
+	}
+	return client.Applications.List(context.Background(), opt).Collect()
+}
+
+// isOwnedByOtherTenant reports whether the application is owned by a tenant other than the client's tenant
+func isOwnedByOtherTenant(client *apiv2.Client, app jsonmodels.Application) bool {
+	if client.Auth.Tenant == "" {
+		return false
+	}
+	owner := app.OwnerTenantID()
+	return owner != "" && owner != client.Auth.Tenant
+}
+
+// formatApplication formats an application as "name<TAB>type | id: <id>"
+func formatApplication(item jsonmodels.Application) string {
+	return fmt.Sprintf("%s\t%s | id: %s", item.Name(), item.Type(), item.ID())
+}
+
 // WithApplication application completion
-func WithApplication(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithApplication(flagName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
 			if err != nil {
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
-			items, _, err := client.Application.GetApplications(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				&c8y.ApplicationOptions{
-					PaginationOptions: *c8y.NewPaginationOptions(2000),
-				},
-			)
+			items, err := listApplications(client, applications.ListOptions{})
 
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
@@ -32,9 +57,9 @@ func WithApplication(flagName string, clientFunc func() (*c8y.Client, error)) Op
 			}
 			values := []string{}
 			pattern := "*" + toComplete + "*"
-			for _, item := range items.Applications {
-				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+			for _, item := range items {
+				if toComplete == "" || MatchString(pattern, item.Name()) || MatchString(pattern, item.ID()) {
+					values = append(values, formatApplication(item))
 				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp
@@ -44,19 +69,14 @@ func WithApplication(flagName string, clientFunc func() (*c8y.Client, error)) Op
 }
 
 // WithApplicationContext application context completion
-func WithApplicationContext(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithApplicationContext(flagName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
 			if err != nil {
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
-			items, _, err := client.Application.GetApplications(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				&c8y.ApplicationOptions{
-					PaginationOptions: *c8y.NewPaginationOptions(2000),
-				},
-			)
+			items, err := listApplications(client, applications.ListOptions{})
 
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
@@ -64,9 +84,10 @@ func WithApplicationContext(flagName string, clientFunc func() (*c8y.Client, err
 			}
 			values := []string{}
 			pattern := "*" + toComplete + "*"
-			for _, item := range items.Applications {
-				if toComplete == "" || MatchString(pattern, item.ContextPath) || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s | type: %s  id: %s", item.ContextPath, item.Name, item.Type, item.ID))
+			for _, item := range items {
+				contextPath := item.ContextPath()
+				if toComplete == "" || MatchString(pattern, contextPath) || MatchString(pattern, item.Name()) || MatchString(pattern, item.ID()) {
+					values = append(values, fmt.Sprintf("%s\t%s | type: %s  id: %s", contextPath, item.Name(), item.Type(), item.ID()))
 				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp
@@ -76,19 +97,14 @@ func WithApplicationContext(flagName string, clientFunc func() (*c8y.Client, err
 }
 
 // WithHostedApplication hosted application completion
-func WithHostedApplication(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithHostedApplication(flagName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
 			if err != nil {
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
-			items, _, err := client.Application.GetApplications(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				&c8y.ApplicationOptions{
-					PaginationOptions: *c8y.NewPaginationOptions(2000),
-				},
-			)
+			items, err := listApplications(client, applications.ListOptions{})
 
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
@@ -96,34 +112,30 @@ func WithHostedApplication(flagName string, clientFunc func() (*c8y.Client, erro
 			}
 			values := []string{}
 			pattern := "*" + toComplete + "*"
-			for _, item := range items.Applications {
-				if !strings.EqualFold(item.Type, "HOSTED") {
+			for _, item := range items {
+				if !strings.EqualFold(item.Type(), applicationTypeHosted) {
 					continue
 				}
 
 				// Ignore if not hosted in the current application
-				if client.TenantName != "" {
-					if item.Owner != nil && item.Owner.Tenant != nil && item.Owner.Tenant.ID != "" {
-						if item.Owner.Tenant.ID != client.TenantName {
-							continue
-						}
-					}
+				if isOwnedByOtherTenant(client, item) {
+					continue
 				}
 
-				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+				if toComplete == "" || MatchString(pattern, item.Name()) || MatchString(pattern, item.ID()) {
+					values = append(values, formatApplication(item))
 				}
 			}
 
 			// If no results, then included applications that are not owned by the current tenant
 			if len(values) == 0 {
-				for _, item := range items.Applications {
-					if !strings.EqualFold(item.Type, "HOSTED") {
+				for _, item := range items {
+					if !strings.EqualFold(item.Type(), applicationTypeHosted) {
 						continue
 					}
 
-					if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-						values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+					if toComplete == "" || MatchString(pattern, item.Name()) || MatchString(pattern, item.ID()) {
+						values = append(values, formatApplication(item))
 					}
 				}
 			}
@@ -134,24 +146,17 @@ func WithHostedApplication(flagName string, clientFunc func() (*c8y.Client, erro
 	}
 }
 
-var BooleanTrue bool = true
-var BooleanFalse bool = false
-
 // WithApplicationWithVersions applications with versions completion
-func WithApplicationWithVersions(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithApplicationWithVersions(flagName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
 			if err != nil {
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
-			items, _, err := client.Application.GetApplications(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				&c8y.ApplicationOptions{
-					PaginationOptions: *c8y.NewPaginationOptions(2000),
-					HasVersions:       &BooleanTrue,
-				},
-			)
+			items, err := listApplications(client, applications.ListOptions{
+				HasVersions: "true",
+			})
 
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
@@ -159,26 +164,22 @@ func WithApplicationWithVersions(flagName string, clientFunc func() (*c8y.Client
 			}
 			values := []string{}
 			pattern := "*" + toComplete + "*"
-			for _, item := range items.Applications {
+			for _, item := range items {
 				// Ignore if not hosted in the current application
-				if client.TenantName != "" {
-					if item.Owner != nil && item.Owner.Tenant != nil && item.Owner.Tenant.ID != "" {
-						if item.Owner.Tenant.ID != client.TenantName {
-							continue
-						}
-					}
+				if isOwnedByOtherTenant(client, item) {
+					continue
 				}
 
-				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+				if toComplete == "" || MatchString(pattern, item.Name()) || MatchString(pattern, item.ID()) {
+					values = append(values, formatApplication(item))
 				}
 			}
 
 			// If no results, then included applications that are not owned by the current tenant
 			if len(values) == 0 {
-				for _, item := range items.Applications {
-					if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-						values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+				for _, item := range items {
+					if toComplete == "" || MatchString(pattern, item.Name()) || MatchString(pattern, item.ID()) {
+						values = append(values, formatApplication(item))
 					}
 				}
 			}
@@ -190,19 +191,14 @@ func WithApplicationWithVersions(flagName string, clientFunc func() (*c8y.Client
 }
 
 // WithMicroservice microservice completion
-func WithMicroservice(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithMicroservice(flagName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
 			if err != nil {
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
-			items, _, err := client.Application.GetApplications(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				&c8y.ApplicationOptions{
-					PaginationOptions: *c8y.NewPaginationOptions(2000),
-				},
-			)
+			items, err := listApplications(client, applications.ListOptions{})
 
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
@@ -210,12 +206,12 @@ func WithMicroservice(flagName string, clientFunc func() (*c8y.Client, error)) O
 			}
 			values := []string{}
 			pattern := "*" + toComplete + "*"
-			for _, item := range items.Applications {
-				if !strings.EqualFold(item.Type, "MICROSERVICE") {
+			for _, item := range items {
+				if !strings.EqualFold(item.Type(), applicationTypeMicroservice) {
 					continue
 				}
-				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+				if toComplete == "" || MatchString(pattern, item.Name()) || MatchString(pattern, item.ID()) {
+					values = append(values, formatApplication(item))
 				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp
@@ -224,8 +220,8 @@ func WithMicroservice(flagName string, clientFunc func() (*c8y.Client, error)) O
 	}
 }
 
-// WithMicroservice completion
-func WithMicroserviceLoggers(flagName string, flagNameMicroserviceName string, clientFunc func() (*c8y.Client, error)) Option {
+// WithMicroserviceLoggers microservice logger completion (requires the microservice name)
+func WithMicroserviceLoggers(flagName string, flagNameMicroserviceName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -239,22 +235,16 @@ func WithMicroserviceLoggers(flagName string, flagNameMicroserviceName string, c
 			}
 
 			values := []string{}
-			resp, err := client.SendRequest(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				c8y.RequestOptions{
-					Method: "GET",
-					Path:   "/service/" + microserviceName + "/loggers",
-				},
-			)
-
-			if err != nil {
-				values := []string{fmt.Sprintf("error. %s", err)}
+			result := client.Microservices.Loggers.List(context.Background(), microserviceName)
+			if result.Err != nil {
+				values := []string{fmt.Sprintf("error. %s", result.Err)}
 				return values, cobra.ShellCompDirectiveError
 			}
 
 			pattern := "*" + toComplete + "*"
 
-			resp.JSON("loggers").ForEach(func(key, value gjson.Result) bool {
+			// The loggers collection is a map keyed by the logger name
+			gjson.ParseBytes(result.Data.Bytes()).ForEach(func(key, value gjson.Result) bool {
 				if toComplete == "" || MatchString(pattern, key.String()) {
 					values = append(values, key.String())
 				}
@@ -267,26 +257,23 @@ func WithMicroserviceLoggers(flagName string, flagNameMicroserviceName string, c
 	}
 }
 
-func getMicroserviceByName(client *c8y.Client, name string) (string, error) {
-	apps, _, err := client.Application.GetApplicationsByName(
-		c8y.WithDisabledDryRunContext(context.Background()),
-		name,
-		&c8y.ApplicationOptions{
-			Type:              c8y.ApplicationTypeMicroservice,
-			PaginationOptions: *c8y.NewPaginationOptions(1),
-		},
-	)
+func getMicroserviceByName(client *apiv2.Client, name string) (string, error) {
+	apps, err := client.Applications.List(context.Background(), applications.ListOptions{
+		Name:              name,
+		Type:              applicationTypeMicroservice,
+		PaginationOptions: pageSize(1),
+	}).Collect()
 	if err != nil {
 		return "", err
 	}
 
-	for _, app := range apps.Applications {
-		return app.ID, nil
+	for _, app := range apps {
+		return app.ID(), nil
 	}
 	return "", ErrNotFound
 }
 
-func getMicroserviceInstances(cmd *cobra.Command, flagApplicationID string, client *c8y.Client, toComplete string, formatFunc func(string) string) ([]string, error) {
+func getMicroserviceInstances(cmd *cobra.Command, flagApplicationID string, client *apiv2.Client, toComplete string, formatFunc func(string) string) ([]string, error) {
 	deviceID, err := cmd.Flags().GetString(flagApplicationID)
 	if err != nil {
 		// try getting a slice (only the first one is supported)
@@ -312,20 +299,17 @@ func getMicroserviceInstances(cmd *cobra.Command, flagApplicationID string, clie
 	}
 
 	pattern := "*" + toComplete + "*"
-	items, _, err := client.Inventory.GetManagedObjects(
-		c8y.WithDisabledDryRunContext(context.Background()),
-		&c8y.ManagedObjectOptions{
-			Type:              "c8y_Application_" + deviceID,
-			PaginationOptions: *c8y.NewPaginationOptions(1),
-		},
-	)
+	items, err := listManagedObjects(client, managedobjects.ListOptions{
+		Type:              "c8y_Application_" + deviceID,
+		PaginationOptions: pageSize(1),
+	})
 
 	if err != nil {
 		return nil, err
 	}
 	values := []string{}
-	for i := range items.ManagedObjects {
-		if v := items.Items[i].Get("c8y_Status.instances"); v.IsObject() {
+	for _, item := range items {
+		if v := item.Get("c8y_Status.instances"); v.IsObject() {
 			v.ForEach(func(key, value gjson.Result) bool {
 				if toComplete == "" || MatchString(pattern, key.Str) {
 					fValue := formatFunc(key.Str)
@@ -342,7 +326,7 @@ func getMicroserviceInstances(cmd *cobra.Command, flagApplicationID string, clie
 }
 
 // WithMicroserviceInstance microservice instances completion
-func WithMicroserviceInstance(flagName string, flagApplicationID string, clientFunc func() (*c8y.Client, error)) Option {
+func WithMicroserviceInstance(flagName string, flagApplicationID string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()

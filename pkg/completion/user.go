@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/users"
 	"github.com/spf13/cobra"
 )
 
 // WithUser user completion
-func WithUser(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithUser(flagName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -18,12 +18,12 @@ func WithUser(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
 
-			items, _, err := client.User.GetUsers(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				&c8y.UserOptions{
-					PaginationOptions: *c8y.NewPaginationOptions(2000),
+			items, err := client.Users.List(
+				context.Background(),
+				users.ListOptions{
+					PaginationOptions: pageSize(2000),
 				},
-			)
+			).Collect()
 
 			if err != nil {
 				values := []string{fmt.Sprintf("error. %s", err)}
@@ -31,16 +31,17 @@ func WithUser(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 			}
 			values := []string{}
 			pattern := "*" + toComplete + "*"
-			for _, item := range items.Users {
-				if toComplete == "" || MatchString(pattern, item.Username) || MatchString(pattern, item.FirstName) || MatchString(pattern, item.LastName) {
+			for _, item := range items {
+				firstName, lastName := item.FirstName(), item.LastName()
+				if toComplete == "" || MatchString(pattern, item.UserName()) || MatchString(pattern, firstName) || MatchString(pattern, lastName) {
 					details := []string{}
-					if item.Email != "" {
-						details = append(details, "email: "+item.Email)
+					if email := item.Email(); email != "" {
+						details = append(details, "email: "+email)
 					}
-					if item.FirstName != "" || item.LastName != "" {
-						details = append(details, fmt.Sprintf("name: %s %s", item.FirstName, item.LastName))
+					if firstName != "" || lastName != "" {
+						details = append(details, fmt.Sprintf("name: %s %s", firstName, lastName))
 					}
-					values = append(values, fmt.Sprintf("%s\t%s", item.ID, strings.Join(details, " | ")))
+					values = append(values, fmt.Sprintf("%s\t%s", item.ID(), strings.Join(details, " | ")))
 				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp

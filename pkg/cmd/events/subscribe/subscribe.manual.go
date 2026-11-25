@@ -9,7 +9,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -50,7 +49,7 @@ Subscribe to events (in realtime) for all devices, and stop after receiving 10 e
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", ccmd.factory.ClientV2),
 		completion.WithValidateSet("actionTypes", "CREATE", "UPDATE", "DELETE"),
 	)
 

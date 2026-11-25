@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants/devicestatistics"
 	"github.com/spf13/cobra"
 )
@@ -65,8 +64,8 @@ Get monthly device statistics for all devices for a specific month (day is ignor
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("type", "daily", "monthly"),
-		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithTenantID("tenant", ccmd.factory.ClientV2),
+		completion.WithDevice("device", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

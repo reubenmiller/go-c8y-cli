@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	appversions "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/applications/versions"
 	"github.com/spf13/cobra"
 )
@@ -54,7 +53,7 @@ Get an application versions by name
 
 	completion.WithOptions(
 		cmd,
-		completion.WithApplicationWithVersions("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithApplicationWithVersions("application", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

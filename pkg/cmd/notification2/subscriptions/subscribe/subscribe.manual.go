@@ -74,7 +74,7 @@ func NewSubscribeCmd(f *cmdutil.Factory) *SubscribeCmd {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithNotification2SubscriptionName("name", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithNotification2SubscriptionName("name", ccmd.factory.ClientV2),
 		completion.WithValidateSet("actionTypes", "CREATE", "UPDATE", "DELETE"),
 	)
 

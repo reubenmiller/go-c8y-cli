@@ -12,7 +12,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/spf13/cobra"
@@ -54,12 +53,12 @@ func New(cmd *cobra.Command, f *cmdutil.Factory, a Assert) *cobra.Command {
 	case Device:
 		flag = "device"
 		cmd.Flags().StringSlice(flag, []string{""}, "Device id or name (accepts pipeline)")
-		completion.WithOptions(cmd, completion.WithDevice(flag, func() (*c8y.Client, error) { return f.Client() }))
+		completion.WithOptions(cmd, completion.WithDevice(flag, f.ClientV2))
 		flags.WithOptions(cmd, flags.WithExtendedPipelineSupport(flag, flag, false, "deviceId", "source.id", "managedObject.id", "id"))
 	case Tenant:
 		flag = "tenant"
 		cmd.Flags().StringSlice(flag, []string{}, "Tenant id (accepts pipeline)")
-		completion.WithOptions(cmd, completion.WithTenantID(flag, func() (*c8y.Client, error) { return f.Client() }))
+		completion.WithOptions(cmd, completion.WithTenantID(flag, f.ClientV2))
 		flags.WithOptions(cmd, flags.WithExtendedPipelineSupport(flag, flag, false, "tenantId", "id", "owner.tenant.id", "tenant"))
 	default:
 		cmd.Flags().StringSlice(flag, []string{""}, "Inventory id (required) (accepts pipeline)")

@@ -12,7 +12,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/spf13/cobra"
 )
@@ -64,7 +63,7 @@ Open a multiple web browser tabs for a list of device groups in the cockpit appl
 
 	completion.WithOptions(
 		cmd,
-		completion.WithApplicationContext("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithApplicationContext("application", ccmd.factory.ClientV2),
 		completion.WithCustomValidateSet("page", func() []string {
 			cfg, err := ccmd.factory.Config()
 			if err != nil {
@@ -96,7 +95,7 @@ Open a multiple web browser tabs for a list of device groups in the cockpit appl
 				"software",
 			}
 		}),
-		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

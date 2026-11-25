@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -53,9 +52,9 @@ Get an existing child addition reference
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("id", ccmd.factory.ClientV2),
 		completion.WithValidateSet("childType", "addition", "asset", "device"),
-		completion.WithDevice("child", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("child", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

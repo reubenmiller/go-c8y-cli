@@ -5,42 +5,42 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants"
 	"github.com/spf13/cobra"
 )
 
 // WithTenantID tenant id completion
-func WithTenantID(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+func WithTenantID(flagName string, clientFunc ClientFunc) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
 			if err != nil {
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
-			tenants, _, err := client.Tenant.GetTenants(
-				c8y.WithDisabledDryRunContext(context.Background()),
-				c8y.NewPaginationOptions(20),
-			)
+			currentTenant := client.Auth.Tenant
+			items, err := client.Tenants.List(
+				context.Background(),
+				tenants.ListOptions{PaginationOptions: pageSize(20)},
+			).Collect()
 
 			if err != nil {
 				// Hide error, and just use the current tenant id
 				values := make([]string, 0)
-				if client.TenantName != "" {
-					values = append(values, client.TenantName+"\tcurrent tenant")
+				if currentTenant != "" {
+					values = append(values, currentTenant+"\tcurrent tenant")
 				}
-				// values = append(values, fmt.Sprintf("error\t%s", err))
 				return values, cobra.ShellCompDirectiveDefault
 			}
-			values := []string{client.TenantName + "\tcurrent tenant"}
-			for _, tenant := range tenants.Tenants {
+			values := []string{currentTenant + "\tcurrent tenant"}
+			for _, tenant := range items {
 				details := []string{}
-				if tenant.Company != "" {
-					details = append(details, fmt.Sprintf("company: %s", tenant.Company))
+				if company := tenant.Company(); company != "" {
+					details = append(details, fmt.Sprintf("company: %s", company))
 				}
-				if tenant.Domain != "" {
-					details = append(details, fmt.Sprintf("domain: %s", tenant.Domain))
+				if domain := tenant.Domain(); domain != "" {
+					details = append(details, fmt.Sprintf("domain: %s", domain))
 				}
-				values = append(values, fmt.Sprintf("%s\t%s", tenant.ID, strings.Join(details, " | ")))
+				values = append(values, fmt.Sprintf("%s\t%s", tenant.ID(), strings.Join(details, " | ")))
 			}
 			return values, cobra.ShellCompDirectiveDefault
 		})

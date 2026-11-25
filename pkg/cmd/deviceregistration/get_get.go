@@ -13,7 +13,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -49,7 +48,7 @@ Get a new device request
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDeviceRegistrationRequest("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDeviceRegistrationRequest("id", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

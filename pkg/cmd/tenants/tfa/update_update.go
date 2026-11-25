@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -54,7 +53,7 @@ Update the Tenant's TFA setting to use time based one-time-password
 
 	completion.WithOptions(
 		cmd,
-		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithTenantID("tenant", ccmd.factory.ClientV2),
 		completion.WithValidateSet("strategy", "SMS", "TOTP"),
 	)
 

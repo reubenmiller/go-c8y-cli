@@ -18,7 +18,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/pkg/remoteaccess"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
@@ -86,8 +85,8 @@ func NewCmdRun(f *cmdutil.Factory) *CmdRun {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithRemoteAccessPassthroughConfiguration("configuration", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", ccmd.factory.ClientV2),
+		completion.WithRemoteAccessPassthroughConfiguration("configuration", "device", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

@@ -20,7 +20,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/software/softwareitems"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/software/softwareversions"
@@ -72,9 +71,9 @@ Install a software package version with an explicit url
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithSoftware("software", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithSoftwareVersion("version", "software", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", ccmd.factory.ClientV2),
+		completion.WithSoftware("software", ccmd.factory.ClientV2),
+		completion.WithSoftwareVersion("version", "software", ccmd.factory.ClientV2),
 		completion.WithValidateSet("action", "install"),
 	)
 

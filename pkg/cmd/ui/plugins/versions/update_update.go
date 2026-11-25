@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -54,8 +53,8 @@ Replace tags assigned to a version of a plugin
 
 	completion.WithOptions(
 		cmd,
-		completion.WithUIPlugin("plugin", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithUIPluginVersion("version", "plugin", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUIPlugin("plugin", ccmd.factory.ClientV2),
+		completion.WithUIPluginVersion("version", "plugin", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

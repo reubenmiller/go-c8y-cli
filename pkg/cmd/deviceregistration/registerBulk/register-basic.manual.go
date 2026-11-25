@@ -6,7 +6,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devices/registration"
 	"github.com/spf13/cobra"
 )
@@ -56,7 +55,7 @@ func NewRegisterBasicCmd(f *cmdutil.Factory) *RegisterBasicCmd {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithRootDeviceGroup("group", func() (*c8y.Client, error) { return f.Client() }),
+		completion.WithRootDeviceGroup("group", f.ClientV2),
 	)
 
 	flags.WithOptions(

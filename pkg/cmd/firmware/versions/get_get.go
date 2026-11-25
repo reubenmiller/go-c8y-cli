@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/firmware/firmwareversions"
 	"github.com/spf13/cobra"
 )
@@ -61,8 +60,8 @@ Get a firmware package version using pipeline
 
 	completion.WithOptions(
 		cmd,
-		completion.WithFirmwareVersion("id", "firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithFirmware("firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmwareVersion("id", "firmware", ccmd.factory.ClientV2),
+		completion.WithFirmware("firmware", ccmd.factory.ClientV2),
 	)
 
 	flags.WithOptions(

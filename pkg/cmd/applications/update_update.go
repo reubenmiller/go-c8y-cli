@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -58,7 +57,7 @@ Update an application's availability
 
 	completion.WithOptions(
 		cmd,
-		completion.WithApplication("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithApplication("id", ccmd.factory.ClientV2),
 		completion.WithValidateSet("availability", "MARKET", "PRIVATE"),
 	)
 

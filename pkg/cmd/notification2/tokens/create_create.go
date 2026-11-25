@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
 )
@@ -60,7 +59,7 @@ Create a new token which is valid for 30 minutes
 
 	completion.WithOptions(
 		cmd,
-		completion.WithNotification2SubscriptionName("name", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithNotification2SubscriptionName("name", ccmd.factory.ClientV2),
 		completion.WithValidateSet("type", "notification"),
 	)
 

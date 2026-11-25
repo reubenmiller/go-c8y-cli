@@ -1,0 +1,171 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+# Flag completions which look up values on the server. They use the test data
+# of tests/scripts/setup.sh and run against the go-c8y fake server
+# (tests/run-offline.sh) or a real tenant.
+tests:
+  It completes devices by a partial name:
+    command: |
+      c8y __complete devices get --id "device0"
+    exit-code: 0
+    stdout:
+      contains:
+        - "device01\t"
+        - "device02\t"
+        - "| id: "
+      not-contains:
+        - agentParent01
+
+  It completes agents:
+    command: |
+      c8y __complete agents get --id "agent0"
+    exit-code: 0
+    stdout:
+      contains:
+        - "agent01\t"
+
+  It completes device groups:
+    command: |
+      c8y __complete devicegroups get --id "My G"
+    exit-code: 0
+    stdout:
+      contains:
+        - "My Group\t"
+
+  It completes smart groups:
+    command: |
+      c8y __complete smartgroups get --id "my smart"
+    exit-code: 0
+    stdout:
+      contains:
+        - "my smartgroup\t"
+
+  It completes applications:
+    command: |
+      c8y __complete applications get --id "my-example"
+    exit-code: 0
+    stdout:
+      contains:
+        - "my-example-app\t"
+
+  It completes microservices:
+    command: |
+      c8y __complete microservices enable --id "techn"
+    exit-code: 0
+    stdout:
+      contains:
+        - "technician\tMICROSERVICE | id: "
+
+  It completes users:
+    command: |
+      c8y __complete users get --id "peterpi"
+    exit-code: 0
+    stdout:
+      contains:
+        - "peterpi@example.com\temail: peterpi@example.com"
+
+  It completes user groups:
+    command: |
+      c8y __complete usergroups get --id "power"
+    exit-code: 0
+    stdout:
+      contains:
+        - "powerusers\tid: "
+
+  It completes user roles:
+    command: |
+      c8y __complete userroles addRoleToUser --role ""
+    exit-code: 0
+    stdout:
+      contains:
+        - ROLE_
+
+  It completes tenants with the current tenant first:
+    command: |
+      c8y __complete applications list --tenant "" | head -n 1
+    exit-code: 0
+    stdout:
+      contains:
+        - "\tcurrent tenant"
+
+  It completes software:
+    command: |
+      c8y __complete software get --id "my-a"
+    exit-code: 0
+    stdout:
+      contains:
+        - "my-app\t"
+
+  It completes software versions of a software package:
+    command: |
+      c8y __complete software versions get --software my-app --id ""
+    exit-code: 0
+    stdout:
+      contains:
+        - "1.2.3\t"
+
+  It completes firmware:
+    command: |
+      c8y __complete firmware get --id "iot"
+    exit-code: 0
+    stdout:
+      contains:
+        - "iot-linux\t"
+
+  It completes firmware versions of a firmware package:
+    command: |
+      c8y __complete firmware versions get --firmware iot-linux --id ""
+    exit-code: 0
+    stdout:
+      contains:
+        - "1.0.0\t"
+
+  It completes firmware patches of a firmware package:
+    command: |
+      c8y __complete firmware patches get --firmware iot-linux --id ""
+    exit-code: 0
+    stdout:
+      contains:
+        - "1.0.1\t"
+
+  It completes configurations:
+    command: |
+      c8y __complete configuration get --id "example"
+    exit-code: 0
+    stdout:
+      contains:
+        - "example-config\t"
+
+  It completes device profiles:
+    command: |
+      c8y __complete deviceprofiles get --id "profile"
+    exit-code: 0
+    stdout:
+      contains:
+        - "profile01\t"
+
+  It completes the services of a device:
+    command: |
+      c8y __complete devices services get --device device02 --id ""
+    exit-code: 0
+    stdout:
+      contains:
+        - "sshd\t"
+
+  It completes trusted device certificates:
+    command: |
+      c8y __complete devicemanagement certificates get --id "My"
+    exit-code: 0
+    stdout:
+      contains:
+        - "MyCert\t"
+
+  It completes the remote access configurations of a device:
+    command: |
+      c8y remoteaccess configurations create-passthrough --device device01 --name completion-ssh --hostname 127.0.0.1 --port 22 > /dev/null
+      c8y __complete remoteaccess configurations get --device device01 --id "completion"
+      c8y remoteaccess configurations delete --device device01 --id completion-ssh > /dev/null
+    exit-code: 0
+    stdout:
+      contains:
+        - "completion-ssh\tPASSTHROUGH 127.0.0.1:22 | id: "

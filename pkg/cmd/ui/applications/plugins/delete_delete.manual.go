@@ -7,7 +7,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -50,8 +49,8 @@ func DeleteNewCmd(f *cmdutil.Factory) *plugins.PluginCmd {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithHostedApplication("application", func() (*c8y.Client, error) { return ccmd.Factory.Client() }),
-		completion.WithUIPluginWithVersions("plugin", func() (*c8y.Client, error) { return ccmd.Factory.Client() }),
+		completion.WithHostedApplication("application", ccmd.Factory.ClientV2),
+		completion.WithUIPluginWithVersions("plugin", ccmd.Factory.ClientV2),
 	)
 
 	flags.WithOptions(

@@ -54,8 +54,10 @@ func matchesMethod(method string, candidates ...string) bool {
 	return false
 }
 
+// clientFactoryArg is the client getter argument of the completion options
+// (completion.ClientFunc): the factory's go-c8y v2 client.
 func clientFactoryArg() string {
-	return "func() (*c8y.Client, error) { return ccmd.factory.Client()}),"
+	return "ccmd.factory.ClientV2),"
 }
 
 // GenerateCommand ports New-C8yApiGoCommand.ps1: it renders the unformatted
