@@ -274,6 +274,11 @@ func (h *LoginHandlerV2) requestAuth() authv2.AuthOptions {
 		auth.Username = h.auth.Username
 		auth.Password = h.auth.Password
 	}
+	if authType != authv2.AuthTypeUnset {
+		// The client applies the type to every request, e.g. basic auth never exchanges
+		// the credentials for a token
+		auth.AuthType = []authv2.AuthType{authType}
+	}
 	return auth
 }
 
