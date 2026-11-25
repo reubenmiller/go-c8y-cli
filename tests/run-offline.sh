@@ -96,6 +96,9 @@ elif [ "${C8Y_OFFLINE_SUITE:-auto}" = manual ]; then
     folder="${1:-}"
     [ $# -gt 0 ] && shift
     cd "$SCRIPT_DIR"
+    # Same as run-manual.sh: the test extensions (e.g. c8y-kitchensink) and no default page size
+    export C8Y_SETTINGS_EXTENSIONS_DATADIR="$SCRIPT_DIR/testdata"
+    export C8Y_SETTINGS_DEFAULTS_PAGESIZE=" "
     export TEST_SHELL=bash
     if [ -f "manual/$folder" ]; then
         commander test --config ./config.manual.yaml "$@" "manual/$folder" </dev/null

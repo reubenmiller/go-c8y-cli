@@ -175,7 +175,7 @@ jobs:
     - name: Manual cli tests against the fake server
       run: task test-cli-offline-manual
       shell: bash
-      timeout-minutes: 15
+      timeout-minutes: 30
 
   test-examples:
     runs-on: ${{ matrix.os }}
