@@ -28,7 +28,8 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/totp"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	c8ycache "github.com/reubenmiller/go-c8y/v2/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -1868,12 +1869,12 @@ func (c *Config) GetSilentExit() bool {
 }
 
 func ParseLoginTypeWithDefault(v string) string {
-	// Pass v2-only types through unchanged – c8y.ParseLoginType doesn't know them.
+	// Pass CLI-only types through unchanged as the SDK's login type parser doesn't know them.
 	switch strings.ToUpper(v) {
 	case logintype.Browser, logintype.Certificate, logintype.Device:
 		return strings.ToUpper(v)
 	}
-	value, err := c8y.ParseLoginType(v)
+	value, err := authentication.ParseLoginType(v)
 	if err != nil {
 		value = ""
 	}
@@ -1890,7 +1891,7 @@ func (c *Config) GetLoginTypeWithDefault() string {
 func (c *Config) GetLoginTypeRaw() string {
 	if c.HasSessionUsernameOrPassword() {
 		// Force BASIC AUTH
-		return c8y.LoginTypeBasic
+		return logintype.Basic
 	}
 	v := c.viper.GetString(SettingsLoginType)
 	return strings.ToUpper(v)
@@ -1916,9 +1917,9 @@ func (c *Config) SetLoginType(v string) {
 		c.Set(SettingsLoginType, strings.ToUpper(v))
 		return
 	}
-	value, err := c8y.ParseLoginType(v)
+	value, err := authentication.ParseLoginType(v)
 	if err != nil {
-		value = c8y.LoginTypeOAuth2Internal
+		value = logintype.OAuth2Internal
 	}
 	c.Set(SettingsLoginType, value)
 }
@@ -1944,12 +1945,12 @@ func (c *Config) CacheMethods() string {
 }
 
 // CacheMode caching mode which controls
-func (c *Config) CacheMode() c8y.StoreMode {
+func (c *Config) CacheMode() c8ycache.StoreMode {
 	rawValue := c.viper.GetString(SettingsCacheMode)
 	if strings.EqualFold(rawValue, "storeonly") {
-		return c8y.StoreModeWrite
+		return c8ycache.StoreModeWrite
 	}
-	return c8y.StoreModeReadWrite
+	return c8ycache.StoreModeReadWrite
 }
 
 // CacheKeyIncludeHost include full host name in cache key generation
@@ -2166,7 +2167,7 @@ func (c *Config) MarshalSettings() ([]byte, error) {
 }
 
 // SaveClientConfig save client settings to the session configuration
-func (c *Config) SaveClientConfig(client *c8y.Client) error {
+func (c *Config) SaveClientConfig(client *ClientSession) error {
 	if client != nil {
 		if c.StorePassword() {
 			c.SetPassword(client.Password)
@@ -2175,7 +2176,7 @@ func (c *Config) SaveClientConfig(client *c8y.Client) error {
 		if c.StoreToken() {
 			c.SetToken(client.Token)
 		}
-		c.SetTenant(client.TenantName)
+		c.SetTenant(client.Tenant)
 
 		if client.Version != "" {
 			c.SetCumulocityVersion(client.Version)
@@ -2374,7 +2375,7 @@ func (c *Config) GetSessionFile(overrideSession ...string) string {
 // 1. load settings (from C8Y_SESSION_HOME path)
 // 2. load session file (by path)
 // 3. load session file (by name)
-func (c *Config) ReadConfigFiles(client *c8y.Client, ignoreSessionFile ...bool) (path string, err error) {
+func (c *Config) ReadConfigFiles(client *ClientSession, ignoreSessionFile ...bool) (path string, err error) {
 	c.Logger.Debugf("Reading configuration files")
 	v := c.viper
 	v.AddConfigPath(".")
@@ -2422,14 +2423,14 @@ func (c *Config) ReadConfigFiles(client *c8y.Client, ignoreSessionFile ...bool) 
 	return path, err
 }
 
-func (c *Config) HideSensitiveInformationIfActive(client *c8y.Client, message string) string {
+func (c *Config) HideSensitiveInformationIfActive(client *ClientSession, message string) string {
 	if !c.HideSensitive() {
 		return message
 	}
 	return c.HideSensitiveInformation(client, message)
 }
 
-func (c *Config) HideSensitiveInformation(client *c8y.Client, message string) string {
+func (c *Config) HideSensitiveInformation(client *ClientSession, message string) string {
 	if client == nil {
 		return message
 	}
@@ -2439,8 +2440,8 @@ func (c *Config) HideSensitiveInformation(client *c8y.Client, message string) st
 		message = strings.ReplaceAll(message, username, "******")
 	}
 
-	if client.TenantName != "" {
-		message = strings.ReplaceAll(message, client.TenantName, "{tenant}")
+	if client.Tenant != "" {
+		message = strings.ReplaceAll(message, client.Tenant, "{tenant}")
 	}
 	if client.Username != "" {
 		message = strings.ReplaceAll(message, client.Username, "{username}")
@@ -2451,10 +2452,8 @@ func (c *Config) HideSensitiveInformation(client *c8y.Client, message string) st
 	if client.Token != "" {
 		message = strings.ReplaceAll(message, client.Token, "{token}")
 	}
-	if client.BaseURL != nil {
-		if host := client.BaseURL.Host; host != "" {
-			message = strings.ReplaceAll(message, strings.TrimRight(host, "/"), "{host}")
-		}
+	if host := client.Host; host != "" {
+		message = strings.ReplaceAll(message, strings.TrimRight(host, "/"), "{host}")
 	}
 
 	basicAuthMatcher := regexp.MustCompile(`(Basic)\s+[A-Za-z0-9=]+`)

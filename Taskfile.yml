@@ -407,7 +407,7 @@ tasks:
           inventory/wait.yaml inventory/assert inventory/parents events/assert \
           ui/applications/plugins/plugins_install.yaml ui/applications/plugins/plugins_delete.yaml \
           ui/plugins/plugins_create.yaml notification2/subscribe.yaml \
-          applications/open sessions/encrypt_text.yaml; do
+          applications/open sessions/encrypt_text.yaml sessions/login/login_types.yaml; do
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
 

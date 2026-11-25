@@ -1,13 +1,5 @@
 {
   "go-c8y-v1": [
-    "pkg/cmd/factory/c8yclient.go",
-    "pkg/cmd/factory/factory.go",
-    "pkg/cmd/root/command.go",
-    "pkg/cmd/root/extension_exec.go",
-    "pkg/cmd/root/root.go",
-    "pkg/cmd/sessions/create/create.manual.go",
-    "pkg/cmd/sessions/login/login.manual.go",
-    "pkg/cmd/sessions/set_set.manual.go",
-    "pkg/cmd/settings/update_update.manual.go"
+    "pkg/cmd/factory/c8yclient.go"
   ]
 }

@@ -19,7 +19,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions/cmdtree"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -74,16 +74,16 @@ func extensionEnv(f *cmdutil.Factory, ext extensions.Extension) []string {
 	unset := map[string]bool{}
 
 	if cfg, err := f.Config(); err == nil {
-		if client, err := f.Client(); err == nil && client != nil && client.BaseURL != nil && client.BaseURL.Host != "" {
+		if client, err := f.ClientSession(); err == nil && client.Host != "" {
 			session := &c8ysession.CumulocitySession{
 				Path:     cfg.GetSessionFile(),
-				Host:     strings.TrimSuffix(c8y.FormatBaseURL(client.BaseURL.String()), "/"),
+				Host:     strings.TrimSuffix(apiv2.FormatBaseURL(client.URL), "/"),
 				Token:    client.Token,
 				Tenant:   cfg.GetTenant(),
 				Version:  cfg.GetCumulocityVersion(),
 				Username: client.Username,
 			}
-			for key, value := range c8ysession.GetVariablesFromSession(session, cfg, client, false) {
+			for key, value := range c8ysession.GetVariablesFromSession(session, cfg, &client, false) {
 				// Remove values from the parent environment which belong to another session
 				unset[key] = true
 				if v := fmt.Sprintf("%v", value); v != "" {

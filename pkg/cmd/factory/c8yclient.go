@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -17,27 +18,9 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
 	"github.com/spf13/viper"
 )
-
-var EnvCumulocityHostNames = []string{
-	"C8Y_HOST",
-	"C8Y_BASEURL",
-	"C8Y_URL",
-}
-
-// GetHostFromEnvironment gets the first non-empty host environment variable value
-// as Cumulocity uses different environment variable names for different tooling
-func GetHostFromEnvironment() string {
-	var value = ""
-	for _, name := range EnvCumulocityHostNames {
-		value = strings.TrimSpace(os.Getenv(name))
-		if value != "" {
-			break
-		}
-	}
-	return value
-}
 
 // WithCompression sets the compression option for the http client
 func WithCompression(enable bool) c8y.ClientOption {
@@ -77,7 +60,7 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		}
 
 		log.Debug("Creating c8y client")
-		configureProxySettings(cfg, log)
+		cfg.ConfigureProxySettings(log)
 
 		internalHttpClient := c8y.NewHTTPClient(
 			WithProxyDisabled(cfg.IgnoreProxy()),
@@ -126,7 +109,7 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 				c8y.CacheOptions{
 					ExcludeAuth: !cfg.CacheKeyIncludeAuth(),
 					ExcludeHost: !cfg.CacheKeyIncludeHost(),
-					Mode:        cfg.CacheMode(),
+					Mode:        c8y.StoreMode(cfg.CacheMode()),
 					BodyKeys:    cacheBodyPaths,
 				},
 			)
@@ -141,45 +124,16 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 			}
 		}
 
-		if username == "" {
-			username = cfg.GetUsername()
-		}
+		clientAuth, authErrors := cfg.LoadClientAuth(username, password)
 
-		tenant := ""
-		if parts := strings.SplitN(username, "/", 2); len(parts) == 2 {
-			if parts[0] != "" {
-				tenant = parts[0]
-			}
-			username = parts[1]
-		}
-		if tenant == "" {
-			tenant = cfg.GetTenant()
-		}
-
-		authErrors := make([]error, 0)
-		if password == "" {
-			// Only log errors
-			if pass, err := cfg.GetPassword(); err == nil {
-				password = pass
-			} else {
-				authErrors = append(authErrors, err)
-			}
-		}
-
-		c8yURL := cfg.GetHost()
-		c8yURLFromEnv := GetHostFromEnvironment()
-		if c8yURL == "" && c8yURLFromEnv != "" {
-			// Get url from env variable if it is empty
-			log.Debugf("Using URL from env variable. %s", c8yURLFromEnv)
-			c8yURL = c8yURLFromEnv
-		}
+		c8yURL := cfg.GetHostWithEnvironment()
 
 		client := c8y.NewClient(
 			httpClient,
 			c8ysession.FormatHost(c8yURL),
-			tenant,
-			username,
-			password,
+			clientAuth.Tenant,
+			clientAuth.Username,
+			clientAuth.Password,
 			true,
 		)
 
@@ -205,20 +159,14 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 					Config:        cfg,
 					Logger:        log,
 					Console:       consol,
-					HideSensitive: cfg.HideSensitiveInformationIfActive,
+					HideSensitive: cmdutil.HideSensitiveForLegacyClient(cfg),
 				}
 				handler.DryRunHandler(f.IOStreams, options, req)
 			},
 		})
 
 		// load authentication
-		if err := loadAuthentication(cfg, client); err != nil {
-			// Only log errors
-			authErrors = append(authErrors, err)
-		} else {
-			// Clear any existing auth errors
-			authErrors = nil
-		}
+		applyClientAuth(client, clientAuth)
 
 		log.Infof("Using client auth type: %s", client.AuthorizationType.String())
 
@@ -266,68 +214,20 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 	}
 }
 
-func parseBasicAuthCredentials(client *c8y.Client, tenant, username, password string) {
-	if t, u, found := strings.Cut(username, "/"); found {
-		tenant = t
-		username = u
-	}
-	client.SetTenantUsernamePassword(tenant, username, password)
-}
+// applyClientAuth sets the credentials and the authorization of the session to the legacy client
+func applyClientAuth(client *c8y.Client, auth config.ClientAuth) {
+	client.TenantName = auth.Tenant
+	client.Username = auth.Username
+	client.Password = auth.Password
 
-func loadAuthentication(conf *config.Config, client *c8y.Client) error {
-	loginType := conf.GetLoginTypeRaw()
-	if loginType == "" {
-		// auto detect auth method based on the info which is there
-
-		// oauth2_internal / token
-		token, err := conf.GetToken()
-		if err == nil && token != "" {
-			client.SetToken(token)
-			return nil
-		}
-
-		// password
-		if p, err := conf.GetPassword(); err == nil && p != "" {
-			parseBasicAuthCredentials(client, conf.GetTenant(), conf.GetUsername(), p)
-			return nil
-		}
-
-		// none
+	switch auth.AuthType {
+	case authentication.AuthTypeBasic:
+		client.SetAuthorizationType(c8y.AuthTypeBasic)
+	case authentication.AuthTypeBearer:
+		client.SetToken(auth.Token)
+	case authentication.AuthTypeNone:
 		client.SetAuthorizationType(c8y.AuthTypeNone)
-		return nil
 	}
-
-	// Force the usage of an auth method regardless if the pre-requisites for
-	// such auth method are available (this allows users to also enforce it)
-	loginType = conf.GetLoginTypeWithDefault()
-
-	// OAUTH2 (internal and external)
-	if strings.EqualFold(loginType, c8y.LoginTypeOAuth2Internal) || strings.EqualFold(loginType, c8y.LoginTypeOAuth2) ||
-		strings.EqualFold(loginType, "BROWSER") || strings.EqualFold(loginType, "CERTIFICATE") ||
-		strings.EqualFold(loginType, "DEVICE") {
-		token, err := conf.GetToken()
-		if err != nil {
-			return err
-		}
-		client.SetToken(token)
-		return nil
-	}
-
-	if strings.EqualFold(loginType, c8y.LoginTypeBasic) {
-		password, err := conf.GetPassword()
-		if err != nil {
-			return err
-		}
-		parseBasicAuthCredentials(client, conf.GetTenant(), conf.GetUsername(), password)
-		return nil
-	}
-
-	if strings.EqualFold(loginType, c8y.LoginTypeNone) {
-		// clear token as we want to force basic auth
-		client.SetAuthorizationType(c8y.AuthTypeNone)
-		return nil
-	}
-	return nil
 }
 
 func newWebsocketDialer(ignoreProxySettings bool) *websocket.Dialer {
@@ -356,44 +256,32 @@ func WithProxyDisabled(disable bool) c8y.ClientOption {
 	}
 }
 
-func configureProxySettings(cfg *config.Config, log *logger.Logger) {
+// clientMissing is the default legacy client function, which is used until the client is configured
+func clientMissing() (*c8y.Client, error) {
+	return nil, fmt.Errorf("client is missing")
+}
 
-	// Proxy settings
-	// Either use explicit proxy, ignore proxy, or use existing env variables
-	// --proxy "http://10.0.0.1:8080"
-	// --noProxy
-	// HTTP_PROXY=http://10.0.0.1:8080
-	// NO_PROXY=localhost,127.0.0.1
-	proxy := cfg.Proxy()
-	noProxy := cfg.IgnoreProxy()
-	if noProxy {
-		log.Debug("using explicit noProxy setting")
-		os.Setenv("HTTP_PROXY", "")
-		os.Setenv("HTTPS_PROXY", "")
-		os.Setenv("http_proxy", "")
-		os.Setenv("https_proxy", "")
-	} else {
-		if proxy != "" {
-			log.Debugf("using explicit proxy [%s]", proxy)
+// NewLegacyClient returns a function which creates the legacy (go-c8y v1) client once, and returns
+// the same client on every call. It is used for the commands which have not been migrated to the
+// go-c8y v2 client yet (see cmdutil.Factory.Client).
+func NewLegacyClient(f *cmdutil.Factory, sessionFile, username, password string, disableEncryptionCheck bool) func() (*c8y.Client, error) {
+	var mu sync.Mutex
+	var client *c8y.Client
+	return func() (*c8y.Client, error) {
+		mu.Lock()
+		defer mu.Unlock()
 
-			os.Setenv("HTTP_PROXY", proxy)
-			os.Setenv("HTTPS_PROXY", proxy)
-			os.Setenv("http_proxy", proxy)
-			os.Setenv("https_proxy", proxy)
-
-		} else {
-			proxyVars := []string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
-
-			var proxySettings strings.Builder
-
-			for _, name := range proxyVars {
-				if v := os.Getenv(name); v != "" {
-					proxySettings.WriteString(fmt.Sprintf(" %s [%s]", name, v))
-				}
-			}
-			if proxySettings.Len() > 0 {
-				log.Debugf("Using existing env variables.%s", proxySettings.String())
-			}
+		if client != nil {
+			return client, nil
 		}
+		// the logger must be set before the client is created, as the creation sends requests
+		if log, logErr := f.Logger(); logErr == nil && log != nil {
+			c8y.Logger = log
+		} else {
+			c8y.Logger = logger.NewDummyLogger("c8y")
+		}
+		created, err := CreateCumulocityClient(f, sessionFile, username, password, disableEncryptionCheck)()
+		client = created
+		return created, err
 	}
 }

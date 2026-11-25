@@ -1,11 +1,11 @@
 package session
 
 import (
+	"encoding/base64"
 	"fmt"
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/testing/command"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/stretchr/testify/assert"
 	"github.com/tidwall/gjson"
 )
@@ -29,5 +29,5 @@ func Test_SetUsernamePassword(t *testing.T) {
 	assert.NotEmpty(t, stdout)
 
 	response := gjson.Parse(stdout)
-	assert.Equal(t, response.Get("headers.Authorization").String(), c8y.NewBasicAuthString(tenant, username, password))
+	assert.Equal(t, response.Get("headers.Authorization").String(), "Basic "+base64.StdEncoding.EncodeToString([]byte(tenant+"/"+username+":"+password)))
 }

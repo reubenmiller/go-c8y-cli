@@ -18,7 +18,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/shell"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/tableviewer"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -279,13 +278,13 @@ var updateSettingsOptions = map[string]argumentHandler{
 
 	// login type
 	"login.type": {"login.type", "string", config.SettingsLoginType, []string{
-		c8y.LoginTypeBasic + "\tBasic Auth (not recommended)",
-		c8y.LoginTypeOAuth2Internal + "\tInternal OAUTH2 (tokens)",
-		c8y.LoginTypeOAuth2 + "\tExternal OAUTH2/SSO (tokens)",
+		logintype.Basic + "\tBasic Auth (not recommended)",
+		logintype.OAuth2Internal + "\tInternal OAUTH2 (tokens)",
+		logintype.OAuth2 + "\tExternal OAUTH2/SSO (tokens)",
 		logintype.Browser + "\tSSO via browser (authorization code flow)",
 		logintype.Device + "\tOAuth2 device flow",
 		logintype.Certificate + "\tCertificate-based authentication",
-		c8y.LoginTypeNone + "\tNone",
+		logintype.None + "\tNone",
 		"",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
@@ -560,10 +559,6 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	client, err := n.factory.Client()
-	if err != nil {
-		return err
-	}
 	var v *viper.Viper
 	writeToFile := true
 	if n.file != "" {
@@ -611,12 +606,16 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 		if n.file != "" {
 			err = v.WriteConfig()
 		} else {
+			client, sessionErr := n.factory.ClientSession()
+			if sessionErr != nil {
+				return sessionErr
+			}
 			if cfg.IsEncryptionEnabled() || cfg.IsPasswordEncrypted() || cfg.IsTokenEncrypted() {
-				if err := utilities.CheckEncryption(n.factory.IOStreams, cfg, client); err != nil {
+				if err := utilities.CheckEncryption(n.factory.IOStreams, cfg, &client); err != nil {
 					return err
 				}
 			}
-			err = cfg.SaveClientConfig(client)
+			err = cfg.SaveClientConfig(&client)
 		}
 		if err != nil {
 			return err
