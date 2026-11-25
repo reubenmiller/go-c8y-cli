@@ -19,7 +19,7 @@ the Pester tests under `tools/PSc8y/Tests` and the packaged module under
 ```sh
 go run ./cmd/gen-cli            # regenerate pkg/cmd/**/*.auto.go (in place)
 go run ./cmd/gen-cli -check     # verify outputs are current (CI-friendly)
-go run ./cmd/gen-cli -new       # also write commands with no *.auto.go on disk (scaffold)
+go run ./cmd/gen-cli -new -spec alarms.json  # scaffold the commands of one spec (no *.auto.go on disk)
 task generate-go-code           # same as the first command, with task deps
 go test ./internal/codegen      # golden test: every spec vs committed output
 
@@ -32,7 +32,9 @@ go test ./internal/codegen/powershell # golden test vs committed cmdlets/tests
 A command whose `*.auto.go` file is not on disk is treated as migrated to a
 hand-written command on the go-c8y v2 `c8ystream` Runner, and is skipped by
 `gen-cli` (unless `-new` is given) and by the golden test. On the v3 branch all
-commands are migrated, so `gen-cli` writes nothing by default.
+commands are migrated, so `gen-cli` writes nothing by default. `-new` writes every
+command of the selected specs, so limit it with `-spec` to the specification of the
+new command, else it writes all migrated commands again.
 
 ## Byte-exact compatibility
 

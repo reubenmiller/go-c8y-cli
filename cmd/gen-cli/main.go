@@ -17,19 +17,32 @@ func main() {
 	specDir := flag.String("specs", "api/spec/json", "Directory containing the json specifications")
 	outputDir := flag.String("output", "pkg/cmd", "Output directory for the generated commands")
 	check := flag.Bool("check", false, "Verify the generated files match the files on disk without writing")
-	includeNew := flag.Bool("new", false, "Also write the commands which have no *.auto.go file on disk (scaffold a new command). Without it, those are treated as migrated to hand-written commands and skipped")
+	includeNew := flag.Bool("new", false, "Also write the commands which have no *.auto.go file on disk (scaffold a new command). Without it, those are treated as migrated to hand-written commands and skipped. Combine it with -spec, else every migrated command is written again")
+	onlySpec := flag.String("spec", "", "Only use this specification file of the -specs directory (e.g. alarms.json)")
 	flag.Parse()
 
-	if err := run(*specDir, *outputDir, *check, *includeNew); err != nil {
+	if err := run(*specDir, *outputDir, *check, *includeNew, *onlySpec); err != nil {
 		fmt.Fprintf(os.Stderr, "gen-cli: %s\n", err)
 		os.Exit(1)
 	}
 }
 
-func run(specDir, outputDir string, check bool, includeNew bool) error {
+func run(specDir, outputDir string, check bool, includeNew bool, onlySpec string) error {
 	specFiles, err := codegen.ListSpecFiles(specDir)
 	if err != nil {
 		return err
+	}
+	if onlySpec != "" {
+		filtered := specFiles[:0]
+		for _, specFile := range specFiles {
+			if filepath.Base(specFile) == filepath.Base(onlySpec) {
+				filtered = append(filtered, specFile)
+			}
+		}
+		if len(filtered) == 0 {
+			return fmt.Errorf("specification %s not found in %s", onlySpec, specDir)
+		}
+		specFiles = filtered
 	}
 	if len(specFiles) == 0 {
 		return fmt.Errorf("no specification files found in %s", specDir)
