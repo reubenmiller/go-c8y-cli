@@ -53,10 +53,22 @@ if [ -z "$HOST" ]; then
 fi
 echo "Fake server: $HOST"
 
-# Isolate the CLI from the user's sessions and settings
-unset C8Y_SESSION C8Y_TOKEN C8Y_USERNAME
+# Isolate the CLI from the user's sessions and settings: drop every C8Y_*
+# variable of the caller's environment (e.g. C8Y_SETTINGS_PINENTRY would run
+# the user's passphrase helper, such as a Touch ID prompt, when a test asks for
+# the encryption passphrase), except the ones that configure this script.
+for name in $(env | sed -n 's/^\(C8Y_[A-Za-z0-9_]*\)=.*/\1/p'); do
+    case "$name" in
+        C8Y_FAKESERVER|C8Y_OFFLINE_SUITE) ;;
+        *) unset "$name" ;;
+    esac
+done
 export C8Y_SESSION_HOME="$WORK_DIR/session-home"
 mkdir -p "$C8Y_SESSION_HOME"
+# No extensions of the user's own installation (e.g. session providers)
+export C8Y_SETTINGS_EXTENSIONS_DATADIR="$WORK_DIR/extensions"
+export C8Y_SETTINGS_EXTENSIONS_SYSTEMDIRS="$WORK_DIR/extensions-system"
+mkdir -p "$C8Y_SETTINGS_EXTENSIONS_DATADIR" "$C8Y_SETTINGS_EXTENSIONS_SYSTEMDIRS"
 export C8Y_HOST="$HOST"
 export C8Y_TENANT=t12345
 export C8Y_USER=admin
