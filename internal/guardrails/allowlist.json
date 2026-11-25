@@ -1,7 +1,4 @@
 {
-  "flag-type-device": [
-    "remoteaccess configurations update (string, expected stringSlice)"
-  ],
   "go-c8y-v1": [
     "pkg/cmd/agents/delete_delete.go",
     "pkg/cmd/agents/get_get.go",
@@ -239,10 +236,5 @@
     "pkg/cmd/users/resetuserpassword_resetUserPassword.go",
     "pkg/cmd/users/revoketotpsecret_revokeTOTPSecret.go",
     "pkg/cmd/users/update_update.go"
-  ],
-  "v1-worker": [
-    "pkg/cmd/remoteaccess/connect/run_run.manual.go",
-    "pkg/cmd/remoteaccess/connect/ssh/ssh.manual.go",
-    "pkg/cmd/remoteaccess/server_server.manual.go"
   ]
 }

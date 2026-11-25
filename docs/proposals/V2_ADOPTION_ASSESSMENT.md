@@ -292,16 +292,17 @@ The `v3` branch of go-c8y-cli starts from `origin/v2`, merged with the v2 SDK mi
 | `devices enroll` on the Runner: the SDK removes an old device request, registers the device or asks a user to, and polls for the certificate (`Devices.Enroll`, with the dry run); the CLI handles the key, CSR and certificate files and the banner. A dry run or failed enrollment writes no files | go-c8y `devices/enroll.go`, `pkg/cmd/devices/enroll` |
 | `measurements createBulk` on the Runner: `Runner.RunBatch` sends the piped items in batches (one request per `--batchSize` items, `--maxJobs` limits the batches, an invalid item is reported and left out); the SDK's `Measurements.CreateList` resolves device names | `pkg/c8ystream/batch.go`, go-c8y `measurements/api.go`, `pkg/cmd/measurements/createBulk` |
 | `api` on the Runner: `Runner.RequestCall` sends a request with the SDK's `SendRequest` and renders any response (a JSON collection's items, `--includeAll` over the next links, text bodies as is, HTTP errors as item errors). The SDK sends form parts as files or plain fields (`FormFile`, `FormField`), applies the context's headers, query parameters and processing mode, and returns HTTP errors as `*core.Error`. A url with its own `pageSize` no longer gets a second one | `pkg/c8ystream/request.go`, go-c8y `api/client_compat.go`, `pkg/cmd/api` |
+| Remote access (`server`, `connect run`, `connect ssh`) on the Runner, so every command now runs on it (the `v1-worker` category is empty). The SDK selects the passthrough configuration (`Configurations.Detect`), sends the client's `Authorization` header on the websocket handshake (basic auth had no tenant) and logs to the client's logger; the fake server has an echo device behind the remote access websocket. The Runner honors `--nullInput` for every input driver, which `server --listen -` needs (stdin carries the proxied stream). `remoteaccess configurations update --device` takes a list like every other command | go-c8y `remoteaccess`, `pkg/cmd/remoteaccess`, `pkg/c8ystream/runner.go` |
 | The SDK's HTTP layer logs through `ClientOptions.Logger`; its warnings (credentials over plain HTTP) only show with `--verbose` | go-c8y `api/resty_logger.go`, `pkg/c8ystream/runner.go` |
 
 ### Pull requests (in review)
 
 | PR | What |
 |---|---|
-| reubenmiller/go-c8y-cli#777 | one Go package per command group (359 packages merged into 87), no surface change |
-| reubenmiller/go-c8y-cli#797 | `api` on the Runner (`Runner.RequestCall`) |
+| reubenmiller/go-c8y-cli#800 | remote access on the Runner, `--nullInput` in the Runner |
+| reubenmiller/go-c8y-cli#798 | tests no longer inherit the developer's `C8Y_*` environment |
 
-Merged: go-c8y #199 (SDK seams), #200 (`op.Result` with 15 instead of 30 methods, the method/function rule and a compile-cost budget test), #202 (committed binaries removed), #204 (`ClientOptions.Logger`), #205 (fake server removes `null` fragments), #207 (certificate authority), #208 (fake server `withParents`), #209 (`ListServiceUsers`, collection results yield their items), #211 (`UIApplicationPlugins` manages `config.remotes`), #213 (`Microservices.Deploy`), #216 (`Registration.Register`), #217 (`Devices.Enroll`), #218 (`CreateList` resolves device names), #220 (`SendRequest` like the typed service methods, `FormFile` and `FormField`); go-c8y-cli #775 (CI for `v3`), #776 (body references and binary downloads), #782 (realtime subscribe), #787 (wait and assert), #788 (certificate authority), #789 (inventory parents), #790 (service users), #791 (UI plugins), #792 (hosted application and microservice create), #793 (text commands, `applications open`, bulk registration), #794 (`devices enroll`), #796 (`measurements createBulk`).
+Merged: go-c8y #199 (SDK seams), #200 (`op.Result` with 15 instead of 30 methods, the method/function rule and a compile-cost budget test), #202 (committed binaries removed), #204 (`ClientOptions.Logger`), #205 (fake server removes `null` fragments), #207 (certificate authority), #208 (fake server `withParents`), #209 (`ListServiceUsers`, collection results yield their items), #211 (`UIApplicationPlugins` manages `config.remotes`), #213 (`Microservices.Deploy`), #216 (`Registration.Register`), #217 (`Devices.Enroll`), #218 (`CreateList` resolves device names), #220 (`SendRequest` like the typed service methods, `FormFile` and `FormField`), #221 (remote access: `Configurations.Detect`, client logger, handshake auth fix, fake server echo device); go-c8y-cli #775 (CI for `v3`), #776 (body references and binary downloads), #782 (realtime subscribe), #787 (wait and assert), #788 (certificate authority), #789 (inventory parents), #790 (service users), #791 (UI plugins), #792 (hosted application and microservice create), #793 (text commands, `applications open`, bulk registration), #794 (`devices enroll`), #796 (`measurements createBulk`), #797 (`api`), #777 (one Go package per command group: cold build 313 instead of 914 CPU-seconds, CI build 48 instead of 124 minutes).
 
 ### Build time
 
@@ -321,11 +322,12 @@ The guardrail tests make the per-package cost visible again if new command packa
 
 The allowlist in `internal/guardrails/allowlist.json` is the worklist. Each entry disappears when it is fixed. After the PRs above:
 
-- `go-c8y-v1` (mostly completion callbacks) and `v1-worker`: remote access (C6, C7).
+- `go-c8y-v1`: mostly completion callbacks; also the v1 stack behind runtime (extension) commands, login and sessions.
+- The websocket clients (realtime, remote access) do not honor `--dry`: lookups run, then the session is opened as in v1.
 - Two `api` tests in `tests/manual/api` need a live tenant: offline sessions add a default `pageSize`, and the fake server answers an unknown path with a JSON error instead of HTML.
 - `alarms assert count --fragmentType` is ignored: `alarms.ListOptions` has no fragment type (the alarm API does not document one).
 - The fake server reports `totalPages: 1` for an empty collection (Cumulocity reports 0). The count asserts now use `totalElements`, so they are not affected.
-- `flag-type-*`: `--id` differs in 3 commands (tenants create is intentional), `--group` in 3 (bulk registration, where it is a group path, so a string is right), `--device` in 1 (remote access configurations update).
+- `flag-type-*`: `--id` differs in 3 commands (tenants create is intentional), `--group` in 3 (bulk registration, where it is a group path, so a string is right).
 - `dry-run-check`: none left; every multi-step dry run is in the SDK.
 - Without a session, commands which allow that (`applications open`, `devices enroll`) still send `GET https://https/tenant/currentTenant` (the tenant lookup with an empty host), which fails and is ignored.
 - Some unit tests fail on `v3` and are not run by CI: `internal/ghrepo`, `pkg/cmdparser`, `pkg/cmdutil` (`Test_HeaderFlags`, `Test_Body`), `pkg/flags` (`Test_RelativeTimeIteratorWithFormatter`); `pkg/passwordmanager/bitwarden` does not build.
