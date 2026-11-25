@@ -23,6 +23,7 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/filter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"log/slog"
@@ -120,6 +121,7 @@ type Runner struct {
 	runCtx       context.Context // set in Run; exposed to Build via Resolver.Context
 	submission   *submission     // confirmation + delays; nil when neither applies
 	assert       *assertion      // set by Assert; nil for other commands
+	filters      []string        // filters of the command itself (see Filter)
 	index        int64
 
 	// tmplInput is the current item's raw input, kept pointed at the item being
@@ -369,6 +371,21 @@ func (r *Runner) Query(getters ...flags.GetOption) error {
 	return nil
 }
 
+// Filter adds client side filters which the command itself applies to its
+// output (e.g. the filter of an extension command), in addition to the
+// user's --filter values. Each expression uses the --filter syntax, and a
+// document must match all of them.
+func (r *Runner) Filter(expressions ...string) error {
+	if len(expressions) == 0 {
+		return nil
+	}
+	if _, err := filter.Parse(expressions...); err != nil {
+		return cmderrors.NewUserError(err)
+	}
+	r.filters = append(r.filters, expressions...)
+	return nil
+}
+
 // Body configures the request body document built from the given flag options
 // (data flag, templates, piped values). Evaluate it per item in Build with
 // in.Body().
@@ -579,6 +596,13 @@ func (r *Runner) run(newProducer func() Producer) error {
 	stages, err := CommonStages(cfg, nil)
 	if err != nil {
 		return err
+	}
+	if len(r.filters) > 0 {
+		pred, err := filter.Parse(r.filters...)
+		if err != nil {
+			return err
+		}
+		stages = append([]output.Stage{output.Filter(pred)}, stages...)
 	}
 	// --view: when the user didn't select columns, restrict the documents to
 	// the detected/named view's columns (no-op for --view off / the non-TTY

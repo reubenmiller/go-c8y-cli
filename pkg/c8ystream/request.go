@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
@@ -64,7 +65,7 @@ func (r *Runner) sendRequest(ctx context.Context, client *apiv2.Client, opts api
 			return
 		}
 
-		property := collectionProperty(body)
+		property := r.resultProperty(body)
 		count := 0
 		docs := []jsondoc.JSONDoc{jsondoc.New(body)}
 		if property != "" || body[0] == '[' {
@@ -116,6 +117,23 @@ func (r *Runner) sendRequest(ctx context.Context, client *apiv2.Client, opts api
 			IgnoreAccept:   opts.IgnoreAccept,
 		}
 	}
+}
+
+// resultProperty returns the array property which holds a response's items:
+// the command's collection property (flags.WithCollectionProperty) when the
+// response has it ("-" for none), or else the detected one (see
+// collectionProperty).
+func (r *Runner) resultProperty(body []byte) string {
+	switch property := flags.GetCollectionPropertyFromAnnotation(r.Cmd); property {
+	case "":
+	case "-":
+		return ""
+	default:
+		if gjson.GetBytes(body, property).IsArray() {
+			return property
+		}
+	}
+	return collectionProperty(body)
 }
 
 // isJSONDocument reports whether body is a JSON object or array.

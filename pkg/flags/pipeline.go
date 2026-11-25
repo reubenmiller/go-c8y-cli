@@ -26,6 +26,10 @@ func (e *ParameterError) Error() string {
 // or from the pipeline
 // It will automatically try to get the value from a String or a StringSlice flag
 func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, supportsPipeline bool) (iterator.Iterator, error) {
+	if pipeOpt.Source != nil {
+		return sourceIterator(pipeOpt.Source, pipeOpt.Format, pipeOpt.Formatter), nil
+	}
+
 	// Use manual values if provided
 	if len(pipeOpt.Values) > 0 {
 		return iterator.NewSliceIterator(pipeOpt.Values, pipeOpt.Format), nil
@@ -135,4 +139,21 @@ func FilterJsonLines(line []byte) bool {
 	// only allow json objects
 	isJSONObject := jsonUtilities.IsJSONObject(line)
 	return isJSONObject
+}
+
+// sourceIterator returns the values of a pipeline source, applying the
+// getter's format (or formatter) to each non-empty value like the pipe
+// iterator does.
+func sourceIterator(source iterator.Iterator, format string, formatter func([]byte) []byte) iterator.Iterator {
+	return iterator.NewStringIterator(source, func(v string) string {
+		switch {
+		case v == "":
+			return v
+		case formatter != nil:
+			return string(formatter([]byte(v)))
+		case format != "":
+			return fmt.Sprintf(format, v)
+		}
+		return v
+	})
 }

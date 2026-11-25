@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/extensionCommands.json
+---
+group:
+  name: pipeline
+  description: Commands which accept piped input and look up references
+
+commands:
+  - name: get
+    description: Get a device
+    method: GET
+    path: inventory/managedObjects/{device}
+    pathParameters:
+      - name: device
+        type: device[]
+        pipeline: true
+        required: true
+        description: Device id or name
+
+  - name: update
+    description: Update a device
+    method: PUT
+    path: inventory/managedObjects/{device}
+    pathParameters:
+      - name: device
+        type: device[]
+        pipeline: true
+        required: true
+        description: Device id or name
+    body:
+      - name: newName
+        type: string
+        property: name
+        description: New name
+
+  - name: createEvent
+    description: Create an event on a device
+    method: POST
+    path: event/events
+    body:
+      - name: device
+        type: device[]
+        property: source.id
+        pipeline: true
+        required: true
+        description: Device id or name
+      - name: type
+        type: string
+        description: Event type
+      - name: text
+        type: string
+        description: Event text
+    bodyTemplates:
+      - type: jsonnet
+        template: "{type: 'ci_pipelineEvent', text: 'pipeline event', time: _.Now()}"
+
+  - name: listGroupChildren
+    description: List the child assets of a device group
+    method: GET
+    path: inventory/managedObjects/{group}/childAssets
+    collectionProperty: references
+    pathParameters:
+      - name: group
+        type: devicegroup[]
+        pipeline: true
+        required: true
+        description: Device group id or name

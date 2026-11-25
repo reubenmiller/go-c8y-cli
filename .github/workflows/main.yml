@@ -156,7 +156,7 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Unit tests
-      run: go test ./pkg/c8ystream/... ./internal/guardrails/... ./internal/clisurface/...
+      run: go test ./pkg/c8ystream/... ./pkg/cmdparser/... ./internal/guardrails/... ./internal/clisurface/...
 
     - name: Dry-run cli tests against the fake server
       run: task test-cli-offline
@@ -170,6 +170,11 @@ jobs:
 
     - name: Manual cli tests against the fake server
       run: task test-cli-offline-manual
+      shell: bash
+      timeout-minutes: 15
+
+    - name: Extension cli tests against the fake server
+      run: task test-cli-offline-extensions
       shell: bash
       timeout-minutes: 15
 

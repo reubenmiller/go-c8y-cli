@@ -12,7 +12,8 @@
 #
 # C8Y_OFFLINE_SUITE=manual runs a tests/manual folder or file instead of
 # tests/auto (for manual tests that the fake server supports, e.g.
-# alarms/subscribe or inventory/wait.yaml).
+# alarms/subscribe or inventory/wait.yaml). The extensions/* tests use the
+# test extensions under tests/testdata (e.g. c8y-kitchensink).
 #
 # The c8y binary under test is the first one on PATH.
 set -euo pipefail
@@ -75,6 +76,14 @@ if [ "${C8Y_OFFLINE_SUITE:-auto}" = manual ]; then
     [ $# -gt 0 ] && shift
     cd "$SCRIPT_DIR"
     export TEST_SHELL=bash
+    case "$folder" in
+        extensions/*)
+            # The extension tests use the test extensions (e.g. c8y-kitchensink)
+            # under tests/testdata, and expect no default page size (see run-manual.sh)
+            export C8Y_SETTINGS_EXTENSIONS_DATADIR="$SCRIPT_DIR/testdata"
+            export C8Y_SETTINGS_DEFAULTS_PAGESIZE=" "
+            ;;
+    esac
     if [ -f "manual/$folder" ]; then
         commander test --config ./config.manual.yaml "$@" "manual/$folder" </dev/null
     else
