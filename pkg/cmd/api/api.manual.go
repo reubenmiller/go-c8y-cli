@@ -6,8 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -326,7 +324,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				return nil, cmderrors.NewUserError(err)
 			}
-			opts.FormData = formParts(formData)
+			opts.FormData = c8ystream.FormParts(formData)
 			opts.PrepareRequest = func(req *http.Request) error {
 				out, err := addProgress(req)
 				if err == nil && out != nil {
@@ -406,40 +404,4 @@ func pagingParameters(common config.CommonCommandOptions) url.Values {
 		query.Set(flags.FlagWithTotalElements, "true")
 	}
 	return query
-}
-
-// formParts converts the form data to the go-c8y multipart parts: files are
-// sent as file parts (using the filename and contentType metadata values of
-// --form), every other value as a plain form field.
-func formParts(form map[string]io.Reader) map[string]io.Reader {
-	fileName := readFormText(form[flags.FormDataKeyFilename])
-	contentType := readFormText(form[flags.FormDataKeyContentType])
-	parts := make(map[string]io.Reader, len(form))
-	for name, value := range form {
-		switch name {
-		case flags.FormDataKeyFilename, flags.FormDataKeyContentType:
-			continue
-		}
-		if f, ok := value.(*os.File); ok {
-			part := &apiv2.FormFile{Reader: f, FileName: filepath.Base(f.Name()), ContentType: contentType}
-			if fileName != "" {
-				part.FileName = fileName
-			}
-			parts[name] = part
-			continue
-		}
-		parts[name] = &apiv2.FormField{Reader: value}
-	}
-	return parts
-}
-
-func readFormText(r io.Reader) string {
-	if r == nil {
-		return ""
-	}
-	b, err := io.ReadAll(r)
-	if err != nil {
-		return ""
-	}
-	return string(b)
 }

@@ -266,6 +266,17 @@ tests:
         - 'Content-Disposition: form-data; name="object"'
         - '{"name":"file1.txt","type":"text/plain; charset=utf-8"}'
 
+  file - It uses the name for the file part:
+    command: |
+      c8y kitchensink body file --file manual/extensions/file1.txt --name custom.txt --type text/x-custom --dryFormat dump
+    stdout:
+      contains:
+        - 'Content-Disposition: form-data; name="file"; filename="custom.txt"'
+        - '{"name":"custom.txt","type":"text/x-custom"}'
+      not-contains:
+        - 'name="filename"'
+        - 'filename="file1.txt"'
+
   fileContents - It can upload file contents:
     command: |
       c8y kitchensink body fileContents --file manual/extensions/file1.txt --dry --dryFormat json |

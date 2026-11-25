@@ -436,13 +436,14 @@ func (t *requestTemplate) build(in *c8ystream.Resolver) (apiv2.RequestOptions, e
 		return opts, nil
 	}
 
-	// form data (the readers are recreated for each request)
+	// form data (the readers are recreated for each request). The file
+	// part is named by the form's filename value (e.g. --name), as in v1.
 	if len(t.formData) > 0 {
 		formData, err := flags.ReopenFormData(t.formData)
 		if err != nil {
 			return opts, cmderrors.NewUserError(err)
 		}
-		opts.FormData = formData
+		opts.FormData = c8ystream.FormParts(formData)
 	}
 
 	// body
