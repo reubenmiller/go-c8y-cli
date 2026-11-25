@@ -6,10 +6,6 @@
 package loglevels
 
 import (
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/loglevels/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/loglevels/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/loglevels/list"
-	cmdSet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/loglevels/set"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -32,10 +28,10 @@ Loggers define the log levels based on the qualified name of the Java class.
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
-	cmd.AddCommand(cmdSet.NewSetCmd(f).GetCommand())
-	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewSetCmd(f).GetCommand())
+	cmd.AddCommand(NewDeleteCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

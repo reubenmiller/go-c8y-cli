@@ -4,9 +4,6 @@
 package currentapplication
 
 import (
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentapplication/get"
-	cmdListSubscriptions "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentapplication/listsubscriptions"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentapplication/update"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -26,9 +23,9 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdCurrentapplication {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
-	cmd.AddCommand(cmdListSubscriptions.NewListSubscriptionsCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewUpdateCmd(f).GetCommand())
+	cmd.AddCommand(NewListSubscriptionsCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

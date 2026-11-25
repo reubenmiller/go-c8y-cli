@@ -5,8 +5,6 @@ package tfa
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/tfa/get"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/tfa/update"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -25,8 +23,8 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdTfa {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewUpdateCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

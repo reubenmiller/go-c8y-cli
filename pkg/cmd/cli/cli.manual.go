@@ -1,8 +1,6 @@
 package cli
 
 import (
-	cmdInstall "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/cli/install"
-	cmdProfile "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/cli/profile"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -22,8 +20,8 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdCLI {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdInstall.NewCmdInstall(f).GetCommand())
-	cmd.AddCommand(cmdProfile.NewCmdProfile(f).GetCommand())
+	cmd.AddCommand(NewCmdInstall(f).GetCommand())
+	cmd.AddCommand(NewCmdProfile(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

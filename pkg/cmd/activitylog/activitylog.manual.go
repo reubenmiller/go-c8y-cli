@@ -1,7 +1,6 @@
 package activitylog
 
 import (
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/activitylog/list"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -21,7 +20,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdActivityLog {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewCmdList(f).GetCommand())
+	cmd.AddCommand(NewCmdList(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

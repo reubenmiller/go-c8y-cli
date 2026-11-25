@@ -5,8 +5,6 @@ package systemoptions
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/systemoptions/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/systemoptions/list"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -28,8 +26,8 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdSystemoptions {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewListCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

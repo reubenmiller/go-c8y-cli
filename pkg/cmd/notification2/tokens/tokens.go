@@ -4,8 +4,6 @@
 package tokens
 
 import (
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/notification2/tokens/create"
-	cmdUnsubscribe "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/notification2/tokens/unsubscribe"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -28,8 +26,8 @@ receive subscribed notifications.
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
-	cmd.AddCommand(cmdUnsubscribe.NewUnsubscribeCmd(f).GetCommand())
+	cmd.AddCommand(NewCreateCmd(f).GetCommand())
+	cmd.AddCommand(NewUnsubscribeCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

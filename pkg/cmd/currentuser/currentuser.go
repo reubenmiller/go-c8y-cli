@@ -4,9 +4,6 @@
 package currentuser
 
 import (
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentuser/get"
-	cmdLogout "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentuser/logout"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentuser/update"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -26,9 +23,9 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdCurrentuser {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
-	cmd.AddCommand(cmdLogout.NewLogoutCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewUpdateCmd(f).GetCommand())
+	cmd.AddCommand(NewLogoutCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

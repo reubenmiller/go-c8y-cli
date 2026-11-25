@@ -2,10 +2,6 @@ package certificate_authority
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement/certificate_authority/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement/certificate_authority/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement/certificate_authority/get"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement/certificate_authority/update"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -29,10 +25,10 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdCertificate_authority {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
-	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
-	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
+	cmd.AddCommand(NewGetCmd(f).GetCommand())
+	cmd.AddCommand(NewCreateCmd(f).GetCommand())
+	cmd.AddCommand(NewUpdateCmd(f).GetCommand())
+	cmd.AddCommand(NewDeleteCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
