@@ -19,7 +19,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/requestutil"
 	_url "github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/types"
@@ -203,7 +203,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if cmd.Flags().Changed("form") {
-		if !request.RequestSupportsBody(method) {
+		if !requestutil.RequestSupportsBody(method) {
 			return cmderrors.NewUserError(fmt.Sprintf("--form can not be used with a %s request", method))
 		}
 		if cmd.Flags().Changed("template") || cmd.Flags().Changed("data") {
@@ -234,14 +234,14 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	hasBody := request.RequestSupportsBody(method) && (cmd.Flags().Changed("template") || cmd.Flags().Changed("data"))
+	hasBody := requestutil.RequestSupportsBody(method) && (cmd.Flags().Changed("template") || cmd.Flags().Changed("data"))
 	if hasBody {
 		headers := http.Header{}
 		if contentType != "" {
 			headers.Set("Content-Type", contentType)
 		}
 		if err := r.Body(
-			flags.WithDataValueAdvanced(!n.keepProperties, !request.HasJSONHeader(&headers), flags.FlagDataName, ""),
+			flags.WithDataValueAdvanced(!n.keepProperties, !requestutil.HasJSONHeader(&headers), flags.FlagDataName, ""),
 			cmdutil.WithTemplateValue(n.factory),
 			flags.WithTemplateVariablesValue(),
 		); err != nil {
@@ -251,7 +251,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 
 	// Form data (--file, --formdata and --form) is sent with every request
 	var form map[string]io.Reader
-	if request.RequestSupportsBody(method) {
+	if requestutil.RequestSupportsBody(method) {
 		form = make(map[string]io.Reader)
 		if err := flags.WithFormDataOptions(cmd, form, r.InputIterators, flags.WithFormDataFileAndInfo("file", "formdata")...); err != nil {
 			return cmderrors.NewUserError(err)

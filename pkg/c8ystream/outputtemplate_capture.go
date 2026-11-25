@@ -3,7 +3,7 @@ package c8ystream
 import (
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/requestutil"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 )
 
@@ -38,8 +38,8 @@ func (r *Runner) installOutputTemplateCapture(client *apiv2.Client) {
 			requestData["pathEncoded"] = strings.Replace(u.String(), u.Scheme+"://"+u.Host, "", 1)
 			requestData["host"] = u.Host
 			requestData["url"] = u.String()
-			requestData["query"] = request.TryUnescapeURL(u.RawQuery)
-			requestData["queryParams"] = request.FlattenArrayMap(u.Query())
+			requestData["query"] = requestutil.TryUnescapeURL(u.RawQuery)
+			requestData["queryParams"] = requestutil.FlattenArrayMap(u.Query())
 			requestData["method"] = req.Method
 		}
 

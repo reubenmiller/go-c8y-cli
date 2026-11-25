@@ -2,6 +2,7 @@ package cmdutil
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -26,7 +28,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonformatter"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
@@ -34,10 +35,10 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mode"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/requestutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/tableviewer"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants/currenttenant"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/pretty"
@@ -50,7 +51,6 @@ type Browser interface {
 type Factory struct {
 	IOStreams      *iostreams.IOStreams
 	Browser        Browser
-	Client         func() (*c8y.Client, error)
 	Config         func() (*config.Config, error)
 	Logger         func() (*logger.Logger, error)
 	ActivityLogger func() (*activitylogger.ActivityLogger, error)
@@ -68,6 +68,9 @@ type Factory struct {
 
 	// Command
 	Command *cobra.Command
+
+	tenantMu sync.Mutex
+	tenant   string
 }
 
 // Set reference to the cobra command
@@ -235,7 +238,8 @@ func (f *Factory) DeleteModeEnabled(cmd *cobra.Command) error {
 	return nil
 }
 
-func (f *Factory) GetRequestHandler() (*request.RequestHandler, error) {
+// DryRunPrinter returns the printer which renders the requests of a dry run
+func (f *Factory) DryRunPrinter() (*requestutil.Printer, error) {
 	cfg, err := f.Config()
 	if err != nil {
 		return nil, err
@@ -244,154 +248,17 @@ func (f *Factory) GetRequestHandler() (*request.RequestHandler, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	activityLogger, err := f.ActivityLogger()
+	session, err := f.ClientSession()
 	if err != nil {
 		return nil, err
 	}
-	consol, err := f.Console()
-	if err != nil {
-		return nil, err
-	}
-	dataview, err := f.DataView()
-	if err != nil {
-		return nil, err
-	}
-	client, err := f.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	handler := &request.RequestHandler{
-		IsTerminal:     f.IOStreams.IsStdoutTTY(),
-		IO:             f.IOStreams,
-		Client:         client,
-		Config:         cfg,
-		Logger:         log,
-		DataView:       dataview,
-		Console:        consol,
-		ActivityLogger: activityLogger,
-		HideSensitive:  HideSensitiveForLegacyClient(cfg),
-	}
-	return handler, nil
-}
-
-func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8y.RequestOptions, inputIterators *flags.RequestInputIterators) error {
-	cfg, err := f.Config()
-	if err != nil {
-		return err
-	}
-	log, err := f.Logger()
-	if err != nil {
-		return err
-	}
-
-	activityLogger, err := f.ActivityLogger()
-	if err != nil {
-		return err
-	}
-	consol, err := f.Console()
-	if err != nil {
-		return err
-	}
-	dataview, err := f.DataView()
-	if err != nil {
-		return err
-	}
-
-	handler := &request.RequestHandler{
-		IsTerminal:     f.IOStreams.IsStdoutTTY(),
-		IO:             f.IOStreams,
-		Client:         client,
-		Config:         cfg,
-		Logger:         log,
-		DataView:       dataview,
-		Console:        consol,
-		ActivityLogger: activityLogger,
-		HideSensitive:  HideSensitiveForLegacyClient(cfg),
-	}
-	w, err := worker.NewWorker(log, cfg, f.IOStreams, client, activityLogger, handler.ProcessRequestAndResponse, f.CheckPostCommandError)
-
-	if err != nil {
-		return err
-	}
-	return w.ProcessRequestAndResponse(cmd, req, inputIterators)
-}
-
-func (f *Factory) RunWithGenericWorkers(cmd *cobra.Command, inputIterators *flags.RequestInputIterators, iter iterator.Iterator, runFunc worker.Runner, checkError func(error) error) error {
-	client, err := f.Client()
-	if err != nil {
-		return err
-	}
-	cfg, err := f.Config()
-	if err != nil {
-		return err
-	}
-	log, err := f.Logger()
-	if err != nil {
-		return err
-	}
-
-	// set a default run once iterator if one is not defined
-	if iter == nil {
-		iter = iterator.NewRunOnceIterator()
-	}
-
-	activityLogger, err := f.ActivityLogger()
-	if err != nil {
-		return err
-	}
-	// consol, err := f.Console()
-	// if err != nil {
-	// 	return err
-	// }
-	// dataview, err := f.DataView()
-	// if err != nil {
-	// 	return err
-	// }
-
-	if checkError == nil {
-		checkError = f.CheckPostCommandError
-	}
-
-	w, err := worker.NewGenericWorker(log, cfg, f.IOStreams, client, activityLogger, runFunc, checkError)
-
-	if err != nil {
-		return err
-	}
-	return w.Run(cmd, iter, inputIterators)
-}
-
-func (f *Factory) RunSequentiallyWithGenericWorkers(cmd *cobra.Command, iter iterator.Iterator, runFunc worker.Runner, inputIterators *flags.RequestInputIterators) error {
-	client, err := f.Client()
-	if err != nil {
-		return err
-	}
-	cfg, err := f.Config()
-	if err != nil {
-		return err
-	}
-	log, err := f.Logger()
-	if err != nil {
-		return err
-	}
-
-	activityLogger, err := f.ActivityLogger()
-	if err != nil {
-		return err
-	}
-
-	// set a default run once iterator if one is not defined
-	if iter == nil {
-		iter = iterator.NewRunOnceIterator()
-	}
-
-	w, err := worker.NewGenericWorker(log, cfg, f.IOStreams, client, activityLogger, runFunc, f.CheckPostCommandError)
-
-	if err != nil {
-		return err
-	}
-	return w.RunSequentially(cmd, iter, inputIterators)
+	return &requestutil.Printer{
+		Config: cfg,
+		Logger: log,
+		HideSensitive: func(message string) string {
+			return cfg.HideSensitiveInformationIfActive(&session, message)
+		},
+	}, nil
 }
 
 // GetViewProperties Look up the view properties to display
@@ -595,12 +462,28 @@ func (f *Factory) ResolveTemplates(pattern string, withFullPath bool) ([]string,
 	return allMatches, nil
 }
 
+// GetTenant returns the tenant of the session. If the session does not have a tenant, it is looked up
+// from Cumulocity (the tenant is required by some APIs), and the lookup is never a dry run.
 func (f *Factory) GetTenant() string {
-	client, err := f.Client()
+	f.tenantMu.Lock()
+	defer f.tenantMu.Unlock()
+	if f.tenant != "" {
+		return f.tenant
+	}
+	if session, err := f.ClientSession(); err == nil && session.Tenant != "" {
+		f.tenant = session.Tenant
+		return f.tenant
+	}
+	client, err := f.ClientV2()
 	if err != nil {
 		return ""
 	}
-	return client.TenantName
+	res := client.Tenants.Current.Get(apiv2.WithDryRun(context.Background(), false), currenttenant.GetOptions{})
+	if res.Err != nil {
+		return ""
+	}
+	f.tenant = res.Data.Name()
+	return f.tenant
 }
 
 // NewRequestInputIterators create a request iterator based on pipe line configuration
@@ -638,8 +521,8 @@ func (f *Factory) ExecuteOutputTemplate(output []byte, params OutputContext, com
 		requestData["pathEncoded"] = strings.Replace(resp.Request.URL.String(), resp.Request.URL.Scheme+"://"+resp.Request.URL.Host, "", 1)
 		requestData["host"] = resp.Request.URL.Host
 		requestData["url"] = resp.Request.URL.String()
-		requestData["query"] = request.TryUnescapeURL(resp.Request.URL.RawQuery)
-		requestData["queryParams"] = request.FlattenArrayMap(resp.Request.URL.Query())
+		requestData["query"] = requestutil.TryUnescapeURL(resp.Request.URL.RawQuery)
+		requestData["queryParams"] = requestutil.FlattenArrayMap(resp.Request.URL.Query())
 		requestData["method"] = resp.Request.Method
 		// requestData["header"] = resp.Response.Request.Header
 
@@ -649,7 +532,7 @@ func (f *Factory) ExecuteOutputTemplate(output []byte, params OutputContext, com
 		responseData["duration"] = params.Duration.Milliseconds()
 		responseData["contentLength"] = resp.ContentLength
 		responseData["contentType"] = resp.Header.Get("Content-Type")
-		responseData["header"] = request.FlattenArrayMap(resp.Header)
+		responseData["header"] = requestutil.FlattenArrayMap(resp.Header)
 		responseData["proto"] = resp.Proto
 		responseData["body"] = string(output)
 	}

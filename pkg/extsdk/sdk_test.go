@@ -13,6 +13,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/tenants/currenttenant"
 	"github.com/spf13/cobra"
 )
 
@@ -109,8 +110,8 @@ func TestClientAuthorization(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if _, _, err := client.Tenant.GetCurrentTenant(context.Background()); err != nil {
-				t.Fatal(err)
+			if res := client.Tenants.Current.Get(context.Background(), currenttenant.GetOptions{}); res.Err != nil {
+				t.Fatal(res.Err)
 			}
 			if got != tc.want {
 				t.Errorf("unexpected authorization header: %q", got)
@@ -135,7 +136,7 @@ func TestCheckErrorUnauthorized(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, _, err = client.Tenant.GetCurrentTenant(context.Background())
+	err = client.Tenants.Current.Get(context.Background(), currenttenant.GetOptions{}).Err
 	if err == nil {
 		t.Fatal("expected an error")
 	}

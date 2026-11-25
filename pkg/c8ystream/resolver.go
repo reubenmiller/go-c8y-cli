@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -274,6 +275,15 @@ func (in *Resolver) RawBody() (string, bool) {
 		return "", false
 	}
 	return in.r.body.GetRaw(), true
+}
+
+// BodyFile returns the file which is sent as the request body (e.g. a binary upload), or nil
+// when the body is not set from a file.
+func (in *Resolver) BodyFile() (*os.File, error) {
+	if in.r.body == nil || !in.r.body.HasFile() {
+		return nil, nil
+	}
+	return in.r.body.GetFile()
 }
 
 // refForFlag resolves a `-`/`-.path` flag reference against the current input

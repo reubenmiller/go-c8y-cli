@@ -3,11 +3,14 @@ package sessions
 import (
 	"context"
 	"encoding/json"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
 	"github.com/spf13/cobra"
 )
 
@@ -59,24 +62,42 @@ func (n *CmdGetSession) RunE(cmd *cobra.Command, args []string) error {
 	sessionPath := cfg.GetSessionFile()
 	cfg.Persistent.Set("path", sessionPath)
 
-	client, err := n.factory.Client()
+	session, err := n.factory.ClientSession()
 	if err != nil {
 		return err
 	}
 
 	// Support looking up a session which is only controlled via env variables
-	if !c8ysession.IsSessionFilePath(sessionPath) && client != nil {
-		cfg.Persistent.Set("host", client.GetHostname())
-		cfg.Persistent.Set("tenant", client.TenantName)
-		cfg.Persistent.Set("username", client.GetUsername())
+	if !c8ysession.IsSessionFilePath(sessionPath) {
+		host, username := session.Host, session.Username
+		if session.Token != "" {
+			// the token is the source of truth (it is the identity which is used for the requests)
+			if claims, err := authentication.ParseToken(session.Token); err == nil {
+				username = claims.User
+				if host == "" || strings.Contains(host, claims.Issuer) {
+					host = claims.Issuer
+				}
+			}
+		}
+		tenant := session.Tenant
+		if tenant == "" {
+			tenant = n.factory.GetTenant()
+		}
+		cfg.Persistent.Set("host", host)
+		cfg.Persistent.Set("tenant", tenant)
+		cfg.Persistent.Set("username", username)
 
-		version := client.Version
+		version := session.Version
 		if version == "" {
-			serverVersion, err := client.TenantOptions.GetVersion(context.Background())
+			client, err := n.factory.ClientV2()
 			if err != nil {
 				return err
 			}
-			version = serverVersion
+			res := client.Tenants.Current.GetVersion(apiv2.WithDryRun(context.Background(), false))
+			if res.Err != nil {
+				return res.Err
+			}
+			version = res.Data.Value()
 		}
 		cfg.Persistent.Set("version", version)
 	}

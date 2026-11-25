@@ -1,5 +1,1 @@
-{
-  "go-c8y-v1": [
-    "pkg/cmd/factory/c8yclient.go"
-  ]
-}
+{}

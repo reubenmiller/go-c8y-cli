@@ -316,3 +316,47 @@ func TestSharedFlagTypes(t *testing.T) {
 	}
 	ratchet(t, found, func(string) string { return "use the same flag type as the other commands" })
 }
+
+// TestNoGoC8yV1Module keeps the go-c8y v1 SDK out of the CLI: no module of the repository may
+// require it, and no Go file may import it. Only the v2 module (github.com/reubenmiller/go-c8y/v2)
+// is allowed.
+func TestNoGoC8yV1Module(t *testing.T) {
+	root := repoRoot(t)
+	requiresV1 := regexp.MustCompile(`(?m)^\s*(require\s+)?github\.com/reubenmiller/go-c8y\s+v`)
+	importsV1 := regexp.MustCompile(`"github\.com/reubenmiller/go-c8y/pkg/`)
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			switch d.Name() {
+			case ".git", "node_modules", ".claude":
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		rel, _ := filepath.Rel(root, path)
+		switch {
+		case d.Name() == "go.mod":
+			b, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			if requiresV1.Match(b) {
+				t.Errorf("%s requires the go-c8y v1 module; use github.com/reubenmiller/go-c8y/v2", rel)
+			}
+		case strings.HasSuffix(d.Name(), ".go") && rel != filepath.Join("internal", "guardrails", "guardrails_test.go"):
+			b, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			if importsV1.Match(b) {
+				t.Errorf("%s imports the go-c8y v1 SDK; use the v2 SDK", rel)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}

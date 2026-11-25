@@ -1,11 +1,12 @@
 package mapbuilder
 
 import (
+	"bytes"
+	"encoding/json"
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/assert"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 func Test_BodyWithLargeNumbersWithoutTemplates(t *testing.T) {
@@ -13,7 +14,7 @@ func Test_BodyWithLargeNumbersWithoutTemplates(t *testing.T) {
 
 	input := []byte(`{"value":19.1010101E19}`)
 	data := map[string]interface{}{}
-	err := c8y.DecodeJSONBytes(input, &data)
+	err := decodeJSONNumbers(input, &data)
 	assert.OK(t, err)
 	body.SetMap(data)
 	assert.EqualMarshalJSON(t, body, `{"value":19.1010101E19}`)
@@ -25,7 +26,7 @@ func Test_BodyWithLargeNumbersWithTemplates(t *testing.T) {
 	body := NewInitializedMapBuilder(true)
 	input := []byte(`{"value":19.1010101E19}`)
 	data := map[string]interface{}{}
-	err := c8y.DecodeJSONBytes(input, &data)
+	err := decodeJSONNumbers(input, &data)
 	assert.OK(t, err)
 	body.SetMap(data)
 	body.AppendTemplate("{}")
@@ -71,4 +72,11 @@ func Test_ExternalInput(t *testing.T) {
 
 	// body should be merged
 	assert.EqualJSON(t, out, `{"root":{"value":[{"name":"one"}]},"input":"1"}`)
+}
+
+// decodeJSONNumbers decodes json and keeps the numbers as they are written (json.Number)
+func decodeJSONNumbers(input []byte, dst any) error {
+	decoder := json.NewDecoder(bytes.NewReader(input))
+	decoder.UseNumber()
+	return decoder.Decode(dst)
 }

@@ -58,7 +58,6 @@ import (
 	eventsAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/events/assert"
 	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/events/subscribe"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/extension"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/factory"
 	featuresCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/features"
 	featuresByTenantCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/features/tenants"
 	firmwareCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware"
@@ -836,9 +835,6 @@ func (c *CmdRoot) Configure(disableEncryptionCheck, forceVerbose, forceDebug boo
 	consoleHandler.Colorized = !cfg.DisableColor()
 	consoleHandler.Compact = cfg.CompactJSON()
 	consoleHandler.Disabled = cfg.ShowProgress() && c.Factory.IOStreams.IsStdoutTTY()
-
-	// Update client (legacy go-c8y v1 client for the commands which have not been migrated yet)
-	c.Factory.Client = factory.NewLegacyClient(c.Factory, c.SessionFile, c.SessionUsername, c.SessionPassword, disableEncryptionCheck)
 	return nil
 }
 
