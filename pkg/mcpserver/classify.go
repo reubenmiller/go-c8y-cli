@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/kballard/go-shellquote"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
@@ -133,14 +134,22 @@ func checkShellSyntax(args []string) error {
 	return nil
 }
 
-// Classifier resolves commands against the c8y command tree and applies the policy
+// Classifier resolves commands against the c8y command tree and applies the policy.
+// It is safe for concurrent use
 type Classifier struct {
 	Root   *cobra.Command
 	Policy Policy
+
+	// mu serializes the lookups in the command tree, as cobra changes the commands'
+	// flag sets when finding a command (e.g. merging the persistent flags), so
+	// concurrent tool calls would crash the server
+	mu sync.Mutex
 }
 
 // Plan parses and validates a command line
 func (c *Classifier) Plan(commandLine string) (*Plan, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	segments, err := SplitPipeline(commandLine)
 	if err != nil {
 		return nil, err
