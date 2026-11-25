@@ -3,7 +3,7 @@ module github.com/reubenmiller/go-c8y-cli/pkg/extsdk
 go 1.27.0
 
 require (
-	github.com/reubenmiller/go-c8y/v2 v2.0.0-20261125201648-899b530e5281
+	github.com/reubenmiller/go-c8y/v2 v2.0.0-20261125215357-013bd1c4d2d9
 	github.com/spf13/cobra v1.10.2
 )
 
