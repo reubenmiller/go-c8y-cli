@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+tests:
+  It shows the requests to create an application and subscribe the tenant in a dry run:
+    command: |
+      c8y microservices serviceusers create --name dry-su --tenants t12345 --roles ROLE_A --roles ROLE_B --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      contains:
+        - '"path":"/application/applications"'
+        - '"body":{"contextPath":"dry-su","key":"dry-su-key","name":"dry-su","requiredRoles":["ROLE_A","ROLE_B"],"type":"MICROSERVICE"}'
+        - '"path":"/tenant/tenants/t12345/applications"'
+
+  It does not create anything in a dry run:
+    command: |
+      c8y microservices serviceusers create --name dry-su2 --tenants t12345 --dry > /dev/null && c8y applications list --name dry-su2 --select name -o csv
+    exit-code: 0
+    stdout:
+      exactly: ""
+
+  It creates an application and subscribes the tenant to it:
+    command: |
+      c8y microservices serviceusers create --name my-su --tenants t12345 --roles ROLE_A --select name,key,type,contextPath,requiredRoles
+    exit-code: 0
+    stdout:
+      json:
+        name: my-su
+        key: my-su-key
+        type: MICROSERVICE
+        contextPath: my-su
+        requiredRoles.0: ROLE_A
+
+  It created a service user for the subscribed tenant:
+    command: |
+      c8y microservices serviceusers get --id my-su --select name -o csv
+    exit-code: 0
+    stdout:
+      contains:
+        - service_
+
+  It accepts a tenant which is already subscribed:
+    command: |
+      c8y microservices serviceusers create --name my-su --tenants t12345 --select name -o csv
+    exit-code: 0
+    stdout:
+      lines:
+        1: my-su

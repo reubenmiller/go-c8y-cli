@@ -7,8 +7,6 @@ import (
 	"strconv"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/integration/models"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
@@ -453,7 +451,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "json_custom":
 		opts = append(opts, flags.WithDataValue(p.Name, targetProp, p.Format))
 	case "binaryUploadURL":
-		opts = append(opts, c8ybinary.WithBinaryUploadURL(factory.Client, factory.IOStreams.ProgressIndicator(), p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withBinaryUploadURL(factory.IOStreams.ProgressIndicator(), func(cmd *cobra.Command) bool { return isDryRun(factory, cmd) }, p.Name, targetProp, p.Format))
 	case "json":
 		// don't do anything because it should be manually set)
 
@@ -461,7 +459,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 		opts = append(opts, flags.WithStringDefaultValue(factory.GetTenant(), p.Name, targetProp, p.Format))
 
 	case "id[]", "devicerequest[]":
-		opts = append(opts, c8yfetcher.WithIDSlice(args, p.Name, targetProp, p.Format))
+		opts = append(opts, withIDSlice(args, p.Name, targetProp, p.Format))
 
 	case "application":
 		opts = append(opts, refs.withReference(resolveApplication, args, p.Name, targetProp, p.Format))
@@ -479,16 +477,16 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 		opts = append(opts, refs.withReference(resolveSoftware, args, p.Name, targetProp, p.Format))
 
 	case "softwareDetails":
-		opts = append(opts, c8yfetcher.WithSoftwareVersionData(factory, p.GetDependentProperty(0, "software"), p.Name, p.GetDependentProperty(1, "url"), p.GetDependentProperty(2, "softwareType"), args, "", targetProp, p.Format))
+		opts = append(opts, refs.withSoftwareDetails(p.GetDependentProperty(0, "software"), p.Name, p.GetDependentProperty(1, "url"), p.GetDependentProperty(2, "softwareType"), "", targetProp, p.Format))
 
 	case "configurationDetails":
-		opts = append(opts, c8yfetcher.WithConfigurationFileData(factory, p.Name, p.GetDependentProperty(0, "configurationType"), p.GetDependentProperty(1, "url"), args, "", targetProp, p.Format))
+		opts = append(opts, refs.withConfigurationDetails(p.Name, p.GetDependentProperty(0, "configurationType"), p.GetDependentProperty(1, "url"), "", targetProp, p.Format))
 
 	case "softwareversion[]":
 		opts = append(opts, refs.withReference(resolveSoftwareVersion(p.GetDependentProperty(0, "software")), args, p.Name, targetProp, p.Format))
 
 	case "deviceservice[]":
-		opts = append(opts, c8yfetcher.WithDeviceServiceByNameFirstMatch(factory, p.GetDependentProperty(0, "device"), args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveDeviceService(p.GetDependentProperty(0, "device")), args, p.Name, targetProp, p.Format))
 
 	case "certificatefile":
 		opts = append(opts, flags.WithCertificateFile(p.Name, targetProp))
@@ -500,7 +498,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 	case "firmwareversion[]":
 		opts = append(opts, refs.withReference(resolveFirmwareVersion(p.GetDependentProperty(0, "firmware")), args, p.Name, targetProp, p.Format))
 	case "firmwareDetails":
-		opts = append(opts, c8yfetcher.WithFirmwareVersionData(factory, p.GetDependentProperty(0, "firmware"), p.Name, p.GetDependentProperty(1, "url"), args, "", targetProp))
+		opts = append(opts, refs.withFirmwareDetails(p.GetDependentProperty(0, "firmware"), p.Name, p.GetDependentProperty(1, "url"), "", targetProp))
 	case "firmwarepatch[]":
 		opts = append(opts, refs.withReference(resolveFirmwarePatch(p.GetDependentProperty(0, "firmware")), args, p.Name, targetProp))
 
@@ -601,7 +599,6 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 		cmd.Path.Options = append(
 			cmd.Path.Options,
 			[]flags.GetOption{
-				// c8yfetcher.WithDeviceByNameFirstMatch(client, args, "id", "id"),
 				flags.WithStringSliceValues("id", "id", "%s"),
 			}...,
 		)
@@ -619,7 +616,6 @@ func AddPredefinedGroupsFlags(cmd *CmdOptions, factory *cmdutil.Factory, templat
 			flags.WithEncodedRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
 			flags.WithEncodedRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "(creationTime.date le '%s')"),
 			flags.WithEncodedRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "(creationTime.date ge '%s')"),
-			// c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "group", "bygroupid(%s)"),
 		}
 
 		// Add extensions to cumulocity query builder

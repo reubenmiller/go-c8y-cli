@@ -1,0 +1,145 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+# Extension parameter types which look up the software, firmware, configuration
+# and service details, and upload a binary. The lookups use the data which
+# tests/scripts/setup.sh creates (so they also run against the go-c8y fake server).
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  #
+  # Software
+  #
+  softwareDetails looks up the url of the version:
+    command: |
+      c8y kitchensink body_complex softwareDetails --software my-app --version "1.2.3"
+    exit-code: 0
+    stdout:
+      json:
+        body.software: r/^\d+$
+        body.c8y_Software.name: my-app
+        body.c8y_Software.version: "1.2.3"
+        body.c8y_Software.url: "https://example.com/debian/my-app-1.2.3.deb"
+        body.c8y_Software.softwareType: linux-package
+
+  softwareDetails without a version only looks up the software type:
+    command: |
+      c8y kitchensink body_complex softwareDetails --software my-app
+    exit-code: 0
+    stdout:
+      json:
+        body.c8y_Software.name: my-app
+        body.c8y_Software.version: ""
+        body.c8y_Software.url: ""
+        body.c8y_Software.softwareType: linux-package
+
+  softwareDetails fails when the version does not exist:
+    command: |
+      c8y kitchensink body_complex softwareDetails --software my-app --version "9.9.9"
+    exit-code: 101
+    stderr:
+      contains:
+        - no matching items found
+
+  #
+  # Firmware
+  #
+  firmwareDetails looks up the url of the version:
+    command: |
+      c8y kitchensink body_complex firmwareDetails --sourceFirmware iot-linux --version 1.0.0
+    exit-code: 0
+    stdout:
+      json:
+        body.sourceFirmware: r/^\d+$
+        body.c8y_Firmware.name: "iot-linux"
+        body.c8y_Firmware.url: "https://example.com"
+        body.c8y_Firmware.version: "1.0.0"
+
+  firmwareDetails fails when the version does not exist:
+    command: |
+      c8y kitchensink body_complex firmwareDetails --sourceFirmware iot-linux --version 9.9.9
+    exit-code: 101
+    stderr:
+      contains:
+        - no matching items found
+
+  #
+  # Configuration
+  #
+  configurationDetails looks up a configuration by name:
+    command: |
+      c8y kitchensink body_complex configurationDetails --id example-config
+    exit-code: 0
+    stdout:
+      json:
+        body.c8y_Configuration.name: "example-config"
+        body.c8y_Configuration.type: "agentConfig"
+        body.c8y_Configuration.url: "https://test.com/content/raw/app.json"
+
+  configurationDetails looks up a configuration by id:
+    command: |
+      c8y kitchensink body_complex configurationDetails --id "$(C8Y_SETTINGS_DEFAULTS_DRY=false c8y configuration list --name example-config --select id -o csv)"
+    exit-code: 0
+    stdout:
+      json:
+        body.c8y_Configuration.name: "example-config"
+        body.c8y_Configuration.type: "agentConfig"
+        body.c8y_Configuration.url: "https://test.com/content/raw/app.json"
+
+  configurationDetails fails when the configuration does not exist:
+    command: |
+      c8y kitchensink body_complex configurationDetails --id does-not-exist
+    exit-code: 101
+    stderr:
+      contains:
+        - no matching items found
+
+  #
+  # Device services
+  #
+  deviceservice looks up the service of the device:
+    command: |
+      c8y kitchensink body_complex deviceservice --device device02 --service sshd
+    exit-code: 0
+    stdout:
+      json:
+        body.device: r/^\d+$
+        body.service: r/^\d+$
+
+  deviceservice fails when the service does not exist:
+    command: |
+      c8y kitchensink body_complex deviceservice --device device02 --service does-not-exist
+    exit-code: 101
+    stderr:
+      contains:
+        - no matching items found
+
+  #
+  # Binary upload
+  #
+  binaryUploadURL does not upload the file in a dry run:
+    command: |
+      c8y kitchensink body binaryUploadURL --file manual/extensions/file1.txt
+    exit-code: 0
+    stdout:
+      json:
+        body.myUrl: "{host}/inventory/binaries/{id}"
+
+  binaryUploadURL uploads the file and sets its url:
+    command: |
+      C8Y_SETTINGS_DEFAULTS_DRY=false c8y kitchensink body binaryUploadURL --file manual/extensions/file1.txt
+    exit-code: 0
+    stdout:
+      json:
+        myUrl: r/^https?://.+/inventory/binaries/\d+$
+
+  binaryUploadURL uploads the file with a progress bar:
+    command: |
+      C8Y_FORCE_STDERR_TTY=true C8Y_SETTINGS_DEFAULTS_DRY=false c8y kitchensink body binaryUploadURL --file manual/extensions/file1.txt --progress --select myUrl -o csv
+    exit-code: 0
+    stdout:
+      contains:
+        - /inventory/binaries/

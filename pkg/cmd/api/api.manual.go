@@ -325,13 +325,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 				return nil, cmderrors.NewUserError(err)
 			}
 			opts.FormData = c8ystream.FormParts(formData)
-			opts.PrepareRequest = func(req *http.Request) error {
-				out, err := addProgress(req)
-				if err == nil && out != nil {
-					req.Body = out.Body
-				}
-				return err
-			}
+			opts.PrepareRequest = addProgress
 		}
 		return r.RequestCall(client, opts), nil
 	})

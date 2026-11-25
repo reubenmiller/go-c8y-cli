@@ -10,14 +10,13 @@ import (
 	"context"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/firmware/firmwareversions"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/repodetails"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -158,25 +157,25 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 			}
 		}
 
-		// Look up the binary url (and firmware name) from the repository when no
-		// explicit url is provided, matching v1. With no version there is no
-		// specific version managed-object to resolve a url from (versionRef yields
-		// an empty reference), so skip the lookup and keep the flag values
-		// (url stays "", name from --firmware) rather than resolving an empty id.
-		if ref := installVersionRef(in.String("version"), in.String("firmware")); in.String("url") == "" && ref != "" {
-			vres := client.Repository.Firmware.Versions.Get(in.ResolveContext(), ref, firmwareversions.GetOptions{WithParents: true})
-			if vres.Err != nil {
-				return nil, vres.Err
-			}
-			if url := vres.Data.URL(); url != "" {
-				if body, err = sjson.SetBytes(body, "c8y_Firmware.url", url); err != nil {
-					return nil, err
-				}
-			}
-			if name := vres.Data.FirmwareName(); name != "" {
-				if body, err = sjson.SetBytes(body, "c8y_Firmware.name", name); err != nil {
-					return nil, err
-				}
+		// Look up the version, binary url and firmware name from the repository when
+		// no explicit url is provided, matching v1. With no version there is no
+		// specific version managed-object to resolve a url from, so the flag
+		// values are kept (url stays "", name from --firmware).
+		details, err := repodetails.LookupFirmware(in.ResolveContext(), client, repodetails.Firmware{
+			Name:    in.String("firmware"),
+			Version: in.String("version"),
+			URL:     in.String("url"),
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, kv := range [][2]string{
+			{"c8y_Firmware.name", details.Name},
+			{"c8y_Firmware.version", details.Version},
+			{"c8y_Firmware.url", details.URL},
+		} {
+			if body, err = sjson.SetBytes(body, kv[0], kv[1]); err != nil {
+				return nil, err
 			}
 		}
 
@@ -184,17 +183,4 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 			return client.Operations.CreateRaw(ctx, body)
 		}, nil
 	})
-}
-
-// versionRef builds the version resolver reference for the firmware repository
-// lookup: a plain managed-object id (the version itself) is used directly,
-// otherwise the version is scoped to its firmware (by id or name).
-func installVersionRef(version, firmware string) string {
-	if version == "" || firmware == "" || c8ydata.IsID(version) {
-		return version
-	}
-	if c8ydata.IsID(firmware) {
-		return firmwareversions.NewRef().ByVersion(version, firmware)
-	}
-	return firmwareversions.NewRef().ByVersionAndName(version, firmware)
 }

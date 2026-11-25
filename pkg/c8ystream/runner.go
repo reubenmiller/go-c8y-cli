@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
@@ -406,6 +407,10 @@ func (r *Runner) run(newProducer func() Producer) error {
 	}
 	ctx = WithProcessingMode(ctx, r.Cmd, cfg)
 	ctx = WithExtraRequestOptions(ctx, cfg)
+	if progress := r.Factory.IOStreams.ProgressIndicator(); progress.IsEnabled() {
+		// show a progress bar for the download of a binary
+		ctx = apiv2.WithResponseBodyWrapper(ctx, c8ybinary.DownloadProgress(progress))
+	}
 
 	// Confirmation + delays live on the submission, shared across items and
 	// carried via context to the per-item Submit calls. Built once here so the
