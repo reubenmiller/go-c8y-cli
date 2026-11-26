@@ -148,6 +148,18 @@ func (f *Factory) ClientV2() (*apiv2.Client, error) {
 		opts.Auth = authentication.AuthOptions{Tenant: opts.Auth.Tenant, AuthType: opts.Auth.AuthType}
 	}
 
+	// The SDK's HTTP layer logs its warnings (e.g. credentials over plain
+	// HTTP) at info level and the realtime client logs every websocket frame
+	// at info level: show them only with --verbose/--debug.
+	level := slog.LevelWarn
+	if cfg.Verbose() || cfg.Debug() {
+		level = slog.LevelDebug
+	}
+	var errOut io.Writer = io.Discard
+	if f.IOStreams != nil && f.IOStreams.ErrOut != nil {
+		errOut = f.IOStreams.ErrOut
+	}
+	logger := slog.New(slog.NewTextHandler(errOut, &slog.HandlerOptions{Level: level}))
 	// Install the HTTP response cache. The cache is a RoundTripper wrapper, so it
 	// becomes the v2 client's base transport; apiv2.NewClient further wraps it in
 	// DryRunTransport, giving DryRun -> cache -> network ordering (a dry run
@@ -183,6 +195,7 @@ func (f *Factory) ClientV2() (*apiv2.Client, error) {
 				ExcludeHost: !cfg.CacheKeyIncludeHost(),
 				Mode:        cfg.CacheMode(),
 				BodyKeys:    cfg.CacheBodyKeys(),
+				Logger:      logger,
 			},
 		)
 	}
@@ -201,18 +214,6 @@ func (f *Factory) ClientV2() (*apiv2.Client, error) {
 		}
 	}
 
-	// The SDK's HTTP layer logs its warnings (e.g. credentials over plain
-	// HTTP) at info level and the realtime client logs every websocket frame
-	// at info level: show them only with --verbose/--debug.
-	level := slog.LevelWarn
-	if cfg.Verbose() || cfg.Debug() {
-		level = slog.LevelDebug
-	}
-	var errOut io.Writer = io.Discard
-	if f.IOStreams != nil && f.IOStreams.ErrOut != nil {
-		errOut = f.IOStreams.ErrOut
-	}
-	logger := slog.New(slog.NewTextHandler(errOut, &slog.HandlerOptions{Level: level}))
 	opts.Logger = logger
 	// Parts of the SDK (e.g. the response cache: "Using cached response") log
 	// through the default slog logger instead of the client's logger, which

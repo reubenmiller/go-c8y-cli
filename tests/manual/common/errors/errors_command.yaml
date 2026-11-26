@@ -57,6 +57,9 @@ tests:
   It returns a timeout error:
     config:
       retries: 3
+      env:
+        # An unroutable address, so the 1ms timeout always wins
+        C8Y_HOST: http://10.255.255.1
     command: |
       c8y devices list --timeout "1ms" --withError --noCache
     exit-code: 106
