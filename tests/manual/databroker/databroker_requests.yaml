@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# Real (non-dry) requests. The CLI has no create command, so the connector is created
+# with "c8y api". Requires the data broker feature (not available on every tenant).
+tests:
+    Get a data broker connector:
+        command: |
+          ID=$(c8y api POST /databroker/connectors --data 'name=cli-test-connector,status=SUSPENDED' --select id -o csv)
+          c8y databroker get --id "$ID" --select name,status -o csv
+        exit-code: 0
+        stdout:
+            exactly: |
+              cli-test-connector,SUSPENDED
+
+    List data broker connectors:
+        command: |
+          ID=$(c8y api POST /databroker/connectors --data 'name=cli-test-connector-list,status=SUSPENDED' --select id -o csv)
+          c8y databroker list --pageSize 100 --select id -o csv | grep -c "^$ID$"
+        exit-code: 0
+        stdout:
+            exactly: |
+              1
+
+    Update the status of a data broker connector:
+        command: |
+          ID=$(c8y api POST /databroker/connectors --data 'name=cli-test-connector-update,status=SUSPENDED' --select id -o csv)
+          c8y databroker update --id "$ID" --template "{status: 'ACTIVE'}" --select status -o csv
+          c8y databroker get --id "$ID" --select status -o csv
+        exit-code: 0
+        stdout:
+            exactly: |
+              ACTIVE
+              ACTIVE
