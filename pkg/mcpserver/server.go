@@ -20,6 +20,8 @@ const (
 
 	// PromptSwitchSession prompt to let the user switch the session (stdio mode)
 	PromptSwitchSession = "switch_session"
+	// PromptMode prompt to let the user change the mode of the current session
+	PromptMode = "mode"
 )
 
 // SessionInfo non-secret information about the session used by the server
@@ -58,6 +60,20 @@ type Server struct {
 	// run, not the agent. It returns a message for the conversation, and should not wait
 	// for the user's selection: tool calls wait for it instead (see Gate)
 	SwitchSession func(ctx context.Context) (string, error)
+
+	// SwitchSessionTo optional function which switches to the named session straight away
+	// if it needs no passphrase or code (and otherwise opens the picker at its unlock
+	// step), then applies the mode (if not empty). It is used by the switch_session prompt
+	// when the user gives a session or a mode
+	SwitchSessionTo func(ctx context.Context, session string, mode string) (string, error)
+
+	// SessionNames optional function which lists the names of the sessions, to complete
+	// the session argument of the switch_session prompt
+	SessionNames func(ctx context.Context) []string
+
+	// EnableModePrompt offers the mode prompt, which changes the mode of the current
+	// session (see SetMode)
+	EnableModePrompt bool
 
 	// ConfirmDeviceShell optional confirmation by the user of commands which run a shell
 	// command on a device, in addition to the normal approval. Unlike the approval, the
@@ -219,7 +235,8 @@ func (s *Server) New() *mcp.Server {
 		Title:   "Cumulocity (go-c8y-cli)",
 		Version: s.Version,
 	}, &mcp.ServerOptions{
-		Instructions: s.Instructions(),
+		Instructions:      s.Instructions(),
+		CompletionHandler: s.complete,
 	})
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -271,24 +288,7 @@ func (s *Server) New() *mcp.Server {
 		},
 	}, s.handleSession)
 
-	if s.SwitchSession != nil {
-		server.AddPrompt(&mcp.Prompt{
-			Name:        PromptSwitchSession,
-			Title:       "Switch the Cumulocity session",
-			Description: "Open a session picker in the browser to change the Cumulocity session used by the c8y tools",
-		}, func(ctx context.Context, req *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-			message, err := s.SwitchSession(ctx)
-			if err != nil {
-				return nil, err
-			}
-			return &mcp.GetPromptResult{
-				Description: "Switch the Cumulocity session",
-				Messages: []*mcp.PromptMessage{
-					{Role: "user", Content: &mcp.TextContent{Text: message}},
-				},
-			}, nil
-		})
-	}
+	s.addPrompts(server)
 
 	return server
 }

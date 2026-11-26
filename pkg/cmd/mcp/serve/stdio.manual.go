@@ -33,6 +33,7 @@ func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcp
 		log.Infof("%s: %s (%s)", tool, command, outcome)
 	}
 	server.Logf = log.Infof
+	server.EnableModePrompt = true
 	if n.confirmDeviceShell {
 		// stdin is used by the MCP transport, so only a dialog can be used
 		confirmer := &mcpserver.DeviceShellConfirmer{}
@@ -103,6 +104,8 @@ func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcp
 		return sessions.ensure(ctx)
 	}
 	server.SwitchSession = sessions.startSwitch
+	server.SwitchSessionTo = sessions.switchTo
+	server.SessionNames = sessions.sessionNames
 
 	log.Infof("Starting MCP server (stdio). session=%s, sessionProviders=%v, approval=%s", sessionFile, providerRefs(sources), server.Policy.Approval)
 	return runStdioServer(ctx, server)
@@ -625,4 +628,139 @@ func (s *stdioSessions) startSwitch(ctx context.Context) (string, error) {
 	return fmt.Sprintf("I'm switching the Cumulocity session used by the %s tools in the browser window which just opened. "+
 		"Once I've selected it, call %s and tell me which tenant and user are now used. Don't change any data as part of this.",
 		"c8y", mcpserver.ToolSession), nil
+}
+
+// sessionNames returns the names of the sessions to complete the arguments of a prompt:
+// the session files, and the sessions of the providers which were listed before (the
+// providers are not listed again for each completion)
+func (s *stdioSessions) sessionNames(ctx context.Context) []string {
+	var names []string
+	seen := map[string]bool{}
+	add := func(name string) {
+		if name != "" && !seen[name] {
+			seen[name] = true
+			names = append(names, name)
+		}
+	}
+	for _, source := range s.sources {
+		if source.IsFiles() {
+			if list, err := selectsession.ListSessions(s.cfg, s.log); err == nil {
+				for _, session := range list {
+					add(mcpserver.SessionKey(session.Path))
+				}
+			}
+		}
+	}
+	s.listedMu.Lock()
+	for _, session := range s.listed {
+		add(session.DisplayName())
+	}
+	s.listedMu.Unlock()
+	return names
+}
+
+// findChoice returns the session with the given name (or session file path, or provider
+// session uri), and fails if the name is unknown or ambiguous
+func (s *stdioSessions) findChoice(ctx context.Context, name string) (mcpserver.SessionChoice, error) {
+	matches := func(choice mcpserver.SessionChoice) bool {
+		return strings.EqualFold(choice.Name, name) || (choice.Path != "" && choice.Path == name) || (choice.URI != "" && choice.URI == name)
+	}
+	var found []mcpserver.SessionChoice
+	var names []string
+	collect := func(choices []mcpserver.SessionChoice) {
+		for _, choice := range choices {
+			names = append(names, choice.Name)
+			if matches(choice) {
+				found = append(found, choice)
+			}
+		}
+	}
+	listed := s.providerChoices(ctx)
+	for i, source := range s.sources {
+		if source.IsFiles() {
+			choices, err := s.fileChoices()
+			if err != nil {
+				return mcpserver.SessionChoice{}, err
+			}
+			collect(choices)
+		} else {
+			collect(listed[i].choices)
+		}
+	}
+	switch len(found) {
+	case 1:
+		return found[0], nil
+	case 0:
+		return mcpserver.SessionChoice{}, fmt.Errorf("unknown session %q. Available sessions: %s", name, strings.Join(names, ", "))
+	default:
+		return mcpserver.SessionChoice{}, fmt.Errorf("the session name %q is ambiguous (%d sessions match)", name, len(found))
+	}
+}
+
+// switchTo switches to the named session without the browser if it needs no passphrase
+// or two-factor code, and otherwise opens the picker at its unlock step. The mode (if
+// given) is applied to the session. Without a session, only the mode of the current
+// session changes
+func (s *stdioSessions) switchTo(ctx context.Context, name string, modeName string) (string, error) {
+	mode := config.SessionModeUnset
+	if modeName != "" {
+		var err error
+		if mode, err = mcpserver.ParseMode(modeName); err != nil {
+			return "", err
+		}
+	}
+	if name == "" {
+		change, err := s.server.SetMode(mode, "prompt")
+		if err != nil {
+			return "", err
+		}
+		return change.Message(), nil
+	}
+	choice, err := s.findChoice(ctx, name)
+	if err != nil {
+		return "", err
+	}
+	if !s.mu.TryLock() {
+		return "A Cumulocity session picker is already open in the browser. Wait for me to select a session.", nil
+	}
+	apply := func(session *pendingSession) error {
+		s.use(session)
+		if modeName == "" {
+			return nil
+		}
+		_, err := s.server.SetMode(mode, "prompt")
+		return err
+	}
+	if !choice.NeedsPassphrase && !choice.NeedsCode {
+		value, err := s.login(ctx, choice, mcpserver.LoginSecrets{})
+		switch {
+		case err == nil:
+			defer s.mu.Unlock()
+			if err := apply(value.(*pendingSession)); err != nil {
+				return "", err
+			}
+			info, runner := s.server.Active()
+			return fmt.Sprintf("Switched the Cumulocity session to %s (tenant %s, user %s, mode %s). "+
+				"Call %s to confirm. Don't change any data as part of this.",
+				info.SessionName, info.Tenant, info.Username, runner.Mode, mcpserver.ToolSession), nil
+		case errors.Is(err, mcpserver.ErrTOTPRequired):
+			// ask for the code in the browser
+		default:
+			s.mu.Unlock()
+			return "", err
+		}
+	}
+	go func() {
+		defer s.mu.Unlock()
+		selection, err := s.pickerWithLogin().Unlock(context.Background(), "Unlock the Cumulocity session", "", choice)
+		if err == nil {
+			err = apply(selection.Value.(*pendingSession))
+		}
+		if err != nil && !errors.Is(err, mcpserver.ErrPickerCancelled) {
+			s.log.Warnf("Session was not switched. %s", err)
+		}
+	}()
+	return fmt.Sprintf("I'm switching the Cumulocity session to %s. It needs a passphrase or code, so I opened the browser window to unlock it. "+
+		"Once I've unlocked it, call %s and tell me which tenant, user and mode are now used. Don't change any data as part of this.",
+		choice.Name, mcpserver.ToolSession), nil
 }
