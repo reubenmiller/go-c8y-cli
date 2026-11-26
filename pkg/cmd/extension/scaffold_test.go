@@ -111,7 +111,7 @@ func TestCreateGoExtension(t *testing.T) {
 	declared, err := readDeclaredName(dir)
 	require.NoError(t, err)
 	assert.Equal(t, "gofoo", declared)
-	findings := ValidateExtension(&Extension{path: dir, isLocal: true, manifest: &manifestCache{}}, ValidateOptions{GlobalFlags: testGlobalFlags(), RootCommand: testRootCommand()})
+	findings := ValidateExtension(&Extension{path: dir, isLocal: true, manifest: &manifestCache{}}, ValidateOptions{CompleteTimeout: testCompleteTimeout, GlobalFlags: testGlobalFlags(), RootCommand: testRootCommand()})
 	assert.Empty(t, findings, findingsText(findings))
 
 	// The release workflow validates the extension
