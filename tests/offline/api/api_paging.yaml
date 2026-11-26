@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# c8y api does not send paging parameters of its own (as c8y v2): the server's default
+# page size applies, and --includeAll follows the next page links of the responses.
+# (The fake server's next page links drop the other query parameters, so the requests
+# have none and the test data of the setup, which is more than one page, is counted.)
+tests:
+  It follows the next page links with --includeAll without sending a page size:
+    command: |
+      all=$(c8y api "/inventory/managedObjects?pageSize=2000" --select id -o csv | wc -l | tr -d ' ')
+      paged=$(c8y api /inventory/managedObjects --includeAll --select id -o csv | wc -l | tr -d ' ')
+      first=$(c8y api /inventory/managedObjects --select id -o csv | wc -l | tr -d ' ')
+      echo "first=$first"
+      if [ "$all" = "$paged" ] && [ "$all" -gt "$first" ]; then echo "all pages"; fi
+    exit-code: 0
+    stdout:
+      exactly: |
+        first=5
+        all pages
+
+  It stops after --totalPages pages:
+    command: |
+      c8y api /inventory/managedObjects --includeAll --totalPages 2 --select id -o csv | wc -l | tr -d ' '
+    exit-code: 0
+    stdout:
+      exactly: |
+        10

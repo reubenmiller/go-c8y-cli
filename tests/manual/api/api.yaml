@@ -168,13 +168,58 @@ tests:
         path: /alarm/alarms
         query: pageSize=10&status=ACTIVE
 
-  It supports the pageSize flag:
+  It does not add the paging flags to the query of a GET request (as c8y v2):
     command: |
-      c8y api /inventory/managedObjects --pageSize 10 --dry
+      c8y api /inventory/managedObjects --pageSize 10 --currentPage 2 --withTotalPages --withTotalElements --dry
+    exit-code: 0
+    stdout:
+      not-contains:
+        - pageSize
+        - currentPage
+        - withTotalPages
+        - withTotalElements
+      json:
+        method: GET
+        path: /inventory/managedObjects
+
+  It does not add the default page size to a binary download:
+    command: |
+      C8Y_SETTINGS_DEFAULTS_PAGESIZE=20 c8y api /inventory/binaries/12345 --dry
+    exit-code: 0
+    stdout:
+      not-contains:
+        - pageSize
+      json:
+        method: GET
+        path: /inventory/binaries/12345
+
+  It does not add the default page size to a GET request with a custom query parameter:
+    command: |
+      C8Y_SETTINGS_DEFAULTS_PAGESIZE=20 c8y api /inventory/managedObjects --customQueryParam "type=a" --dry
     exit-code: 0
     stdout:
       json:
-        query: pageSize=10
+        path: /inventory/managedObjects
+        query: type=a
+
+  It does not add the include all page size to a GET request:
+    command: |
+      c8y api /inventory/managedObjects --includeAll --dry
+    exit-code: 0
+    stdout:
+      not-contains:
+        - pageSize
+      json:
+        path: /inventory/managedObjects
+
+  It keeps the paging parameters of the url:
+    command: |
+      C8Y_SETTINGS_DEFAULTS_PAGESIZE=20 c8y api "/inventory/managedObjects?pageSize=7&type=a" --pageSize 10 --dry
+    exit-code: 0
+    stdout:
+      json:
+        path: /inventory/managedObjects
+        query: pageSize=7&type=a
 
   It accepts positional arguments for path and defaults to GET (not using pipeline):
     command: |

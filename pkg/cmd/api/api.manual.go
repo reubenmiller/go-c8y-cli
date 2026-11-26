@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
@@ -264,15 +263,6 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	var paging url.Values
-	if method == http.MethodGet {
-		common, err := cfg.GetOutputCommonOptions(cmd)
-		if err != nil {
-			return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-		}
-		paging = pagingParameters(common)
-	}
-
 	progressBar := cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY())
 	addProgress := c8ybinary.AddProgress(cmd, "file", progressBar)
 
@@ -289,12 +279,10 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, cmderrors.NewUserError(err)
 		}
-		for key, values := range paging {
-			// The url's own paging parameters win
-			if !query.Has(key) {
-				query[key] = values
-			}
-		}
+		// The paging flags (--pageSize, --currentPage, --withTotalPages and
+		// --withTotalElements) are not sent: like c8y v2, the request has only
+		// the query of the url and --customQueryParam. --includeAll and
+		// --totalPages still follow the next page links.
 
 		opts := apiv2.RequestOptions{
 			Method:       method,
@@ -379,23 +367,4 @@ func requestURL(template, itemURL, prefix string) (string, url.Values, error) {
 		path = "/" + path
 	}
 	return path, query, nil
-}
-
-// pagingParameters returns the query parameters of the paging flags
-// (--pageSize, --currentPage, --withTotalPages and --withTotalElements).
-func pagingParameters(common config.CommonCommandOptions) url.Values {
-	query := url.Values{}
-	if common.CurrentPage > 0 {
-		query.Set(flags.FlagCurrentPage, fmt.Sprintf("%d", common.CurrentPage))
-	}
-	if common.PageSize > 0 {
-		query.Set(flags.FlagPageSize, fmt.Sprintf("%d", common.PageSize))
-	}
-	if common.WithTotalPages {
-		query.Set(flags.FlagWithTotalPages, "true")
-	}
-	if common.WithTotalElements {
-		query.Set(flags.FlagWithTotalElements, "true")
-	}
-	return query
 }

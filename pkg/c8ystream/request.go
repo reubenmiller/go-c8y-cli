@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -45,6 +46,9 @@ func (r *Runner) sendRequest(ctx context.Context, client *apiv2.Client, opts api
 		return
 	}
 	paging := strings.EqualFold(opts.Method, http.MethodGet) && (common.IncludeAll || common.TotalPages > 1)
+	// The page size of the requests: a request without pageSize (e.g. c8y api)
+	// gets the server's default pages, so a short page does not end the paging.
+	pageSize := requestPageSize(opts.Query)
 	whole := r.Config.RawOutput() || common.WithTotalPages || common.WithTotalElements
 
 	for page := int64(1); ; page++ {
@@ -89,7 +93,7 @@ func (r *Runner) sendRequest(ctx context.Context, client *apiv2.Client, opts api
 
 		// Follow the next page link of a collection
 		next := gjson.GetBytes(body, "next").String()
-		if !paging || property == "" || next == "" || count == 0 || count < common.PageSize {
+		if !paging || property == "" || next == "" || count == 0 || count < pageSize {
 			return
 		}
 		if common.TotalPages > 0 && page >= common.TotalPages {
@@ -117,6 +121,20 @@ func (r *Runner) sendRequest(ctx context.Context, client *apiv2.Client, opts api
 			IgnoreAccept:   opts.IgnoreAccept,
 		}
 	}
+}
+
+// requestPageSize returns the pageSize of a request's query (url.Values or an
+// encoded string), or 0 when it has none.
+func requestPageSize(query any) int {
+	var values url.Values
+	switch q := query.(type) {
+	case url.Values:
+		values = q
+	case string:
+		values, _ = url.ParseQuery(q)
+	}
+	size, _ := strconv.Atoi(values.Get(flags.FlagPageSize))
+	return size
 }
 
 // resultProperty returns the array property which holds a response's items:

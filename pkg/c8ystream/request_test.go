@@ -1,6 +1,7 @@
 package c8ystream
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
@@ -105,6 +106,26 @@ func TestResponseText(t *testing.T) {
 	for _, tc := range cases {
 		if got := string(responseText([]byte(tc.body), tc.raw)); got != tc.want {
 			t.Errorf("responseText(%q, raw=%v) = %q, want %q", tc.body, tc.raw, got, tc.want)
+		}
+	}
+}
+
+func TestRequestPageSize(t *testing.T) {
+	cases := []struct {
+		query any
+		want  int
+	}{
+		{nil, 0},
+		{url.Values{}, 0},
+		{url.Values{"type": {"a"}}, 0},
+		{url.Values{"pageSize": {"7"}}, 7},
+		{"", 0},
+		{"currentPage=2&pageSize=30", 30},
+		{"pageSize=abc", 0},
+	}
+	for _, c := range cases {
+		if got := requestPageSize(c.query); got != c.want {
+			t.Errorf("requestPageSize(%v) = %d, want %d", c.query, got, c.want)
 		}
 	}
 }

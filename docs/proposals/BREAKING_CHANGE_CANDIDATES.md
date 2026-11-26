@@ -142,6 +142,30 @@ Deprecated in go-c8y v2 and kept as aliases: `Client.ApplicationVersions`, `Devi
 - **Ways to ship**: change before the first v3 release, when nobody relies on it yet.
 - **Source**: CLI#820.
 
+### 17. `c8y api` with an absolute url
+
+- **Today**: a piped absolute url (for example `https://test.com/path`, or a self link from a response) is reduced to its path and query, and the request goes to the session's host (or `--host`), the same as v2. The host of the url is dropped without a message, so `echo https://test.com/path | c8y api` calls the session's tenant, not test.com.
+- **Proposed**: honor the host of an absolute url, and send the session's credentials only when it is the session's own host (never to another host). Alternatively, fail with a clear error when the host differs from the session's.
+- **Breaks**: scripts that pipe self links from another tenant or an old host name and rely on them being redirected to the session's host (honoring the host would call the other host; failing would be an error).
+- **Ways to ship**: an opt-in flag first (for example `--followHost`), or a warning when the host differs, then the stricter behavior in a major release.
+- **Source**: `pkg/cmd/api` `requestURL`.
+
+### 18. Create commands are not idempotent
+
+- **Today**: `ui plugins create` and `microservices serviceusers create` (and similar create commands, such as creating a plugin version or an application that exists) fail with a 409 when the version or application already exists, so a script cannot be re-run.
+- **Proposed**: an opt-in, such as `--ifExists skip` (or `update`), or treating an identical existing version (same name and content) as success. This is the per-command part of topics 2 and 3.
+- **Breaks**: nothing if opt-in. Treating identical versions as success changes the exit code from 9 to 0 for scripts that use the 409 as a signal.
+- **Ways to ship**: `--ifExists` on the create commands first, default `fail`.
+- **Source**: live test runs of `ui plugins create` and `microservices serviceusers create`.
+
+### 19. `c8y api` and the paging flags
+
+- **Today**: for a GET, `c8y api` sends only the query of the url and `--customQueryParam` (the same as v2). `--pageSize`, `--currentPage`, `--withTotalPages` and `--withTotalElements` are accepted but not sent, and the default page size is not sent either, so the server's default applies. `--includeAll` and `--totalPages` still follow the `next` links. The help examples `c8y api GET "/alarm/alarms&status=ACTIVE" --pageSize 10` and `... --pageSize 1 --withTotalPages` therefore do not do what they say (v3 only: v2 has no `--withTotalElements`, and rejects it as an unknown flag).
+- **Proposed**: send the paging flags the user sets explicitly (not the defaults), unless the url already has the parameter, so `c8y api ... --pageSize 10` works like on the list commands. Alternatively, remove the flags and the examples from `c8y api`.
+- **Breaks**: scripts that pass these flags to `c8y api` today get changed requests (a smaller or larger page, or `withTotalPages=true` in the response). Binary downloads and other non-collection paths must not receive them, so the flags would apply to the requests that have them set only.
+- **Ways to ship**: honor explicit flags in a major release, with a release note. The v3 branch briefly sent `pageSize` (the default) on every GET, including binary downloads; that was a regression and is fixed.
+- **Source**: this page's measurements of v2 (master) and v3 against a stub server.
+
 ## Part 2: already changed on v3 (confirm or revert)
 
 These changes are on the v3 branch today. A v2 CLI user would notice them. Each should be confirmed (and listed in the release notes) or reverted.
@@ -206,3 +230,8 @@ Verified since the first version of this page: a 409 on identity create, child a
 - The exit code for unresolved names on built-in commands (100 or 101).
 - The `inventory find` query shape, and whether the no-content success message is ported.
 - `--withGroups` is accepted but ignored by `devices get`, `devices list`, `agents get`, `agents list` and `smartgroups get`, although the SDK now has `managedobjects.GetOptions.WithGroups` (other inventory-based commands already send it). Wiring it would add `withGroups=true` to the request and `assetParents` to the output when the flag is set, so it changes output for scripts that pass the flag today.
+
+## Notes and open questions (not CLI behavior)
+
+- **Live tests that need a tenant feature**: a live test cannot skip itself when the tenant lacks a feature. For example, Notification 2.0 answers the test user with 403 (`security/Forbidden`), so the test fails although the CLI works. This is a convention for the test suite, not a CLI change. Proposed: a shared helper in `tests/manual` that probes the feature once (a cheap request, a 403 or 404 meaning "not available") and marks the test as skipped, and a list of the features that the shared test tenant has. Decision needed: where the helper lives (a script sourced by the tests, or a commander precondition) and whether a skipped test counts as a pass in the live workflow summary.
+- **`--includeAll` of `c8y api` against a stub**: with a stub that returned a next link on pages 1 and 2 (three pages in all), the v2 binary stopped after the second page, while v3 follows every page. To verify against a real tenant whether v2 had a limit (it is not documented), and keep v3's behavior if not.
