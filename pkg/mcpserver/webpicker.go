@@ -750,7 +750,13 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   .pill.accent { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent); }
   .mode { font-size: .78rem; color: var(--faint); }
   .modes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 6px; padding: 0 16px 12px; }
-  .modes input { position: absolute; opacity: 0; pointer-events: none; }
+  .modes { position: relative; }
+  /* the radios are only for the form and the keyboard; the labels show the modes.
+     They are clipped, not only transparent, so no other rule can make them visible */
+  .modes input {
+    position: absolute; top: 0; left: 0; width: 1px; height: 1px; margin: 0;
+    overflow: hidden; clip-path: inset(50%); opacity: 0; pointer-events: none;
+  }
   .seg {
     padding: 4px 14px; font-size: .78rem; font-weight: 600; letter-spacing: .04em; cursor: pointer;
     color: var(--muted); border: 1px solid var(--line); border-radius: 99px; transition: background .15s, border-color .15s, color .15s;
@@ -813,7 +819,8 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   .status { display: none; align-items: center; justify-content: center; gap: 10px; margin-top: 20px; font-size: .9rem; color: var(--muted); text-align: center; }
   .spinner { flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--accent-line); border-top-color: var(--accent); animation: spin .8s linear infinite; }
   body.busy .status { display: flex; }
-  body.busy .button, body.busy .session, body.busy input { opacity: .45; pointer-events: none; }
+  /* the hidden mode radios are left out, and their labels are dimmed instead */
+  body.busy .button, body.busy .session, body.busy .seg, body.busy input:not([type=radio]) { opacity: .45; pointer-events: none; }
 
   .check-ring { width: 80px; height: 80px; margin: 0 auto 28px; display: block; }
   .check-ring circle {
