@@ -5,9 +5,10 @@ tests:
         command: c8y tenantstatistics listSummaryAllTenants
         exit-code: 0
     
+    # The summary is empty on tenants without subtenants; --raw then prints
+    # nothing (same as v2), otherwise the whole array on one line
     It supports raw values:
         command: c8y tenantstatistics listSummaryAllTenants --raw
         exit-code: 0
         stdout:
-            match-pattern: |
-                \[.*\]
+            match-pattern: ^(\[.*\])?$
