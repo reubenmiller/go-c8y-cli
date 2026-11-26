@@ -192,7 +192,7 @@ return extsdk.PrintSession(extsdk.Session{
 
 ## Go SDK
 
-The [extension SDK](https://pkg.go.dev/github.com/reubenmiller/go-c8y-cli/pkg/extsdk) is a small Go module which reads the runtime context, creates a [go-c8y](https://github.com/reubenmiller/go-c8y) client for the active session, and writes JSON output for c8y to format.
+The [extension SDK](https://pkg.go.dev/github.com/reubenmiller/go-c8y-cli/pkg/extsdk) is a small Go module which reads the runtime context, creates a [go-c8y v2](https://github.com/reubenmiller/go-c8y) client for the active session, and writes JSON output for c8y to format.
 
 ```go
 ctx, err := extsdk.FromEnv()

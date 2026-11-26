@@ -3,11 +3,10 @@ package flags
 import (
 	"errors"
 	"fmt"
-	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -21,14 +20,28 @@ func ExactArgsOrExample(n int) cobra.PositionalArgs {
 	}
 }
 
+// QueryValidator validates the query parameters of a request
+type QueryValidator func(query url.Values) error
+
+// ValidateQuery validates the query parameters of a request with all the validators, and returns the
+// first error
+func ValidateQuery(query url.Values, validators ...QueryValidator) error {
+	for _, validate := range validators {
+		if err := validate(query); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 var ErrInvalidQueryParameter error = errors.New("invalid query parameters")
 
-func WithQueryParameterOneRequired(name ...string) c8y.RequestValidator {
-	return func(r *http.Request) error {
+func WithQueryParameterOneRequired(name ...string) QueryValidator {
+	return func(query url.Values) error {
 		var err error
 		matches := 0
 		for _, k := range name {
-			if r.URL.Query().Has(k) {
+			if query.Has(k) {
 				matches += 1
 				break
 			}
@@ -42,12 +55,12 @@ func WithQueryParameterOneRequired(name ...string) c8y.RequestValidator {
 	}
 }
 
-func WithQueryParameterMutuallyExclusive(name ...string) c8y.RequestValidator {
-	return func(r *http.Request) error {
+func WithQueryParameterMutuallyExclusive(name ...string) QueryValidator {
+	return func(query url.Values) error {
 		var err error
 		matches := 0
 		for _, k := range name {
-			if r.URL.Query().Has(k) {
+			if query.Has(k) {
 				matches += 1
 			}
 		}
@@ -59,12 +72,12 @@ func WithQueryParameterMutuallyExclusive(name ...string) c8y.RequestValidator {
 	}
 }
 
-func WithQueryParameterRequiredTogether(name ...string) c8y.RequestValidator {
-	return func(r *http.Request) error {
+func WithQueryParameterRequiredTogether(name ...string) QueryValidator {
+	return func(query url.Values) error {
 		var err error
 		matches := 0
 		for _, k := range name {
-			if r.URL.Query().Has(k) {
+			if query.Has(k) {
 				matches += 1
 			}
 		}

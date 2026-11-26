@@ -19,7 +19,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/requestutil"
 	pkgurl "github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/types"
@@ -433,7 +433,7 @@ func (t *requestTemplate) build(in *c8ystream.Resolver) (apiv2.RequestOptions, e
 		}
 	}
 
-	if !request.RequestSupportsBody(t.method) {
+	if !requestutil.RequestSupportsBody(t.method) {
 		return opts, nil
 	}
 

@@ -9,7 +9,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 const (
@@ -87,8 +86,9 @@ func isArray(value string) ([]string, bool) {
 
 // parseJSON converts either a
 func parseJSONStructure(value string, data map[string]interface{}) error {
-	rdr := strings.NewReader(value)
-	if err := c8y.DecodeJSONReader(rdr, &data); err != nil {
+	decoder := json.NewDecoder(strings.NewReader(value))
+	decoder.UseNumber()
+	if err := decoder.Decode(&data); err != nil {
 		return errors.Wrap(err, "invalid json")
 	}
 	return nil

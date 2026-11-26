@@ -55,13 +55,12 @@ func (r *Runner) newSubmission() *submission {
 	if !s.confirmActive() && !s.hasDelays() {
 		return nil
 	}
-	// Target shown in the prompt — best-effort; the client is already built by
-	// the time Run executes, so this does not trigger a fresh login.
-	if client, err := r.Factory.Client(); err == nil && client != nil {
-		if client.BaseURL != nil {
-			s.targetInfo = fmt.Sprintf("host %s (tenant %s)", client.GetHostname(), client.TenantName)
+	// Target shown in the prompt (best-effort, taken from the session so it does not send any request)
+	if session, err := r.Factory.ClientSession(); err == nil {
+		if session.Host != "" {
+			s.targetInfo = fmt.Sprintf("host %s (tenant %s)", session.Host, session.Tenant)
 		} else {
-			s.targetInfo = fmt.Sprintf("tenant %s", client.TenantName)
+			s.targetInfo = fmt.Sprintf("tenant %s", session.Tenant)
 		}
 	}
 	return s

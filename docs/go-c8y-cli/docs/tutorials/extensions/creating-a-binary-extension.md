@@ -65,7 +65,7 @@ return extsdk.Print(results)
 
 ## Add a command which uses the API
 
-Add a command which counts the devices of each type. `extsdk.FromEnv()` reads the session which c8y passes to the extension, and `ctx.Client()` creates a [go-c8y](https://github.com/reubenmiller/go-c8y) client for it.
+Add a command which counts the devices of each type. `extsdk.FromEnv()` reads the session which c8y passes to the extension, and `ctx.Client()` creates a [go-c8y v2](https://github.com/reubenmiller/go-c8y) client for it.
 
 ```go title="file: main.go"
 func newTypesCmd() *cobra.Command {
@@ -81,9 +81,24 @@ func newTypesCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			devices, _, err := client.Inventory.GetDevices(cmd.Context(), &c8y.PaginationOptions{PageSize: 2000})
-			if err != nil {
-				return extsdk.CheckError(err)
+			res := client.SendRequest(cmd.Context(), api.RequestOptions{
+				Method: http.MethodGet,
+				Path:   "/inventory/managedObjects",
+				Query: url.Values{
+					"query":    {"$filter=has(c8y_IsDevice)"},
+					"pageSize": {"2000"},
+				},
+			})
+			if res.Error != nil {
+				return extsdk.CheckError(res.Error)
+			}
+			var devices struct {
+				ManagedObjects []struct {
+					Type string `json:"type"`
+				} `json:"managedObjects"`
+			}
+			if err := json.Unmarshal(res.Body(), &devices); err != nil {
+				return err
 			}
 
 			counts := map[string]int{}
@@ -100,7 +115,7 @@ func newTypesCmd() *cobra.Command {
 }
 ```
 
-Register the command in `main()` with `root.AddCommand(newTypesCmd())`, and import `github.com/reubenmiller/go-c8y/pkg/c8y`.
+Register the command in `main()` with `root.AddCommand(newTypesCmd())`, and import `encoding/json`, `net/http`, `net/url` and `github.com/reubenmiller/go-c8y/v2/pkg/c8y/api`.
 
 Then declare it in `extension.yaml`, so it is listed in the help and its output is formatted by c8y:
 

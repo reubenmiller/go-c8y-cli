@@ -1,16 +1,12 @@
 package cmderrors
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 
-	nativeErrors "errors"
-
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/tidwall/pretty"
 )
 
@@ -280,56 +276,6 @@ func ExitCodeFromStatusCode(statusCode int) ExitCode {
 	return ExitUnknownError
 }
 
-// NewServerError creates a server error from a Cumulocity response
-func NewServerError(r *c8y.Response, err error, iostream *iostreams.IOStreams, withRawMessage bool) CommandError {
-	cmdError := CommandError{
-		Message:        err.Error(),
-		ErrorType:      ErrTypeServer,
-		silent:         false,
-		ExitCode:       ExitUnknownError,
-		StatusCode:     0,
-		Err:            err,
-		WithRawMessage: withRawMessage,
-		IO:             iostream,
-	}
-
-	if errors.Is(err, context.DeadlineExceeded) {
-		cmdError.ErrorType = ErrTypeCommand
-		cmdError.Message = "command timed out"
-		cmdError.ExitCode = ExitTimeout
-	}
-
-	if v, ok := err.(*c8y.ErrorResponse); ok {
-		if v.Response != nil {
-			if json.Valid(v.Response.Body()) {
-				cmdError.CumulocityError = json.RawMessage(v.Response.Body())
-			} else if strings.Contains(v.Response.Header().Get("Content-Type"), "text") {
-				cmdError.CumulocityError = json.RawMessage(v.Response.Body())
-			} else {
-				// handle non json/non-text response into base64 (which is the default behaviour of json.Marshal for a []byte)
-				cmdError.CumulocityError = json.RawMessage(v.Response.Body())
-			}
-		}
-		cmdError.Message = v.Message
-	}
-
-	if r != nil {
-		if r.Response != nil {
-			cmdError.StatusCode = r.Response.StatusCode
-
-			if r.Response.Request != nil {
-				cmdError.URL = r.Response.Request.URL.Path
-			}
-
-			if v, ok := httpStatusCodeToExitCode[cmdError.StatusCode]; ok {
-				cmdError.ExitCode = v
-			}
-		}
-	}
-
-	return cmdError
-}
-
 // NewSystemErrorF creates a custom system error
 func NewSystemErrorF(format string, a ...interface{}) CommandError {
 	return CommandError{Message: fmt.Sprintf(format, a...), ErrorType: ErrTypeCommand}
@@ -349,13 +295,4 @@ func NewErrorSummary(message string, errorsCh <-chan error) error {
 		return nil
 	}
 	return errorSummary
-}
-
-func IsNotFound(err error) bool {
-	if errResponse, ok := err.(*c8y.ErrorResponse); ok && errResponse != nil {
-		if errResponse.Response.StatusCode() == 404 {
-			return true
-		}
-	}
-	return nativeErrors.Is(err, ErrNoMatchesFound)
 }

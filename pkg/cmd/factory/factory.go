@@ -28,7 +28,6 @@ func New(appVersion string, buildBranch string, configFunc func() (*config.Confi
 	f := &cmdutil.Factory{
 		IOStreams:      io,
 		Config:         configFunc,
-		Client:         clientMissing,
 		Executable:     c8yExecutable,
 		Logger:         loggerFunc,
 		ActivityLogger: activityLoggerFunc,
