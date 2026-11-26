@@ -462,6 +462,9 @@ func TestWebPickerShowsKeyboardShortcuts(t *testing.T) {
 		// hint line, shown by the script as the shortcuts need it
 		`<p class="keys" id="keys" hidden>`,
 		`id="show-help" aria-keyshortcuts="?"`,
+		`<kbd>←</kbd><kbd>→</kbd> mode`,
+		// mode changes made with the keyboard are announced to screen readers
+		`id="announce" aria-live="polite"`,
 		// help dialog
 		`<dialog class="help" id="help"`,
 		`Keyboard shortcuts`,

@@ -45,7 +45,8 @@ Changing the mode only needs a copy of the `Runner` with another `Mode` and the 
   mode (or its current override). Modes above the ceiling are disabled. Modes above the
   session's own mode are marked as an override.
 - The current session offers "Change mode only", which keeps the logged-in session.
-- Keyboard: `↑`/`↓` move, `p`/`q`/`d` (or `1`/`2`/`3`) set the mode, `Enter` selects,
+- Keyboard: `↑`/`↓` move, `←`/`→` lower or raise the mode (no wrap-around, so one key
+  press never goes from prod to dev), `p`/`q`/`d` (or `1`/`2`/`3`) set the mode, `Enter` selects,
   typing filters by name.
 - The shortcuts are shown on the page: a hint line under the sessions (only with
   JavaScript, as the shortcuts need it), and a help dialog on `?` which also lists the

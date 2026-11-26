@@ -774,6 +774,7 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   .keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-top: 12px; font-size: .78rem; color: var(--faint); }
   .keys[hidden] { display: none; }
   .key-modes[hidden] { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .keys span { display: inline-flex; align-items: center; gap: 4px; }
   .link { padding: 0; font: inherit; color: var(--muted); background: none; border: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .link:hover, .link:focus-visible { color: var(--strong); outline: none; }
@@ -952,11 +953,12 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   </form>
   <!-- the shortcuts need the script, so the hint is only shown by it -->
   <p class="keys" id="keys" hidden>
-    <span><kbd>↑</kbd><kbd>↓</kbd> move</span>
-    <span class="key-modes"><kbd>P</kbd><kbd>Q</kbd><kbd>D</kbd> set mode</span>
+    <span><kbd>↑</kbd><kbd>↓</kbd> session</span>
+    <span class="key-modes"><kbd>←</kbd><kbd>→</kbd> mode</span>
     <span><kbd>Enter</kbd> select</span>
     <button class="link" type="button" id="show-help" aria-keyshortcuts="?"><kbd>?</kbd> all shortcuts</button>
   </p>
+  <p class="sr-only" id="announce" aria-live="polite"></p>
   <div class="actions">
     <form method="post" action="/cancel"><input type="hidden" name="csrf" value="{{.CSRF}}"><button class="button" type="submit">Cancel</button></form>
   </div>
@@ -966,6 +968,7 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   <h2 id="help-title">Keyboard shortcuts</h2>
   <dl>
     <dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd>Move between the sessions. <kbd>↑</kbd> on the first session goes back to the filter.</dd>
+    <dt class="key-modes"><kbd>←</kbd><kbd>→</kbd></dt><dd class="key-modes">Lower or raise the mode of the focused session. It stops at prod and at the highest allowed mode.</dd>
     <dt class="key-modes"><kbd>P</kbd> or <kbd>1</kbd></dt><dd class="key-modes">prod: the agent can only read data</dd>
     <dt class="key-modes"><kbd>Q</kbd> or <kbd>2</kbd></dt><dd class="key-modes">qual: the agent can also create and update</dd>
     <dt class="key-modes"><kbd>D</kbd> or <kbd>3</kbd></dt><dd class="key-modes">dev: the agent can also delete</dd>
@@ -1005,8 +1008,8 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
       document.getElementById("empty").style.display = shown ? "none" : "block";
     });
   }
-  // keyboard: up/down move between the sessions, p/q/d or 1/2/3 set the mode of the
-  // focused session, Enter selects it, "?" shows the help, and typing filters by name.
+  // keyboard: up/down move between the sessions, left/right, p/q/d or 1/2/3 set the mode
+  // of the focused session, Enter selects it, "?" shows the help, and typing filters by name.
   // The page works without it
   const list = document.getElementById("sessions");
   if (list) {
@@ -1022,6 +1025,13 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
     const showHelp = () => { if (help && !help.open && help.showModal) help.showModal(); };
     const showHelpButton = document.getElementById("show-help");
     if (showHelpButton) showHelpButton.addEventListener("click", showHelp);
+    // setMode checks a mode of a session, and tells screen readers what the agent can do
+    const announce = document.getElementById("announce");
+    const setMode = (item, radio) => {
+      radio.checked = true;
+      const can = item.querySelector(".can-" + radio.value);
+      if (announce) announce.textContent = radio.value + ": " + (can ? can.textContent.trim() : "");
+    };
     document.addEventListener("keydown", (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
       if (help && help.open) return;
@@ -1053,11 +1063,30 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
         if (first) { e.preventDefault(); first.click(); }
         return;
       }
+      // left/right lower or raise the mode of the focused session. They stop at the
+      // first and last allowed mode instead of wrapping (the browser's own handling of
+      // radio buttons wraps, so it is replaced), so one key press never turns a read
+      // only session into one which can delete data
+      if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && item) {
+        const radios = Array.from(item.querySelectorAll(".modes input")).filter(r => !r.disabled);
+        if (!radios.length) return;
+        e.preventDefault();
+        const at = radios.findIndex(r => r.checked);
+        const next = radios[e.key === "ArrowLeft" ? Math.max(at - 1, 0) : Math.min(at + 1, radios.length - 1)];
+        if (next && !next.checked) {
+          setMode(item, next);
+          if (onRadio) next.focus();
+        }
+        return;
+      }
       if (e.key.length !== 1 || target === filter) return;
       const mode = modeKeys[e.key.toLowerCase()];
       if (item && mode) {
         const radio = item.querySelector('.modes input[value="' + mode + '"]');
-        if (radio && !radio.disabled) { radio.checked = true; e.preventDefault(); }
+        if (radio && !radio.disabled) {
+          e.preventDefault();
+          if (!radio.checked) setMode(item, radio);
+        }
         return;
       }
       if (filter && !(target instanceof HTMLInputElement)) filter.focus();
