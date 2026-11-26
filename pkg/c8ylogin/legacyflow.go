@@ -421,7 +421,7 @@ func (h *LoginHandlerV2) login() (LoginState, error) {
 				return LoginStateAbort, err
 			}
 
-			// Note: The flow replaces the authorization of the client with the token
+			// Note: The flow sets the token of the client, and keeps the other credentials
 			deviceFlow := h.deviceFlowOptions()
 			accessToken, loginErr := h.V2Client.AuthorizeWithDeviceFlow(h.ctx(), option.InitRequest, deviceFlow.AuthEndpoints, deviceFlow.DisplayFunc)
 			if loginErr != nil {
@@ -502,7 +502,7 @@ func (h *LoginHandlerV2) login() (LoginState, error) {
 // by the SDK, which calls the prompts of the handler when they are needed.
 func (h *LoginHandlerV2) loginInternal() error {
 	// The login requires the credentials, and the token must not be used
-	h.applyAuth(authv2.AuthOptions{
+	h.V2Client.SetAuth(authv2.AuthOptions{
 		Tenant:   h.auth.Tenant,
 		Username: h.auth.Username,
 		Password: h.auth.Password,

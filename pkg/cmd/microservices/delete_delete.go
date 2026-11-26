@@ -87,10 +87,15 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		ref := c8ystream.NameOrID(in.String("id"))
+		// Resolve a name here so a missing name is a "not found" error (exit code 4) as it
+		// always was. Microservices.Delete skips a missing name (even with WithNotFoundAsError)
+		id, err := client.Microservices.ResolveID(in.ResolveContext(), c8ystream.NameOrID(in.String("id")), nil)
+		if err != nil {
+			return nil, err
+		}
 		opt := microservices.DeleteOptions{Force: in.Bool("unsubscribeAll")}
 		return func(ctx context.Context) any {
-			return client.Microservices.Delete(ctx, ref, opt)
+			return client.Microservices.Delete(ctx, id, opt)
 		}, nil
 	})
 }
