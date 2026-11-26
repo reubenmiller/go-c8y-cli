@@ -86,7 +86,7 @@ func TestValidateCleanExtension(t *testing.T) {
 		file("api/devices.yaml", "group:\n  name: devices\n  description: Devices\ncommands:\n  - name: list\n    description: List\n    method: GET\n    path: inventory/managedObjects\n", 0644).
 		file("commands/hello", "#!/bin/sh\necho hello\n", 0755)
 
-	findings := ext.validate(ValidateOptions{})
+	findings := ext.validate(ValidateOptions{CompleteTimeout: testCompleteTimeout})
 	assert.Empty(t, findings, findingsText(findings))
 }
 
@@ -96,7 +96,7 @@ func TestValidateFlagClashes(t *testing.T) {
 		file("extension.yaml", "binary:\n  completion: cobra\ncommands:\n  - name: services list\n", 0644).
 		file("bin/c8y-clash", binaryScript("--verbose -v --output -o --status --help -h"), 0755)
 
-	findings := ext.validate(ValidateOptions{})
+	findings := ext.validate(ValidateOptions{CompleteTimeout: testCompleteTimeout})
 	require.Len(t, findings, 2, findingsText(findings))
 	assert.Equal(t, SeverityWarning, findings[0].Severity)
 	assert.Equal(t, CheckFlags, findings[0].Check)
@@ -115,7 +115,7 @@ func TestValidateFlagsNotChecked(t *testing.T) {
 		file("extension.yaml", "binary: {}\ncommands:\n  - name: list\n", 0644).
 		file("bin/c8y-nocobra", "#!/bin/sh\n", 0755)
 
-	findings := ext.validate(ValidateOptions{})
+	findings := ext.validate(ValidateOptions{CompleteTimeout: testCompleteTimeout})
 	require.Len(t, findings, 1, findingsText(findings))
 	assert.Equal(t, SeverityInfo, findings[0].Severity)
 	assert.Contains(t, findings[0].Message, "not checked")
@@ -126,7 +126,7 @@ func TestValidateFlagsCompleteFails(t *testing.T) {
 	ext := newTestExt(t, "c8y-broken").
 		file("extension.yaml", "binary: {completion: cobra}\ncommands:\n  - name: list\n", 0644).
 		file("bin/c8y-broken", "#!/bin/sh\nexit 3\n", 0755)
-	findings := ext.validate(ValidateOptions{})
+	findings := ext.validate(ValidateOptions{CompleteTimeout: testCompleteTimeout})
 	require.Len(t, findings, 1, findingsText(findings))
 	assert.Equal(t, SeverityWarning, findings[0].Severity)
 	assert.Contains(t, findings[0].Message, "could not read the flags")
@@ -172,7 +172,7 @@ commands:
 
 func TestValidateInvalidManifest(t *testing.T) {
 	ext := newTestExt(t, "c8y-invalid").file("extension.yaml", "binary: [\n", 0644)
-	findings := ext.validate(ValidateOptions{})
+	findings := ext.validate(ValidateOptions{CompleteTimeout: testCompleteTimeout})
 	require.Len(t, findings, 1, findingsText(findings))
 	assert.Equal(t, SeverityError, findings[0].Severity)
 	assert.Contains(t, findings[0].Message, "invalid yaml")
@@ -180,7 +180,7 @@ func TestValidateInvalidManifest(t *testing.T) {
 
 func TestValidateCommandsWithoutBinary(t *testing.T) {
 	ext := newTestExt(t, "c8y-nobinary").file("extension.yaml", "commands:\n  - name: list\n  - name: get\n", 0644)
-	findings := ext.validate(ValidateOptions{})
+	findings := ext.validate(ValidateOptions{CompleteTimeout: testCompleteTimeout})
 	require.Len(t, findings, 1, findingsText(findings))
 	assert.Equal(t, SeverityError, findings[0].Severity)
 	assert.Contains(t, findings[0].Message, "2 declared command(s) are ignored")
@@ -188,14 +188,14 @@ func TestValidateCommandsWithoutBinary(t *testing.T) {
 
 func TestValidateBinary(t *testing.T) {
 	ext := newTestExt(t, "c8y-missing").file("extension.yaml", "binary: {}\n", 0644)
-	findings := ext.validate(ValidateOptions{})
+	findings := ext.validate(ValidateOptions{CompleteTimeout: testCompleteTimeout})
 	require.Len(t, findings, 1, findingsText(findings))
 	assert.Equal(t, "error|binary|bin/c8y-missing|the binary does not exist, so the binary commands are not available. Build it, or check binary.path", findingsText(findings))
 
 	ext = newTestExt(t, "c8y-noexec").
 		file("extension.yaml", "binary: {}\n", 0644).
 		file("bin/c8y-noexec", "#!/bin/sh\n", 0644)
-	findings = ext.validate(ValidateOptions{GOOS: "linux"})
+	findings = ext.validate(ValidateOptions{GOOS: "linux", CompleteTimeout: testCompleteTimeout})
 	require.Len(t, findings, 1, findingsText(findings))
 	assert.Contains(t, findings[0].Message, "not executable")
 
@@ -223,7 +223,7 @@ func TestValidateAPIAndScripts(t *testing.T) {
 		file("api/README.md", "not a spec", 0644).
 		file("commands/notexec", "#!/bin/sh\n", 0644)
 
-	text := findingsText(ext.validate(ValidateOptions{GOOS: "linux"}))
+	text := findingsText(ext.validate(ValidateOptions{GOOS: "linux", CompleteTimeout: testCompleteTimeout}))
 	assert.Contains(t, text, "error|api|api/broken.yaml|invalid api specification")
 	assert.Contains(t, text, "warning|scripts|commands/notexec|the script is not executable")
 	assert.NotContains(t, text, "README")
@@ -234,7 +234,7 @@ func TestValidateAPIAndScripts(t *testing.T) {
 func TestValidateKitchensinkFixture(t *testing.T) {
 	dir, err := filepath.Abs(filepath.Join("..", "..", "..", "tests", "testdata", "extensions", "c8y-kitchensink"))
 	require.NoError(t, err)
-	findings := ValidateExtension(&Extension{path: dir, isLocal: true, manifest: &manifestCache{}}, ValidateOptions{GlobalFlags: testGlobalFlags()})
+	findings := ValidateExtension(&Extension{path: dir, isLocal: true, manifest: &manifestCache{}}, ValidateOptions{CompleteTimeout: testCompleteTimeout, GlobalFlags: testGlobalFlags()})
 	errorCount, _ := CountFindings(findings)
 	assert.Zero(t, errorCount, findingsText(findings))
 }
@@ -272,7 +272,13 @@ sessionProviders:
 
 	// Providers without a binary are ignored
 	ext = newTestExt(t, "c8y-providers-nobinary").file("extension.yaml", "sessionProviders:\n  - name: vault\n", 0644)
-	findings := ext.validate(ValidateOptions{})
+	findings := ext.validate(ValidateOptions{CompleteTimeout: testCompleteTimeout})
 	require.Len(t, findings, 1, findingsText(findings))
 	assert.Contains(t, findings[0].Message, "does not declare a binary")
 }
+
+// testCompleteTimeout is the upper bound for a test extension binary to list its flags.
+// It is deliberately generous, so that slow process start-up on a loaded machine (e.g.
+// when many packages are tested in parallel) does not fail tests which expect the
+// flags to be read successfully. Tests which expect a timeout use a short value instead.
+const testCompleteTimeout = 60 * time.Second
