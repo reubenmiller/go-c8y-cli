@@ -4,7 +4,7 @@ This page collects improvements that would change existing behavior. Each one ne
 
 Until a topic is decided, the current (v2 CLI) behavior is kept. Opt-in additions, such as a new flag or a new command that does not change any default, can ship without a decision.
 
-Sources: go-c8y-cli PRs #777 and #797 to #808, go-c8y PRs #220 to #235, the go-c8y v2 CHANGELOG, the SDK consistency audit and the `tests/manual` changes between master and v3.
+Sources: go-c8y-cli PRs #777 and #797 to #811, go-c8y PRs #220 to #239, the go-c8y v2 CHANGELOG, the SDK consistency audit and the `tests/manual` changes between master and v3.
 
 ## How to read an entry
 
@@ -123,6 +123,7 @@ These changes are on the v3 branch today. A v2 CLI user would notice them. Each 
 | `events list --device <file outside the allowed paths>` | 101 | 100 (resolved like `--id`) | CLI#806, `tests/manual/fileguard/fileguard.yaml` |
 | `operations wait` on a missing id | 100, "No operation for" | 4, message contains "404" | `tests/manual/operations/wait/operations_wait.yaml` |
 | Name that cannot be resolved (built-in commands) | 100 (unverified) | 101 (unverified) | CLI#801, CLI#805 |
+| `microservices delete --id <missing name>` | 4 | 4 (same), but the message is now `microservice not found with name: <name> [404]` | CLI#811 |
 
 ### Behavior
 
@@ -161,9 +162,12 @@ These changes are on the v3 branch today. A v2 CLI user would notice them. Each 
 - Paging stops with a "pagination made no progress" error instead of hanging (#232).
 - `agents.ListOptions.Query` is sent as `q` (#235).
 - `SendRequest` reports HTTP error statuses as errors (#220).
+- `api.WithNotFoundAsError` and `api.WithConflictAsError` only change the SDK's own `IgnoreNotFound`/`IgnoreConflict` calls. A caller's explicit `.IgnoreStatusCodes(404)` still clears the error, which is intended (the caller asked for it) but worth documenting next to the options.
+- `Microservices.Delete` with a name that does not resolve returns Skipped ("not found") even with `api.WithNotFoundAsError`, because the not-found comes from the name lookup, not from a 404 on the delete. The CLI resolves the name itself to keep exit 4 (CLI#811). Making the SDK honor the option here is a fix for callers who set it, and a change for callers who rely on Skipped.
 
 ## Part 3: still to verify
 
-- Whether v3 commands that hit `IgnoreConflict` (identity create, child assign, subscribe) exit 0 on a 409 (topic 2). Being checked; the v2 exit code will be restored if it changed.
+Verified since the first version of this page: a 409 on identity create, child assign or subscribe exits 9 as in v2 (CLI#809, `tests/manual/common/errors/conflict_not_ignored.yaml`).
+
 - The exit code for unresolved names on built-in commands (100 or 101).
 - The `inventory find` query shape, and whether the no-content success message is ported.
