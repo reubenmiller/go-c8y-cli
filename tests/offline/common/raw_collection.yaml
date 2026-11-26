@@ -43,6 +43,13 @@ tests:
         stdout:
             exactly: ""
 
+    Raw output of c8y api with a plain JSON array applies --filter to the elements:
+        command: c8y api /tenant/statistics/allTenantsSummary --raw --filter 'deviceCount gt 999999999'
+        exit-code: 0
+        stdout:
+            exactly: |
+                []
+
     Raw output of an enveloped collection without items is the whole envelope:
         command: c8y api "/inventory/managedObjects?type=raw_no_such_type" --raw
         exit-code: 0
