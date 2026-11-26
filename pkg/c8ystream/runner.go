@@ -480,7 +480,7 @@ func (r *Runner) run(newProducer func() Producer) error {
 		if err != nil {
 			return err
 		}
-		stages = append([]output.Stage{output.Filter(pred)}, stages...)
+		stages = append([]output.Stage{output.Filter(wholeArrayPasses(cfg, pred))}, stages...)
 	}
 	// --view: when the user didn't select columns, restrict the documents to
 	// the detected/named view's columns (no-op for --view off / the non-TTY

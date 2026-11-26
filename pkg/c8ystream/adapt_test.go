@@ -101,8 +101,9 @@ func TestAdaptRawArrayResult(t *testing.T) {
 }
 
 // With --raw an enveloped collection renders as its envelope, also when it holds
-// no items, and --select, --flatten and --filter still apply to the items of a
-// top-level array, as in the v2 CLI. An empty top-level array prints nothing.
+// no items. An empty top-level array prints "[]" as in the v2 CLI, and --filter
+// selects the elements of such an array. --select and --flatten still apply to
+// the items of a top-level array, which prints nothing when it is empty.
 func TestAdaptRawCollectionResult(t *testing.T) {
 	array := op.OK(model{jsondoc.New([]byte(`[{"a":1},{"a":2}]`))})
 	emptyArray := op.OK(model{jsondoc.New([]byte(`[]`))})
@@ -122,9 +123,16 @@ func TestAdaptRawCollectionResult(t *testing.T) {
 		{"envelope raw select", map[string]any{config.SettingsRawOutput: true, config.SettingsSelect: []string{"users.*.name"}}, envelope, []string{`{"users":[{"name":"u1"},{"name":"u2"}]}`}},
 		{"empty envelope", nil, emptyEnvelope, nil},
 		{"empty envelope raw", map[string]any{config.SettingsRawOutput: true}, emptyEnvelope, []string{`{"users":[]}`}},
-		{"empty array raw", map[string]any{config.SettingsRawOutput: true}, emptyArray, nil},
+		{"empty array", nil, emptyArray, nil},
+		{"empty array raw", map[string]any{config.SettingsRawOutput: true}, emptyArray, []string{`[]`}},
+		{"empty array raw select", map[string]any{config.SettingsRawOutput: true, config.SettingsSelect: []string{"a"}}, emptyArray, nil},
+		{"empty array raw flatten", map[string]any{config.SettingsRawOutput: true, config.SettingsJSONFlatten: true}, emptyArray, nil},
+		{"empty array raw filter", map[string]any{config.SettingsRawOutput: true, config.SettingsFilter: []string{"a gt 1"}}, emptyArray, []string{`[]`}},
+		{"empty array response raw", map[string]any{config.SettingsRawOutput: true}, op.WithResponse(op.OK(model{jsondoc.New([]byte(`[]`))}), []byte(`[]`)), []string{`[]`}},
 		{"array raw select", map[string]any{config.SettingsRawOutput: true, config.SettingsSelect: []string{"a"}}, array, []string{`{"a":1}`, `{"a":2}`}},
-		{"array raw filter", map[string]any{config.SettingsRawOutput: true, config.SettingsFilter: []string{"a gt 1"}}, array, []string{`{"a":1}`, `{"a":2}`}},
+		{"array raw filter", map[string]any{config.SettingsRawOutput: true, config.SettingsFilter: []string{"a gt 1"}}, array, []string{`[{"a":2}]`}},
+		{"array raw filter no match", map[string]any{config.SettingsRawOutput: true, config.SettingsFilter: []string{"a gt 5"}}, array, []string{`[]`}},
+		{"array raw filter select", map[string]any{config.SettingsRawOutput: true, config.SettingsFilter: []string{"a gt 1"}, config.SettingsSelect: []string{"a"}}, array, []string{`{"a":1}`, `{"a":2}`}},
 		{"array response raw", map[string]any{config.SettingsRawOutput: true}, arrayResponse, []string{`[{"a":1},{"a":2}]`}},
 		{"array response raw select", map[string]any{config.SettingsRawOutput: true, config.SettingsSelect: []string{"a"}}, arrayResponse, []string{`{"a":1}`, `{"a":2}`}},
 		{"array raw flatten", map[string]any{config.SettingsRawOutput: true, config.SettingsJSONFlatten: true}, array, []string{`{"a":1}`, `{"a":2}`}},

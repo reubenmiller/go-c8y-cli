@@ -2,6 +2,8 @@
 
 This page collects improvements that would change existing behavior. Each one needs a decision before it ships, because it can break scripts, extensions or SDK callers.
 
+The v2 reference is the released v2 CLI: tag `v2.59.0` on branch `v2`. (Branch `master` is a stale 2022 branch and is not a reference.)
+
 Until a topic is decided, the current (v2 CLI) behavior is kept. Opt-in additions, such as a new flag or a new command that does not change any default, can ship without a decision.
 
 Sources: go-c8y-cli PRs #777 and #797 to #811, go-c8y PRs #220 to #239, the go-c8y v2 CHANGELOG, the SDK consistency audit and the `tests/manual` changes between master and v3.
@@ -142,6 +144,22 @@ Deprecated in go-c8y v2 and kept as aliases: `Client.ApplicationVersions`, `Devi
 - **Ways to ship**: change before the first v3 release, when nobody relies on it yet.
 - **Source**: CLI#820.
 
+### 17. `c8y api` with an absolute url
+
+- **Today**: a piped absolute url (for example `https://test.com/path`, or a self link from a response) is reduced to its path and query, and the request goes to the session's host (or `--host`), the same as v2. The host of the url is dropped without a message, so `echo https://test.com/path | c8y api` calls the session's tenant, not test.com.
+- **Proposed**: honor the host of an absolute url, and send the session's credentials only when it is the session's own host (never to another host). Alternatively, fail with a clear error when the host differs from the session's.
+- **Breaks**: scripts that pipe self links from another tenant or an old host name and rely on them being redirected to the session's host (honoring the host would call the other host; failing would be an error).
+- **Ways to ship**: an opt-in flag first (for example `--followHost`), or a warning when the host differs, then the stricter behavior in a major release.
+- **Source**: `pkg/cmd/api` `requestURL`; CLI#824.
+
+### 18. Create commands are not idempotent
+
+- **Today**: `ui plugins create` and `microservices serviceusers create` (and similar create commands, such as creating a plugin version or an application that exists) fail with a 409 when the version or application already exists, so a script cannot be re-run.
+- **Proposed**: an opt-in, such as `--ifExists skip` (or `update`), or treating an identical existing version (same name and content) as success. This is the per-command part of topics 2 and 3.
+- **Breaks**: nothing if opt-in. Treating identical versions as success changes the exit code from 9 to 0 for scripts that use the 409 as a signal.
+- **Ways to ship**: `--ifExists` on the create commands first, default `fail`.
+- **Source**: live test runs of `ui plugins create` and `microservices serviceusers create`; CLI#824.
+
 ## Part 2: already changed on v3 (confirm or revert)
 
 These changes are on the v3 branch today. A v2 CLI user would notice them. Each should be confirmed (and listed in the release notes) or reverted.
@@ -169,6 +187,7 @@ These changes are on the v3 branch today. A v2 CLI user would notice them. Each 
 - **Cache**: `C8Y_SETTINGS_CACHE_METHODS` is supported; responses with status 300 or above are not cached.
 - **Assert commands**: `--strict` with several ids prints one line per id plus a summary (three lines instead of two); the timeout message lost its ", context" suffix; `--not` on an existing object waits the full duration.
 - **`c8y api`**: HTTP errors become item errors with the right exit code; HTML error bodies are shown; `--withTotalPages`, `--withTotalElements` and `--raw` print the whole response; a URL with its own `pageSize` no longer gets a second one (CLI#797).
+- **`c8y api` with its own `pageSize`**: for `c8y api /inventory/managedObjects?pageSize=7&type=a`, v2.59.0 sends `pageSize=20` (the default page size, or `--pageSize`, overrides the one in the url), while v3 keeps the `pageSize=7` of the url. Scripts that relied on the override get another page size.
 - **Logging**: notification2 SDK logs go to stderr at warning level (more with `--verbose`/`--debug`); remote access logs only with `--verbose`.
 - **Session handling**: the tenant is taken from the token when possible, so the first command of a session no longer makes an extra request (CLI#804).
 
@@ -206,3 +225,7 @@ Verified since the first version of this page: a 409 on identity create, child a
 - The exit code for unresolved names on built-in commands (100 or 101).
 - The `inventory find` query shape, and whether the no-content success message is ported.
 - `--withGroups` is accepted but ignored by `devices get`, `devices list`, `agents get`, `agents list` and `smartgroups get`, although the SDK now has `managedobjects.GetOptions.WithGroups` (other inventory-based commands already send it). Wiring it would add `withGroups=true` to the request and `assetParents` to the output when the flag is set, so it changes output for scripts that pass the flag today.
+
+## Notes and open questions (not CLI behavior)
+
+- **Live tests that need a tenant feature**: a live test cannot skip itself when the tenant lacks a feature. For example, Notification 2.0 answers the test user with 403 (`security/Forbidden`), so the test fails although the CLI works. This is a convention for the test suite, not a CLI change. Proposed: a shared helper in `tests/manual` that probes the feature once (a cheap request, a 403 or 404 meaning "not available") and marks the test as skipped, and a list of the features that the shared test tenant has. Decision needed: where the helper lives (a script sourced by the tests, or a commander precondition) and whether a skipped test counts as a pass in the live workflow summary. Source: CLI#824.

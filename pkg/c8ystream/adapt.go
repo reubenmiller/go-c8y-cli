@@ -1,11 +1,13 @@
 package c8ystream
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
 	"iter"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
 
@@ -13,6 +15,7 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/filter"
 )
 
 // pageSource is a paginating result that can also yield whole pages (the
@@ -78,10 +81,12 @@ func (r *Runner) adaptItem(v any, item string) output.Seq {
 // under --raw the whole body is yielded instead, as the v2 CLI did. Anything
 // else (objects, errors, dry runs, 204) renders as usual.
 //
-// Like v2, the envelope is also printed when it holds no items, while an empty
-// top-level array prints nothing. --select, --flatten and --filter applied to
-// the items of a top-level array in v2, also with --raw, so such an array is
-// still split into its items then.
+// Like v2, an empty response is printed as it was received: the envelope with
+// no items, and an empty top-level array as "[]". --select and --flatten
+// applied to the items of a top-level array in v2, also with --raw, so such an
+// array is still split into its items then (an empty one prints nothing).
+// --filter selected the elements of a top-level array, which is printed as an
+// array again ("[]" when no element matches).
 func (r *Runner) rawDocuments(src op.DocumentSource) output.Seq {
 	whole, kind, empty := wholeBody(src)
 	if kind == bodyArray && r.shapesItems() {
@@ -89,6 +94,21 @@ func (r *Runner) rawDocuments(src op.DocumentSource) output.Seq {
 	}
 	if kind == bodyNone {
 		return output.Seq(src.Documents())
+	}
+	if kind == bodyArray {
+		whole = r.filterArray(whole)
+		// an array always prints, also when it has no items (Documents() yields
+		// nothing then), and errors are not lost
+		return func(yield func(jsondoc.JSONDoc, error) bool) {
+			for doc, err := range src.Documents() {
+				if err != nil {
+					yield(doc, err)
+					return
+				}
+				break
+			}
+			yield(whole, nil)
+		}
 	}
 	return func(yield func(jsondoc.JSONDoc, error) bool) {
 		for doc, err := range src.Documents() {
@@ -100,18 +120,53 @@ func (r *Runner) rawDocuments(src op.DocumentSource) output.Seq {
 			yield(whole, nil)
 			return
 		}
-		if kind == bodyEnvelope && empty {
+		if empty {
 			yield(whole, nil)
 		}
 	}
 }
 
-// shapesItems reports whether the documents are shaped per item (--select,
-// --flatten, --filter or a command's own filter), which v2 applied to the
-// items of a top-level JSON array also with --raw.
+// shapesItems reports whether the documents are shaped per item (--select or
+// --flatten), which v2 applied to the items of a top-level JSON array also
+// with --raw.
 func (r *Runner) shapesItems() bool {
 	cfg := r.Config
-	return len(cfg.GetJSONSelect()) > 0 || cfg.FlattenJSON() || len(cfg.GetJSONFilter()) > 0 || len(r.filters) > 0
+	return len(cfg.GetJSONSelect()) > 0 || cfg.FlattenJSON()
+}
+
+// filterArray keeps the elements of a top-level JSON array which match --filter
+// (and the filters of the command itself), as the v2 CLI did with --raw. The
+// filter stages of the pipeline let such an array pass (see wholeArrayPasses).
+func (r *Runner) filterArray(whole jsondoc.JSONDoc) jsondoc.JSONDoc {
+	expressions := append(append([]string{}, r.Config.GetJSONFilter()...), r.filters...)
+	if len(expressions) == 0 {
+		return whole
+	}
+	pred, err := filter.Parse(expressions...)
+	if err != nil {
+		return whole
+	}
+	kept := make([][]byte, 0)
+	for _, item := range whole.Get().Array() {
+		if pred(jsondoc.New([]byte(item.Raw))) {
+			kept = append(kept, []byte(item.Raw))
+		}
+	}
+	return jsondoc.New(append(append([]byte{'['}, bytes.Join(kept, []byte{','})...), ']'))
+}
+
+// wholeArrayPasses lets the whole top-level JSON array of a --raw response
+// through a --filter stage: rawDocuments has filtered its elements already.
+func wholeArrayPasses(cfg *config.Config, pred filter.Predicate) filter.Predicate {
+	if !cfg.RawOutput() {
+		return pred
+	}
+	return func(doc jsondoc.JSONDoc) bool {
+		if doc.Get().IsArray() {
+			return true
+		}
+		return pred(doc)
+	}
 }
 
 // bodyKind is the kind of collection body an op.Result holds (see wholeBody).

@@ -28,7 +28,7 @@ func CommonStages(cfg *config.Config, outputTemplate output.Stage) ([]output.Sta
 		if err != nil {
 			return nil, err
 		}
-		stages = append(stages, output.Filter(pred))
+		stages = append(stages, output.Filter(wholeArrayPasses(cfg, pred)))
 	}
 
 	// --outputTemplate runs between --filter and --select. The stage is built by
