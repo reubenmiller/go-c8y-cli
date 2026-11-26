@@ -62,7 +62,7 @@ func (r *Runner) adaptItem(v any, item string) output.Seq {
 		}
 	case op.DocumentSource:
 		if r.Config.RawOutput() {
-			seq = rawDocuments(x)
+			seq = r.rawDocuments(x)
 		} else {
 			seq = output.Seq(x.Documents())
 		}
@@ -78,48 +78,89 @@ func (r *Runner) adaptItem(v any, item string) output.Seq {
 // from an envelope such as the service users) into one document per element, so
 // under --raw the whole body is yielded instead, as the v2 CLI did. Anything
 // else (objects, errors, dry runs, 204) renders as usual.
-func rawDocuments(src op.DocumentSource) output.Seq {
+//
+// Like v2, the envelope is also printed when it holds no items, while an empty
+// top-level array prints nothing. --select, --flatten and --filter applied to
+// the items of a top-level array in v2, also with --raw, so such an array is
+// still split into its items then.
+func (r *Runner) rawDocuments(src op.DocumentSource) output.Seq {
+	whole, kind, empty := wholeBody(src)
+	if kind == bodyArray && r.shapesItems() {
+		kind = bodyNone
+	}
+	if kind == bodyNone {
+		return output.Seq(src.Documents())
+	}
 	return func(yield func(jsondoc.JSONDoc, error) bool) {
-		whole, isCollection := wholeBody(src)
 		for doc, err := range src.Documents() {
-			if err == nil && isCollection {
-				// the first document stands for the whole body
-				yield(whole, nil)
+			if err != nil {
+				yield(doc, err)
 				return
 			}
-			if !yield(doc, err) {
-				return
-			}
+			// the first document stands for the whole body
+			yield(whole, nil)
+			return
+		}
+		if kind == bodyEnvelope && empty {
+			yield(whole, nil)
 		}
 	}
 }
 
+// shapesItems reports whether the documents are shaped per item (--select,
+// --flatten, --filter or a command's own filter), which v2 applied to the
+// items of a top-level JSON array also with --raw.
+func (r *Runner) shapesItems() bool {
+	cfg := r.Config
+	return len(cfg.GetJSONSelect()) > 0 || cfg.FlattenJSON() || len(cfg.GetJSONFilter()) > 0 || len(r.filters) > 0
+}
+
+// bodyKind is the kind of collection body an op.Result holds (see wholeBody).
+type bodyKind int
+
+const (
+	bodyNone     bodyKind = iota // not a collection
+	bodyEnvelope                 // an object, the items were plucked from it
+	bodyArray                    // a top-level JSON array
+)
+
 // wholeBody returns the body of an op.Result which Documents() splits into
 // several documents: the raw response of a collection result (op.Result.Response,
-// retained when the items were plucked from an envelope), or else the data when
-// it is a JSON array (jsondoc.Unwrapper). op.Result is generic and exposes these
-// only through its fields, hence the reflection.
-func wholeBody(src op.DocumentSource) (jsondoc.JSONDoc, bool) {
+// retained when the items were plucked from the response), or else the data
+// when it is a JSON array (jsondoc.Unwrapper). The kind tells an enveloped
+// collection from a top-level JSON array, and empty reports whether the
+// collection holds no items. op.Result is generic and exposes these only
+// through its fields, hence the reflection.
+func wholeBody(src op.DocumentSource) (doc jsondoc.JSONDoc, kind bodyKind, empty bool) {
 	v := reflect.ValueOf(src)
 	if v.Kind() != reflect.Struct {
-		return jsondoc.Empty(), false
+		return jsondoc.Empty(), bodyNone, false
+	}
+	var data jsondoc.JSONDoc
+	isArray := false
+	if d := v.FieldByName("Data"); d.IsValid() && d.CanInterface() {
+		if u, ok := d.Interface().(jsondoc.Unwrapper); ok {
+			data = u.GetJSONDoc()
+			if len(data.Raw()) > 0 {
+				if value := data.Get(); value.IsArray() {
+					isArray = true
+					empty = len(value.Array()) == 0
+				}
+			}
+		}
 	}
 	if resp := v.FieldByName("Response"); resp.IsValid() && resp.Kind() == reflect.Slice && resp.Type().Elem().Kind() == reflect.Uint8 && resp.Len() > 0 {
-		return jsondoc.New(resp.Bytes()), true
+		body := jsondoc.New(resp.Bytes())
+		if body.Get().IsArray() {
+			// e.g. the tenant usage statistics summary, a collection without envelope
+			return body, bodyArray, isArray && empty
+		}
+		return body, bodyEnvelope, isArray && empty
 	}
-	data := v.FieldByName("Data")
-	if !data.IsValid() || !data.CanInterface() {
-		return jsondoc.Empty(), false
+	if !isArray {
+		return jsondoc.Empty(), bodyNone, false
 	}
-	u, ok := data.Interface().(jsondoc.Unwrapper)
-	if !ok {
-		return jsondoc.Empty(), false
-	}
-	doc := u.GetJSONDoc()
-	if !doc.Get().IsArray() {
-		return jsondoc.Empty(), false
-	}
-	return doc, true
+	return data, bodyArray, empty
 }
 
 // approvalError marks an error returned by the confirmation prompt (e.g. "No"
