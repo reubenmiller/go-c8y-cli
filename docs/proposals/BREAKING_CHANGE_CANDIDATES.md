@@ -110,6 +110,38 @@ Deprecated in go-c8y v2 and kept as aliases: `Client.ApplicationVersions`, `Devi
 
 - **Decision**: the deprecation window (for example remove in v2.x+2 or only in v3).
 
+### 13. `devices enroll` fails fast on permanent errors
+
+- **Today**: `devices enroll` (and the SDK's `devices.Enroll`) retries every error, including permanent 4xx answers from the EST endpoint, until the timeout is reached.
+- **Proposed**: stop at once on permanent errors (for example 400, 401, 403, 404) and keep retrying only on network errors, 5xx and "not accepted yet" answers.
+- **Breaks**: scripts that rely on the retries to bridge a short window where the endpoint answers 4xx while the device request is still being set up; the command would then fail sooner.
+- **Ways to ship**: opt-in first (a `--failFast` flag), then flip the default in a major release.
+- **Source**: go-c8y `devices.Enroll`, `c8y devices enroll`.
+
+### 14. `devices enroll --mode manual` keeps an existing device request
+
+- **Today**: with session credentials, `--mode manual` deletes an existing device request with the same external id when it starts, so a request that a user registered beforehand is lost.
+- **Proposed**: do not remove the request in manual mode; use it, and only fail when the request is in an unusable state.
+- **Breaks**: scripts that rely on the clean start (an old, stale request is no longer replaced).
+- **Ways to ship**: opt-in first (a flag to replace the request), then flip the default in a major release.
+- **Source**: `c8y devices enroll --mode manual`.
+
+### 15. Plain-number timeout values
+
+- **Today**: a plain number in `C8Y_SETTINGS_DEFAULTS_TIMEOUT` (or `settings.defaults.timeout`) is read as seconds, the same as v2. A value written in milliseconds therefore means hours, and `devices enroll` waits that long by default.
+- **Proposed**: warn on large plain numbers (for example above one day) or require a unit (`30s`, `5m`).
+- **Breaks**: with a required unit, every setting that holds a plain number; with only a warning, nothing.
+- **Ways to ship**: warning first, require the unit in a major release.
+- **Source**: settings handling for `defaults.timeout`.
+
+### 16. `--raw` output of list commands that return a bare array
+
+- **Today**: `features list` (new in v3, bare-array response) prints one object per item under `--raw`; there is no v2 reference, so the raw output was left as is. `ui applications plugins list` (new in v3) prints the response envelope under `--raw`, like the other list commands.
+- **Proposed**: decide one rule for new commands: either `--raw` prints the response as received (envelope or bare array) everywhere, or it prints the items everywhere.
+- **Breaks**: only users of the two new commands.
+- **Ways to ship**: change before the first v3 release, when nobody relies on it yet.
+- **Source**: CLI#820.
+
 ## Part 2: already changed on v3 (confirm or revert)
 
 These changes are on the v3 branch today. A v2 CLI user would notice them. Each should be confirmed (and listed in the release notes) or reverted.
@@ -164,6 +196,8 @@ These changes are on the v3 branch today. A v2 CLI user would notice them. Each 
 - `SendRequest` reports HTTP error statuses as errors (#220).
 - `api.WithNotFoundAsError` and `api.WithConflictAsError` only change the SDK's own `IgnoreNotFound`/`IgnoreConflict` calls. A caller's explicit `.IgnoreStatusCodes(404)` still clears the error, which is intended (the caller asked for it) but worth documenting next to the options.
 - `Microservices.Delete` with a name that does not resolve returns Skipped ("not found") even with `api.WithNotFoundAsError`, because the not-found comes from the name lookup, not from a 404 on the delete. The CLI resolves the name itself to keep exit 4 (CLI#811). Making the SDK honor the option here is a fix for callers who set it, and a change for callers who rely on Skipped.
+- `Registration.Register` on an existing external id used to fail against the fake server ("already exists"); it now succeeds and updates the credentials, like the platform (the response lists the id in `credentialUpdatedList`). Callers that relied on the error must check `credentialUpdatedList` instead. The CLI test `tests/manual/deviceregistration/register_bulk.yaml` covers this.
+- The fake server's 404 error type changed from `<resource>/notFound` to the platform style `<resource>/Not Found` for managed objects, alarms, events, measurements and operations. Code that matches the old type string breaks.
 
 ## Part 3: still to verify
 
