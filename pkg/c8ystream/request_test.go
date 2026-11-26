@@ -97,7 +97,8 @@ func TestResponseText(t *testing.T) {
 	}{
 		{body: "<html></html>", want: "<html></html>\n"},
 		{body: " hello \n\n", want: "hello\n"},
-		{body: "  \n", want: ""},
+		{body: "  \n", want: "\n"},
+		{body: "", want: ""},
 		{body: "dummy file", raw: true, want: "dummy file"},
 		{body: "a\n", raw: true, want: "a\n"},
 	}

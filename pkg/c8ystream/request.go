@@ -197,15 +197,13 @@ func (r *Runner) writeResponseBody(res *apiv2.RequestResult, body []byte) error 
 // responseText returns the bytes which are written for a response body which is
 // not JSON. Only a binary download (and --raw output) is written as received. Any
 // other body is text: it is trimmed and ends with a newline, so that the
-// responses of several requests are written line by line (as in v2).
+// responses of several requests are written line by line (as in v2, which also
+// writes an empty line for a body of only whitespace).
 func responseText(body []byte, raw bool) []byte {
-	if raw {
+	if raw || len(body) == 0 {
 		return body
 	}
 	body = bytes.TrimSpace(body)
-	if len(body) == 0 {
-		return nil
-	}
 	return append(body[:len(body):len(body)], '\n')
 }
 
