@@ -1,16 +1,14 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
-# Real (non-dry) requests. The microservice must serve the Spring Boot actuator loggers endpoint.
-# By default a placeholder microservice is created (enough for the fake server). On a live
-# tenant set C8Y_TEST_LOGLEVELS_MICROSERVICE to the name of a running Spring Boot microservice.
+# Real requests against the fake server (needs a placeholder microservice, which has no running instance on a live tenant).
 tests:
     Set a log level of a package then get it back:
         command: |
-          APP="${C8Y_TEST_LOGLEVELS_MICROSERVICE:-loglevels-test-app}"
-          [ -n "${C8Y_TEST_LOGLEVELS_MICROSERVICE:-}" ] || c8y applications create --name "$APP" --key "$APP" --type MICROSERVICE --contextPath "$APP" >/dev/null
+          APP=loglevels-test-app
+          c8y applications create --name "$APP" --key "$APP" --type MICROSERVICE --contextPath "$APP" >/dev/null
           c8y microservices loglevels set --name "$APP" --loggerName org.example.set --logLevel DEBUG
           c8y microservices loglevels get --name "$APP" --loggerName org.example.set --select configuredLevel -o csv
           c8y microservices loglevels delete --name "$APP" --loggerName org.example.set
-          [ -n "${C8Y_TEST_LOGLEVELS_MICROSERVICE:-}" ] || c8y applications delete --id "$APP" 2>/dev/null || true
+          c8y applications delete --id "$APP" 2>/dev/null || true
         exit-code: 0
         stdout:
             exactly: |
@@ -18,12 +16,12 @@ tests:
 
     Lists the configured log levels of a microservice:
         command: |
-          APP="${C8Y_TEST_LOGLEVELS_MICROSERVICE:-loglevels-test-app}"
-          [ -n "${C8Y_TEST_LOGLEVELS_MICROSERVICE:-}" ] || c8y applications create --name "$APP" --key "$APP" --type MICROSERVICE --contextPath "$APP" >/dev/null
+          APP=loglevels-test-app
+          c8y applications create --name "$APP" --key "$APP" --type MICROSERVICE --contextPath "$APP" >/dev/null
           c8y microservices loglevels set --name "$APP" --loggerName org.example.listed --logLevel TRACE
           c8y microservices loglevels list --name "$APP" -o json -c | c8y util show --select '**.configuredLevel' -o csv
           c8y microservices loglevels delete --name "$APP" --loggerName org.example.listed
-          [ -n "${C8Y_TEST_LOGLEVELS_MICROSERVICE:-}" ] || c8y applications delete --id "$APP" 2>/dev/null || true
+          c8y applications delete --id "$APP" 2>/dev/null || true
         exit-code: 0
         stdout:
             contains:
@@ -31,12 +29,12 @@ tests:
 
     Delete resets the configured log level:
         command: |
-          APP="${C8Y_TEST_LOGLEVELS_MICROSERVICE:-loglevels-test-app}"
-          [ -n "${C8Y_TEST_LOGLEVELS_MICROSERVICE:-}" ] || c8y applications create --name "$APP" --key "$APP" --type MICROSERVICE --contextPath "$APP" >/dev/null
+          APP=loglevels-test-app
+          c8y applications create --name "$APP" --key "$APP" --type MICROSERVICE --contextPath "$APP" >/dev/null
           c8y microservices loglevels set --name "$APP" --loggerName org.example.reset --logLevel WARN
           c8y microservices loglevels delete --name "$APP" --loggerName org.example.reset
           c8y microservices loglevels get --name "$APP" --loggerName org.example.reset --select configuredLevel -o json -c
-          [ -n "${C8Y_TEST_LOGLEVELS_MICROSERVICE:-}" ] || c8y applications delete --id "$APP" 2>/dev/null || true
+          c8y applications delete --id "$APP" 2>/dev/null || true
         exit-code: 0
         stdout:
             exactly: |

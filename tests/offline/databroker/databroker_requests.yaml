@@ -1,6 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
-# Real (non-dry) requests. The CLI has no create command, so the connector is created
-# with "c8y api". Requires the data broker feature (not available on every tenant).
+# Real requests against the fake server. The CLI has no create command, so connectors are created with "c8y api".
 tests:
     Get a data broker connector:
         command: |

@@ -421,6 +421,7 @@ tasks:
           common/select/select_context_shaping.yaml common/select/select_special_cases.yaml; do
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_TLS=1 C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
+      - env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=offline ./tests/run-offline.sh .
 
   test-cli-offline-extensions:
     desc: Run the extension (runtime command) cli tests against the go-c8y fake server, using the c8y-kitchensink test extension
