@@ -89,7 +89,8 @@ func (a *approvalTokens) use(state string, key string) error {
 }
 
 // approvalKey identifies what the user approves: the command, its input, the session and
-// the mode the command needs, so an approval can't be reused for another mode
-func approvalKey(session SessionInfo, plan *Plan, in CommandInput, required config.SessionMode) string {
-	return strings.Join([]string{plan.String(), in.Stdin, session.Host, session.Tenant, session.Username, session.SessionName, required.String()}, "\x00")
+// the mode the command needs and the mode of the session when asked, so an approval can't
+// be reused for another mode, or after the user changed the session mode
+func approvalKey(session SessionInfo, plan *Plan, in CommandInput, required, current config.SessionMode) string {
+	return strings.Join([]string{plan.String(), in.Stdin, session.Host, session.Tenant, session.Username, session.SessionName, required.String(), current.String()}, "\x00")
 }

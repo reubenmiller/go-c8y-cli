@@ -115,10 +115,13 @@ func TestApprovalKeyIncludesRequiredMode(t *testing.T) {
 	}
 	session := SessionInfo{Host: "https://example.com", Tenant: "t123"}
 	in := CommandInput{Command: "devices create --name a"}
-	qual := approvalKey(session, plan, in, config.SessionModeQual)
-	dev := approvalKey(session, plan, in, config.SessionModeDev)
+	qual := approvalKey(session, plan, in, config.SessionModeQual, config.SessionModeQual)
+	dev := approvalKey(session, plan, in, config.SessionModeDev, config.SessionModeQual)
 	if qual == dev {
 		t.Fatalf("the key should depend on the required mode")
+	}
+	if prod := approvalKey(session, plan, in, config.SessionModeQual, config.SessionModeProduction); prod == qual {
+		t.Fatalf("the key should depend on the mode of the session when asked")
 	}
 	tokens := &approvalTokens{}
 	state := tokens.issue(qual)

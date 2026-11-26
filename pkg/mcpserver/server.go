@@ -549,7 +549,7 @@ func (s *Server) approve(ctx context.Context, req *mcp.CallToolRequest, session 
 		return nil, config.SessionModeUnset, fmt.Errorf("write commands need to be approved by the user, but the MCP client does not support elicitation. Ask the user to run the command themselves, or change the approval setting of the MCP server")
 	}
 
-	key := approvalKey(session, plan, in, required)
+	key := approvalKey(session, plan, in, required, runner.Mode)
 
 	// The user's answer, when the client calls the tool again
 	if req.Params != nil && req.Params.InputResponses != nil {

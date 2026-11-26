@@ -51,7 +51,7 @@ func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcp
 			SessionName: mcpserver.SessionKey(sessionFile),
 			SessionMode: sessionMode.String(),
 		}
-		server.SetSessionKey(sessionFile, info, &mcpserver.Runner{Executable: executable, SessionFile: sessionFile, Mode: effectiveMode, DeniedPaths: deniedPaths(cfg, server.Policy, sessionFile), SSHFallbackUser: sshFallbackUser(cfg)})
+		server.SetSessionKey(info.SessionName, info, &mcpserver.Runner{Executable: executable, SessionFile: sessionFile, Mode: effectiveMode, DeniedPaths: deniedPaths(cfg, server.Policy, sessionFile), SSHFallbackUser: sshFallbackUser(cfg)})
 		log.Infof("Starting MCP server (stdio). host=%s, mode=%s, approval=%s", host, effectiveMode.String(), server.Policy.Approval)
 		return runStdioServer(ctx, server)
 	}

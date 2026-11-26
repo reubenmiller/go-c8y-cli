@@ -142,3 +142,11 @@ func TestSessionToolShowsModeSource(t *testing.T) {
 		t.Errorf("unexpected %s", out)
 	}
 }
+
+func TestSetModeWithSessionNameKey(t *testing.T) {
+	s := &Server{Policy: Policy{Mode: config.SessionModeDev}}
+	s.SetSessionKey("default", SessionInfo{SessionName: "default", SessionMode: "prod"}, &Runner{Mode: config.SessionModeProduction})
+	if _, err := s.SetMode(config.SessionModeQual, "test"); err != nil {
+		t.Fatalf("an environment-only session should accept a mode change: %s", err)
+	}
+}
