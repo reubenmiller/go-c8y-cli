@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"iter"
-	"reflect"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
@@ -125,42 +124,25 @@ const (
 )
 
 // wholeBody returns the body of an op.Result which Documents() splits into
-// several documents: the raw response of a collection result (op.Result.Response,
-// retained when the items were plucked from the response), or else the data
-// when it is a JSON array (jsondoc.Unwrapper). The kind tells an enveloped
-// collection from a top-level JSON array, and empty reports whether the
-// collection holds no items. op.Result is generic and exposes these only
-// through its fields, hence the reflection.
+// several documents: the raw response of a collection result, or else the data
+// when it is a JSON array. The kind tells an enveloped collection from a
+// top-level JSON array, and empty reports whether the collection holds no
+// items. It uses the SDK accessor op.RawBodySource.
 func wholeBody(src op.DocumentSource) (doc jsondoc.JSONDoc, kind bodyKind, empty bool) {
-	v := reflect.ValueOf(src)
-	if v.Kind() != reflect.Struct {
+	rb, ok := src.(op.RawBodySource)
+	if !ok {
 		return jsondoc.Empty(), bodyNone, false
 	}
-	var data jsondoc.JSONDoc
-	isArray := false
-	if d := v.FieldByName("Data"); d.IsValid() && d.CanInterface() {
-		if u, ok := d.Interface().(jsondoc.Unwrapper); ok {
-			data = u.GetJSONDoc()
-			if len(data.Raw()) > 0 {
-				if value := data.Get(); value.IsArray() {
-					isArray = true
-					empty = len(value.Array()) == 0
-				}
-			}
-		}
-	}
-	if resp := v.FieldByName("Response"); resp.IsValid() && resp.Kind() == reflect.Slice && resp.Type().Elem().Kind() == reflect.Uint8 && resp.Len() > 0 {
-		body := jsondoc.New(resp.Bytes())
-		if body.Get().IsArray() {
-			// e.g. the tenant usage statistics summary, a collection without envelope
-			return body, bodyArray, isArray && empty
-		}
-		return body, bodyEnvelope, isArray && empty
-	}
-	if !isArray {
+	b := rb.RawBody()
+	switch b.Kind {
+	case op.BodyEnvelope:
+		kind = bodyEnvelope
+	case op.BodyArray:
+		kind = bodyArray
+	default:
 		return jsondoc.Empty(), bodyNone, false
 	}
-	return data, bodyArray, empty
+	return b.Doc(), kind, b.Empty
 }
 
 // approvalError marks an error returned by the confirmation prompt (e.g. "No"
