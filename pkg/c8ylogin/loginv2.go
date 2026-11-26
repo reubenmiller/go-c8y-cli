@@ -87,9 +87,8 @@ type LoginHandlerV2 struct {
 	Logger *logger.Logger
 
 	// V2Client is the go-c8y v2 api.Client used for all login operations.
-	// It is created by NewLoginHandlerV2 and is replaced when the authorization of
-	// the handler changes, so don't keep a reference to it. Use Session() to get the
-	// credentials after the login.
+	// It is created by NewLoginHandlerV2, and its authorization is updated with
+	// SetAuth as the login progresses. Use Session() to get the credentials after the login.
 	V2Client *apiv2.Client
 
 	// LoginType is the login type string (e.g. "OAUTH2_INTERNAL",
@@ -168,9 +167,6 @@ type LoginHandlerV2 struct {
 
 	onSave func()
 
-	// clientOpts are the options used to (re)create the client
-	clientOpts apiv2.ClientOptions
-
 	// auth the credentials of the session
 	auth authv2.AuthOptions
 
@@ -195,7 +191,7 @@ type LoginHandlerV2 struct {
 // The credentials of the options (opts.Auth) are used as the session credentials, and opts.Auth.AuthType
 // selects the authorization which is used for the requests.
 //
-// The client is created without the credentials, so no token is requested before the login
+// The client does not request a token when it is created, so nothing is sent before the login
 // starts. Set opts.Transport / opts.InsecureSkipVerify to control the connection.
 func NewLoginHandlerV2(
 	IO *iostreams.IOStreams,
@@ -216,10 +212,6 @@ func NewLoginHandlerV2(
 	h.auth = opts.Auth
 	h.authType = opts.Auth.GetAuthTypes()[0]
 
-	// The credentials are applied after the client is created. Otherwise the client requests a
-	// token as soon as it has a username and password, before the login flow had a chance to
-	// handle two-factor authentication.
-	opts.Auth = authv2.AuthOptions{Tenant: opts.Auth.Tenant}
 	opts.SkipTenantLookup = true
 	if opts.Timeout == 0 {
 		opts.Timeout = time.Duration(Timeout) * time.Millisecond
@@ -231,8 +223,8 @@ func NewLoginHandlerV2(
 		}
 		opts.Logger = slog.New(slog.NewTextHandler(errOut, &slog.HandlerOptions{Level: slog.LevelWarn}))
 	}
-	h.clientOpts = opts
-	h.applyAuth(h.requestAuth())
+	opts.Auth = h.requestAuth()
+	h.V2Client = apiv2.NewClient(opts)
 	return h
 }
 
@@ -245,13 +237,6 @@ func (h *LoginHandlerV2) Session() config.ClientSession {
 	session := config.NewClientSession(h.V2Client.BaseURL, h.auth, h.version)
 	session.AuthType = h.authType
 	return session
-}
-
-// applyAuth replaces the client with a new client which uses the given authorization
-func (h *LoginHandlerV2) applyAuth(auth authv2.AuthOptions) {
-	client := apiv2.NewClient(h.clientOpts)
-	client.SetAuth(auth)
-	h.V2Client = client
 }
 
 // requestAuth returns the authorization which is used for requests, based on the authorization type
@@ -284,7 +269,7 @@ func (h *LoginHandlerV2) requestAuth() authv2.AuthOptions {
 
 // syncAuth updates the client after the credentials or the authorization type has changed
 func (h *LoginHandlerV2) syncAuth() {
-	h.applyAuth(h.requestAuth())
+	h.V2Client.SetAuth(h.requestAuth())
 }
 
 // ctx returns the context used for requests
@@ -319,7 +304,7 @@ func (h *LoginHandlerV2) Run() error {
 
 func (h *LoginHandlerV2) runSDKFlow() error {
 	// The login needs the credentials, and not only the ones used by the authorization type
-	h.applyAuth(h.auth)
+	h.V2Client.SetAuth(h.auth)
 
 	// Resolve LoginType string → v2 method / preference.
 	// LoginMethod takes precedence; otherwise derive from LoginType string.

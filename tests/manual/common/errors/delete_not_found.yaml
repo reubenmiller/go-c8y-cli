@@ -36,3 +36,8 @@ tests:
     command: |
       echo "0" | c8y events delete
     exit-code: 4
+
+  It reports a missing microservice name as a 404 with exit code 4:
+    command: |
+      c8y microservices delete --id this-microservice-does-not-exist
+    exit-code: 4
