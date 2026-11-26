@@ -13,7 +13,7 @@ func TestSwitchSessionPrompt(t *testing.T) {
 	defer cancel()
 
 	t.Run("not offered without a session switcher", func(t *testing.T) {
-		server, _ := newApprovalTestServer(t)
+		server := newPolicyTestServer("c8y")
 		cs := connectApprovalClient(t, ctx, server, nil)
 		if cs.InitializeResult().Capabilities.Prompts != nil {
 			res, err := cs.ListPrompts(ctx, nil)
@@ -27,7 +27,7 @@ func TestSwitchSessionPrompt(t *testing.T) {
 	})
 
 	t.Run("returns the switcher's message", func(t *testing.T) {
-		server, _ := newApprovalTestServer(t)
+		server := newPolicyTestServer("c8y")
 		calls := 0
 		server.SwitchSession = func(ctx context.Context) (string, error) {
 			calls++

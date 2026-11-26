@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 )
 
 func TestApprovalTokens(t *testing.T) {
@@ -49,32 +48,7 @@ func newApprovalTestServer(t *testing.T) (*Server, string) {
 	if err := os.WriteFile(script, []byte(content), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	policy := DefaultPolicy()
-	policy.Mode = config.SessionModeQual
-	policy.Approval = ApprovalElicit
-	return &Server{
-		Version:    "test",
-		Session:    SessionInfo{Host: "https://example.com", Tenant: "t123"},
-		Policy:     policy,
-		Classifier: &Classifier{Root: newTestRoot(), Policy: policy},
-		Runner:     &Runner{Executable: script, Mode: config.SessionModeQual, BaseEnv: []string{"PATH=/usr/bin:/bin"}},
-	}, marker
-}
-
-func connectApprovalClient(t *testing.T, ctx context.Context, server *Server, opts *mcp.ClientOptions) *mcp.ClientSession {
-	t.Helper()
-	serverTransport, clientTransport := mcp.NewInMemoryTransports()
-	ss, err := server.New().Connect(ctx, serverTransport, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { ss.Close() })
-	cs, err := mcp.NewClient(&mcp.Implementation{Name: "test", Version: "0"}, opts).Connect(ctx, clientTransport, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { cs.Close() })
-	return cs
+	return newPolicyTestServer(script), marker
 }
 
 func resultText(res *mcp.CallToolResult) string {

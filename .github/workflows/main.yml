@@ -98,6 +98,11 @@ jobs:
 
     - name: Build cli
       run: task build-powershell build-snapshot
+
+    # Compiles all packages and their test files for Windows (the unit tests only run on unix),
+    # so a missing build tag on a test file is caught here
+    - name: Vet tests for Windows
+      run: GOOS=windows go vet ./...
       shell: bash
 
     - uses: actions/upload-artifact@v6
