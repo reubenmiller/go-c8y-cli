@@ -77,7 +77,7 @@ func TestModePrompt(t *testing.T) {
 	}
 
 	t.Run("not offered unless enabled", func(t *testing.T) {
-		server, _ := newApprovalTestServer(t)
+		server := newPolicyTestServer("c8y")
 		cs := connectApprovalClient(t, ctx, server, nil)
 		if cs.InitializeResult().Capabilities.Prompts != nil {
 			list, _ := cs.ListPrompts(ctx, nil)
