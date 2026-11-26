@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
 )
 
 // ErrNoSession is returned when a client is requested, but c8y does not have an active session
@@ -51,10 +53,10 @@ func (c *Context) HTTPClient() (*http.Client, error) {
 	}, nil
 }
 
-// Client returns a Cumulocity client for the active c8y session. The credentials are used
-// in the following order: token, authorization header, then username without a password
+// Client returns a Cumulocity client (go-c8y v2) for the active c8y session. The credentials are
+// used in the following order: token, authorization header, then username without a password
 // (which fails on the first request, see CheckError)
-func (c *Context) Client() (*c8y.Client, error) {
+func (c *Context) Client() (*api.Client, error) {
 	if !c.HasSession() {
 		return nil, ErrNoSession
 	}
@@ -63,31 +65,34 @@ func (c *Context) Client() (*c8y.Client, error) {
 		return nil, err
 	}
 
-	opts := c8y.ClientOptions{
-		BaseURL:  c.Host,
+	auth := authentication.AuthOptions{
 		Tenant:   c.Tenant,
 		Username: c.Username,
 	}
 	switch {
 	case c.Token != "":
-		opts.Token = c.Token
-		opts.AuthType = c8y.AuthTypeBearer
+		auth.Token = c.Token
+		auth.AuthType = []authentication.AuthType{authentication.AuthTypeBearer}
 	case c.AuthorizationHeader != "":
 		// The header is added by the http transport
-		opts.AuthType = c8y.AuthTypeNone
+		auth.AuthType = []authentication.AuthType{authentication.AuthTypeNone}
 	default:
-		opts.AuthType = c8y.AuthTypeBasic
+		auth.AuthType = []authentication.AuthType{authentication.AuthTypeBasic}
 	}
-	client := c8y.NewClientFromOptions(httpClient, opts)
-	client.Version = c.CumulocityVersion
-	return client, nil
+	return api.NewClient(api.ClientOptions{
+		BaseURL:   c.Host,
+		Auth:      auth,
+		Transport: httpClient.Transport,
+		Timeout:   httpClient.Timeout,
+		// the tenant of the session is used, and it must not send any request when creating the client
+		SkipTenantLookup: true,
+	}), nil
 }
 
 // CheckError adds a hint how to fix authentication errors (401) returned by the Cumulocity client.
 // Other errors are returned unchanged
 func CheckError(err error) error {
-	var errResp *c8y.ErrorResponse
-	if errors.As(err, &errResp) && errResp.Response != nil && errResp.Response.StatusCode() == http.StatusUnauthorized {
+	if core.ErrHasStatus(err, http.StatusUnauthorized) {
 		return fmt.Errorf("%w. Authentication failed: %s", err, errExpiredCredentialMsg)
 	}
 	return err

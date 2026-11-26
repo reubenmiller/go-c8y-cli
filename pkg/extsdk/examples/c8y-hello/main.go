@@ -7,12 +7,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/extsdk"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/spf13/cobra"
 )
 
@@ -75,17 +78,27 @@ func newDevicesCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			col, _, err := client.Inventory.GetDevices(cmd.Context(), &c8y.PaginationOptions{
-				PageSize:       1,
-				WithTotalPages: true,
+			res := client.SendRequest(cmd.Context(), api.RequestOptions{
+				Method: http.MethodGet,
+				Path:   "/inventory/managedObjects",
+				Query: url.Values{
+					"query":             {"$filter=has(c8y_IsDevice)"},
+					"pageSize":          {"1"},
+					"withTotalElements": {"true"},
+				},
 			})
-			if err != nil {
-				return extsdk.CheckError(err)
+			if res.Error != nil {
+				return extsdk.CheckError(res.Error)
 			}
-			total := 0
-			if col.Statistics != nil && col.Statistics.TotalPages != nil {
-				total = *col.Statistics.TotalPages
+			var page struct {
+				Statistics struct {
+					TotalElements int `json:"totalElements"`
+				} `json:"statistics"`
 			}
+			if err := json.Unmarshal(res.Body(), &page); err != nil {
+				return err
+			}
+			total := page.Statistics.TotalElements
 			return extsdk.Print(map[string]any{"count": total})
 		},
 	})

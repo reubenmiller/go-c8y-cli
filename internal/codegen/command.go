@@ -38,7 +38,7 @@ var (
 	reOverrideExclude = regexp.MustCompile(`(?i)device\b|agent\b|group|devicegroup|self|application|hostedapplication|software\b|softwareName\b|deviceservice\b|softwareversion\b|softwareversionName\b|firmware\b|firmwareName\b|firmwareversion\b|firmwareversionName\b|firmwarepatch\b|firmwarepatchName\b|configuration\b|deviceprofile\b|microservice|id\[\]|devicerequest\[\]`)
 	reDeviceSuffix    = regexp.MustCompile(`(?i)device$`)
 	reFormDataCode    = regexp.MustCompile(`(?i)^flags\.WithFormData`)
-	reOptionCode      = regexp.MustCompile(`(?i)^(flags\.|c8yfetcher\.|With|c8ybinary\.)`)
+	reOptionCode      = regexp.MustCompile(`(?i)^(flags\.|With|c8ybinary\.)`)
 )
 
 func containsFold(s, substr string) bool {
@@ -126,6 +126,7 @@ func GenerateCommand(spec *Value, parentName string) (fileName string, src []byt
 	var commandArgs []*cmdArg
 	pipelineVariableName := ""
 	pipelineVariableRequired := "false"
+	pipelineFromBody := false
 	pipelineVariableProperty := ""
 	var pipelineVariableAliases []string
 	collectionProperty := spec.Get("collectionProperty").Str()
@@ -145,6 +146,7 @@ func GenerateCommand(spec *Value, parentName string) (fileName string, src []byt
 
 		if iArg.v.Get("pipeline").Truthy() {
 			pipelineVariableName = argName
+			pipelineFromBody = iArg.argSource == "body"
 			if iArg.v.Get("required").Truthy() {
 				pipelineVariableRequired = "true"
 			} else {
@@ -302,42 +304,20 @@ func GenerateCommand(spec *Value, parentName string) (fileName string, src []byt
 		}))
 	}
 
-	// Post actions
-	postActions := &strings.Builder{}
-	postActionsTotal := 0
-	for _, iArg := range removeSkipped(argumentSources) {
-		urlProperty := iArg.v.Get("name").Str()
-		if iArg.v.Get("property").Truthy() {
-			urlProperty = iArg.v.Get("property").Str()
-		}
-		if strings.EqualFold(iArg.v.Get("type").Str(), "binaryUploadURL") {
-			postActions.WriteString("&c8ydata.AddChildAddition{Client: client, URLProperty: " + q(urlProperty) + "},\n")
-			postActionsTotal++
-		}
-	}
-	postActionOptions := ""
-	if postActionsTotal > 0 {
-		postActionOptions = "inputIterators.PipeOptions.PostActions = []flags.Action{\n" + postActions.String() + "}\n"
-	}
-
-	// Prepare Request
-	prepareRequest := ""
-
 	//
 	// Body
 	//
-	getBodyContents := "body"
 	isFormData := false
+	isBinary := false
+	progressSource := ""
 
 	if spec.Get("body").Truthy() {
 		switch {
 		case spec.Get("bodyContent").Get("type").StrEquals("binary"):
-			getBodyContents = "body.GetFileContents()"
+			isBinary = true
 		case spec.Get("bodyContent").Get("type").StrEquals("formdata"):
-			getBodyContents = "body"
 			isFormData = true
 		default:
-			getBodyContents = "body"
 			restBodyBuilder.WriteString("flags.WithDataFlagValue(),\n")
 		}
 
@@ -346,7 +326,7 @@ func GenerateCommand(spec *Value, parentName string) (fileName string, src []byt
 			if matchesMethod(restMethod, "POST", "PUT") && !hasProgress {
 				if equalsAnyFold(iArg.v.Get("type").Str(), "file", "fileContents", "attachment") {
 					hasProgress = true
-					prepareRequest = "PrepareRequest: c8ybinary.AddProgress(cmd, " + q(iArg.v.Get("name").Str()) + ", cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY())),"
+					progressSource = iArg.v.Get("name").Str()
 				}
 			}
 
@@ -416,30 +396,16 @@ func GenerateCommand(spec *Value, parentName string) (fileName string, src []byt
 	}
 
 	//
-	// Host
+	// Request parameters. The values of the path, query and header parameters are read from the
+	// flags for each input item (see the c8ystream.Resolver) in the generated code
 	//
-	restHost := ""
-	if !spec.Get("host").IsNull() {
-		restHost = "\nHost:         replacePathParameters(" + q(spec.Get("host").Str()) + ", pathParameters),"
-	}
-
-	//
-	// Path Parameters
-	//
-	restPathBuilder := &strings.Builder{}
-	for _, p := range removeSkipped(wrapArgs(spec.Get("pathParameters").Items())) {
-		if code := getValueFromFlag(p.v, "path"); code != "" {
-			restPathBuilder.WriteString(code + "\n")
-		}
-	}
-
-	//
-	// Query parameters
-	//
-	restQueryBuilder := &strings.Builder{}
+	var pathCode, queryCode, headerCode strings.Builder
 	cumulocityQueryBuilder := &strings.Builder{}
-	restQueryBuilderPost := &strings.Builder{}
+	for _, p := range removeSkipped(wrapArgs(spec.Get("pathParameters").Items())) {
+		pathCode.WriteString(pathParameterCode(p.v, !spec.Get("host").IsNull()))
+	}
 
+	cumulocityQueryProperty := ""
 	for _, p := range removeSkipped(wrapArgs(spec.Get("queryParameters").Items())) {
 		if p.v.Get("type").StrEquals("queryExpression") && p.v.Get("children").Truthy() {
 			cumulocityQueryBuilder.WriteString("\t\tflags.WithCumulocityQuery(\n")
@@ -458,17 +424,16 @@ func GenerateCommand(spec *Value, parentName string) (fileName string, src []byt
 			cumulocityQueryBuilder.WriteString("\t\t\t},\n")
 			cumulocityQueryBuilder.WriteString("\t\t\t" + q(p.v.Get("property").Str()) + ",\n")
 			cumulocityQueryBuilder.WriteString("\t\t),\n")
+			cumulocityQueryProperty = p.v.Get("property").Str()
 		} else {
-			if code := getValueFromFlag(p.v, "query"); code != "" {
-				restQueryBuilder.WriteString(code + "\n")
-			}
+			queryCode.WriteString(valueSetterCode(p.v, "query"))
 		}
 	}
+
+	// Paging parameters (common options) of the collections
+	pagingCode := ""
 	if matchesMethod(restMethod, "GET") {
-		restQueryBuilderPost.WriteString("        commonOptions, err := cfg.GetOutputCommonOptions(cmd)\n" +
-			"        if err != nil {\n" +
-			"            return cmderrors.NewUserError(fmt.Sprintf(\"Failed to get common options. err=%s\", err))\n" +
-			"        }\n")
+		addPaging := "common.AddQueryParameters(pagingTemplate)"
 		// Support mapping common flags to custom query parameters (e.g. if a service uses limit instead of pageSize)
 		// but for consistency the flag --pageSize will still be used and mapped to 'limit'.
 		if flagMapping := spec.Get("flagMapping"); flagMapping.Truthy() {
@@ -476,33 +441,31 @@ func GenerateCommand(spec *Value, parentName string) (fileName string, src []byt
 			for _, key := range flagMapping.Keys() {
 				flagAliases = append(flagAliases, q(key)+":"+q(flagMapping.Get(key).Str()))
 			}
-			restQueryBuilderPost.WriteString("commonOptions.AddQueryParametersWithMapping(query, map[string]string{" + strings.Join(flagAliases, ",") + "})\n")
-		} else {
-			restQueryBuilderPost.WriteString("commonOptions.AddQueryParameters(query)\n")
+			addPaging = "common.AddQueryParametersWithMapping(pagingTemplate, map[string]string{" + strings.Join(flagAliases, ",") + "})"
 		}
+		pagingCode = "common, err := r.Config.GetOutputCommonOptions(cmd)\n" +
+			"if err != nil {\n" +
+			"return cmderrors.NewUserError(fmt.Sprintf(\"Failed to get common options. err=%s\", err))\n" +
+			"}\n" +
+			"pagingTemplate := flags.NewQueryTemplate()\n" +
+			addPaging + "\n" +
+			"paging, _, err := pagingTemplate.Execute(true)\n" +
+			"if err != nil {\n" +
+			"return err\n" +
+			"}\n"
 	}
 
 	//
 	// Headers
 	//
-	restHeaderBuilder := &strings.Builder{}
 	for _, iArg := range removeSkipped(wrapArgs(spec.Get("headerParameters").Items())) {
-		if code := getValueFromFlag(iArg.v, "header"); code != "" {
-			restHeaderBuilder.WriteString(code + "\n")
-		}
+		headerCode.WriteString(valueSetterCode(iArg.v, "header"))
 	}
 
-	if spec.Get("contentType").Truthy() {
-		restHeaderBuilder.WriteString("flags.WithStaticStringValue(\"Content-Type\", " + q(spec.Get("contentType").Str()) + "),\n")
-	}
-
+	requestContentType := spec.Get("contentType").Str()
+	requestAccept := ""
 	if spec.Get("addAccept").Truthy() && spec.Get("accept").Truthy() {
-		restHeaderBuilder.WriteString("flags.WithStaticStringValue(\"Accept\", " + q(spec.Get("accept").Str()) + "),\n")
-	}
-
-	// Processing Mode
-	if matchesMethod(restMethod, "DELETE", "PUT", "POST") {
-		restHeaderBuilder.WriteString("flags.WithProcessingModeValue(),\n")
+		requestAccept = spec.Get("accept").Str()
 	}
 
 	// Add common parameters
@@ -529,12 +492,6 @@ func GenerateCommand(spec *Value, parentName string) (fileName string, src []byt
 		preRunFunction = "f.DeleteModeEnabled(cmd)"
 	}
 
-	// Additional options
-	requestOptionsBuilder := ""
-	if spec.Get("responseType").StrEquals("array") {
-		requestOptionsBuilder = "ResponseData: make([]map[string]interface{}, 0),\n"
-	}
-
 	//
 	// Template
 	//
@@ -546,20 +503,20 @@ func GenerateCommand(spec *Value, parentName string) (fileName string, src []byt
 	b.WriteString("import (\n")
 	b.WriteString("\t\"fmt\"\n")
 	b.WriteString("\t\"io\"\n")
-	b.WriteString("\t\"net/http\"\n")
 	b.WriteString("\t\"net/url\"\n")
+	b.WriteString("\t\"strconv\"\n")
+	b.WriteString("\t\"strings\"\n")
 	b.WriteString("\n")
 	b.WriteString("    \"github.com/MakeNowJust/heredoc/v2\"\n")
 	b.WriteString("    \"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary\"\n")
-	b.WriteString("    \"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher\"\n")
+	b.WriteString("    \"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream\"\n")
 	b.WriteString("    \"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand\"\n")
 	b.WriteString("    \"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors\"\n")
 	b.WriteString("    \"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil\"\n")
 	b.WriteString("    \"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion\"\n")
 	b.WriteString("    \"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags\"\n")
-	b.WriteString("\t\"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder\"\n")
-	b.WriteString("\t\"github.com/reubenmiller/go-c8y/pkg/c8y\"\n")
-	b.WriteString("\t\"github.com/spf13/cobra\"\n")
+	b.WriteString("    apiv2 \"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api\"\n")
+	b.WriteString("    \"github.com/spf13/cobra\"\n")
 	b.WriteString(")\n")
 	b.WriteString("\n")
 	b.WriteString("// " + nameCamel + "Cmd command\n")
@@ -686,119 +643,161 @@ func GenerateCommand(spec *Value, parentName string) (fileName string, src []byt
 	b.WriteString("\n")
 	b.WriteString("// RunE executes the command\n")
 	b.WriteString("func (n *" + nameCamel + "Cmd) RunE(cmd *cobra.Command, args []string) error {\n")
-	b.WriteString("    cfg, err := n.factory.Config()\n")
+	b.WriteString("    r, err := c8ystream.NewRunner(cmd, n.factory)\n")
 	b.WriteString("\tif err != nil {\n")
 	b.WriteString("\t\treturn err\n")
 	b.WriteString("\t}\n")
-	b.WriteString("    // Runtime flag options\n")
-	b.WriteString("    flags.WithOptions(\n")
-	b.WriteString("\t\tcmd,\n")
-	b.WriteString("\t\tflags.WithRuntimePipelineProperty(),\n")
-	b.WriteString("\t)\n")
-	b.WriteString("    client, err := n.factory.Client()\n")
+	b.WriteString("\n")
+	if pipelineVariableName != "" && !pipelineFromBody {
+		// the pipeline flag drives the iteration, and is read as a value of the current item
+		b.WriteString("    // the pipeline flag drives the iteration (piped items, or the values of the flag)\n")
+		b.WriteString("    if err := r.InputFlag(" + q(pipelineVariableName) + "); err != nil {\n")
+	} else {
+		b.WriteString("    if err := r.Input(); err != nil {\n")
+	}
+	b.WriteString("\t\treturn err\n")
+	b.WriteString("\t}\n")
+	b.WriteString("\n")
+	if cumulocityQueryBuilder.Len() > 0 {
+		b.WriteString("    // Cumulocity query expression\n")
+		b.WriteString("    err = r.Query(\n")
+		b.WriteString("        " + cumulocityQueryBuilder.String() + "\n")
+		b.WriteString("    )\n")
+		b.WriteString("    if err != nil {\n")
+		b.WriteString("        return err\n")
+		b.WriteString("    }\n")
+		b.WriteString("\n")
+	}
+	if spec.Get("body").Truthy() && !isFormData {
+		b.WriteString("    // body\n")
+		b.WriteString("    err = r.Body(\n")
+		b.WriteString("        " + restBodyBuilder.String() + "\n")
+		b.WriteString("    )\n")
+		b.WriteString("    if err != nil {\n")
+		b.WriteString("        return err\n")
+		b.WriteString("    }\n")
+		b.WriteString("\n")
+	}
+	if isFormData || restFormDataBuilder.Len() > 0 {
+		b.WriteString("    // form data (the readers are recreated for each request)\n")
+		b.WriteString("    formData := make(map[string]io.Reader)\n")
+		b.WriteString("    err = flags.WithFormDataOptions(\n")
+		b.WriteString("\t\tcmd,\n")
+		b.WriteString("        formData,\n")
+		b.WriteString("        r.InputIterators,")
+		if restFormDataBuilder.Len() > 0 {
+			b.WriteString("                flags.WithOptionBuilder().\n")
+			b.WriteString("                    " + restFormDataBuilder.String() + "\n")
+			b.WriteString("                Build()...")
+		}
+		b.WriteString("\n")
+		b.WriteString("    )\n")
+		b.WriteString("    if err != nil {\n")
+		b.WriteString("\t\treturn cmderrors.NewUserError(err)\n")
+		b.WriteString("    }\n")
+		b.WriteString("    if err := flags.MakeFormDataReopenable(formData); err != nil {\n")
+		b.WriteString("\t\treturn cmderrors.NewUserError(err)\n")
+		b.WriteString("    }\n")
+		b.WriteString("\n")
+	}
+	if progressSource != "" {
+		b.WriteString("    addProgress := c8ybinary.AddProgress(cmd, " + q(progressSource) + ", r.Config.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY()))\n")
+		b.WriteString("\n")
+	}
+	if pagingCode != "" {
+		b.WriteString("    " + pagingCode + "\n")
+	}
+	b.WriteString("    client, err := r.Client()\n")
 	b.WriteString("\tif err != nil {\n")
 	b.WriteString("\t\treturn err\n")
 	b.WriteString("\t}\n")
-	b.WriteString("    inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)\n")
-	b.WriteString("    if err != nil {\n")
-	b.WriteString("        return err\n")
-	b.WriteString("    }\n")
 	b.WriteString("\n")
-	b.WriteString("    // query parameters\n")
-	b.WriteString("    query := flags.NewQueryTemplate()\n")
-	b.WriteString("    err = flags.WithQueryParameters(\n")
-	b.WriteString("\t\tcmd,\n")
-	b.WriteString("        query,\n")
-	b.WriteString("        inputIterators,\n")
-	b.WriteString("        flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, \"custom\"),\n")
-	b.WriteString("        " + restQueryBuilder.String() + "\n")
-	b.WriteString("        " + cumulocityQueryBuilder.String() + "\n")
-	b.WriteString("    )\n")
-	b.WriteString("    if err != nil {\n")
-	b.WriteString("\t\treturn cmderrors.NewUserError(err)\n")
-	b.WriteString("    }\n")
-	b.WriteString("    " + restQueryBuilderPost.String() + "\n")
-	b.WriteString("\tqueryValue, err := query.GetQueryUnescape(true)\n")
-	b.WriteString("\n")
-	b.WriteString("\tif err != nil {\n")
-	b.WriteString("\t\treturn cmderrors.NewSystemError(\"Invalid query parameter\")\n")
-	b.WriteString("\t}\n")
-	b.WriteString("\n")
-	b.WriteString("    // headers\n")
-	b.WriteString("    headers := http.Header{}\n")
-	b.WriteString("    err = flags.WithHeaders(\n")
-	b.WriteString("\t\tcmd,\n")
-	b.WriteString("        headers,\n")
-	b.WriteString("        inputIterators,\n")
-	b.WriteString("        flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, \"header\"),\n")
-	b.WriteString("        " + restHeaderBuilder.String() + "\n")
-	b.WriteString("    )\n")
-	b.WriteString("    if err != nil {\n")
-	b.WriteString("\t\treturn cmderrors.NewUserError(err)\n")
-	b.WriteString("    }\n")
-	b.WriteString("\n")
-	b.WriteString("    // form data\n")
-	b.WriteString("    formData := make(map[string]io.Reader)\n")
-	b.WriteString("    err = flags.WithFormDataOptions(\n")
-	b.WriteString("\t\tcmd,\n")
-	b.WriteString("        formData,\n")
-	b.WriteString("        inputIterators,")
-	if restFormDataBuilder.Len() > 0 {
-		b.WriteString("                flags.WithOptionBuilder().\n")
-		b.WriteString("                    " + restFormDataBuilder.String() + "\n")
-		b.WriteString("                Build()...")
+	b.WriteString("    return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {\n")
+	b.WriteString("        path := " + q(restPath) + "\n")
+	if !spec.Get("host").IsNull() {
+		b.WriteString("        host := " + q(spec.Get("host").Str()) + "\n")
 	}
-	b.WriteString("\n")
-	b.WriteString("    )\n")
-	b.WriteString("    if err != nil {\n")
-	b.WriteString("\t\treturn cmderrors.NewUserError(err)\n")
-	b.WriteString("    }\n")
-	b.WriteString("    \n")
-	b.WriteString("\n")
-	b.WriteString("    // body\n")
-	hasBody := "false"
-	if matchesMethod(restMethod, "PUT", "POST") && spec.Get("body").Truthy() {
-		hasBody = "true"
+	b.WriteString("        " + pathCode.String() + "\n")
+	b.WriteString("        query := url.Values{}\n")
+	b.WriteString("        " + queryCode.String() + "\n")
+	if cumulocityQueryProperty != "" {
+		b.WriteString("        queryExpression, err := in.Query()\n")
+		b.WriteString("        if err != nil {\n")
+		b.WriteString("            return nil, cmderrors.NewUserError(err)\n")
+		b.WriteString("        }\n")
+		b.WriteString("        if queryExpression != \"\" {\n")
+		b.WriteString("            query.Set(" + q(cumulocityQueryProperty) + ", queryExpression)\n")
+		b.WriteString("        }\n")
 	}
-	b.WriteString("    body := mapbuilder.NewInitializedMapBuilder(" + hasBody + ")\n")
-	b.WriteString("    err = flags.WithBody(\n")
-	b.WriteString("        cmd,\n")
-	b.WriteString("        body,\n")
-	b.WriteString("        inputIterators,\n")
-	b.WriteString("        " + restBodyBuilder.String() + "\n")
-	b.WriteString("    )\n")
-	b.WriteString("    if err != nil {\n")
-	b.WriteString("\t\treturn cmderrors.NewUserError(err)\n")
-	b.WriteString("    }\n")
+	if pagingCode != "" {
+		b.WriteString("        for key, values := range paging {\n")
+		b.WriteString("            query[key] = append(query[key], values...)\n")
+		b.WriteString("        }\n")
+	}
+	if validators := flagConstraints(spec); validators != "" {
+		b.WriteString("        if err := flags.ValidateQuery(query,\n")
+		b.WriteString("            " + validators + "\n")
+		b.WriteString("        ); err != nil {\n")
+		b.WriteString("            return nil, err\n")
+		b.WriteString("        }\n")
+	}
+	b.WriteString("        headers := map[string]string{}\n")
+	b.WriteString("        " + headerCode.String() + "\n")
 	b.WriteString("\n")
-	b.WriteString("    // path parameters\n")
-	b.WriteString("    path := flags.NewStringTemplate(\"" + restPath + "\")\n")
-	b.WriteString("    err = flags.WithPathParameters(\n")
-	b.WriteString("        cmd,\n")
-	b.WriteString("        path,\n")
-	b.WriteString("        inputIterators,\n")
-	b.WriteString("        " + restPathBuilder.String() + "\n")
-	b.WriteString("    )\n")
-	b.WriteString("    if err != nil {\n")
-	b.WriteString("        return err\n")
-	b.WriteString("    }\n")
-	b.WriteString("\n")
-	b.WriteString("    req := c8y.RequestOptions{" + restHost + "\n")
-	b.WriteString("        Method:       \"" + restMethod + "\",\n")
-	b.WriteString("        Path:         path.GetTemplate(),\n")
-	b.WriteString("        Query:        queryValue,\n")
-	b.WriteString("        Body:         " + getBodyContents + ",\n")
-	b.WriteString("        FormData:     formData,\n")
-	b.WriteString("        Header:       headers,\n")
-	b.WriteString("        IgnoreAccept: cfg.IgnoreAcceptHeader(),\n")
-	b.WriteString("        DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),\n")
-	b.WriteString("        " + prepareRequest + "\n")
-	b.WriteString("        " + requestOptionsBuilder + "\n")
-	b.WriteString("    }\n")
-	b.WriteString("    " + postActionOptions + "\n")
-	b.WriteString("    " + flagConstraints(spec) + "\n")
-	b.WriteString("\n")
-	b.WriteString("    return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)\n")
+	b.WriteString("        opts := apiv2.RequestOptions{\n")
+	b.WriteString("            Method:       " + q(restMethod) + ",\n")
+	b.WriteString("            Path:         path,\n")
+	if !spec.Get("host").IsNull() {
+		b.WriteString("            Host:         host,\n")
+	}
+	b.WriteString("            Query:        query,\n")
+	b.WriteString("            Headers:      headers,\n")
+	if requestAccept != "" {
+		b.WriteString("            Accept:       " + q(requestAccept) + ",\n")
+	}
+	if requestContentType != "" {
+		b.WriteString("            ContentType:  " + q(requestContentType) + ",\n")
+	}
+	b.WriteString("            IgnoreAccept: r.Config.IgnoreAcceptHeader(),\n")
+	b.WriteString("        }\n")
+	switch {
+	case isFormData || restFormDataBuilder.Len() > 0:
+		b.WriteString("        form, err := flags.ReopenFormData(formData)\n")
+		b.WriteString("        if err != nil {\n")
+		b.WriteString("            return nil, cmderrors.NewUserError(err)\n")
+		b.WriteString("        }\n")
+		b.WriteString("        opts.FormData = c8ystream.FormParts(form)\n")
+		if progressSource != "" {
+			b.WriteString("        opts.PrepareRequest = addProgress\n")
+		}
+	case isBinary:
+		b.WriteString("        // a binary body is only sent from a file\n")
+		b.WriteString("        file, err := in.BodyFile()\n")
+		b.WriteString("        if err != nil {\n")
+		b.WriteString("            return nil, cmderrors.NewUserError(err)\n")
+		b.WriteString("        }\n")
+		b.WriteString("        if file != nil {\n")
+		b.WriteString("            opts.Body = file\n")
+		if progressSource != "" {
+			b.WriteString("            opts.PrepareRequest = addProgress\n")
+		}
+		b.WriteString("        }\n")
+	case spec.Get("body").Truthy():
+		b.WriteString("        if raw, ok := in.RawBody(); ok {\n")
+		b.WriteString("            opts.Body = []byte(raw)\n")
+		b.WriteString("        } else {\n")
+		b.WriteString("            body, err := in.Body()\n")
+		b.WriteString("            if err != nil {\n")
+		b.WriteString("                return nil, cmderrors.NewUserError(err)\n")
+		b.WriteString("            }\n")
+		b.WriteString("            opts.Body = []byte(body)\n")
+		b.WriteString("            if opts.ContentType == \"\" {\n")
+		b.WriteString("                opts.ContentType = \"application/json\"\n")
+		b.WriteString("            }\n")
+		b.WriteString("        }\n")
+	}
+	b.WriteString("        return r.RequestCall(client, opts), nil\n")
+	b.WriteString("    })\n")
 	b.WriteString("}\n")
 	b.WriteString("\n")
 
@@ -825,7 +824,8 @@ func bodyTemplatesAllowUserTemplates(bodyTemplates *Value) bool {
 	return !bodyTemplates.Get("type").StrEquals("none")
 }
 
-// flagConstraints ports Get-FlagConstraints.
+// flagConstraints ports Get-FlagConstraints: it returns the query parameter validators (flags.QueryValidator)
+// of the constraints of the specification.
 func flagConstraints(spec *Value) string {
 	constraints := spec.Get("constraints")
 	if constraints.IsNull() {
@@ -857,10 +857,5 @@ func flagConstraints(spec *Value) string {
 			lines = append(lines, fmt.Sprintf("flags.WithQueryParameterRequiredTogether(%s),\n", joinGroup(requiredTogether)))
 		}
 	}
-	if len(lines) == 0 {
-		return ""
-	}
-	parts := append([]string{"req.WithValidateFunc(\n"}, lines...)
-	parts = append(parts, ")\n")
-	return strings.Join(parts, " ")
+	return strings.Join(lines, " ")
 }

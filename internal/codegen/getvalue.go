@@ -77,7 +77,7 @@ var getValueFromFlagKeys = []string{
 }
 
 // getValueFromFlag ports New-C8yApiGoGetValueFromFlag.ps1: it returns the
-// flags/c8yfetcher option code that reads a parameter value and applies it to
+// flags option code that reads a parameter value and applies it to
 // the request part given by setterType (query, path, body or header).
 func getValueFromFlag(p *Value, setterType string) string {
 	prop := p.Get("name").Str()
@@ -168,9 +168,10 @@ func getValueFromFlag(p *Value, setterType string) string {
 	case "json_custom":
 		return fmt.Sprintf("flags.WithDataValue(%s, %s%s),", q(prop), q(queryParam), formatValue)
 
-	// binaryUploadURL: uploads a binary and returns the URL
+	// binaryUploadURL: the upload of the binary has to be added by hand (e.g. with the
+	// c8ybinary.UploadBinary helper), so no value is read from the flag
 	case "binaryUploadURL":
-		return fmt.Sprintf("c8ybinary.WithBinaryUploadURL(n.factory.Client, n.factory.IOStreams.ProgressIndicator(), %s, %s%s),", q(prop), q(queryParam), formatValue)
+		return ""
 
 	// json - don't do anything because it should be manually set
 	case "json":
@@ -179,95 +180,127 @@ func getValueFromFlag(p *Value, setterType string) string {
 	case "tenant":
 		return fmt.Sprintf("flags.WithStringDefaultValue(n.factory.GetTenant(), %s, %s%s),", q(prop), q(queryParam), formatValue)
 
-	case "application", "application_with_versions":
-		return fmt.Sprintf("c8yfetcher.WithApplicationByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "hostedapplication":
-		return fmt.Sprintf("c8yfetcher.WithHostedApplicationByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "microservice":
-		return fmt.Sprintf("c8yfetcher.WithMicroserviceByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "uiplugin":
-		return fmt.Sprintf("c8yfetcher.WithUIPluginByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "devicerequest[]", "id[]":
-		return fmt.Sprintf("c8yfetcher.WithIDSlice(args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "software[]":
-		return fmt.Sprintf("c8yfetcher.WithSoftwareByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "softwareDetails":
-		return fmt.Sprintf("c8yfetcher.WithSoftwareVersionData(n.factory, \"software\", \"version\", \"url\", \"softwareType\", args, \"\", %s%s),", q(queryParam), formatValue)
-
-	case "configurationDetails":
-		return fmt.Sprintf("c8yfetcher.WithConfigurationFileData(n.factory, \"configuration\", \"configurationType\", \"url\", args, \"\", %s%s),", q(queryParam), formatValue)
-
-	case "softwareversion[]":
-		return fmt.Sprintf("c8yfetcher.WithSoftwareVersionByNameFirstMatch(n.factory, \"software\", args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "deviceservice[]":
-		return fmt.Sprintf("c8yfetcher.WithDeviceServiceByNameFirstMatch(n.factory, \"device\", args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
 	case "certificatefile":
 		return fmt.Sprintf("flags.WithCertificateFile(%s, %s),", q(prop), q(queryParam))
 
-	case "certificate[]":
-		return fmt.Sprintf("c8yfetcher.WithCertificateByNameFirstMatch(n.factory, args, %s, %s),", q(prop), q(queryParam))
+	// Lookups of a value by name or id are not resolved by the generated command (the go-c8y v2
+	// client resolves them where it is needed), so the flag value is used as is.
+	case "application", "application_with_versions", "hostedapplication", "microservice", "uiplugin",
+		"remoteaccessconfiguration", "firmwarepatchName", "certificate[]", "configuration[]", "deviceprofile[]":
+		return fmt.Sprintf("flags.WithStringValue(%s, %s%s),", q(prop), q(queryParam), formatValue)
 
-	case "firmware[]":
-		return fmt.Sprintf("c8yfetcher.WithFirmwareByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
+	// Reference lists (ids or names) of a flag (which can be piped)
+	case "devicerequest[]", "id[]", "software[]", "softwareversion[]", "deviceservice[]", "firmware[]",
+		"firmwareversion[]", "firmwarepatch[]", "device[]", "agent[]", "devicegroup[]", "smartgroup[]",
+		"user[]", "userself[]", "roleself[]", "role[]", "usergroup[]":
+		return fmt.Sprintf("flags.WithSliceRefValue(%s, %s),", q(prop), q(queryParam))
 
-	case "firmwareversion[]":
-		return fmt.Sprintf("c8yfetcher.WithFirmwareVersionByNameFirstMatch(n.factory, \"firmware\", args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "firmwareDetails":
-		return fmt.Sprintf("c8yfetcher.WithFirmwareVersionData(n.factory, \"firmware\", \"version\", \"url\", args, \"\", %s),", q(queryParam))
-
-	case "firmwarepatch[]":
-		return fmt.Sprintf("c8yfetcher.WithFirmwarePatchByNameFirstMatch(n.factory, \"firmware\", args, %s, %s),", q(prop), q(queryParam))
-
-	case "firmwarepatchName":
-		return fmt.Sprintf("flags.WithStringValue(%s, %s),", q(prop), q(queryParam))
-
-	case "configuration[]":
-		return fmt.Sprintf("c8yfetcher.WithConfigurationByNameFirstMatch(n.factory, args, %s, %s),", q(prop), q(queryParam))
-
-	case "deviceprofile[]":
-		return fmt.Sprintf("c8yfetcher.WithDeviceProfileByNameFirstMatch(n.factory, args, %s, %s),", q(prop), q(queryParam))
-
-	case "device[]":
-		return fmt.Sprintf("c8yfetcher.WithDeviceByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "agent[]":
-		return fmt.Sprintf("c8yfetcher.WithAgentByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "devicegroup[]":
-		return fmt.Sprintf("c8yfetcher.WithDeviceGroupByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "smartgroup[]":
-		return fmt.Sprintf("c8yfetcher.WithSmartGroupByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "user[]":
-		return fmt.Sprintf("c8yfetcher.WithUserByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "userself[]":
-		return fmt.Sprintf("c8yfetcher.WithUserSelfByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "roleself[]":
-		return fmt.Sprintf("c8yfetcher.WithRoleSelfByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "role[]":
-		return fmt.Sprintf("c8yfetcher.WithRoleByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "usergroup[]":
-		return fmt.Sprintf("c8yfetcher.WithUserGroupByNameFirstMatch(n.factory, args, %s, %s%s),", q(prop), q(queryParam), formatValue)
-
-	case "remoteaccessconfiguration":
-		return fmt.Sprintf("c8yfetcher.WithRemoteAccessConfigurationFirstMatch(n.factory, \"device\", args, %s, %s),", q(prop), q(queryParam))
+	// Details of a software/firmware version or a configuration file have to be looked up by hand
+	case "softwareDetails", "configurationDetails", "firmwareDetails":
+		return ""
 	}
 
 	// Unknown types produce no setter (the PowerShell hashtable lookup with a
 	// non-matching key returns an empty result).
 	return ""
+}
+
+// parameterKind is the way the value of a flag is read and written to the request
+func parameterKind(p *Value) string {
+	switch strings.ToLower(p.Get("type").Str()) {
+	case "stringstatic":
+		return "static"
+	case "boolean", "booleandefault", "optional_fragment":
+		return "bool"
+	case "datetime", "date":
+		return "time"
+	case "integer":
+		return "int"
+	case "float":
+		return "float"
+	case "string[]":
+		return "slice"
+	case "stringcsv[]":
+		return "csv"
+	case "tenant":
+		return "tenant"
+	case "json", "json_custom", "binaryuploadurl", "file", "filecontents", "attachment", "formdatafile",
+		"certificatefile", "softwaredetails", "configurationdetails", "firmwaredetails":
+		// not a plain request value
+		return ""
+	}
+	for _, key := range getValueFromFlagKeys {
+		if strings.EqualFold(key, p.Get("type").Str()) {
+			return "string"
+		}
+	}
+	// Unknown types produce no value
+	return ""
+}
+
+// valueSetterCode returns the code which reads the value of a parameter from the flags (of the current
+// input item, see c8ystream.Resolver), and sets it to a query parameter or a header. The target is
+// either "query" (url.Values) or "header" (map[string]string).
+func valueSetterCode(p *Value, target string) string {
+	prop := p.Get("name").Str()
+	key := p.Get("property").Str()
+	if key == "" {
+		key = prop
+	}
+	set := func(value string) string {
+		if target == "header" {
+			return fmt.Sprintf("headers[%s] = %s\n", q(key), value)
+		}
+		return fmt.Sprintf("query.Set(%s, %s)\n", q(key), value)
+	}
+	switch parameterKind(p) {
+	case "static":
+		return set(q(p.Get("value").Str()))
+	case "bool":
+		return fmt.Sprintf("if v := in.BoolPtrIfChanged(%s); v != nil {\n%s}\n", q(prop), set("strconv.FormatBool(*v)"))
+	case "time":
+		return fmt.Sprintf("if v := in.Time(%s); v != \"\" {\n%s}\n", q(prop), set("v"))
+	case "int":
+		return fmt.Sprintf("if cmd.Flags().Changed(%s) {\nv, _ := cmd.Flags().GetInt(%s)\n%s}\n", q(prop), q(prop), set("strconv.Itoa(v)"))
+	case "float":
+		return fmt.Sprintf("if cmd.Flags().Changed(%s) {\nv, _ := cmd.Flags().GetFloat32(%s)\n%s}\n", q(prop), q(prop), set("strconv.FormatFloat(float64(v), 'f', -1, 32)"))
+	case "slice":
+		if target == "header" {
+			return fmt.Sprintf("if v := strings.Join(in.StringSlice(%s), \",\"); v != \"\" {\n%s}\n", q(prop), set("v"))
+		}
+		return fmt.Sprintf("for _, v := range in.StringSlice(%s) {\nif v != \"\" {\nquery.Add(%s, v)\n}\n}\n", q(prop), q(key))
+	case "csv":
+		return fmt.Sprintf("if v := strings.Join(in.StringSlice(%s), \",\"); v != \"\" {\n%s}\n", q(prop), set("v"))
+	case "tenant":
+		return fmt.Sprintf("{\nv := in.FirstString(%s)\nif v == \"\" {\nv = n.factory.GetTenant()\n}\nif v != \"\" {\n%s}\n}\n", q(prop), set("v"))
+	case "string":
+		return fmt.Sprintf("if v := in.FirstString(%s); v != \"\" {\n%s}\n", q(prop), set("v"))
+	}
+	return ""
+}
+
+// pathParameterCode returns the code which replaces a path parameter (and the same variable in
+// the host) with the value of the flag (of the current input item, see c8ystream.Resolver)
+func pathParameterCode(p *Value, hasHost bool) string {
+	prop := p.Get("name").Str()
+	key := p.Get("property").Str()
+	if key == "" {
+		key = prop
+	}
+	if parameterKind(p) == "" {
+		return ""
+	}
+	var b strings.Builder
+	b.WriteString("{\n")
+	b.WriteString(fmt.Sprintf("v := in.FirstString(%s)\n", q(prop)))
+	if parameterKind(p) == "tenant" {
+		b.WriteString("if v == \"\" {\nv = n.factory.GetTenant()\n}\n")
+	}
+	b.WriteString("if v != \"\" {\n")
+	b.WriteString(fmt.Sprintf("path = strings.ReplaceAll(path, %s, url.PathEscape(v))\n", q("{"+key+"}")))
+	if hasHost {
+		b.WriteString(fmt.Sprintf("host = strings.ReplaceAll(host, %s, v)\n", q("{"+key+"}")))
+	}
+	b.WriteString("}\n}\n")
+	return b.String()
 }

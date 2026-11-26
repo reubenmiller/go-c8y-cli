@@ -27,12 +27,12 @@ Every one of those per-command choices can be made wrong, and some already are.
 |---|---|---|
 | Spec-generated `.auto.go` commands | inventory, identity, applications, users, repository and others remaining | **0 remaining** (`CLI_MIGRATION_TRACKER.md`) |
 | Commands on `c8ystream.Runner` | 9 services | ~315 files |
-| Commands still on the v1 path (`worker`, `c8yfetcher`, `pkg/request`) | not tracked | ~35 files (listed below) |
+| go-c8y v1 SDK | still required | **Removed**: `go.mod` (and `pkg/extsdk/go.mod`) only require `github.com/reubenmiller/go-c8y/v2`. `pkg/request`, `pkg/requestiterator`, `pkg/worker` and the legacy client are deleted; a guardrail test fails if v1 comes back |
 | Request-modifier seam (headers, custom query params) | open SDK gap | **Done**: `api.WithExtraHeaders` / `api.WithExtraQueryParams` are applied centrally in `Runner.Run` |
 | Regression list from the manual tests | not tracked | `v2-migration-remaining-issues.md`: section A fixed, B1 needs a decision, section C needs a tenant |
 | v2 release | not tracked | All tasks done except "Tag v2.0.0" |
 
-**v1 holdouts.** These are commands still on the v1 worker or v1 client. They are the reason `go.mod` still needs `github.com/reubenmiller/go-c8y` v1.
+**v1 holdouts (historical; all are migrated and v1 is removed).** These were commands still on the v1 worker or v1 client. They were the reason `go.mod` needed `github.com/reubenmiller/go-c8y` v1.
 
 - **Realtime:** `{alarms,events,measurements,operations,inventory}/subscribe`, `realtime/{subscribe,subscribeall}`, `notification2/subscriptions/subscribe`.
 - **Wait and assert:** `operations/wait`, `inventory/wait`, `assert/text`, `devices/assert`, `inventory/assert` (which the `count` asserts reuse), `tenants/assert/exists`.
@@ -322,7 +322,7 @@ The guardrail tests make the per-package cost visible again if new command packa
 
 The allowlist in `internal/guardrails/allowlist.json` is the worklist. Each entry disappears when it is fixed. After the PRs above:
 
-- `go-c8y-v1`: mostly completion callbacks; also the v1 stack behind runtime (extension) commands, login and sessions.
+- `go-c8y-v1`: empty, and the go-c8y v1 module is no longer required. `TestNoGoC8yV1Module` fails if a `go.mod` requires it or a file imports it.
 - The websocket clients (realtime, remote access) do not honor `--dry`: lookups run, then the session is opened as in v1.
 - Two `api` tests in `tests/manual/api` need a live tenant: offline sessions add a default `pageSize`, and the fake server answers an unknown path with a JSON error instead of HTML.
 - `alarms assert count --fragmentType` is ignored: `alarms.ListOptions` has no fragment type (the alarm API does not document one).

@@ -36,6 +36,13 @@ commands are migrated, so `gen-cli` writes nothing by default. `-new` writes eve
 command of the selected specs, so limit it with `-spec` to the specification of the
 new command, else it writes all migrated commands again.
 
+The generated commands run on the go-c8y v2 `c8ystream` Runner: the pipeline flag drives
+the iteration (`r.InputFlag` or `r.Input`), the body is built with `r.Body`, and each item
+sends a request with `r.RequestCall` (`apiv2.RequestOptions`), with the path, query and header
+parameters read from the flags (`c8ystream.Resolver`). References which were looked up by name
+(devices, software, ...) are used as given: add the lookup by hand with the go-c8y service of
+the command, as the migrated commands do. They are a starting point for a new command.
+
 ## Byte-exact compatibility
 
 The port reproduces the PowerShell output **byte-for-byte** for all 365

@@ -13,7 +13,7 @@ The module only depends on [go-c8y](https://github.com/reubenmiller/go-c8y) and 
 | Function | Description |
 |---|---|
 | `extsdk.FromEnv()` | Reads the runtime context that c8y passes to extension commands: session, extension folder, path to c8y, dry run, and session mode. Returns `ErrNotRunByC8y` if the binary is not run through `c8y`. |
-| `ctx.Client()` | Creates a go-c8y client for the active session. |
+| `ctx.Client()` | Creates a go-c8y v2 client (`github.com/reubenmiller/go-c8y/v2/pkg/c8y/api`) for the active session. |
 | `extsdk.CheckError(err)` | Adds a hint to log in again when a request fails with 401. |
 | `extsdk.Print(v)` | Writes JSON to stdout. A slice is written as one JSON value per line. Use it for commands declared with `output: json`, so c8y can format the output (views, `--select`, `--output table`). |
 | `extsdk.Exec(ctx, args...)` | Runs a c8y command with the same c8y executable and session. |
