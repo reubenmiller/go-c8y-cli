@@ -582,7 +582,12 @@ func (r *Runner) producer(build Build) Producer {
 		job := Job(func(ctx context.Context) output.Seq {
 			// One approval scope per input item: an item whose call sends
 			// several requests (upload then update, ...) is confirmed once.
-			seq := r.adaptItem(call(apiv2.WithApprovalScope(ctx)), item)
+			// Deleting an id that does not exist is reported as a 404 error
+			// (exit code 4) and creating or assigning one that exists as a 409
+			// error, as go-c8y-cli always did. The SDK would skip both.
+			// Resolver lookups use runCtx and keep their own behavior.
+			callCtx := apiv2.WithConflictAsError(apiv2.WithNotFoundAsError(apiv2.WithApprovalScope(ctx)))
+			seq := r.adaptItem(call(callCtx), item)
 			if r.assert != nil {
 				seq = r.assert.filter(seq)
 			}

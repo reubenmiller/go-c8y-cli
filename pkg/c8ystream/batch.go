@@ -76,7 +76,7 @@ func (r *Runner) batchProducer(size int, item BatchItem, send BatchCall) Produce
 					return
 				}
 				// One approval scope per batch: a batch is one request
-				for doc, err := range r.adaptItem(call(apiv2.WithApprovalScope(ctx)), "") {
+				for doc, err := range r.adaptItem(call(apiv2.WithConflictAsError(apiv2.WithNotFoundAsError(apiv2.WithApprovalScope(ctx)))), "") {
 					if !yield(doc, err) {
 						return
 					}

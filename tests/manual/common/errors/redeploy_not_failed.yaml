@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+# The commands report a missing id (404, exit code 4) and an existing resource
+# (409, exit code 9) as errors, but a deploy which finds its application
+# already active, already subscribed or a binary already gone is not an error.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+
+tests:
+  It redeploys a hosted application whose version is already active:
+    command: |
+      portfile=$(mktemp)
+      python3 ./manual/common/errors/redeploy_server.py "$portfile" &
+      pid=$!
+      trap 'kill $pid 2>/dev/null' EXIT
+      for i in $(seq 1 50); do [ -s "$portfile" ] && break; sleep 0.1; done
+      export C8Y_HOST="http://127.0.0.1:$(cat "$portfile")"
+      c8y applications createHostedApplication --file "./manual/applications/createHostedApplication/app.zip" -o json
+    exit-code: 0
+    stdout:
+      json:
+        id: "5"
+
+  It redeploys a microservice which is already subscribed:
+    command: |
+      portfile=$(mktemp)
+      python3 ./manual/common/errors/redeploy_server.py "$portfile" &
+      pid=$!
+      trap 'kill $pid 2>/dev/null' EXIT
+      for i in $(seq 1 50); do [ -s "$portfile" ] && break; sleep 0.1; done
+      export C8Y_HOST="http://127.0.0.1:$(cat "$portfile")"
+      c8y microservices create --file manual/microservices/helloworld3-0.0.1-SNAPSHOT.zip --skipUpload -o json
+    exit-code: 0
+    stdout:
+      json:
+        id: "5"

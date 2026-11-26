@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+# Creating or assigning something which already exists is an error (409, exit
+# code 9). The SDK would treat it as a duplicate without an error. A small
+# server answers every request with 409 because the fake server only returns it
+# for few endpoints.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+
+tests:
+  It reports an existing external id as a 409 with exit code 9:
+    command: |
+      portfile=$(mktemp)
+      python3 ./manual/common/errors/conflict_server.py "$portfile" &
+      pid=$!
+      trap 'kill $pid 2>/dev/null' EXIT
+      for i in $(seq 1 50); do [ -s "$portfile" ] && break; sleep 0.1; done
+      export C8Y_HOST="http://127.0.0.1:$(cat "$portfile")"
+      c8y identity create --device 1 --name dup01
+    exit-code: 9
+    stderr:
+      contains:
+        - "409"
+
+  It reports a child which is already assigned as a 409 with exit code 9:
+    command: |
+      portfile=$(mktemp)
+      python3 ./manual/common/errors/conflict_server.py "$portfile" &
+      pid=$!
+      trap 'kill $pid 2>/dev/null' EXIT
+      for i in $(seq 1 50); do [ -s "$portfile" ] && break; sleep 0.1; done
+      export C8Y_HOST="http://127.0.0.1:$(cat "$portfile")"
+      c8y inventory children assign --id 1 --child 2 --childType device
+    exit-code: 9
