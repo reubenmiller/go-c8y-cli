@@ -130,7 +130,7 @@ tests:
         C8Y_SETTINGS_FILES_DENIEDPATHS: testdata/fileguard/sessions
     command: >
       c8y events list --device testdata/fileguard/sessions/ids.txt --dry
-    exit-code: 100
+    exit-code: 101
     stdout:
       not-contains:
         - /event/events

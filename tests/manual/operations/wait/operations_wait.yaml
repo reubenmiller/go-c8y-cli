@@ -55,10 +55,10 @@ tests:
     command: |
       echo "asdf8229d" |
         c8y operations wait --duration 10s
-    exit-code: 4
+    exit-code: 100
     stderr:
       contains:
-        - '404'
+        - 'No operation for'
     stdout:
       match-pattern: ^$
 

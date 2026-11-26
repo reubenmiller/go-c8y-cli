@@ -19,7 +19,7 @@ tests:
             | c8y util show --select path
         exit-code: 0
         stderr:
-            line-count: 3 # one per id, and the summary of the failed items
+            line-count: 2
             contains:
                 - "assertionError: managedObject - wanted: Found, got: NotFound, context: {ID:1}"
                 - "assertionError: managedObject - wanted: Found, got: NotFound, context: {ID:2}"

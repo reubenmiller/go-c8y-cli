@@ -158,7 +158,10 @@ func RunWait(cmd *cobra.Command, f *cmdutil.Factory, flag string, check Check) e
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		state := check(client, in, in.String(flag))
 		return func(ctx context.Context) any {
-			return c8ywait.Seq(c8ywait.Until(ctx, opts, state))
+			doc, err := c8ywait.Until(ctx, opts, state)
+			// A failed request ends the wait with a command error (exit code
+			// 100), not a server error, as in v1.
+			return c8ywait.Seq(doc, c8ystream.WaitRequestError(err))
 		}, nil
 	})
 }

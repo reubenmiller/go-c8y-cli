@@ -1,0 +1,164 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# The error output and exit codes of v2.59.0: the texts of the failed requests
+# and unresolved names, the Error Response block, the --withError JSON, and the
+# exit codes of the assert and wait commands.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+
+tests:
+  It exits 104 without a summary line when several assertions fail:
+    command: |
+      c8y inventory assert exists --id 0,1 --strict --attempts 1 --interval 1s
+    exit-code: 104
+    stderr:
+      line-count: 2
+      contains:
+        - "assertionError: managedObject - wanted: Found, got: NotFound, context: {ID:0}"
+        - "assertionError: managedObject - wanted: Found, got: NotFound, context: {ID:1}"
+      not-contains:
+        - jobs completed with
+
+  It exits 112 when one assertion fails:
+    command: |
+      c8y inventory assert exists --id 0 --strict --attempts 1 --interval 1s
+    exit-code: 112
+    stderr:
+      line-count: 1
+
+  It exits 104 without a summary line when the fragments of several devices do not match:
+    command: |
+      c8y devices assert fragments --device 0,1 --fragments c8y_IsDevice --strict --attempts 1 --interval 1s
+    exit-code: 104
+    stderr:
+      not-contains:
+        - jobs completed with
+
+  It still prints the summary line when other commands fail for several ids:
+    command: |
+      printf "0\n1\n" | c8y events delete
+    exit-code: 104
+    stderr:
+      contains:
+        - "jobs completed with 2 errors"
+
+  It exits 100 with a command error when waiting for an operation which does not exist:
+    command: |
+      echo "asdf8229d" | c8y operations wait --duration 10s
+    exit-code: 100
+    stdout:
+      match-pattern: ^$
+    stderr:
+      match-pattern: "commandError: GET http.+/devicecontrol/operations/asdf8229d: 404 .*No operation for id"
+      not-contains:
+        - serverError
+
+  It exits 100 with a command error when waiting for a managed object which does not exist:
+    command: |
+      c8y inventory wait --id 999999 --fragments c8y_IsDevice --duration 5s
+    exit-code: 100
+    stderr:
+      contains:
+        - "commandError: GET http"
+
+  It reports an application which has no bootstrap user as a user error:
+    command: |
+      c8y microservices serviceusers get --id 999999
+    exit-code: 101
+    stderr:
+      match-pattern: "commandError: GET http.+/application/applications/999999/bootstrapUser: 404 "
+
+  It reports a name which is not found as a command error with exit code 4:
+    command: |
+      c8y devices get --id this-device-does-not-exist-parity
+    exit-code: 4
+    stderr:
+      contains:
+        - "commandError: referenceByName: no matching items found. name=this-device-does-not-exist-parity"
+        - "::StatusCode=404"
+      not-contains:
+        - serverError
+
+  It reports a source device name which is not found as a command error with exit code 4:
+    command: |
+      c8y events list --device this-device-does-not-exist-parity
+    exit-code: 4
+    stderr:
+      contains:
+        - "commandError: referenceByName: no matching items found. name=this-device-does-not-exist-parity"
+
+  It reports an application name which is not found as a command error with exit code 4:
+    command: |
+      c8y applications get --id this-app-does-not-exist-parity
+    exit-code: 4
+    stderr:
+      contains:
+        - "commandError: referenceByName: no matching items found. name=this-app-does-not-exist-parity"
+
+  It reports a microservice name which is not found as a command error with exit code 4:
+    command: |
+      c8y microservices delete --id this-microservice-does-not-exist-parity
+    exit-code: 4
+    stderr:
+      contains:
+        - "commandError: referenceByName: no matching items found. name=this-microservice-does-not-exist-parity"
+
+  It reports a user group name which is not found as a command error with exit code 4:
+    command: |
+      c8y usergroups get --id this-group-does-not-exist-parity
+    exit-code: 4
+    stderr:
+      contains:
+        - "commandError: referenceByName: no matching items found. name=this-group-does-not-exist-parity"
+
+  It prints the server message, the request and the Error Response block by default:
+    command: |
+      c8y devices get --id 999999
+    exit-code: 4
+    stdout:
+      match-pattern: ^$
+    stderr:
+      contains:
+        - "serverError: Finding device data from database failed : No managedObject for id '999999'! GET http"
+        - "999999: 404 inventory/Not Found Finding device data"
+        - "Error Response"
+        - '"error": "inventory/Not Found"'
+      not-contains:
+        - "[404]"
+        - "https://cumulocity.com/api/core/ ["
+
+  It prints only the JSON of the error with --withError:
+    command: |
+      c8y devices get --id 999999 --withError
+    exit-code: 4
+    stdout:
+      json:
+        errorType: serverError
+        message: "Finding device data from database failed : No managedObject for id '999999'!"
+        statusCode: "404"
+        exitCode: "4"
+        url: /inventory/managedObjects/999999
+        c8yResponse.error: inventory/Not Found
+        error.error: inventory/Not Found
+        error.info: https://cumulocity.com/api/core/
+        error.message: "Finding device data from database failed : No managedObject for id '999999'!"
+      not-contains:
+        - MessageRaw
+        - ReceivedAt
+    stderr:
+      contains:
+        - "serverError: Finding device data"
+      not-contains:
+        - "Error Response"
+
+  It reports a failed request of an assert command as a plain command error:
+    command: |
+      c8y events assert count --device 0,1
+    exit-code: 104
+    stderr:
+      line-count: 2
+      match-pattern: "commandError: GET http.+/inventory/managedObjects/0: 404 inventory/Not Found"
+      not-contains:
+        - "Error Response"
+        - serverError

@@ -18,7 +18,7 @@ tests:
             | c8y util show --select path
         exit-code: 0
         stderr:
-            line-count: 3 # one per id, and the summary of the failed items
+            line-count: 2
             contains:
                 - "assertionError: managedObjectFragments - wanted: [name], got: [], context: {ID:1}"
                 - "assertionError: managedObjectFragments - wanted: [name], got: [], context: {ID:2}"
