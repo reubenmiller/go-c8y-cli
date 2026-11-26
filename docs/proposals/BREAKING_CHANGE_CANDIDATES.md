@@ -146,10 +146,10 @@ Deprecated in go-c8y v2 and kept as aliases: `Client.ApplicationVersions`, `Devi
 
 ### 17. `c8y api` with an absolute url
 
-- **Today**: a piped absolute url (for example `https://test.com/path`, or a self link from a response) is reduced to its path and query, and the request goes to the session's host (or `--host`), the same as v2. The host of the url is dropped without a message, so `echo https://test.com/path | c8y api` calls the session's tenant, not test.com.
+- **Today**: v2.59.0 sends the request to the host of an absolute url, given as an argument or piped (for example a self link from a response), with the session's credentials, and logs the warning "Parsing url in request". v3 does not (see Part 2): it sends a piped absolute url to the session's host (or `--host`) without a message, and requests an absolute url given as an argument as the path `/http://...`, which fails with 404.
 - **Proposed**: honor the host of an absolute url, and send the session's credentials only when it is the session's own host (never to another host). Alternatively, fail with a clear error when the host differs from the session's.
-- **Breaks**: scripts that pipe self links from another tenant or an old host name and rely on them being redirected to the session's host (honoring the host would call the other host; failing would be an error).
-- **Ways to ship**: an opt-in flag first (for example `--followHost`), or a warning when the host differs, then the stricter behavior in a major release.
+- **Breaks**: scripts that call another host through an absolute url and rely on the session's credentials being sent there (they would get no credentials, or an error).
+- **Ways to ship**: restore the v2.59.0 behavior on v3 first. Then a warning when the host differs, and the stricter behavior in a major release.
 - **Source**: `pkg/cmd/api` `requestURL`; CLI#824.
 
 ### 18. Create commands are not idempotent
@@ -187,6 +187,7 @@ These changes are on the v3 branch today. A v2 CLI user would notice them. Each 
 - **Cache**: `C8Y_SETTINGS_CACHE_METHODS` is supported; responses with status 300 or above are not cached.
 - **Assert commands**: `--strict` with several ids prints one line per id plus a summary (three lines instead of two); the timeout message lost its ", context" suffix; `--not` on an existing object waits the full duration.
 - **`c8y api`**: HTTP errors become item errors with the right exit code; HTML error bodies are shown; `--withTotalPages`, `--withTotalElements` and `--raw` print the whole response; a URL with its own `pageSize` no longer gets a second one (CLI#797).
+- **`c8y api` with an absolute url**: v2.59.0 sends the request to the host of the url. v3 sends a piped absolute url to the session's host (or `--host`), and an absolute url given as an argument fails with 404 because it is requested as the path `/http://...`. The argument form is a regression; see topic 17 for the rest.
 - **`c8y api` with its own `pageSize`**: for `c8y api /inventory/managedObjects?pageSize=7&type=a`, v2.59.0 sends `pageSize=20` (the default page size, or `--pageSize`, overrides the one in the url), while v3 keeps the `pageSize=7` of the url. Scripts that relied on the override get another page size.
 - **Logging**: notification2 SDK logs go to stderr at warning level (more with `--verbose`/`--debug`); remote access logs only with `--verbose`.
 - **Session handling**: the tenant is taken from the token when possible, so the first command of a session no longer makes an extra request (CLI#804).
