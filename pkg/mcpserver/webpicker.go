@@ -847,7 +847,7 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
 {{end}}
 {{define "modes"}}{{$i := .Index}}
   <div class="modes" role="radiogroup" aria-label="Mode of the agent for {{.Choice.Name}}">
-    {{range .ModeOptions}}<input type="radio" class="m-{{.Name}}" id="m{{$i}}-{{.Name}}" name="mode-{{$i}}" value="{{.Name}}"{{if .Checked}} checked{{end}}{{if .Disabled}} disabled{{end}} aria-keyshortcuts="{{if eq .Name "prod"}}P 1{{else if eq .Name "qual"}}Q 2{{else}}D 3{{end}}"><label for="m{{$i}}-{{.Name}}" class="seg{{if .Override}} override{{end}}" title="{{if .Disabled}}Above the maximum mode of the MCP server{{else if .Override}}Override: above the session's own mode{{else}}Agent can {{.Info}}{{end}}">{{.Name}}</label>
+    {{range .ModeOptions}}<input type="radio" class="m-{{.Name}}" id="m{{$i}}-{{.Name}}" name="mode-{{$i}}" value="{{.Name}}"{{if .Checked}} checked{{end}}{{if .Disabled}} disabled{{end}} aria-keyshortcuts="{{if eq .Name "prod"}}1{{else if eq .Name "qual"}}2{{else}}3{{end}}"><label for="m{{$i}}-{{.Name}}" class="seg{{if .Override}} override{{end}}" title="{{if .Disabled}}Above the maximum mode of the MCP server{{else if .Override}}Override: above the session's own mode{{else}}Agent can {{.Info}}{{end}}">{{.Name}}</label>
     {{end}}
     {{range .ModeOptions}}<span class="can can-{{.Name}}{{if .Override}} override{{end}}">Agent can {{.Info}}{{if .Override}}. Override: above the session's own mode{{end}}</span>
     {{end}}
@@ -969,9 +969,9 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   <dl>
     <dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd>Move between the sessions. <kbd>↑</kbd> on the first session goes back to the filter.</dd>
     <dt class="key-modes"><kbd>←</kbd><kbd>→</kbd></dt><dd class="key-modes">Lower or raise the mode of the focused session. It stops at prod and at the highest allowed mode.</dd>
-    <dt class="key-modes"><kbd>P</kbd> or <kbd>1</kbd></dt><dd class="key-modes">prod: the agent can only read data</dd>
-    <dt class="key-modes"><kbd>Q</kbd> or <kbd>2</kbd></dt><dd class="key-modes">qual: the agent can also create and update</dd>
-    <dt class="key-modes"><kbd>D</kbd> or <kbd>3</kbd></dt><dd class="key-modes">dev: the agent can also delete</dd>
+    <dt class="key-modes"><kbd>1</kbd></dt><dd class="key-modes">prod: the agent can only read data</dd>
+    <dt class="key-modes"><kbd>2</kbd></dt><dd class="key-modes">qual: the agent can also create and update</dd>
+    <dt class="key-modes"><kbd>3</kbd></dt><dd class="key-modes">dev: the agent can also delete</dd>
     <dt><kbd>Enter</kbd></dt><dd>Select the focused session with the mode shown for it. In the filter, select the first match.</dd>
     <dt>Typing</dt><dd>Filter the sessions by name, host, tenant or user.</dd>
     <dt><kbd>?</kbd></dt><dd>Show this help. <kbd>Esc</kbd> closes it.</dd>
@@ -1008,13 +1008,13 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
       document.getElementById("empty").style.display = shown ? "none" : "block";
     });
   }
-  // keyboard: up/down move between the sessions, left/right, p/q/d or 1/2/3 set the mode
+  // keyboard: up/down move between the sessions, left/right or 1/2/3 set the mode
   // of the focused session, Enter selects it, "?" shows the help, and typing filters by name.
   // The page works without it
   const list = document.getElementById("sessions");
   if (list) {
     const buttons = () => Array.from(list.querySelectorAll("li.item:not([hidden]) button.session"));
-    const modeKeys = { p: "prod", 1: "prod", q: "qual", 2: "qual", d: "dev", 3: "dev" };
+    const modeKeys = { 1: "prod", 2: "qual", 3: "dev" };
     // the shortcuts only work with the script, so their hint is shown here
     const help = document.getElementById("help");
     const keys = document.getElementById("keys");
@@ -1080,7 +1080,7 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
         return;
       }
       if (e.key.length !== 1 || target === filter) return;
-      const mode = modeKeys[e.key.toLowerCase()];
+      const mode = modeKeys[e.key];
       if (item && mode) {
         const radio = item.querySelector('.modes input[value="' + mode + '"]');
         if (radio && !radio.disabled) {

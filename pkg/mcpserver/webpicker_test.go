@@ -470,9 +470,9 @@ func TestWebPickerShowsKeyboardShortcuts(t *testing.T) {
 		`Keyboard shortcuts`,
 		`<code>mode dev</code>`,
 		// shortcuts announced by screen readers
-		`value="prod" checked aria-keyshortcuts="P 1"`,
-		`value="qual" aria-keyshortcuts="Q 2"`,
-		`value="dev" disabled aria-keyshortcuts="D 3"`,
+		`value="prod" checked aria-keyshortcuts="1"`,
+		`value="qual" aria-keyshortcuts="2"`,
+		`value="dev" disabled aria-keyshortcuts="3"`,
 		`button class="session" type="submit" name="session" value="0" aria-keyshortcuts="Enter"`,
 	} {
 		if !strings.Contains(body, want) {

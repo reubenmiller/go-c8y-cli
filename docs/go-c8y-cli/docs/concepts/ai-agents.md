@@ -26,7 +26,7 @@ Your MCP client starts `c8y mcp serve` and communicates with it over stdin and s
     |---|---|
     | `↑` `↓` | Move between the sessions. `↑` on the first session goes back to the filter |
     | `←` `→` | Lower or raise the mode of the focused session. It stops at prod and at the highest allowed mode |
-    | `P` `Q` `D` (or `1` `2` `3`) | Set the mode of the focused session to prod, qual or dev |
+    | `1` `2` `3` | Set the mode of the focused session to prod, qual or dev |
     | `Enter` | Select the focused session with the mode shown for it. In the filter, select the first match |
     | Typing | Filter the sessions by name, host, tenant or user |
     | `?` | Show the shortcuts. `Esc` closes them |
