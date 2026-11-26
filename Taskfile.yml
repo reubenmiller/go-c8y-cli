@@ -408,7 +408,7 @@ tasks:
           devicegroups devicemanagement deviceprofiles deviceregistration devices events fileguard firmware identity \
           measurements microservices operations pipeline retentionrules sessions settings smartgroups software template \
           tenantoptions tenants usergroups users util version \
-          common/errors/errors_server.yaml common/errors/delete_not_found.yaml common/errors/conflict_not_ignored.yaml common/errors/redeploy_not_failed.yaml inventory/wait.yaml inventory/assert inventory/parents inventory/find inventory/update inventory/additions \
+          common/errors/errors_server.yaml common/errors/delete_not_found.yaml common/errors/conflict_not_ignored.yaml common/errors/redeploy_not_failed.yaml inventory/wait.yaml inventory/assert inventory/parents inventory/find inventory/update inventory/additions inventory/create common/select/select.yaml \
           ui notification2/subscribe.yaml; do
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
