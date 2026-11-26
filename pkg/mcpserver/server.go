@@ -64,8 +64,15 @@ type Server struct {
 	// MCP client can't answer it
 	ConfirmDeviceShell func(ctx context.Context, session SessionInfo, command string) error
 
+	// Logf optional function which logs mode changes
+	Logf func(format string, args ...any)
+
 	mu        sync.RWMutex
 	approvals approvalTokens
+	// sessionKey identifies the active session (file path or provider key)
+	sessionKey string
+	// modeOverrides modes chosen by the user, by session key. They only live in memory
+	modeOverrides map[string]config.SessionMode
 }
 
 // SetSession changes the session used by the commands, e.g. when the user switches
@@ -73,10 +80,90 @@ type Server struct {
 // using the previous session, so a command always runs against the tenant it was
 // approved for.
 func (s *Server) SetSession(info SessionInfo, runner *Runner) {
+	s.SetSessionKey(info.SessionName, info, runner)
+}
+
+// SetSessionKey is like SetSession for the session identified by key (the path of the
+// session file, or the key of a provider session). The mode override of the session
+// (if any) is applied to the runner.
+func (s *Server) SetSessionKey(key string, info SessionInfo, runner *Runner) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.sessionKey = key
 	s.Session = info
+	if _, ok := s.modeOverrides[key]; ok && runner != nil {
+		if mode := s.resolveLocked(key, info.SessionMode); runner.Mode != mode {
+			runner = runner.WithMode(mode)
+		}
+	}
 	s.Runner = runner
+}
+
+func (s *Server) resolveLocked(key string, sessionMode string) config.SessionMode {
+	override, ok := s.modeOverrides[key]
+	if !ok {
+		override = config.SessionModeUnset
+	}
+	return ResolveMode(s.Policy.Ceiling(), config.SessionModeUnset.FromString(sessionMode, false), override)
+}
+
+// EffectiveMode returns the mode the agent gets in a session: the ceiling, limited by the
+// override of the user, or the mode of the session
+func (s *Server) EffectiveMode(key string, sessionMode string) config.SessionMode {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.resolveLocked(key, sessionMode)
+}
+
+// ModeOverride returns the mode the user chose for a session, if any
+func (s *Server) ModeOverride(key string) (config.SessionMode, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	mode, ok := s.modeOverrides[key]
+	return mode, ok
+}
+
+// SetMode changes the mode of the active session without a new login. SessionModeUnset
+// resets it to the session's own mode. The mode can't exceed the ceiling. via names the
+// source of the change in the log. It must only be called for the user's choice.
+func (s *Server) SetMode(mode config.SessionMode, via string) (ModeChange, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	key := s.sessionKey
+	if key == "" || s.Runner == nil {
+		return ModeChange{}, fmt.Errorf("no session is selected")
+	}
+	if mode != config.SessionModeUnset {
+		if mode > config.SessionModeDev {
+			return ModeChange{}, fmt.Errorf("invalid mode %q", mode)
+		}
+		if ceiling := s.Policy.Ceiling(); mode > ceiling {
+			return ModeChange{}, fmt.Errorf("mode %s is above the maximum mode of the MCP server (%s)", mode, ceiling)
+		}
+	}
+	from := s.resolveLocked(key, s.Session.SessionMode)
+	change := ModeChange{
+		Session:     s.Session.SessionName,
+		From:        from,
+		Source:      ModeSourceOverride,
+		SessionMode: SessionDefaultMode(config.SessionModeUnset.FromString(s.Session.SessionMode, false)),
+	}
+	if mode == config.SessionModeUnset {
+		delete(s.modeOverrides, key)
+		change.Source = ModeSourceSession
+	} else {
+		if s.modeOverrides == nil {
+			s.modeOverrides = map[string]config.SessionMode{}
+		}
+		s.modeOverrides[key] = mode
+	}
+	change.To = s.resolveLocked(key, s.Session.SessionMode)
+	// new tool calls use the new mode, calls which have started keep theirs
+	s.Runner = s.Runner.WithMode(change.To)
+	if s.Logf != nil {
+		s.Logf("mode override: %s -> %s (session %s, via %s)", from, change.To, change.Session, via)
+	}
+	return change, nil
 }
 
 // Active returns the session and runner used for new tool calls
@@ -206,6 +293,13 @@ func (s *Server) New() *mcp.Server {
 	return server
 }
 
+func modeRejection(mode config.SessionMode) string {
+	if mode == config.SessionModeProduction {
+		return "read-only mode"
+	}
+	return "mode too low"
+}
+
 func errorResult(format string, a ...any) *mcp.CallToolResult {
 	return &mcp.CallToolResult{
 		IsError: true,
@@ -245,11 +339,20 @@ func (s *Server) handleSession(ctx context.Context, req *mcp.CallToolRequest, _ 
 		return res, nil, nil
 	}
 	session, runner := s.Active()
+	modeSource := ModeSourceSession
+	s.mu.RLock()
+	if _, ok := s.modeOverrides[s.sessionKey]; ok {
+		modeSource = ModeSourceOverride
+	}
+	s.mu.RUnlock()
 	info := map[string]any{
-		"session":  session,
-		"mode":     runner.Mode.String(),
-		"modeInfo": runner.Mode.Description(),
-		"approval": string(s.Policy.Approval),
+		"session":     session,
+		"mode":        runner.Mode.String(),
+		"modeInfo":    runner.Mode.Description(),
+		"modeSource":  modeSource,
+		"sessionMode": SessionDefaultMode(config.SessionModeUnset.FromString(session.SessionMode, false)).String(),
+		"maxMode":     s.Policy.Ceiling().String(),
+		"approval":    string(s.Policy.Approval),
 		"deviceShell": map[string]any{
 			"enabled":           s.Policy.AllowDeviceShell,
 			"confirmedByServer": s.ConfirmDeviceShell != nil,
@@ -311,9 +414,9 @@ func (s *Server) handleWrite(ctx context.Context, req *mcp.CallToolRequest, in C
 		return errorResult("running commands on devices is disabled. The user can enable it by starting the MCP server with --allowDeviceShell"), nil, nil
 	}
 	if !plan.ReadOnly() {
-		if runner.Mode == config.SessionModeProduction {
-			s.logCall(ToolWrite, in.Command, "rejected: read-only mode")
-			return errorResult("the MCP server is running in read-only mode (prod) so write commands are disabled. Ask the user to change the mode if this is needed"), nil, nil
+		if err := CheckMode(runner.Mode, RequiredMode(plan)); err != nil {
+			s.logCall(ToolWrite, in.Command, "rejected: "+modeRejection(runner.Mode))
+			return errorResult("%s", err), nil, nil
 		}
 		inputRequest, err := s.approve(ctx, req, session, runner, plan, in)
 		if err != nil {

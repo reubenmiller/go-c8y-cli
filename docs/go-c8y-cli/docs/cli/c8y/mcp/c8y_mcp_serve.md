@@ -36,10 +36,12 @@ You control what the agent can do:
 * Session: selected by you in the browser. The agent can't switch the session, host or
   credentials. Commands only receive the token (or the password for basic auth sessions), never
   the passphrase.
-* Mode (prod, qual, dev): the maximum mode the agent can use. By default, the agent uses the mode
-  of the session (settings.session.mode), and prod (read only) if the session has none. --mode can
-  only narrow the session's own mode, never widen it, also after switching the session. Read-only
-  commands always run in prod (read-only) mode.
+* Mode (prod, qual, dev): by default, the agent uses the mode of the session (settings.session.mode),
+  and prod (read only) if the session has none. --mode is the maximum the agent can ever use, also
+  after switching the session (dev if not set). You can raise the mode of the current session up to
+  that maximum in the session picker or with the mode prompt, which lasts until the server stops and
+  is never saved in the session file. Set --mode to the session's mode to keep it as the maximum.
+  The agent can't change the mode. Read-only commands always run in prod (read-only) mode.
 * Allow and deny lists: which commands the agent can use, e.g. "devices", "inventory *", "* delete".
 * Local files: commands can't read files in the session home folder or the session file (e.g. with
   --template, --data or --file), so the agent can't read secrets from session files. Use --denyPath
@@ -100,7 +102,7 @@ Use credentials from environment variables (e.g. for CI)
       --denyPath stringArray              Local file or folder the commands can't read, e.g. ~/.ssh. The session home folder and the session file are always denied. Can be used multiple times
       --maxOutput int                     Maximum number of output bytes returned to the agent per command. Default: 100000
       --maxTimeout duration               Maximum timeout the agent can request per command. Default: 10m
-      --mode string                       Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: the session's mode (prod if the session has none)
+      --mode string                       Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: dev. The agent uses the session's mode (prod if none), which the user can raise up to this maximum in the session picker or with the mode prompt
       --noDefaultDeny[=true|false]        Don't include the default deny list: mcp, sessions, settings, cli, alias, completion, extensions, microservices getBootstrapUser, deviceregistration getCredentials, remoteaccess connect run, remoteaccess server
       --noNotify[=true|false]             Don't show a desktop notification when the session picker opens in the browser
       --policy string                     Policy file (json, yaml or toml). Flags override the values in the file

@@ -32,6 +32,7 @@ func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcp
 	server.OnCall = func(tool string, command string, outcome string) {
 		log.Infof("%s: %s (%s)", tool, command, outcome)
 	}
+	server.Logf = log.Infof
 	if n.confirmDeviceShell {
 		// stdin is used by the MCP transport, so only a dialog can be used
 		confirmer := &mcpserver.DeviceShellConfirmer{}
@@ -41,15 +42,15 @@ func (n *CmdServe) runStdio(ctx context.Context, cfg *config.Config, server *mcp
 	// Session only defined by environment variables (e.g. CI). The commands use
 	// the server's environment
 	if !isFile(sessionFile) && host != "" {
-		sessionMode, effectiveMode := capMode(log, server.Policy.Mode, sessionModeName)
-		server.Session = mcpserver.SessionInfo{
+		sessionMode, effectiveMode := capMode(server, sessionFile, sessionModeName)
+		info := mcpserver.SessionInfo{
 			Host:        host,
 			Tenant:      cfg.GetTenant(),
 			Username:    cfg.GetUsername(),
 			SessionName: mcpserver.SessionKey(sessionFile),
 			SessionMode: sessionMode.String(),
 		}
-		server.Runner = &mcpserver.Runner{Executable: executable, SessionFile: sessionFile, Mode: effectiveMode, DeniedPaths: deniedPaths(cfg, server.Policy, sessionFile), SSHFallbackUser: sshFallbackUser(cfg)}
+		server.SetSessionKey(sessionFile, info, &mcpserver.Runner{Executable: executable, SessionFile: sessionFile, Mode: effectiveMode, DeniedPaths: deniedPaths(cfg, server.Policy, sessionFile), SSHFallbackUser: sshFallbackUser(cfg)})
 		log.Infof("Starting MCP server (stdio). host=%s, mode=%s, approval=%s", host, effectiveMode.String(), server.Policy.Approval)
 		return runStdioServer(ctx, server)
 	}
@@ -198,7 +199,7 @@ func (s *stdioSessions) newSession(sessionFile string) (*pendingSession, *mcpser
 	if details.host == "" {
 		return nil, nil, cmderrors.NewUserError(fmt.Sprintf("the session does not have a host: %s", sessionFile))
 	}
-	sessionMode, effectiveMode := capMode(s.log, s.server.Policy.Mode, details.mode)
+	sessionMode, effectiveMode := capMode(s.server, sessionFile, details.mode)
 
 	tempDir, err := os.MkdirTemp(s.tempDir, "session-")
 	if err != nil {
@@ -246,7 +247,7 @@ func (s *stdioSessions) newProviderSession(choice mcpserver.SessionChoice) (*pen
 	if !ok {
 		return nil, nil, fmt.Errorf("unknown session %s of session provider %s", choice.URI, choice.Provider)
 	}
-	sessionMode, effectiveMode := capMode(s.log, s.server.Policy.Mode, listed.Mode)
+	sessionMode, effectiveMode := capMode(s.server, key, listed.Mode)
 
 	login := &mcpserver.InteractiveLogin{
 		Executable:  s.executable,
@@ -283,7 +284,7 @@ func (s *stdioSessions) newProviderSession(choice mcpserver.SessionChoice) (*pen
 
 // use makes the session the one used by new commands
 func (s *stdioSessions) use(session *pendingSession) {
-	s.server.SetSession(session.info, session.runner)
+	s.server.SetSessionKey(session.key, session.info, session.runner)
 	s.current = session.key
 	s.startup = ""
 }
@@ -393,7 +394,7 @@ func (s *stdioSessions) checkPassphrase(sessionFile string, passphrase string) e
 // choice returns the details of a session shown in the picker
 func (s *stdioSessions) choice(sessionFile string) mcpserver.SessionChoice {
 	details := readSessionDetails(sessionFile)
-	mode := mcpserver.CapMode(s.server.Policy.Mode, config.SessionModeUnset.FromString(details.mode, false))
+	mode := s.server.EffectiveMode(sessionFile, details.mode)
 	return mcpserver.SessionChoice{
 		Path:            sessionFile,
 		Name:            mcpserver.SessionKey(sessionFile),
@@ -525,7 +526,7 @@ func (s *stdioSessions) providerChoices(ctx context.Context) []sourceChoices {
 		for _, session := range r.sessions {
 			key := providerKey(provider.Ref, session.SessionURI)
 			listed[key] = session
-			mode := mcpserver.CapMode(s.server.Policy.Mode, config.SessionModeUnset.FromString(session.Mode, false))
+			mode := s.server.EffectiveMode(key, session.Mode)
 			out[i].choices = append(out[i].choices, mcpserver.SessionChoice{
 				Name:      session.DisplayName(),
 				Host:      strings.TrimRight(session.Host, "/"),
