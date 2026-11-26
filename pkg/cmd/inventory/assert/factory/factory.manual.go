@@ -83,6 +83,9 @@ func New(cmd *cobra.Command, f *cmdutil.Factory, a Assert) *cobra.Command {
 		if err != nil {
 			return err
 		}
+		// before InputFlag: a denied file of an assert command is an
+		// unexpected error (exit code 100), as in v1
+		r.Assert(strict)
 		if err := r.InputFlag(flag); err != nil {
 			return err
 		}
@@ -90,7 +93,6 @@ func New(cmd *cobra.Command, f *cmdutil.Factory, a Assert) *cobra.Command {
 		if err != nil {
 			return err
 		}
-		r.Assert(strict)
 		return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 			ref := in.String(flag)
 			if a.Target != Tenant {

@@ -69,6 +69,26 @@ tests:
     stderr:
       match-pattern: "commandError: GET http.+/application/applications/999999/bootstrapUser: 404 "
 
+  It keeps the server error of the generated bootstrap user command:
+    command: |
+      c8y microservices getBootstrapUser --id 999999
+    exit-code: 4
+    stderr:
+      match-pattern: "serverError: Not found GET http.+/application/applications/999999/bootstrapUser: 404 "
+      not-contains:
+        - commandError
+
+  It reports a group which is not found by usergroups getByName as a server error:
+    command: |
+      c8y usergroups getByName --name this-group-does-not-exist-parity
+    exit-code: 4
+    stderr:
+      contains:
+        - "serverError: Not found GET http"
+        - "Error Response"
+      not-contains:
+        - referenceByName
+
   It reports a name which is not found as a command error with exit code 4:
     command: |
       c8y devices get --id this-device-does-not-exist-parity

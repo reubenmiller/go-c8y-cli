@@ -74,6 +74,9 @@ type Runner struct {
 	assert       *assertion      // set by Assert; nil for other commands
 	filters      []string        // filters of the command itself (see Filter)
 
+	userErrorPath    string // see UserErrorRequests
+	directNameLookup bool   // see DirectNameLookup
+
 	viewDefinition  *dataview.Definition // the view applied to the output; its column widths apply to tables
 	consoleRenderer *consoleRenderer     // the table/json renderer; nil for csv/tsv
 	index           int64
@@ -223,9 +226,10 @@ func (r *Runner) InputFlag(name string) error {
 	pipeOpts.Disabled = pipeOpts.Disabled || r.stdinDisabled()
 	iter, err := flags.NewFlagWithPipeIterator(r.Cmd, pipeOpts, true)
 	if err != nil {
-		if name == "device" && errors.Is(err, fileguard.ErrDenied) && !devicePathCommand(r.Cmd) {
+		if name == "device" && errors.Is(err, fileguard.ErrDenied) && r.assert == nil && !devicePathCommand(r.Cmd) {
 			// A denied file of the source device filter is a user error (exit
-			// code 101), unlike a denied file of a path argument (--id), as in v1.
+			// code 101), unlike a denied file of a path argument (--id) or of an
+			// assert command, as in v1.
 			return cmderrors.NewUserError(err)
 		}
 		return err

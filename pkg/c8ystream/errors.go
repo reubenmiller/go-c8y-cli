@@ -53,7 +53,7 @@ func (r *Runner) toServerError(err error) error {
 
 	// A name that the SDK could not resolve to an id is reported as v1 did:
 	// "referenceByName: no matching items found" (commandError, exit code 4).
-	if name, ok := unresolvedName(apiErr); ok {
+	if name, ok := unresolvedName(apiErr, r.directNameLookup); ok {
 		notFound := cmderrors.NewUserErrorWithExitCode(
 			cmderrors.ExitNotFound404,
 			cmderrors.NewNoMatchesFoundError(name),
@@ -83,9 +83,10 @@ func (r *Runner) toServerError(err error) error {
 		url = apiErr.Response.Request.URL.Path
 	}
 
-	// Looking up the bootstrap user of an application (microservices serviceusers
-	// get) was a user error (exit code 101) in v1, whatever the status.
-	if detail != nil && strings.HasSuffix(url, "/bootstrapUser") {
+	// A failed request the command marked with UserErrorRequests (e.g. the
+	// bootstrap user of microservices serviceusers get) is a user error (exit
+	// code 101), whatever the status, as in v1.
+	if detail != nil && r.userErrorPath != "" && strings.HasSuffix(url, r.userErrorPath) {
 		return cmderrors.NewUserError(detail)
 	}
 
@@ -113,6 +114,22 @@ func (r *Runner) toServerError(err error) error {
 		WithRawMessage:  !r.Config.WithError(),
 		IO:              r.Factory.IOStreams,
 	}
+}
+
+// UserErrorRequests makes a failed request whose url path ends with
+// pathSuffix a user error (commandError, exit code 101) in the v1 format
+// "METHOD url: status type message". v1 did this for a few hand-written
+// commands only (e.g. the bootstrap user lookup of microservices serviceusers
+// get); the generated command of the same endpoint kept the server error.
+func (r *Runner) UserErrorRequests(pathSuffix string) {
+	r.userErrorPath = pathSuffix
+}
+
+// DirectNameLookup marks a command whose own request is a lookup by name
+// (usergroups getByName): its 404 is a server error as in v1, not an
+// unresolved name reference.
+func (r *Runner) DirectNameLookup() {
+	r.directNameLookup = true
 }
 
 // WaitRequestError turns the HTTP error that ended a wait command (operations
@@ -206,8 +223,9 @@ var nameLookupRe = regexp.MustCompile(`not found with name[:=]\s*(.+?)(?:,\s*\w+
 
 // unresolvedName returns the name of a lookup by name that found nothing: the
 // SDK's "<thing> not found with name: <name>", or the 404 of the group name
-// endpoint. A 404 of an id is a normal server error.
-func unresolvedName(apiErr *core.Error) (string, bool) {
+// endpoint (unless that request is the command itself, see DirectNameLookup).
+// A 404 of an id is a normal server error.
+func unresolvedName(apiErr *core.Error, directNameLookup bool) (string, bool) {
 	if apiErr.StatusCode() != http.StatusNotFound {
 		return "", false
 	}
@@ -217,7 +235,7 @@ func unresolvedName(apiErr *core.Error) (string, bool) {
 		}
 		return "", false
 	}
-	if req := apiErr.Response.Request; req != nil && req.URL != nil {
+	if req := apiErr.Response.Request; !directNameLookup && req != nil && req.URL != nil {
 		if _, name, ok := strings.Cut(req.URL.Path, "/groupByName/"); ok && name != "" {
 			return name, true
 		}

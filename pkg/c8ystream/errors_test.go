@@ -101,11 +101,22 @@ func TestToServerError_unresolvedName(t *testing.T) {
 	if ce := r.toServerError(serverErr("GET", "http://host/inventory/managedObjects/1", 404, notFoundBody)).(cmderrors.CommandError); ce.ErrorType != cmderrors.ErrTypeServer {
 		t.Errorf("a 404 of an id must stay a server error, got %s", ce.ErrorType)
 	}
+	// the 404 of usergroups getByName (the command's own request) is a server error
+	r.DirectNameLookup()
+	if ce := r.toServerError(serverErr("GET", "http://host/user/t1/groupByName/nogroup", 404, `{"error":"user/group/notFound","message":"Not found"}`)).(cmderrors.CommandError); ce.ErrorType != cmderrors.ErrTypeServer || ce.ExitCode != cmderrors.ExitNotFound404 {
+		t.Errorf("a direct group name lookup must stay a server error, got %s exit=%d", ce.ErrorType, ce.ExitCode)
+	}
 }
 
 func TestToServerError_bootstrapUserIsUserError(t *testing.T) {
 	r := newErrorRunner(false)
-	got := r.toServerError(serverErr("GET", "http://host/application/applications/9/bootstrapUser", 404, `{"error":"application/notFound","message":"Not found"}`))
+	in := serverErr("GET", "http://host/application/applications/9/bootstrapUser", 404, `{"error":"application/notFound","message":"Not found"}`)
+	// without UserErrorRequests (microservices getBootstrapUser) it is a server error
+	if ce := r.toServerError(in).(cmderrors.CommandError); ce.ErrorType != cmderrors.ErrTypeServer || ce.ExitCode != cmderrors.ExitNotFound404 {
+		t.Errorf("got exit=%d type=%s, want 4 serverError", ce.ExitCode, ce.ErrorType)
+	}
+	r.UserErrorRequests("/bootstrapUser")
+	got := r.toServerError(in)
 	ce := got.(cmderrors.CommandError)
 	if ce.ExitCode != cmderrors.ExitUserError || ce.ErrorType != cmderrors.ErrTypeCommand {
 		t.Errorf("got exit=%d type=%s, want 101 commandError", ce.ExitCode, ce.ErrorType)
