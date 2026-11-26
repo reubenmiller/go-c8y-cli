@@ -80,3 +80,43 @@ func TestSwitchToModeOnly(t *testing.T) {
 		t.Fatal("expected an invalid mode to be rejected")
 	}
 }
+
+func TestApplyPickedMode(t *testing.T) {
+	s := newSwitchTestSessions(config.SessionModeQual)
+	s.server.SetSessionKey("k", mcpserver.SessionInfo{SessionName: "k", SessionMode: "prod"}, &mcpserver.Runner{Mode: config.SessionModeProduction})
+	choice := mcpserver.SessionChoice{SessionMode: "prod"}
+
+	if err := s.applyPickedMode(&mcpserver.Selection{Choice: choice, Mode: config.SessionModeQual}); err != nil {
+		t.Fatal(err)
+	}
+	if _, runner := s.server.Active(); runner.Mode != config.SessionModeQual {
+		t.Fatalf("expected the override to be applied, got %s", runner.Mode)
+	}
+	// the session's own mode resets the override
+	if err := s.applyPickedMode(&mcpserver.Selection{Choice: choice, Mode: config.SessionModeProduction, ModeOnly: true}); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := s.server.ModeOverride("k"); ok {
+		t.Fatal("the override should have been reset")
+	}
+	// no mode chosen: nothing changes
+	if err := s.applyPickedMode(&mcpserver.Selection{Choice: choice}); err != nil {
+		t.Fatal(err)
+	}
+	// the ceiling is never exceeded
+	if err := s.applyPickedMode(&mcpserver.Selection{Choice: choice, Mode: config.SessionModeDev}); err == nil {
+		t.Fatal("expected a mode above the ceiling to be rejected")
+	}
+}
+
+func TestChoiceModes(t *testing.T) {
+	s := newSwitchTestSessions(config.SessionModeQual)
+	_, sessions, _ := s.listProviderSessions(context.Background(), "bitwarden", nil)
+	if len(sessions) == 0 {
+		t.Fatal("expected sessions")
+	}
+	choices := s.providerChoices(context.Background())[0].choices
+	if choices[0].MaxMode != "qual" || choices[0].SessionMode != "prod" || choices[0].Mode != "prod" {
+		t.Fatalf("unexpected modes: %+v", choices[0])
+	}
+}

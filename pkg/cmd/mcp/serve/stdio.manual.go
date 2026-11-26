@@ -406,21 +406,21 @@ func (s *stdioSessions) choice(sessionFile string) mcpserver.SessionChoice {
 		Username:        details.username,
 		Mode:            mode.String(),
 		ModeInfo:        modeLabel(mode),
+		SessionMode:     sessionModeName(details.mode),
+		MaxMode:         s.server.Policy.Ceiling().String(),
 		NeedsPassphrase: s.needsPassphraseFor(details),
 		NeedsCode:       s.needsCodeFor(sessionFile),
 	}
 }
 
+// sessionModeName returns the session's own mode (prod if it has none)
+func sessionModeName(name string) string {
+	return mcpserver.SessionDefaultMode(config.SessionModeUnset.FromString(name, false)).String()
+}
+
 // modeLabel describes what the agent can do in a mode
 func modeLabel(mode config.SessionMode) string {
-	switch mode {
-	case config.SessionModeQual:
-		return "read, create and update"
-	case config.SessionModeDev:
-		return "read, create, update and delete"
-	default:
-		return "read only"
-	}
+	return mcpserver.ModeInfo(mode)
 }
 
 // choices returns the sessions shown in the picker, in the order of the sources: the session
@@ -531,18 +531,20 @@ func (s *stdioSessions) providerChoices(ctx context.Context) []sourceChoices {
 			listed[key] = session
 			mode := s.server.EffectiveMode(key, session.Mode)
 			out[i].choices = append(out[i].choices, mcpserver.SessionChoice{
-				Name:      session.DisplayName(),
-				Host:      strings.TrimRight(session.Host, "/"),
-				Tenant:    session.Tenant,
-				Username:  session.Username,
-				Mode:      mode.String(),
-				ModeInfo:  modeLabel(mode),
-				NeedsCode: s.needsCodeFor(key),
-				Current:   s.current == key,
-				Source:    source,
-				Provider:  provider.Ref,
-				URI:       session.SessionURI,
-				Group:     session.Group,
+				Name:        session.DisplayName(),
+				Host:        strings.TrimRight(session.Host, "/"),
+				Tenant:      session.Tenant,
+				Username:    session.Username,
+				Mode:        mode.String(),
+				ModeInfo:    modeLabel(mode),
+				SessionMode: sessionModeName(session.Mode),
+				MaxMode:     s.server.Policy.Ceiling().String(),
+				NeedsCode:   s.needsCodeFor(key),
+				Current:     s.current == key,
+				Source:      source,
+				Provider:    provider.Ref,
+				URI:         session.SessionURI,
+				Group:       session.Group,
 			})
 		}
 	}
@@ -576,8 +578,25 @@ func (s *stdioSessions) pick(ctx context.Context, title string) error {
 	if err != nil {
 		return err
 	}
+	if selection.ModeOnly {
+		return s.applyPickedMode(selection)
+	}
 	s.use(selection.Value.(*pendingSession))
-	return nil
+	return s.applyPickedMode(selection)
+}
+
+// applyPickedMode applies the mode the user chose in the picker to the active session. The
+// session's own mode resets the override, any other mode is an override up to the ceiling
+func (s *stdioSessions) applyPickedMode(selection *mcpserver.Selection) error {
+	if selection.Mode == config.SessionModeUnset {
+		return nil
+	}
+	mode := selection.Mode
+	if sessionModeName(selection.Choice.SessionMode) == mode.String() {
+		mode = config.SessionModeUnset
+	}
+	_, err := s.server.SetMode(mode, "picker")
+	return err
 }
 
 // unlockStartup asks for the passphrase of the session given with --session. It must

@@ -108,3 +108,15 @@ func ParseModeOrReset(name string) (config.SessionMode, error) {
 	}
 	return ParseMode(name)
 }
+
+// ModeInfo describes what the agent can do in a mode
+func ModeInfo(mode config.SessionMode) string {
+	switch mode {
+	case config.SessionModeQual:
+		return "read, create and update"
+	case config.SessionModeDev:
+		return "read, create, update and delete"
+	default:
+		return "read only"
+	}
+}

@@ -12,6 +12,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 )
 
 var testChoices = []SessionChoice{
@@ -402,5 +404,141 @@ func TestWebPickerKnownTOTP(t *testing.T) {
 	b.post("/select", url.Values{"csrf": {b.csrf}, "session": {"0"}, "unlock": {"1"}, "code": {"123456"}}, nil)
 	if r := waitPicker(t, results); r.err != nil {
 		t.Errorf("unexpected result: %+v", r)
+	}
+}
+
+// modeChoices sessions with a mode control: the first is the current one (own mode prod),
+// the second has the own mode qual. The ceiling is qual
+var modeChoices = []SessionChoice{
+	{Path: "/s/one.json", Name: "one", Host: "https://one.example.com", Current: true, Mode: "prod", ModeInfo: ModeInfo(config.SessionModeProduction), SessionMode: "prod", MaxMode: "qual"},
+	{Path: "/s/two.json", Name: "two", Host: "https://two.example.com", Mode: "qual", ModeInfo: ModeInfo(config.SessionModeQual), SessionMode: "qual", MaxMode: "qual"},
+}
+
+func TestSessionChoiceModeOptions(t *testing.T) {
+	options := modeChoices[0].ModeOptions()
+	if len(options) != 3 {
+		t.Fatalf("expected 3 modes, got %+v", options)
+	}
+	want := []ModeOption{
+		{Name: "prod", Info: "read only", Checked: true},
+		{Name: "qual", Info: "read, create and update", Override: true},
+		{Name: "dev", Info: "read, create, update and delete", Override: true, Disabled: true},
+	}
+	for i := range want {
+		if options[i] != want[i] {
+			t.Errorf("mode %d: expected %+v, got %+v", i, want[i], options[i])
+		}
+	}
+	if got := (SessionChoice{Name: "x"}).ModeOptions(); got != nil {
+		t.Errorf("a session without a maximum mode has no mode control: %+v", got)
+	}
+}
+
+func TestWebPickerShowsModes(t *testing.T) {
+	link, _ := startPickerWith(t, &WebPicker{Timeout: 5 * time.Second}, modeChoices)
+	b := newBrowser(t)
+	_, body := b.open(link)
+	for _, want := range []string{
+		`name="mode-0" value="prod" checked`,
+		`name="mode-0" value="dev" disabled`,
+		`name="mode-1" value="qual" checked`,
+		`class="seg override"`,
+		`name="modeonly" value="0"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("page should contain %s", want)
+		}
+	}
+	if strings.Count(body, `name="modeonly"`) != 1 {
+		t.Errorf("only the current session offers to change the mode only")
+	}
+}
+
+func TestWebPickerSelectWithMode(t *testing.T) {
+	link, results := startPickerWith(t, &WebPicker{}, modeChoices)
+	b := newBrowser(t)
+	b.open(link)
+	status, body := b.post("/select", url.Values{"csrf": {b.csrf}, "session": {"1"}, "mode-0": {"qual"}, "mode-1": {"prod"}}, nil)
+	if status != http.StatusOK || !strings.Contains(body, "Session selected") {
+		t.Fatalf("unexpected response %d: %s", status, body)
+	}
+	r := waitPicker(t, results)
+	if r.err != nil || r.selection.Choice.Path != "/s/two.json" || r.selection.Mode != config.SessionModeProduction || r.selection.ModeOnly {
+		t.Errorf("unexpected result: %+v %+v", r, r.selection)
+	}
+}
+
+func TestWebPickerRejectsModeAboveCeiling(t *testing.T) {
+	link, results := startPickerWith(t, &WebPicker{Timeout: 5 * time.Second}, modeChoices)
+	b := newBrowser(t)
+	b.open(link)
+	for _, mode := range []string{"dev", "ci", "bogus", "production"} {
+		for _, form := range []url.Values{
+			{"csrf": {b.csrf}, "session": {"1"}, "mode-1": {mode}},
+			{"csrf": {b.csrf}, "modeonly": {"0"}, "mode-0": {mode}},
+		} {
+			if status, _ := b.post("/select", form, nil); status != http.StatusBadRequest {
+				t.Errorf("mode %q: expected 400, got %d", mode, status)
+			}
+		}
+	}
+	// the page was not finished by the rejected posts
+	select {
+	case r := <-results:
+		t.Fatalf("the picker should still be open: %+v", r)
+	default:
+	}
+	// a mode is not accepted for sessions without a mode control
+	link2, _ := startPicker(t, &WebPicker{Timeout: 5 * time.Second})
+	b2 := newBrowser(t)
+	b2.open(link2)
+	if status, _ := b2.post("/select", url.Values{"csrf": {b2.csrf}, "session": {"0"}, "mode-0": {"dev"}}, nil); status != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", status)
+	}
+}
+
+func TestWebPickerChangeModeOnly(t *testing.T) {
+	loggedIn := false
+	picker := &WebPicker{Login: func(ctx context.Context, choice SessionChoice, secrets LoginSecrets) (any, error) {
+		loggedIn = true
+		return nil, nil
+	}}
+	link, results := startPickerWith(t, picker, modeChoices)
+	b := newBrowser(t)
+	b.open(link)
+
+	// not the current session
+	if status, _ := b.post("/select", url.Values{"csrf": {b.csrf}, "modeonly": {"1"}, "mode-1": {"prod"}}, nil); status != http.StatusBadRequest {
+		t.Errorf("only the current session can change the mode only, got %d", status)
+	}
+	// csrf and origin are still checked
+	if status, _ := b.post("/select", url.Values{"csrf": {"wrong"}, "modeonly": {"0"}, "mode-0": {"qual"}}, nil); status != http.StatusForbidden {
+		t.Errorf("wrong csrf: expected 403, got %d", status)
+	}
+	if status, _ := b.post("/select", url.Values{"csrf": {b.csrf}, "modeonly": {"0"}, "mode-0": {"qual"}}, map[string]string{"Origin": "http://evil.example.com"}); status != http.StatusForbidden {
+		t.Errorf("wrong origin: expected 403, got %d", status)
+	}
+
+	status, body := b.post("/select", url.Values{"csrf": {b.csrf}, "modeonly": {"0"}, "mode-0": {"qual"}}, nil)
+	if status != http.StatusOK || !strings.Contains(body, "Mode changed") {
+		t.Fatalf("unexpected response %d: %s", status, body)
+	}
+	r := waitPicker(t, results)
+	if r.err != nil || !r.selection.ModeOnly || r.selection.Mode != config.SessionModeQual || r.selection.Value != nil {
+		t.Errorf("unexpected result: %+v %+v", r, r.selection)
+	}
+	if loggedIn {
+		t.Errorf("changing the mode only must not log in")
+	}
+}
+
+func TestWebPickerKeepsModeWhileUnlocking(t *testing.T) {
+	choices := []SessionChoice{{Path: "/s/enc.json", Name: "enc", Mode: "prod", SessionMode: "prod", MaxMode: "dev", NeedsPassphrase: true}}
+	link, _ := startPickerWith(t, &WebPicker{Timeout: 5 * time.Second}, choices)
+	b := newBrowser(t)
+	b.open(link)
+	status, body := b.post("/select", url.Values{"csrf": {b.csrf}, "session": {"0"}, "mode-0": {"dev"}}, nil)
+	if status != http.StatusOK || !strings.Contains(body, `name="mode-0" value="dev"`) || !strings.Contains(body, `name="passphrase"`) {
+		t.Errorf("the chosen mode should be posted again with the passphrase: %d %s", status, body)
 	}
 }
