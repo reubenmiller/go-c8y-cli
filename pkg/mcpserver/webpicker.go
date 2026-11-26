@@ -767,6 +767,30 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   .button.small { order: 6; margin-left: auto; padding: 4px 12px; font-size: .78rem; }
   .empty { padding: 14px 16px; color: var(--faint); font-size: .9rem; display: none; }
 
+  kbd {
+    display: inline-block; min-width: 1.6em; padding: 1px 6px; font-family: var(--mono); font-size: .72rem; line-height: 1.5;
+    text-align: center; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px;
+  }
+  .keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-top: 12px; font-size: .78rem; color: var(--faint); }
+  .keys[hidden] { display: none; }
+  .key-modes[hidden] { display: none !important; }
+  .keys span { display: inline-flex; align-items: center; gap: 4px; }
+  .link { padding: 0; font: inherit; color: var(--muted); background: none; border: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .link:hover, .link:focus-visible { color: var(--strong); outline: none; }
+  dialog.help {
+    margin: auto; width: min(480px, calc(100vw - 32px)); padding: 28px 28px 24px; color: var(--fg);
+    background: #161b22; border: 1px solid var(--line); border-radius: 16px;
+  }
+  dialog.help::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(2px); }
+  dialog.help h2 { font-size: 1.1rem; font-weight: 700; color: var(--strong); margin-bottom: 16px; }
+  dialog.help h3 { margin: 20px 0 8px; font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+  dialog.help dl { display: grid; grid-template-columns: max-content 1fr; gap: 10px 16px; align-items: baseline; font-size: .88rem; }
+  dialog.help dt { display: flex; flex-wrap: wrap; gap: 4px; }
+  dialog.help dd { color: var(--muted); line-height: 1.5; }
+  dialog.help code { font-family: var(--mono); font-size: .82rem; color: var(--fg); }
+  dialog.help .actions { margin-top: 24px; }
+  dialog.help .note { margin-top: 12px; font-size: .82rem; }
+
   .selected {
     display: grid; gap: 4px; padding: 14px 16px; margin-bottom: 20px;
     background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 12px;
@@ -822,7 +846,7 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
 {{end}}
 {{define "modes"}}{{$i := .Index}}
   <div class="modes" role="radiogroup" aria-label="Mode of the agent for {{.Choice.Name}}">
-    {{range .ModeOptions}}<input type="radio" class="m-{{.Name}}" id="m{{$i}}-{{.Name}}" name="mode-{{$i}}" value="{{.Name}}"{{if .Checked}} checked{{end}}{{if .Disabled}} disabled{{end}}><label for="m{{$i}}-{{.Name}}" class="seg{{if .Override}} override{{end}}" title="{{if .Disabled}}Above the maximum mode of the MCP server{{else if .Override}}Override: above the session's own mode{{else}}Agent can {{.Info}}{{end}}">{{.Name}}</label>
+    {{range .ModeOptions}}<input type="radio" class="m-{{.Name}}" id="m{{$i}}-{{.Name}}" name="mode-{{$i}}" value="{{.Name}}"{{if .Checked}} checked{{end}}{{if .Disabled}} disabled{{end}} aria-keyshortcuts="{{if eq .Name "prod"}}P 1{{else if eq .Name "qual"}}Q 2{{else}}D 3{{end}}"><label for="m{{$i}}-{{.Name}}" class="seg{{if .Override}} override{{end}}" title="{{if .Disabled}}Above the maximum mode of the MCP server{{else if .Override}}Override: above the session's own mode{{else}}Agent can {{.Info}}{{end}}">{{.Name}}</label>
     {{end}}
     {{range .ModeOptions}}<span class="can can-{{.Name}}{{if .Override}} override{{end}}">Agent can {{.Info}}{{if .Override}}. Override: above the session's own mode{{end}}</span>
     {{end}}
@@ -918,7 +942,7 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
       {{if $group.Error}}<li class="problem" data-group="{{$g}}">{{$group.Error}}</li>{{end}}
       {{range $group.Items}}
       <li class="item" data-group="{{$g}}" data-search="{{.Choice.Name}} {{.Choice.Host}} {{.Choice.Tenant}} {{.Choice.Username}} {{.Choice.Group}} {{$group.Label}}">
-        <button class="session" type="submit" name="session" value="{{.Index}}">{{template "session" .Choice}}</button>
+        <button class="session" type="submit" name="session" value="{{.Index}}" aria-keyshortcuts="Enter">{{template "session" .Choice}}</button>
         {{if .ModeOptions}}{{template "modes" .}}{{end}}
       </li>
       {{end}}
@@ -926,11 +950,38 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
     </ul>
     <div class="empty" id="empty">No sessions match the filter.</div>
   </form>
+  <!-- the shortcuts need the script, so the hint is only shown by it -->
+  <p class="keys" id="keys" hidden>
+    <span><kbd>↑</kbd><kbd>↓</kbd> move</span>
+    <span class="key-modes"><kbd>P</kbd><kbd>Q</kbd><kbd>D</kbd> set mode</span>
+    <span><kbd>Enter</kbd> select</span>
+    <button class="link" type="button" id="show-help" aria-keyshortcuts="?"><kbd>?</kbd> all shortcuts</button>
+  </p>
   <div class="actions">
     <form method="post" action="/cancel"><input type="hidden" name="csrf" value="{{.CSRF}}"><button class="button" type="submit">Cancel</button></form>
   </div>
   <p class="status" role="status"><span class="spinner"></span><span>Logging in. If you are asked to confirm, for example with Touch ID, confirm it there.</span></p>
 </main>
+<dialog class="help" id="help" aria-labelledby="help-title">
+  <h2 id="help-title">Keyboard shortcuts</h2>
+  <dl>
+    <dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd>Move between the sessions. <kbd>↑</kbd> on the first session goes back to the filter.</dd>
+    <dt class="key-modes"><kbd>P</kbd> or <kbd>1</kbd></dt><dd class="key-modes">prod: the agent can only read data</dd>
+    <dt class="key-modes"><kbd>Q</kbd> or <kbd>2</kbd></dt><dd class="key-modes">qual: the agent can also create and update</dd>
+    <dt class="key-modes"><kbd>D</kbd> or <kbd>3</kbd></dt><dd class="key-modes">dev: the agent can also delete</dd>
+    <dt><kbd>Enter</kbd></dt><dd>Select the focused session with the mode shown for it. In the filter, select the first match.</dd>
+    <dt>Typing</dt><dd>Filter the sessions by name, host, tenant or user.</dd>
+    <dt><kbd>?</kbd></dt><dd>Show this help. <kbd>Esc</kbd> closes it.</dd>
+  </dl>
+  <p class="key-modes note">The mode keys change the session under the focus, so press <kbd>↓</kbd> first when you are in the filter.</p>
+  <h3>From your agent</h3>
+  <dl>
+    <dt><code>mode dev</code></dt><dd>Change the mode of the current session without this page. <code>mode reset</code> goes back to the session's own mode.</dd>
+    <dt><code>switch_session name qual</code></dt><dd>Switch to a session, and optionally set its mode.</dd>
+  </dl>
+  <p class="note">These are prompts of the MCP server. In Claude Code, run them as <code>/mcp__&lt;server&gt;__mode</code>.</p>
+  <div class="actions"><form method="dialog"><button class="button primary" type="submit" autofocus>Close</button></form></div>
+</dialog>
 {{end}}
 {{if not (or .Done .Cancelled)}}
 <script nonce="{{.Nonce}}">
@@ -955,14 +1006,32 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
     });
   }
   // keyboard: up/down move between the sessions, p/q/d or 1/2/3 set the mode of the
-  // focused session, Enter selects it, and typing filters by name. The page works without it
+  // focused session, Enter selects it, "?" shows the help, and typing filters by name.
+  // The page works without it
   const list = document.getElementById("sessions");
   if (list) {
     const buttons = () => Array.from(list.querySelectorAll("li.item:not([hidden]) button.session"));
     const modeKeys = { p: "prod", 1: "prod", q: "qual", 2: "qual", d: "dev", 3: "dev" };
+    // the shortcuts only work with the script, so their hint is shown here
+    const help = document.getElementById("help");
+    const keys = document.getElementById("keys");
+    if (!list.querySelector(".modes")) {
+      for (const el of document.querySelectorAll(".key-modes")) el.hidden = true;
+    }
+    if (keys) keys.hidden = false;
+    const showHelp = () => { if (help && !help.open && help.showModal) help.showModal(); };
+    const showHelpButton = document.getElementById("show-help");
+    if (showHelpButton) showHelpButton.addEventListener("click", showHelp);
     document.addEventListener("keydown", (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
+      if (help && help.open) return;
       const target = e.target;
+      // "?" shows the help, unless it is typed into a filter which already has text
+      if (e.key === "?" && !(target === filter && filter.value)) {
+        e.preventDefault();
+        showHelp();
+        return;
+      }
       const item = target.closest ? target.closest("li.item") : null;
       const onRadio = !!(target.matches && target.matches(".modes input"));
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {

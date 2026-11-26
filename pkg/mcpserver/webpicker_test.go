@@ -454,6 +454,34 @@ func TestWebPickerShowsModes(t *testing.T) {
 	}
 }
 
+func TestWebPickerShowsKeyboardShortcuts(t *testing.T) {
+	link, _ := startPickerWith(t, &WebPicker{Timeout: 5 * time.Second}, modeChoices)
+	b := newBrowser(t)
+	_, body := b.open(link)
+	for _, want := range []string{
+		// hint line, shown by the script as the shortcuts need it
+		`<p class="keys" id="keys" hidden>`,
+		`id="show-help" aria-keyshortcuts="?"`,
+		// help dialog
+		`<dialog class="help" id="help"`,
+		`Keyboard shortcuts`,
+		`<code>mode dev</code>`,
+		// shortcuts announced by screen readers
+		`value="prod" checked aria-keyshortcuts="P 1"`,
+		`value="qual" aria-keyshortcuts="Q 2"`,
+		`value="dev" disabled aria-keyshortcuts="D 3"`,
+		`button class="session" type="submit" name="session" value="0" aria-keyshortcuts="Enter"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("page should contain %s", want)
+		}
+	}
+	// the page's content security policy blocks inline style attributes
+	if strings.Contains(body, ` style="`) {
+		t.Errorf("page must not use inline style attributes")
+	}
+}
+
 func TestWebPickerSelectWithMode(t *testing.T) {
 	link, results := startPickerWith(t, &WebPicker{}, modeChoices)
 	b := newBrowser(t)

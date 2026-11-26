@@ -20,6 +20,17 @@ Your MCP client starts `c8y mcp serve` and communicates with it over stdin and s
     Without a pin entry command, the page asks for the passphrase of encrypted sessions and checks it before logging in. This also applies to a session given with `--session`.
 * **Two-factor authentication**: If the login needs a code, the page asks for the code from your authenticator app, unless the session contains a TOTP secret. Setting up two-factor authentication for the first time needs a terminal, so run `c8y sessions login` once in a terminal first.
 * **Switching sessions**: Run the server's `switch_session` prompt, for example `/mcp__c8y__switch_session` in Claude Code. Only you can run it, not the agent. The session picker opens in the browser, and the agent's tool calls wait until you have selected and logged in to a session. Commands which are already running finish with the previous session.
+* **Keyboard shortcuts in the picker**: press `?` on the page to see them all.
+
+    | Keys | Action |
+    |---|---|
+    | `↑` `↓` | Move between the sessions. `↑` on the first session goes back to the filter |
+    | `P` `Q` `D` (or `1` `2` `3`) | Set the mode of the focused session to prod, qual or dev |
+    | `Enter` | Select the focused session with the mode shown for it. In the filter, select the first match |
+    | Typing | Filter the sessions by name, host, tenant or user |
+    | `?` | Show the shortcuts. `Esc` closes them |
+
+    The mode keys change the session under the focus, so press `↓` first when you are in the filter.
 
 * **Session providers**: The picker can also show the sessions of an [extension session provider](/docs/concepts/extensions/binary-commands#session-providers), such as a password manager. By default, the picker shows your session files, and the sessions of your default provider if you set one with the `session.provider.type extension` and `session.provider.extension <provider>` settings. Use `--sessionProvider` to choose the sources yourself: the picker then only shows the sources you list, in the given order. Use `file` for your session files. Give the sources as comma separated values (`--sessionProvider bitwarden,file`), or repeat the flag. The provider must declare the `list` and `select` commands. The provider's secrets (for example `BW_SESSION`) are read from the server's environment, otherwise with your pin entry command. When the token expires, the server asks the provider for the session again, so the provider can return a new password or two-factor code without opening the picker.
 

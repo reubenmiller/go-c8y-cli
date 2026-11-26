@@ -47,6 +47,10 @@ Changing the mode only needs a copy of the `Runner` with another `Mode` and the 
 - The current session offers "Change mode only", which keeps the logged-in session.
 - Keyboard: `↑`/`↓` move, `p`/`q`/`d` (or `1`/`2`/`3`) set the mode, `Enter` selects,
   typing filters by name.
+- The shortcuts are shown on the page: a hint line under the sessions (only with
+  JavaScript, as the shortcuts need it), and a help dialog on `?` which also lists the
+  `mode` and `switch_session` prompts. The controls announce their keys to screen
+  readers (`aria-keyshortcuts`).
 
 ## 2. Prompts with arguments
 
