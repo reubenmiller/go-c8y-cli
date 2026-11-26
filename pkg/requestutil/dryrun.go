@@ -32,6 +32,11 @@ type Printer struct {
 	HideSensitive func(string) string
 }
 
+// ClientAcceptEncoding is the Accept-Encoding header which the HTTP client
+// (resty) sets on a request that has none. It is removed from the requests
+// (the transport then asks for "gzip", as v2.59.0 did) and from the dry run.
+const ClientAcceptEncoding = "gzip, deflate"
+
 type RequestDetails struct {
 	URL         string            `json:"url,omitempty"`
 	Host        string            `json:"host,omitempty"`
@@ -57,8 +62,11 @@ func (r *Printer) PrintRequestDetails(w io.Writer, req *http.Request) {
 
 	// the HTTP client adds Accept-Encoding when the request is sent; it is
 	// not part of the request the command built, so do not show it (v2.59.0
-	// never did). Display only: the real request is unaffected.
-	req.Header.Del("Accept-Encoding")
+	// never did). A value the user gave (--header) is shown, as in v2.59.0.
+	// Display only: the real request is unaffected.
+	if req.Header.Get("Accept-Encoding") == ClientAcceptEncoding {
+		req.Header.Del("Accept-Encoding")
+	}
 
 	if format == "dump" {
 		// v2.59.0 dumped the User-Agent and X-Application headers of a request,

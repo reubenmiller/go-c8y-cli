@@ -107,6 +107,22 @@ tests:
         X-Application: go-client
         Accept-Encoding: gzip
 
+  An Accept-Encoding header given with --header is sent and shown:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y api /inventory/managedObjects --header "Accept-Encoding: identity" >/dev/null
+      grep -E '^Accept-Encoding: ' "$LOG"
+      c8y api /inventory/managedObjects --header "Accept-Encoding: identity" --dry --dryFormat dump | grep -E '^Accept-Encoding: '
+      c8y api /inventory/managedObjects --header "Accept-Encoding: identity" --dry --dryFormat json -c |
+        python3 -c 'import json,sys; print(json.load(sys.stdin)["headers"]["Accept-Encoding"])'
+    exit-code: 0
+    stdout:
+      exactly: |
+        Accept-Encoding: identity
+        Accept-Encoding: identity
+        identity
+
   The dump of a request does not have the Accept-Encoding header the HTTP client adds:
     command: |
       c8y devices list --pageSize 1 --dry --dryFormat dump

@@ -11,7 +11,8 @@ import (
 // TestRequestDefaults checks the headers every request gets, as in v2.59.0:
 // Accept: application/json when the request has none, an Accept header which
 // is set stays, --noAccept sends none, and the HTTP client's Accept-Encoding
-// is removed (the transport then sends "gzip" itself).
+// is removed (the transport then sends "gzip" itself), while one given with
+// --header is kept.
 func TestRequestDefaults(t *testing.T) {
 	cases := []struct {
 		name         string
@@ -24,6 +25,7 @@ func TestRequestDefaults(t *testing.T) {
 		{name: "keeps Accept", header: http.Header{"Accept": {"text/csv"}}, wantAccept: "text/csv"},
 		{name: "no Accept with noAccept", noAccept: true, header: http.Header{}, wantAccept: ""},
 		{name: "removes Accept-Encoding", header: http.Header{"Accept-Encoding": {"gzip, deflate"}}, wantAccept: "application/json", wantEncoding: ""},
+		{name: "keeps a given Accept-Encoding", header: http.Header{"Accept-Encoding": {"identity"}}, wantAccept: "application/json", wantEncoding: "identity"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
