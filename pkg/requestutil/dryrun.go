@@ -33,17 +33,16 @@ type Printer struct {
 }
 
 type RequestDetails struct {
-	URL         string              `json:"url,omitempty"`
-	Host        string              `json:"host,omitempty"`
-	PathEncoded string              `json:"pathEncoded,omitempty"`
-	Path        string              `json:"path,omitempty"`
-	Query       string              `json:"query,omitempty"`
-	QueryParams map[string][]string `json:"queryParams,omitempty"`
-	Method      string              `json:"method,omitempty"`
-	Headers     map[string]string   `json:"headers,omitempty"`
-	Body        interface{}         `json:"body,omitempty"`
-	Shell       string              `json:"shell,omitempty"`
-	PowerShell  string              `json:"powershell,omitempty"`
+	URL         string            `json:"url,omitempty"`
+	Host        string            `json:"host,omitempty"`
+	PathEncoded string            `json:"pathEncoded,omitempty"`
+	Path        string            `json:"path,omitempty"`
+	Query       string            `json:"query,omitempty"`
+	Method      string            `json:"method,omitempty"`
+	Headers     map[string]string `json:"headers,omitempty"`
+	Body        interface{}       `json:"body,omitempty"`
+	Shell       string            `json:"shell,omitempty"`
+	PowerShell  string            `json:"powershell,omitempty"`
 }
 
 func (r *Printer) DumpRequest(w io.Writer, req *http.Request) {
@@ -55,10 +54,26 @@ func (r *Printer) DumpRequest(w io.Writer, req *http.Request) {
 // PrintRequestDetails prints the request to the console making it easier to extra information from it
 func (r *Printer) PrintRequestDetails(w io.Writer, req *http.Request) {
 	format := r.Config.DryRunFormat()
+
+	// the HTTP client adds Accept-Encoding when the request is sent; it is
+	// not part of the request the command built, so do not show it (v2.59.0
+	// never did). Display only: the real request is unaffected.
+	req.Header.Del("Accept-Encoding")
+
 	if format == "dump" {
+		// v2.59.0 dumped the User-Agent and X-Application headers of a request,
+		// but not of a multipart upload (which it built without them)
+		if strings.HasPrefix(req.Header.Get("Content-Type"), "multipart/form-data") {
+			req.Header.Del("User-Agent")
+			req.Header.Del("X-Application")
+		}
 		r.DumpRequest(w, req)
 		return
 	}
+
+	// strip headers which are not useful to anyone
+	req.Header.Del("User-Agent")
+	req.Header.Del("X-Application")
 
 	sectionLabel := color.New(color.Bold, color.FgHiCyan)
 	label := color.New(color.FgHiCyan)
@@ -72,15 +87,6 @@ func (r *Printer) PrintRequestDetails(w io.Writer, req *http.Request) {
 
 	fullURL := req.URL.String()
 
-	// strip headers which are not useful to anyone
-	req.Header.Del("User-Agent")
-	req.Header.Del("X-Application")
-	// resty's v2 transport sets Accept-Encoding ("gzip, deflate") on every
-	// request; v1 relied on http.DefaultTransport adding it transparently at
-	// send time, so it never appeared in the dry-run output. Drop it here so the
-	// rendered request (json/markdown/curl) matches the v1 behaviour. Display
-	// only — the real request is unaffected.
-	req.Header.Del("Accept-Encoding")
 	headers := map[string]string{}
 	for key := range req.Header {
 		headers[key] = r.HideSensitive(req.Header.Get(key))
@@ -134,18 +140,6 @@ func (r *Printer) PrintRequestDetails(w io.Writer, req *http.Request) {
 
 	shell, pwsh, dummyFiles, _ := r.GetCurlCommands(req)
 
-	// queryParams is the decoded form of Query as a map, so consumers (e.g. test
-	// assertions, --select) can address a single parameter by name instead of
-	// substring-matching the raw string. It is url.Values (map[string][]string)
-	// so a parameter repeated in the query — "status=ACTIVE&status=ACKNOWLEDGED"
-	// — is preserved as ["ACTIVE","ACKNOWLEDGED"] rather than being collapsed,
-	// which a plain map[string]string could not represent. nil (omitted) when the
-	// request carries no query string.
-	var queryParams map[string][]string
-	if values := req.URL.Query(); len(values) > 0 {
-		queryParams = values
-	}
-
 	details := &RequestDetails{
 		URL:         fullURL,
 		Host:        req.URL.Scheme + "://" + req.URL.Host, // Include host port number
@@ -153,7 +147,6 @@ func (r *Printer) PrintRequestDetails(w io.Writer, req *http.Request) {
 		Method:      req.Method,
 		Headers:     headers,
 		Query:       TryUnescapeURL(req.URL.RawQuery),
-		QueryParams: queryParams,
 		Body:        requestBody,
 		Shell:       shell,
 		PowerShell:  pwsh,

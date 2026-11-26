@@ -9,6 +9,8 @@ package measurements
 
 import (
 	"context"
+	"net/http"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -16,6 +18,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/measurements"
 	"github.com/spf13/cobra"
@@ -133,6 +136,10 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		unit := in.String("unit")
 		fragmentType := in.String("fragmentType")
 		withParams := func(ctx context.Context) context.Context {
+			if !cmd.Flags().Changed("revert") {
+				// the SDK always sends revert=false; v2.59.0 sent revert only when the flag is given
+				ctx = apiv2.WithRequestHook(ctx, dropRevertFalse)
+			}
 			ctx = c8ystream.WithHeaderParam(ctx, "X-Cumulocity-System-Of-Units", unit)
 			return c8ystream.WithQueryParam(ctx, "fragmentType", fragmentType)
 		}
@@ -151,4 +158,20 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			return client.Measurements.ListAll(withParams(ctx), opt)
 		}, nil
 	})
+}
+
+// dropRevertFalse removes the revert=false query parameter of a request.
+func dropRevertFalse(req *http.Request) error {
+	if req.URL == nil || !strings.Contains(req.URL.RawQuery, "revert=false") {
+		return nil
+	}
+	params := strings.Split(req.URL.RawQuery, "&")
+	kept := params[:0]
+	for _, p := range params {
+		if p != "revert=false" {
+			kept = append(kept, p)
+		}
+	}
+	req.URL.RawQuery = strings.Join(kept, "&")
+	return nil
 }

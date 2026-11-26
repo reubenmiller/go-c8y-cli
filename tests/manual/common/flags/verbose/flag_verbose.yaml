@@ -10,7 +10,4 @@ tests:
     exit-code: 0
     stderr:
       contains:
-        # v2 keyset pagination adds currentPage/query params, so only assert the
-        # log line itself, the masked host and that pageSize was carried through
-        - 'Sending request: GET https://{host}/inventory/managedObjects?'
-        - 'pageSize=1'
+        - 'Sending request: GET https://{host}/inventory/managedObjects?pageSize=1'

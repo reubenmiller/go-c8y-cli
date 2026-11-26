@@ -73,3 +73,23 @@ tests:
         stdout:
             exactly: |
               2
+
+    Raw output of c8y api with a plain JSON array applies --select to each element:
+        command: c8y api /tenant/statistics/allTenantsSummary --raw --select deviceCount
+        exit-code: 0
+        stdout:
+            match-pattern: |
+                ^\{"deviceCount":\d+\}$
+
+    Raw output of c8y api with a plain JSON array applies --flatten to each element:
+        command: c8y api /tenant/statistics/allTenantsSummary --raw --flatten
+        exit-code: 0
+        stdout:
+            match-pattern: |
+                ^\{.*\}$
+
+    Raw output of c8y api with an empty plain JSON array and --select prints nothing:
+        command: c8y api /tenant/statistics/allTenantsSummary --raw --filter 'deviceCount gt 999999999' --select deviceCount
+        exit-code: 0
+        stdout:
+            exactly: ""

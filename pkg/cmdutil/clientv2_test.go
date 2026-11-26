@@ -120,3 +120,29 @@ func TestClientSessionWithoutHost(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, session.Host, "a session without a host has not been loaded")
 }
+
+// The client sends what v2.59.0 sent: "go-client" as X-Application and
+// User-Agent, every request once unless --retries is given, and with
+// settings.http.compression=false no Accept-Encoding.
+func TestClientOptionsV2RequestSettings(t *testing.T) {
+	f := newClientTestFactory(t, map[string]any{
+		"host": "example.com", "tenant": "t123", "username": "peter", "password": "secret",
+		"settings.http.compression": true,
+	})
+	opts, err := f.ClientOptionsV2(false)
+	require.NoError(t, err)
+	assert.Equal(t, "go-client", opts.Agent)
+	require.NotNil(t, opts.Retry)
+	assert.Equal(t, 0, opts.Retry.Count, "no retries unless --retries is given")
+	assert.False(t, opts.Transport.(*http.Transport).DisableCompression)
+
+	f = newClientTestFactory(t, map[string]any{
+		"host": "example.com", "tenant": "t123", "username": "peter", "password": "secret",
+		config.SettingsHTTPMaxRetries: 2,
+		"settings.http.compression":   false,
+	})
+	opts, err = f.ClientOptionsV2(false)
+	require.NoError(t, err)
+	assert.Equal(t, 2, opts.Retry.Count)
+	assert.True(t, opts.Transport.(*http.Transport).DisableCompression)
+}

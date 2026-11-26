@@ -6,7 +6,7 @@ tests:
             json:
                 method: GET
                 path: /service/datahub/offloadingconfigurations
-                queryParams.locale.0: en
+                query: r/(^|&)locale=en(&|$)
     datahub_scheduler_list_List the datahub scheduled items:
         command: c8y datahub scheduler list
         exit-code: 0
@@ -14,7 +14,7 @@ tests:
             json:
                 method: GET
                 path: /service/datahub/scheduler/latestjobs
-                queryParams.jobType.0: COMPACTION
+                query: r/(^|&)jobType=COMPACTION(&|$)
     datahub_scheduler_list_List the datahub scheduled items with offset:
         command: c8y datahub scheduler list --offset 5 --pageSize 7
         exit-code: 0
@@ -22,8 +22,7 @@ tests:
             json:
                 method: GET
                 path: /service/datahub/scheduler/latestjobs
-                queryParams.offset.0: "5"
-                queryParams.limit.0: "7"
+                query: r/^jobType=COMPACTION&limit=7&offset=5$
     datahub_tenant_get_Get datahub tenant configuration:
         command: c8y datahub tenant get
         exit-code: 0

@@ -111,6 +111,14 @@ func (f *Factory) clientOptionsV2(disableEncryptionCheck bool) (apiv2.ClientOpti
 		InsecureSkipVerify: cfg.SkipSSLVerify(),
 		Transport:          newBaseTransport(cfg),
 		Timeout:            cfg.RequestTimeout(),
+		// v2.59.0 sent "go-client" as the X-Application and the User-Agent
+		Agent: "go-client",
+		// v2.59.0 sent every request once, unless --retries was given
+		Retry: &apiv2.RetryOptions{
+			Count:   cfg.HTTPRetryMax(),
+			WaitMin: cfg.HTTPRetryWaitMin(),
+			WaitMax: cfg.HTTPRetryWaitMax(),
+		},
 	}, session, nil
 }
 
@@ -123,6 +131,8 @@ func newBaseTransport(cfg *config.Config) *http.Transport {
 	if cfg.IgnoreProxy() {
 		tr.Proxy = nil
 	}
+	// settings.http.compression: with false no Accept-Encoding is sent
+	tr.DisableCompression = !cfg.ShouldUseCompression()
 	return tr
 }
 
