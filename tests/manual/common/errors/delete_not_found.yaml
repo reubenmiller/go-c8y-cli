@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+# Deleting an id that does not exist is an error (404, exit code 4), as it has
+# always been. The offline CI runs this file: errors_server.yaml also asserts
+# a clean stderr for cached responses, which the fake server run does not give.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+
+tests:
+  It reports a missing id as a 404 with exit code 4:
+    command: |
+      echo "0" | c8y inventory delete
+    exit-code: 4
+    stderr:
+      contains:
+        - "404"
+
+  It exits 0 for a missing id with silentStatusCodes and silentExit:
+    command: |
+      echo "0" | c8y inventory delete --silentStatusCodes 404 --silentExit
+    exit-code: 0
+
+  It exits 4 for one missing and one existing id:
+    command: |
+      mo=$( c8y inventory create --select id --output csv )
+      printf "0\n%s\n" "$mo" | c8y inventory delete --silentStatusCodes 404
+    exit-code: 4
+
+  It exits 104 when several ids are missing:
+    command: |
+      printf "0\n1\n" | c8y inventory delete
+    exit-code: 104
+
+  It reports a missing id of other delete commands as a 404 error:
+    command: |
+      echo "0" | c8y events delete
+    exit-code: 4
