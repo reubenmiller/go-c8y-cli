@@ -89,6 +89,17 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// --data/--template (and piped values via input.value): the typed version
+	// fragment is merged with the flags below, so a template can set the
+	// version and url without them being overridden by the empty flag defaults.
+	if err := r.Body(
+		flags.WithDataFlagValue(),
+		cmdutil.WithTemplateValue(n.factory),
+		flags.WithTemplateVariablesValue(),
+	); err != nil {
+		return err
+	}
+
 	client, err := r.Client()
 	if err != nil {
 		return err
@@ -105,14 +116,27 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, err
 		}
+		body, err := in.Body()
+		if err != nil {
+			return nil, err
+		}
+		tpl := cmdutil.ParseVersionBody(body, "c8y_Firmware")
 		version := in.String("version")
+		if version == "" {
+			version = tpl.Version
+		}
+		urlValue := in.String("url")
+		if urlValue == "" {
+			urlValue = tpl.URL
+		}
 		if version == "" && file != "" {
 			version = c8ydata.ExtractVersion(file)
 		}
 
 		opt := firmwareversions.CreateOptions{
-			Version: version,
-			URL:     in.String("url"),
+			Version:     version,
+			URL:         urlValue,
+			Annotations: tpl.Annotations,
 		}
 		if file != "" {
 			opt.File = firmwareversions.UploadFileOptions{FilePath: file}

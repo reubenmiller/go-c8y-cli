@@ -3,6 +3,7 @@ package c8ystream
 import (
 	"bytes"
 	"io"
+	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
@@ -27,6 +28,10 @@ import (
 type consoleRenderer struct {
 	console *console.Console
 	isTable bool
+
+	// selected are the --select patterns; an element of an array which was
+	// selected explicitly (e.g. tags.1) gets its own table column
+	selected []string
 }
 
 // newConsoleRenderer builds a console renderer for the json/table/server
@@ -47,8 +52,9 @@ func newConsoleRenderer(out io.Writer, cfg *config.Config) *consoleRenderer {
 	c.Compact = cfg.CompactJSON()
 	c.Colorized = !cfg.DisableColor()
 	return &consoleRenderer{
-		console: c,
-		isTable: c.IsTable(),
+		console:  c,
+		isTable:  c.IsTable(),
+		selected: cfg.GetJSONSelect(),
 	}
 }
 
@@ -57,7 +63,7 @@ func (r *consoleRenderer) Write(doc jsondoc.JSONDoc) error {
 	if r.isTable {
 		// Provide the resolved columns for this row so the console can merge
 		// them into the table header across the sampled rows.
-		if cols := leafPaths(raw); len(cols) > 0 {
+		if cols := leafPaths(raw, r.selected); len(cols) > 0 {
 			r.console.SetHeaderFromInput("", []jsonfilter.KeyGroup{{Pattern: "*", Keys: cols}})
 		}
 	}
@@ -79,11 +85,12 @@ func (r *consoleRenderer) Close() error {
 	return nil
 }
 
-// leafPaths returns the dotted key paths of every leaf in a JSON object, in
-// document order. Objects are traversed; arrays and scalars are leaves —
-// matching how the select stage and the table viewer treat the document, so
-// the returned paths can be looked up directly as table columns.
-func leafPaths(raw []byte) []string {
+// leafPaths returns the dotted key paths of every column of a JSON object, in
+// document order. Objects are traversed. Arrays of simple values (strings,
+// numbers, booleans, null) are one column, shown as a bracketed list. Arrays
+// which contain objects or arrays have a column per index (items.0.id), and an
+// array element which --select named explicitly (tags.1) is its own column.
+func leafPaths(raw []byte, selected []string) []string {
 	var paths []string
 	var walk func(res gjson.Result, prefix string)
 	walk = func(res gjson.Result, prefix string) {
@@ -92,9 +99,18 @@ func leafPaths(raw []byte) []string {
 			if prefix != "" {
 				path = prefix + "." + path
 			}
-			if v.IsObject() {
+			switch {
+			case v.IsObject():
 				walk(v, path)
-			} else {
+			case v.IsArray():
+				if elements := selectedElements(path, selected, v); len(elements) > 0 {
+					paths = append(paths, elements...)
+				} else if hasNestedValues(v) {
+					walk(v, path)
+				} else {
+					paths = append(paths, path)
+				}
+			default:
 				paths = append(paths, path)
 			}
 			return true
@@ -102,4 +118,31 @@ func leafPaths(raw []byte) []string {
 	}
 	walk(gjson.ParseBytes(raw), "")
 	return paths
+}
+
+// hasNestedValues reports whether an array contains objects or arrays.
+func hasNestedValues(arr gjson.Result) bool {
+	nested := false
+	arr.ForEach(func(_, v gjson.Result) bool {
+		nested = v.IsObject() || v.IsArray()
+		return !nested
+	})
+	return nested
+}
+
+// selectedElements returns the --select patterns which address an element of
+// the array at path (e.g. tags.1 for tags) and which exist in the array.
+func selectedElements(path string, selected []string, arr gjson.Result) []string {
+	var elements []string
+	prefix := path + "."
+	for _, sel := range selected {
+		rest, ok := strings.CutPrefix(sel, prefix)
+		if !ok || rest == "" || rest[0] < '0' || rest[0] > '9' {
+			continue
+		}
+		if arr.Get(rest).Exists() {
+			elements = append(elements, sel)
+		}
+	}
+	return elements
 }
