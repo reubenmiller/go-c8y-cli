@@ -56,8 +56,8 @@ jobs:
       C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
       DEVICE_BOOTSTRAP_USER: ${{ secrets.DEVICE_BOOTSTRAP_USER }}
       DEVICE_BOOTSTRAP_PASSWORD: ${{ secrets.DEVICE_BOOTSTRAP_PASSWORD }}
-      # Max timeout for each request (in milliseconds)
-      C8Y_SETTINGS_DEFAULTS_TIMEOUT: 30000
+      # Max timeout for each request and wait, so one hanging test can't block the suite
+      C8Y_SETTINGS_DEFAULTS_TIMEOUT: 60s
       SUITES: ${{ inputs.suites || 'all' }}
       FILTER: ${{ inputs.filter || '' }}
 
