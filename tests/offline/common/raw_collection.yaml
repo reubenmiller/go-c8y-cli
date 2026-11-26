@@ -23,6 +23,40 @@ tests:
             match-pattern: |
                 ^\{"deviceCount":\d+\}$
 
+    Raw output of an empty plain JSON array is []:
+        command: c8y tenantstatistics listSummaryAllTenants --raw --filter 'deviceCount gt 999999999'
+        exit-code: 0
+        stdout:
+            exactly: |
+                []
+
+    Raw output of a plain JSON array applies --filter to the elements and prints an array:
+        command: c8y tenantstatistics listSummaryAllTenants --raw --filter 'deviceCount gt -1'
+        exit-code: 0
+        stdout:
+            match-pattern: |
+                ^\[\{.*\}\]$
+
+    Raw output of an empty plain JSON array with --select prints nothing:
+        command: c8y tenantstatistics listSummaryAllTenants --raw --filter 'deviceCount gt 999999999' --select deviceCount
+        exit-code: 0
+        stdout:
+            exactly: ""
+
+    Raw output of c8y api with a plain JSON array applies --filter to the elements:
+        command: c8y api /tenant/statistics/allTenantsSummary --raw --filter 'deviceCount gt 999999999'
+        exit-code: 0
+        stdout:
+            exactly: |
+                []
+
+    Raw output of an enveloped collection without items is the whole envelope:
+        command: c8y api "/inventory/managedObjects?type=raw_no_such_type" --raw
+        exit-code: 0
+        stdout:
+            match-pattern: |
+                ^\{.*"managedObjects":\[\].*\}$
+
     Raw output of a response with plucked items is the whole envelope:
         command: c8y microservices serviceusers get --id technician --raw
         exit-code: 0
