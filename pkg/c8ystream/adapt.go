@@ -96,8 +96,8 @@ func (r *Runner) rawDocuments(src op.DocumentSource) output.Seq {
 		return output.Seq(src.Documents())
 	}
 	if kind == bodyArray {
-		whole = r.filterArray(whole)
-		// an array always prints, also when it has no items (Documents() yields
+		// --filter selects the elements of the array in the filter stage (see filterStage), and an
+		// array always prints, also when it has no items (Documents() yields
 		// nothing then), and errors are not lost
 		return func(yield func(jsondoc.JSONDoc, error) bool) {
 			for doc, err := range src.Documents() {
@@ -134,38 +134,42 @@ func (r *Runner) shapesItems() bool {
 	return len(cfg.GetJSONSelect()) > 0 || cfg.FlattenJSON()
 }
 
-// filterArray keeps the elements of a top-level JSON array which match --filter
-// (and the filters of the command itself), as the v2 CLI did with --raw. The
-// filter stages of the pipeline let such an array pass (see wholeArrayPasses).
-func (r *Runner) filterArray(whole jsondoc.JSONDoc) jsondoc.JSONDoc {
-	expressions := append(append([]string{}, r.Config.GetJSONFilter()...), r.filters...)
-	if len(expressions) == 0 {
-		return whole
-	}
-	pred, err := filter.Parse(expressions...)
-	if err != nil {
-		return whole
-	}
-	kept := make([][]byte, 0)
-	for _, item := range whole.Get().Array() {
-		if pred(jsondoc.New([]byte(item.Raw))) {
-			kept = append(kept, []byte(item.Raw))
-		}
-	}
-	return jsondoc.New(append(append([]byte{'['}, bytes.Join(kept, []byte{','})...), ']'))
-}
-
-// wholeArrayPasses lets the whole top-level JSON array of a --raw response
-// through a --filter stage: rawDocuments has filtered its elements already.
-func wholeArrayPasses(cfg *config.Config, pred filter.Predicate) filter.Predicate {
+// filterStage is the --filter stage (also used for the filters of a command).
+// Under --raw a top-level JSON array is printed whole, so, as the v2 CLI did,
+// the filter selects its elements and the result is printed as an array again
+// ("[]" when no element matches). Any other document is kept or dropped as a
+// whole.
+func filterStage(cfg *config.Config, pred filter.Predicate) output.Stage {
 	if !cfg.RawOutput() {
-		return pred
+		return output.Filter(pred)
 	}
-	return func(doc jsondoc.JSONDoc) bool {
-		if doc.Get().IsArray() {
-			return true
+	return func(src output.Seq) output.Seq {
+		return func(yield func(jsondoc.JSONDoc, error) bool) {
+			for doc, err := range src {
+				if err != nil {
+					if !yield(doc, err) {
+						return
+					}
+					continue
+				}
+				value := doc.Get()
+				if !value.IsArray() {
+					if pred(doc) && !yield(doc, nil) {
+						return
+					}
+					continue
+				}
+				kept := make([][]byte, 0)
+				for _, item := range value.Array() {
+					if pred(jsondoc.New([]byte(item.Raw))) {
+						kept = append(kept, []byte(item.Raw))
+					}
+				}
+				if !yield(jsondoc.New(append(append([]byte{'['}, bytes.Join(kept, []byte{','})...), ']')), nil) {
+					return
+				}
+			}
 		}
-		return pred(doc)
 	}
 }
 

@@ -10,6 +10,7 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/filter"
 	"github.com/spf13/viper"
 )
 
@@ -103,7 +104,8 @@ func TestAdaptRawArrayResult(t *testing.T) {
 // With --raw an enveloped collection renders as its envelope, also when it holds
 // no items. An empty top-level array prints "[]" as in the v2 CLI, and --filter
 // selects the elements of such an array. --select and --flatten still apply to
-// the items of a top-level array, which prints nothing when it is empty.
+// the items of a top-level array, which prints nothing when it is empty. The
+// --filter stage (filterStage) runs after adapt, as in the runner.
 func TestAdaptRawCollectionResult(t *testing.T) {
 	array := op.OK(model{jsondoc.New([]byte(`[{"a":1},{"a":2}]`))})
 	emptyArray := op.OK(model{jsondoc.New([]byte(`[]`))})
@@ -132,7 +134,8 @@ func TestAdaptRawCollectionResult(t *testing.T) {
 		{"array raw select", map[string]any{config.SettingsRawOutput: true, config.SettingsSelect: []string{"a"}}, array, []string{`{"a":1}`, `{"a":2}`}},
 		{"array raw filter", map[string]any{config.SettingsRawOutput: true, config.SettingsFilter: []string{"a gt 1"}}, array, []string{`[{"a":2}]`}},
 		{"array raw filter no match", map[string]any{config.SettingsRawOutput: true, config.SettingsFilter: []string{"a gt 5"}}, array, []string{`[]`}},
-		{"array raw filter select", map[string]any{config.SettingsRawOutput: true, config.SettingsFilter: []string{"a gt 1"}, config.SettingsSelect: []string{"a"}}, array, []string{`{"a":1}`, `{"a":2}`}},
+		{"array raw filter select", map[string]any{config.SettingsRawOutput: true, config.SettingsFilter: []string{"a gt 1"}, config.SettingsSelect: []string{"a"}}, array, []string{`{"a":2}`}},
+		{"array filter", map[string]any{config.SettingsFilter: []string{"a gt 1"}}, array, []string{`{"a":2}`}},
 		{"array response raw", map[string]any{config.SettingsRawOutput: true}, arrayResponse, []string{`[{"a":1},{"a":2}]`}},
 		{"array response raw select", map[string]any{config.SettingsRawOutput: true, config.SettingsSelect: []string{"a"}}, arrayResponse, []string{`{"a":1}`, `{"a":2}`}},
 		{"array raw flatten", map[string]any{config.SettingsRawOutput: true, config.SettingsJSONFlatten: true}, array, []string{`{"a":1}`, `{"a":2}`}},
@@ -143,7 +146,58 @@ func TestAdaptRawCollectionResult(t *testing.T) {
 				v.Set(k, val)
 			}
 			r := &Runner{Config: config.NewConfig(v)}
-			docs, errs := drain(r.adapt(c.in))
+			seq := r.adapt(c.in)
+			if expressions := r.Config.GetJSONFilter(); len(expressions) > 0 {
+				pred, err := filter.Parse(expressions...)
+				if err != nil {
+					t.Fatal(err)
+				}
+				seq = filterStage(r.Config, pred)(seq)
+			}
+			docs, errs := drain(seq)
+			if len(errs) != 0 {
+				t.Fatalf("errs = %v", errs)
+			}
+			if fmt.Sprint(docs) != fmt.Sprint(c.want) {
+				t.Errorf("docs = %v, want %v", docs, c.want)
+			}
+		})
+	}
+}
+
+// Under --raw the --filter stage selects the elements of any top-level JSON
+// array it gets (also one which c8y api prints whole) and keeps or drops other
+// documents whole. Without --raw it keeps or drops every document whole.
+func TestRawFilterStage(t *testing.T) {
+	pred, err := filter.Parse("a gt 1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	in := func(docs ...string) output.Seq {
+		return func(yield func(jsondoc.JSONDoc, error) bool) {
+			for _, d := range docs {
+				if !yield(jsondoc.New([]byte(d)), nil) {
+					return
+				}
+			}
+		}
+	}
+	for _, c := range []struct {
+		name string
+		raw  bool
+		in   []string
+		want []string
+	}{
+		{"raw array", true, []string{`[{"a":1},{"a":2},{"a":3}]`}, []string{`[{"a":2},{"a":3}]`}},
+		{"raw array no match", true, []string{`[{"a":1}]`}, []string{`[]`}},
+		{"raw empty array", true, []string{`[]`}, []string{`[]`}},
+		{"raw objects", true, []string{`{"a":1}`, `{"a":2}`}, []string{`{"a":2}`}},
+		{"objects", false, []string{`{"a":1}`, `{"a":2}`}, []string{`{"a":2}`}},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			v := viper.New()
+			v.Set(config.SettingsRawOutput, c.raw)
+			docs, errs := drain(filterStage(config.NewConfig(v), pred)(in(c.in...)))
 			if len(errs) != 0 {
 				t.Fatalf("errs = %v", errs)
 			}
