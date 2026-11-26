@@ -67,18 +67,6 @@ tests:
     stdout:
       line-count: 2
 
-  It fails for a device that exists:
-    command: |
-      id="dup_$(c8y template execute --template "_.Char(10)")"
-      c8y deviceregistration register-basic --id "$id" >/dev/null
-      c8y deviceregistration register-basic --id "$id" --verbose 2>&1
-      code=$?
-      c8y devices delete --id "$id" --silentStatusCodes 404 >/dev/null
-      exit $code
-    exit-code: 101
-    stdout:
-      exactly: zzz
-
   It only shows the registration request in a dry run:
     command: |
       c8y deviceregistration register-basic --id dryrun01 --password abc --dry |

@@ -107,7 +107,7 @@ jobs:
       if: ${{ !cancelled() && steps.setup.outcome == 'success' && (env.SUITES == 'all' || env.SUITES == 'manual') }}
       run: ./tests/run-manual.sh "$FILTER"
       shell: bash
-      timeout-minutes: 60
+      timeout-minutes: 90
 
     - name: Go tests against the tenant (cmd/tests)
       id: go

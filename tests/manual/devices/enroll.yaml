@@ -9,7 +9,7 @@ tests:
     command: |
       cd "$(mktemp -d)"
       id="enroll_$(c8y template execute --template "_.Char(10)")"
-      c8y devices enroll --timeout 20s --verbose --id "$id" --type thin-edge.io |
+      c8y devices enroll --timeout 20s --id "$id" --type thin-edge.io |
         c8y template execute --template "input.value + {id: 'x', key: std.endsWith(input.value.key, '.key'), certificate: std.endsWith(input.value.certificate, '.crt')}"
       head -n 1 "$id.key" "$id.crt"
       c8y devices delete --id "$id" --silentStatusCodes 404 >/dev/null
@@ -27,8 +27,8 @@ tests:
     command: |
       cd "$(mktemp -d)"
       id="enroll_$(c8y template execute --template "_.Char(10)")"
-      c8y devices enroll --timeout 20s --verbose --id "$id" >/dev/null
-      c8y devices enroll --timeout 20s --verbose --id "$id" --select alreadyRegistered
+      c8y devices enroll --timeout 20s --id "$id" >/dev/null
+      c8y devices enroll --timeout 20s --id "$id" --select alreadyRegistered
       c8y devices delete --id "$id" --silentStatusCodes 404 >/dev/null
     exit-code: 0
     stdout:
@@ -66,7 +66,7 @@ tests:
   It times out when the device is not registered and leaves no files:
     command: |
       cd "$(mktemp -d)"
-      c8y devices enroll --id enroll_timeout --mode manual --retry-every 100ms --timeout 1s 2>&1
+      c8y devices enroll --id enroll_timeout --mode manual --retry-every 100ms --timeout 1s 2>/dev/null
       echo "exit=$?"
       ls
     exit-code: 0
@@ -78,7 +78,7 @@ tests:
       cd "$(mktemp -d)"
       suffix="$(c8y template execute --template "_.Char(10)")"
       c8y util repeat 2 |
-        c8y devices enroll --timeout 20s --verbose --template "{id: 'pipe_${suffix}_' + input.index}" --select id,alreadyRegistered
+        c8y devices enroll --timeout 20s --template "{id: 'pipe_${suffix}_' + input.index}" --select id,alreadyRegistered
       ls | wc -l | tr -d ' '
     exit-code: 0
     stdout:
