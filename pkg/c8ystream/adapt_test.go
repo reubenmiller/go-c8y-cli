@@ -66,3 +66,82 @@ func TestAdapt(t *testing.T) {
 		t.Errorf("unsupported type must yield an error, got %v", errs)
 	}
 }
+
+// A response which is a plain JSON array renders item by item, and as the whole
+// body with --raw (as the v2 CLI did). Objects, and a failed result, are not
+// affected.
+func TestAdaptRawArrayResult(t *testing.T) {
+	array := op.OK(model{jsondoc.New([]byte(`[{"a":1},{"a":2}]`))})
+	object := op.OK(model{jsondoc.New([]byte(`{"id":"1"}`))})
+
+	for _, c := range []struct {
+		name string
+		raw  bool
+		in   any
+		want []string
+	}{
+		{"array", false, array, []string{`{"a":1}`, `{"a":2}`}},
+		{"array raw", true, array, []string{`[{"a":1},{"a":2}]`}},
+		{"object raw", true, object, []string{`{"id":"1"}`}},
+		{"object", false, object, []string{`{"id":"1"}`}},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			v := viper.New()
+			v.Set(config.SettingsRawOutput, c.raw)
+			r := &Runner{Config: config.NewConfig(v)}
+			docs, errs := drain(r.adapt(c.in))
+			if len(errs) != 0 {
+				t.Fatalf("errs = %v", errs)
+			}
+			if fmt.Sprint(docs) != fmt.Sprint(c.want) {
+				t.Errorf("docs = %v, want %v", docs, c.want)
+			}
+		})
+	}
+}
+
+// With --raw an enveloped collection renders as its envelope, also when it holds
+// no items, and --select, --flatten and --filter still apply to the items of a
+// top-level array, as in the v2 CLI. An empty top-level array prints nothing.
+func TestAdaptRawCollectionResult(t *testing.T) {
+	array := op.OK(model{jsondoc.New([]byte(`[{"a":1},{"a":2}]`))})
+	emptyArray := op.OK(model{jsondoc.New([]byte(`[]`))})
+	envelope := op.WithResponse(op.OK(model{jsondoc.New([]byte(`[{"name":"u1"},{"name":"u2"}]`))}), []byte(`{"users":[{"name":"u1"},{"name":"u2"}]}`))
+	// a collection without envelope: the response is the array itself
+	arrayResponse := op.WithResponse(op.OK(model{jsondoc.New([]byte(`[{"a":1},{"a":2}]`))}), []byte(`[{"a":1},{"a":2}]`))
+	emptyEnvelope := op.WithResponse(op.OK(model{jsondoc.New([]byte(`[]`))}), []byte(`{"users":[]}`))
+
+	for _, c := range []struct {
+		name     string
+		settings map[string]any
+		in       any
+		want     []string
+	}{
+		{"envelope", nil, envelope, []string{`{"name":"u1"}`, `{"name":"u2"}`}},
+		{"envelope raw", map[string]any{config.SettingsRawOutput: true}, envelope, []string{`{"users":[{"name":"u1"},{"name":"u2"}]}`}},
+		{"envelope raw select", map[string]any{config.SettingsRawOutput: true, config.SettingsSelect: []string{"users.*.name"}}, envelope, []string{`{"users":[{"name":"u1"},{"name":"u2"}]}`}},
+		{"empty envelope", nil, emptyEnvelope, nil},
+		{"empty envelope raw", map[string]any{config.SettingsRawOutput: true}, emptyEnvelope, []string{`{"users":[]}`}},
+		{"empty array raw", map[string]any{config.SettingsRawOutput: true}, emptyArray, nil},
+		{"array raw select", map[string]any{config.SettingsRawOutput: true, config.SettingsSelect: []string{"a"}}, array, []string{`{"a":1}`, `{"a":2}`}},
+		{"array raw filter", map[string]any{config.SettingsRawOutput: true, config.SettingsFilter: []string{"a gt 1"}}, array, []string{`{"a":1}`, `{"a":2}`}},
+		{"array response raw", map[string]any{config.SettingsRawOutput: true}, arrayResponse, []string{`[{"a":1},{"a":2}]`}},
+		{"array response raw select", map[string]any{config.SettingsRawOutput: true, config.SettingsSelect: []string{"a"}}, arrayResponse, []string{`{"a":1}`, `{"a":2}`}},
+		{"array raw flatten", map[string]any{config.SettingsRawOutput: true, config.SettingsJSONFlatten: true}, array, []string{`{"a":1}`, `{"a":2}`}},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			v := viper.New()
+			for k, val := range c.settings {
+				v.Set(k, val)
+			}
+			r := &Runner{Config: config.NewConfig(v)}
+			docs, errs := drain(r.adapt(c.in))
+			if len(errs) != 0 {
+				t.Fatalf("errs = %v", errs)
+			}
+			if fmt.Sprint(docs) != fmt.Sprint(c.want) {
+				t.Errorf("docs = %v, want %v", docs, c.want)
+			}
+		})
+	}
+}
