@@ -88,3 +88,23 @@ func TestFilter(t *testing.T) {
 		t.Error("expected an error for an invalid filter")
 	}
 }
+
+func TestResponseText(t *testing.T) {
+	cases := []struct {
+		body string
+		raw  bool
+		want string
+	}{
+		{body: "<html></html>", want: "<html></html>\n"},
+		{body: " hello \n\n", want: "hello\n"},
+		{body: "  \n", want: "\n"},
+		{body: "", want: ""},
+		{body: "dummy file", raw: true, want: "dummy file"},
+		{body: "a\n", raw: true, want: "a\n"},
+	}
+	for _, tc := range cases {
+		if got := string(responseText([]byte(tc.body), tc.raw)); got != tc.want {
+			t.Errorf("responseText(%q, raw=%v) = %q, want %q", tc.body, tc.raw, got, tc.want)
+		}
+	}
+}

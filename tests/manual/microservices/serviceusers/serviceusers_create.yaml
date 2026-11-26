@@ -20,31 +20,3 @@ tests:
     exit-code: 0
     stdout:
       exactly: ""
-
-  It creates an application and subscribes the tenant to it:
-    command: |
-      c8y microservices serviceusers create --name my-su --tenants t12345 --roles ROLE_A --select name,key,type,contextPath,requiredRoles
-    exit-code: 0
-    stdout:
-      json:
-        name: my-su
-        key: my-su-key
-        type: MICROSERVICE
-        contextPath: my-su
-        requiredRoles.0: ROLE_A
-
-  It created a service user for the subscribed tenant:
-    command: |
-      c8y microservices serviceusers get --id my-su --select name -o csv
-    exit-code: 0
-    stdout:
-      contains:
-        - service_
-
-  It accepts a tenant which is already subscribed:
-    command: |
-      c8y microservices serviceusers create --name my-su --tenants t12345 --select name -o csv
-    exit-code: 0
-    stdout:
-      lines:
-        1: my-su

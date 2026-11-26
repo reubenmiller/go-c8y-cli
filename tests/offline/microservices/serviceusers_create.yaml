@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# Real requests against the fake server. On a live tenant the application would be kept
+# (it can not be created again) and the tenant (t12345) does not exist.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+tests:
+  It creates an application and subscribes the tenant to it:
+    command: |
+      c8y microservices serviceusers create --name my-su --tenants t12345 --roles ROLE_A --select name,key,type,contextPath,requiredRoles
+    exit-code: 0
+    stdout:
+      json:
+        name: my-su
+        key: my-su-key
+        type: MICROSERVICE
+        contextPath: my-su
+        requiredRoles.0: ROLE_A
+
+  It created a service user for the subscribed tenant:
+    command: |
+      c8y microservices serviceusers get --id my-su --select name -o csv
+    exit-code: 0
+    stdout:
+      contains:
+        - service_
+
+  It accepts a tenant which is already subscribed:
+    command: |
+      c8y microservices serviceusers create --name my-su --tenants t12345 --select name -o csv
+    exit-code: 0
+    stdout:
+      lines:
+        1: my-su

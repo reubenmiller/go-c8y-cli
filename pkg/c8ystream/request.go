@@ -180,6 +180,10 @@ func (r *Runner) writeResponseBody(res *apiv2.RequestResult, body []byte) error 
 		return err
 	}
 	out := r.Cmd.OutOrStdout()
+	raw := r.Config.IsResponseOutput() || res.Header("Content-Type") == "application/octet-stream"
+	if body = responseText(body, raw); len(body) == 0 {
+		return nil
+	}
 	if _, err := out.Write(body); err != nil {
 		return err
 	}
@@ -188,6 +192,19 @@ func (r *Runner) writeResponseBody(res *apiv2.RequestResult, body []byte) error 
 		return err
 	}
 	return nil
+}
+
+// responseText returns the bytes which are written for a response body which is
+// not JSON. Only a binary download (and --raw output) is written as received. Any
+// other body is text: it is trimmed and ends with a newline, so that the
+// responses of several requests are written line by line (as in v2, which also
+// writes an empty line for a body of only whitespace).
+func responseText(body []byte, raw bool) []byte {
+	if raw || len(body) == 0 {
+		return body
+	}
+	body = bytes.TrimSpace(body)
+	return append(body[:len(body):len(body)], '\n')
 }
 
 func responseFields(res *apiv2.RequestResult, body []byte) map[string]string {

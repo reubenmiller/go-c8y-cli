@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# The output of non-JSON (text) responses of c8y api. The live suite covers the same
+# case in tests/manual/software/crud.sh (c8y software versions list | c8y api).
+tests:
+  It writes each text response on its own line:
+    command: |
+      tmp=$(mktemp -d)
+      trap 'rm -rf "$tmp"' EXIT
+      printf 'first' > "$tmp/first.txt"
+      printf ' second \n\n' > "$tmp/second.txt"
+      id1=$(c8y binaries create --file "$tmp/first.txt" --select id -o csv) &&
+      id2=$(c8y binaries create --file "$tmp/second.txt" --select id -o csv) &&
+      printf '/inventory/binaries/%s\n' "$id1" "$id2" | c8y api
+    exit-code: 0
+    stdout:
+      lines:
+        1: first
+        2: second
+
+  It writes a text response as received with --output serverresponse:
+    command: |
+      tmp=$(mktemp -d)
+      trap 'rm -rf "$tmp"' EXIT
+      printf 'first' > "$tmp/first.txt"
+      id=$(c8y binaries create --file "$tmp/first.txt" --select id -o csv) &&
+      c8y api "/inventory/binaries/$id" --output serverresponse | od -An -c | tr -d ' \n'
+    exit-code: 0
+    stdout:
+      exactly: first
+
+  It writes a binary (application/octet-stream) response as received:
+    command: |
+      tmp=$(mktemp -d)
+      trap 'rm -rf "$tmp"' EXIT
+      printf ' data\n\n' > "$tmp/data.bin"
+      id=$(c8y binaries create --file "$tmp/data.bin" --select id -o csv) &&
+      c8y api "/inventory/binaries/$id" | od -An -tx1 | tr -d ' \n'
+    exit-code: 0
+    stdout:
+      # " data\n\n" as hex
+      exactly: 20646174610a0a
