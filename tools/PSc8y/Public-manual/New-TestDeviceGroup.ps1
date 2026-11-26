@@ -54,7 +54,7 @@ Create a test device group with 10 newly created devices
         $TypeName = ""
         switch ($Type) {
             "SubGroup" {
-                $TypeName = "c8y_DeviceSubGroup"
+                $TypeName = "c8y_DeviceSubgroup"
                 break;
             }
             default {

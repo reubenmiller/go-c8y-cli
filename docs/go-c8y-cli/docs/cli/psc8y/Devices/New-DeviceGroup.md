@@ -110,7 +110,7 @@ Accept wildcard characters: False
 ```
 
 ### -Type
-Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubGroup (sub folder)).
+Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubgroup (sub folder)).
 Defaults to c8y_DeviceGroup
 
 ```yaml

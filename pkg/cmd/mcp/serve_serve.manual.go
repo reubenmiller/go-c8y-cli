@@ -11,11 +11,13 @@ import (
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/kballard/go-shellquote"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extensions"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mcpserver"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -38,6 +40,8 @@ type CmdServe struct {
 	maxOutput     int
 	noDefaultDeny bool
 	noNotify      bool
+
+	sessionProviders []string
 
 	allowDeviceShell   bool
 	confirmDeviceShell bool
@@ -74,6 +78,14 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			  link which the server opens in the browser. The link is never shown to the agent.
 			* The passphrase and code are passed to the login via a pipe, and aren't kept. When the token
 			  expires, the page opens again if they are needed.
+			* The picker shows the session files, and the sessions of the extension session provider set
+			  with "c8y settings update session.provider.extension <provider>" (if session.provider.type
+			  is extension). --sessionProvider replaces these sources: the picker only shows the listed
+			  sources, in the given order. Use "file" for the session files, e.g.
+			  --sessionProvider file,bitwarden (or --sessionProvider file --sessionProvider bitwarden). An extension session provider (e.g. a
+			  password manager) must declare the list and select commands in its extension.yaml. Its
+			  secrets are read from the environment, otherwise with the pin entry command. When the
+			  token expires, the provider is asked for the session again (e.g. for a new TOTP code).
 
 			For automation and CI, set C8Y_HOST, C8Y_TENANT, C8Y_USER and C8Y_PASSWORD or C8Y_TOKEN in the MCP
 			client configuration instead.
@@ -83,10 +95,12 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			* Session: selected by you in the browser. The agent can't switch the session, host or
 			  credentials. Commands only receive the token (or the password for basic auth sessions), never
 			  the passphrase.
-			* Mode (prod, qual, dev): the maximum mode the agent can use. By default, the agent uses the mode
-			  of the session (settings.session.mode), and prod (read only) if the session has none. --mode can
-			  only narrow the session's own mode, never widen it, also after switching the session. Read-only
-			  commands always run in prod (read-only) mode.
+			* Mode (prod, qual, dev): by default, the agent uses the mode of the session (settings.session.mode),
+			  and prod (read only) if the session has none. --mode is the maximum the agent can ever use, also
+			  after switching the session (dev if not set). You can raise the mode of the current session up to
+			  that maximum in the session picker or with the mode prompt, which lasts until the server stops and
+			  is never saved in the session file. Set --mode to the session's mode to keep it as the maximum.
+			  The agent can't change the mode. Read-only commands always run in prod (read-only) mode.
 			* Allow and deny lists: which commands the agent can use, e.g. "devices", "inventory *", "* delete".
 			* Local files: commands can't read files in the session home folder or the session file (e.g. with
 			  --template, --data or --file), so the agent can't read secrets from session files. Use --denyPath
@@ -124,6 +138,15 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			$ claude mcp add --scope user c8y -- c8y mcp serve --deny "users" --deny "tenants" --approval elicit
 			Deny user and tenant management, and always ask the user to approve writes
 
+			$ claude mcp add --scope user c8y -- c8y mcp serve --sessionProvider bitwarden
+			Only show the sessions of the "bitwarden" extension session provider in the session picker
+
+			$ claude mcp add --scope user c8y -- c8y mcp serve --sessionProvider bitwarden,file
+			Show the "bitwarden" sessions, then the session files
+
+			$ claude mcp add --scope user c8y -- c8y mcp serve --sessionProvider file --sessionProvider "bitwarden --folder c8y"
+			Show the session files and the "bitwarden" sessions, and pass arguments to the provider's list command
+
 			$ claude mcp add c8y -e C8Y_HOST=https://example.cumulocity.com -e C8Y_USER=ci -e C8Y_PASSWORD=... -- c8y mcp serve
 			Use credentials from environment variables (e.g. for CI)
 		`),
@@ -132,7 +155,7 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 	}
 
 	cmd.Flags().StringVar(&ccmd.policyFile, "policy", "", "Policy file (json, yaml or toml). Flags override the values in the file")
-	cmd.Flags().StringVar(&ccmd.mode, "mode", "", "Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: the session's mode (prod if the session has none)")
+	cmd.Flags().StringVar(&ccmd.mode, "mode", "", "Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: dev. The agent uses the session's mode (prod if none), which the user can raise up to this maximum in the session picker or with the mode prompt")
 	cmd.Flags().StringArrayVar(&ccmd.allow, "allow", nil, "Only allow commands matching this pattern, e.g. devices, \"inventory *\". Can be used multiple times")
 	cmd.Flags().StringArrayVar(&ccmd.deny, "deny", nil, "Deny commands matching this pattern, e.g. users, \"* delete\". Can be used multiple times")
 	cmd.Flags().StringArrayVar(&ccmd.denyPaths, "denyPath", nil, "Local file or folder the commands can't read, e.g. ~/.ssh. The session home folder and the session file are always denied. Can be used multiple times")
@@ -147,6 +170,33 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 	cmd.Flags().BoolVar(&ccmd.allowDeviceShell, "allowDeviceShell", false, "Allow the agent to run shell commands on devices (remoteaccess connect ssh and c8y_Command operations). Needs --mode qual or dev")
 	cmd.Flags().BoolVar(&ccmd.confirmDeviceShell, "confirmDeviceShell", false, "Ask for confirmation of each command run on a device in a native dialog, in addition to the normal approval")
 	cmd.Flags().BoolVar(&ccmd.noNotify, "noNotify", false, "Don't show a desktop notification when the session picker opens in the browser")
+	cmd.Flags().StringArrayVar(&ccmd.sessionProviders, "sessionProvider", nil, "Source of the sessions shown in the session picker: \"file\" for the session files, or an extension session provider (<provider> or <extension>/<provider>, optionally followed by arguments for its list command). Accepts comma separated values, and can be used multiple times. Replaces the default sources: the session files, and session.provider.extension (if session.provider.type is extension)")
+	_ = cmd.RegisterFlagCompletionFunc("sessionProvider", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		values := []string{FileSessionSource + "\tSession files in the session home folder"}
+		values = append(values, extensions.SessionProviderCompletions(listableProviders(f))...)
+		// complete the value after the last comma, e.g. "bitwarden,f", without the sources
+		// which are already listed
+		if i := strings.LastIndex(toComplete, ","); i >= 0 {
+			prefix := toComplete[:i+1]
+			used := map[string]bool{}
+			if items, err := splitSources(toComplete[:i]); err == nil {
+				for _, item := range items {
+					if parts, err := shellquote.Split(item); err == nil && len(parts) > 0 {
+						used[parts[0]] = true
+					}
+				}
+			}
+			remaining := []string{}
+			for _, v := range values {
+				name, _, _ := strings.Cut(v, "\t")
+				if !used[name] {
+					remaining = append(remaining, prefix+v)
+				}
+			}
+			values = remaining
+		}
+		return values, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
+	})
 	cmd.Flags().BoolVar(&ccmd.noDefaultDeny, "noDefaultDeny", false, fmt.Sprintf("Don't include the default deny list: %s", strings.Join(mcpserver.DefaultDenyCommands, ", ")))
 
 	completion.WithOptions(
@@ -298,22 +348,139 @@ func (n *CmdServe) RunE(cmd *cobra.Command, args []string) error {
 		},
 	}
 
-	return n.runStdio(ctx, cfg, server, executable, host, sessionFile, sessionModeName)
+	providers, err := n.providerSources(cfg)
+	if err != nil {
+		return err
+	}
+
+	return n.runStdio(ctx, cfg, server, executable, host, sessionFile, sessionModeName, providers)
 }
 
-// capMode returns the session mode, and the mode the agent can use (the policy mode limited
-// by the session mode). The mode stored in the session is used, ignoring CI detection, so CI
+// listableProviders returns the installed session providers which can list their sessions
+func listableProviders(f *cmdutil.Factory) []extensions.InstalledSessionProvider {
+	providers := []extensions.InstalledSessionProvider{}
+	for _, p := range extensions.ListSessionProviders(f.ExtensionManager().List(), nil) {
+		if p.Provider.CanList() {
+			providers = append(providers, p)
+		}
+	}
+	return providers
+}
+
+// providerSources returns the sources of the sessions shown in the picker, in the order they
+// are shown: the sources given with --sessionProvider, otherwise the session files and the
+// configured extension provider (if it can list its sessions)
+func (n *CmdServe) providerSources(cfg *config.Config) ([]providerSource, error) {
+	values := []string{}
+	for _, value := range n.sessionProviders {
+		items, err := splitSources(value)
+		if err != nil {
+			return nil, cmderrors.NewUserError(err)
+		}
+		values = append(values, items...)
+	}
+	fromConfig := false
+	if len(values) == 0 {
+		values = []string{FileSessionSource}
+		if strings.EqualFold(cfg.SessionProvider(), config.ProviderTypeExtension) && cfg.SessionProviderExtension() != "" {
+			values = append(values, cfg.SessionProviderExtension())
+			fromConfig = true
+		}
+	}
+
+	installed := extensions.ListSessionProviders(n.factory.ExtensionManager().List(), nil)
+	sources := make([]providerSource, 0, len(values))
+	seen := map[string]bool{}
+	for _, value := range values {
+		parts, err := shellquote.Split(value)
+		if err != nil || len(parts) == 0 {
+			return nil, cmderrors.NewUserError(fmt.Sprintf("invalid session provider: %q", value))
+		}
+		if seen[parts[0]] {
+			return nil, cmderrors.NewUserError(fmt.Sprintf("session provider %q is given more than once", parts[0]))
+		}
+		seen[parts[0]] = true
+
+		if parts[0] == FileSessionSource {
+			if len(parts) > 1 {
+				return nil, cmderrors.NewUserError(fmt.Sprintf("the %q session provider does not accept arguments: %q", FileSessionSource, value))
+			}
+			sources = append(sources, providerSource{Ref: FileSessionSource})
+			continue
+		}
+
+		provider, err := extensions.ResolveSessionProvider(installed, parts[0])
+		if err == nil && !provider.Provider.CanList() {
+			err = fmt.Errorf("session provider %s can't list its sessions, as it does not declare the list and select commands in its extension.yaml", provider.Ref())
+		}
+		if err != nil {
+			if fromConfig {
+				// the configured provider still works for "c8y sessions login"
+				log, _ := n.factory.Logger()
+				if log != nil {
+					log.Infof("The sessions of the configured session provider are not shown in the session picker. %s", err)
+				}
+				continue
+			}
+			return nil, cmderrors.NewUserError(err)
+		}
+		sources = append(sources, providerSource{Ref: parts[0], Args: parts[1:]})
+	}
+	return sources, nil
+}
+
+// splitSources splits a --sessionProvider value on commas which are not quoted (or escaped),
+// e.g. "bitwarden --folder 'a,b',file" is split into "bitwarden --folder 'a,b'" and "file".
+// The quotes are kept, so the items can be split into arguments
+func splitSources(value string) ([]string, error) {
+	items := []string{}
+	var current strings.Builder
+	var quote rune
+	escaped := false
+	add := func() error {
+		item := strings.TrimSpace(current.String())
+		current.Reset()
+		if item == "" {
+			return fmt.Errorf("invalid session provider: %q (empty value)", value)
+		}
+		items = append(items, item)
+		return nil
+	}
+	for _, r := range value {
+		switch {
+		case escaped:
+			escaped = false
+		case r == '\\' && quote != '\'':
+			escaped = true
+		case quote != 0:
+			if r == quote {
+				quote = 0
+			}
+		case r == '\'' || r == '"':
+			quote = r
+		case r == ',':
+			if err := add(); err != nil {
+				return nil, err
+			}
+			continue
+		}
+		current.WriteRune(r)
+	}
+	if quote != 0 {
+		return nil, fmt.Errorf("invalid session provider: %q (unterminated quote)", value)
+	}
+	if err := add(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+// capMode returns the session mode, and the mode the agent can use (the session mode or the
+// user's override, limited by the policy mode). The mode stored in the session is used, ignoring CI detection, so CI
 // env variables can't widen what the agent is allowed to do
-func capMode(log interface{ Warnf(string, ...any) }, policyMode config.SessionMode, sessionModeName string) (config.SessionMode, config.SessionMode) {
-	sessionMode := config.SessionModeUnset.FromString(sessionModeName, false)
-	if sessionMode == config.SessionModeUnset {
-		sessionMode = config.SessionModeProduction
-	}
-	effectiveMode := mcpserver.CapMode(policyMode, sessionMode)
-	if policyMode != config.SessionModeUnset && effectiveMode != policyMode {
-		log.Warnf("MCP mode %q is limited by the session mode %q", policyMode.String(), sessionMode.String())
-	}
-	return sessionMode, effectiveMode
+func capMode(server *mcpserver.Server, key string, sessionModeName string) (config.SessionMode, config.SessionMode) {
+	sessionMode := mcpserver.SessionDefaultMode(config.SessionModeUnset.FromString(sessionModeName, false))
+	return sessionMode, server.EffectiveMode(key, sessionModeName)
 }
 
 // expandHome expands a leading ~ to the user's home folder

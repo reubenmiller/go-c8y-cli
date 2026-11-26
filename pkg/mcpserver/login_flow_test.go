@@ -209,3 +209,38 @@ func newTestServer() *Server {
 		Runner:     &Runner{Executable: "/bin/false", Mode: config.SessionModeProduction},
 	}
 }
+
+func TestInteractiveLoginWithProvider(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("uses a shell script")
+	}
+	dir := shortTempDir(t)
+	token, _ := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Second))}).SignedString([]byte("key"))
+
+	login := &InteractiveLogin{
+		Executable:  writeFakeC8y(t, dir, token),
+		Provider:    "bitwarden",
+		SessionURI:  "bitwarden://item-1",
+		SessionMode: "qual",
+		RenewBefore: time.Minute,
+	}
+	env, err := login.AuthEnv(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := strings.Join(env, "\n")
+	if !strings.Contains(joined, "C8Y_TOKEN="+token) || strings.Contains(joined, "C8Y_SESSION=") {
+		t.Errorf("provider sessions should only pass the token: %s", joined)
+	}
+	// the token expires soon, so the provider is asked for the session again
+	if _, err := login.AuthEnv(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	args, _ := os.ReadFile(filepath.Join(dir, "args.log"))
+	if strings.Count(string(args), "--from-extension bitwarden --select bitwarden://item-1") != 2 {
+		t.Errorf("expected the provider login to be repeated: %s", args)
+	}
+	if strings.Contains(string(args), "--from-env") || strings.Contains(string(args), "--from-file") {
+		t.Errorf("provider logins should not use the environment or a file: %s", args)
+	}
+}

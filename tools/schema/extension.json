@@ -125,8 +125,11 @@
                 "name": {
                     "type": "string",
                     "title": "Provider name",
-                    "description": "Name used to select the provider, e.g. 'c8y sessions login --from-extension <name>'",
+                    "description": "Name used to select the provider, e.g. 'c8y sessions login --from-extension <name>'. The name 'file' is reserved for the session files",
                     "pattern": "^[a-z][a-z0-9-]*$",
+                    "not": {
+                        "const": "file"
+                    },
                     "examples": [
                         "bitwarden"
                     ]
@@ -173,7 +176,38 @@
                         "dotenv"
                     ],
                     "default": "auto"
+                },
+                "list": {
+                    "type": "array",
+                    "title": "List arguments",
+                    "description": "Arguments which make the binary print the provider's sessions as a json array (sessionUri, name, host, tenant, username, mode, loginType, group), without secrets and without user interaction. Used by the browser session picker of 'c8y mcp serve'. Requires select",
+                    "items": {
+                        "type": "string"
+                    },
+                    "examples": [
+                        [
+                            "list",
+                            "--json"
+                        ]
+                    ]
+                },
+                "select": {
+                    "type": "array",
+                    "title": "Select arguments",
+                    "description": "Arguments which make the binary print one session (like exec), given by its sessionUri which is appended to the arguments, without user interaction. Used by 'c8y sessions login --select <sessionUri>'. Requires list",
+                    "items": {
+                        "type": "string"
+                    },
+                    "examples": [
+                        [
+                            "get"
+                        ]
+                    ]
                 }
+            },
+            "dependentRequired": {
+                "list": ["select"],
+                "select": ["list"]
             },
             "required": [
                 "name"

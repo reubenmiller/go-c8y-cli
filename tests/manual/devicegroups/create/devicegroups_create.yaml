@@ -31,7 +31,7 @@ tests:
     command: |
       c8y devicegroups create \
         --name "My Custom Sub Group" \
-        --type "c8y_DeviceSubGroup" |
+        --type "c8y_DeviceSubgroup" |
       c8y util show --select method,pathEncoded,body --compact=false
     exit-code: 0
     stdout:
@@ -40,7 +40,7 @@ tests:
           "body": {
             "c8y_IsDeviceGroup": { },
             "name": "My Custom Sub Group",
-            "type": "c8y_DeviceSubGroup"
+            "type": "c8y_DeviceSubgroup"
           },
           "method": "POST",
           "pathEncoded": "/inventory/managedObjects"

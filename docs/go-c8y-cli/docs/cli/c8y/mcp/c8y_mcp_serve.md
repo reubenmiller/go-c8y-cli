@@ -27,6 +27,14 @@ Sessions are selected and unlocked in the browser, as the server has no terminal
   link which the server opens in the browser. The link is never shown to the agent.
 * The passphrase and code are passed to the login via a pipe, and aren't kept. When the token
   expires, the page opens again if they are needed.
+* The picker shows the session files, and the sessions of the extension session provider set
+  with "c8y settings update session.provider.extension \<provider>" (if session.provider.type
+  is extension). --sessionProvider replaces these sources: the picker only shows the listed
+  sources, in the given order. Use "file" for the session files, e.g.
+  --sessionProvider file,bitwarden (or --sessionProvider file --sessionProvider bitwarden). An extension session provider (e.g. a
+  password manager) must declare the list and select commands in its extension.yaml. Its
+  secrets are read from the environment, otherwise with the pin entry command. When the
+  token expires, the provider is asked for the session again (e.g. for a new TOTP code).
 
 For automation and CI, set C8Y_HOST, C8Y_TENANT, C8Y_USER and C8Y_PASSWORD or C8Y_TOKEN in the MCP
 client configuration instead.
@@ -36,10 +44,12 @@ You control what the agent can do:
 * Session: selected by you in the browser. The agent can't switch the session, host or
   credentials. Commands only receive the token (or the password for basic auth sessions), never
   the passphrase.
-* Mode (prod, qual, dev): the maximum mode the agent can use. By default, the agent uses the mode
-  of the session (settings.session.mode), and prod (read only) if the session has none. --mode can
-  only narrow the session's own mode, never widen it, also after switching the session. Read-only
-  commands always run in prod (read-only) mode.
+* Mode (prod, qual, dev): by default, the agent uses the mode of the session (settings.session.mode),
+  and prod (read only) if the session has none. --mode is the maximum the agent can ever use, also
+  after switching the session (dev if not set). You can raise the mode of the current session up to
+  that maximum in the session picker or with the mode prompt, which lasts until the server stops and
+  is never saved in the session file. Set --mode to the session's mode to keep it as the maximum.
+  The agent can't change the mode. Read-only commands always run in prod (read-only) mode.
 * Allow and deny lists: which commands the agent can use, e.g. "devices", "inventory *", "* delete".
 * Local files: commands can't read files in the session home folder or the session file (e.g. with
   --template, --data or --file), so the agent can't read secrets from session files. Use --denyPath
@@ -84,6 +94,15 @@ Use a specific session, and at most allow creating and updating data
 $ claude mcp add --scope user c8y -- c8y mcp serve --deny "users" --deny "tenants" --approval elicit
 Deny user and tenant management, and always ask the user to approve writes
 
+$ claude mcp add --scope user c8y -- c8y mcp serve --sessionProvider bitwarden
+Only show the sessions of the "bitwarden" extension session provider in the session picker
+
+$ claude mcp add --scope user c8y -- c8y mcp serve --sessionProvider bitwarden,file
+Show the "bitwarden" sessions, then the session files
+
+$ claude mcp add --scope user c8y -- c8y mcp serve --sessionProvider file --sessionProvider "bitwarden --folder c8y"
+Show the session files and the "bitwarden" sessions, and pass arguments to the provider's list command
+
 $ claude mcp add c8y -e C8Y_HOST=https://example.cumulocity.com -e C8Y_USER=ci -e C8Y_PASSWORD=... -- c8y mcp serve
 Use credentials from environment variables (e.g. for CI)
 
@@ -100,11 +119,12 @@ Use credentials from environment variables (e.g. for CI)
       --denyPath stringArray              Local file or folder the commands can't read, e.g. ~/.ssh. The session home folder and the session file are always denied. Can be used multiple times
       --maxOutput int                     Maximum number of output bytes returned to the agent per command. Default: 100000
       --maxTimeout duration               Maximum timeout the agent can request per command. Default: 10m
-      --mode string                       Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: the session's mode (prod if the session has none)
+      --mode string                       Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: dev. The agent uses the session's mode (prod if none), which the user can raise up to this maximum in the session picker or with the mode prompt
       --noDefaultDeny[=true|false]        Don't include the default deny list: mcp, sessions, settings, cli, alias, completion, extensions, microservices getBootstrapUser, deviceregistration getCredentials, remoteaccess connect run, remoteaccess server
       --noNotify[=true|false]             Don't show a desktop notification when the session picker opens in the browser
       --policy string                     Policy file (json, yaml or toml). Flags override the values in the file
       --read stringArray                  Additional commands to treat as read-only, e.g. extension commands. Can be used multiple times
+      --sessionProvider stringArray       Source of the sessions shown in the session picker: "file" for the session files, or an extension session provider (<provider> or <extension>/<provider>, optionally followed by arguments for its list command). Accepts comma separated values, and can be used multiple times. Replaces the default sources: the session files, and session.provider.extension (if session.provider.type is extension)
       --timeout duration                  Default timeout per command. Default: 2m
 ```
 
