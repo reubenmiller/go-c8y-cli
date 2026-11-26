@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 )
 
 // approvalInputID id of the approval in the input requests of a tool result
@@ -86,7 +88,8 @@ func (a *approvalTokens) use(state string, key string) error {
 	return nil
 }
 
-// approvalKey identifies what the user approves: the command, its input and the session
-func approvalKey(session SessionInfo, plan *Plan, in CommandInput) string {
-	return strings.Join([]string{plan.String(), in.Stdin, session.Host, session.Tenant, session.Username, session.SessionName}, "\x00")
+// approvalKey identifies what the user approves: the command, its input, the session and
+// the mode the command needs, so an approval can't be reused for another mode
+func approvalKey(session SessionInfo, plan *Plan, in CommandInput, required config.SessionMode) string {
+	return strings.Join([]string{plan.String(), in.Stdin, session.Host, session.Tenant, session.Username, session.SessionName, required.String()}, "\x00")
 }

@@ -163,7 +163,7 @@ func TestWriteApprovalCanNotBeForged(t *testing.T) {
 	}{
 		{"forged state", "devices create --name approved", "0123.abcd"},
 		{"no state", "devices create --name approved", ""},
-		{"other command", "devices delete --id 1", first.RequestState},
+		{"other command", "devices create --name other", first.RequestState},
 	}
 	for _, tc := range cases {
 		res := call(tc.command, tc.state, accept)
