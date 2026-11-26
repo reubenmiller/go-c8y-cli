@@ -15,6 +15,10 @@
 # alarms/subscribe or inventory/wait.yaml). The extensions/* tests use the
 # test extensions under tests/testdata (e.g. c8y-kitchensink).
 #
+# C8Y_OFFLINE_SUITE=offline runs a tests/offline folder or file (same setup as
+# manual). These tests send real requests (create data the live tenant would
+# keep, or need server features) and are not part of the live suite.
+#
 # C8Y_OFFLINE_TLS=1 starts the fake server with --tls (self-signed) and sets
 # C8Y_SETTINGS_DEFAULTS_INSECURE=true.
 #
@@ -106,7 +110,10 @@ if [ "${C8Y_OFFLINE_SUITE:-auto}" = go ]; then
         set -- ./...
     fi
     go test "$@" </dev/null
-elif [ "${C8Y_OFFLINE_SUITE:-auto}" = manual ]; then
+elif [ "${C8Y_OFFLINE_SUITE:-auto}" = manual ] || [ "${C8Y_OFFLINE_SUITE:-auto}" = offline ]; then
+    # offline: tests/offline, real requests which only run against the fake server
+    base=manual
+    [ "${C8Y_OFFLINE_SUITE}" = offline ] && base=offline
     folder="${1:-}"
     [ $# -gt 0 ] && shift
     cd "$SCRIPT_DIR"
@@ -122,10 +129,10 @@ elif [ "${C8Y_OFFLINE_SUITE:-auto}" = manual ]; then
             export C8Y_SETTINGS_DEFAULTS_PAGESIZE=" "
             ;;
     esac
-    if [ -f "manual/$folder" ]; then
-        commander test --config ./config.manual.yaml "$@" "manual/$folder" </dev/null
+    if [ -f "$base/$folder" ]; then
+        commander test --config ./config.manual.yaml "$@" "$base/$folder" </dev/null
     else
-        commander test --config ./config.manual.yaml "$@" --dir "manual/$folder" </dev/null
+        commander test --config ./config.manual.yaml "$@" --dir "$base/$folder" </dev/null
     fi
 else
     "$SCRIPT_DIR/run-auto.sh" "$@" </dev/null
