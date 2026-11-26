@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"iter"
+	"reflect"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
@@ -60,11 +61,65 @@ func (r *Runner) adaptItem(v any, item string) output.Seq {
 			seq = output.Seq(x.Pages())
 		}
 	case op.DocumentSource:
-		seq = output.Seq(x.Documents())
+		if r.Config.RawOutput() {
+			seq = rawDocuments(x)
+		} else {
+			seq = output.Seq(x.Documents())
+		}
 	default:
 		return errSeq(fmt.Errorf("c8ystream: unsupported call result %T", v))
 	}
 	return skipDeclined(seq)
+}
+
+// rawDocuments is the --raw rendering of an op.Result: the response body as
+// received. Documents() unwraps a response that holds a collection (a top-level
+// JSON array such as the tenant usage statistics summary, or the items plucked
+// from an envelope such as the service users) into one document per element, so
+// under --raw the whole body is yielded instead, as the v2 CLI did. Anything
+// else (objects, errors, dry runs, 204) renders as usual.
+func rawDocuments(src op.DocumentSource) output.Seq {
+	return func(yield func(jsondoc.JSONDoc, error) bool) {
+		whole, isCollection := wholeBody(src)
+		for doc, err := range src.Documents() {
+			if err == nil && isCollection {
+				// the first document stands for the whole body
+				yield(whole, nil)
+				return
+			}
+			if !yield(doc, err) {
+				return
+			}
+		}
+	}
+}
+
+// wholeBody returns the body of an op.Result which Documents() splits into
+// several documents: the raw response of a collection result (op.Result.Response,
+// retained when the items were plucked from an envelope), or else the data when
+// it is a JSON array (jsondoc.Unwrapper). op.Result is generic and exposes these
+// only through its fields, hence the reflection.
+func wholeBody(src op.DocumentSource) (jsondoc.JSONDoc, bool) {
+	v := reflect.ValueOf(src)
+	if v.Kind() != reflect.Struct {
+		return jsondoc.Empty(), false
+	}
+	if resp := v.FieldByName("Response"); resp.IsValid() && resp.Kind() == reflect.Slice && resp.Type().Elem().Kind() == reflect.Uint8 && resp.Len() > 0 {
+		return jsondoc.New(resp.Bytes()), true
+	}
+	data := v.FieldByName("Data")
+	if !data.IsValid() || !data.CanInterface() {
+		return jsondoc.Empty(), false
+	}
+	u, ok := data.Interface().(jsondoc.Unwrapper)
+	if !ok {
+		return jsondoc.Empty(), false
+	}
+	doc := u.GetJSONDoc()
+	if !doc.Get().IsArray() {
+		return jsondoc.Empty(), false
+	}
+	return doc, true
 }
 
 // approvalError marks an error returned by the confirmation prompt (e.g. "No"

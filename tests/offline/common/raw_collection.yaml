@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# --raw prints the response body as received, also when the response is a plain
+# JSON array or its items are plucked from an envelope (not a paginated list).
+tests:
+    Raw output of a response which is a plain JSON array is the whole array:
+        command: c8y tenantstatistics listSummaryAllTenants --raw
+        exit-code: 0
+        stdout:
+            match-pattern: |
+                ^\[\{.*\}\]$
+
+    Output of a response which is a plain JSON array is one document per item:
+        command: c8y tenantstatistics listSummaryAllTenants
+        exit-code: 0
+        stdout:
+            match-pattern: |
+                ^\{.*\}$
+
+    Raw output of a response with plucked items is the whole envelope:
+        command: c8y microservices serviceusers get --id technician --raw
+        exit-code: 0
+        stdout:
+            match-pattern: |
+                ^\{.*"users":\[\{.*\}\]\}$
+
+    Raw output of a batched create is the response of each batch:
+        command: |
+          id=$(c8y devices create --name raw-bulk-device --select id -o csv)
+          seq 1 3 | c8y measurements createBulk --device "$id" --type rawBulk --batchSize 2 --template "{nx_T: {v: {value: input.index}}}" --raw | c8y util show --select 'measurements.*.nx_T.v.value' -o csv | wc -l | tr -d ' '
+          c8y devices delete --id "$id" >/dev/null
+        exit-code: 0
+        stdout:
+            exactly: |
+              2

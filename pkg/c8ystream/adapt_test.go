@@ -66,3 +66,36 @@ func TestAdapt(t *testing.T) {
 		t.Errorf("unsupported type must yield an error, got %v", errs)
 	}
 }
+
+// A response which is a plain JSON array renders item by item, and as the whole
+// body with --raw (as the v2 CLI did). Objects, and a failed result, are not
+// affected.
+func TestAdaptRawArrayResult(t *testing.T) {
+	array := op.OK(model{jsondoc.New([]byte(`[{"a":1},{"a":2}]`))})
+	object := op.OK(model{jsondoc.New([]byte(`{"id":"1"}`))})
+
+	for _, c := range []struct {
+		name string
+		raw  bool
+		in   any
+		want []string
+	}{
+		{"array", false, array, []string{`{"a":1}`, `{"a":2}`}},
+		{"array raw", true, array, []string{`[{"a":1},{"a":2}]`}},
+		{"object raw", true, object, []string{`{"id":"1"}`}},
+		{"object", false, object, []string{`{"id":"1"}`}},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			v := viper.New()
+			v.Set(config.SettingsRawOutput, c.raw)
+			r := &Runner{Config: config.NewConfig(v)}
+			docs, errs := drain(r.adapt(c.in))
+			if len(errs) != 0 {
+				t.Fatalf("errs = %v", errs)
+			}
+			if fmt.Sprint(docs) != fmt.Sprint(c.want) {
+				t.Errorf("docs = %v, want %v", docs, c.want)
+			}
+		})
+	}
+}
