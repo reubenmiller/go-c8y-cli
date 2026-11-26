@@ -171,3 +171,4 @@ Verified since the first version of this page: a 409 on identity create, child a
 
 - The exit code for unresolved names on built-in commands (100 or 101).
 - The `inventory find` query shape, and whether the no-content success message is ported.
+- `--withGroups` is accepted but ignored by `devices get`, `devices list`, `agents get`, `agents list` and `smartgroups get`, although the SDK now has `managedobjects.GetOptions.WithGroups` (other inventory-based commands already send it). Wiring it would add `withGroups=true` to the request and `assetParents` to the output when the flag is set, so it changes output for scripts that pass the flag today.

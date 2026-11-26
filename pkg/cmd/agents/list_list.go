@@ -18,7 +18,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/agents"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devicegroups"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/devices"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/model"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/spf13/cobra"
@@ -185,10 +184,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		// GAP: --withGroups has no field in managedobjects.GetOptions yet (same
 		// gap as devices list).
-		// The agent scope is part of the query, so it is listed with the
-		// devices service: it sends the query as `q` (as the v1 command did),
-		// where agents.ListOptions.Query would be sent as `query`.
-		opt := devices.ListOptions{Query: q.Build()}
+		opt := agents.ListOptions{Query: q.Build()}
 		opt.SkipChildrenNames = in.Bool("skipChildrenNames")
 		opt.WithChildren = in.Bool("withChildren")
 		opt.WithChildrenCount = in.Bool("withChildrenCount")
@@ -196,7 +192,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		opt.WithLatestValues = in.Bool("withLatestValues")
 		opt.PaginationOptions = paging
 		return func(ctx context.Context) any {
-			return client.Devices.ListAll(ctx, opt)
+			return client.Agents.ListAll(ctx, opt)
 		}, nil
 	})
 }
