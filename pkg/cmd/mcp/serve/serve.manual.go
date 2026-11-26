@@ -95,10 +95,12 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 			* Session: selected by you in the browser. The agent can't switch the session, host or
 			  credentials. Commands only receive the token (or the password for basic auth sessions), never
 			  the passphrase.
-			* Mode (prod, qual, dev): the maximum mode the agent can use. By default, the agent uses the mode
-			  of the session (settings.session.mode), and prod (read only) if the session has none. --mode can
-			  only narrow the session's own mode, never widen it, also after switching the session. Read-only
-			  commands always run in prod (read-only) mode.
+			* Mode (prod, qual, dev): by default, the agent uses the mode of the session (settings.session.mode),
+			  and prod (read only) if the session has none. --mode is the maximum the agent can ever use, also
+			  after switching the session (dev if not set). You can raise the mode of the current session up to
+			  that maximum in the session picker or with the mode prompt, which lasts until the server stops and
+			  is never saved in the session file. Set --mode to the session's mode to keep it as the maximum.
+			  The agent can't change the mode. Read-only commands always run in prod (read-only) mode.
 			* Allow and deny lists: which commands the agent can use, e.g. "devices", "inventory *", "* delete".
 			* Local files: commands can't read files in the session home folder or the session file (e.g. with
 			  --template, --data or --file), so the agent can't read secrets from session files. Use --denyPath
@@ -153,7 +155,7 @@ func NewCmdServe(f *cmdutil.Factory) *CmdServe {
 	}
 
 	cmd.Flags().StringVar(&ccmd.policyFile, "policy", "", "Policy file (json, yaml or toml). Flags override the values in the file")
-	cmd.Flags().StringVar(&ccmd.mode, "mode", "", "Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: the session's mode (prod if the session has none)")
+	cmd.Flags().StringVar(&ccmd.mode, "mode", "", "Maximum mode the agent can use: prod (read only), qual (create, update) or dev (create, update, delete). Default: dev. The agent uses the session's mode (prod if none), which the user can raise up to this maximum in the session picker or with the mode prompt")
 	cmd.Flags().StringArrayVar(&ccmd.allow, "allow", nil, "Only allow commands matching this pattern, e.g. devices, \"inventory *\". Can be used multiple times")
 	cmd.Flags().StringArrayVar(&ccmd.deny, "deny", nil, "Deny commands matching this pattern, e.g. users, \"* delete\". Can be used multiple times")
 	cmd.Flags().StringArrayVar(&ccmd.denyPaths, "denyPath", nil, "Local file or folder the commands can't read, e.g. ~/.ssh. The session home folder and the session file are always denied. Can be used multiple times")
@@ -473,19 +475,12 @@ func splitSources(value string) ([]string, error) {
 	return items, nil
 }
 
-// capMode returns the session mode, and the mode the agent can use (the policy mode limited
-// by the session mode). The mode stored in the session is used, ignoring CI detection, so CI
+// capMode returns the session mode, and the mode the agent can use (the session mode or the
+// user's override, limited by the policy mode). The mode stored in the session is used, ignoring CI detection, so CI
 // env variables can't widen what the agent is allowed to do
-func capMode(log interface{ Warnf(string, ...any) }, policyMode config.SessionMode, sessionModeName string) (config.SessionMode, config.SessionMode) {
-	sessionMode := config.SessionModeUnset.FromString(sessionModeName, false)
-	if sessionMode == config.SessionModeUnset {
-		sessionMode = config.SessionModeProduction
-	}
-	effectiveMode := mcpserver.CapMode(policyMode, sessionMode)
-	if policyMode != config.SessionModeUnset && effectiveMode != policyMode {
-		log.Warnf("MCP mode %q is limited by the session mode %q", policyMode.String(), sessionMode.String())
-	}
-	return sessionMode, effectiveMode
+func capMode(server *mcpserver.Server, key string, sessionModeName string) (config.SessionMode, config.SessionMode) {
+	sessionMode := mcpserver.SessionDefaultMode(config.SessionModeUnset.FromString(sessionModeName, false))
+	return sessionMode, server.EffectiveMode(key, sessionModeName)
 }
 
 // expandHome expands a leading ~ to the user's home folder

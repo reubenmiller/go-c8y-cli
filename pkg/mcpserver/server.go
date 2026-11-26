@@ -20,6 +20,8 @@ const (
 
 	// PromptSwitchSession prompt to let the user switch the session (stdio mode)
 	PromptSwitchSession = "switch_session"
+	// PromptMode prompt to let the user change the mode of the current session
+	PromptMode = "mode"
 )
 
 // SessionInfo non-secret information about the session used by the server
@@ -59,13 +61,34 @@ type Server struct {
 	// for the user's selection: tool calls wait for it instead (see Gate)
 	SwitchSession func(ctx context.Context) (string, error)
 
+	// SwitchSessionTo optional function which switches to the named session straight away
+	// if it needs no passphrase or code (and otherwise opens the picker at its unlock
+	// step), then applies the mode (if not empty). It is used by the switch_session prompt
+	// when the user gives a session or a mode
+	SwitchSessionTo func(ctx context.Context, session string, mode string) (string, error)
+
+	// SessionNames optional function which lists the names of the sessions, to complete
+	// the session argument of the switch_session prompt
+	SessionNames func(ctx context.Context) []string
+
+	// EnableModePrompt offers the mode prompt, which changes the mode of the current
+	// session (see SetMode)
+	EnableModePrompt bool
+
 	// ConfirmDeviceShell optional confirmation by the user of commands which run a shell
 	// command on a device, in addition to the normal approval. Unlike the approval, the
 	// MCP client can't answer it
 	ConfirmDeviceShell func(ctx context.Context, session SessionInfo, command string) error
 
+	// Logf optional function which logs mode changes
+	Logf func(format string, args ...any)
+
 	mu        sync.RWMutex
 	approvals approvalTokens
+	// sessionKey identifies the active session (file path or provider key)
+	sessionKey string
+	// modeOverrides modes chosen by the user, by session key. They only live in memory
+	modeOverrides map[string]config.SessionMode
 }
 
 // SetSession changes the session used by the commands, e.g. when the user switches
@@ -73,10 +96,99 @@ type Server struct {
 // using the previous session, so a command always runs against the tenant it was
 // approved for.
 func (s *Server) SetSession(info SessionInfo, runner *Runner) {
+	s.SetSessionKey(info.SessionName, info, runner)
+}
+
+// SetSessionKey is like SetSession for the session identified by key (the path of the
+// session file, or the key of a provider session). The mode override of the session
+// (if any) is applied to the runner.
+func (s *Server) SetSessionKey(key string, info SessionInfo, runner *Runner) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.sessionKey = key
 	s.Session = info
+	if _, ok := s.modeOverrides[key]; ok && runner != nil {
+		if mode := s.resolveLocked(key, info.SessionMode); runner.Mode != mode {
+			runner = runner.WithMode(mode)
+		}
+	}
 	s.Runner = runner
+}
+
+func (s *Server) resolveLocked(key string, sessionMode string) config.SessionMode {
+	override, ok := s.modeOverrides[key]
+	if !ok {
+		override = config.SessionModeUnset
+	}
+	return ResolveMode(s.Policy.Ceiling(), config.SessionModeUnset.FromString(sessionMode, false), override)
+}
+
+// EffectiveMode returns the mode the agent gets in a session: the ceiling, limited by the
+// override of the user, or the mode of the session
+func (s *Server) EffectiveMode(key string, sessionMode string) config.SessionMode {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.resolveLocked(key, sessionMode)
+}
+
+// ModeOverride returns the mode the user chose for a session, if any
+func (s *Server) ModeOverride(key string) (config.SessionMode, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	mode, ok := s.modeOverrides[key]
+	return mode, ok
+}
+
+// SetMode changes the mode of the active session without a new login. SessionModeUnset
+// resets it to the session's own mode. The mode can't exceed the ceiling. via names the
+// source of the change in the log. It must only be called for the user's choice.
+func (s *Server) SetMode(mode config.SessionMode, via string) (ModeChange, error) {
+	return s.setMode(mode, via, nil)
+}
+
+// setMode is SetMode which fails if the active session is not the expected one (if given),
+// e.g. when the user switched the session while a command waited for approval
+func (s *Server) setMode(mode config.SessionMode, via string, expect *SessionInfo) (ModeChange, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	key := s.sessionKey
+	if key == "" || s.Runner == nil {
+		return ModeChange{}, fmt.Errorf("no session is selected")
+	}
+	if expect != nil && (s.Session.SessionName != expect.SessionName || s.Session.Host != expect.Host || s.Session.Tenant != expect.Tenant) {
+		return ModeChange{}, fmt.Errorf("the session was changed while waiting for the approval")
+	}
+	if mode != config.SessionModeUnset {
+		if mode > config.SessionModeDev {
+			return ModeChange{}, fmt.Errorf("invalid mode %q", mode)
+		}
+		if ceiling := s.Policy.Ceiling(); mode > ceiling {
+			return ModeChange{}, fmt.Errorf("mode %s is above the maximum mode of the MCP server (%s)", mode, ceiling)
+		}
+	}
+	from := s.resolveLocked(key, s.Session.SessionMode)
+	change := ModeChange{
+		Session:     s.Session.SessionName,
+		From:        from,
+		Source:      ModeSourceOverride,
+		SessionMode: SessionDefaultMode(config.SessionModeUnset.FromString(s.Session.SessionMode, false)),
+	}
+	if mode == config.SessionModeUnset {
+		delete(s.modeOverrides, key)
+		change.Source = ModeSourceSession
+	} else {
+		if s.modeOverrides == nil {
+			s.modeOverrides = map[string]config.SessionMode{}
+		}
+		s.modeOverrides[key] = mode
+	}
+	change.To = s.resolveLocked(key, s.Session.SessionMode)
+	// new tool calls use the new mode, calls which have started keep theirs
+	s.Runner = s.Runner.WithMode(change.To)
+	if s.Logf != nil {
+		s.Logf("mode override: %s -> %s (session %s, via %s)", from, change.To, change.Session, via)
+	}
+	return change, nil
 }
 
 // Active returns the session and runner used for new tool calls
@@ -132,7 +244,8 @@ func (s *Server) New() *mcp.Server {
 		Title:   "Cumulocity (go-c8y-cli)",
 		Version: s.Version,
 	}, &mcp.ServerOptions{
-		Instructions: s.Instructions(),
+		Instructions:      s.Instructions(),
+		CompletionHandler: s.complete,
 	})
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -184,26 +297,16 @@ func (s *Server) New() *mcp.Server {
 		},
 	}, s.handleSession)
 
-	if s.SwitchSession != nil {
-		server.AddPrompt(&mcp.Prompt{
-			Name:        PromptSwitchSession,
-			Title:       "Switch the Cumulocity session",
-			Description: "Open a session picker in the browser to change the Cumulocity session used by the c8y tools",
-		}, func(ctx context.Context, req *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-			message, err := s.SwitchSession(ctx)
-			if err != nil {
-				return nil, err
-			}
-			return &mcp.GetPromptResult{
-				Description: "Switch the Cumulocity session",
-				Messages: []*mcp.PromptMessage{
-					{Role: "user", Content: &mcp.TextContent{Text: message}},
-				},
-			}, nil
-		})
-	}
+	s.addPrompts(server)
 
 	return server
+}
+
+func modeRejection(mode config.SessionMode) string {
+	if mode == config.SessionModeProduction {
+		return "read-only mode"
+	}
+	return "mode too low"
 }
 
 func errorResult(format string, a ...any) *mcp.CallToolResult {
@@ -245,11 +348,20 @@ func (s *Server) handleSession(ctx context.Context, req *mcp.CallToolRequest, _ 
 		return res, nil, nil
 	}
 	session, runner := s.Active()
+	modeSource := ModeSourceSession
+	s.mu.RLock()
+	if _, ok := s.modeOverrides[s.sessionKey]; ok {
+		modeSource = ModeSourceOverride
+	}
+	s.mu.RUnlock()
 	info := map[string]any{
-		"session":  session,
-		"mode":     runner.Mode.String(),
-		"modeInfo": runner.Mode.Description(),
-		"approval": string(s.Policy.Approval),
+		"session":     session,
+		"mode":        runner.Mode.String(),
+		"modeInfo":    runner.Mode.Description(),
+		"modeSource":  modeSource,
+		"sessionMode": SessionDefaultMode(config.SessionModeUnset.FromString(session.SessionMode, false)).String(),
+		"maxMode":     s.Policy.Ceiling().String(),
+		"approval":    string(s.Policy.Approval),
 		"deviceShell": map[string]any{
 			"enabled":           s.Policy.AllowDeviceShell,
 			"confirmedByServer": s.ConfirmDeviceShell != nil,
@@ -311,11 +423,24 @@ func (s *Server) handleWrite(ctx context.Context, req *mcp.CallToolRequest, in C
 		return errorResult("running commands on devices is disabled. The user can enable it by starting the MCP server with --allowDeviceShell"), nil, nil
 	}
 	if !plan.ReadOnly() {
-		if runner.Mode == config.SessionModeProduction {
-			s.logCall(ToolWrite, in.Command, "rejected: read-only mode")
-			return errorResult("the MCP server is running in read-only mode (prod) so write commands are disabled. Ask the user to change the mode if this is needed"), nil, nil
+		required := RequiredMode(plan)
+		// The user can be asked to allow a higher mode, if the approval is asked via elicitation
+		canAsk := (s.Policy.Approval == ApprovalAuto || s.Policy.Approval == ApprovalElicit) && clientSupportsElicitation(req)
+		preview := ""
+		if canAsk && !plan.HasDeviceShell() {
+			preview = s.preview(ctx, runner, plan, in)
+			required = RequiredModeFromPreview(plan, preview)
 		}
-		inputRequest, err := s.approve(ctx, req, session, runner, plan, in)
+		if ceiling := s.Policy.Ceiling(); required > ceiling {
+			s.logCall(ToolWrite, in.Command, "rejected: mode above the maximum")
+			return errorResult("the command needs mode %s but the maximum mode of the MCP server is %s, so it can't be run by the agent. Ask the user to run the command themselves", required, ceiling), nil, nil
+		}
+		if required > runner.Mode && !canAsk {
+			err := CheckMode(runner.Mode, required)
+			s.logCall(ToolWrite, in.Command, "rejected: "+modeRejection(runner.Mode))
+			return errorResult("%s", err), nil, nil
+		}
+		inputRequest, runMode, err := s.approve(ctx, req, session, runner, plan, in, required, preview)
 		if err != nil {
 			s.logCall(ToolWrite, in.Command, "not approved")
 			return errorResult("%s", err), nil, nil
@@ -324,6 +449,10 @@ func (s *Server) handleWrite(ctx context.Context, req *mcp.CallToolRequest, in C
 			// the client asks the user and calls the tool again with the answer
 			s.logCall(ToolWrite, in.Command, "waiting for approval")
 			return inputRequest, nil, nil
+		}
+		if runMode != config.SessionModeUnset && runMode != runner.Mode {
+			// allowed by the user for this run only (a copy, the session keeps its mode)
+			runner = runner.WithMode(runMode)
 		}
 		if plan.HasDeviceShell() && s.ConfirmDeviceShell != nil {
 			s.logCall(ToolWrite, in.Command, "waiting for confirmation in a dialog")
@@ -379,6 +508,13 @@ func (s *Server) run(ctx context.Context, runner *Runner, plan *Plan, in Command
 	}, nil, nil
 }
 
+// Answers of the user when a command needs a higher mode than the session has
+const (
+	escalationScopeID = "scope"
+	escalationOnce    = "once"
+	escalationSession = "session"
+)
+
 func clientSupportsElicitation(req *mcp.CallToolRequest) bool {
 	if req == nil || req.Session == nil {
 		return false
@@ -392,32 +528,37 @@ func clientSupportsElicitation(req *mcp.CallToolRequest) bool {
 // (multi round-trip requests, SEP-2322). For clients using an older protocol version, the
 // MCP SDK asks via an elicitation request instead and calls the tool again itself.
 //
+// If the command needs a higher mode than the runner has (required), the question offers to
+// run it once in that mode, or to switch the session to it. The answer is returned as the
+// mode to run the command in (unset if the runner's mode is used).
+//
 // It returns the input request to send to the client, nil if the command is approved, or
 // an error if it isn't.
-func (s *Server) approve(ctx context.Context, req *mcp.CallToolRequest, session SessionInfo, runner *Runner, plan *Plan, in CommandInput) (*mcp.CallToolResult, error) {
+func (s *Server) approve(ctx context.Context, req *mcp.CallToolRequest, session SessionInfo, runner *Runner, plan *Plan, in CommandInput, required config.SessionMode, preview string) (*mcp.CallToolResult, config.SessionMode, error) {
 	switch s.Policy.Approval {
 	case ApprovalNone, ApprovalClient:
-		return nil, nil
+		return nil, config.SessionModeUnset, nil
 	}
+	escalate := required > runner.Mode
 
 	if !clientSupportsElicitation(req) {
 		if s.Policy.Approval == ApprovalAuto {
 			// rely on the client's tool permission prompt
-			return nil, nil
+			return nil, config.SessionModeUnset, nil
 		}
-		return nil, fmt.Errorf("write commands need to be approved by the user, but the MCP client does not support elicitation. Ask the user to run the command themselves, or change the approval setting of the MCP server")
+		return nil, config.SessionModeUnset, fmt.Errorf("write commands need to be approved by the user, but the MCP client does not support elicitation. Ask the user to run the command themselves, or change the approval setting of the MCP server")
 	}
 
-	key := approvalKey(session, plan, in)
+	key := approvalKey(session, plan, in, required, runner.Mode)
 
 	// The user's answer, when the client calls the tool again
 	if req.Params != nil && req.Params.InputResponses != nil {
 		response, ok := req.Params.InputResponses[approvalInputID]
 		if !ok {
-			return nil, fmt.Errorf("the approval of the user is missing")
+			return nil, config.SessionModeUnset, fmt.Errorf("the approval of the user is missing")
 		}
 		if err := s.approvals.use(req.Params.RequestState, key); err != nil {
-			return nil, fmt.Errorf("%s. Run the command again to ask the user for approval", err)
+			return nil, config.SessionModeUnset, fmt.Errorf("%s. Run the command again to ask the user for approval", err)
 		}
 		result, ok := response.(*mcp.ElicitResult)
 		if !ok || result.Action != "accept" {
@@ -425,12 +566,28 @@ func (s *Server) approve(ctx context.Context, req *mcp.CallToolRequest, session 
 			if ok && result.Action != "" {
 				action = result.Action
 			}
-			return nil, fmt.Errorf("the user did not approve the command (%s). Don't retry it unless the user asks you to", action)
+			return nil, config.SessionModeUnset, fmt.Errorf("the user did not approve the command (%s). Don't retry it unless the user asks you to", action)
 		}
-		return nil, nil
+		if !escalate {
+			return nil, config.SessionModeUnset, nil
+		}
+		switch scope, _ := result.Content[escalationScopeID].(string); scope {
+		case "", escalationOnce:
+			return nil, required, nil
+		case escalationSession:
+			if _, err := s.setMode(required, "approval", &session); err != nil {
+				return nil, config.SessionModeUnset, err
+			}
+			return nil, required, nil
+		default:
+			return nil, config.SessionModeUnset, fmt.Errorf("the answer of the user is not valid (%q). Don't retry it unless the user asks you to", scope)
+		}
 	}
 
 	message := &strings.Builder{}
+	if escalate {
+		fmt.Fprintf(message, "This needs %s; the session is in %s.\n\n", required, runner.Mode)
+	}
 	fmt.Fprintf(message, "Allow the agent to run this command against %s", session.Host)
 	if session.Tenant != "" {
 		fmt.Fprintf(message, " (tenant %s", session.Tenant)
@@ -449,22 +606,34 @@ func (s *Server) approve(ctx context.Context, req *mcp.CallToolRequest, session 
 	}
 	if plan.HasDeviceShell() {
 		message.WriteString("\nThe command after \"--\" runs on the device via ssh (Cumulocity remote access).\n")
-	} else if preview := s.preview(ctx, runner, plan, in); preview != "" {
+	} else if preview != "" {
 		fmt.Fprintf(message, "\nRequests (dry run):\n%s\n", preview)
 	}
 
+	properties := map[string]any{}
+	if escalate {
+		properties[escalationScopeID] = map[string]any{
+			"type":  "string",
+			"title": "Allow",
+			"oneOf": []any{
+				map[string]any{"const": escalationOnce, "title": fmt.Sprintf("Allow once, run only this command in %s", required)},
+				map[string]any{"const": escalationSession, "title": fmt.Sprintf("Switch this session to %s, then run the command", required)},
+			},
+			"default": escalationOnce,
+		}
+	}
 	return &mcp.CallToolResult{
 		InputRequests: mcp.InputRequestMap{
 			approvalInputID: &mcp.ElicitParams{
 				Message: message.String(),
 				RequestedSchema: map[string]any{
 					"type":       "object",
-					"properties": map[string]any{},
+					"properties": properties,
 				},
 			},
 		},
 		RequestState: s.approvals.issue(key),
-	}, nil
+	}, config.SessionModeUnset, nil
 }
 
 // preview uses the c8y dry run mode to show which requests would be sent

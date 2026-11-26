@@ -20,6 +20,18 @@ Your MCP client starts `c8y mcp serve` and communicates with it over stdin and s
     Without a pin entry command, the page asks for the passphrase of encrypted sessions and checks it before logging in. This also applies to a session given with `--session`.
 * **Two-factor authentication**: If the login needs a code, the page asks for the code from your authenticator app, unless the session contains a TOTP secret. Setting up two-factor authentication for the first time needs a terminal, so run `c8y sessions login` once in a terminal first.
 * **Switching sessions**: Run the server's `switch_session` prompt, for example `/mcp__c8y__switch_session` in Claude Code. Only you can run it, not the agent. The session picker opens in the browser, and the agent's tool calls wait until you have selected and logged in to a session. Commands which are already running finish with the previous session.
+* **Keyboard shortcuts in the picker**: press `?` on the page to see them all.
+
+    | Keys | Action |
+    |---|---|
+    | `↑` `↓` | Move between the sessions. `↑` on the first session goes back to the filter |
+    | `←` `→` | Lower or raise the mode of the focused session. It stops at prod and at the highest allowed mode |
+    | `1` `2` `3` | Set the mode of the focused session to prod, qual or dev |
+    | `Enter` | Select the focused session with the mode shown for it. In the filter, select the first match |
+    | Typing | Filter the sessions by name, host, tenant or user |
+    | `?` | Show the shortcuts. `Esc` closes them |
+
+    The mode keys change the session under the focus, so press `↓` first when you are in the filter.
 
 * **Session providers**: The picker can also show the sessions of an [extension session provider](/docs/concepts/extensions/binary-commands#session-providers), such as a password manager. By default, the picker shows your session files, and the sessions of your default provider if you set one with the `session.provider.type extension` and `session.provider.extension <provider>` settings. Use `--sessionProvider` to choose the sources yourself: the picker then only shows the sources you list, in the given order. Use `file` for your session files. Give the sources as comma separated values (`--sessionProvider bitwarden,file`), or repeat the flag. The provider must declare the `list` and `select` commands. The provider's secrets (for example `BW_SESSION`) are read from the server's environment, otherwise with your pin entry command. When the token expires, the server asks the provider for the session again, so the provider can return a new password or two-factor code without opening the picker.
 
@@ -48,7 +60,7 @@ Each tool call runs a normal `c8y` command, so the existing go-c8y-cli features 
 * **Credentials**: the commands only receive the token from the login and a copy of the session file without secrets. The password and encryption passphrase are never passed to the commands, except the password for sessions which use basic auth (no token). The token and password are passed through a pipe, not environment variables, as other programs running as your user can read the environment of a process. On Windows, environment variables are still used.
 * **Session files**: the commands can't read or write files in the session home folder (`C8Y_SESSION_HOME`, e.g. `~/.cumulocity`) or the session file, so the agent can't read secrets with `--template`, `--data`, `--templateVars`, `--file`, or a jsonnet `import`. Use `--denyPath` to protect other folders, such as `~/.ssh`. Paths in your [`files.deniedPaths`](/docs/configuration/settings#filesdeniedpaths-string) setting are denied as well.
 * **Token renewal**: when the token is about to expire, the server logs in again. If the passphrase or a two-factor code is needed, the page opens again in your browser.
-* **Session mode**: by default, the agent uses the mode of each session (`settings.session.mode`), so it can only read data in a `prod` session and can also delete data in a `dev` session. A session without a mode is read only. The mode set with `--mode` (or in the policy file) is a maximum for every session, limited by each session's own mode. For example, with `--mode qual`, the agent can create and update data in a `dev` session, but only read data after you switch to a `prod` session. Read commands always run in `prod` (read-only) mode, and CI environment variables are ignored.
+* **Session mode**: by default, the agent uses the mode of each session (`settings.session.mode`), so it can only read data in a `prod` session and can also delete data in a `dev` session. A session without a mode is read only. The mode set with `--mode` (or in the policy file) is the maximum for every session (`dev` if not set). You can raise the mode of the current session up to that maximum in the session picker or with the mode prompt; it lasts until the server stops and is never saved in the session file, and the agent can't change it. For example, with `--mode qual`, the agent can create and update data in a `dev` session, and you can raise a `prod` session to `qual`, but never to `dev`. Set `--mode` to the session's mode to keep it as the maximum. Read commands always run in `prod` (read-only) mode, and CI environment variables are ignored.
 * **Dry run**: commands with `--dry` are treated as read commands, and the approval prompt shows the dry run output of the requests.
 * **Activity log**: each command is recorded in the [activity log](/docs/concepts/activitylog) with the message `mcp:c8y_read` or `mcp:c8y_write`.
 * **Sensitive information**: always hidden in log output.
@@ -109,7 +121,7 @@ You can also provide `C8Y_TOKEN` instead of a password. In this case, the comman
 
 | Flag | Description |
 |------|-------------|
-| `--mode` | Maximum mode: `prod` (read only), `qual` (create and update) or `dev` (create, update and delete). Default: the session's mode, or `prod` if the session has none |
+| `--mode` | Maximum mode: `prod` (read only), `qual` (create and update) or `dev` (create, update and delete). Default: `dev`. The agent uses the session's mode (`prod` if none), which you can raise up to this maximum |
 | `--allow` | Only allow commands matching the pattern. Can be used multiple times |
 | `--deny` | Deny commands matching the pattern (wins over `--allow`). Can be used multiple times |
 | `--read` | Treat additional commands as read-only, e.g. extension commands |

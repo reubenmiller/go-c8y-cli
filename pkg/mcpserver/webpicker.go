@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/cli/browser"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 )
 
 // DefaultPickerTimeout how long the user has to select a session in the browser
@@ -45,6 +46,12 @@ type SessionChoice struct {
 	Mode     string
 	ModeInfo string
 
+	// SessionMode the session's own mode, and MaxMode the highest mode the user can choose
+	// (the ceiling of the server). The mode control is only shown if MaxMode is set. Modes
+	// above SessionMode are an override, and are marked as such. Mode is preselected
+	SessionMode string
+	MaxMode     string
+
 	// NeedsPassphrase true if the passphrase must be entered on the page to unlock the
 	// session (it is encrypted and no pin entry command is configured)
 	NeedsPassphrase bool
@@ -66,6 +73,39 @@ type SessionChoice struct {
 	Group string
 }
 
+// ModeOption a mode in the mode control of a session
+type ModeOption struct {
+	Name string
+	Info string
+	// Disabled the mode is above the ceiling
+	Disabled bool
+	// Override the mode is above the session's own mode
+	Override bool
+	Checked  bool
+}
+
+// ModeOptions returns the modes the user can choose for the session: prod, qual and dev,
+// with the ones above MaxMode disabled. It returns nothing if the session has no MaxMode
+func (c SessionChoice) ModeOptions() []ModeOption {
+	maxMode, err := ParseMode(c.MaxMode)
+	if err != nil {
+		return nil
+	}
+	sessionMode := SessionDefaultMode(config.SessionModeUnset.FromString(c.SessionMode, false))
+	current, _ := ParseMode(c.Mode)
+	options := []ModeOption{}
+	for _, m := range []config.SessionMode{config.SessionModeProduction, config.SessionModeQual, config.SessionModeDev} {
+		options = append(options, ModeOption{
+			Name:     m.String(),
+			Info:     ModeInfo(m),
+			Disabled: m > maxMode,
+			Override: m > sessionMode,
+			Checked:  m == current,
+		})
+	}
+	return options
+}
+
 // SourceError a source of sessions (e.g. a session provider) which could not list its
 // sessions. It is shown in the picker instead of the source's sessions
 type SourceError struct {
@@ -85,6 +125,12 @@ type LoginFunc func(ctx context.Context, choice SessionChoice, secrets LoginSecr
 // Selection the session selected by the user
 type Selection struct {
 	Choice SessionChoice
+	// Mode the mode the user chose (a mode up to the ceiling), or unset if the page had no
+	// mode control. The caller applies it
+	Mode config.SessionMode
+	// ModeOnly true if only the mode of the current session is changed: no login was done
+	// and Value is nil
+	ModeOnly bool
 	// Value returned by the login (if any)
 	Value any
 }
@@ -157,6 +203,9 @@ type pickerItem struct {
 	Choice SessionChoice
 }
 
+// ModeOptions the modes of the session, see SessionChoice.ModeOptions
+func (i pickerItem) ModeOptions() []ModeOption { return i.Choice.ModeOptions() }
+
 // showGroupHeadings returns true if the headings of the groups are shown: if there is more than
 // one source, a source has an error, or a session provider is used, so the user can see where
 // the sessions come from. Only session files are shown without a heading
@@ -227,8 +276,12 @@ type pickerView struct {
 	AskPassphrase bool
 	AskCode       bool
 
+	// Mode the mode chosen for the session to unlock, posted again with the secrets
+	Mode string
+
 	Error     string
 	Done      *SessionChoice
+	ModeOnly  bool
 	Cancelled bool
 }
 
@@ -306,14 +359,22 @@ func (w *WebPicker) run(ctx context.Context, title string, message string, choic
 		rw.WriteHeader(status)
 		_ = pickerPage.Execute(rw, view)
 	}
-	unlockViewFor := func(index int, errorMessage string) pickerView {
+	unlockViewFor := func(index int, mode string, errorMessage string) pickerView {
+		// the mode control is not shown while unlocking, but the chosen mode is
+		unlockChoice := choices[index]
+		unlockChoice.MaxMode = ""
+		if m, err := ParseMode(mode); err == nil {
+			unlockChoice.Mode = m.String()
+			unlockChoice.ModeInfo = ModeInfo(m)
+		}
 		mu.Lock()
 		_, hasPassphrase := pendingPassphrase[index]
 		askCode := choices[index].NeedsCode || needsCode[index]
 		mu.Unlock()
 		return pickerView{
-			Unlock:        &choices[index],
+			Unlock:        &unlockChoice,
 			UnlockIndex:   index,
+			Mode:          mode,
 			AskPassphrase: choices[index].NeedsPassphrase && !hasPassphrase,
 			AskCode:       askCode,
 			Error:         errorMessage,
@@ -321,7 +382,7 @@ func (w *WebPicker) run(ctx context.Context, title string, message string, choic
 	}
 	listView := func() pickerView {
 		if unlockOnly {
-			return unlockViewFor(0, "")
+			return unlockViewFor(0, "", "")
 		}
 		groups := groupChoices(choices, problems)
 		return pickerView{Choices: choices, Groups: groups, ShowGroups: showGroupHeadings(groups)}
@@ -390,15 +451,65 @@ func (w *WebPicker) run(ctx context.Context, title string, message string, choic
 		}
 		var selected *SessionChoice
 		var index int
-		if _, err := fmt.Sscanf(r.PostFormValue("session"), "%d", &index); err == nil && index >= 0 && index < len(choices) {
+		// "change mode only" posts the index of the current session as modeonly
+		modeOnly := r.PostFormValue("modeonly") != ""
+		indexValue := r.PostFormValue("session")
+		if modeOnly {
+			indexValue = r.PostFormValue("modeonly")
+		}
+		if _, err := fmt.Sscanf(indexValue, "%d", &index); err == nil && index >= 0 && index < len(choices) {
 			selected = &choices[index]
 		}
 		if selected == nil {
 			http.Error(rw, "unknown session", http.StatusBadRequest)
 			return
 		}
+
+		// the mode is validated here, whatever the page offered: it must be one of the
+		// modes of the session, up to the ceiling
+		mode := config.SessionModeUnset
+		modeName := r.PostFormValue(fmt.Sprintf("mode-%d", index))
+		if modeName == "" && modeOnly {
+			http.Error(rw, "no mode was selected", http.StatusBadRequest)
+			return
+		}
+		if modeName != "" {
+			allowed := false
+			if m, err := ParseMode(modeName); err == nil {
+				for _, o := range selected.ModeOptions() {
+					if o.Name == modeName && !o.Disabled {
+						allowed, mode = true, m
+					}
+				}
+			}
+			if !allowed {
+				http.Error(rw, "the mode is not allowed", http.StatusBadRequest)
+				return
+			}
+		}
+		if modeOnly {
+			if unlockOnly || !selected.Current {
+				http.Error(rw, "the mode can only be changed for the current session", http.StatusBadRequest)
+				return
+			}
+			mu.Lock()
+			done := finished
+			mu.Unlock()
+			if done {
+				http.Error(rw, "The session was already selected. You can close this tab.", http.StatusConflict)
+				return
+			}
+			doneChoice := *selected
+			doneChoice.Current = false
+			doneChoice.MaxMode = ""
+			doneChoice.Mode = mode.String()
+			doneChoice.ModeInfo = ModeInfo(mode)
+			render(rw, http.StatusOK, pickerView{Done: &doneChoice, ModeOnly: true})
+			finish(pickerResult{selection: &Selection{Choice: *selected, Mode: mode, ModeOnly: true}})
+			return
+		}
 		unlockView := func(errorMessage string) pickerView {
-			return unlockViewFor(index, errorMessage)
+			return unlockViewFor(index, modeName, errorMessage)
 		}
 		errorView := func(errorMessage string) pickerView {
 			mu.Lock()
@@ -487,8 +598,13 @@ func (w *WebPicker) run(ctx context.Context, title string, message string, choic
 		// "current" refers to the session before the selection
 		doneChoice := *selected
 		doneChoice.Current = false
+		doneChoice.MaxMode = ""
+		if mode != config.SessionModeUnset {
+			doneChoice.Mode = mode.String()
+			doneChoice.ModeInfo = ModeInfo(mode)
+		}
 		render(rw, http.StatusOK, pickerView{Done: &doneChoice})
-		finish(pickerResult{selection: &Selection{Choice: *selected, Value: value}})
+		finish(pickerResult{selection: &Selection{Choice: *selected, Mode: mode, Value: value}})
 	})
 	mux.HandleFunc("POST /cancel", func(rw http.ResponseWriter, r *http.Request) {
 		if !checkRequest(rw, r, true, true) {
@@ -551,6 +667,7 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
     --surface: rgba(255,255,255,.05); --surface-2: rgba(255,255,255,.04); --hover: rgba(255,255,255,.08);
     --line: rgba(255,255,255,.1); --line-2: rgba(255,255,255,.06);
     --accent: #ffd200; --accent-soft: rgba(255,210,0,.1); --accent-line: rgba(255,210,0,.35);
+    --warn: #ffb74d; --warn-soft: rgba(255,183,77,.12); --warn-line: rgba(255,183,77,.45);
     --error: #ff8a80; --error-soft: rgba(255,82,82,.1); --error-line: rgba(255,82,82,.4);
     --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
   }
@@ -632,7 +749,54 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   }
   .pill.accent { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent); }
   .mode { font-size: .78rem; color: var(--faint); }
+  .modes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 6px; padding: 0 16px 12px; }
+  .modes { position: relative; }
+  /* the radios are only for the form and the keyboard; the labels show the modes.
+     They are clipped, not only transparent, so no other rule can make them visible */
+  .modes input {
+    position: absolute; top: 0; left: 0; width: 1px; height: 1px; margin: 0;
+    overflow: hidden; clip-path: inset(50%); opacity: 0; pointer-events: none;
+  }
+  .seg {
+    padding: 4px 14px; font-size: .78rem; font-weight: 600; letter-spacing: .04em; cursor: pointer;
+    color: var(--muted); border: 1px solid var(--line); border-radius: 99px; transition: background .15s, border-color .15s, color .15s;
+  }
+  .seg:hover { color: var(--strong); border-color: var(--faint); }
+  .modes input:checked + .seg { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent); }
+  .modes input:checked + .seg.override { background: var(--warn-soft); border-color: var(--warn-line); color: var(--warn); }
+  .modes input:focus-visible + .seg { box-shadow: 0 0 0 3px var(--accent-soft); }
+  .modes input:disabled + .seg { opacity: .35; cursor: not-allowed; text-decoration: line-through; }
+  .modes input:disabled + .seg:hover { color: var(--muted); border-color: var(--line); }
+  .can { display: none; order: 5; flex-basis: 100%; font-size: .78rem; color: var(--faint); }
+  .can.override { color: var(--warn); }
+  .m-prod:checked ~ .can-prod, .m-qual:checked ~ .can-qual, .m-dev:checked ~ .can-dev { display: block; }
+  .button.small { order: 6; margin-left: auto; padding: 4px 12px; font-size: .78rem; }
   .empty { padding: 14px 16px; color: var(--faint); font-size: .9rem; display: none; }
+
+  kbd {
+    display: inline-block; min-width: 1.6em; padding: 1px 6px; font-family: var(--mono); font-size: .72rem; line-height: 1.5;
+    text-align: center; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px;
+  }
+  .keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-top: 12px; font-size: .78rem; color: var(--faint); }
+  .keys[hidden] { display: none; }
+  .key-modes[hidden] { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .keys span { display: inline-flex; align-items: center; gap: 4px; }
+  .link { padding: 0; font: inherit; color: var(--muted); background: none; border: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .link:hover, .link:focus-visible { color: var(--strong); outline: none; }
+  dialog.help {
+    margin: auto; width: min(480px, calc(100vw - 32px)); padding: 28px 28px 24px; color: var(--fg);
+    background: #161b22; border: 1px solid var(--line); border-radius: 16px;
+  }
+  dialog.help::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(2px); }
+  dialog.help h2 { font-size: 1.1rem; font-weight: 700; color: var(--strong); margin-bottom: 16px; }
+  dialog.help h3 { margin: 20px 0 8px; font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+  dialog.help dl { display: grid; grid-template-columns: max-content 1fr; gap: 10px 16px; align-items: baseline; font-size: .88rem; }
+  dialog.help dt { display: flex; flex-wrap: wrap; gap: 4px; }
+  dialog.help dd { color: var(--muted); line-height: 1.5; }
+  dialog.help code { font-family: var(--mono); font-size: .82rem; color: var(--fg); }
+  dialog.help .actions { margin-top: 24px; }
+  dialog.help .note { margin-top: 12px; font-size: .82rem; }
 
   .selected {
     display: grid; gap: 4px; padding: 14px 16px; margin-bottom: 20px;
@@ -655,7 +819,8 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   .status { display: none; align-items: center; justify-content: center; gap: 10px; margin-top: 20px; font-size: .9rem; color: var(--muted); text-align: center; }
   .spinner { flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--accent-line); border-top-color: var(--accent); animation: spin .8s linear infinite; }
   body.busy .status { display: flex; }
-  body.busy .button, body.busy .session, body.busy input { opacity: .45; pointer-events: none; }
+  /* the hidden mode radios are left out, and their labels are dimmed instead */
+  body.busy .button, body.busy .session, body.busy .seg, body.busy input:not([type=radio]) { opacity: .45; pointer-events: none; }
 
   .check-ring { width: 80px; height: 80px; margin: 0 auto 28px; display: block; }
   .check-ring circle {
@@ -685,7 +850,16 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
 {{define "session"}}
   <span class="row"><span class="name">{{.Name}}</span>{{if .Current}}<span class="pill accent">current</span>{{end}}{{if .NeedsPassphrase}}<span class="pill">encrypted</span>{{end}}{{if .Group}}<span class="pill">{{.Group}}</span>{{end}}</span>
   <span class="details">{{.Host}}{{if .Tenant}} · {{.Tenant}}{{end}}{{if .Username}} · {{.Username}}{{end}}</span>
-  {{if .ModeInfo}}<span class="mode">Agent can {{.ModeInfo}} ({{.Mode}})</span>{{end}}
+  {{if and .ModeInfo (not .MaxMode)}}<span class="mode">Agent can {{.ModeInfo}} ({{.Mode}})</span>{{end}}
+{{end}}
+{{define "modes"}}{{$i := .Index}}
+  <div class="modes" role="radiogroup" aria-label="Mode of the agent for {{.Choice.Name}}">
+    {{range .ModeOptions}}<input type="radio" class="m-{{.Name}}" id="m{{$i}}-{{.Name}}" name="mode-{{$i}}" value="{{.Name}}"{{if .Checked}} checked{{end}}{{if .Disabled}} disabled{{end}} aria-keyshortcuts="{{if eq .Name "prod"}}1{{else if eq .Name "qual"}}2{{else}}3{{end}}"><label for="m{{$i}}-{{.Name}}" class="seg{{if .Override}} override{{end}}" title="{{if .Disabled}}Above the maximum mode of the MCP server{{else if .Override}}Override: above the session's own mode{{else}}Agent can {{.Info}}{{end}}">{{.Name}}</label>
+    {{end}}
+    {{range .ModeOptions}}<span class="can can-{{.Name}}{{if .Override}} override{{end}}">Agent can {{.Info}}{{if .Override}}. Override: above the session's own mode{{end}}</span>
+    {{end}}
+    {{if .Choice.Current}}<button class="button small" type="submit" name="modeonly" value="{{$i}}">Change mode only</button>{{end}}
+  </div>
 {{end}}
 {{define "logo"}}<svg class="logo" role="img" aria-label="Cumulocity" viewBox="0 0 873 189" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#a)">
@@ -716,10 +890,10 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
 <main class="card center">
   {{template "logo"}}
   <svg class="check-ring" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="34"/><polyline points="24,40 34,51 56,28"/></svg>
-  <h1>Session selected</h1>
-  <p>The MCP server now uses this session.<br>You can close this tab and return to your agent.</p>
+  <h1>{{if .ModeOnly}}Mode changed{{else}}Session selected{{end}}</h1>
+  <p>{{if .ModeOnly}}The MCP server keeps using this session with the new mode.{{else}}The MCP server now uses this session.{{end}}<br>You can close this tab and return to your agent.</p>
   <div class="selected summary">{{template "session" .Done}}</div>
-  <span class="pill accent badge">&#x2714;&nbsp; Session active</span>
+  <span class="pill accent badge">&#x2714;&nbsp; {{if .ModeOnly}}Mode active{{else}}Session active{{end}}</span>
 </main>
 {{else if .Cancelled}}
 <main class="card center">
@@ -738,6 +912,7 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
     <input type="hidden" name="csrf" value="{{.CSRF}}">
     <input type="hidden" name="session" value="{{.UnlockIndex}}">
     <input type="hidden" name="unlock" value="1">
+    {{if .Mode}}<input type="hidden" name="mode-{{.UnlockIndex}}" value="{{.Mode}}">{{end}}
     {{if .AskPassphrase}}
     <div class="field">
       <label class="label" for="passphrase">Passphrase</label>
@@ -767,24 +942,56 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
   <input type="search" id="filter" placeholder="Filter by name, host, tenant or user" autofocus autocomplete="off" aria-label="Filter sessions">
   <form method="post" action="/select" class="login">
     <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <!-- disabled default button: Enter in a mode control must not select the first session -->
+    <button type="submit" disabled hidden aria-hidden="true" tabindex="-1"></button>
     <ul class="sessions" id="sessions">
     {{range $g, $group := .Groups}}
       {{if $.ShowGroups}}<li class="group" data-group="{{$g}}">{{$group.Label}}</li>{{end}}
       {{if $group.Error}}<li class="problem" data-group="{{$g}}">{{$group.Error}}</li>{{end}}
       {{range $group.Items}}
       <li class="item" data-group="{{$g}}" data-search="{{.Choice.Name}} {{.Choice.Host}} {{.Choice.Tenant}} {{.Choice.Username}} {{.Choice.Group}} {{$group.Label}}">
-        <button class="session" type="submit" name="session" value="{{.Index}}">{{template "session" .Choice}}</button>
+        <button class="session" type="submit" name="session" value="{{.Index}}" aria-keyshortcuts="Enter">{{template "session" .Choice}}</button>
+        {{if .ModeOptions}}{{template "modes" .}}{{end}}
       </li>
       {{end}}
     {{end}}
     </ul>
     <div class="empty" id="empty">No sessions match the filter.</div>
   </form>
+  <!-- the shortcuts need the script, so the hint is only shown by it -->
+  <p class="keys" id="keys" hidden>
+    <span><kbd>↑</kbd><kbd>↓</kbd> session</span>
+    <span class="key-modes"><kbd>←</kbd><kbd>→</kbd> mode</span>
+    <span><kbd>Enter</kbd> select</span>
+    <button class="link" type="button" id="show-help" aria-keyshortcuts="?"><kbd>?</kbd> all shortcuts</button>
+  </p>
+  <p class="sr-only" id="announce" aria-live="polite"></p>
   <div class="actions">
     <form method="post" action="/cancel"><input type="hidden" name="csrf" value="{{.CSRF}}"><button class="button" type="submit">Cancel</button></form>
   </div>
   <p class="status" role="status"><span class="spinner"></span><span>Logging in. If you are asked to confirm, for example with Touch ID, confirm it there.</span></p>
 </main>
+<dialog class="help" id="help" aria-labelledby="help-title">
+  <h2 id="help-title">Keyboard shortcuts</h2>
+  <dl>
+    <dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd>Move between the sessions. <kbd>↑</kbd> on the first session goes back to the filter.</dd>
+    <dt class="key-modes"><kbd>←</kbd><kbd>→</kbd></dt><dd class="key-modes">Lower or raise the mode of the focused session. It stops at prod and at the highest allowed mode.</dd>
+    <dt class="key-modes"><kbd>1</kbd></dt><dd class="key-modes">prod: the agent can only read data</dd>
+    <dt class="key-modes"><kbd>2</kbd></dt><dd class="key-modes">qual: the agent can also create and update</dd>
+    <dt class="key-modes"><kbd>3</kbd></dt><dd class="key-modes">dev: the agent can also delete</dd>
+    <dt><kbd>Enter</kbd></dt><dd>Select the focused session with the mode shown for it. In the filter, select the first match.</dd>
+    <dt>Typing</dt><dd>Filter the sessions by name, host, tenant or user.</dd>
+    <dt><kbd>?</kbd></dt><dd>Show this help. <kbd>Esc</kbd> closes it.</dd>
+  </dl>
+  <p class="key-modes note">The mode keys change the session under the focus, so press <kbd>↓</kbd> first when you are in the filter.</p>
+  <h3>From your agent</h3>
+  <dl>
+    <dt><code>mode dev</code></dt><dd>Change the mode of the current session without this page. <code>mode reset</code> goes back to the session's own mode.</dd>
+    <dt><code>switch_session name qual</code></dt><dd>Switch to a session, and optionally set its mode.</dd>
+  </dl>
+  <p class="note">These are prompts of the MCP server. In Claude Code, run them as <code>/mcp__&lt;server&gt;__mode</code>.</p>
+  <div class="actions"><form method="dialog"><button class="button primary" type="submit" autofocus>Close</button></form></div>
+</dialog>
 {{end}}
 {{if not (or .Done .Cancelled)}}
 <script nonce="{{.Nonce}}">
@@ -806,6 +1013,90 @@ var pickerPage = template.Must(template.New("picker").Parse(`<!doctype html>
         heading.hidden = terms.length > 0 && !shownGroups.has(heading.dataset.group);
       }
       document.getElementById("empty").style.display = shown ? "none" : "block";
+    });
+  }
+  // keyboard: up/down move between the sessions, left/right or 1/2/3 set the mode
+  // of the focused session, Enter selects it, "?" shows the help, and typing filters by name.
+  // The page works without it
+  const list = document.getElementById("sessions");
+  if (list) {
+    const buttons = () => Array.from(list.querySelectorAll("li.item:not([hidden]) button.session"));
+    const modeKeys = { 1: "prod", 2: "qual", 3: "dev" };
+    // the shortcuts only work with the script, so their hint is shown here
+    const help = document.getElementById("help");
+    const keys = document.getElementById("keys");
+    if (!list.querySelector(".modes")) {
+      for (const el of document.querySelectorAll(".key-modes")) el.hidden = true;
+    }
+    if (keys) keys.hidden = false;
+    const showHelp = () => { if (help && !help.open && help.showModal) help.showModal(); };
+    const showHelpButton = document.getElementById("show-help");
+    if (showHelpButton) showHelpButton.addEventListener("click", showHelp);
+    // setMode checks a mode of a session, and tells screen readers what the agent can do
+    const announce = document.getElementById("announce");
+    const setMode = (item, radio) => {
+      radio.checked = true;
+      const can = item.querySelector(".can-" + radio.value);
+      if (announce) announce.textContent = radio.value + ": " + (can ? can.textContent.trim() : "");
+    };
+    document.addEventListener("keydown", (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
+      if (help && help.open) return;
+      const target = e.target;
+      // "?" shows the help, unless it is typed into a filter which already has text
+      if (e.key === "?" && !(target === filter && filter.value)) {
+        e.preventDefault();
+        showHelp();
+        return;
+      }
+      const item = target.closest ? target.closest("li.item") : null;
+      const onRadio = !!(target.matches && target.matches(".modes input"));
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        const all = buttons();
+        if (!all.length) return;
+        const at = item ? all.indexOf(item.querySelector("button.session")) : -1;
+        e.preventDefault();
+        if (e.key === "ArrowDown") {
+          all[Math.min(at + 1, all.length - 1)].focus();
+        } else if (at > 0) {
+          all[at - 1].focus();
+        } else if (filter) {
+          filter.focus();
+        }
+        return;
+      }
+      if (e.key === "Enter" && (onRadio || target === filter)) {
+        const first = onRadio ? item.querySelector("button.session") : buttons()[0];
+        if (first) { e.preventDefault(); first.click(); }
+        return;
+      }
+      // left/right lower or raise the mode of the focused session. They stop at the
+      // first and last allowed mode instead of wrapping (the browser's own handling of
+      // radio buttons wraps, so it is replaced), so one key press never turns a read
+      // only session into one which can delete data
+      if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && item) {
+        const radios = Array.from(item.querySelectorAll(".modes input")).filter(r => !r.disabled);
+        if (!radios.length) return;
+        e.preventDefault();
+        const at = radios.findIndex(r => r.checked);
+        const next = radios[e.key === "ArrowLeft" ? Math.max(at - 1, 0) : Math.min(at + 1, radios.length - 1)];
+        if (next && !next.checked) {
+          setMode(item, next);
+          if (onRadio) next.focus();
+        }
+        return;
+      }
+      if (e.key.length !== 1 || target === filter) return;
+      const mode = modeKeys[e.key];
+      if (item && mode) {
+        const radio = item.querySelector('.modes input[value="' + mode + '"]');
+        if (radio && !radio.disabled) {
+          e.preventDefault();
+          if (!radio.checked) setMode(item, radio);
+        }
+        return;
+      }
+      if (filter && !(target instanceof HTMLInputElement)) filter.focus();
     });
   }
   // show that the login is running (it can take a moment, e.g. to confirm with the
