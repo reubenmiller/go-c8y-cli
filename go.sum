@@ -174,10 +174,8 @@ github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pquerna/otp v1.5.0 h1:NMMR+WrmaqXU4EzdGJEE1aUUI0AMRzsp96fFFWNPwxs=
 github.com/pquerna/otp v1.5.0/go.mod h1:dkJfzwRKNiegxyNb54X/3fLwhCynbMspSyWKnvi1AEg=
-github.com/reubenmiller/go-c8y/v2 v2.0.0-20261126191905-285eb258dda1 h1:EgObFUoXVgZu41uEt4IuCjb/mPhr56swmRfTBobad2c=
-github.com/reubenmiller/go-c8y/v2 v2.0.0-20261126191905-285eb258dda1/go.mod h1:lRo1Q+bHYGaDXezkaWm9B30IPRDhdXtFGdS1cdnCWPY=
-github.com/reubenmiller/go-c8y/v2 v2.0.0-20261126223951-0ed4937ba7f8 h1:eKfXtCre23kFv9iRpaYIvXv5RsnZNujTQMFaRjcbAIE=
-github.com/reubenmiller/go-c8y/v2 v2.0.0-20261126223951-0ed4937ba7f8/go.mod h1:lRo1Q+bHYGaDXezkaWm9B30IPRDhdXtFGdS1cdnCWPY=
+github.com/reubenmiller/go-c8y/v2 v2.0.0-20261126233350-2d70699820ad h1:ZonhCY1w1vl7WxUClg3YW16aV/zqH4XxGXjIfwMrXM0=
+github.com/reubenmiller/go-c8y/v2 v2.0.0-20261126233350-2d70699820ad/go.mod h1:lRo1Q+bHYGaDXezkaWm9B30IPRDhdXtFGdS1cdnCWPY=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
