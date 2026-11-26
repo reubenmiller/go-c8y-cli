@@ -98,6 +98,7 @@ jobs:
 
     - name: Build cli
       run: task build-powershell build-snapshot
+      shell: bash
 
     # Compiles all packages and their test files for Windows (the unit tests only run on unix),
     # so a missing build tag on a test file is caught here
