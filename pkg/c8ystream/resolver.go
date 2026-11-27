@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/url"
 	"os"
 	"strings"
@@ -16,6 +17,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -41,12 +43,33 @@ type Resolver struct {
 	lastFlag string
 }
 
-// lookupFlagIsSecondary reports whether the last flag read is not the flag
-// which drives the command (InputFlag): the name which could not be looked up
-// is the value of a secondary flag (e.g. --device of
-// "remoteaccess configurations get", which is driven by --id).
-func (in *Resolver) lookupFlagIsSecondary() bool {
-	return in.lastFlag != "" && in.lastFlag != in.r.primaryName
+// lookupFlagIsSecondary reports whether the lookup which failed with err was
+// the lookup of a flag which does not drive the command (InputFlag), e.g.
+// --device of "remoteaccess configurations get", which is driven by --id: the
+// last flag read is another flag, and the name which could not be looked up
+// is not the value of the flag which drives the command (a command may read
+// that value, then other flags, then look it up).
+func (in *Resolver) lookupFlagIsSecondary(err error) bool {
+	if in.lastFlag == "" || in.lastFlag == in.r.primaryName {
+		return false
+	}
+	if name, ok := lookupName(err); ok && in.primary != "" && name == in.primary {
+		return false
+	}
+	return true
+}
+
+// lookupName returns the name of a failed lookup: the name which matched
+// nothing, or the reference which could not be resolved (without "name:").
+func lookupName(err error) (string, bool) {
+	if _, name, ok := core.NameNotFound(err); ok {
+		return name, true
+	}
+	var lookupErr *core.LookupError
+	if errors.As(err, &lookupErr) {
+		return strings.TrimPrefix(lookupErr.Reference, "name:"), true
+	}
+	return "", false
 }
 
 // Index is the zero-based position of this item in the input stream.

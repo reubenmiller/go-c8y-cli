@@ -681,7 +681,7 @@ func (r *Runner) producer(build Build) Producer {
 // flag which holds the name: the flag which drives the command (InputFlag) or
 // another one (see LookupTransportError and NoMatchesFlagError).
 func (r *Runner) buildError(in *Resolver, err error) error {
-	secondary := in.lookupFlagIsSecondary()
+	secondary := in.lookupFlagIsSecondary(err)
 	if lookupErr, ok := r.lookupTransportError(err, secondary); ok {
 		return lookupErr
 	}

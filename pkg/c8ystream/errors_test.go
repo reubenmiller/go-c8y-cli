@@ -397,6 +397,21 @@ func TestRunner_buildErrorOfLookup(t *testing.T) {
 		t.Errorf("secondary flag, not found: got %q exit=%d", ce.Error(), ce.ExitCode)
 	}
 
+	// the value of the flag which drives the command, looked up after another
+	// flag was read
+	in.primary = "x"
+	_ = in.FirstString("device")
+	if ce := r.buildError(in, lookup).(cmderrors.CommandError); ce.ExitCode != cmderrors.ExitUserError || ce.Message != "Could not fetch by id: "+refused().Error() {
+		t.Errorf("driver flag read before another flag, transport: got %q exit=%d", ce.Message, ce.ExitCode)
+	}
+	if got := r.buildError(in, notFound); got != notFound {
+		t.Errorf("driver flag read before another flag, not found: got %v, want the error unchanged", got)
+	}
+	in.primary = "y"
+	if ce := r.buildError(in, notFound).(cmderrors.CommandError); ce.ExitCode != cmderrors.ExitError {
+		t.Errorf("secondary flag with another driver value, not found: got %q exit=%d", ce.Error(), ce.ExitCode)
+	}
+
 	// any other error is left alone
 	other := errors.New("boom")
 	if got := r.buildError(in, other); got != other {

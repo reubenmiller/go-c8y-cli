@@ -82,14 +82,16 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		app, err := c8ystream.ResolveHostedApplication(in.ResolveContext(), client, n.factory.GetTenant(), in.String("application"))
+		// A name which no hosted application has is an unresolved name (exit
+		// code 4). v2.59.0 listed nothing and exited with 0, which is a v2 bug
+		// (see docs/proposals/BREAKING_CHANGE_CANDIDATES.md).
+		app, err := c8ystream.HostedApplicationRef(in.ResolveContext(), client, n.factory.GetTenant(), in.String("application"))
 		if err != nil {
 			return nil, err
 		}
 		if app == "" {
-			// As in v2.59.0 no application, or a name which no hosted
-			// application has, is not an error: nothing is listed (also
-			// nothing under --raw) and no request is sent
+			// As in v2.59.0 no application is not an error: nothing is
+			// listed (also nothing under --raw) and no request is sent
 			return func(context.Context) any {
 				return nil
 			}, nil

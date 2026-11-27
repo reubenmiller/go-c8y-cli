@@ -4,7 +4,8 @@
 # a name was looked up is a command error (exit code 101, or 100 for a flag which does
 # not drive the command), not the server error (99) of the request of the command itself.
 # The text depends on the resource. A name which matches nothing is reported the same
-# way for every resource. These tests pass on v2.59.0 too.
+# way for every resource. These tests pass on v2.59.0 too, except the one marked as a
+# v2 bug.
 config:
   env:
     C8Y_SETTINGS_DEFAULTS_CACHE: false
@@ -209,12 +210,15 @@ tests:
       not-contains:
         - referenceByName
 
-  It prints nothing for a plugin list of an application which no hosted application has:
+  # v2.59.0 exited with 0 and printed nothing here (a v2 bug, not restored)
+  It reports a plugin list of an application which no hosted application has as an unresolved name:
     command: |
       c8y ui applications plugins list --application nosuchname
-    exit-code: 0
+    exit-code: 4
     stdout:
       match-pattern: ^$
+    stderr:
+      match-pattern: "commandError: referenceByName: no matching items found. name=nosuchname"
 
   It resolves a user with a wildcard and reports one which matches nothing:
     command: |
