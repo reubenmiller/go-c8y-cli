@@ -63,6 +63,7 @@ Get a list of series [app_Weather.temperature] and [app_Weather.barometer] for d
 		cmd,
 		flags.WithExtendedPipelineSupport("device", "source.id", false, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPowershellName("Get-MeasurementSeries"),
+		flags.WithCollectionProperty("-"),
 		flags.WithOutputType("application/json", ""),
 	)
 

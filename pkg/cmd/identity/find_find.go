@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/identity"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -92,7 +91,7 @@ func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 			},
 		}
 		return func(ctx context.Context) any {
-			return output.FromIterator(client.Identity.Search(ctx, opts).Items())
+			return client.Identity.Search(ctx, opts)
 		}, nil
 	})
 }

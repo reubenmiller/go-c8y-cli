@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"os"
+	"os/signal"
 	"slices"
 	"strings"
 	"time"
@@ -127,6 +129,10 @@ func (n *SubscribeCmd) RunE(cmd *cobra.Command, args []string) error {
 		level = slog.LevelDebug
 	}
 	logger := slog.New(slog.NewTextHandler(n.factory.IOStreams.ErrOut, &slog.HandlerOptions{Level: level}))
+	// in the format of v2.59.0
+	if cliLog, logErr := n.factory.Logger(); logErr == nil && cliLog != nil {
+		logger = slog.New(cmdutil.NewWebsocketLogHandler(cliLog, nil, "unsubscribing", "Worker is shutting down"))
+	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		clientOpts := notification2.ClientOptions{
@@ -167,8 +173,16 @@ func (n *SubscribeCmd) messages(ctx context.Context, cfg *config.Config, logger 
 			defer cancel()
 		}
 
+		// Ctrl-C stops the subscription (v2.59.0 exited without an error), also
+		// while it connects
+		ctx, stopInterrupt := signal.NotifyContext(ctx, os.Interrupt)
+		defer stopInterrupt()
+
 		stream, err := subscribeStream(ctx, client, clientOpts, cmdutil.NewNotification2Connector(client, cfg.SkipSSLVerify()))
 		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				err = cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCancel, "Interrupted")
+			}
 			yield(jsondoc.Empty(), err)
 			return
 		}

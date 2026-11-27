@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -75,7 +76,30 @@ type Factory struct {
 	// the session log messages which are shown once
 	bindLogged     sync.Once
 	authTypeLogged sync.Once
+	clientLogged   sync.Once
+	runningCommand *cobra.Command
+	streaming      atomic.Bool // the command streams from a websocket (realtime, notification2)
+	wsLogMuted     atomic.Bool
+	timeoutLogged  sync.Once
 }
+
+// SetRunningCommand sets the command which runs (a subcommand, where Command is the root),
+// which the log of the responses reads the result property from.
+func (f *Factory) SetRunningCommand(cmd *cobra.Command) {
+	f.runningCommand = cmd
+}
+
+// SetStreaming marks the command as one which streams from a websocket. As in
+// v2.59.0 such a command does not log the jobs and the responses of its requests
+// like the commands which send requests do.
+func (f *Factory) SetStreaming() { f.streaming.Store(true) }
+
+// IsStreaming reports whether the command streams from a websocket.
+func (f *Factory) IsStreaming() bool { return f.streaming.Load() }
+
+// MuteWebsocketLog stops the log of the websocket clients of the SDK: v2.59.0
+// logged nothing of the clean up of the connection when a command stopped.
+func (f *Factory) MuteWebsocketLog() { f.wsLogMuted.Store(true) }
 
 // Set reference to the cobra command
 func (f *Factory) SetCommand(cmd *cobra.Command) *Factory {

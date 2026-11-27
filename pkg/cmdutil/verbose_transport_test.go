@@ -139,6 +139,30 @@ func TestUnfilteredArraySize(t *testing.T) {
 	assert.False(t, ok, "more than one array")
 }
 
+func TestDataArraySizeAsV2(t *testing.T) {
+	log, read := captureLog(t)
+	tr := &verboseTransport{log: log}
+
+	// the property of the command
+	tr.resultProperty = func() string { return "managedObjects" }
+	n, ok := tr.dataArraySize([]byte(`{"managedObjects":[{"id":"1"},{"id":"2"}],"next":"x"}`))
+	assert.True(t, ok)
+	assert.Equal(t, 2, n)
+	// no data property: v2.59.0 did not look for one
+	tr.resultProperty = func() string { return "-" }
+	_, ok = tr.dataArraySize([]byte(`{"managedObjects":[{"id":"1"}]}`))
+	assert.False(t, ok)
+
+	// no result property: detected, and logged (at debug level, which is not captured here)
+	tr.resultProperty = func() string { return "" }
+	n, ok = tr.dataArraySize([]byte(`{"features":[1,2,3]}`))
+	assert.True(t, ok)
+	assert.Equal(t, 3, n)
+	_, ok = tr.dataArraySize([]byte(`[{"id":"1"}]`))
+	assert.False(t, ok, "a top-level array has no data property")
+	_ = read
+}
+
 type failingTransport struct{}
 
 func (failingTransport) RoundTrip(*http.Request) (*http.Response, error) {

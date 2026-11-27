@@ -95,6 +95,7 @@ type Runner struct {
 	tmplMu       sync.Mutex // guards tmplRequest/tmplResponse against the response middleware
 	tmplRequest  map[string]any
 	tmplResponse map[string]any
+	tmplPages    []templatePage // the responses of the current job, guarded by tmplMu
 }
 
 // NewRunner resolves the command configuration and pipeline annotations and
@@ -105,6 +106,7 @@ func NewRunner(cmd *cobra.Command, f *cmdutil.Factory) (*Runner, error) {
 	if err != nil {
 		return nil, err
 	}
+	f.SetRunningCommand(cmd)
 	flags.WithOptions(cmd, flags.WithRuntimePipelineProperty())
 	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
 	if err != nil {
@@ -533,10 +535,16 @@ func (r *Runner) run(newProducer func() Producer) error {
 		if vs != nil {
 			stages = append(stages, vs)
 		}
-		if columnsInRenderer(cfg) {
-			flatten = flattenUnlessColumns(flatten, cols)
+		switch {
+		case selectionCSVActive(cfg):
+			// csv/tsv: the columns of the renderer are the flat paths of the
+			// document already (also an empty object or array), so a flattened
+			// document would lose those
+		case columnsInRenderer(cfg):
+			stages = append(stages, flattenUnlessColumns(flatten, cols))
+		default:
+			stages = append(stages, flatten)
 		}
-		stages = append(stages, flatten)
 	} else if vs != nil {
 		stages = append(stages, vs)
 	}
@@ -678,6 +686,14 @@ func (r *Runner) nextItem() (*Resolver, error) {
 		in.input = toBytes(raw)
 		in.primary = string(value)
 		r.cursor.Set(in.input)
+	}
+	// as v2.59.0, which logged the line of the input (<nil> without input)
+	if log, err := r.Factory.Logger(); err == nil && log != nil && !r.Factory.IsStreaming() {
+		if r.driver != nil {
+			log.Debugf("Input line: %s", in.input)
+		} else {
+			log.Debugf("Input line: %s", nil)
+		}
 	}
 	// Point the output-template input at this item. In the serial pipeline
 	// (workers<=1) the item's documents are rendered before the next item is

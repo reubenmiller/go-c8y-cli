@@ -80,7 +80,7 @@ func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
 	channel := n.flagChannel
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		return func(ctx context.Context) any {
-			return c8ystream.Subscribed(client.Realtime().SubscribeStream(ctx, channel), opts)
+			return c8ystream.SubscribePatterns(r, ctx, opts, client.Realtime().SubscribeStream, channel)
 		}, nil
 	})
 }

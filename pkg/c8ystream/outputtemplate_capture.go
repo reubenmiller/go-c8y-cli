@@ -55,6 +55,11 @@ func (r *Runner) installOutputTemplateCapture(client *apiv2.Client) {
 
 		r.tmplMu.Lock()
 		r.tmplRequest = requestData
+		page := templatePage{body: o.Body}
+		if req := raw.Request; req != nil && req.URL != nil {
+			page.method, page.path = req.Method, req.URL.Path
+		}
+		r.tmplPages = append(r.tmplPages, page)
 		r.tmplResponse = responseData
 		r.tmplMu.Unlock()
 	}))

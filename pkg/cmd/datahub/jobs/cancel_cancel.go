@@ -49,6 +49,7 @@ Cancel a running Dremio job
 		flags.WithProcessingMode(),
 		flags.WithExtendedPipelineSupport("id", "id", true, "id"),
 		flags.WithPowershellName("Stop-DataHubJob"),
+		flags.WithCollectionProperty("-"),
 		flags.WithOutputType("application/json", ""),
 	)
 

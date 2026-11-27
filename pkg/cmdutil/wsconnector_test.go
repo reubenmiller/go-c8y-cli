@@ -3,6 +3,8 @@ package cmdutil
 import (
 	"context"
 	"crypto/tls"
+	"errors"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -133,4 +135,78 @@ type roundTripperFunc func(*http.Request) (*http.Response, error)
 
 func (f roundTripperFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return f(req)
+}
+
+func Test_WebsocketConnector_RealtimeHandshakeTimeoutIsTenSeconds(t *testing.T) {
+	// v2.59.0: 10 seconds (the default of the SDK is 45)
+	connector := NewRealtimeConnector(nil, false)
+	if connector.HandshakeTimeout != 10*time.Second {
+		t.Fatalf("expected a handshake timeout of 10s, got %v", connector.HandshakeTimeout)
+	}
+}
+
+// newSilentServer accepts connections and never answers
+func newSilentServer(t *testing.T) string {
+	t.Helper()
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	go func() {
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				return
+			}
+			t.Cleanup(func() { _ = conn.Close() })
+		}
+	}()
+	t.Cleanup(func() { _ = listener.Close() })
+	return "ws://" + listener.Addr().String() + "/cep/realtime"
+}
+
+// newBasicClient creates a client for a server which answers everything
+func newBasicClient(t *testing.T) *apiv2.Client {
+	t.Helper()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	t.Cleanup(server.Close)
+	return apiv2.NewClient(apiv2.ClientOptions{
+		BaseURL:          server.URL,
+		Auth:             authentication.AuthOptions{Tenant: "t1", Username: "u", Password: "p"},
+		SkipTenantLookup: true,
+	})
+}
+
+func Test_WebsocketConnector_HandshakeTimeoutApplies(t *testing.T) {
+	url := newSilentServer(t)
+	client := newBasicClient(t)
+	connector := NewRealtimeConnector(client, false)
+	connector.HandshakeTimeout = 300 * time.Millisecond
+
+	start := time.Now()
+	_, _, err := connector.DialWebsocket(context.Background(), url, nil)
+	if err == nil {
+		t.Fatal("expected a timeout")
+	}
+	if elapsed := time.Since(start); elapsed > 5*time.Second {
+		t.Fatalf("the handshake timeout did not apply, waited %v", elapsed)
+	}
+}
+
+func Test_WebsocketConnector_CancelEndsTheHandshake(t *testing.T) {
+	url := newSilentServer(t)
+	client := newBasicClient(t)
+	// the default timeout is much longer than the test
+	connector := NewRealtimeConnector(client, false)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	time.AfterFunc(200*time.Millisecond, cancel)
+	start := time.Now()
+	_, _, err := connector.DialWebsocket(ctx, url, nil)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected the dial to be cancelled, got %v", err)
+	}
+	if elapsed := time.Since(start); elapsed > 5*time.Second {
+		t.Fatalf("the cancel did not end the handshake, waited %v", elapsed)
+	}
 }

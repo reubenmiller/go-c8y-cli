@@ -12,7 +12,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -72,7 +71,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		return func(ctx context.Context) any {
-			return output.FromIterator(client.DataHub.ListUsers(ctx).Items())
+			return client.DataHub.ListUsers(ctx)
 		}, nil
 	})
 }

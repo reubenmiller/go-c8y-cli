@@ -11,3 +11,31 @@ tests:
       c8y notification2 subscriptions create --name my-subscription --context mo --apiFilter managedobjects --device notification2-device > /dev/null &&
       c8y notification2 subscriptions subscribe --name my-subscription --duration 1s
     exit-code: 0
+
+  It closes the subscription without a warning (the unsubscribe is sent before the connection is closed):
+    command: |
+      c8y devices create --name notification2-close-device --select id -o csv > /dev/null &&
+      c8y notification2 subscriptions create --name close-subscription --context mo --apiFilter managedobjects --device notification2-close-device > /dev/null &&
+      for i in 1 2 3 4 5 6 7 8; do
+        c8y notification2 subscriptions subscribe --name close-subscription --duration 1s 2>&1 >/dev/null
+      done | grep -c -E 'WARN|level=' || true
+    exit-code: 0
+    stdout:
+      exactly: |
+        0
+
+  --verbose of notification2 subscribe logs in the CLI log format and not as slog records:
+    command: |
+      c8y devices create --name notification2-log-device --select id -o csv > /dev/null &&
+      c8y notification2 subscriptions create --name log-subscription --context mo --apiFilter managedobjects --device notification2-log-device > /dev/null &&
+      c8y notification2 subscriptions subscribe --name log-subscription --duration 1s --verbose 2>&1 >/dev/null | cut -f3- | grep -E '^(Creating new notification2 token|Token does not match claim|Sending request: POST)' | sed -E 's#http://[^/]+#http://HOST#'
+      c8y notification2 subscriptions subscribe --name log-subscription --duration 1s --verbose 2>&1 >/dev/null | grep -c -E 'level=|msg=|Max jobs|started job' || true
+    exit-code: 0
+    stdout:
+      exactly: |
+        Creating new notification2 token
+        Sending request: POST http://HOST/notification2/token
+        Token does not match claim. Invalid information will be ignored in the token
+        Creating new notification2 token
+        Sending request: POST http://HOST/notification2/token
+        0

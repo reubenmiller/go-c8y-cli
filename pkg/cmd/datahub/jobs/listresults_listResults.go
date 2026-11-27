@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/datahub/jobs"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -94,7 +93,7 @@ func (n *ListResultsCmd) RunE(cmd *cobra.Command, args []string) error {
 			if limit > 0 {
 				ctx = c8ystream.WithQueryParam(ctx, "limit", strconv.Itoa(limit))
 			}
-			return output.FromIterator(client.DataHub.Jobs.GetResults(ctx, id, opt).Items())
+			return client.DataHub.Jobs.GetResults(ctx, id, opt)
 		}, nil
 	})
 }

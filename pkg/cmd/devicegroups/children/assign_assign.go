@@ -61,6 +61,7 @@ Add a related managed object as a child to an existing managed object
 		flags.WithProcessingMode(),
 		flags.WithExtendedPipelineSupport("child", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPowershellName("Add-DeviceGroupChild"),
+		flags.WithCollectionProperty("managedObject"),
 	)
 
 	_ = cmd.MarkFlagRequired("id")

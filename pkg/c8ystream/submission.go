@@ -84,7 +84,7 @@ func submissionFrom(ctx context.Context) *submission {
 // (interactive, not CI/--force/--dry). When false the Submit fast path skips
 // the deferred-execution prepare entirely.
 func (s *submission) confirmActive() bool {
-	return s.cfg != nil && s.cfg.ShouldConfirm()
+	return s.cfg != nil && s.cfg.ConfirmationPossible()
 }
 
 // hasDelays reports whether any inter-request delay is configured.

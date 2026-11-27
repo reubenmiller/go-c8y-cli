@@ -62,6 +62,7 @@ Assign a device as a child device to an existing device
 		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("newChild", "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPowershellName("Add-ChildDeviceToDevice"),
+		flags.WithCollectionProperty("managedObject"),
 		flags.WithDeprecationNotice("please use 'c8y devices children assign --childType device' instead"),
 	)
 

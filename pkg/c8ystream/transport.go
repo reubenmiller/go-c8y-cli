@@ -16,10 +16,15 @@ func (r *Runner) dryRunHandler() (func(*http.Request), error) {
 		return nil, err
 	}
 	out := r.Cmd.OutOrStdout()
+	log, _ := r.Factory.Logger()
 	var mu sync.Mutex
 	return func(req *http.Request) {
 		mu.Lock()
 		defer mu.Unlock()
+		if log != nil {
+			// as v2.59.0, which logged the dry run of each request
+			log.Debug("Overriding common options provided in the context. dryRun=true")
+		}
 		handler.PrintRequestDetails(out, req)
 	}, nil
 }

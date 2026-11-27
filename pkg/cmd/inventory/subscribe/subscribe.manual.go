@@ -88,7 +88,7 @@ func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
 			device = "*"
 		}
 		return func(ctx context.Context) any {
-			return c8ystream.Subscribed(client.ManagedObjects.SubscribeStream(ctx, device), opts)
+			return c8ystream.Subscribe(r, ctx, opts, client.ManagedObjects.SubscribeStream, device)
 		}, nil
 	})
 }

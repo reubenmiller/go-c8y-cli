@@ -234,3 +234,107 @@ tests:
       exactly: |
         requests: 4
         ok
+
+  --outputTemplate of an empty list gets an empty array:
+    command: |
+      echo "$(c8y devices list --name no_such_device_for_template --outputTemplate 'std.length(output)')"
+      c8y devices list --name no_such_device_for_template --outputTemplate 'output' | wc -l | tr -d ' '
+    exit-code: 0
+    stdout:
+      exactly: |
+        0
+        0
+
+  --outputTemplate of a list with one item gets an array with the item:
+    command: |
+      echo "$(c8y devices list --pageSize 1 --outputTemplate 'std.length(output)')"
+    exit-code: 0
+    stdout:
+      exactly: |
+        1
+
+  --outputTemplate gets the whole response with --withTotalElements and --withTotalPages:
+    command: |
+      echo "$(c8y devices list --pageSize 2 --withTotalElements --outputTemplate 'output.statistics.pageSize')"
+      echo "$(c8y devices list --pageSize 2 --withTotalPages --outputTemplate 'output.statistics.pageSize')"
+      echo "$(c8y devices list --pageSize 2 --raw --outputTemplate 'output.statistics.pageSize')"
+    exit-code: 0
+    stdout:
+      exactly: |
+        2
+        2
+        2
+
+  --outputTemplate which returns an array prints one document per element:
+    command: |
+      c8y devices list --pageSize 2 --outputTemplate 'output' --select id | wc -l | tr -d ' '
+      c8y devices list --pageSize 2 --outputTemplate 'output' --select id -o csv | wc -l | tr -d ' '
+      c8y devices get --id "$(c8y devices list --pageSize 1 --select id -o csv)" --outputTemplate '[{id: output.id}, {id: 2}]' --select id -o csv | tail -1
+    exit-code: 0
+    stdout:
+      exactly: |
+        2
+        2
+        2
+
+  --outputTemplate which returns an array prints the array with --raw:
+    command: |
+      c8y devices get --id "$(c8y devices list --pageSize 1 --select id -o csv)" --raw --outputTemplate '[{id: 1}, {id: 2}]'
+    exit-code: 0
+    stdout:
+      exactly: |
+        [{"id":1},{"id":2}]
+
+  csv, csvheader and tsv have a column for an empty object or array, which holds {} or []:
+    command: |
+      id=$(c8y inventory create --name csv-empty-columns --template "{a: {}, b: [], c: [1, 2], d: {e: {}, f: [], g: {h: 1}}, n: null}" --select id -o csv)
+      c8y inventory get --id "$id" --view off -o csvheader | head -1 | tr ',' '\n' | head -8 | tr '\n' ' '; echo
+      c8y inventory get --id "$id" --view off -o csv | cut -d, -f1-4
+      c8y inventory get --id "$id" --view off -o tsv | cut -f1-4
+      c8y inventory get --id "$id" -o csv | cut -d, -f1-4
+      c8y devices list --pageSize 1 --view off -o csv | cut -d, -f1
+      c8y devices list --pageSize 1 --view off -o csvheader | head -1 | cut -d, -f1
+      c8y devices list --pageSize 1 --view off --flatten -o csv | cut -d, -f1
+      c8y inventory delete --id "$id" >/dev/null
+    exit-code: 0
+    stdout:
+      exactly: |
+        a b c.0 c.1 creationTime d.e d.f d.g.h 
+        {},[],1,2
+        {}	[]	1	2
+        {},[],1,2
+        {}
+        c8y_IsDevice
+        {}
+
+  --debug logs the worker loop of v2.59.0 in its order:
+    command: |
+      c8y devices list --pageSize 1 --debug 2>&1 >/dev/null | cut -f3- |
+        grep -E '^(Creating c8y client|Binding authorization|Using client auth type|timeout:|starting worker|checking job iterator|Input line|adding job|no confirmation|finished adding jobs|worker 1: started|Overriding common options)'
+    exit-code: 0
+    stdout:
+      exactly: |
+        Creating c8y client
+        Binding authorization environment variables
+        Using client auth type: BASIC
+        timeout: 10m0s
+        starting worker: 1
+        checking job iterator: 1
+        Input line: %!s(<nil>)
+        adding job: 1
+        no confirmation required. ci_mode=true, force=false, dry=false
+        checking job iterator: 2
+        finished adding jobs. lastJobID=1
+        worker 1: started job 1
+        Overriding common options provided in the context. dryRun=false
+
+  --debug logs the array properties of a response without a result property:
+    command: |
+      c8y currenttenant get --debug 2>&1 >/dev/null | cut -f3- | grep -E '^(Array properties|Data property)'
+      c8y api "/inventory/managedObjects?pageSize=1" --debug 2>&1 >/dev/null | cut -f3- | grep -E '^(Array properties|Data property)'
+    exit-code: 0
+    stdout:
+      exactly: |
+        Array properties: []
+        Array properties: [managedObjects]
+        Data property: managedObjects

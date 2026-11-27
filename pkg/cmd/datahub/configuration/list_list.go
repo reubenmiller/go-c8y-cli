@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/datahub"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -88,7 +87,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			Limit:               int(common.PageSize),
 		}
 		return func(ctx context.Context) any {
-			return output.FromIterator(client.DataHub.ListOffloadingConfigurations(ctx, opt).Items())
+			return client.DataHub.ListOffloadingConfigurations(ctx, opt)
 		}, nil
 	})
 }

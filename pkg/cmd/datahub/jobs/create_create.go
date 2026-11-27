@@ -52,6 +52,7 @@ Submit a SQL query and get the Dremio job id
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("sql", "sql", false, "id"),
 		flags.WithPowershellName("New-DataHubJob"),
+		flags.WithCollectionProperty("-"),
 		flags.WithOutputType("application/json", ""),
 	)
 

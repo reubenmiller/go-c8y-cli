@@ -15,6 +15,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	c8ycache "github.com/reubenmiller/go-c8y/v2/pkg/c8y"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
@@ -33,6 +34,8 @@ func (f *Factory) sessionFileFlag() string {
 // resolveSession resolves the url and the authentication of the session from the configuration
 // (and the environment variables if the session is not given using the --session flag).
 func (f *Factory) resolveSession(cfg *config.Config, log *logger.Logger) (baseURL *url.URL, auth authentication.AuthOptions, authErrors []error) {
+	// v2.59.0 logged the creation of the client before the session settings
+	f.clientLogged.Do(func() { log.Debug("Creating c8y client") })
 	if f.sessionFileFlag() == "" {
 		f.logOnce(&f.bindLogged, log, "Binding authorization environment variables")
 		if err := cfg.BindAuthorization(); err != nil {
@@ -51,6 +54,7 @@ func (f *Factory) resolveSession(cfg *config.Config, log *logger.Logger) (baseUR
 	baseURL, _ = url.Parse(apiv2.FormatBaseURL(c8ysession.FormatHost(cfg.GetHostWithEnvironment())))
 	auth = clientAuth.Auth()
 	f.logOnce(&f.authTypeLogged, log, "Using client auth type: "+auth.GetAuthTypes()[0].String())
+	f.timeoutLogged.Do(func() { log.Debugf("timeout: %v", cfg.RequestTimeout()) })
 	return baseURL, auth, authErrors
 }
 
@@ -103,7 +107,6 @@ func (f *Factory) clientOptionsV2(disableEncryptionCheck bool) (apiv2.ClientOpti
 		os.Setenv(apiv2.EnvVarLoggerHideSensitive, "true")
 	}
 
-	log.Debug("Creating c8y client")
 	cfg.ConfigureProxySettings(log)
 
 	baseURL, auth, authErrors := f.resolveSession(cfg, log)
@@ -240,11 +243,15 @@ func (f *Factory) ClientV2() (*apiv2.Client, error) {
 	if f.Logger != nil {
 		if logg, logErr := f.Logger(); logErr == nil && logg != nil {
 			opts.Transport = &verboseTransport{
-				base:    opts.Transport,
-				cfg:     cfg,
-				session: &session,
-				log:     logg,
-				verbose: verbose,
+				base:      opts.Transport,
+				cfg:       cfg,
+				session:   &session,
+				log:       logg,
+				verbose:   verbose,
+				streaming: f.IsStreaming,
+				resultProperty: func() string {
+					return flags.GetCollectionPropertyFromAnnotation(f.runningCommand)
+				},
 			}
 		}
 	}
@@ -256,7 +263,14 @@ func (f *Factory) ClientV2() (*apiv2.Client, error) {
 
 	client := apiv2.NewClient(opts)
 	client.Realtime().SetConnector(NewRealtimeConnector(client, cfg.IgnoreProxy()))
-	client.Realtime().SetLogger(logger.With("component", "realtime"))
+	// The websocket frames are logged in the format of v2.59.0 (see websocketLogHandler)
+	realtimeLogger := logger.With("component", "realtime")
+	if f.Logger != nil {
+		if logg, logErr := f.Logger(); logErr == nil && logg != nil {
+			realtimeLogger = slog.New(f.NewRealtimeLogHandler(logg))
+		}
+	}
+	client.Realtime().SetLogger(realtimeLogger)
 	return client, nil
 }
 

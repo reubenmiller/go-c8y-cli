@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gorilla/websocket"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
@@ -35,7 +36,14 @@ type WebsocketConnector struct {
 
 	// IgnoreProxy connects directly, without the proxy of the environment
 	IgnoreProxy bool
+
+	// HandshakeTimeout is how long the opening handshake of the websocket may
+	// take (0: the default of the SDK, 45 seconds)
+	HandshakeTimeout time.Duration
 }
+
+// realtimeHandshakeTimeout is the handshake timeout of the realtime websocket in v2.59.0
+const realtimeHandshakeTimeout = 10 * time.Second
 
 var _ wsdial.Connector = (*WebsocketConnector)(nil)
 
@@ -48,7 +56,40 @@ func (c *WebsocketConnector) WebsocketHeader(ctx context.Context) (http.Header, 
 // DialWebsocket connects, also when ctx is in a dry run.
 func (c *WebsocketConnector) DialWebsocket(ctx context.Context, rawURL string, header http.Header) (*websocket.Conn, *http.Response, error) {
 	ctx = apiv2.WithDryRun(ctx, false)
-	if !c.InsecureSkipVerify && !c.IgnoreProxy {
+	return dialUntilDone(ctx, func() (*websocket.Conn, *http.Response, error) {
+		return c.dial(ctx, rawURL, header)
+	})
+}
+
+// dialUntilDone returns when ctx is done, also if the dial is still waiting for
+// the handshake of the server (which the dialer only stops after its handshake
+// timeout): a connection which is made after that is closed.
+func dialUntilDone(ctx context.Context, dial func() (*websocket.Conn, *http.Response, error)) (*websocket.Conn, *http.Response, error) {
+	type result struct {
+		conn *websocket.Conn
+		resp *http.Response
+		err  error
+	}
+	results := make(chan result, 1)
+	go func() {
+		conn, resp, err := dial()
+		results <- result{conn, resp, err}
+	}()
+	select {
+	case res := <-results:
+		return res.conn, res.resp, res.err
+	case <-ctx.Done():
+		go func() {
+			if res := <-results; res.conn != nil {
+				_ = res.conn.Close()
+			}
+		}()
+		return nil, nil, ctx.Err()
+	}
+}
+
+func (c *WebsocketConnector) dial(ctx context.Context, rawURL string, header http.Header) (*websocket.Conn, *http.Response, error) {
+	if !c.InsecureSkipVerify && !c.IgnoreProxy && c.HandshakeTimeout == 0 {
 		return c.Client.DialWebsocket(ctx, rawURL, header)
 	}
 
@@ -78,6 +119,9 @@ func (c *WebsocketConnector) DialWebsocket(ctx context.Context, rawURL string, h
 	if c.IgnoreProxy {
 		dialer.Proxy = nil
 	}
+	if c.HandshakeTimeout > 0 {
+		dialer.HandshakeTimeout = c.HandshakeTimeout
+	}
 	return dialer.DialContext(ctx, dialURL, requestHeader)
 }
 
@@ -101,9 +145,10 @@ func websocketURL(rawURL string) (string, error) {
 
 // NewRealtimeConnector returns the connector of the realtime client, which
 // like in v2.59.0 never verifies the certificate of the server (whatever the
-// insecure setting) and does not use the proxy with --ignoreProxy.
+// insecure setting), does not use the proxy with --ignoreProxy, and waits 10
+// seconds for the handshake of the websocket.
 func NewRealtimeConnector(client *apiv2.Client, ignoreProxy bool) *WebsocketConnector {
-	return &WebsocketConnector{Client: client, InsecureSkipVerify: true, IgnoreProxy: ignoreProxy}
+	return &WebsocketConnector{Client: client, InsecureSkipVerify: true, IgnoreProxy: ignoreProxy, HandshakeTimeout: realtimeHandshakeTimeout}
 }
 
 // NewNotification2Connector returns the connector of the notification2

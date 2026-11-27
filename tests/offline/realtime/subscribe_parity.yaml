@@ -46,3 +46,34 @@ tests:
     stdout:
       contains:
         - "exit=0"
+
+  --verbose of realtime subscribe logs the websocket as v2.59.0 did, in the CLI log format:
+    command: |
+      device=$(c8y devices create --name "ws-log-$RANDOM" --select id --output csv)
+      c8y realtime subscribe --channel "/alarms/$device" --duration 2s --verbose 2>&1 >/dev/null | cut -f3- |
+        sed -E "s#ws://[^ ]+#ws://HOST#; s#(ws \((send|recv)\): [^ ]+ : ).*#\1...#; s#/alarms/$device#/alarms/DEVICE#" |
+        grep -E '^(Establishing connection|Waiting for message: id=1$|ws \((send|recv)\): /meta/handshake|Pending messages ids: 1$|Removing message from pending requests: 1$|Received message 1$|Resending /meta/connect heartbeat with 500 ms delay$|Listening to subscriptions|Subscribing to |Successfully subscribed to channel|Duration has expired)' |
+        LC_ALL=C sort -u
+      c8y realtime subscribe --channel "/alarms/$device" --duration 1s --verbose 2>&1 >/dev/null | grep -c -E 'level=(INFO|WARN|DEBUG)|component=realtime' || true
+    exit-code: 0
+    stdout:
+      exactly: |
+        Duration has expired. Stopping realtime client
+        Establishing connection to ws://HOST
+        Listening to subscriptions: /alarms/DEVICE
+        Pending messages ids: 1
+        Received message 1
+        Removing message from pending requests: 1
+        Resending /meta/connect heartbeat with 500 ms delay
+        Subscribing to /alarms/DEVICE
+        Successfully subscribed to channel /alarms/DEVICE
+        Waiting for message: id=1
+        ws (recv): /meta/handshake : ...
+        ws (send): /meta/handshake : ...
+        0
+
+  Ctrl-C while the realtime websocket connects does not wait for the handshake:
+    command: ./offline/realtime/interrupt.sh
+    exit-code: 0
+    stdout:
+      exactly: "interrupted_in_time=true"
