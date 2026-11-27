@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"os/signal"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -74,6 +75,29 @@ func SubscribePatterns[T any](r *Runner, ctx context.Context, opts realtime.Stre
 	})
 }
 
+// connectErrorPrefix is the start of the error of a realtime client which could
+// not open its websocket ("realtime: failed to connect to <url>: <error>").
+const connectErrorPrefix = "realtime: failed to connect to "
+
+// realtimeConnectError gives the error of a realtime websocket which could not
+// be opened (connection refused, a rejected upgrade, ...) the text and the exit
+// code of v2.59.0: a command error "could not create realtime client. <error>"
+// with exit code 100. Any other error is returned as it is.
+func realtimeConnectError(err error) error {
+	if err == nil || !strings.HasPrefix(err.Error(), connectErrorPrefix) {
+		return err
+	}
+	cause := errors.Unwrap(err)
+	if cause == nil {
+		return err
+	}
+	return cmderrors.CommandError{
+		Message:   "could not create realtime client. " + cause.Error(),
+		ErrorType: cmderrors.ErrTypeCommand,
+		ExitCode:  cmderrors.ExitError,
+	}
+}
+
 func subscribeStream[T any](r *Runner, ctx context.Context, opts realtime.StreamOptions, subscribe func(context.Context) op.Result[*realtime.Stream[T]]) any {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
@@ -115,6 +139,7 @@ func subscribeStream[T any](r *Runner, ctx context.Context, opts realtime.Stream
 			// Ctrl-C while connecting
 			res.Err = cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCancel, "Interrupted")
 		}
+		res.Err = realtimeConnectError(res.Err)
 		return Subscribed(res, opts)
 	}
 	connected.Store(true)

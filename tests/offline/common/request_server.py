@@ -18,6 +18,10 @@ Modes:
                dateFrom/dateTo (inclusive) and by an "_id gt 'N'" in the query, newest
                first (oldest first with revert=true or an "$orderby=_id asc"), and
                paged by currentPage and pageSize, like the platform does
+  wsfail-<status>
+               answers every /notification2/* request with the status (and the error of
+               the platform), and every other request with 200 {} (so no websocket
+               upgrade: the websocket handshake of the realtime commands fails)
   escaped      answers a list with the "<", ">" and "&" of the names escaped (as Go's
                encoding/json writes them: the six characters backslash-u-0-0-3-c etc.)
 """
@@ -112,7 +116,13 @@ class Handler(BaseHTTPRequestHandler):
             time.sleep(2)
         status = 200
         path = self.path.split("?")[0]
-        if mode == "unavailable":
+        if mode.startswith("wsfail-"):
+            if path.startswith("/notification2/"):
+                status = int(mode.split("-", 1)[1])
+                out = {"error": "security/Forbidden", "message": "Access is denied"}
+            else:
+                out = {}
+        elif mode == "unavailable":
             status, out = 503, {}
         elif mode == "notfound" and self.command == "GET":
             status, out = 404, {"error": "inventory/Not Found", "message": "Finding device data from database failed", "info": "https://cumulocity.com/api"}

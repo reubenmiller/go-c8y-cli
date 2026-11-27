@@ -157,6 +157,27 @@ func TransportError(err error) (cmderrors.CommandError, bool) {
 	}, true
 }
 
+// HTTPCommandError is the error of a failed request as v2.59.0 reported it for
+// the requests which a command sent without the request handler (e.g. the
+// token request of notification2 subscriptions subscribe): a command error
+// "METHOD url: status type message" with exit code 100, whatever the status.
+// ok is false for an error which is not the error response of a request.
+func HTTPCommandError(err error) (cmderrors.CommandError, bool) {
+	var apiErr *core.Error
+	if !errors.As(err, &apiErr) || apiErr.StatusCode() < 100 {
+		return cmderrors.CommandError{}, false
+	}
+	detail := parseServerError(apiErr)
+	if detail == nil {
+		return cmderrors.CommandError{}, false
+	}
+	return cmderrors.CommandError{
+		Message:   detail.Error(),
+		ErrorType: cmderrors.ErrTypeCommand,
+		ExitCode:  cmderrors.ExitError,
+	}, true
+}
+
 // IsUnresolvedName reports whether err is a lookup by name which found nothing
 // (see core.NameNotFound).
 func IsUnresolvedName(err error) bool {

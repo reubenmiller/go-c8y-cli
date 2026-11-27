@@ -1,5 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
-# Moved from tests/manual: the live test tenant has no Notification 2.0 access (403).
+# Moved from tests/manual: the live test tenant has no Notification 2.0 access (403). Under --dry the
+# command connects with an empty token (as v2.59.0 does), which a real tenant rejects: exit 100,
+# see realtime/handshake_errors.yaml.
 config:
   env:
     C8Y_SETTINGS_DEFAULTS_OUTPUT: json
@@ -39,3 +41,12 @@ tests:
         Creating new notification2 token
         Sending request: POST http://HOST/notification2/token
         0
+
+  It shows the request to create the token in a dry run (the command connects with an empty token, which the fake server accepts):
+    command: |
+      c8y notification2 subscriptions subscribe --name my-subscription --subscriber my-sub --expiresInMinutes 60 --duration 1s --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      contains:
+        - '"path":"/notification2/token"'
+        - '"body":{"expiresInMinutes":60,"subscriber":"mysub","subscription":"my-subscription"}'
