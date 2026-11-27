@@ -1,0 +1,31 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "parityDevices",
+            "priority": 300,
+            "fragments": ["c8y_IsDevice"],
+            "columns": ["id", "name", "c8y_Agent.version", "c8y_Hardware.model"]
+        },
+        {
+            "name": "parityEvents",
+            "priority": 300,
+            "requestMethod": "GET",
+            "requestPath": "/event/events$",
+            "contentType": "application/json",
+            "columns": ["id", "type", "text", "missing.column"]
+        },
+        {
+            "name": "parityUsers",
+            "priority": 300,
+            "requestPath": "/user/[^/]+/users$",
+            "columns": ["userName:userName", "email", "displayName"]
+        },
+        {
+            "name": "parityAlias",
+            "priority": 900,
+            "autoMatch": false,
+            "columns": ["id", "label:name", "c8y_Agent.version"]
+        }
+    ]
+}

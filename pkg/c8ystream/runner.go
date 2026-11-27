@@ -77,6 +77,8 @@ type Runner struct {
 	userErrorPath    string // see UserErrorRequests
 	directNameLookup bool   // see DirectNameLookup
 
+	viewMu          sync.Mutex           // guards viewResp against the response middleware
+	viewResp        *viewResponse        // the latest response, which --view auto matches
 	viewDefinition  *dataview.Definition // the view applied to the output; its column widths apply to tables
 	consoleRenderer *consoleRenderer     // the table/json renderer; nil for csv/tsv
 	index           int64
@@ -402,6 +404,7 @@ func (r *Runner) Client() (*apiv2.Client, error) {
 		return nil, err
 	}
 	r.installOutputTemplateCapture(client)
+	r.installViewCapture(client)
 	r.installSilentSuccessMessage(client)
 	return client, nil
 }
@@ -496,7 +499,7 @@ func (r *Runner) run(newProducer func() Producer) error {
 	if r.tmpl != nil {
 		r.tmplFlags = r.commandFlags()
 	}
-	stages, err := CommonStages(cfg, nil)
+	stages, err := commonStages(cfg, nil)
 	if err != nil {
 		return err
 	}
@@ -510,10 +513,26 @@ func (r *Runner) run(newProducer func() Producer) error {
 	// --view: when the user didn't select columns, restrict the documents to
 	// the detected/named view's columns (no-op for --view off / the non-TTY
 	// default), matching the v1 output path.
-	if vs := r.viewStage(); vs != nil {
+	cols := newColumnSelector(cfg)
+	vs := r.viewStage(cols)
+	if len(cfg.GetJSONSelect()) == 0 && cfg.FlattenJSON() && len(stages) > 0 {
+		// --flatten (without --select) is the last common stage. As in v1, where
+		// the view was the selection which --flatten flattened, the view comes
+		// first: it shapes the nested document (json), or resolves the columns
+		// which a tabular renderer applies to the nested document.
+		flatten := stages[len(stages)-1]
+		stages = stages[: len(stages)-1 : len(stages)-1]
+		if vs != nil {
+			stages = append(stages, vs)
+		}
+		if columnsInRenderer(cfg) {
+			flatten = flattenUnlessColumns(flatten, cols)
+		}
+		stages = append(stages, flatten)
+	} else if vs != nil {
 		stages = append(stages, vs)
 	}
-	renderer, err := NewRenderer(r.Cmd.OutOrStdout(), cfg)
+	renderer, err := newRenderer(r.Cmd.OutOrStdout(), cfg, cols)
 	if err != nil {
 		return err
 	}
