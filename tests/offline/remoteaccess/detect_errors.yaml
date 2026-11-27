@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# The remote access commands which connect print the error text of v2.59.0 when the
+# passthrough configuration is not found. They fail before ssh or the listener start.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+
+tests:
+  It fails with the v2 text when the device has no passthrough configuration (connect ssh):
+    command: |
+      c8y devices create --name ra-none-ssh --select id -o csv | c8y remoteaccess connect ssh
+    exit-code: 101
+    stderr:
+      contains:
+        - "commandError: configuration not found. name="
+      not-contains:
+        - "no remote access passthrough configuration"
+
+  It fails with the v2 text when the device has no passthrough configuration (connect run):
+    command: |
+      c8y devices create --name ra-none-run --select id -o csv | c8y remoteaccess connect run -- true
+    exit-code: 101
+    stderr:
+      contains:
+        - "commandError: configuration not found. name="
+
+  It fails with the v2 text when the device has no passthrough configuration (server):
+    command: |
+      c8y devices create --name ra-none-server --select id -o csv | c8y remoteaccess server --listen 127.0.0.1:0
+    exit-code: 101
+    stderr:
+      contains:
+        - "commandError: configuration not found. name="
+
+  It fails with the v2 text and the name when the named configuration does not exist:
+    command: |
+      c8y devices create --name ra-named --select id -o csv | c8y remoteaccess connect ssh --configuration does-not-exist
+    exit-code: 101
+    stderr:
+      contains:
+        - "commandError: configuration not found. name=does-not-exist"
+      not-contains:
+        - "passthrough configuration not found"
