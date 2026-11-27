@@ -129,7 +129,12 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		// Carry the user's self link on the reference body. A piped user supplies
 		// its self/id; a user name is turned into its canonical self link.
-		if userRef := in.String("user"); userRef != "" {
+		// as v2.59.0 a user name with a wildcard resolves to the first user which matches
+		userRef, err := c8ystream.UserWithWildcards(in.ResolveContext(), client, in.String("user"))
+		if err != nil {
+			return nil, err
+		}
+		if userRef != "" {
 			if body, err = sjson.SetBytes(body, "user.self", client.Users.UserSelfLink(tenant, userRef)); err != nil {
 				return nil, err
 			}

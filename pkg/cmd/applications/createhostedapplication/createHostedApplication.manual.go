@@ -6,6 +6,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
@@ -96,6 +97,9 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 	if err != nil {
 		return err
 	}
+	// v2.59.0: "failed to find hosted application. could not fetch applications: <error>"
+	// (exit code 100) when the server could not be reached to look the application up
+	r.LookupFailureStyle("failed to find hosted application. ", cmderrors.ExitError)
 	client, err := r.Client()
 	if err != nil {
 		return err

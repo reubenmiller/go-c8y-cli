@@ -6,18 +6,15 @@ package configurations
 
 import (
 	"context"
-	"strings"
+	"errors"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	racfg "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/remoteaccess/remoteaccess_configurations"
 	"github.com/spf13/cobra"
 )
-
-// notFoundByNamePrefix is the start of the error of the SDK when no
-// configuration of the device has the given name.
-const notFoundByNamePrefix = "remote access configuration not found: name="
 
 // resolveConfigurationID resolves the id or name of a configuration of a
 // device. A name which matches nothing is reported as v2.59.0 did for
@@ -26,8 +23,9 @@ const notFoundByNamePrefix = "remote access configuration not found: name="
 func resolveConfigurationID(ctx context.Context, client *apiv2.Client, deviceID, ref string) (string, error) {
 	id, err := client.RemoteAccess.Configurations.ResolveID(ctx, deviceID, c8ystream.NameOrID(ref))
 	if err != nil {
-		if name, ok := strings.CutPrefix(err.Error(), notFoundByNamePrefix); ok {
-			return "", c8ystream.UnresolvedNameError(name)
+		var notFound *racfg.ConfigurationNotFoundError
+		if errors.As(err, &notFound) {
+			return "", c8ystream.UnresolvedNameError(notFound.Name)
 		}
 		return "", err
 	}

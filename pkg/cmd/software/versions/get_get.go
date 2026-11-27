@@ -15,6 +15,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/repodetails"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/software/softwareversions"
 	"github.com/spf13/cobra"
 )
@@ -93,7 +94,23 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		ref := getVersionRef(c8ystream.FirstID(in.String("id")), in.FirstString("software"))
+		id := c8ystream.FirstID(in.String("id"))
+		parent := in.FirstString("software")
+		if parent == "" {
+			// as v2.59.0: a version number given without its software is
+			// looked up in all of them (the first match is used)
+			var err error
+			if id, err = repodetails.VersionWithoutParent(in.ResolveContextFor("id"), client, repodetails.SoftwareVersionKind, id); err != nil {
+				return nil, err
+			}
+		} else if !c8ydata.IsID(parent) {
+			// the software is looked up first, before the version of it
+			var err error
+			if parent, err = client.Repository.Software.ResolveID(in.ResolveContextFor("software"), c8ystream.NameOrID(parent), nil); err != nil {
+				return nil, err
+			}
+		}
+		ref := getVersionRef(id, parent)
 		opt := softwareversions.GetOptions{
 			WithGroups:        in.Bool("withGroups"),
 			WithParents:       in.Bool("withParents"),

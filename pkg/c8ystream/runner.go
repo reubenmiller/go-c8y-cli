@@ -20,6 +20,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/stream"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/filter"
@@ -75,9 +76,12 @@ type Runner struct {
 	filters      []string        // filters of the command itself (see Filter)
 
 	userErrorPath     string // see UserErrorRequests
-	directNameLookup  bool   // see DirectNameLookup
-	noDefaultPageSize bool   // see NoDefaultPageSize
-	getPageSize       int    // page size of the GET requests of a call (0: none), see defaultPageSizeHook
+	lookupStyled      bool
+	lookupPrefix      string
+	lookupExitCode    cmderrors.ExitCode
+	directNameLookup  bool // see DirectNameLookup
+	noDefaultPageSize bool // see NoDefaultPageSize
+	getPageSize       int  // page size of the GET requests of a call (0: none), see defaultPageSizeHook
 
 	viewMu          sync.Mutex           // guards viewResp against the response middleware
 	viewResp        *viewResponse        // the latest response, which --view auto matches
@@ -632,7 +636,7 @@ func (r *Runner) producer(build Build) Producer {
 			// so the collector records it and the batch continues with the next
 			// item, matching the v1 worker semantics. Returning (nil, err) here
 			// would instead abort the whole stream after the first bad item.
-			itemErr := err
+			itemErr := r.buildError(in, err)
 			return Job(func(context.Context) output.Seq {
 				return func(yield func(jsondoc.JSONDoc, error) bool) {
 					yield(jsondoc.Empty(), itemErr)
@@ -670,6 +674,21 @@ func (r *Runner) producer(build Build) Producer {
 		return Limit(produce, r.Config.GetMaxJobs())
 	}
 	return Limit(produce, 1)
+}
+
+// buildError is the error of an item whose call could not be built. A name
+// which could not be looked up is reported as v2.59.0 did, which depends on the
+// flag which holds the name: the flag which drives the command (InputFlag) or
+// another one (see LookupTransportError and NoMatchesFlagError).
+func (r *Runner) buildError(in *Resolver, err error) error {
+	secondary := in.lookupFlagIsSecondary()
+	if lookupErr, ok := r.lookupTransportError(err, secondary); ok {
+		return lookupErr
+	}
+	if _, _, ok := core.NameNotFound(err); ok && secondary {
+		return NoMatchesFlagError()
+	}
+	return err
 }
 
 // nextItem reads the next input item from the driver (io.EOF when there is

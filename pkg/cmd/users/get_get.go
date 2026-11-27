@@ -1,6 +1,6 @@
 // v2-based user get: the id flag drives iteration (pipe or --id); each user is
 // fetched via Users.Get. For Cumulocity users the id is the username, so the
-// reference is passed straight through (no name resolution).
+// reference is passed straight through (a name with a wildcard is looked up).
 
 package users
 
@@ -88,9 +88,14 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		if tenant == "" {
 			tenant = n.factory.GetTenant()
 		}
+		// as v2.59.0: a user name with a wildcard resolves to the first user which matches
+		userID, err := c8ystream.UserWithWildcards(in.ResolveContext(), client, in.String("id"))
+		if err != nil {
+			return nil, err
+		}
 		opt := users.GetOptions{
 			Tenant: tenant,
-			ID:     users.UserRef(in.String("id")),
+			ID:     users.UserRef(userID),
 		}
 		return func(ctx context.Context) any {
 			return client.Users.Get(ctx, opt)
