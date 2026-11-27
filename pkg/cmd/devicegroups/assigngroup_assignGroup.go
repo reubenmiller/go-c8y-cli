@@ -63,6 +63,7 @@ Add multiple groups to a group
 		flags.WithProcessingMode(),
 		flags.WithExtendedPipelineSupport("newChildGroup", "managedObject.id", true, "id"),
 		flags.WithPowershellName("Add-ChildGroupToGroup"),
+		flags.WithCollectionProperty("managedObject"),
 		flags.WithDeprecationNotice("please use 'c8y devicegroups children unassign --childType asset' instead"),
 	)
 

@@ -7,7 +7,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/encode"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/shape"
 )
 
@@ -84,7 +83,16 @@ func selectionCSVActive(cfg *config.Config) bool {
 	if len(cfg.GetJSONSelect()) > 0 {
 		return true
 	}
-	return !cfg.RawOutput() && !strings.EqualFold(cfg.ViewOption(), config.ViewsOff)
+	if cfg.RawOutput() {
+		return false
+	}
+	if !strings.EqualFold(cfg.ViewOption(), config.ViewsOff) {
+		return true
+	}
+	// No selection and no view: every property is a column, derived from the
+	// selection of "**" as in v2.59.0 (an empty object or array is a column
+	// which holds {} or [], and an array has a column per element).
+	return true
 }
 
 // selectionCSVRenderer renders each document by applying the --select selector
@@ -103,7 +111,7 @@ func selectionCSVActive(cfg *config.Config) bool {
 type selectionCSVRenderer struct {
 	w          io.Writer
 	cols       *columnSelector
-	fallback   output.Renderer // the generic encoder, while no columns are resolved
+	all        *shape.Selector // every property, while no columns are resolved
 	separator  string
 	header     bool
 	headerDone bool
@@ -118,16 +126,10 @@ func newSelectionCSVRenderer(w io.Writer, cfg *config.Config, cols *columnSelect
 	case config.OutputCSVWithHeader:
 		header = true
 	}
-	var fallback output.Renderer
-	if cfg.GetOutputFormat() == config.OutputTSV {
-		fallback = encode.NewTSV(w, encode.CSVOptions{AutoFlush: true})
-	} else {
-		fallback = encode.NewCSV(w, encode.CSVOptions{Header: header, AutoFlush: true})
-	}
 	return &selectionCSVRenderer{
+		all:       shape.NewSelector("**"),
 		w:         w,
 		cols:      cols,
-		fallback:  fallback,
 		separator: separator,
 		header:    header,
 	}
@@ -137,7 +139,7 @@ func (e *selectionCSVRenderer) Write(doc jsondoc.JSONDoc) error {
 	sel := e.cols.get()
 	if sel == nil {
 		// no view applies (yet): every property of the document
-		return e.fallback.Write(doc)
+		sel = e.all
 	}
 	selection, err := sel.Apply(doc.Raw())
 	if err != nil {
@@ -157,7 +159,7 @@ func (e *selectionCSVRenderer) Write(doc jsondoc.JSONDoc) error {
 	return nil
 }
 
-func (e *selectionCSVRenderer) Close() error { return e.fallback.Close() }
+func (e *selectionCSVRenderer) Close() error { return nil }
 
 // headerRow joins the selection's display keys (alias applied, the integer-key
 // marker stripped) with the separator.

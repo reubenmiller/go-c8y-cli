@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	"io"
 	"sync/atomic"
 	"time"
 
@@ -32,10 +34,12 @@ func workerID(ctx context.Context) int {
 //	...
 //	worker 1: finished job 1 in 6ms
 //
-// --debug additionally logs the start of the workers and the outcome of each job.
+// --debug additionally logs the start of the workers, the job iterator
+// ("checking job iterator", "finished adding jobs") and the outcome of each job.
 func (r *Runner) logJobs(produce Producer) Producer {
 	log, err := r.Factory.Logger()
-	if err != nil || log == nil {
+	if err != nil || log == nil || r.Factory.IsStreaming() {
+		// as v2.59.0, a command which streams from a websocket logs no jobs
 		return produce
 	}
 	workers := max(r.Config.GetWorkers(), 1)
@@ -45,13 +49,38 @@ func (r *Runner) logJobs(produce Producer) Producer {
 	log.Infof("Max jobs: %d", r.Config.GetMaxJobs())
 
 	var jobCount atomic.Int64
+	var checks int64 // the job iterator is read by one goroutine
+	finishedLogged := false
+	finished := func() {
+		if !finishedLogged {
+			finishedLogged = true
+			log.Debugf("finished adding jobs. lastJobID=%d", checks-1)
+		}
+	}
 	return func() (Job, error) {
+		// as v2.59.0, which checked the iterator before it read the next item
+		if !finishedLogged {
+			checks++
+			log.Debugf("checking job iterator: %d", checks)
+		}
 		job, err := produce()
+		if errors.Is(err, io.EOF) {
+			finished()
+		}
 		if err != nil || job == nil {
 			return job, err
 		}
 		jobID := jobCount.Add(1)
 		log.Debugf("adding job: %d", jobID)
+		// v2.59.0 checked for each job whether it has to be confirmed (logged when it is not)
+		_ = r.Config.ShouldConfirm()
+		if r.driver == nil {
+			// a command without input runs once: v2.59.0 added its jobs before
+			// the first one started, so the iterator is already exhausted
+			checks++
+			log.Debugf("checking job iterator: %d", checks)
+			finished()
+		}
 		return func(ctx context.Context) output.Seq {
 			return func(yield func(jsondoc.JSONDoc, error) bool) {
 				worker := workerID(ctx)

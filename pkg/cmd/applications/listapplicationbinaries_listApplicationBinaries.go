@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -86,7 +85,7 @@ func (n *ListApplicationBinariesCmd) RunE(cmd *cobra.Command, args []string) err
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		ref := c8ystream.NameOrID(in.String("id"))
 		return func(ctx context.Context) any {
-			return output.FromIterator(client.Applications.ListBinaries(ctx, ref).Items())
+			return client.Applications.ListBinaries(ctx, ref)
 		}, nil
 	})
 }

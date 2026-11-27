@@ -90,12 +90,12 @@ func (n *CmdSubscribeAll) RunE(cmd *cobra.Command, args []string) error {
 				}
 				id = resolved
 			}
-			return c8ystream.Subscribed(client.Realtime().SubscribeStream(ctx,
+			return c8ystream.SubscribePatterns(r, ctx, opts, client.Realtime().SubscribeStream,
 				realtime.Alarms(id),
 				realtime.Events(id),
 				realtime.Measurements(id),
 				realtime.Operations(id),
-			), opts)
+			)
 		}, nil
 	})
 }

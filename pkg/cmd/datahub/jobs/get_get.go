@@ -48,6 +48,7 @@ Get the status of a Dremio job
 		cmd,
 		flags.WithExtendedPipelineSupport("id", "id", true, "id"),
 		flags.WithPowershellName("Get-DataHubJob"),
+		flags.WithCollectionProperty("-"),
 		flags.WithOutputType("application/json", ""),
 	)
 

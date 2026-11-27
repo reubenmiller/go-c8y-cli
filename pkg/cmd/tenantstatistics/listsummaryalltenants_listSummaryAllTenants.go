@@ -53,6 +53,7 @@ Get tenant summary statistics for all tenants for the last 30 days
 	flags.WithOptions(
 		cmd,
 		flags.WithPowershellName("Get-AllTenantUsageSummaryStatistics"),
+		flags.WithCollectionProperty("-"),
 		flags.WithOutputType("application/json", ""),
 	)
 

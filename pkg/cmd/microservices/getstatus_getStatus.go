@@ -14,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -95,7 +94,7 @@ func (n *GetStatusCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 		return func(ctx context.Context) any {
-			return output.FromIterator(client.Microservices.GetStatus(ctx, id).Items())
+			return client.Microservices.GetStatus(ctx, id)
 		}, nil
 	})
 }

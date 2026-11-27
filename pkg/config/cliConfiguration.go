@@ -2189,6 +2189,12 @@ func (c *Config) SaveClientConfig(client *ClientSession) error {
 	return c.WritePersistentConfig()
 }
 
+// ConfirmationPossible reports whether a confirmation prompt can apply at all
+// (interactive, not CI, --force or --dry), without logging.
+func (c *Config) ConfirmationPossible() bool {
+	return c.ForceConfirm() || !(c.IsCIMode() || c.Force() || c.ShouldUseDryRun(""))
+}
+
 func (c *Config) ShouldConfirm(methods ...string) bool {
 	if c.ForceConfirm() {
 		return true

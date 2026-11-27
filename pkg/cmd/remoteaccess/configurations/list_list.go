@@ -16,7 +16,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	racfg "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/remoteaccess/remoteaccess_configurations"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/spf13/cobra"
 )
 
@@ -90,7 +89,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 		return func(ctx context.Context) any {
-			return output.FromIterator(client.RemoteAccess.Configurations.List(ctx, racfg.ListOptions{ManagedObjectID: deviceID}).Items())
+			return client.RemoteAccess.Configurations.List(ctx, racfg.ListOptions{ManagedObjectID: deviceID})
 		}, nil
 	})
 }

@@ -42,7 +42,18 @@ type verboseTransport struct {
 	// verbose is true when the log messages are shown: only then the bodies are
 	// read to log them
 	verbose bool
+
+	// resultProperty is the property of the response which holds the items of the
+	// command (empty: detect it, "-": none)
+	resultProperty func() string
+
+	// streaming reports whether the command streams from a websocket: v2.59.0 logged
+	// the requests of such a command (e.g. the token) without the details of the
+	// response and the context of the jobs
+	streaming func() bool
 }
+
+func (t *verboseTransport) isStreaming() bool { return t.streaming != nil && t.streaming() }
 
 func (t *verboseTransport) mask(message string) string {
 	return t.cfg.HideSensitiveInformationIfActive(t.session, message)
@@ -67,6 +78,10 @@ func (t *verboseTransport) headers(h http.Header) string {
 }
 
 func (t *verboseTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// as v2.59.0 (a request which is not sent, a dry run, is rendered elsewhere)
+	if !t.isStreaming() {
+		t.log.Debug("Overriding common options provided in the context. dryRun=false")
+	}
 	t.log.Info(t.headers(req.Header))
 	t.log.Infof("Sending request: %s %s", req.Method, t.mask(req.URL.String()))
 	if t.verbose {
@@ -91,6 +106,9 @@ func (t *verboseTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 		t.log.Infof("Invalid response received from server. %s", errorSummary(req, resp, body))
 	} else {
 		t.log.Infof("Status code: %d", resp.StatusCode)
+	}
+	if t.isStreaming() {
+		return resp, nil
 	}
 	t.log.Infof("Response time: %dms", duration.Milliseconds())
 	t.log.Infof("Response Content-Type: %s", resp.Header.Get("Content-Type"))
@@ -173,10 +191,69 @@ func (t *verboseTransport) logResponseBody(resp *http.Response, body []byte) {
 	if !jsonUtilities.IsValidJSON(body) {
 		return
 	}
-	if n, ok := unfilteredArraySize(body); ok {
+	if n, ok := t.dataArraySize(body); ok {
 		t.log.Infof("Unfiltered array size. len=%d", n)
 	}
 	t.log.Infof("View mode: %s", t.cfg.ViewOption())
+}
+
+// dataArraySize returns the number of items of the data of a response, as
+// v2.59.0 did: the property of the command, or else the detected one (which is
+// logged at debug level).
+func (t *verboseTransport) dataArraySize(body []byte) (int, bool) {
+	property := ""
+	if t.resultProperty != nil {
+		property = t.resultProperty()
+	}
+	switch property {
+	case "":
+		property = t.guessDataProperty(body)
+	case "-":
+		property = ""
+	}
+	v := gjson.ParseBytes(body)
+	if property != "" {
+		v = v.Get(property)
+	}
+	if property != "" && v.Exists() && v.IsArray() {
+		return len(v.Array()), true
+	}
+	return 0, false
+}
+
+// guessDataProperty detects the property of a response which holds its items,
+// and logs it as v2.59.0 did.
+func (t *verboseTransport) guessDataProperty(body []byte) string {
+	parsed := gjson.ParseBytes(body)
+	arrayProperties := []string{}
+	totalKeys := 0
+	if !parsed.Get("id").Exists() {
+		// Find the property which is an array
+		parsed.ForEach(func(key, value gjson.Result) bool {
+			totalKeys++
+			if value.IsArray() {
+				arrayProperties = append(arrayProperties, key.String())
+			}
+			return true
+		})
+	}
+	if len(arrayProperties) > 1 {
+		t.log.Debugf("Could not detect property as more than 1 array like property detected: %v", arrayProperties)
+		return ""
+	}
+	t.log.Debugf("Array properties: %v", arrayProperties)
+	if len(arrayProperties) == 0 {
+		return ""
+	}
+	property := arrayProperties[0]
+	// a lot of properties: it is most likely not an array of data (e.g. /tenant/statistics)
+	if totalKeys > 10 {
+		return ""
+	}
+	if totalKeys < 10 {
+		t.log.Debugf("Data property: %s", property)
+	}
+	return property
 }
 
 // unfilteredArraySize returns the number of items of the array which holds the data of a
