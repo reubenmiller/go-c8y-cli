@@ -83,8 +83,23 @@ func submissionFrom(ctx context.Context) *submission {
 // confirmActive reports whether confirmation prompting could apply at all
 // (interactive, not CI/--force/--dry). When false the Submit fast path skips
 // the deferred-execution prepare entirely.
+//
+// A command with a read semantic method (flags.WithSemanticMethod("GET")) never
+// asks, also with --confirm: its main action is a read or a stream, so any
+// POST/PUT/DELETE it sends is an internal step (a token request, the clean up
+// of a registration, ...) which the user did not ask for. v2.59.0 did not
+// prompt for these requests either.
 func (s *submission) confirmActive() bool {
-	return s.cfg != nil && s.cfg.ConfirmationPossible()
+	return s.cfg != nil && !isReadMethod(s.semanticMethod) && s.cfg.ConfirmationPossible()
+}
+
+// isReadMethod reports whether method is a method which does not change data.
+func isReadMethod(method string) bool {
+	switch strings.ToUpper(method) {
+	case http.MethodGet, http.MethodHead, http.MethodOptions:
+		return true
+	}
+	return false
 }
 
 // hasDelays reports whether any inter-request delay is configured.
@@ -102,7 +117,7 @@ func (s *submission) confirm(req *http.Request) (proceed bool, err error) {
 	if s.aborted {
 		return false, nil // a previous "no to all" cancelled the rest
 	}
-	if s.skipConfirm {
+	if s.skipConfirm || isReadMethod(s.semanticMethod) {
 		return true, nil
 	}
 

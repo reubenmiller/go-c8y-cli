@@ -93,6 +93,9 @@ func NewSubscribeCmd(f *cmdutil.Factory) *SubscribeCmd {
 
 	flags.WithOptions(
 		cmd,
+		// The command reads a stream. The token request which it sends when no
+		// token is given is an internal step, so it must not ask for a confirmation
+		flags.WithSemanticMethod("GET"),
 	)
 
 	// Required flags
