@@ -23,5 +23,7 @@ tests:
             json:
                 method: GET
                 path: /devicecontrol/bulkoperations
-                queryParams.generalStatus.0: SCHEDULED
-                queryParams.generalStatus.1: EXECUTING
+                query: generalStatus=SCHEDULED&generalStatus=EXECUTING
+            contains:
+                - generalStatus=SCHEDULED
+                - generalStatus=EXECUTING

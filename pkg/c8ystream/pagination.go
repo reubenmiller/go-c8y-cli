@@ -28,5 +28,10 @@ func (r *Runner) Pagination() (pagination.PaginationOptions, error) {
 		Strategy:          pagination.StrategyKind(r.Config.PaginationStrategy()),
 		// Render the full-walk first request in dry runs of --includeAll.
 		FullWalk: r.Config.IncludeAll(),
+		// A command that returns one page sends the request as given (v2.59.0:
+		// e.g. "?pageSize=1"), not the paging strategy's decorated first
+		// request (currentPage=1, the id keyset query). The real request then
+		// matches the --dry one, and --currentPage is kept.
+		SinglePage: !r.Config.IncludeAll() && r.Config.GetTotalPages() <= 1,
 	}, nil
 }

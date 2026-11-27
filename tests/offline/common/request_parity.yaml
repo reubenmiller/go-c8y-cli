@@ -1,0 +1,286 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+#
+# The requests which the commands really send (recorded by a small server), not
+# only the ones --dry shows. They are the requests of v2.59.0: only the
+# parameters of the flags, the same headers, and the file part of an upload
+# typed like v2.59.0 did.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+    C8Y_SETTINGS_DEFAULTS_PAGESIZE: " "
+    C8Y_SETTINGS_HTTP_RETRYWAITMIN: 100ms
+    C8Y_SETTINGS_HTTP_RETRYWAITMAX: 200ms
+
+tests:
+  A list command which returns one page sends the request of its flags:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y inventory list --pageSize 1 >/dev/null
+      c8y devices list --pageSize 1 >/dev/null
+      c8y agents list --pageSize 1 >/dev/null
+      c8y devicegroups list --pageSize 1 >/dev/null
+      c8y events list --pageSize 1 >/dev/null
+      c8y alarms list --pageSize 1 >/dev/null
+      c8y measurements list --pageSize 1 >/dev/null
+      c8y operations list --pageSize 1 >/dev/null
+      c8y binaries list --pageSize 1 >/dev/null
+      c8y applications list --pageSize 1 >/dev/null
+      c8y auditrecords list --pageSize 1 >/dev/null
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /inventory/managedObjects?pageSize=1
+        GET /inventory/managedObjects?pageSize=1&q=%24filter%3D+%24orderby%3Dname
+        GET /inventory/managedObjects?pageSize=1&q=%24filter%3D%28has%28com_cumulocity_model_Agent%29%29+%24orderby%3Dname
+        GET /inventory/managedObjects?pageSize=1&query=%24filter%3D%28has%28c8y_IsDeviceGroup%29%29+%24orderby%3Dname&withChildren=false
+        GET /event/events?pageSize=1
+        GET /alarm/alarms?pageSize=1
+        GET /measurement/measurements?pageSize=1
+        GET /devicecontrol/operations?pageSize=1
+        GET /inventory/binaries?pageSize=1
+        GET /application/applications?pageSize=1
+        GET /audit/auditRecords?pageSize=1
+
+  The page of --currentPage is requested:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y inventory list --pageSize 2 --currentPage 3 >/dev/null
+      c8y events list --pageSize 2 --currentPage 3 >/dev/null
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /inventory/managedObjects?currentPage=3&pageSize=2
+        GET /event/events?currentPage=3&pageSize=2
+
+  The real request is the one which --dry shows:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y inventory list --pageSize 1 >/dev/null
+      real=$(requests | sed 's/^GET //')
+      dry=$(c8y inventory list --pageSize 1 --dry --dryFormat json -c | python3 -c 'import json,sys; print(json.load(sys.stdin)["pathEncoded"])')
+      [ "$real" = "$dry" ] && echo "same: $real"
+    exit-code: 0
+    stdout:
+      exactly: |
+        same: /inventory/managedObjects?pageSize=1
+
+  The measurements list sends revert only when it is set:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y measurements list --pageSize 1 >/dev/null
+      c8y measurements list --pageSize 1 --revert >/dev/null
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /measurement/measurements?pageSize=1
+        GET /measurement/measurements?pageSize=1&revert=true
+
+  A request has the headers of v2.59.0:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y devices list --pageSize 1 >/dev/null
+      c8y events delete --id 12345 >/dev/null
+      c8y inventory list --pageSize 1 >/dev/null
+      grep -E '^(Accept|Accept-Encoding|User-Agent|X-Application): ' "$LOG"
+    exit-code: 0
+    stdout:
+      exactly: |
+        User-Agent: go-client
+        Accept: application/json
+        X-Application: go-client
+        Accept-Encoding: gzip
+        User-Agent: go-client
+        Accept: application/json
+        X-Application: go-client
+        Accept-Encoding: gzip
+        User-Agent: go-client
+        Accept: application/json
+        X-Application: go-client
+        Accept-Encoding: gzip
+
+  An Accept-Encoding header given with --header is sent and shown:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y api /inventory/managedObjects --header "Accept-Encoding: identity" >/dev/null
+      grep -E '^Accept-Encoding: ' "$LOG"
+      c8y api /inventory/managedObjects --header "Accept-Encoding: identity" --dry --dryFormat dump | grep -E '^Accept-Encoding: '
+      c8y api /inventory/managedObjects --header "Accept-Encoding: identity" --dry --dryFormat json -c |
+        python3 -c 'import json,sys; print(json.load(sys.stdin)["headers"]["Accept-Encoding"])'
+    exit-code: 0
+    stdout:
+      exactly: |
+        Accept-Encoding: identity
+        Accept-Encoding: identity
+        identity
+
+  The dump of a request does not have the Accept-Encoding header the HTTP client adds:
+    command: |
+      c8y devices list --pageSize 1 --dry --dryFormat dump
+    exit-code: 0
+    stdout:
+      contains:
+        - "Accept: application/json"
+        - "User-Agent: go-client"
+        - "X-Application: go-client"
+      not-contains:
+        - "Accept-Encoding"
+
+  The dry run json has the fields of v2.59.0:
+    command: |
+      c8y inventory list --pageSize 1 --dry --dryFormat json -c |
+        python3 -c 'import json,sys; print(",".join(json.load(sys.stdin)))'
+    exit-code: 0
+    stdout:
+      exactly: |
+        url,host,pathEncoded,path,query,method,headers,shell,powershell
+
+  The file part of an upload has no charset:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      tmp=$(mktemp -d)
+      printf 'one\ntwo\n' > "$tmp/file1.txt"
+      printf 'plain content' > "$tmp/noext"
+      c8y api POST /inventory/binaries --file "$tmp/file1.txt" >/dev/null
+      c8y api POST /inventory/binaries --file "$tmp/noext" >/dev/null
+      grep -E '^Content-Type: (text|application)/' "$LOG"
+    exit-code: 0
+    stdout:
+      exactly: |
+        Content-Type: text/plain
+        Content-Type: text/plain
+
+  The dump of an upload has the headers and the file part of v2.59.0:
+    command: |
+      tmp=$(mktemp -d)
+      printf 'one\ntwo\n' > "$tmp/file1.txt"
+      c8y api POST /inventory/binaries --file "$tmp/file1.txt" --dry --dryFormat dump > "$tmp/dump.txt"
+      grep -E '^[A-Za-z-]+: ' "$tmp/dump.txt" | sed 's/: .*//'
+      grep -E '^Content-Type: text/' "$tmp/dump.txt"
+    exit-code: 0
+    stdout:
+      exactly: |
+        Host
+        Accept
+        Authorization
+        Content-Type
+        Content-Disposition
+        Content-Type
+        Content-Disposition
+        Content-Type: text/plain
+
+  An absolute url of c8y api is requested from its own host:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      start_other
+      c8y api "$OTHER_HOST/other/path?x=1" 2>/dev/null >/dev/null
+      echo "session: $(count_requests)"
+      echo "other: $(requests "$OTHER_LOG")"
+      echo "credentials: $(grep -c '^Authorization: Basic' "$OTHER_LOG")"
+    exit-code: 0
+    stdout:
+      exactly: |
+        session: 0
+        other: GET /other/path?x=1
+        credentials: 1
+
+  A piped absolute url of c8y api is requested from its own host:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      start_other
+      echo "$OTHER_HOST/other/piped?x=1" | c8y api 2>/dev/null >/dev/null
+      echo "session: $(count_requests)"
+      echo "other: $(requests "$OTHER_LOG")"
+    exit-code: 0
+    stdout:
+      exactly: |
+        session: 0
+        other: GET /other/piped?x=1
+
+  c8y api with a path is requested from the session host:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      start_other
+      c8y api /inventory/managedObjects >/dev/null
+      echo "session: $(requests)"
+      echo "other: $(count_requests "$OTHER_LOG")"
+    exit-code: 0
+    stdout:
+      exactly: |
+        session: GET /inventory/managedObjects
+        other: 0
+
+  c8y api with --raw shapes each element of an array with --select and --flatten:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y api /arr --raw
+      c8y api /arr --raw --select a
+      c8y api /arr --raw --flatten
+      c8y api /emptyarr --raw
+      echo "empty with select: [$(c8y api /emptyarr --raw --select a)]"
+      echo "empty with flatten: [$(c8y api /emptyarr --raw --flatten)]"
+    exit-code: 0
+    stdout:
+      exactly: |
+        [{"a":1,"b":2},{"a":3,"b":4}]
+        {"a":1}
+        {"a":3}
+        {"a":1,"b":2}
+        {"a":3,"b":4}
+        []
+        empty with select: []
+        empty with flatten: []
+
+  The timeout ends the request without a retry:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server slow
+      c8y devices list --timeout 300ms --withError --noCache 2>/dev/null
+      echo "exit: $?"
+      echo "requests: $(count_requests)"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"errorType":"commandError","message":"command timed out","exitCode":106,"error":{}}
+        exit: 106
+        requests: 1
+
+  A failed request is retried only with --retries:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server unavailable
+      c8y inventory list >/dev/null 2>&1
+      echo "exit: $?, requests: $(count_requests)"
+      : > "$LOG"
+      c8y inventory list --retries 2 >/dev/null 2>&1
+      echo "exit: $?, requests: $(count_requests)"
+    exit-code: 0
+    stdout:
+      exactly: |
+        exit: 53, requests: 1
+        exit: 53, requests: 3
+
+  The measurements list sends revert=false when it is given:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y measurements list --pageSize 1 --revert=false >/dev/null
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /measurement/measurements?pageSize=1&revert=false

@@ -285,9 +285,17 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	cmd.SilenceUsage = true
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		path, query, err := requestURL(urlTemplate, itemURL(in), pathPrefix)
+		urlHost, path, query, err := requestURL(urlTemplate, itemURL(in), pathPrefix)
 		if err != nil {
 			return nil, cmderrors.NewUserError(err)
+		}
+		requestHost := host
+		if urlHost != "" {
+			// an absolute url is requested from its own host (v2.59.0)
+			if log, logErr := n.factory.Logger(); logErr == nil && log != nil {
+				log.Warnf("Parsing url in request. %s", strings.TrimPrefix(strings.TrimPrefix(urlHost, "https://"), "http://"))
+			}
+			requestHost = urlHost
 		}
 		for key, values := range paging {
 			// The url's own paging parameters win
@@ -298,7 +306,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 
 		opts := apiv2.RequestOptions{
 			Method:       method,
-			Host:         host,
+			Host:         requestHost,
 			Path:         path,
 			Query:        query,
 			Accept:       accept,
@@ -358,19 +366,23 @@ func pipedURL(input []byte, opts *flags.PipelineOptions) string {
 	return ""
 }
 
-// requestURL returns the path and query of a request: the url template with
-// '{url}' replaced by the item's url, prefixed with the --host path. An
-// absolute url (e.g. a piped self link) is used without its host, so the
-// request goes to the session's (or --host's) host.
-func requestURL(template, itemURL, prefix string) (string, url.Values, error) {
-	if u, err := url.Parse(itemURL); err == nil && u.IsAbs() && u.Host != "" {
-		itemURL = u.RequestURI()
-	}
+// requestURL returns the host (only for an absolute url), the path and the
+// query of a request: the url template with '{url}' replaced by the item's
+// url, prefixed with the --host path. An absolute url (an argument or a piped
+// self link) is requested from its own host, as in v2.59.0; the --host path
+// prefix does not apply to it.
+func requestURL(template, itemURL, prefix string) (string, string, url.Values, error) {
 	raw := strings.ReplaceAll(template, "{url}", itemURL)
+	host := ""
+	if u, err := url.Parse(raw); err == nil && u.IsAbs() && u.Host != "" {
+		host = u.Scheme + "://" + u.Host
+		raw = u.RequestURI()
+		prefix = ""
+	}
 	path, rawQuery, _ := strings.Cut(raw, "?")
 	query, err := url.ParseQuery(rawQuery)
 	if err != nil {
-		return "", nil, fmt.Errorf("invalid query parameters. %w", err)
+		return "", "", nil, fmt.Errorf("invalid query parameters. %w", err)
 	}
 	if prefix != "" {
 		path = strings.TrimRight(prefix, "/") + "/" + strings.TrimLeft(path, "/")
@@ -378,7 +390,7 @@ func requestURL(template, itemURL, prefix string) (string, url.Values, error) {
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path
 	}
-	return path, query, nil
+	return host, path, query, nil
 }
 
 // pagingParameters returns the query parameters of the paging flags

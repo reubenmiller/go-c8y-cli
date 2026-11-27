@@ -74,7 +74,10 @@ func (r *Runner) sendRequest(ctx context.Context, client *apiv2.Client, opts api
 				items = items.Get(property)
 			}
 			count = len(items.Array())
-			if !whole {
+			// --select and --flatten shape the elements of a top-level array,
+			// also with --raw (v2.59.0); an empty array then prints nothing
+			shapeItems := whole && property == "" && r.Config.RawOutput() && r.shapesItems()
+			if !whole || shapeItems {
 				docs = docs[:0]
 				for _, item := range items.Array() {
 					docs = append(docs, jsondoc.New([]byte(item.Raw)))

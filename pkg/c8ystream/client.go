@@ -3,11 +3,13 @@ package c8ystream
 import (
 	"context"
 	"maps"
+	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/requestutil"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/types"
 	"github.com/spf13/cobra"
@@ -49,7 +51,32 @@ func WithExtraRequestOptions(ctx context.Context, cfg *config.Config) context.Co
 	if cfg.IgnoreAcceptHeader() {
 		ctx = apiv2.WithNoAccept(ctx, true)
 	}
-	return ctx
+	return apiv2.WithRequestHook(ctx, requestDefaults(cfg))
+}
+
+// requestDefaults returns the request hook which gives every request the
+// headers v2.59.0 sent, whichever way the SDK built it. The hook runs on the
+// final request, before a dry run renders it and before it is sent:
+//
+//   - Accept: application/json when the request has none (some SDK calls, e.g.
+//     the inventory lists and deletes, set no Accept header). --noAccept sends
+//     none.
+//   - not the Accept-Encoding of the SDK's HTTP client ("gzip, deflate").
+//     Without it the transport asks for "gzip" and decodes the response, as
+//     v2.59.0 did (and sends nothing with settings.http.compression=false). An
+//     Accept-Encoding given with --header is sent, as in v2.59.0.
+func requestDefaults(cfg *config.Config) func(*http.Request) error {
+	return func(req *http.Request) error {
+		if cfg == nil || !cfg.IgnoreAcceptHeader() {
+			if req.Header.Get("Accept") == "" {
+				req.Header.Set("Accept", types.MimeTypeApplicationJSON)
+			}
+		}
+		if req.Header.Get("Accept-Encoding") == requestutil.ClientAcceptEncoding {
+			req.Header.Del("Accept-Encoding")
+		}
+		return nil
+	}
 }
 
 // WithQueryParam returns ctx with an additional query parameter for the
