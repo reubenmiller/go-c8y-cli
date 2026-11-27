@@ -493,12 +493,21 @@ func (r *Runner) run(newProducer func() Producer) error {
 	// final pass never reprints), exactly like v1's per-job checkError. The
 	// processed results feed the single-error collapse below.
 	var processedErrs []error
+	var fileTee *fileTee // see the renderer below
 	collector.Log = func(err error) {
 		converted := r.toServerError(err)
 		if ce, ok := converted.(cmderrors.CommandError); ok && collector.Emit != nil {
 			// The pipeline already emitted the error document (--withError).
 			ce.OutputEmitted = true
 			converted = ce
+		} else if ok && fileTee != nil && cfg.WithError() && isResponseError(err) {
+			// --withError: v2.59.0 wrote the error of a failed request to
+			// --outputFile in place of the response
+			if werr := fileTee.writeError(jsondoc.New([]byte(ce.JSONString()))); werr != nil {
+				if log, lerr := r.Factory.Logger(); lerr == nil && log != nil {
+					log.Errorf("could not write the error to the output file. %s", werr)
+				}
+			}
 		}
 		processedErrs = append(processedErrs, r.Factory.CheckPostCommandError(converted))
 	}
@@ -551,10 +560,14 @@ func (r *Runner) run(newProducer func() Producer) error {
 	} else if vs != nil {
 		stages = append(stages, vs)
 	}
-	renderer, err := newRenderer(r.Cmd.OutOrStdout(), cfg, cols, r.fileReceivedFunc)
+	// A response with a body and no document (an empty list) writes an empty
+	// --outputFile, unless the command failed (e.g. its --outputTemplate)
+	received := func() bool { return r.fileReceived.Load() && len(collector.Errors) == 0 }
+	renderer, err := newRenderer(r.Cmd.OutOrStdout(), cfg, cols, received)
 	if err != nil {
 		return err
 	}
+	fileTee = findFileTee(renderer)
 	r.consoleRenderer = findConsoleRenderer(renderer)
 	r.applyViewDefinition()
 
@@ -652,7 +665,12 @@ func (r *Runner) producer(build Build) Producer {
 			if r.dropPageSize.Load() {
 				callCtx = apiv2.WithRequestHook(callCtx, dropNoPageSizeHook())
 			}
-			seq := r.adaptItem(call(callCtx), item)
+			result := call(callCtx)
+			if isBinaryResult(result) {
+				// a download writes --outputFileRaw itself (see binary)
+				markRawFileHandled(ctx)
+			}
+			seq := r.adaptItem(result, item)
 			if r.assert != nil {
 				seq = r.assert.filter(seq)
 			}

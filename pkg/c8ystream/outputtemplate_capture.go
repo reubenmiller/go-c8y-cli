@@ -45,7 +45,7 @@ func (r *Runner) installOutputTemplateCapture(client *apiv2.Client) {
 			"body":          string(o.Body),
 		}
 
-		page := templatePage{body: o.Body}
+		page := templatePage{body: o.Body, fields: rawFileFields(raw, o.Body)}
 		if req := raw.Request; req != nil && req.URL != nil {
 			page.method, page.path = req.Method, req.URL.Path
 			// the responses of a job are kept with the job, as the jobs of
@@ -98,7 +98,7 @@ func (r *Runner) captureDryRunRequest(req *http.Request) {
 		"body":          "",
 	}
 	if capture, ok := req.Context().Value(templateCaptureKey{}).(*templateCapture); ok {
-		capture.add(templatePage{method: req.Method, path: req.URL.Path}, requestData, responseData)
+		capture.add(templatePage{method: req.Method, path: req.URL.Path, dry: true}, requestData, responseData)
 	}
 	r.tmplMu.Lock()
 	r.tmplRequest = requestData

@@ -225,3 +225,75 @@ tests:
         {"id":"8"}
         {"id":"7"}
         "managedObjects"
+
+  --outputFile with --withError has the error of a failed request:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server notfound
+      d=$(mktemp -d)
+      c8y inventory get --id 1 --withError --outputFile "$d/out.json" >/dev/null 2>&1
+      echo "exit code: $?"
+      cat "$d/out.json"
+      echo
+    exit-code: 0
+    stdout:
+      exactly: |
+        exit code: 4
+        {"errorType":"serverError","message":"Finding device data from database failed","statusCode":404,"exitCode":4,"url":"/inventory/managedObjects/1","c8yResponse":{"error":"inventory/Not Found","message":"Finding device data from database failed","info":"https://cumulocity.com/api"},"error":{"error":"inventory/Not Found","message":"Finding device data from database failed","info":"https://cumulocity.com/api"}}
+
+  --outputFile is not written when the --outputTemplate fails:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 2 --outputTemplate 'output.id + 1' --outputFile "$d/out.json" >/dev/null 2>&1
+      [ -e "$d/out.json" ] && echo "file" || echo "no file"
+    exit-code: 0
+    stdout:
+      exactly: |
+        no file
+
+  --outputFileRaw fills {basename} and the {id} of the request path:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 1 --outputFileRaw "$d/list-{basename}.json" >/dev/null
+      c8y api GET /inventory/managedObjects/12 --outputFileRaw "$d/api-{id}-{basename}.json" >/dev/null
+      ls "$d"
+    exit-code: 0
+    stdout:
+      exactly: |
+        api-12-12.json
+        list-managedObjects.json
+
+  --outputFileRaw of a request without a response body is an empty file:
+    command: |
+      tmp=$(mktemp -d)
+      trap 'rm -rf "$tmp"' EXIT
+      id=$(c8y devices create --name outputFileRawDelete --select id -o csv) &&
+      c8y inventory delete --id "$id" --outputFileRaw "$tmp/{id}.json" &&
+      c8y inventory delete --id "$id" --dry --outputFileRaw "$tmp/dry-{id}.json" >/dev/null &&
+      ls "$tmp" | sed "s/^$id\./ID./" &&
+      echo "size: $(wc -c < "$tmp/$id.json" | tr -d ' ')"
+    exit-code: 0
+    stdout:
+      exactly: |
+        ID.json
+        size: 0
+
+  --outputFileRaw of a downloaded JSON file is the file only:
+    command: |
+      tmp=$(mktemp -d)
+      trap 'rm -rf "$tmp"' EXIT
+      printf '{"a":1}' > "$tmp/data.json"
+      id=$(c8y binaries create --file "$tmp/data.json" --select id -o csv) &&
+      mkdir "$tmp/out" &&
+      c8y binaries get --id "$id" --outputFileRaw "$tmp/out/{id}-{filename}" >/dev/null &&
+      ls "$tmp/out" | sed "s/^$id-/ID-/" &&
+      cat "$tmp/out/$id-data.json"
+    exit-code: 0
+    stdout:
+      exactly: |
+        ID-data.json
+        {"a":1}

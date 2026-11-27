@@ -163,6 +163,21 @@ func findConsoleRenderer(r output.Renderer) *consoleRenderer {
 	return nil
 }
 
+// findFileTee returns the --outputFile writer of a renderer, if any.
+func findFileTee(r output.Renderer) *fileTee {
+	switch v := r.(type) {
+	case *fileTee:
+		return v
+	case multiRenderer:
+		for _, item := range v {
+			if t := findFileTee(item); t != nil {
+				return t
+			}
+		}
+	}
+	return nil
+}
+
 // viewSelectStage shapes the documents to the columns of a view with the same
 // selector as --select, so the view columns can use aliases (name:path),
 // wildcards (tags.**) and exclusions, like the --select flag. Columns which a

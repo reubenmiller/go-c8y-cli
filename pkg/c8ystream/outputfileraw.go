@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"context"
 	"net/http"
+	"sync/atomic"
 
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
-	"github.com/tidwall/gjson"
 )
 
 // wrapRawFileJob writes the response of a job to the --outputFileRaw path, as
@@ -20,12 +20,14 @@ import (
 // responses are the ones which the output template capture records.
 //
 // A document which has no response of its own (a result which was not read
-// from a JSON response) is written as it is.
+// from a JSON response) is written as it is. A call which writes the file
+// itself (a binary download, or a response which is not JSON, see
+// markRawFileHandled) is left alone.
 //
-// The path may contain {id}/{name}/{type}/{owner} placeholders, substituted
-// from the response, so a stream of items writes one file per item (e.g.
-// "out/{id}.json"). Writes truncate (not append), matching v1: when several
-// responses resolve to the same path the last one wins.
+// The path may contain the placeholders of rawFileFields ({id}, {name},
+// {type}, {owner}, {filename} and {basename}), so a stream of items writes one
+// file per item (e.g. "out/{id}.json"). Writes truncate (not append), matching
+// v1: when several responses resolve to the same path the last one wins.
 func (r *Runner) wrapRawFileJob(pathTemplate string, job Job) Job {
 	return func(ctx context.Context) output.Seq {
 		return func(yield func(jsondoc.JSONDoc, error) bool) {
@@ -34,25 +36,39 @@ func (r *Runner) wrapRawFileJob(pathTemplate string, job Job) Job {
 				capture = &templateCapture{}
 				ctx = context.WithValue(ctx, templateCaptureKey{}, capture)
 			}
-			failed := false
+			state := &rawFileState{}
+			ctx = context.WithValue(ctx, rawFileKey{}, state)
+			failed, written := false, false
 			job(ctx)(func(doc jsondoc.JSONDoc, err error) bool {
 				if err != nil {
 					failed = true
 					return yield(doc, err)
 				}
-				if pages, _, _ := capture.get(); len(pages) == 0 {
-					if werr := writeRawFile(pathTemplate, doc.Raw()); werr != nil {
+				if pages, _, _ := capture.get(); len(pages) == 0 && !state.handled.Load() {
+					raw := doc.Raw()
+					if werr := writeRawFile(pathTemplate, raw, rawFileFields(nil, raw)); werr != nil {
 						failed = true
 						return yield(jsondoc.Empty(), werr)
 					}
+					written = true
 				}
 				return yield(doc, nil)
 			})
-			if failed {
+			if failed || written || state.handled.Load() {
 				return
 			}
-			if pages, _, _ := capture.get(); len(pages) > 0 {
-				if err := writeRawFile(pathTemplate, pages[len(pages)-1].body); err != nil {
+			pages, _, _ := capture.get()
+			last, ok := capture.last()
+			if len(pages) > 0 {
+				last, ok = pages[len(pages)-1], true
+			} else if ok && len(last.body) > 0 {
+				// the response was written by the call or as its documents
+				ok = false
+			}
+			// the last page of a list, or the empty response of a request (e.g.
+			// a delete), but not one of a dry run
+			if ok && !last.dry {
+				if err := writeRawFile(pathTemplate, last.body, last.fields); err != nil {
 					yield(jsondoc.Empty(), err)
 				}
 			}
@@ -60,13 +76,23 @@ func (r *Runner) wrapRawFileJob(pathTemplate string, job Job) Job {
 	}
 }
 
-func writeRawFile(pathTemplate string, raw []byte) error {
-	fields := map[string]string{
-		"id":    gjson.GetBytes(raw, "id").String(),
-		"name":  gjson.GetBytes(raw, "name").String(),
-		"type":  gjson.GetBytes(raw, "type").String(),
-		"owner": gjson.GetBytes(raw, "owner").String(),
+// rawFileKey is the context key of the rawFileState of a job.
+type rawFileKey struct{}
+
+// rawFileState tells whether the call of a job wrote --outputFileRaw itself.
+type rawFileState struct {
+	handled atomic.Bool
+}
+
+// markRawFileHandled records that the call of the job of ctx wrote
+// --outputFileRaw itself, so wrapRawFileJob does not write it again.
+func markRawFileHandled(ctx context.Context) {
+	if state, ok := ctx.Value(rawFileKey{}).(*rawFileState); ok {
+		state.handled.Store(true)
 	}
+}
+
+func writeRawFile(pathTemplate string, raw []byte, fields map[string]string) error {
 	_, err := fileutilities.WriteToFile(bytes.NewReader(raw), pathTemplate, false, true, fields)
 	return err
 }
@@ -85,6 +111,3 @@ func (r *Runner) installOutputFileCapture(client *apiv2.Client) {
 		}
 	}))
 }
-
-// fileReceivedFunc reports whether installOutputFileCapture saw a response.
-func (r *Runner) fileReceivedFunc() bool { return r.fileReceived.Load() }

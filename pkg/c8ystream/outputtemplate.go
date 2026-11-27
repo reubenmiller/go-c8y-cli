@@ -132,6 +132,11 @@ func (r *Runner) wrapTemplateJob(ot *mapbuilder.OutputTemplate, flags map[string
 type templatePage struct {
 	method, path string
 	body         []byte
+	// fields are the --outputFileRaw placeholder values of the response (see
+	// rawFileFields)
+	fields map[string]string
+	// dry is a request of a dry run, which received no response
+	dry bool
 }
 
 // templateCaptureKey is the context key of the templateCapture of a job: the
@@ -159,6 +164,17 @@ func (c *templateCapture) get() ([]templatePage, map[string]any, map[string]any)
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return jobPages(c.pages), c.request, c.response
+}
+
+// last returns the last response of the job, also one which is not JSON (e.g.
+// the empty body of a 204).
+func (c *templateCapture) last() (templatePage, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if len(c.pages) == 0 {
+		return templatePage{}, false
+	}
+	return c.pages[len(c.pages)-1], true
 }
 
 // jobPages returns the JSON responses of the pages of a job: the ones with the

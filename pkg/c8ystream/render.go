@@ -159,6 +159,7 @@ type fileTee struct {
 
 type fileSink struct {
 	f *os.File
+	w io.Writer
 	r output.Renderer
 }
 
@@ -195,7 +196,7 @@ func (t *fileTee) sink(path string) (*fileSink, error) {
 		return nil, err
 	}
 	w := &noTrailingNewline{w: f}
-	s := &fileSink{f: f}
+	s := &fileSink{f: f, w: w}
 	switch {
 	case columnsInRenderer(t.cfg) && t.cfg.GetOutputFormat() != config.OutputTable:
 		s.r = newTabularFileRenderer(w, t.cfg, t.cols)
@@ -219,6 +220,20 @@ func (t *fileTee) Write(doc jsondoc.JSONDoc) error {
 		return err
 	}
 	return s.r.Write(doc)
+}
+
+// writeError writes the error document of a failed request (--withError), as
+// v2.59.0 wrote the error in place of the response: the rows of csv and tsv,
+// else the document as compact JSON (not shaped by the columns of a table).
+func (t *fileTee) writeError(doc jsondoc.JSONDoc) error {
+	s, err := t.sink(t.pathFor(doc))
+	if err != nil {
+		return err
+	}
+	if columnsInRenderer(t.cfg) && t.cfg.GetOutputFormat() != config.OutputTable {
+		return s.r.Write(doc)
+	}
+	return (&jsonLinesRenderer{w: s.w}).Write(doc)
 }
 
 func (t *fileTee) Close() error {
