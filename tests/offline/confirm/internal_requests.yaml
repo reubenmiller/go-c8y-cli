@@ -1,0 +1,124 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# The confirmation prompt (settings.mode.confirm, default POST PUT DELETE) is for the main action
+# of a command. The tests run without C8Y_SETTINGS_CI (which the suite sets so that nothing
+# prompts) and with stdin from /dev/null, so a prompt which is shown is answered with "no" and the
+# command exits with 100/101 ("User did not confirm action").
+#
+# v2.59.0: a command which reads or streams does not ask before the internal POST/PUT/DELETE it
+# sends (e.g. the token request of notification2 subscriptions subscribe, also with --confirm); a
+# read sent as POST (datahub query, deviceregistration getCredentials) asks only with --confirm; the
+# commands which create, update or delete data still ask.
+config:
+  env:
+    # c8y also turns on the CI mode (no prompts) when it finds the variables of a CI system
+    # (e.g. CI=true on GitHub Actions), so they are cleared for the commands which run without
+    # C8Y_SETTINGS_CI
+    CI: "false"
+    BUILD_ID: ""
+    BUILD_NUMBER: ""
+    RUN_ID: ""
+    CI_APP_ID: ""
+    CI_BUILD_ID: ""
+    CI_BUILD_NUMBER: ""
+    CI_NAME: ""
+    CONTINUOUS_INTEGRATION: ""
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+
+tests:
+  notification2 subscriptions subscribe does not ask before it creates the token:
+    command: |
+      c8y devices create --name confirm-n2-device --select id -o csv > /dev/null &&
+      c8y notification2 subscriptions create --name confirm-n2-sub --context mo --apiFilter managedobjects --device confirm-n2-device > /dev/null &&
+      env -u C8Y_SETTINGS_CI c8y notification2 subscriptions subscribe --name confirm-n2-sub --duration 1s --verbose </dev/null 2>&1 >/dev/null | cut -f3- | grep -E '^(Sending request: POST|.*did not confirm)' | sed -E 's#http://[^/]+#http://HOST#'
+    exit-code: 0
+    stdout:
+      contains:
+        - 'Sending request: POST http://HOST/notification2/token'
+      not-contains:
+        - did not confirm
+
+  notification2 subscriptions subscribe exits 0 without CI mode:
+    command: |
+      c8y devices create --name confirm-n2b-device --select id -o csv > /dev/null &&
+      c8y notification2 subscriptions create --name confirm-n2b-sub --context mo --apiFilter managedobjects --device confirm-n2b-device > /dev/null &&
+      env -u C8Y_SETTINGS_CI c8y notification2 subscriptions subscribe --name confirm-n2b-sub --duration 1s </dev/null
+    exit-code: 0
+    stderr:
+      not-contains:
+        - did not confirm
+
+  notification2 subscriptions subscribe does not ask with --confirm either:
+    command: |
+      c8y devices create --name confirm-n2c-device --select id -o csv > /dev/null &&
+      c8y notification2 subscriptions create --name confirm-n2c-sub --context mo --apiFilter managedobjects --device confirm-n2c-device > /dev/null &&
+      env -u C8Y_SETTINGS_CI c8y notification2 subscriptions subscribe --name confirm-n2c-sub --duration 1s --confirm </dev/null
+    exit-code: 0
+    stderr:
+      not-contains:
+        - did not confirm
+
+  devices delete still asks and does not delete the device (default mode, no CI):
+    command: |
+      c8y devices create --name confirm-delete-device --select id -o csv > /dev/null &&
+      env -u C8Y_SETTINGS_CI C8Y_MODE=dev c8y devices delete --id confirm-delete-device </dev/null
+      echo "exit=$?"
+      c8y devices get --id confirm-delete-device --select name -o csv
+    exit-code: 0
+    stdout:
+      contains:
+        - exit=101
+        - confirm-delete-device
+    stderr:
+      contains:
+        - User did not confirm action
+
+  inventory create still asks and does not create the object (default mode, no CI):
+    command: |
+      env -u C8Y_SETTINGS_CI C8Y_MODE=dev c8y inventory create --name confirm-create-should-not-exist </dev/null
+      echo "exit=$?"
+      c8y inventory find --query "name eq 'confirm-create-should-not-exist'" --select id -o csv | wc -l | tr -d ' '
+    exit-code: 0
+    stdout:
+      exactly: |
+        exit=101
+        0
+    stderr:
+      contains:
+        - User did not confirm action
+
+  notification2 tokens create still asks (its main action is the POST):
+    command: |
+      env -u C8Y_SETTINGS_CI C8Y_MODE=dev c8y notification2 tokens create --name confirm-n2-sub --subscriber confirm </dev/null
+    exit-code: 101
+    stderr:
+      contains:
+        - User did not confirm action
+
+  notification2 subscriptions create still asks:
+    command: |
+      env -u C8Y_SETTINGS_CI C8Y_MODE=dev c8y notification2 subscriptions create --name confirm-n2-other --context mo --apiFilter alarms --device 1 </dev/null
+    exit-code: 101
+    stderr:
+      contains:
+        - User did not confirm action
+
+  datahub query does not ask (a read sent as POST, semantic method GET):
+    command: |
+      out=$(env -u C8Y_SETTINGS_CI C8Y_MODE=dev c8y datahub query --sql "SELECT 1" --verbose </dev/null 2>&1)
+      echo "$out" | grep -q 'did not confirm' && echo prompted
+      echo "$out" | grep -q 'Sending request: POST .*/service/datahub/sql' && echo sent
+      true
+    exit-code: 0
+    stdout:
+      exactly: |
+        sent
+
+  a read semantic method still asks with --confirm (deviceregistration getCredentials):
+    command: |
+      env -u C8Y_SETTINGS_CI C8Y_MODE=dev c8y deviceregistration getCredentials --id confirm-reg --sessionUsername x --sessionPassword y --confirm </dev/null
+    exit-code: 101
+    stderr:
+      contains:
+        - User did not confirm action

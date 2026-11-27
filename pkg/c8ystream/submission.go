@@ -106,11 +106,7 @@ func (s *submission) confirm(req *http.Request) (proceed bool, err error) {
 		return true, nil
 	}
 
-	method := s.semanticMethod
-	if method == "" && req != nil {
-		method = req.Method
-	}
-	if !s.cfg.ShouldConfirm(method) {
+	if !s.requiresPrompt(req) {
 		return true, nil // this method is not in the confirmation set
 	}
 
@@ -130,6 +126,19 @@ func (s *submission) confirm(req *http.Request) (proceed bool, err error) {
 	default: // ConfirmNo: skip just this item, recorded as an item error
 		return false, promptErr
 	}
+}
+
+// requiresPrompt reports whether req must be confirmed. A command with a
+// semantic method (flags.WithSemanticMethod) asks according to that method, not
+// to the method of the request: a read semantic method (e.g. datahub query,
+// deviceregistration getCredentials, which send a POST) only asks with
+// --confirm, as in v2.59.0.
+func (s *submission) requiresPrompt(req *http.Request) bool {
+	method := s.semanticMethod
+	if method == "" && req != nil {
+		method = req.Method
+	}
+	return s.cfg.ShouldConfirm(method)
 }
 
 // operationText builds the verb shown in the prompt: the configured
