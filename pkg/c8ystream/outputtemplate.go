@@ -86,13 +86,21 @@ func (r *Runner) wrapTemplateJob(ot *mapbuilder.OutputTemplate, flags map[string
 			}
 			pages, reqData, respData := capture.get()
 			if reqData == nil && respData == nil {
-				// no request of this job was seen (e.g. a dry run)
+				// no request of this job was seen
 				r.tmplMu.Lock()
 				reqData, respData = r.tmplRequest, r.tmplResponse
 				r.tmplMu.Unlock()
 			}
 
-			for _, body := range r.templateBodies(pages, docs, whole) {
+			bodies := r.templateBodies(pages, docs, whole)
+			if len(docs) == 0 && respData != nil && respData["statusCode"] == 0 {
+				// a dry run: the template is evaluated for the request which would
+				// be sent, and `output` is the empty body of the response which was
+				// not received (an empty string, as in v2.59.0)
+				bodies = [][]byte{{}}
+			}
+
+			for _, body := range bodies {
 				out, err := ot.Evaluate(body, input, reqData, respData, flags)
 				if err != nil {
 					yield(jsondoc.Empty(), err)

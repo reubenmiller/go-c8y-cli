@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
@@ -76,6 +77,7 @@ type Runner struct {
 
 	userErrorPath     string // see UserErrorRequests
 	directNameLookup  bool   // see DirectNameLookup
+	dropPageSize      bool   // see noPageSize
 	noDefaultPageSize bool   // see NoDefaultPageSize
 	getPageSize       int    // page size of the GET requests of a call (0: none), see defaultPageSizeHook
 
@@ -84,6 +86,7 @@ type Runner struct {
 	viewDefinition  *dataview.Definition // the view applied to the output; its column widths apply to tables
 	consoleRenderer *consoleRenderer     // the table/json renderer; nil for csv/tsv
 	index           int64
+	fileReceived    atomic.Bool // a response with a body was received (--outputFile)
 
 	// tmplInput is the current item's raw input, kept pointed at the item being
 	// produced so the --outputTemplate evaluation can bind it as input.value.
@@ -407,6 +410,7 @@ func (r *Runner) Client() (*apiv2.Client, error) {
 		return nil, err
 	}
 	r.installOutputTemplateCapture(client)
+	r.installOutputFileCapture(client)
 	r.installViewCapture(client)
 	r.installSilentSuccessMessage(client)
 	return client, nil
@@ -474,6 +478,7 @@ func (r *Runner) run(newProducer func() Producer) error {
 	if common, err := cfg.GetOutputCommonOptions(r.Cmd); err == nil && !r.noDefaultPageSize {
 		r.getPageSize = common.PageSize
 	}
+	r.dropPageSize = r.noPageSizeActive()
 
 	collector := &ErrorCollector{Max: cfg.AbortOnErrorCount()}
 	if cfg.WithError() && (cfg.GetOutputTemplate() != "" || len(cfg.GetJSONSelect()) > 0) {
@@ -547,7 +552,7 @@ func (r *Runner) run(newProducer func() Producer) error {
 	} else if vs != nil {
 		stages = append(stages, vs)
 	}
-	renderer, err := newRenderer(r.Cmd.OutOrStdout(), cfg, cols)
+	renderer, err := newRenderer(r.Cmd.OutOrStdout(), cfg, cols, r.fileReceivedFunc)
 	if err != nil {
 		return err
 	}
@@ -558,12 +563,6 @@ func (r *Runner) run(newProducer func() Producer) error {
 	// single consuming goroutine, so the bar needs no locking).
 	progress := newProgress(r.Factory.IOStreams.ErrOut, cfg.ShowProgress())
 	pipeline := []output.Stage{collector.Stage()}
-	// --outputFileRaw tees the unshaped document to disk, so it runs before the
-	// filter/template/select stages (it sees what the server returned, not the
-	// rendered shape), matching v1.
-	if rawPath := cfg.GetOutputFileRaw(); rawPath != "" {
-		pipeline = append(pipeline, rawFileStage(rawPath))
-	}
 	if progress != nil {
 		pipeline = append(pipeline, progress.stage())
 	}
@@ -651,6 +650,9 @@ func (r *Runner) producer(build Build) Producer {
 			if r.getPageSize > 0 {
 				callCtx = apiv2.WithRequestHook(callCtx, defaultPageSizeHook(r.getPageSize))
 			}
+			if r.dropPageSize {
+				callCtx = apiv2.WithRequestHook(callCtx, dropNoPageSizeHook())
+			}
 			seq := r.adaptItem(call(callCtx), item)
 			if r.assert != nil {
 				seq = r.assert.filter(seq)
@@ -659,6 +661,11 @@ func (r *Runner) producer(build Build) Producer {
 		})
 		if r.submission != nil {
 			job = r.submission.withDelays(job)
+		}
+		// --outputFileRaw writes the unshaped response, so it wraps the job
+		// before the output template does
+		if rawPath := r.Config.GetOutputFileRaw(); rawPath != "" {
+			job = r.wrapRawFileJob(rawPath, job)
 		}
 		if r.tmpl != nil {
 			job = r.wrapTemplateJob(r.tmpl, r.tmplFlags, job)

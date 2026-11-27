@@ -1,6 +1,8 @@
 package c8ystream
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -13,6 +15,7 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/encode"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/filter"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/shape"
+	"github.com/tidwall/gjson"
 )
 
 // CommonStages builds the standard client-side processing chain from the
@@ -88,19 +91,20 @@ func selectStage(cfg *config.Config, selectors []string) output.Stage {
 }
 
 // NewRenderer builds the sink for a command from the --output format, teed
-// to --outputFile as a JSON array when set.
+// to --outputFile when set (see newFileTee for what the file holds).
 //
 // csv/tsv use the v2 encoders (columns derived from the documents, composing
 // with --select); json/table/serverresponse delegate to the v1 console writer
 // (consoleRenderer) so terminal rendering — table column detection and JSON
 // pretty-print/compact/colorisation — matches the v1 commands exactly.
 func NewRenderer(out io.Writer, cfg *config.Config) (output.Renderer, error) {
-	return newRenderer(out, cfg, newColumnSelector(cfg))
+	return newRenderer(out, cfg, newColumnSelector(cfg), nil)
 }
 
 // newRenderer builds the sink for the output format. cols owns the columns of
 // tabular output (--select, or the view once it is resolved), see columnSelector.
-func newRenderer(out io.Writer, cfg *config.Config, cols *columnSelector) (output.Renderer, error) {
+// received tells whether a response with a body was received (see newFileTee).
+func newRenderer(out io.Writer, cfg *config.Config, cols *columnSelector, received func() bool) (output.Renderer, error) {
 	var r output.Renderer
 	switch {
 	// CSV/TSV + --select: the selection owns the columns (array indices become
@@ -123,31 +127,184 @@ func newRenderer(out io.Writer, cfg *config.Config, cols *columnSelector) (outpu
 		r = newConsoleRenderer(out, cfg, cols)
 	}
 
-	if path := cfg.GetOutputFile(); path != "" {
-		var fileRenderer output.Renderer
-		if strings.Contains(path, "{") && strings.Contains(path, "}") {
-			// {id}/{name}/{type}/{owner} placeholders are filled from the first
-			// document (v1 expanded them from the response body), so file creation
-			// must wait until a document arrives.
-			fileRenderer = &lazyFileRenderer{path: path}
-		} else {
-			f, err := createOutputFile(path)
-			if err != nil {
-				return nil, err
-			}
-			fileRenderer = &closingRenderer{Renderer: encode.NewJSONArray(f), closer: f}
-		}
-		// CSV/TSV + --select skips the generic selectStage, so the document
-		// reaching the renderer is unshaped. The --outputFile tee writes JSON, so
-		// shape it here (the same nested selection the json sink would have
-		// received) to keep the file output consistent with --select.
-		if columnsInRenderer(cfg) {
-			fileRenderer = &shapingRenderer{Renderer: fileRenderer, cols: cols, flatten: cfg.FlattenJSON()}
-		}
-		r = Multi(r, fileRenderer)
+	if path := cfg.GetOutputFile(); path != "" && cfg.GetOutputFormat() != config.OutputServerResponse {
+		r = Multi(r, newFileTee(path, cfg, cols, received))
 	}
 
 	return r, nil
+}
+
+// fileTee writes the documents to --outputFile as v2.59.0 did: what the
+// command prints, without the header of csvheader, one document per line and
+// no newline after the last one.
+//
+//   - csv, tsv and csvheader: the rows of the output;
+//   - json and table: the documents as compact JSON (after --filter,
+//     --outputTemplate and --select), also for table, which prints no JSON;
+//   - serverresponse: no file.
+//
+// The file is created with the first document (which fills {id}, {name},
+// {type} and {owner} in the path, one file for each distinct path) and
+// replaced if it exists. A request which fails, a dry run and a response
+// without a body write no file; a response with a body but no document (e.g.
+// an empty list) writes an empty file.
+type fileTee struct {
+	path     string
+	cfg      *config.Config
+	cols     *columnSelector
+	received func() bool
+	sinks    map[string]*fileSink
+	order    []string
+}
+
+type fileSink struct {
+	f *os.File
+	r output.Renderer
+}
+
+func newFileTee(path string, cfg *config.Config, cols *columnSelector, received func() bool) *fileTee {
+	return &fileTee{path: path, cfg: cfg, cols: cols, received: received, sinks: map[string]*fileSink{}}
+}
+
+func (t *fileTee) hasPlaceholders() bool {
+	return strings.Contains(t.path, "{") && strings.Contains(t.path, "}")
+}
+
+// pathFor fills {id}/{name}/{type}/{owner} from the document (v1 expanded
+// them from the response body).
+func (t *fileTee) pathFor(doc jsondoc.JSONDoc) string {
+	path := t.path
+	if !t.hasPlaceholders() {
+		return path
+	}
+	for _, field := range []string{"id", "name", "type", "owner"} {
+		placeholder := "{" + field + "}"
+		if strings.Contains(path, placeholder) {
+			path = strings.ReplaceAll(path, placeholder, fileutilities.SanitizeFileName(doc.Get(field).String()))
+		}
+	}
+	return path
+}
+
+func (t *fileTee) sink(path string) (*fileSink, error) {
+	if s, ok := t.sinks[path]; ok {
+		return s, nil
+	}
+	f, err := createOutputFile(path)
+	if err != nil {
+		return nil, err
+	}
+	w := &noTrailingNewline{w: f}
+	s := &fileSink{f: f}
+	switch {
+	case columnsInRenderer(t.cfg) && t.cfg.GetOutputFormat() != config.OutputTable:
+		s.r = newTabularFileRenderer(w, t.cfg, t.cols)
+	default:
+		var r output.Renderer = &jsonLinesRenderer{w: w}
+		// table + --select or a view: the document reaching the renderer is
+		// unshaped, as the renderer owns the columns
+		if columnsInRenderer(t.cfg) {
+			r = &shapingRenderer{Renderer: r, cols: t.cols, flatten: t.cfg.FlattenJSON()}
+		}
+		s.r = r
+	}
+	t.sinks[path] = s
+	t.order = append(t.order, path)
+	return s, nil
+}
+
+func (t *fileTee) Write(doc jsondoc.JSONDoc) error {
+	s, err := t.sink(t.pathFor(doc))
+	if err != nil {
+		return err
+	}
+	return s.r.Write(doc)
+}
+
+func (t *fileTee) Close() error {
+	var firstErr error
+	if len(t.sinks) == 0 && !t.hasPlaceholders() && t.received != nil && t.received() {
+		// a response with a body but no document (an empty list)
+		if _, err := t.sink(t.path); err != nil {
+			firstErr = err
+		}
+	}
+	for _, path := range t.order {
+		s := t.sinks[path]
+		if err := s.r.Close(); err != nil && firstErr == nil {
+			firstErr = err
+		}
+		if err := s.f.Close(); err != nil && firstErr == nil {
+			firstErr = err
+		}
+	}
+	return firstErr
+}
+
+// newTabularFileRenderer is the csv, tsv or csvheader renderer of the file,
+// which has no header row.
+func newTabularFileRenderer(w io.Writer, cfg *config.Config, cols *columnSelector) output.Renderer {
+	switch {
+	case selectionCSVActive(cfg):
+		r := newSelectionCSVRenderer(w, cfg, cols)
+		r.header = false
+		return r
+	case cfg.GetOutputFormat() == config.OutputTSV:
+		return encode.NewTSV(w, encode.CSVOptions{AutoFlush: true})
+	default:
+		return encode.NewCSV(w, encode.CSVOptions{AutoFlush: true})
+	}
+}
+
+// jsonLinesRenderer writes each document as compact JSON on its own line; a
+// document which is not JSON (the text of an --outputTemplate) is written as is.
+type jsonLinesRenderer struct {
+	w io.Writer
+}
+
+func (j *jsonLinesRenderer) Write(doc jsondoc.JSONDoc) error {
+	raw := doc.Raw()
+	if gjson.ValidBytes(raw) {
+		var buf bytes.Buffer
+		if err := json.Compact(&buf, raw); err == nil {
+			raw = buf.Bytes()
+		}
+		// "<", ">" and "&" are written as the characters, as on stdout
+		raw = bytes.ReplaceAll(raw, []byte("\\u003c"), []byte("<"))
+		raw = bytes.ReplaceAll(raw, []byte("\\u003e"), []byte(">"))
+		raw = bytes.ReplaceAll(raw, []byte("\\u0026"), []byte("&"))
+	}
+	_, err := j.w.Write(append(append([]byte{}, raw...), '\n'))
+	return err
+}
+
+func (j *jsonLinesRenderer) Close() error { return nil }
+
+// noTrailingNewline drops the newline after the last write: the lines of a
+// file are separated by a newline, and the last one has none.
+type noTrailingNewline struct {
+	w       io.Writer
+	pending bool
+}
+
+func (n *noTrailingNewline) Write(p []byte) (int, error) {
+	if len(p) == 0 {
+		return 0, nil
+	}
+	if n.pending {
+		if _, err := n.w.Write([]byte("\n")); err != nil {
+			return 0, err
+		}
+		n.pending = false
+	}
+	if p[len(p)-1] == '\n' {
+		n.pending = true
+		if _, err := n.w.Write(p[:len(p)-1]); err != nil {
+			return 0, err
+		}
+		return len(p), nil
+	}
+	return n.w.Write(p)
 }
 
 // Multi fans every document out to all renderers — teeing at the sink, which
@@ -187,59 +344,4 @@ func createOutputFile(path string) (*os.File, error) {
 		}
 	}
 	return os.Create(path)
-}
-
-// lazyFileRenderer defers the --outputFile creation until the first document
-// so {id}/{name}/{type}/{owner} placeholders in the path can be filled from
-// that document — the same fields (and value sanitisation) v1 extracted from
-// the response body. With no documents no file is created.
-type lazyFileRenderer struct {
-	path string
-	r    output.Renderer
-	f    *os.File
-}
-
-func (l *lazyFileRenderer) Write(doc jsondoc.JSONDoc) error {
-	if l.r == nil {
-		path := l.path
-		for _, field := range []string{"id", "name", "type", "owner"} {
-			placeholder := "{" + field + "}"
-			if strings.Contains(path, placeholder) {
-				path = strings.ReplaceAll(path, placeholder, fileutilities.SanitizeFileName(doc.Get(field).String()))
-			}
-		}
-		f, err := createOutputFile(path)
-		if err != nil {
-			return err
-		}
-		l.f = f
-		l.r = encode.NewJSONArray(f)
-	}
-	return l.r.Write(doc)
-}
-
-func (l *lazyFileRenderer) Close() error {
-	if l.r == nil {
-		return nil
-	}
-	err := l.r.Close()
-	if cerr := l.f.Close(); err == nil {
-		err = cerr
-	}
-	return err
-}
-
-// closingRenderer closes an underlying resource (e.g. the --outputFile
-// handle) after the renderer has flushed its trailing content.
-type closingRenderer struct {
-	output.Renderer
-	closer io.Closer
-}
-
-func (c *closingRenderer) Close() error {
-	err := c.Renderer.Close()
-	if cerr := c.closer.Close(); err == nil {
-		err = cerr
-	}
-	return err
 }

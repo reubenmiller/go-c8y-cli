@@ -113,6 +113,34 @@ func defaultPageSizeHook(pageSize int) func(*http.Request) error {
 	}
 }
 
+// noPageSize is the page size which Pagination gives a list that reads one
+// page when the page size setting is blank (or 0, or 5): the SDK sends a page
+// size on every list (2000 when there is none), and dropNoPageSizeHook removes
+// this one from the request. v2.59.0 sent none then, so the platform's default
+// page size applied. It is a value which no setting or flag has in practice,
+// and which the hook only removes when the setting is blank.
+const noPageSize = 1999
+
+// dropNoPageSizeHook returns the request hook which removes the pageSize that
+// stands for no page size (see noPageSize).
+func dropNoPageSizeHook() func(*http.Request) error {
+	param := "pageSize=" + strconv.Itoa(noPageSize)
+	return func(req *http.Request) error {
+		if req.Method != http.MethodGet || req.URL == nil || !strings.Contains(req.URL.RawQuery, param) {
+			return nil
+		}
+		parts := strings.Split(req.URL.RawQuery, "&")
+		kept := parts[:0]
+		for _, part := range parts {
+			if part != param {
+				kept = append(kept, part)
+			}
+		}
+		req.URL.RawQuery = strings.Join(kept, "&")
+		return nil
+	}
+}
+
 // WithQueryParam returns ctx with an additional query parameter for the
 // requests made under it, merging with (not replacing) any globally configured
 // --customQueryParam values. Use it for legacy CLI parameters that a typed SDK

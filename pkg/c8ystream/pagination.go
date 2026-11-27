@@ -19,8 +19,12 @@ func (r *Runner) Pagination() (pagination.PaginationOptions, error) {
 	if err != nil {
 		return pagination.PaginationOptions{}, err
 	}
+	pageSize := common.PageSize
+	if r.noPageSizeActive() {
+		pageSize = noPageSize
+	}
 	return pagination.PaginationOptions{
-		PageSize:          common.PageSize,
+		PageSize:          pageSize,
 		WithTotalPages:    common.WithTotalPages,
 		WithTotalElements: common.WithTotalElements,
 		CurrentPage:       int(common.CurrentPage),
@@ -53,4 +57,16 @@ func (r *Runner) PaginationByPage() (pagination.PaginationOptions, error) {
 		paging.Strategy = pagination.StrategyOffset
 	}
 	return paging, nil
+}
+
+// noPageSizeActive reports whether a list which reads one page sends no page
+// size: the page size setting is blank (or 0, or 5), as there is no --pageSize.
+// A dry run shows the request without the SDK's default page size already.
+func (r *Runner) noPageSizeActive() bool {
+	cfg := r.Config
+	common, err := cfg.GetOutputCommonOptions(r.Cmd)
+	if err != nil || common.PageSize != 0 || cfg.IncludeAll() || cfg.GetTotalPages() > 1 || cfg.MaxItems() != 0 {
+		return false
+	}
+	return !cfg.ShouldUseDryRun(r.Cmd.CommandPath())
 }
