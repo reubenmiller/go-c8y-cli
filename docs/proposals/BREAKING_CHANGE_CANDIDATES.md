@@ -262,8 +262,9 @@ Deprecated in go-c8y v2 and kept as aliases: `Client.ApplicationVersions`, `Devi
 - **Today**: csv, tsv and csvheader columns are per document on `v2.59.0` and v3: a document with extra fragments adds columns to its row. `--outputTemplate` with `--totalPages N` evaluates the template on the first page only on `v2.59.0` and on every page on v3; with `--includeAll` once for the first-page response on `v2.59.0` and per page on v3 (v3 does not copy the `v2.59.0` behavior, which looks like a bug). `--raw` plus `--select` or `--filter` on a bare array still mixes shaped items and arrays (topic 15). Ctrl-C during the connect of a realtime or notification2 subscribe exits 2 with `Interrupted`. `inventory parents get` lacks the collection property annotation (only the `--debug` and `--verbose` array logs differ).
 - **Proposed**: a stable column set for csv (a first-document or view-based set), one rule for templates with paging, one exit code for an interrupted connect.
 - **Breaks**: scripts that parse csv columns or depend on the current template evaluation.
+- **Also**: `v2.59.0` trimmed the trailing tabs of the last tsv row; v3 keeps every row consistent (a view parity detail from #835).
 
-### 24. Typed file part and request details in the SDK
+### 24. Request shape of count commands and `c8y api` urls
 
 - **Today**: assert count commands request `withTotalPages` as `v2.59.0` does (v3 sent `withTotalElements`, and `revert=false` for measurements, before #837). `c8y api` with a piped absolute url sends a single `pageSize` on v3 (a duplicate on `v2.59.0`).
 - **Proposed**: use `withTotalElements` for the count (cheaper, clearer).
