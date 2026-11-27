@@ -128,7 +128,7 @@ Column widths only affect the table output, so other output formats (e.g. json o
 
 The view is detected once for each stream of results, from the first document. If the response contains an array (i.e. `.managedObjects[]`) then the first item from the array is used. The request path, request method and the `Content-Type` of the response are matched at the same time. If no view matches the first document, no view is applied to the rest of the stream.
 
-When a command sends several requests (for example, when it follows multiple pages), the detection is repeated for the next response until a view matches. Once a view is chosen, it is used for the remaining documents.
+The detection is not repeated when a command sends several requests (for example, when it follows multiple pages, or when it processes piped input). The view of the first document is used for all of the documents, and if the first document matched no view, then none of the documents get a view.
 
 A view definition supports matching by the following criteria:
 
@@ -157,6 +157,8 @@ An extension API command can set its own default view. That view takes precedenc
 ### Columns of a view
 
 In the `table`, `csv`, `csvheader` and `tsv` output, every column of the view is always present, in the order of the view. If a document does not have the property, the cell is empty. This means the columns do not depend on which documents happen to be returned first.
+
+The following examples use a view which matches the devices and has the columns `id`, `name`, `c8y_Agent.version` and `c8y_Hardware.model`.
 
 ```bash
 c8y devices list --output csvheader --view auto
