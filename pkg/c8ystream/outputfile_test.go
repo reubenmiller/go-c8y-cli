@@ -41,13 +41,14 @@ func TestDropNoPageSizeHook(t *testing.T) {
 	tests := []struct {
 		name, method, query, want string
 	}{
-		{"default page size", http.MethodGet, "pageSize=1999", ""},
-		{"with other parameters", http.MethodGet, "a=1&pageSize=1999&q=x", "a=1&q=x"},
+		{"default page size", http.MethodGet, "pageSize=5", ""},
+		{"with other parameters", http.MethodGet, "a=1&pageSize=5&q=x", "a=1&q=x"},
+		{"next page", http.MethodGet, "currentPage=2&pageSize=5", "currentPage=2"},
 		{"explicit page size", http.MethodGet, "pageSize=7&q=x", "pageSize=7&q=x"},
-		{"page size 19990", http.MethodGet, "pageSize=19990", "pageSize=19990"},
+		{"page size 50", http.MethodGet, "pageSize=50", "pageSize=50"},
 		{"page size 2000", http.MethodGet, "pageSize=2000", "pageSize=2000"},
 		{"no query", http.MethodGet, "", ""},
-		{"not a GET", http.MethodPost, "pageSize=1999", "pageSize=1999"},
+		{"not a GET", http.MethodPost, "pageSize=5", "pageSize=5"},
 	}
 	hook := dropNoPageSizeHook()
 	for _, tt := range tests {

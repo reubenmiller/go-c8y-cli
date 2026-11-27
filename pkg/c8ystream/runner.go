@@ -75,11 +75,11 @@ type Runner struct {
 	assert       *assertion      // set by Assert; nil for other commands
 	filters      []string        // filters of the command itself (see Filter)
 
-	userErrorPath     string // see UserErrorRequests
-	directNameLookup  bool   // see DirectNameLookup
-	dropPageSize      bool   // see noPageSize
-	noDefaultPageSize bool   // see NoDefaultPageSize
-	getPageSize       int    // page size of the GET requests of a call (0: none), see defaultPageSizeHook
+	userErrorPath     string      // see UserErrorRequests
+	directNameLookup  bool        // see DirectNameLookup
+	dropPageSize      atomic.Bool // a list sends no page size, see noPageSize
+	noDefaultPageSize bool        // see NoDefaultPageSize
+	getPageSize       int         // page size of the GET requests of a call (0: none), see defaultPageSizeHook
 
 	viewMu          sync.Mutex           // guards viewResp against the response middleware
 	viewResp        *viewResponse        // the latest response, which --view auto matches
@@ -478,7 +478,6 @@ func (r *Runner) run(newProducer func() Producer) error {
 	if common, err := cfg.GetOutputCommonOptions(r.Cmd); err == nil && !r.noDefaultPageSize {
 		r.getPageSize = common.PageSize
 	}
-	r.dropPageSize = r.noPageSizeActive()
 
 	collector := &ErrorCollector{Max: cfg.AbortOnErrorCount()}
 	if cfg.WithError() && (cfg.GetOutputTemplate() != "" || len(cfg.GetJSONSelect()) > 0) {
@@ -650,7 +649,7 @@ func (r *Runner) producer(build Build) Producer {
 			if r.getPageSize > 0 {
 				callCtx = apiv2.WithRequestHook(callCtx, defaultPageSizeHook(r.getPageSize))
 			}
-			if r.dropPageSize {
+			if r.dropPageSize.Load() {
 				callCtx = apiv2.WithRequestHook(callCtx, dropNoPageSizeHook())
 			}
 			seq := r.adaptItem(call(callCtx), item)

@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydefaults"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/requestutil"
@@ -113,13 +114,15 @@ func defaultPageSizeHook(pageSize int) func(*http.Request) error {
 	}
 }
 
-// noPageSize is the page size which Pagination gives a list that reads one
-// page when the page size setting is blank (or 0, or 5): the SDK sends a page
-// size on every list (2000 when there is none), and dropNoPageSizeHook removes
-// this one from the request. v2.59.0 sent none then, so the platform's default
-// page size applied. It is a value which no setting or flag has in practice,
-// and which the hook only removes when the setting is blank.
-const noPageSize = 1999
+// noPageSize is the page size which Pagination gives a list when the page
+// size is the platform's default (the setting or --pageSize is blank, 0 or 5,
+// and there is no --includeAll), and which dropNoPageSizeHook removes from its
+// requests: v2.59.0 sent no pageSize then, so the platform's default page size
+// (5) applied. The SDK sends a page size on every list (2000 when it has
+// none), and it needs the size of the pages the server returns to read
+// --totalPages N pages. A request without pageSize=5 reads the same items as
+// one with it.
+const noPageSize = c8ydefaults.PageSize
 
 // dropNoPageSizeHook returns the request hook which removes the pageSize that
 // stands for no page size (see noPageSize).
