@@ -338,3 +338,12 @@ tests:
         Array properties: []
         Array properties: [managedObjects]
         Data property: managedObjects
+
+  --outputTemplate which returns a text is printed as it is, also when it looks like an array:
+    command: |
+      c8y devices get --id "$(c8y devices list --pageSize 1 --select id -o csv)" --outputTemplate 'std.manifestTomlEx({c8y: {name: "x"}}, "  ")'
+    exit-code: 0
+    stdout:
+      exactly: |
+        [c8y]
+          name = "x"

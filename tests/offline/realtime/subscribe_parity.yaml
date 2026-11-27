@@ -51,7 +51,7 @@ tests:
     command: |
       device=$(c8y devices create --name "ws-log-$RANDOM" --select id --output csv)
       c8y realtime subscribe --channel "/alarms/$device" --duration 2s --verbose 2>&1 >/dev/null | cut -f3- |
-        sed -E "s#ws://[^ ]+#ws://HOST#; s#(ws \((send|recv)\): [^ ]+ : ).*#\1...#; s#/alarms/$device#/alarms/DEVICE#" |
+        sed -E "s#wss?://[^ ]+#ws://HOST#; s#(ws \((send|recv)\): [^ ]+ : ).*#\1...#; s#/alarms/$device#/alarms/DEVICE#" |
         grep -E '^(Establishing connection|Waiting for message: id=1$|ws \((send|recv)\): /meta/handshake|Pending messages ids: 1$|Removing message from pending requests: 1$|Received message 1$|Resending /meta/connect heartbeat with 500 ms delay$|Listening to subscriptions|Subscribing to |Successfully subscribed to channel|Duration has expired)' |
         LC_ALL=C sort -u
       c8y realtime subscribe --channel "/alarms/$device" --duration 1s --verbose 2>&1 >/dev/null | grep -c -E 'level=(INFO|WARN|DEBUG)|component=realtime' || true

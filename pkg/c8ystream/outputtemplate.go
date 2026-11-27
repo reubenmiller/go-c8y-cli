@@ -89,8 +89,12 @@ func (r *Runner) wrapTemplateJob(ot *mapbuilder.OutputTemplate, flags map[string
 					yield(jsondoc.Empty(), err)
 					return
 				}
+				// only a JSON array is split: the text of a template which returns a
+				// string is printed as it is (it can look like an array, e.g. "[c8y]")
+				res := gjson.ParseBytes(out)
+				isArray := split && res.IsArray() && gjson.ValidBytes(out)
 				out = unwrapTemplateString(out)
-				if res := gjson.ParseBytes(out); split && res.IsArray() {
+				if isArray {
 					for _, item := range res.Array() {
 						if !yield(jsondoc.New([]byte(item.Raw)), nil) {
 							return
