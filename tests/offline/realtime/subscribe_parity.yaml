@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# The realtime commands of v2.59.0:
+#   * --dry connects and streams for the whole --duration (v3 returned at once, showing the upgrade request)
+#   * the websocket never verifies the certificate of the server, whatever the insecure setting
+#     (the TLS tests need the fake server in TLS mode, see test-cli-offline-realtime in the Taskfile)
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+
+tests:
+  It streams alarms of alarms subscribe in a dry run:
+    command: ./offline/realtime/stream.sh alarms --dry
+    exit-code: 0
+    stdout:
+      exactly: "exit=0 received=1 elapsed_ok=true"
+
+  It streams the messages of realtime subscribe in a dry run:
+    command: ./offline/realtime/stream.sh realtime --dry
+    exit-code: 0
+    stdout:
+      exactly: "exit=0 received=1 elapsed_ok=true"
+
+  It streams the messages of realtime subscribeAll in a dry run:
+    command: ./offline/realtime/stream.sh subscribeAll --dry
+    exit-code: 0
+    stdout:
+      exactly: "exit=0 received=1 elapsed_ok=true"
+
+  It streams alarms without a dry run:
+    command: ./offline/realtime/stream.sh alarms
+    exit-code: 0
+    stdout:
+      exactly: "exit=0 received=1 elapsed_ok=true"
+
+  It connects to the realtime websocket of a self-signed server when the insecure setting is off:
+    command: ./offline/realtime/websocket_tls.sh realtime
+    exit-code: 0
+    stdout:
+      contains:
+        - "exit=0"
+
+  It connects to the notification2 websocket of a self-signed server with the insecure setting on:
+    command: ./offline/realtime/websocket_tls.sh notification2
+    exit-code: 0
+    stdout:
+      contains:
+        - "exit=0"
