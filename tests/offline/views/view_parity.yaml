@@ -140,3 +140,32 @@ tests:
     stdout:
       exactly: |
         WARN no matching view found. name=doesnotexist
+
+  the view of the first response is kept for piped input:
+    command: |
+      first=$(c8y inventory create --name vp12-nodevice --select id --output csv)
+      second=$(c8y devices create --name vp12-device --template "{c8y_Agent:{version:'12'}}" --select id --output csv)
+      printf '%s\n%s\n' "$first" "$second" | c8y inventory get --output json --view auto | grep -c '"owner":"admin"'
+    exit-code: 0
+    stdout:
+      exactly: |
+        2
+
+  json with flatten applies the view before flattening:
+    command: |
+      c8y devices create --name vp13-a --template "{c8y_Agent:{version:'13'}}" > /dev/null
+      c8y devices list --name "vp13-*" --output json --view auto --flatten | sed -E 's/"id":"[0-9]+"/"id":"N"/'
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"c8y_Agent.version":"13","id":"N","name":"vp13-a"}
+
+  table with flatten keeps the columns of the view:
+    command: |
+      c8y devices create --name vp14-a --template "{c8y_Hardware:{model:'H14', serialNumber:'S14'}}" > /dev/null
+      c8y devices list --name "vp14-*" --output table --flatten --select "name,c8y_Hardware.**" | tr -s ' ' | grep -v '^|:'
+    exit-code: 0
+    stdout:
+      exactly: |
+        | name | c8y_Hardware.model | c8y_Hardware.serialNumber |
+        | vp14-a | H14 | S14 |

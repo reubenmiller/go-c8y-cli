@@ -514,7 +514,22 @@ func (r *Runner) run(newProducer func() Producer) error {
 	// the detected/named view's columns (no-op for --view off / the non-TTY
 	// default), matching the v1 output path.
 	cols := newColumnSelector(cfg)
-	if vs := r.viewStage(cols); vs != nil {
+	vs := r.viewStage(cols)
+	if len(cfg.GetJSONSelect()) == 0 && cfg.FlattenJSON() && len(stages) > 0 {
+		// --flatten (without --select) is the last common stage. As in v1, where
+		// the view was the selection which --flatten flattened, the view comes
+		// first: it shapes the nested document (json), or resolves the columns
+		// which a tabular renderer applies to the nested document.
+		flatten := stages[len(stages)-1]
+		stages = stages[: len(stages)-1 : len(stages)-1]
+		if vs != nil {
+			stages = append(stages, vs)
+		}
+		if columnsInRenderer(cfg) {
+			flatten = flattenUnlessColumns(flatten, cols)
+		}
+		stages = append(stages, flatten)
+	} else if vs != nil {
 		stages = append(stages, vs)
 	}
 	renderer, err := newRenderer(r.Cmd.OutOrStdout(), cfg, cols)

@@ -50,11 +50,10 @@ func (s *shapingRenderer) Write(doc jsondoc.JSONDoc) error {
 // shape the documents in a stage.
 func columnsInRenderer(cfg *config.Config) bool {
 	switch cfg.GetOutputFormat() {
-	case config.OutputCSV, config.OutputCSVWithHeader, config.OutputTSV:
+	case config.OutputCSV, config.OutputCSVWithHeader, config.OutputTSV, config.OutputTable:
+		// the columns are the same with --flatten (the renderer flattens), see
+		// flattenUnlessColumns
 		return true
-	case config.OutputTable:
-		// --flatten shapes the document into one flat object first
-		return !cfg.FlattenJSON()
 	default:
 		return false
 	}

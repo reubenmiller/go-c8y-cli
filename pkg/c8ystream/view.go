@@ -33,8 +33,8 @@ import (
 // property a document lacks is simply absent).
 //
 // With --view auto the columns depend on the data, so the view is detected from
-// the first document of each response (as v1 did, with the request and the
-// content type of the response); a named view is resolved up front.
+// the first document (as v1 did, with the request and the content type of its
+// response); a named view is resolved up front.
 func (r *Runner) viewStage(cols *columnSelector) output.Stage {
 	cfg := r.Config
 	if len(cfg.GetJSONSelect()) > 0 || cfg.RawOutput() {
@@ -181,18 +181,18 @@ func viewSelectStage(sel *shape.Selector) output.Stage {
 	})
 }
 
-// autoViewStage detects the view from the first document of a response (by its
-// fragments, and the request and content type of the response) and applies the
-// detected columns to the documents, so a streamed collection is shaped
-// consistently. As in v1, which matched every response on its own, the detection
-// is repeated for the next response until a view matched. If no definition
-// matches, the documents pass through unchanged.
+// autoViewStage detects the view from the first document (by its fragments,
+// and the request and content type of the response it came from) and applies
+// the detected columns to every document, so a streamed collection is shaped
+// consistently. As in v1, where the view of the first response became the
+// --select of the following responses (also of piped input and of further
+// pages), the detection runs once: if no definition matches the first
+// document, the documents pass through unchanged.
 func autoViewStage(dv *dataview.DataView, response func() *viewResponse, cols *columnSelector, shapeDocs bool, onDefinition func(*dataview.Definition)) output.Stage {
 	return func(src output.Seq) output.Seq {
 		return func(yield func(jsondoc.JSONDoc, error) bool) {
 			var shaper output.Stage
 			matched := false
-			var detectedFor *viewResponse
 			detected := false
 			for doc, err := range src {
 				if err != nil {
@@ -201,10 +201,9 @@ func autoViewStage(dv *dataview.DataView, response func() *viewResponse, cols *c
 					}
 					continue
 				}
-				if current := response(); !matched && (!detected || current != detectedFor) {
+				if !detected {
 					detected = true
-					detectedFor = current
-					if columns := detectViewColumns(dv, doc, current); len(columns) > 0 {
+					if columns := detectViewColumns(dv, doc, response()); len(columns) > 0 {
 						cols.set(columns)
 						matched = true
 						shaper = viewSelectStage(cols.get())
@@ -286,4 +285,17 @@ func (c *columnSelector) selection() *columnSelection {
 		return nil
 	}
 	return c.current.Load()
+}
+
+// flattenUnlessColumns runs the --flatten stage only for a document of tabular
+// output whose columns no view resolved: the renderer applies the columns of a
+// view to the nested document (a flattened document has no nested paths), and
+// the table and csv columns of a view are flat already.
+func flattenUnlessColumns(flatten output.Stage, cols *columnSelector) output.Stage {
+	return output.Map(func(doc jsondoc.JSONDoc) (jsondoc.JSONDoc, error) {
+		if cols.get() != nil {
+			return doc, nil
+		}
+		return applyStageToDoc(flatten, doc), nil
+	})
 }

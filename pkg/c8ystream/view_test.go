@@ -149,10 +149,11 @@ func TestAutoViewStageMatchesTheRequestAndContentType(t *testing.T) {
 	}
 }
 
-// TestAutoViewStageDetectsAgainForTheNextResponse checks that, like v1 which
-// matched each response on its own, a response whose first document did not match
-// does not stop the next response from matching a view.
-func TestAutoViewStageDetectsAgainForTheNextResponse(t *testing.T) {
+// TestAutoViewStageDetectsOnceForTheStream checks that, like v1 where the view
+// detected for the first response was kept for the following responses (piped
+// input, further pages), a first document which matches no view leaves the
+// documents of the next responses whole too.
+func TestAutoViewStageDetectsOnceForTheStream(t *testing.T) {
 	dv := newTestDataView(t, `{"definitions":[{"name":"devices","priority":1,"fragments":["c8y_IsDevice"],"columns":["id","name"]}]}`)
 	first := &viewResponse{}
 	second := &viewResponse{}
@@ -161,7 +162,7 @@ func TestAutoViewStageDetectsAgainForTheNextResponse(t *testing.T) {
 	stage := autoViewStage(dv, func() *viewResponse { return current }, cols, true, func(*dataview.Definition) {})
 
 	var got []string
-	next, stop := iter.Pull2(stage(seqOf(`{"id":"1","owner":"a"}`, `{"id":"2","c8y_IsDevice":{},"name":"n","owner":"b"}`, `{"id":"3","c8y_IsDevice":{},"name":"m","owner":"c"}`)))
+	next, stop := iter.Pull2(stage(seqOf(`{"id":"1","owner":"a"}`, `{"id":"2","c8y_IsDevice":{},"name":"n","owner":"b"}`)))
 	defer stop()
 	for i := 0; ; i++ {
 		if i == 1 {
@@ -176,9 +177,12 @@ func TestAutoViewStageDetectsAgainForTheNextResponse(t *testing.T) {
 		}
 		got = append(got, string(doc.Raw()))
 	}
-	want := []string{`{"id":"1","owner":"a"}`, `{"id":"2","name":"n"}`, `{"id":"3","name":"m"}`}
+	want := []string{`{"id":"1","owner":"a"}`, `{"id":"2","c8y_IsDevice":{},"name":"n","owner":"b"}`}
 	if !slices.Equal(got, want) {
 		t.Errorf("docs = %v, want %v", got, want)
+	}
+	if cols.get() != nil {
+		t.Error("expected no columns when the first document matches no view")
 	}
 }
 
@@ -195,5 +199,23 @@ func TestAutoViewStageKeepsDocumentsWholeForTables(t *testing.T) {
 	}
 	if cols.get() == nil {
 		t.Error("expected the columns of the view to be set")
+	}
+}
+
+// TestFlattenUnlessColumnsKeepsTheNestedDocumentForColumns checks that --flatten
+// leaves the document nested once a view resolved the columns of tabular output
+// (the renderer applies the nested column paths), and flattens it otherwise.
+func TestFlattenUnlessColumnsKeepsTheNestedDocumentForColumns(t *testing.T) {
+	flatten := output.Map(func(doc jsondoc.JSONDoc) (jsondoc.JSONDoc, error) {
+		return jsondoc.New([]byte(`{"a.b":1}`)), nil
+	})
+	cols := &columnSelector{}
+	stage := flattenUnlessColumns(flatten, cols)
+	if got := collectDocs(t, stage(seqOf(`{"a":{"b":1}}`))); !slices.Equal(got, []string{`{"a.b":1}`}) {
+		t.Errorf("without columns: docs = %v", got)
+	}
+	cols.set([]string{"a.b"})
+	if got := collectDocs(t, stage(seqOf(`{"a":{"b":1}}`))); !slices.Equal(got, []string{`{"a":{"b":1}}`}) {
+		t.Errorf("with columns: docs = %v", got)
 	}
 }
