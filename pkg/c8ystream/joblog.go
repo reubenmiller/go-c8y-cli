@@ -3,6 +3,7 @@ package c8ystream
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"sync/atomic"
 	"time"
 
@@ -93,15 +94,51 @@ var htmlEntities = []struct{ escaped, literal string }{
 }
 
 // unescapeHTML replaces the escaped "<", ">" and "&" of the output text with the
-// characters, as v2.59.0 did for all output
+// characters, as v2.59.0 did for all output.
+//
+// v2.59.0 replaced the six characters wherever they were, also after an escaped
+// backslash, which turns valid JSON into invalid JSON (e.g. the JSON string "a\\u003c").
+// The renderers parse the JSON (e.g. csv), so in this case only the real escapes are
+// replaced and the document stays valid.
 func unescapeHTML(b []byte) []byte {
 	if !bytes.Contains(b, []byte("\\"+"u00")) {
 		return b
 	}
+	out := b
 	for _, e := range htmlEntities {
-		b = bytes.ReplaceAll(b, []byte(e.escaped), []byte(e.literal))
+		out = bytes.ReplaceAll(out, []byte(e.escaped), []byte(e.literal))
 	}
-	return b
+	if len(out) != len(b) && !json.Valid(out) && json.Valid(b) {
+		return unescapeHTMLEscapes(b)
+	}
+	return out
+}
+
+// unescapeHTMLEscapes replaces the escapes of "<", ">" and "&" of a JSON text, but not
+// the text which follows an escaped backslash
+func unescapeHTMLEscapes(b []byte) []byte {
+	out := make([]byte, 0, len(b))
+	for i := 0; i < len(b); i++ {
+		if b[i] != '\\' || i+1 >= len(b) {
+			out = append(out, b[i])
+			continue
+		}
+		replaced := false
+		for _, e := range htmlEntities {
+			if bytes.HasPrefix(b[i:], []byte(e.escaped)) {
+				out = append(out, e.literal...)
+				i += len(e.escaped) - 1
+				replaced = true
+				break
+			}
+		}
+		if !replaced {
+			// an escape sequence (e.g. an escaped backslash) is kept as it is
+			out = append(out, b[i], b[i+1])
+			i++
+		}
+	}
+	return out
 }
 
 // unescapeHTMLStage is the last stage before the output is rendered

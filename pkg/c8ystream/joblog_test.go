@@ -24,6 +24,10 @@ func TestUnescapeHTML(t *testing.T) {
 		"other escapes":   {`{"name":"` + "\\" + `u00e4` + `"}`, `{"name":"` + "\\" + `u00e4` + `"}`},
 		"escaped newline": {`{"a":"x\\ny"}`, `{"a":"x\\ny"}`},
 		"plain text":      {"a" + amp + "b", "a&b"},
+		// the blunt replacement of v2.59.0 would write the invalid JSON "a\<b"
+		"escaped backslash":                  {`{"a":"a\\` + "u003c" + `b","b":"` + lt + `"}`, `{"a":"a\\` + "u003c" + `b","b":"<"}`},
+		"escaped backslash before an escape": {`{"a":"a\\` + lt + `"}`, `{"a":"a\\<"}`},
+		"escaped backslash in plain text":    {"a\\\\" + "u003c", "a\\<"},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
