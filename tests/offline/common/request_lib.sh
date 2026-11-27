@@ -55,8 +55,10 @@ PY
 
 # verbose_log runs a command and prints its log (stderr) without the time and level of each line,
 # and without the lines which depend on the environment. A duration is printed as Nms.
+# The log lines are "<time><tab><level><tab><message>" (POSIX sh: the test shell can be dash).
 verbose_log() {
     "$@" 2>&1 >/dev/null |
-        sed -E $'s/^[^\t]+\t[^\t]+\t//; s/in [0-9]+ms/in Nms/; s/^Response time: [0-9]+ms/Response time: Nms/' |
+        cut -f3- |
+        sed -E 's/in [0-9]+ms/in Nms/; s/^Response time: [0-9]+ms/Response time: Nms/' |
         grep -v -E '^(Binding authorization|Failed to read configuration|command:|activityLog path|activityLog is disabled)'
 }

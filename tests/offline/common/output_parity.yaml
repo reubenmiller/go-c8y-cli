@@ -144,6 +144,12 @@ tests:
         worker 1: finished job 2 in Nms
 
   The escaped characters of the response are printed as the characters:
+    config:
+      env:
+        # the table width does not depend on the terminal
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
     command: |
       . ./offline/common/request_lib.sh
       start_server escaped
