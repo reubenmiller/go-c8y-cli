@@ -1,0 +1,171 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+#
+# The views (the default columns of the table/csv output, --view auto) of
+# v2.59.0: every column of the view is a column of the output, an empty cell
+# for a document which lacks it, and the view is also matched on the request
+# (method, path) and the content type of the response.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+    C8Y_SETTINGS_DEFAULTS_PAGESIZE: " "
+    C8Y_SETTINGS_ACTIVITYLOG_ENABLED: false
+    C8Y_SETTINGS_VIEWS_COMMONPATHS: ./testdata/viewdefs
+
+tests:
+  csvheader of a view keeps the columns which the first documents lack:
+    command: |
+      c8y devices create --name vp1-a-plain1 > /dev/null
+      c8y devices create --name vp1-a-plain2 > /dev/null
+      c8y devices create --name vp1-b-agent --template "{c8y_Agent:{version:'1.2'},c8y_Hardware:{model:'M1'}}" > /dev/null
+      c8y devices create --name vp1-c-hw --template "{c8y_Hardware:{model:'OnlyHW'}}" > /dev/null
+      c8y devices list --name "vp1-*" --output csvheader --view auto | cut -d, -f2-
+    exit-code: 0
+    stdout:
+      exactly: |
+        name,c8y_Agent.version,c8y_Hardware.model
+        vp1-a-plain1,,
+        vp1-a-plain2,,
+        vp1-b-agent,1.2,M1
+        vp1-c-hw,,OnlyHW
+
+  csv of a view has a cell for every column of the view:
+    command: |
+      c8y devices create --name vp2-a-plain > /dev/null
+      c8y devices create --name vp2-b-agent --template "{c8y_Agent:{version:'3.4'}}" > /dev/null
+      c8y devices list --name "vp2-*" --output csv --view auto | cut -d, -f2-
+    exit-code: 0
+    stdout:
+      exactly: |
+        vp2-a-plain,,
+        vp2-b-agent,3.4,
+
+  tsv of a view has a cell for every column of the view:
+    command: |
+      c8y devices create --name vp3-a-agent --template "{c8y_Agent:{version:'5.6'},c8y_Hardware:{model:'M3'}}" > /dev/null
+      c8y devices list --name "vp3-*" --output tsv --view auto | cut -f2-
+    exit-code: 0
+    stdout:
+      exactly: "vp3-a-agent\t5.6\tM3\n"
+
+  table of a view shows the columns which no document has:
+    command: |
+      c8y devices create --name vp4-a-plain1 > /dev/null
+      c8y devices create --name vp4-a-plain2 > /dev/null
+      c8y devices list --name "vp4-*" --output table --view auto | tr -s ' ' | grep -v '^|:' | sed -E 's/^\| [0-9]+ /| N /'
+    exit-code: 0
+    stdout:
+      exactly: |
+        | id | name | c8y_Agent.version | c8y_Hardware.model |
+        | N | vp4-a-plain1 | | |
+        | N | vp4-a-plain2 | | |
+
+  table of a single document shows the columns which it lacks:
+    command: |
+      id=$(c8y devices create --name vp5-plain --select id --output csv)
+      c8y devices get --id "$id" --output table --view auto | tr -s ' ' | grep -v '^|:' | sed -E 's/^\| [0-9]+ /| N /'
+    exit-code: 0
+    stdout:
+      exactly: |
+        | id | name | c8y_Agent.version | c8y_Hardware.model |
+        | N | vp5-plain | | |
+
+  json of a view only has the columns which the document has:
+    command: |
+      c8y devices create --name vp6-plain > /dev/null
+      c8y devices list --name "vp6-*" --output json --view auto | sed -E 's/"id":"[0-9]+"/"id":"N"/'
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"id":"N","name":"vp6-plain"}
+
+  csvheader with a named view resolves the aliases and keeps the columns:
+    command: |
+      c8y devices create --name vp7-a --template "{c8y_Agent:{version:'7'}}" > /dev/null
+      c8y devices create --name vp7-b > /dev/null
+      c8y devices list --name "vp7-*" --output csvheader --view parityAlias | cut -d, -f2-
+    exit-code: 0
+    stdout:
+      exactly: |
+        label,c8y_Agent.version
+        vp7-a,7
+        vp7-b,
+
+  view is matched on the request path, method and content type:
+    command: |
+      id=$(c8y devices create --name vp8-device --select id --output csv)
+      c8y events create --device "$id" --type vp8_type --text "vp8 text" > /dev/null
+      c8y events list --device "$id" --output csvheader --view auto | cut -d, -f2-
+    exit-code: 0
+    stdout:
+      exactly: |
+        type,text,missing.column
+        vp8_type,vp8 text,
+
+  view is matched on the request path of a user list:
+    command: |
+      c8y users list --pageSize 1 --output csvheader --view auto | head -1
+    exit-code: 0
+    stdout:
+      exactly: |
+        userName,email,displayName
+
+  select keeps the columns which the documents lack in a table:
+    command: |
+      c8y devices create --name vp9-a-plain1 > /dev/null
+      c8y devices create --name vp9-a-plain2 > /dev/null
+      c8y devices list --name "vp9-*" --output table --select name,c8y_Agent.version,id | tr -s ' ' | grep -v '^|:' | sed -E 's/ [0-9]+ \|$/ N |/'
+    exit-code: 0
+    stdout:
+      exactly: |
+        | name | c8y_Agent.version | id |
+        | vp9-a-plain1 | | N |
+        | vp9-a-plain2 | | N |
+
+  an empty object is a column of the table:
+    command: |
+      c8y devices create --name vp10-a > /dev/null
+      c8y devices list --name "vp10-*" --output table --view off | tr -s ' ' | grep -v '^|:' | cut -d'|' -f2 | tr -d ' '
+    exit-code: 0
+    stdout:
+      exactly: |
+        c8y_IsDevice
+        {}
+
+  a named view which does not exist is reported and every column is shown:
+    command: |
+      c8y devices create --name vp11-a > /dev/null
+      c8y devices list --name "vp11-*" --output csvheader --view doesnotexist 2>&1 >/dev/null | cut -f2- | tr '\t' ' '
+    exit-code: 0
+    stdout:
+      exactly: |
+        WARN no matching view found. name=doesnotexist
+
+  the view of the first response is kept for piped input:
+    command: |
+      first=$(c8y inventory create --name vp12-nodevice --select id --output csv)
+      second=$(c8y devices create --name vp12-device --template "{c8y_Agent:{version:'12'}}" --select id --output csv)
+      printf '%s\n%s\n' "$first" "$second" | c8y inventory get --output json --view auto | grep -c '"owner":"admin"'
+    exit-code: 0
+    stdout:
+      exactly: |
+        2
+
+  json with flatten applies the view before flattening:
+    command: |
+      c8y devices create --name vp13-a --template "{c8y_Agent:{version:'13'}}" > /dev/null
+      c8y devices list --name "vp13-*" --output json --view auto --flatten | sed -E 's/"id":"[0-9]+"/"id":"N"/'
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"c8y_Agent.version":"13","id":"N","name":"vp13-a"}
+
+  table with flatten keeps the columns of the view:
+    command: |
+      c8y devices create --name vp14-a --template "{c8y_Hardware:{model:'H14', serialNumber:'S14'}}" > /dev/null
+      c8y devices list --name "vp14-*" --output table --flatten --select "name,c8y_Hardware.**" | tr -s ' ' | grep -v '^|:'
+    exit-code: 0
+    stdout:
+      exactly: |
+        | name | c8y_Hardware.model | c8y_Hardware.serialNumber |
+        | vp14-a | H14 | S14 |

@@ -21,6 +21,10 @@ import (
 // template is not a valid jsonnet snippet, and an empty selector would strip
 // every property.
 func CommonStages(cfg *config.Config, outputTemplate output.Stage) ([]output.Stage, error) {
+	return commonStages(cfg, outputTemplate)
+}
+
+func commonStages(cfg *config.Config, outputTemplate output.Stage) ([]output.Stage, error) {
 	stages := make([]output.Stage, 0, 3)
 
 	if expressions := cfg.GetJSONFilter(); len(expressions) > 0 {
@@ -39,11 +43,11 @@ func CommonStages(cfg *config.Config, outputTemplate output.Stage) ([]output.Sta
 	}
 
 	if selectors := cfg.GetJSONSelect(); len(selectors) > 0 {
-		// CSV/TSV + --select is rendered by the selection-aware CSV renderer
+		// Table/CSV/TSV + --select is rendered by a selection-aware renderer
 		// (NewRenderer), which owns the columns directly from the selector; adding
 		// the generic selectStage here would shape the document first and drop the
 		// array indices / unmatched columns the renderer needs.
-		if !selectCSVActive(cfg) {
+		if !columnsInRenderer(cfg) {
 			stages = append(stages, selectStage(cfg, selectors))
 		}
 	} else if cfg.FlattenJSON() {
@@ -91,14 +95,20 @@ func selectStage(cfg *config.Config, selectors []string) output.Stage {
 // (consoleRenderer) so terminal rendering — table column detection and JSON
 // pretty-print/compact/colorisation — matches the v1 commands exactly.
 func NewRenderer(out io.Writer, cfg *config.Config) (output.Renderer, error) {
+	return newRenderer(out, cfg, newColumnSelector(cfg))
+}
+
+// newRenderer builds the sink for the output format. cols owns the columns of
+// tabular output (--select, or the view once it is resolved), see columnSelector.
+func newRenderer(out io.Writer, cfg *config.Config, cols *columnSelector) (output.Renderer, error) {
 	var r output.Renderer
 	switch {
 	// CSV/TSV + --select: the selection owns the columns (array indices become
 	// columns, an unmatched --select keeps a stable empty column), so bypass the
 	// generic leaf-path CSV encoder. The generic selectStage is skipped for this
 	// case (see CommonStages); this renderer applies the selector itself.
-	case selectCSVActive(cfg):
-		r = newSelectionCSVRenderer(out, cfg)
+	case selectionCSVActive(cfg):
+		r = newSelectionCSVRenderer(out, cfg, cols)
 	case cfg.GetOutputFormat() == config.OutputCSV:
 		// AutoFlush: terminal output is streamed, so each row must appear as it
 		// is produced (items may arrive seconds apart) rather than being held in
@@ -110,7 +120,7 @@ func NewRenderer(out io.Writer, cfg *config.Config) (output.Renderer, error) {
 		r = encode.NewTSV(out, encode.CSVOptions{AutoFlush: true})
 	default:
 		// json, serverresponse and table
-		r = newConsoleRenderer(out, cfg)
+		r = newConsoleRenderer(out, cfg, cols)
 	}
 
 	if path := cfg.GetOutputFile(); path != "" {
@@ -131,8 +141,8 @@ func NewRenderer(out io.Writer, cfg *config.Config) (output.Renderer, error) {
 		// reaching the renderer is unshaped. The --outputFile tee writes JSON, so
 		// shape it here (the same nested selection the json sink would have
 		// received) to keep the file output consistent with --select.
-		if selectCSVActive(cfg) {
-			fileRenderer = &shapingRenderer{Renderer: fileRenderer, stage: selectStage(cfg, cfg.GetJSONSelect())}
+		if columnsInRenderer(cfg) {
+			fileRenderer = &shapingRenderer{Renderer: fileRenderer, cols: cols, flatten: cfg.FlattenJSON()}
 		}
 		r = Multi(r, fileRenderer)
 	}
