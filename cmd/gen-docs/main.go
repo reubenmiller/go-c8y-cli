@@ -7,6 +7,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/clibuild"
 	"github.com/reubenmiller/go-c8y-cli/v2/internal/docs"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/spf13/pflag"
 )
 
@@ -34,6 +35,8 @@ func main() {
 	if *dir == "" {
 		fatal("no dir set")
 	}
+
+	pinTerminal()
 
 	rootCmd, err := clibuild.NewRootCommand()
 	if err != nil {
@@ -65,6 +68,16 @@ func main() {
 		if err != nil {
 			fatal(err)
 		}
+	}
+}
+
+// pinTerminal makes the generated text independent of the terminal which runs
+// the generator. The defaults of some flags (e.g. --output, --view, --compact
+// and --noColor) depend on whether stdout is a terminal, so the generator
+// always documents the interactive defaults, with or without a terminal.
+func pinTerminal() {
+	for _, name := range []string{iostreams.EnvForceStdinTTY, iostreams.EnvForceStdoutTTY, iostreams.EnvForceStderrTTY} {
+		_ = os.Setenv(name, "true")
 	}
 }
 
