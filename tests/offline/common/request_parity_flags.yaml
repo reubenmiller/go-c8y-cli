@@ -1,0 +1,335 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+#
+# The requests which the commands really send (recorded by a small server), as
+# v2.59.0 sent them: the parameters of --withGroups, the pages of --totalPages,
+# the page size of a get and of c8y api, and the parts of an upload. Every test
+# passes with a v2.59.0 build.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+    C8Y_SETTINGS_DEFAULTS_PAGESIZE: " "
+    C8Y_SETTINGS_HTTP_RETRYWAITMIN: 100ms
+    C8Y_SETTINGS_HTTP_RETRYWAITMAX: 200ms
+
+tests:
+  --withGroups is sent by every command which has the flag:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      # check <name> <command>: prints the withGroups parameter of the last request
+      check() {
+          name=$1; shift
+          "$@" >/dev/null 2>&1
+          echo "$name: $(requests | tail -n 1 | grep -o 'withGroups=[a-z]*')"
+      }
+      check "devices get" c8y devices get --id 1 --withGroups
+      check "devices get (no flag)" c8y devices get --id 1
+      check "devices list" c8y devices list --pageSize 1 --withGroups
+      check "devices list (no flag)" c8y devices list --pageSize 1
+      check "agents get" c8y agents get --id 1 --withGroups
+      check "agents list" c8y agents list --pageSize 1 --withGroups
+      check "smartgroups get" c8y smartgroups get --id 1 --withGroups
+      check "smartgroups list" c8y smartgroups list --pageSize 1 --withGroups
+      check "devicegroups get" c8y devicegroups get --id 1 --withGroups
+      check "devicegroups list" c8y devicegroups list --pageSize 1 --withGroups
+      check "inventory get" c8y inventory get --id 1 --withGroups
+      check "inventory list" c8y inventory list --pageSize 1 --withGroups
+      check "firmware get" c8y firmware get --id 1 --withGroups
+      check "firmware list" c8y firmware list --pageSize 1 --withGroups
+      check "firmware versions get" c8y firmware versions get --id 1 --withGroups
+      check "firmware versions list" c8y firmware versions list --firmware 1 --pageSize 1 --withGroups
+      check "firmware patches get" c8y firmware patches get --id 1 --withGroups
+      check "firmware patches list" c8y firmware patches list --firmware 1 --pageSize 1 --withGroups
+      check "software get" c8y software get --id 1 --withGroups
+      check "software list" c8y software list --pageSize 1 --withGroups
+      check "software versions get" c8y software versions get --id 1 --withGroups
+      check "software versions list" c8y software versions list --software 1 --pageSize 1 --withGroups
+      check "configuration get" c8y configuration get --id 1 --withGroups
+      check "configuration list" c8y configuration list --pageSize 1 --withGroups
+      check "deviceprofiles get" c8y deviceprofiles get --id 1 --withGroups
+      check "deviceprofiles list" c8y deviceprofiles list --pageSize 1 --withGroups
+    exit-code: 0
+    stdout:
+      exactly: |
+        devices get: withGroups=true
+        devices get (no flag): 
+        devices list: withGroups=true
+        devices list (no flag): 
+        agents get: withGroups=true
+        agents list: withGroups=true
+        smartgroups get: withGroups=true
+        smartgroups list: withGroups=true
+        devicegroups get: withGroups=true
+        devicegroups list: withGroups=true
+        inventory get: withGroups=true
+        inventory list: withGroups=true
+        firmware get: withGroups=true
+        firmware list: withGroups=true
+        firmware versions get: withGroups=true
+        firmware versions list: withGroups=true
+        firmware patches get: withGroups=true
+        firmware patches list: withGroups=true
+        software get: withGroups=true
+        software list: withGroups=true
+        software versions get: withGroups=true
+        software versions list: withGroups=true
+        configuration get: withGroups=true
+        configuration list: withGroups=true
+        deviceprofiles get: withGroups=true
+        deviceprofiles list: withGroups=true
+
+  The get options of the repository commands are sent:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y firmware get --id 1 --withParents --withChildren --withChildrenCount --skipChildrenNames >/dev/null
+      c8y firmware versions get --id 1 --withChildren --withChildrenCount --skipChildrenNames >/dev/null
+      c8y software versions get --id 1 --withChildren --withChildrenCount --skipChildrenNames >/dev/null
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /inventory/managedObjects/1?skipChildrenNames=true&withChildren=true&withChildrenCount=true&withParents=true
+        GET /inventory/managedObjects/1?skipChildrenNames=true&withChildren=true&withChildrenCount=true
+        GET /inventory/managedObjects/1?skipChildrenNames=true&withChildren=true&withChildrenCount=true
+
+  --totalPages returns the pages of a list, sent by page number:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      # pages <name> <command>: prints the number of items and the requests
+      pages() {
+          name=$1; shift
+          : > "$LOG"
+          echo "$name: $("$@" --select id -o csv | tr '\n' ',')"
+          requests | sed 's/^/    /'
+      }
+      pages events c8y events list --pageSize 1 --totalPages 3
+      pages alarms c8y alarms list --pageSize 2 --totalPages 3
+      pages measurements c8y measurements list --pageSize 2 --totalPages 2
+      pages operations c8y operations list --pageSize 2 --totalPages 3
+      pages auditrecords c8y auditrecords list --pageSize 2 --totalPages 3
+      pages inventory c8y inventory list --pageSize 2 --totalPages 3
+      pages "events (from page 2)" c8y events list --pageSize 2 --totalPages 2 --currentPage 2
+    exit-code: 0
+    stdout:
+      exactly: |
+        events: 8,7,6,
+            GET /event/events?pageSize=1
+            GET /event/events?currentPage=2&pageSize=1
+            GET /event/events?currentPage=3&pageSize=1
+        alarms: 8,7,6,5,4,3,
+            GET /alarm/alarms?pageSize=2
+            GET /alarm/alarms?currentPage=2&pageSize=2
+            GET /alarm/alarms?currentPage=3&pageSize=2
+        measurements: 8,7,6,5,
+            GET /measurement/measurements?pageSize=2
+            GET /measurement/measurements?currentPage=2&pageSize=2
+        operations: 8,7,6,5,4,3,
+            GET /devicecontrol/operations?pageSize=2
+            GET /devicecontrol/operations?currentPage=2&pageSize=2
+            GET /devicecontrol/operations?currentPage=3&pageSize=2
+        auditrecords: 8,7,6,5,4,3,
+            GET /audit/auditRecords?pageSize=2
+            GET /audit/auditRecords?currentPage=2&pageSize=2
+            GET /audit/auditRecords?currentPage=3&pageSize=2
+        inventory: 8,7,6,5,4,3,
+            GET /inventory/managedObjects?pageSize=2
+            GET /inventory/managedObjects?currentPage=2&pageSize=2
+            GET /inventory/managedObjects?currentPage=3&pageSize=2
+        events (from page 2): 6,5,4,3,
+            GET /event/events?currentPage=2&pageSize=2
+            GET /event/events?currentPage=3&pageSize=2
+
+  A get request sends the default page size:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=20
+      c8y devices get --id 1 >/dev/null
+      c8y agents get --id 1 >/dev/null
+      c8y alarms get --id 1 >/dev/null
+      c8y events get --id 1 >/dev/null
+      c8y inventory get --id 1 --withChildren >/dev/null
+      c8y firmware get --id 1 >/dev/null
+      c8y software versions get --id 1 >/dev/null
+      c8y alarms count >/dev/null
+      c8y currentuser get >/dev/null
+      c8y devices get --id 1 --pageSize 3 >/dev/null
+      c8y devices list --pageSize 3 >/dev/null
+      c8y devices create --name x >/dev/null
+      c8y devices update --id 1 --newName y >/dev/null
+      c8y devices delete --id 1 >/dev/null
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /inventory/managedObjects/1?pageSize=20
+        GET /inventory/managedObjects/1?pageSize=20
+        GET /alarm/alarms/1?pageSize=20
+        GET /event/events/1?pageSize=20
+        GET /inventory/managedObjects/1?pageSize=20&withChildren=true
+        GET /inventory/managedObjects/1?pageSize=20
+        GET /inventory/managedObjects/1?pageSize=20
+        GET /alarm/alarms/count?pageSize=20
+        GET /user/currentUser?pageSize=20
+        GET /inventory/managedObjects/1?pageSize=3
+        GET /inventory/managedObjects?pageSize=3&q=%24filter%3D+%24orderby%3Dname
+        POST /inventory/managedObjects
+        PUT /inventory/managedObjects/1
+        DELETE /inventory/managedObjects/1
+
+  The wait and assert commands send no page size:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=20
+      c8y inventory wait --id 1 --duration 1s >/dev/null
+      c8y inventory assert exists --id 1 >/dev/null
+      c8y alarms assert count --device 1 --minimum 0 >/dev/null
+      # the lookup of the device, the request of the count is not the subject
+      requests | sed -n 1,3p
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /inventory/managedObjects/1
+        GET /inventory/managedObjects/1
+        GET /inventory/managedObjects/1
+
+  The assert count commands count the pages of one item:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y alarms assert count --device 1 --minimum 0 >/dev/null 2>&1
+      c8y events assert count --device 1 --minimum 0 >/dev/null 2>&1
+      c8y measurements assert count --device 1 --minimum 0 >/dev/null 2>&1
+      c8y operations assert count --device 1 --minimum 0 >/dev/null 2>&1
+      requests | grep -v managedObjects
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /alarm/alarms?pageSize=1&source=1&withTotalPages=true
+        GET /event/events?pageSize=1&source=1&withTotalPages=true
+        GET /measurement/measurements?pageSize=1&source=1&withTotalPages=true
+        GET /devicecontrol/operations?deviceId=1&pageSize=1&withTotalPages=true
+
+  The manual commands which sent no page size in v2.59.0 send none:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=20 C8Y_SETTINGS_CI=true
+      c8y deviceregistration register-basic --id dev01 >/dev/null 2>&1
+      c8y ui applications plugins delete --application 1 --plugin 1 >/dev/null 2>&1
+      requests | grep '^GET' | sed -n 1,2p
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /identity/externalIds/c8y_Serial/dev01
+        GET /application/applications/1
+
+  The Data Hub job commands send the page size (the results as the limit):
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=20
+      c8y datahub jobs get --id 1 >/dev/null
+      c8y datahub jobs listresults --id 1 >/dev/null
+      c8y datahub jobs listresults --id 1 --pageSize 7 --offset 2 >/dev/null
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /service/datahub/dremio/api/v3/job/1?pageSize=20
+        GET /service/datahub/dremio/api/v3/job/1/results?limit=20
+        GET /service/datahub/dremio/api/v3/job/1/results?limit=7&offset=2
+
+  The failed get request, and its log line, have the page size:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server notfound
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=20
+      c8y devices get --id 1 2>&1 >/dev/null | grep serverError | cut -f3- | sed "s#http://127.0.0.1:[0-9]*#http://host#"
+      verbose_log c8y devices get --id 1 --verbose | grep -E 'Sending request|Response'| sed "s#http://127.0.0.1:[0-9]*#http://host#"
+    exit-code: 0
+    stdout:
+      exactly: |
+        serverError: Finding device data from database failed GET http://host/inventory/managedObjects/1?pageSize=20: 404 inventory/Not Found Finding device data from database failed
+        Sending request: GET http://{host}/inventory/managedObjects/1?pageSize=20
+        Response time: Nms
+        Response Content-Type: application/json
+        Response Length: 0.1KB
+        Error Response
+
+  c8y api sends the page size, not the page size of the url:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      start_other
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=20
+      c8y api GET "/inventory/managedObjects?pageSize=7&type=a" >/dev/null
+      c8y api GET "/inventory/managedObjects?pageSize=7&type=a" --pageSize 3 >/dev/null
+      c8y api GET "/inventory/managedObjects?type=a" >/dev/null
+      echo "$OTHER_HOST/other/path?pageSize=7&x=1" | c8y api GET >/dev/null
+      c8y api GET "/inventory/managedObjects?pageSize=7&currentPage=2" --pageSize 3 --currentPage 4 >/dev/null
+      c8y api POST "/inventory/managedObjects?pageSize=7" --data a=1 >/dev/null
+      requests
+      echo "piped absolute url, requests with pageSize=20: $(requests "$OTHER_LOG" | grep -c 'pageSize=20')"
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /inventory/managedObjects?pageSize=20&type=a
+        GET /inventory/managedObjects?pageSize=3&type=a
+        GET /inventory/managedObjects?pageSize=20&type=a
+        GET /inventory/managedObjects?currentPage=4&pageSize=3
+        POST /inventory/managedObjects?pageSize=7
+        piped absolute url, requests with pageSize=20: 1
+
+  deviceregistration register-ca sends the file part without a file name and type:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y deviceregistration register-ca --id tmp01 --one-time-password abc >/dev/null 2>&1
+      requests | head -n 1
+      grep -E '^Content-Disposition: ' "$LOG" | head -n 1
+      echo "part types: $(grep -c '^Content-Type: text/' "$LOG")"
+      grep -E '^(ID|tmp01)' "$LOG"
+    exit-code: 0
+    stdout:
+      exactly: |
+        POST /devicecontrol/bulkNewDeviceRequests
+        Content-Disposition: form-data; name="file"
+        part types: 0
+        ID	AUTH_TYPE	ENROLLMENT_OTP	NAME	TYPE	IDTYPE	com_cumulocity_model_Agent.active
+        tmp01	CERTIFICATES	abc	tmp01	thin-edge.io	c8y_Serial	true
+
+  The object type of a binary is the type of the file extension, else application/octet-stream:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      tmp=$(mktemp -d)
+      printf 'plain content' > "$tmp/nofile"
+      printf 'plain content' > "$tmp/data.foo"
+      printf 'plain content' > "$tmp/data.txt"
+      printf '{}' > "$tmp/data.json"
+      printf '\211PNG\r\n\032\n' > "$tmp/image"
+      c8y binaries create --file "$tmp/nofile" >/dev/null
+      c8y binaries create --file "$tmp/data.foo" >/dev/null
+      c8y binaries create --file "$tmp/data.txt" >/dev/null
+      c8y binaries create --file "$tmp/data.json" >/dev/null
+      c8y binaries create --file "$tmp/image" >/dev/null
+      c8y binaries create --file "$tmp/data.txt" --name renamed.json >/dev/null
+      c8y binaries create --file "$tmp/nofile" --name renamed.json >/dev/null
+      c8y binaries create --file "$tmp/data.json" --name renamed >/dev/null
+      grep -E '^\{"name"' "$LOG"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"name":"nofile","type":"application/octet-stream"}
+        {"name":"data.foo","type":"application/octet-stream"}
+        {"name":"data.txt","type":"text/plain; charset=utf-8"}
+        {"name":"data.json","type":"application/json"}
+        {"name":"image","type":"application/octet-stream"}
+        {"name":"renamed.json","type":"text/plain; charset=utf-8"}
+        {"name":"renamed.json","type":"application/octet-stream"}
+        {"name":"renamed","type":"application/json"}

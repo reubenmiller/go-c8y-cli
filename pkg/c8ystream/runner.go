@@ -74,8 +74,10 @@ type Runner struct {
 	assert       *assertion      // set by Assert; nil for other commands
 	filters      []string        // filters of the command itself (see Filter)
 
-	userErrorPath    string // see UserErrorRequests
-	directNameLookup bool   // see DirectNameLookup
+	userErrorPath     string // see UserErrorRequests
+	directNameLookup  bool   // see DirectNameLookup
+	noDefaultPageSize bool   // see NoDefaultPageSize
+	getPageSize       int    // page size of the GET requests of a call (0: none), see defaultPageSizeHook
 
 	viewMu          sync.Mutex           // guards viewResp against the response middleware
 	viewResp        *viewResponse        // the latest response, which --view auto matches
@@ -466,6 +468,12 @@ func (r *Runner) run(newProducer func() Producer) error {
 
 	r.runCtx = ctx
 
+	// v2.59.0 sent the page size on every GET request, also on the ones which
+	// are no list (get by id, count, ...)
+	if common, err := cfg.GetOutputCommonOptions(r.Cmd); err == nil && !r.noDefaultPageSize {
+		r.getPageSize = common.PageSize
+	}
+
 	collector := &ErrorCollector{Max: cfg.AbortOnErrorCount()}
 	if cfg.WithError() && (cfg.GetOutputTemplate() != "" || len(cfg.GetJSONSelect()) > 0) {
 		// --withError with shaping: route each item's error body to stdout as a
@@ -633,6 +641,9 @@ func (r *Runner) producer(build Build) Producer {
 			// error, as go-c8y-cli always did. The SDK would skip both.
 			// Resolver lookups use runCtx and keep their own behavior.
 			callCtx := apiv2.WithConflictAsError(apiv2.WithNotFoundAsError(apiv2.WithApprovalScope(ctx)))
+			if r.getPageSize > 0 {
+				callCtx = apiv2.WithRequestHook(callCtx, defaultPageSizeHook(r.getPageSize))
+			}
 			seq := r.adaptItem(call(callCtx), item)
 			if r.assert != nil {
 				seq = r.assert.filter(seq)

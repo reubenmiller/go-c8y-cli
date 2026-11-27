@@ -155,6 +155,8 @@ func (n *CmdSSH) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// v2.59.0 sent the requests of this command without a page size
+	r.NoDefaultPageSize()
 	if err := r.InputFlag("device"); err != nil {
 		return err
 	}

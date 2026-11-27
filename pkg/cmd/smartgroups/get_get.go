@@ -90,11 +90,11 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		ref := smartgroups.SmartGroupRef(c8ystream.NameOrID(in.String("id")))
-		// GAP: --withGroups has no field in managedobjects.GetOptions yet.
 		opt := smartgroups.GetOptions{
 			SkipChildrenNames: in.Bool("skipChildrenNames"),
 			WithChildren:      in.Bool("withChildren"),
 			WithChildrenCount: in.Bool("withChildrenCount"),
+			WithGroups:        in.Bool("withGroups"),
 			WithParents:       in.Bool("withParents"),
 		}
 		return func(ctx context.Context) any {

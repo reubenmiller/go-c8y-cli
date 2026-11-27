@@ -182,12 +182,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		q.AddOrderBy(orderByValue)
 
-		// GAP: --withGroups has no field in managedobjects.GetOptions yet (same
-		// gap as devices list).
 		opt := agents.ListOptions{Query: q.Build()}
 		opt.SkipChildrenNames = in.Bool("skipChildrenNames")
 		opt.WithChildren = in.Bool("withChildren")
 		opt.WithChildrenCount = in.Bool("withChildrenCount")
+		opt.WithGroups = in.Bool("withGroups")
 		opt.WithParents = in.Bool("withParents")
 		opt.WithLatestValues = in.Bool("withLatestValues")
 		opt.PaginationOptions = paging

@@ -85,11 +85,13 @@ func NewCmdCount(f *cmdutil.Factory) *CmdExists {
 				ValueFragmentSeries: in.String("valueFragmentSeries"),
 			}
 			opt.PageSize = 1
-			opt.WithTotalElements = true
+			// v2.59.0 counted the pages of one item (withTotalPages)
+			opt.WithTotalPages = true
 			return c8ywait.Count(client, ref, cmderrors.MeasurementCount, minimum, maximum, func(ctx context.Context, id string) (int64, error) {
 				opt := opt
 				opt.Source = managedobjects.DeviceRef(id)
-				return c8ywait.Total(client.Measurements.List(ctx, opt))
+				// the SDK always sends revert=false; v2.59.0 sent no revert
+				return c8ywait.Total(client.Measurements.List(apiv2.WithRequestHook(ctx, c8ystream.DropRevertFalse), opt))
 			})
 		},
 	}))

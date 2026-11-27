@@ -62,7 +62,6 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-
 	if err := r.InputFlag("id"); err != nil {
 		return err
 	}

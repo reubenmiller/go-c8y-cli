@@ -48,3 +48,32 @@ func TestRequestDefaults(t *testing.T) {
 		})
 	}
 }
+
+func TestDefaultPageSizeHook(t *testing.T) {
+	tests := []struct {
+		name   string
+		method string
+		query  string
+		want   string
+	}{
+		{"no query", http.MethodGet, "", "pageSize=20"},
+		{"sorted position", http.MethodGet, "withGroups=true", "pageSize=20&withGroups=true"},
+		{"after smaller keys", http.MethodGet, "a=1&z=2", "a=1&pageSize=20&z=2"},
+		{"last", http.MethodGet, "a=1", "a=1&pageSize=20"},
+		{"encoding is kept", http.MethodGet, "q=%24filter%3D+x", "pageSize=20&q=%24filter%3D+x"},
+		{"a list keeps its page size", http.MethodGet, "pageSize=3&q=a", "pageSize=3&q=a"},
+		{"post is untouched", http.MethodPost, "", ""},
+		{"delete is untouched", http.MethodDelete, "a=1", "a=1"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, _ := http.NewRequest(tt.method, "http://host/inventory/managedObjects/1?"+tt.query, nil)
+			if err := defaultPageSizeHook(20)(req); err != nil {
+				t.Fatal(err)
+			}
+			if req.URL.RawQuery != tt.want {
+				t.Errorf("query = %q, want %q", req.URL.RawQuery, tt.want)
+			}
+		})
+	}
+}

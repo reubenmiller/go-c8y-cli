@@ -238,11 +238,12 @@ type countLimits struct {
 	Maximum int64 `json:"maximum,omitempty"`
 }
 
-// Total reads the total number of elements of a collection result, requested
-// with WithTotalElements.
+// Total reads the total number of elements of a collection result requested
+// with a page size of 1 and WithTotalPages (one page per element, as v2.59.0
+// counted them).
 func Total[T any](res op.Result[T]) (int64, error) {
 	if res.Err != nil {
 		return 0, res.Err
 	}
-	return res.Meta.TotalElements(), nil
+	return res.Meta.TotalPages(), nil
 }

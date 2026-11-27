@@ -91,6 +91,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		ref := c8ystream.NameOrID(in.String("id"))
 		opt := softwareitems.GetOptions{
+			WithGroups:        in.Bool("withGroups"),
 			WithParents:       in.Bool("withParents"),
 			WithChildren:      in.Bool("withChildren"),
 			WithChildrenCount: in.Bool("withChildrenCount"),

@@ -92,6 +92,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		ref := getPatchRef(c8ystream.FirstID(in.String("id")), in.FirstString("firmware"))
 		opt := firmwarepatches.GetOptions{
+			WithGroups:        in.Bool("withGroups"),
 			WithParents:       in.Bool("withParents"),
 			WithChildren:      in.Bool("withChildren"),
 			WithChildrenCount: in.Bool("withChildrenCount"),

@@ -88,7 +88,8 @@ func NewCmdCount(f *cmdutil.Factory) *CmdExists {
 				opt.BulkOperationID, _ = strconv.Atoi(v)
 			}
 			opt.PageSize = 1
-			opt.WithTotalElements = true
+			// v2.59.0 counted the pages of one item (withTotalPages)
+			opt.WithTotalPages = true
 			return c8ywait.Count(client, ref, cmderrors.OperationCount, minimum, maximum, func(ctx context.Context, id string) (int64, error) {
 				opt := opt
 				opt.DeviceID = managedobjects.DeviceRef(id)

@@ -136,6 +136,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		opt.SkipChildrenNames = in.Bool("skipChildrenNames")
 		opt.WithChildren = in.Bool("withChildren")
 		opt.WithChildrenCount = in.Bool("withChildrenCount")
+		opt.WithGroups = in.Bool("withGroups")
 		opt.WithParents = in.Bool("withParents")
 		opt.PaginationOptions = paging
 		return func(ctx context.Context) any {

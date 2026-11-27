@@ -35,3 +35,22 @@ func (r *Runner) Pagination() (pagination.PaginationOptions, error) {
 		SinglePage: !r.Config.IncludeAll() && r.Config.GetTotalPages() <= 1,
 	}, nil
 }
+
+// PaginationByPage returns the pagination options of a list which --totalPages
+// N (N > 1, without --includeAll) reads by page number, as in v2.59.0:
+// "--pageSize 1 --totalPages 3" returns 3 items with the requests
+// "?pageSize=1", "?currentPage=2&pageSize=1" and "?currentPage=3&pageSize=1".
+// It is used by the time-series lists (events, alarms, measurements,
+// operations), whose default time keyset requests the items of the boundary
+// timestamp again on every page (so N requests return fewer than N pages of
+// items), and by "inventory list". An explicit --paginationStrategy is kept.
+func (r *Runner) PaginationByPage() (pagination.PaginationOptions, error) {
+	paging, err := r.Pagination()
+	if err != nil {
+		return paging, err
+	}
+	if r.Config.GetTotalPages() > 1 && !r.Config.IncludeAll() && (paging.Strategy == "" || paging.Strategy == pagination.StrategyAuto) {
+		paging.Strategy = pagination.StrategyOffset
+	}
+	return paging, nil
+}

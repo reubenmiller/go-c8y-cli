@@ -63,6 +63,8 @@ func (n *CmdGet) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// v2.59.0 sent the requests of this command without a page size
+	r.NoDefaultPageSize()
 	// v1 reported a failed lookup of the bootstrap user as a user error (exit code 101)
 	r.UserErrorRequests("/bootstrapUser")
 	if err := r.InputFlag("id"); err != nil {

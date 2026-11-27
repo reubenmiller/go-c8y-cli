@@ -220,6 +220,8 @@ func (n *RuntimeCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// the extension command maps the page size itself (pageSize or another parameter)
+	r.NoDefaultPageSize()
 	if err := r.Filter(n.options.Spec.Filter...); err != nil {
 		return cmderrors.NewUserError(fmt.Sprintf("invalid filter in command '%s'. %s", n.options.Spec.Name, err))
 	}

@@ -5,6 +5,7 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
@@ -79,6 +80,39 @@ func requestDefaults(cfg *config.Config) func(*http.Request) error {
 	}
 }
 
+// defaultPageSizeHook returns the request hook which adds pageSize=<n> to a GET
+// request that has none. v2.59.0 sent the page size on every GET request of a
+// command, also on the ones which return one object (get by id, count, ...),
+// e.g. "GET /inventory/managedObjects/12?pageSize=20". A request which has a
+// pageSize (a list) is left as it is. The parameter is inserted in sorted
+// position, so the other parameters keep their encoding.
+func defaultPageSizeHook(pageSize int) func(*http.Request) error {
+	return func(req *http.Request) error {
+		if req.Method != http.MethodGet || req.URL == nil {
+			return nil
+		}
+		param := "pageSize=" + strconv.Itoa(pageSize)
+		if req.URL.RawQuery == "" {
+			req.URL.RawQuery = param
+			return nil
+		}
+		parts := strings.Split(req.URL.RawQuery, "&")
+		insertAt := len(parts)
+		for i, part := range parts {
+			key, _, _ := strings.Cut(part, "=")
+			if key == "pageSize" {
+				return nil
+			}
+			if key > "pageSize" && insertAt == len(parts) {
+				insertAt = i
+			}
+		}
+		parts = append(parts[:insertAt], append([]string{param}, parts[insertAt:]...)...)
+		req.URL.RawQuery = strings.Join(parts, "&")
+		return nil
+	}
+}
+
 // WithQueryParam returns ctx with an additional query parameter for the
 // requests made under it, merging with (not replacing) any globally configured
 // --customQueryParam values. Use it for legacy CLI parameters that a typed SDK
@@ -149,4 +183,22 @@ func splitKeyValue(s string) (key, value string, ok bool) {
 		return "", "", false
 	}
 	return key, value, true
+}
+
+// DropRevertFalse is a request hook which removes the revert=false query
+// parameter of a request: the SDK always sends it, v2.59.0 sent revert only
+// when it was given.
+func DropRevertFalse(req *http.Request) error {
+	if req.URL == nil || !strings.Contains(req.URL.RawQuery, "revert=false") {
+		return nil
+	}
+	params := strings.Split(req.URL.RawQuery, "&")
+	kept := params[:0]
+	for _, p := range params {
+		if p != "revert=false" {
+			kept = append(kept, p)
+		}
+	}
+	req.URL.RawQuery = strings.Join(kept, "&")
+	return nil
 }
