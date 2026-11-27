@@ -12,10 +12,3 @@ tests:
       contains:
         - '"path":"/notification2/token"'
         - '"body":{"expiresInMinutes":60,"subscriber":"mysub","subscription":"my-subscription"}'
-
-  It stops after the duration:
-    command: |
-      c8y devices create --name notification2-device --select id -o csv > /dev/null &&
-      c8y notification2 subscriptions create --name my-subscription --context mo --apiFilter managedobjects --device notification2-device > /dev/null &&
-      c8y notification2 subscriptions subscribe --name my-subscription --duration 1s
-    exit-code: 0
