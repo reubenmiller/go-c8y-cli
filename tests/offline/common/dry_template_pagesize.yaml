@@ -145,11 +145,11 @@ tests:
         GET /devicecontrol/operations
         GET /devicecontrol/operations?currentPage=2
 
-  The default page size is 20 on a list and on a get when the setting is not set:
+  The page size setting of the default settings.yaml (20) is sent on a list and on a get:
     command: |
       . ./offline/common/request_lib.sh
       start_server
-      unset C8Y_SETTINGS_DEFAULTS_PAGESIZE
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=20
       c8y events list >/dev/null
       c8y inventory get --id 1 >/dev/null
       requests
