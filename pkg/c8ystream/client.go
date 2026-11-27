@@ -184,3 +184,21 @@ func splitKeyValue(s string) (key, value string, ok bool) {
 	}
 	return key, value, true
 }
+
+// DropRevertFalse is a request hook which removes the revert=false query
+// parameter of a request: the SDK always sends it, v2.59.0 sent revert only
+// when it was given.
+func DropRevertFalse(req *http.Request) error {
+	if req.URL == nil || !strings.Contains(req.URL.RawQuery, "revert=false") {
+		return nil
+	}
+	params := strings.Split(req.URL.RawQuery, "&")
+	kept := params[:0]
+	for _, p := range params {
+		if p != "revert=false" {
+			kept = append(kept, p)
+		}
+	}
+	req.URL.RawQuery = strings.Join(kept, "&")
+	return nil
+}

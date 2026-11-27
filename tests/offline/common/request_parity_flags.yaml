@@ -197,6 +197,23 @@ tests:
         GET /inventory/managedObjects/1
         GET /inventory/managedObjects/1
 
+  The assert count commands count the pages of one item:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y alarms assert count --device 1 --minimum 0 >/dev/null 2>&1
+      c8y events assert count --device 1 --minimum 0 >/dev/null 2>&1
+      c8y measurements assert count --device 1 --minimum 0 >/dev/null 2>&1
+      c8y operations assert count --device 1 --minimum 0 >/dev/null 2>&1
+      requests | grep -v managedObjects
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /alarm/alarms?pageSize=1&source=1&withTotalPages=true
+        GET /event/events?pageSize=1&source=1&withTotalPages=true
+        GET /measurement/measurements?pageSize=1&source=1&withTotalPages=true
+        GET /devicecontrol/operations?deviceId=1&pageSize=1&withTotalPages=true
+
   The manual commands which sent no page size in v2.59.0 send none:
     command: |
       . ./offline/common/request_lib.sh

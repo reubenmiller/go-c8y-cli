@@ -87,7 +87,8 @@ func NewCmdCount(f *cmdutil.Factory) *CmdExists {
 				Resolved: in.Bool("resolved"),
 			}
 			opt.PageSize = 1
-			opt.WithTotalElements = true
+			// v2.59.0 counted the pages of one item (withTotalPages)
+			opt.WithTotalPages = true
 			if v := in.String("type"); v != "" {
 				opt.Type = []string{v}
 			}
