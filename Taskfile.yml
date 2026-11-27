@@ -86,6 +86,8 @@ tasks:
       # ignore any extensions which maybe be used on the host
       C8Y_SETTINGS_EXTENSIONS_DATADIR: /tmp/dummy
     cmds:
+      # remove the pages of commands which no longer exist
+      - rm -rf "docs/go-c8y-cli/docs/cli/c8y"
       - go run ./cmd/gen-docs --website --doc-path "docs/go-c8y-cli/docs/cli/c8y"
 
   docs-check:
