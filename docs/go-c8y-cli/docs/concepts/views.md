@@ -32,6 +32,7 @@ Views are activated by default when the output of the command is being written t
 
 * csv
 * csvheader
+* tsv
 * json
 * table
 
@@ -125,7 +126,9 @@ Column widths only affect the table output, so other output formats (e.g. json o
 
 ### View matching
 
-The first response item is used in the view detection. If the response contains an array (i.e. `.managedObjects[]`) then the first item from the array will be used in the detection.
+The view is detected once for each stream of results, from the first document. If the response contains an array (i.e. `.managedObjects[]`) then the first item from the array is used. The request path, request method and the `Content-Type` of the response are matched at the same time. If no view matches the first document, no view is applied to the rest of the stream.
+
+When a command sends several requests (for example, when it follows multiple pages), the detection is repeated for the next response until a view matches. Once a view is chosen, it is used for the remaining documents.
 
 A view definition supports matching by the following criteria:
 
@@ -150,6 +153,41 @@ If two or more definitions match on the same data, then the view with the lowest
 :::note
 An extension API command can set its own default view. That view takes precedence over the automatic detection, but not over a view chosen by the user with `--view`.
 :::
+
+### Columns of a view
+
+In the `table`, `csv`, `csvheader` and `tsv` output, every column of the view is always present, in the order of the view. If a document does not have the property, the cell is empty. This means the columns do not depend on which documents happen to be returned first.
+
+```bash
+c8y devices list --output csvheader --view auto
+```
+
+```csv title="Output"
+id,name,c8y_Agent.version,c8y_Hardware.model
+10030,vz-agent,1.2,M1
+10029,vz-plain,,
+```
+
+The `json` output only contains the properties that a document has, so a document that lacks a column does not get an empty value.
+
+The view is applied before `--flatten`, so the flattened output only contains the properties of the view.
+
+```bash
+c8y devices list --output json --view auto --flatten --compact
+```
+
+```json title="Output"
+{"c8y_Agent.version":"1.2","c8y_Hardware.model":"M1","id":"10030","name":"vz-agent"}
+{"id":"10029","name":"vz-plain"}
+```
+
+### Unknown view name
+
+If the name given to `--view` does not match any view, the CLI prints a warning (`no matching view found. name=<name>`) and writes the output without a view.
+
+```bash
+c8y devices list --view nope
+```
 
 ## Tab completion
 
