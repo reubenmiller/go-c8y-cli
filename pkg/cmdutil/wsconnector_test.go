@@ -127,3 +127,10 @@ func Test_WebsocketConnector_UsesTheClientAuthorization(t *testing.T) {
 		t.Errorf("expected basic authorization, got %q", authorization)
 	}
 }
+
+// roundTripperFunc adapts a function to http.RoundTripper.
+type roundTripperFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripperFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req)
+}

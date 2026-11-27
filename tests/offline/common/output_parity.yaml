@@ -1,0 +1,236 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+#
+# The log (--verbose), the output text, the headers and the retries of v2.59.0:
+# the --verbose layout without an HTTP dump, "<", ">" and "&" printed as the
+# characters, the User-Agent and X-Application headers which the user gives,
+# and the waits between the retries.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+    C8Y_SETTINGS_DEFAULTS_PAGESIZE: " "
+    C8Y_SETTINGS_ACTIVITYLOG_ENABLED: false
+    C8Y_SETTINGS_LOGGER_HIDESENSITIVE: true
+
+tests:
+  --verbose of a list logs the lines of v2.59.0 and no HTTP dump:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      verbose_log c8y inventory list --pageSize 1 --verbose
+    exit-code: 0
+    stdout:
+      exactly: |
+        Using client auth type: BASIC
+        Max jobs: 0
+        worker 1: started job 1
+        Headers: map[Accept:[application/json] Authorization:[Basic  {base64 tenant/username:password}] User-Agent:[go-client] X-Application:[go-client]]
+        Sending request: GET http://{host}/inventory/managedObjects?pageSize=1
+        Status code: 200
+        Response time: Nms
+        Response Content-Type: application/json
+        Response Length: 0.1KB
+        Unfiltered array size. len=0
+        View mode: off
+        worker 1: finished job 1 in Nms
+
+  --verbose of a create logs the body and the status code:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      verbose_log c8y inventory create --data "name=x" --verbose
+    exit-code: 0
+    stdout:
+      exactly: |
+        Using client auth type: BASIC
+        Max jobs: 0
+        worker 1: started job 1
+        Headers: map[Accept:[application/json] Authorization:[Basic  {base64 tenant/username:password}] Content-Type:[application/json] User-Agent:[go-client] X-Application:[go-client]]
+        Sending request: POST http://{host}/inventory/managedObjects
+        Body: {"name":"x"}
+
+        Status code: 201
+        Response time: Nms
+        Response Content-Type: application/json
+        Response Length: 0.0KB
+        View mode: off
+        worker 1: finished job 1 in Nms
+
+  --verbose of c8y api logs the lines of v2.59.0:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      verbose_log c8y api GET /inventory/managedObjects/1 --verbose
+    exit-code: 0
+    stdout:
+      exactly: |
+        Using client auth type: BASIC
+        Max jobs: 0
+        worker 1: started job 1
+        Headers: map[Accept:[application/json] Authorization:[Basic  {base64 tenant/username:password}] User-Agent:[go-client] X-Application:[go-client]]
+        Sending request: GET http://{host}/inventory/managedObjects/1
+        Status code: 200
+        Response time: Nms
+        Response Content-Type: application/json
+        Response Length: 0.0KB
+        View mode: off
+        worker 1: finished job 1 in Nms
+
+  --verbose of a failed request logs the invalid response and the job error:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server unavailable
+      verbose_log c8y inventory list --pageSize 1 --verbose
+    exit-code: 0
+    stdout:
+      contains:
+        - "Invalid response received from server. GET http://127.0.0.1:"
+        - "job error. serverError: "
+      not-contains:
+        - "Status code:"
+        - "~~~ REQUEST ~~~"
+
+  --verbose does not print the HTTP dump or the SDK messages:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y inventory list --pageSize 1 --verbose 2>&1 >/dev/null
+    exit-code: 0
+    stderr:
+      not-contains:
+        - "~~~ REQUEST ~~~"
+        - "~~~ RESPONSE ~~~"
+        - "Using sensitive credentials"
+        - "Could not set TLS config"
+    stdout:
+      not-contains:
+        - "~~~ REQUEST ~~~"
+        - "~~~ RESPONSE ~~~"
+        - "Using sensitive credentials"
+        - "Could not set TLS config"
+
+  --verbose does not show the password:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y inventory list --pageSize 1 --verbose 2>&1 | grep -c -e "$C8Y_PASSWORD" -e "$(printf '%s:%s' "$C8Y_USER" "$C8Y_PASSWORD" | base64)" || true
+    exit-code: 0
+    stdout:
+      exactly: |
+        0
+
+  --debug does not print the HTTP dump:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y inventory create --data name=x --debug 2>&1 | grep -c -e "~~~ REQUEST" -e "~~~ RESPONSE" || true
+    exit-code: 0
+    stdout:
+      exactly: |
+        0
+
+  --verbose logs each job of a piped list:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      printf "1\n2\n" | verbose_log c8y inventory get --verbose | grep -E '^(Max jobs|worker)'
+    exit-code: 0
+    stdout:
+      exactly: |
+        Max jobs: 0
+        worker 1: started job 1
+        worker 1: finished job 1 in Nms
+        worker 1: started job 2
+        worker 1: finished job 2 in Nms
+
+  The escaped characters of the response are printed as the characters:
+    config:
+      env:
+        # the table width does not depend on the terminal
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server escaped
+      for output in json csv csvheader table; do
+        echo "--- $output"
+        c8y inventory list --output $output --select id,name
+      done
+      echo "--- raw"
+      c8y inventory list --raw | sed "s#$C8Y_HOST#http://{host}#"
+      echo "--- flatten"
+      c8y inventory list --flatten --select id,name
+    exit-code: 0
+    stdout:
+      exactly: |
+        --- json
+        {"id":"1","name":"amp&lt<gt>"}
+        --- csv
+        1,amp&lt<gt>
+        --- csvheader
+        id,name
+        1,amp&lt<gt>
+        --- table
+        | id         | name            |
+        |:-----------|:----------------|
+        | 1          | amp&lt<gt>      |
+        --- raw
+        {"managedObjects":[{"id":"1","name":"amp&lt<gt>"}],"next":"http://{host}/inventory/managedObjects?pageSize=1&currentPage=2","statistics":{"currentPage":1,"pageSize":1}}
+        --- flatten
+        {"id":"1","name":"amp&lt<gt>"}
+
+  The escaped characters are printed as the characters without a select:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server escaped
+      c8y inventory list
+      c8y inventory list --raw | sed "s#$C8Y_HOST#http://{host}#"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"id":"1","name":"amp&lt<gt>"}
+        {"managedObjects":[{"id":"1","name":"amp&lt<gt>"}],"next":"http://{host}/inventory/managedObjects?pageSize=1&currentPage=2","statistics":{"currentPage":1,"pageSize":1}}
+
+  A User-Agent and an X-Application header of --header are sent and shown:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y inventory list --pageSize 1 --header "User-Agent: my-agent" --header "X-Application: my-app" >/dev/null
+      grep -E '^(User-Agent|X-Application): ' "$LOG"
+      echo "--- dry run"
+      c8y inventory list --pageSize 1 --header "User-Agent: my-agent" --header "X-Application: my-app" --dry --dryFormat dump | grep -E '^(User-Agent|X-Application): '
+      echo "--- only one"
+      : > "$LOG"
+      c8y inventory list --pageSize 1 --header "X-Application: my-app" >/dev/null
+      grep -E '^(User-Agent|X-Application): ' "$LOG"
+    exit-code: 0
+    stdout:
+      exactly: |
+        User-Agent: my-agent
+        X-Application: my-app
+        --- dry run
+        User-Agent: my-agent
+        X-Application: my-app
+        --- only one
+        User-Agent: go-client
+        X-Application: my-app
+
+  The retries wait with an exponential backoff of the minimum wait:
+    config:
+      env:
+        C8Y_SETTINGS_HTTP_RETRYWAITMIN: 500ms
+        C8Y_SETTINGS_HTTP_RETRYWAITMAX: 10s
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server unavailable
+      c8y inventory list --retries 3 >/dev/null 2>&1
+      echo "requests: $(count_requests)"
+      # 0.5s, 1s and 2s: no jitter, so the waits are the same on every run (measured by the
+      # server, so the start of the CLI does not count)
+      check_waits 0.5 1 2
+    exit-code: 0
+    stdout:
+      exactly: |
+        requests: 4
+        ok

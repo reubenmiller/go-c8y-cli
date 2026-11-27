@@ -2,13 +2,16 @@ package cmdutil
 
 import (
 	"compress/gzip"
+	"context"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
@@ -31,7 +34,7 @@ func (f *Factory) sessionFileFlag() string {
 // (and the environment variables if the session is not given using the --session flag).
 func (f *Factory) resolveSession(cfg *config.Config, log *logger.Logger) (baseURL *url.URL, auth authentication.AuthOptions, authErrors []error) {
 	if f.sessionFileFlag() == "" {
-		log.Info("Binding authorization environment variables")
+		f.logOnce(&f.bindLogged, log, "Binding authorization environment variables")
 		if err := cfg.BindAuthorization(); err != nil {
 			log.Warnf("Failed to bind to authorization variables. %s", err)
 		}
@@ -46,7 +49,16 @@ func (f *Factory) resolveSession(cfg *config.Config, log *logger.Logger) (baseUR
 		}
 	}
 	baseURL, _ = url.Parse(apiv2.FormatBaseURL(c8ysession.FormatHost(cfg.GetHostWithEnvironment())))
-	return baseURL, clientAuth.Auth(), authErrors
+	auth = clientAuth.Auth()
+	f.logOnce(&f.authTypeLogged, log, "Using client auth type: "+auth.GetAuthTypes()[0].String())
+	return baseURL, auth, authErrors
+}
+
+// logOnce logs an info message the first time only. The session is resolved several times
+// by a command (e.g. to hide the sensitive values in the log messages), but the log shows the
+// session settings once, as in v2.59.0.
+func (f *Factory) logOnce(once *sync.Once, log *logger.Logger, message string) {
+	once.Do(func() { log.Info(message) })
 }
 
 // ClientSession returns the session values (credentials and host) of the current session.
@@ -98,7 +110,6 @@ func (f *Factory) clientOptionsV2(disableEncryptionCheck bool) (apiv2.ClientOpti
 	if !disableEncryptionCheck && len(authErrors) > 0 {
 		log.Warnf("Could not load authentication. error=%v", authErrors[0])
 	}
-	log.Infof("Using client auth type: %s", auth.GetAuthTypes()[0].String())
 	session := config.NewClientSession(baseURL, auth, cfg.GetCumulocityVersion())
 
 	// Note: The authorization which was detected from the session is set (see AuthOptions.AuthType).
@@ -114,10 +125,12 @@ func (f *Factory) clientOptionsV2(disableEncryptionCheck bool) (apiv2.ClientOpti
 		// v2.59.0 sent "go-client" as the X-Application and the User-Agent
 		Agent: "go-client",
 		// v2.59.0 sent every request once, unless --retries was given
+		// and waited WaitMin, 2*WaitMin, 4*WaitMin, ... between the retries
 		Retry: &apiv2.RetryOptions{
-			Count:   cfg.HTTPRetryMax(),
-			WaitMin: cfg.HTTPRetryWaitMin(),
-			WaitMax: cfg.HTTPRetryWaitMax(),
+			Count:       cfg.HTTPRetryMax(),
+			WaitMin:     cfg.HTTPRetryWaitMin(),
+			WaitMax:     cfg.HTTPRetryWaitMax(),
+			Exponential: true,
 		},
 	}, session, nil
 }
@@ -152,17 +165,18 @@ func (f *Factory) ClientV2() (*apiv2.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	opts.Debug = cfg.Verbose() || cfg.Debug()
+	// --verbose/--debug log the requests as v2.59.0 did (see verboseTransport), not with the
+	// request and response dump of the SDK (opts.Debug)
+	verbose := cfg.Verbose() || cfg.Debug()
 	if opts.Auth.GetAuthTypes()[0] == authentication.AuthTypeNone {
 		// no credentials are sent
 		opts.Auth = authentication.AuthOptions{Tenant: opts.Auth.Tenant, AuthType: opts.Auth.AuthType}
 	}
 
-	// The SDK's HTTP layer logs its warnings (e.g. credentials over plain
-	// HTTP) at info level and the realtime client logs every websocket frame
-	// at info level: show them only with --verbose/--debug.
+	// The SDK's realtime client logs every websocket frame at info level: show them only
+	// with --verbose/--debug.
 	level := slog.LevelWarn
-	if cfg.Verbose() || cfg.Debug() {
+	if verbose {
 		level = slog.LevelDebug
 	}
 	var errOut io.Writer = io.Discard
@@ -170,6 +184,16 @@ func (f *Factory) ClientV2() (*apiv2.Client, error) {
 		errOut = f.IOStreams.ErrOut
 	}
 	logger := slog.New(slog.NewTextHandler(errOut, &slog.HandlerOptions{Level: level}))
+	// The SDK's HTTP layer logs its warnings (e.g. credentials over plain HTTP) at info
+	// level: they are not part of the v2.59.0 log, so only warnings and errors are shown
+	httpLogger := slog.New(slog.NewTextHandler(errOut, &slog.HandlerOptions{Level: slog.LevelWarn}))
+	// The cache logs like the rest of the CLI ("Using cached response. file: ..., age: ..., ttl: ...")
+	cacheLogger := logger
+	if f.Logger != nil {
+		if logg, logErr := f.Logger(); logErr == nil && logg != nil {
+			cacheLogger = slog.New(newCLILogHandler(logg))
+		}
+	}
 	// Install the HTTP response cache. The cache is a RoundTripper wrapper, so it
 	// becomes the v2 client's base transport; apiv2.NewClient further wraps it in
 	// DryRunTransport, giving DryRun -> cache -> network ordering (a dry run
@@ -205,42 +229,35 @@ func (f *Factory) ClientV2() (*apiv2.Client, error) {
 				ExcludeHost: !cfg.CacheKeyIncludeHost(),
 				Mode:        cfg.CacheMode(),
 				BodyKeys:    cfg.CacheBodyKeys(),
-				Logger:      logger,
+				Logger:      cacheLogger,
 			},
 		)
 	}
 
-	// The SDK logged "Sending request: <method> <url>" (session values masked)
-	// before every send. Wrap the transport outside the cache so the line also
-	// appears for cache hits; dry runs still skip it because DryRunTransport
+	// The requests and responses are logged as in v2.59.0. The transport wraps the cache, so
+	// the lines also appear for cache hits; dry runs still skip it because DryRunTransport
 	// short-circuits before this layer.
 	if f.Logger != nil {
 		if logg, logErr := f.Logger(); logErr == nil && logg != nil {
-			base := opts.Transport
-			opts.Transport = roundTripperFunc(func(req *http.Request) (*http.Response, error) {
-				logg.Infof("Sending request: %s %s", req.Method, cfg.HideSensitiveInformationIfActive(&session, req.URL.String()))
-				return base.RoundTrip(req)
-			})
+			opts.Transport = &verboseTransport{
+				base:    opts.Transport,
+				cfg:     cfg,
+				session: &session,
+				log:     logg,
+				verbose: verbose,
+			}
 		}
 	}
 
-	opts.Logger = logger
-	// Parts of the SDK (e.g. the response cache: "Using cached response") log
-	// through the default slog logger instead of the client's logger, which
-	// would print info messages on stderr of every command.
-	slog.SetDefault(logger)
+	opts.Logger = httpLogger
+	// Parts of the SDK log through the default slog logger instead of the client's logger,
+	// which would print info messages on stderr of every command.
+	slog.SetDefault(slog.New(&dropMessageHandler{Handler: logger.Handler(), drop: sdkNoise}))
 
 	client := apiv2.NewClient(opts)
 	client.Realtime().SetConnector(NewRealtimeConnector(client, cfg.IgnoreProxy()))
 	client.Realtime().SetLogger(logger.With("component", "realtime"))
 	return client, nil
-}
-
-// roundTripperFunc adapts a function to http.RoundTripper.
-type roundTripperFunc func(*http.Request) (*http.Response, error)
-
-func (f roundTripperFunc) RoundTrip(req *http.Request) (*http.Response, error) {
-	return f(req)
 }
 
 // decompressTransport gunzips gzip-encoded response bodies (removing the
@@ -289,3 +306,76 @@ func (g *gunzipReadCloser) Close() error {
 	}
 	return err
 }
+
+// sdkNoise are the SDK debug messages which are not part of the v2.59.0 --verbose log
+var sdkNoise = map[string]bool{
+	// the transport of the CLI is configured already
+	"Could not set TLS config on custom transport": true,
+}
+
+// dropMessageHandler is a slog handler which drops the records with the given messages
+type dropMessageHandler struct {
+	slog.Handler
+	drop map[string]bool
+}
+
+func (h *dropMessageHandler) Handle(ctx context.Context, r slog.Record) error {
+	if h.drop[r.Message] {
+		return nil
+	}
+	return h.Handler.Handle(ctx, r)
+}
+
+func (h *dropMessageHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return &dropMessageHandler{Handler: h.Handler.WithAttrs(attrs), drop: h.drop}
+}
+
+func (h *dropMessageHandler) WithGroup(name string) slog.Handler {
+	return &dropMessageHandler{Handler: h.Handler.WithGroup(name), drop: h.drop}
+}
+
+// cliLogHandler is a slog handler which writes the records to the CLI logger, as
+// "message. key: value, key: value" (the layout of the log of v2.59.0)
+type cliLogHandler struct {
+	log   *logger.Logger
+	attrs []slog.Attr
+}
+
+func newCLILogHandler(log *logger.Logger) *cliLogHandler {
+	return &cliLogHandler{log: log}
+}
+
+func (h *cliLogHandler) Enabled(context.Context, slog.Level) bool { return true }
+
+func (h *cliLogHandler) Handle(_ context.Context, r slog.Record) error {
+	var details []string
+	add := func(a slog.Attr) bool {
+		details = append(details, fmt.Sprintf("%s: %v", a.Key, a.Value))
+		return true
+	}
+	for _, a := range h.attrs {
+		add(a)
+	}
+	r.Attrs(add)
+	message := r.Message
+	if len(details) > 0 {
+		message += ". " + strings.Join(details, ", ")
+	}
+	switch {
+	case r.Level >= slog.LevelError:
+		h.log.Error(message)
+	case r.Level >= slog.LevelWarn:
+		h.log.Warn(message)
+	case r.Level >= slog.LevelInfo:
+		h.log.Info(message)
+	default:
+		h.log.Debug(message)
+	}
+	return nil
+}
+
+func (h *cliLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return &cliLogHandler{log: h.log, attrs: append(append([]slog.Attr(nil), h.attrs...), attrs...)}
+}
+
+func (h *cliLogHandler) WithGroup(string) slog.Handler { return h }
