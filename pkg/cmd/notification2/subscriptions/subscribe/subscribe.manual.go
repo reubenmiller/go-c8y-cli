@@ -22,6 +22,7 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 	realtime "github.com/reubenmiller/go-c8y/v2/pkg/c8y/notification2"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/wsdial"
 	"github.com/spf13/cobra"
 )
 
@@ -165,14 +166,9 @@ func (n *SubscribeCmd) messages(ctx context.Context, cfg *config.Config, logger 
 			defer cancel()
 		}
 
-		res := client.Notification2.SubscribeStream(ctx, clientOpts)
-		if res.Err != nil {
-			yield(jsondoc.Empty(), res.Err)
-			return
-		}
-		stream := res.Data
-		if stream == nil {
-			// dry run: the requests were only shown
+		stream, err := subscribeStream(ctx, client, clientOpts, cmdutil.NewNotification2Connector(client, cfg.SkipSSLVerify()))
+		if err != nil {
+			yield(jsondoc.Empty(), err)
 			return
 		}
 		defer stream.Close()
@@ -202,6 +198,61 @@ func (n *SubscribeCmd) messages(ctx context.Context, cfg *config.Config, logger 
 			}
 		}
 	}
+}
+
+// subscribeStream creates the client of the subscription (which creates the
+// token, unless one is given) and connects it with the connector. It is
+// client.Notification2.SubscribeStream, except that the connector decides how
+// to connect: like v2.59.0, a dry run (--dry) shows the requests which create
+// the token and then connects, and the insecure setting applies to the
+// certificate of the server.
+func subscribeStream(ctx context.Context, client *apiv2.Client, opts notification2.ClientOptions, connector wsdial.Connector) (*notification2.MessageStream, error) {
+	nc, err := client.Notification2.CreateClient(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+	nc.SetConnector(connector)
+	if err := nc.ConnectContext(ctx); err != nil {
+		_ = nc.Close()
+		return nil, err
+	}
+
+	// The client delivers the messages to ch. Forward them to the stream until
+	// the stream is closed or ctx is done.
+	streamCtx, stopForwarding := context.WithCancel(ctx)
+	messages := make(chan *realtime.Message, 10)
+	ch := make(chan realtime.Message)
+	nc.Register("*", ch)
+	go func() {
+		defer close(messages)
+		for {
+			select {
+			case <-streamCtx.Done():
+				return
+			case msg := <-ch:
+				select {
+				case messages <- &msg:
+				case <-streamCtx.Done():
+					return
+				}
+			}
+		}
+	}()
+
+	return realtime.NewStream(streamCtx, nc, messages, func(msg *realtime.Message) realtime.StreamData[jsondoc.JSONDoc] {
+		return realtime.StreamData[jsondoc.JSONDoc]{
+			Action:      msg.Action,
+			Identifier:  msg.Identifier,
+			Description: msg.Description,
+			Data:        jsondoc.New(msg.Payload),
+		}
+	}, func() {
+		stopForwarding()
+		if err := nc.Unsubscribe(); err != nil {
+			slog.Warn("Failed to unsubscribe", "err", err)
+		}
+		_ = nc.Close()
+	}), nil
 }
 
 // matchesAction reports whether the action matches the action types (every

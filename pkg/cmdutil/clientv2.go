@@ -255,6 +255,7 @@ func (f *Factory) ClientV2() (*apiv2.Client, error) {
 	slog.SetDefault(slog.New(&dropMessageHandler{Handler: logger.Handler(), drop: sdkNoise}))
 
 	client := apiv2.NewClient(opts)
+	client.Realtime().SetConnector(NewRealtimeConnector(client, cfg.IgnoreProxy()))
 	client.Realtime().SetLogger(logger.With("component", "realtime"))
 	return client, nil
 }

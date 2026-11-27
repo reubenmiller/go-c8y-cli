@@ -5,6 +5,8 @@ package rasession
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strings"
 
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
@@ -35,11 +37,25 @@ type Session struct {
 
 // Detect selects the device's passthrough configuration. Call it with a
 // resolution context so it also runs in a dry run.
+//
+// The errors for a missing configuration have the text of v2.59.0
+// ("configuration not found. name=<name>"), which the commands print.
 func Detect(ctx context.Context, client *apiv2.Client, opts Options) (jsonmodels.RemoteAccessConfiguration, error) {
-	return client.RemoteAccess.Configurations.Detect(ctx, racfg.DetectOptions{
+	config, err := client.RemoteAccess.Configurations.Detect(ctx, racfg.DetectOptions{
 		ManagedObjectID: opts.DeviceID,
 		Name:            opts.Configuration,
 	})
+	if errors.Is(err, racfg.ErrPassthroughNotFound) || errors.Is(err, racfg.ErrNoPassthrough) {
+		return config, notFoundError(opts.Configuration)
+	}
+	return config, err
+}
+
+// notFoundError is the error of v2.59.0 for a configuration which was not
+// found: it is the same when a name was given and when the device has no
+// passthrough configuration at all (then the name is empty).
+func notFoundError(name string) error {
+	return fmt.Errorf("configuration not found. name=%s", name)
 }
 
 // New creates the remote access client for a configuration from Detect.

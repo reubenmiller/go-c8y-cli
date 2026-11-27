@@ -387,6 +387,12 @@ tasks:
         for suite in alarms/subscribe events/subscribe measurements/subscribe inventory/subscribe realtime; do
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
+      - |
+        # the websockets of v2.59.0 never verify the certificate of the server
+        for suite in alarms/subscribe events/subscribe measurements/subscribe inventory/subscribe realtime; do
+          env PATH="$LOCAL_PATH" C8Y_OFFLINE_TLS=1 C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
+        done
+      - env PATH="$LOCAL_PATH" C8Y_OFFLINE_TLS=1 C8Y_OFFLINE_SUITE=offline ./tests/run-offline.sh realtime
 
   test-cli-offline-manual:
     desc: Run the manual cli tests that pass against the go-c8y fake server (whole folders, plus single files of the other folders)
