@@ -2,12 +2,12 @@
 # The websocket TLS behavior of v2.59.0 against the self-signed fake server
 # (C8Y_OFFLINE_TLS=1); without TLS there is nothing to verify, so the test is skipped.
 #
-# usage: websocket_tls.sh <realtime|notification2-verified|notification2-insecure>
+# usage: websocket_tls.sh <realtime|notification2>
 #
 # * realtime: connects with the insecure setting off (the websocket never verified the certificate)
 # * notification2: honors the insecure setting. The token request is a normal request, which
-#   fails verifying the certificate; the websocket must too when only the websocket would verify,
-#   so this test only checks that it connects with the setting on.
+#   fails verifying the certificate without the setting, so this test only checks that the
+#   websocket connects with the setting on.
 set -eou pipefail
 
 case "$C8Y_HOST" in

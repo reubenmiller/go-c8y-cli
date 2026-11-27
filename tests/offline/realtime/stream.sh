@@ -1,7 +1,7 @@
 #!/bin/bash
 # Streams realtime alarms with a subscribe command and prints how many arrived.
 #
-# usage: stream.sh <alarms|realtime|subscribeAll|notification2> [extra flags...]
+# usage: stream.sh <alarms|realtime|subscribeAll> [extra flags...]
 #
 # The subscribe command runs for 4s (--duration). An alarm is created while it
 # runs. TLS: with the fake server in TLS mode (C8Y_OFFLINE_TLS=1) the commands
