@@ -6,7 +6,7 @@ The reference is the released v2 CLI: tag `v2.59.0` on branch `v2`. (Branch `mas
 
 Rule for v3: keep or restore the `v2.59.0` behavior. A better but breaking idea is not implemented. It is listed here until it is decided. Opt-in additions, such as a new flag or a new command that does not change any default, can ship without a decision.
 
-Sources: go-c8y-cli PRs #777 to #831, go-c8y PRs #220 to #245, the go-c8y v2 CHANGELOG, the SDK consistency audit, and a side-by-side run of a `v2.59.0` build and a build of `v3` (commit `59de5b0d6`) against the go-c8y fake server. Part 2 lists only differences that still exist in that run.
+Sources: go-c8y-cli PRs #777 to #838, go-c8y PRs #220 to #247, the go-c8y v2 CHANGELOG, the SDK consistency audit, and a side-by-side run of a `v2.59.0` build and a build of `v3` (commit `9fd137402`) against the go-c8y fake server. Part 2 lists only differences that still exist in that run.
 
 ## How to read an entry
 
@@ -30,6 +30,12 @@ Earlier versions of this page recorded some v2 behavior as v3 changes. These are
   - request shape: one-page lists send the plain request, `--retries` with `retryWaitMin` and `retryWaitMax`, `settings.http.compression`, `Accept` and the `go-client` identity headers, multipart file part without a charset, no `queryParams` field in dry JSON, `--raw` with `--select`, `--flatten` and `--filter` on a top-level array, `measurements list` sends `revert` only when the flag is given, `c8y api` with an absolute url;
   - `--verbose` log lines, the characters `<`, `>` and `&` in output, custom `User-Agent` and `X-Application` headers, retry backoff without jitter;
   - realtime and notification2 websockets over TLS, `--dry` for websocket commands, the remote access "configuration not found" text.
+- Batch 3 restored these (go-c8y-cli #835 to #838, go-c8y #246 and #247), each measured against a `v2.59.0` build:
+  - views (default columns): every column of a view is a column, an empty cell where a document lacks it, empty objects show as `{}`, views that match on request path or content type work, detection repeats until a view matches, and an unknown `--view` name is reported (#835);
+  - errors: a missing required pipeline path parameter of an extension command (exit 100), `remoteaccess configurations get`, `delete` and `update` with an unknown name (exit 4, `referenceByName`), REST transport errors (exit 99, the text twice, `--withError` identical; wait commands exit 100 and assert commands 112), the failed `notification2` token request (exit 100), the denied `--device` file on the create commands of events, alarms, measurements and operations, `ui applications plugins list` without `--application` (exit 0, no output, also with `--raw`), and `user[]`, `userself[]` and `hostedapplication` name matching in extension commands (wildcards expand again, first match; an unknown name prints `reference by name: no matches found`) (#836);
+  - requests: `--withGroups` (also `withChildren`, `withChildrenCount` and `skipChildrenNames` on firmware, software and configuration get), `--totalPages N` on events, alarms, measurements, operations and `inventory list` (page by page, as v2), the paging flags and the default page size replace the `pageSize` of the `c8y api` url, the default `pageSize` on get-by-id and similar GET requests (topic 8), `alarms|events|measurements|operations assert count` with `withTotalPages`, `datahub jobs get` (`pageSize`) and `datahub jobs listresults` (`limit`), the plain `file` form field of `register-ca`, and the object type of `binaries create` (the extension of the file, else `application/octet-stream`, no sniffing; `--name` does not change it) (#837);
+  - output: `--raw` of `features list` and of every list that returned items before (13 commands) prints the response as received, `ui applications plugins list` prints one document per plugin, `--outputTemplate` of a list gets the array of the page items (`[]` for an empty page; the whole response with `--raw`, `--withTotalPages` or `--withTotalElements`), a template that returns an array prints one document per element, csv, tsv and csvheader without `--select` use the `**` selection (empty objects and arrays are `{}` and `[]` columns, `null` prints as `null`), the `--debug` worker-loop lines and the order of `Creating c8y client`, the realtime and notification2 websocket log lines in the CLI log format (including `ws (recv)`), no `use of closed network connection` warning at the end of notification2 subscribe, the 10 second realtime handshake timeout, and `notification2 subscribe` exiting 0 on Ctrl-C (#838, go-c8y#247).
+- Not restored because `v2.59.0` was wrong (v2 bugs): `microservices serviceusers get --id <unknown name>` exits 0 with no output; `operations wait --id 1,2` reports only the last error; `--withError` prints the error document twice; an extension `binaryUploadURL` uploads for real under `--dry`; a transport error with `--includeAll` or `--totalPages` prints `commandError: Response is empty` (exit 101); `ui applications plugins list --application <unknown name>` exits 0 with no output (and exit 100 for an unknown numeric id); a piped absolute url in `c8y api` sends `pageSize` twice (`pageSize=20&pageSize=7`); `devices list --includeAll` sends one extra id keyset request after a short page; `--outputTemplate` with `--totalPages N` evaluates the template on the first page only and with `--includeAll` once for the first-page response; `realtime subscribe --verbose` logged the handshake token in clear text (v3 masks it as `{token}` while `logger.hideSensitive` is on, the default).
 
 ### Follows the v2 release (not a break)
 
@@ -41,7 +47,7 @@ v3 had not yet taken these v2.59.0 changes. They were merged into v3 (go-c8y-cli
 
 ### Restored behavior that v3 still differs from in one detail
 
-- `--debug` prints the v2.59.0 lines again except `timeout:`, `checking job iterator`, `Input line`, `finished adding jobs` and `Overriding common options` (see Part 2).
+- `--debug` prints the v2.59.0 lines again. The job iterator lines (`checking job iterator`, `finished adding jobs`) of a piped or `--id` run appear after the job on v3, because v3 runs serially, and v2.59.0 logged a second `Input line: %!s(<nil>)` for body commands (a format artifact): both are not restored. In `--debug` the output document appears after `job successful` on v3 and before it on v2.59.0 (stdout buffering).
 
 ## Part 1: proposed improvements (decision needed)
 
@@ -96,7 +102,7 @@ Websocket commands are: `alarms|events|measurements|operations|inventory subscri
 
 **4d. TLS and proxy settings come from one place**
 
-- **Today**: realtime honors `--ignoreProxy`; notification2 and remote access always use the environment proxy. The CLI sets TLS and proxy for websockets in `pkg/cmdutil/wsconnector.go`, because the SDK builds its websocket dialer from the REST transport and the CLI wraps that transport, so the SDK cannot see through it. The realtime dialer also uses the SDK default handshake timeout of 45 seconds (`v2.59.0`: 10 seconds), and pressing Ctrl-C during the TCP or TLS handshake waits for that timeout.
+- **Today**: realtime honors `--ignoreProxy`; notification2 and remote access always use the environment proxy. The CLI sets TLS, proxy and the handshake timeout for websockets in `pkg/cmdutil/wsconnector.go`, because the SDK builds its websocket dialer from the REST transport and the CLI wraps that transport, so the SDK cannot see through it. The realtime handshake timeout is 10 seconds as in `v2.59.0` (a connector field), and the cancel-aware dial `dialUntilDone` ends a connect when Ctrl-C is pressed, in realtime and notification2 subscribe (exit 2, `Interrupted`; `v2.59.0` waited 10 seconds in the bayeux handshake or was killed by the signal). A silent TCP server never made v3 wait 45 seconds, as an earlier version of this page claimed.
 - **Proposed**: one rule for TLS, proxy and handshake timeout in all websocket commands. SDK side: an explicit websocket TLS and proxy option on `ClientOptions`, and an exported cancel-aware dial helper, so the CLI can drop the connector.
 - **Breaks**: users who depend on the current proxy split (for example `--ignoreProxy` affecting only realtime).
 
@@ -104,10 +110,10 @@ Websocket commands are: `alarms|events|measurements|operations|inventory subscri
 
 - **Today**: 100 (unexpected error) and 101 (user error) are used inconsistently between built-in, extension and runtime commands. v3 now reproduces the `v2.59.0` codes and error text for built-in commands, including the inconsistencies below.
 - **Proposed**: a single mapping (HTTP status codes, user errors, unresolved names, timeouts, assertion failures), documented and tested, with one error format. Known inconsistencies to clean up:
-  - a denied `--device` file exits 101 for filter and body flags and 100 for path arguments and assert commands;
+  - a denied `--device` file exits 101 for filter and body flags (and for the create commands of events, alarms, measurements and operations, which treat the flag as a file reference) and 100 for path arguments and assert commands; one rule for every flag that accepts a file is needed;
   - name lookup failures print `commandError: referenceByName: no matching items found ... ::StatusCode=404`, while a direct lookup (`usergroups getByName`) prints a `serverError` with the Error Response block; the SDK text (`managed object not found with name: x`) is clearer;
-  - the remote access "not found" error has three texts and two exit codes: `configuration not found. name=` (101) for connect and server, `referenceByName: no matching items found` (4) for `configurations get` and `delete`; v3 uses a fourth text (101) for `get` and `delete` (see Part 2);
-  - REST transport errors (connection refused, TLS verification failure) exit 99 with the raw Go message, printed twice, on `v2.59.0`, but 100 for the token request of `notification2 subscriptions subscribe`; v3 exits 101 for both (see Part 2);
+  - the remote access "not found" error has three texts and two exit codes: `configuration not found. name=` (101) for connect and server, `referenceByName: no matching items found. name=x  ::StatusCode=404` (4) for `configurations get`, `delete` and `update`; v3 matches `v2.59.0` (the detection matches the SDK text `remote access configuration not found: name=`; a sentinel error in go-c8y like `ErrPassthroughNotFound` would be more robust);
+  - REST transport errors (connection refused, TLS verification failure) exit 99 with the raw Go message, printed twice, but 100 for the token request of `notification2 subscriptions subscribe` and for wait commands (`commandError`), and 112 for assert commands; v3 matches `v2.59.0`. Two differences remain: a transport error during a name lookup (`v2.59.0`: `commandError: Could not fetch by id: <err>`, exit 101, or exit 100 `failed to lookup by name.` for some commands; v3: exit 99, because the SDK resolves names inside the call and the CLI cannot tell a lookup request from the command's own request; fixing it needs an SDK or runner marker for lookup requests) and the misleading `Response is empty` of `v2.59.0` for `--includeAll` and `--totalPages` (not copied). The `--withError` JSON of the `notification2` token error has `"exitCode":100` on v3, which `v2.59.0` omits. One rule (for example "could not reach the server", one exit code, the message once) would be clearer;
   - an error whose message equals the server message repeats the text after `METHOD url: status type`;
   - `--withError` prints the error document twice on `v2.59.0` (sorted and nested);
   - the aggregate "jobs completed with N errors" line depends on the worker type, not on the command kind;
@@ -115,12 +121,14 @@ Websocket commands are: `alarms|events|measurements|operations|inventory subscri
   - `microservices serviceusers get --id <unknown name>` exits 0 with no output on `v2.59.0`;
   - error text for a response without a JSON body: v1 printed an empty message, v3 derives it from the SDK;
   - the v1 `details` field of the error JSON (debug mode only) is not restored.
+  - a missing required parameter of an extension command: exit 100 for a path parameter, 101 for a query or body parameter, with two texts (`missing required parameters. [device]` for reference types, `Missing required parameter. id` for the others). An extension body parameter that is pipeline and required prints `Body is missing required properties: source.id` on `v2.59.0` and `Missing required parameter. device` on v3 (both exit 101);
+  - name-not-found has three texts: `reference by name: no matches found` (flag, exit 101), `referenceByName: no matching items found. name=x  ::StatusCode=404` (pipeline or path, exit 4) and the SDK text `application not found with name: x`; one text and one exit code, with the candidate list, would be clearer;
 - **Breaks**: scripts that match the exit codes or messages that change.
 - **Source**: CLI#828, CLI#831.
 
 ### 6. Name resolution: wildcards and ambiguous matches
 
-- **Today (v3)**: user lookups in extension commands no longer expand wildcards (`--user 'adm*'`; `v2.59.0` expands them and takes the first match). The SDK's new `Users.ResolveID` supports wildcards but returns an "ambiguous" error when more than one user matches. Role lookups keep wildcard and first-match.
+- **Today (v3, as `v2.59.0`)**: extension `user[]` and `userself[]` expand wildcards and take the first match (`--user 'adm*'`; the server filter is a name prefix with the wildcards removed, over a page of 5 users, so `a*b` filters by `ab`; no match gives `reference by name: no matches found`). `hostedapplication` matches hosted applications only (current tenant first, exact name with no wildcards, a numeric id is used as is). The SDK's `Users.ResolveID` supports wildcards but returns an "ambiguous" error when more than one user matches. Role lookups keep wildcard and first-match.
 - **Proposed**: one rule for all name lookups: wildcards allowed; more than one match is an error that lists the candidates (safer for update and delete), with an opt-in `--first` for the old behavior.
 - **Breaks**: scripts that rely on the first match.
 
@@ -133,7 +141,7 @@ Websocket commands are: `alarms|events|measurements|operations|inventory subscri
 
 ### 8. Default page size and the stray `pageSize`
 
-- **Today**: the CLI sends `pageSize=20` unless the setting is blank (a space) or `0`; an empty string still sends 20. An explicit `5` (setting or `--pageSize 5`) sends no `pageSize` at all, because of a quirk inherited from the v1 SDK (the SDK default is 5). Get-by-id requests (`devices get`, `inventory get`) carry `?pageSize=20` on `v2.59.0`; v3 does not send it.
+- **Today**: the CLI sends `pageSize=20` unless the setting is blank (a space) or `0`; an empty string still sends 20. An explicit `5` (setting or `--pageSize 5`) sends no `pageSize` at all, because of a quirk inherited from the v1 SDK (the SDK default is 5). Get-by-id requests (`devices get`, `inventory get`, count commands and similar GET requests) carry `?pageSize=20` on `v2.59.0`; v3 sends it again through a request hook on the call context, so the `--verbose` line and the error message match. Commands that send none on `v2.59.0` are exempt (`NoDefaultPageSize`): wait and assert commands, extension runtime commands, `microservices serviceusers get`, `ui applications plugins list|install|delete|update|replace`, `ui plugins create`, `deviceregistration register-basic|register-ca`, `devices enroll`, `remoteaccess connect ssh|run` and `server`, and the v3-only datahub commands (`datahub jobs get` sends `pageSize` and `datahub jobs listresults` sends it as `limit`, as in `v2.59.0`). With a blank `C8Y_SETTINGS_DEFAULTS_PAGESIZE` list commands on v3 still send `pageSize=2000` where `v2.59.0` sends none. `devicemanagement certificate-authority get` sends `pageSize=20` on v3 (`v2.59.0`: `pageSize=5&withTotalElements=true`).
 - **Proposed**: send no `pageSize` unless asked (the platform default applies, and nothing is added to get-by-id requests), and send an explicit 5.
 - **Breaks**: scripts that rely on getting 20 items per page by default, or on the exact request URL. Sending an explicit 5 is itself a change.
 
@@ -194,7 +202,7 @@ Deprecated in go-c8y v2 and kept as aliases: `Client.ApplicationVersions`, `Devi
 
 ### 15. What `--raw` prints
 
-- **Today**: `--raw` prints the response as received for an enveloped list, and a top-level array as an array (`[]` when empty), but `--select` and `--flatten` split a top-level array into one document per item, and `--filter` keeps the array (`v2.59.0`, restored on v3 by CLI#826 and CLI#829). A filter on an enveloped list under `--raw` prints nothing on both. `features list` and `ui applications plugins list` exist in `v2.59.0` too (they are not new in v3), and v3 still differs there (see Part 2).
+- **Today**: `--raw` prints the response as received for an enveloped list, and a top-level array as an array (`[]` when empty), but `--select` and `--flatten` split a top-level array into one document per item, and `--filter` keeps the array (`v2.59.0`, restored on v3 by CLI#826 and CLI#829). A filter on an enveloped list under `--raw` prints nothing on both. Every command whose response is a plain array or an envelope prints it as received with `--raw` (13 commands returned items before #838), and `ui applications plugins list` prints one document per plugin, also with `--raw`.
 - **Proposed**: one rule: `--raw` always prints the unmodified response (envelope or bare array), and `--select`, `--flatten` and `--filter` either do not apply under `--raw` or always apply to the items.
 - **Breaks**: scripts that rely on the `v2.59.0` mix of shaped items and arrays under `--raw`.
 - **Ways to ship**: opt-in setting first, then flip the default in a major release.
@@ -233,21 +241,33 @@ Deprecated in go-c8y v2 and kept as aliases: `Client.ApplicationVersions`, `Devi
 
 ### 20. Paging strategy for `--includeAll` and `--totalPages`
 
-- **Today**: for `--totalPages N` with N above 1, the first request of `devices list` differs from `v2.59.0`: v2 replaced the query with the id keyset (`_id gt '0'`, `$orderby=_id asc`), v3 keeps `$orderby=name` and sends `currentPage=1` (reported for `--includeAll` too: the SDK uses the id keyset for inventory and `currentPage=1` on the first request). `--paginationStrategy` (auto, offset, id) exists only on v3.
+- **Today**: `--totalPages N` on `inventory list` and on the time-series lists (events, alarms, measurements, operations) reads N pages by page number, as `v2.59.0` (the first request has no `currentPage`); the time keyset is used only for `--includeAll` or an explicit `--paginationStrategy time`. The typed inventory lists (devices, agents, devicegroups, smartgroups, deviceprofiles, configuration, software, firmware and their versions and patches) still differ for N above 1: `v2.59.0` used the id keyset (first request `_id gt '0'`, `$orderby=_id asc`, results ordered by id), v3 keeps `$orderby=name` (or `--orderBy`) and offset paging, and N pages still come back. The SDK id keyset exists only for devices, agents, devicegroups, smartgroups, deviceprofiles and configuration lists, so the firmware and software lists need an SDK change. `inventory find` uses the id keyset in both, but the later-page filter differs (`v2.59.0` nests `_id gt 'N' and (_id gt '0' and (...))`, v3 sends `_id gt 'N' and (...)`); the results are the same. `--paginationStrategy` (auto, offset, id) exists only on v3. In the SDK the offset, id keyset and time keyset strategies no longer send `currentPage` on the first request (id keyset: on any request), and the sequential walk no longer forces `withTotalPages` or `withTotalElements`; this matches `v2.59.0`, but SDK callers that relied on it see a change.
 - **Proposed**: decide whether the SDK strategy is the rule everywhere, and document the order and the keyset.
 - **Breaks**: scripts that depend on the order of results with `--includeAll`.
 
 ### 21. Object type of `binaries create` for a file without extension
 
-- **Today**: the object type is `application/octet-stream` on `v2.59.0`; v3 gets `text/plain; charset=utf-8` because the SDK sniffs the content (measured with a text file named `nofile`).
-- **Proposed**: keep the SDK behavior (it follows the content) or restore octet-stream; decide.
-- **Breaks**: scripts that match the type of binaries created from extensionless files.
+- **Today**: v3 matches `v2.59.0`: the object type is the type of the source file's extension, else `application/octet-stream`, with no content sniffing, and `--name` does not change it. In the SDK, an upload from a reader is typed by the extension of its name. One difference remains: `--type my/type` also types the file part on v3 (SDK `UploadFileOptions.ContentType`), while `v2.59.0` set only the object type.
+- **Proposed**: sniff the content (what the SDK designed) or keep octet-stream; and decide whether `--type` types the file part.
+- **Breaks**: scripts that match the type of binaries created from extensionless files, or the part type of an upload with `--type`.
 
 ### 22. Per-request timeout model
 
 - **Today**: `--timeout` is restored. A real deadline that starts before the request is prepared (the effect of `--timeout 1ms` on `v2.59.0`, a race even there: 0 to 3 of 10 runs timed out on loopback) is not reproduced, so a timeout test needs a slow server.
 - **Proposed**: define when the timeout starts (request preparation, connect, whole command).
 - **Breaks**: scripts that depend on very short timeouts.
+
+### 23. Selected output details that are per document or per page
+
+- **Today**: csv, tsv and csvheader columns are per document on `v2.59.0` and v3: a document with extra fragments adds columns to its row. `--outputTemplate` with `--totalPages N` evaluates the template on the first page only on `v2.59.0` and on every page on v3; with `--includeAll` once for the first-page response on `v2.59.0` and per page on v3 (v3 does not copy the `v2.59.0` behavior, which looks like a bug). `--raw` plus `--select` or `--filter` on a bare array still mixes shaped items and arrays (topic 15). Ctrl-C during the connect of a realtime or notification2 subscribe exits 2 with `Interrupted`. `inventory parents get` lacks the collection property annotation (only the `--debug` and `--verbose` array logs differ).
+- **Proposed**: a stable column set for csv (a first-document or view-based set), one rule for templates with paging, one exit code for an interrupted connect.
+- **Breaks**: scripts that parse csv columns or depend on the current template evaluation.
+
+### 24. Typed file part and request details in the SDK
+
+- **Today**: assert count commands request `withTotalPages` as `v2.59.0` does (v3 sent `withTotalElements`, and `revert=false` for measurements, before #837). `c8y api` with a piped absolute url sends a single `pageSize` on v3 (a duplicate on `v2.59.0`).
+- **Proposed**: use `withTotalElements` for the count (cheaper, clearer).
+- **Breaks**: nothing visible, only the request shape.
 
 ## Part 2: differences that remain on v3 (confirm or revert)
 
@@ -257,35 +277,22 @@ These differences from `v2.59.0` exist on v3 today (measured on the fake server 
 
 | Change | v2.59.0 | v3 | Source |
 |---|---|---|---|
-| Extension command missing a required pipeline path parameter (`kitchensink pipeline get`) | exit 100, `missing required parameters. [device]` | exit 101, `Missing required parameter. device` | CLI#801 |
-| `remoteaccess configurations get` and `delete` with an unknown configuration name | exit 4, `referenceByName: no matching items found. name=nope ::StatusCode=404` | exit 101, `remote access configuration not found: name=nope` | CLI#831 |
 | `microservices serviceusers get --id <unknown name>` | exit 0, no output | exit 4, `referenceByName: no matching items found` | CLI#799 |
-| REST transport error (connection refused, TLS verification failure) | exit 99, `serverError: Get "<url>": <error>` (the text twice) | exit 101, `commandError: [002]  : Get "<url>": <error>` | CLI#828 |
-| `notification2 subscriptions subscribe` over TLS without the insecure setting (the token request fails) | exit 100, `commandError: Post "<url>": <error>` | exit 101, `commandError: [002]  : Post "<url>": <error>` | CLI#831 |
-| `events`, `alarms`, `measurements` or `operations create --device <denied file>` | exit 101, `access to the file is denied: <file>` | exit 101, `Body is missing required properties: source.id` (`deviceId` for operations); the denied file is not named | measured |
-| `ui applications plugins list` without `--application` | exit 0, no output | exit 101, `empty application reference string` | CLI#792 |
 | `operations wait --id 1,2` with several failing ids | exit 100, only the last error | exit 104, one error per id and `jobs completed with 2 errors` | CLI#828 |
 | `--withError` with a failing request | prints the error document twice | prints it once | CLI#828 |
+| A transport error during a name lookup (`remoteaccess configurations get --device <name>`) | exit 101, `commandError: Could not fetch by id: <error>` (exit 100 `failed to lookup by name.` for some commands) | exit 99, `serverError` (the SDK resolves names inside the call) | CLI#836 |
+| `ui applications plugins list --application <unknown name>` | exit 0, no output (exit 100 for an unknown numeric id) | exit 4 (unknown name); a server error for an unknown numeric id | CLI#836 |
+| `--outputTemplate` with `--dry` | prints the request that would be sent (`request.method` is `GET`) | no `request` data: `Value non indexable`, exit 101 (the observe middleware never sees dry-run requests) | CLI#838 |
 
 ### Behavior
 
 - **Dry run is more complete**: `ui plugins create --file <url>` downloads the url under `--dry` (v2 failed with "no such file"). An extension `binaryUploadURL` parameter no longer uploads for real under `--dry` (v2 did) and shows a placeholder url in the body (CLI#805).
-- **Extension commands**: `user[]` and `userself[]` no longer expand wildcards (`--user 'peter*'` is sent as written; v2 resolved it to the first match). `hostedapplication` resolves any application by name (v2: only hosted applications of the current tenant, and `reference by name: no matches found` for a microservice name) (CLI#801).
-- **`--withGroups` is ignored** by `devices get`, `devices list`, `agents get`, `agents list` and `smartgroups get`. `v2.59.0` adds `withGroups=true` to the request. (`inventory list` and `devicegroups get` still send it.) The SDK has `managedobjects.GetOptions.WithGroups`, so this looks like a regression and not a decision. A fix restores the v2 request and adds `assetParents` to the output when the flag is set.
 - **`--withTotalPages` and `--withTotalElements` with `--select`**: v2 returned the whole response, with the statistics, and `--select` paths start at its top level. v3 prints each item on its own line, so the statistics are lost and `--select statistics.totalElements` matches nothing. This is deferred on purpose: the go-c8y v2 client has to keep the statistics with the results first, and the CLI has no workaround. `c8y api` is not affected.
 - **Multi-value flags**: `microservices serviceusers get --id` accepts a list (CLI#799).
-- **`c8y api` with its own `pageSize`**: for `c8y api /inventory/managedObjects?pageSize=7&type=a`, `v2.59.0` sends `pageSize=20` (the default page size, or `--pageSize`, overrides the one in the url), while v3 keeps the `pageSize=7` of the url. With `--pageSize 3`, v2 sends 3 and v3 still sends 7. A piped absolute url with its own `pageSize` behaves the same way (see topic 8 for the get-by-id case).
-- **Get-by-id requests** carry no `pageSize` on v3 (`v2.59.0`: `?pageSize=20`). The `--verbose` line and the error message show the request that was sent (topic 8).
-- **`--totalPages 2` on `devices list`**: the first request keeps the `$orderby=name` query on v3 (`v2.59.0` used the id keyset); see topic 20.
-- **`--totalPages N` on `events list` and `alarms list` returns one page less**: `events list --pageSize 1 --totalPages 3` prints 2 events on v3 and 3 on `v2.59.0`. v3 sends page 1, then page 1 again with a `dateTo` keyset, then page 2, and counts all three requests. `inventory list` and `devices list` return N pages. This looks like a regression, not a decision.
-- **`features list --raw`** prints one object per item on v3; `v2.59.0` prints the bare array as received. `ui applications plugins list --application <app without plugins> --raw` prints `[]` on v3 and nothing on `v2.59.0`. Both commands exist in `v2.59.0` (topic 15).
-- **`deviceregistration register-ca`**: the multipart file part has `filename="devices.csv"` and `Content-Type: text/csv` on v3 (dry curl `-F 'file=@devices.csv;type=text/csv'`); `v2.59.0` sent neither (dry curl `-F 'file=@input1.txt'`).
-- **`binaries create`** of a file without extension sets the type `text/plain; charset=utf-8` (v2: `application/octet-stream`; topic 21).
-- **`--outputTemplate`** on a list gets the array of items on both versions, with three differences: for an empty list `output` is `null` on v3 and `[]` on `v2.59.0`, so `std.length(output)` fails on v3 with exit 101; with `--withTotalPages` or `--withTotalElements`, `v2.59.0` passes the whole response (with `statistics`) and v3 the array; with `--totalPages N`, `v2.59.0` applies the template to the first page only and v3 to all items.
-- **CSV output**: `devices list -o csv` has no column for an empty object (`c8y_IsDevice`); `v2.59.0` prints it as `{}` (the first column).
-- **`--debug`** does not log the `v2.59.0` worker-loop lines (`timeout:`, `checking job iterator`, `Input line`, `finished adding jobs`, `Overriding common options`, `Array properties`), and `Creating c8y client` appears in another order.
-- **Logging**: notification2 subscribe sometimes prints `level=WARN msg="Failed to send message" err="use of closed network connection"` on stderr at the end (1 of 5 runs here). The SDK sends the unsubscribe after the connection is closed. `v2.59.0` prints nothing. With `--verbose`, the realtime and notification2 websocket lines (`Establishing connection`, `ws (send)`, `Pending messages`, ...) are printed by the SDK in slog form (`time=... level=INFO msg="..." component=realtime`) on v3, and in the CLI log format with other texts on `v2.59.0`.
-- **Websocket handshake**: the realtime handshake timeout is the SDK default of 45 seconds (`v2.59.0`: 10 seconds), and Ctrl-C during the TCP or TLS handshake waits for it (from code review; not timed).
+- **`c8y api` with a piped absolute url that has its own `pageSize`**: `v2.59.0` sends the parameter twice (`pageSize=20&pageSize=7`), v3 sends a single `pageSize=20` (a v2 bug, not copied).
+- **`--totalPages N` on the typed inventory lists** (devices, agents, devicegroups, smartgroups, deviceprofiles, configuration, software, firmware and their versions and patches) keeps `$orderby=name` and offset paging on v3 (`v2.59.0` used the id keyset ordered by `_id`); N pages still come back. See topic 20.
+- **Not restored, logging**: after the end of a realtime stream (duration, count, Ctrl-C) `v2.59.0` logged nothing from the disconnect, and v3 mutes the websocket log from that point (two clean-up lines of the SDK are dropped for notification2). The order of `Pending messages ids` and of `Received message` in `realtime subscribeAll` is random on both versions.
+- **Other differences found while restoring requests** (not caused by batch 3): `ui applications plugins install|delete|update` with `--plugin <id>` list the hosted and shared applications on v3 (`v2.59.0`: `GET /application/applications/<id>`); name lookups use `pageSize=1` and another query shape than `v2.59.0` (`pageSize=5`); `software versions get --id <name>` without `--software` does a GET by id (`v2.59.0` looked the version up by name); `applications createHostedApplication` looks the application up by name with `pageSize=20` (`v2.59.0`: `pageSize=2000` without a name filter); `currenttenant listApplications --raw` prints nothing against the fake server, whose tenant has no `applications` property (probably a fake-server artifact).
 
 ### Extension SDK and Go packages
 
@@ -315,10 +322,12 @@ These differences from `v2.59.0` exist on v3 today (measured on the fake server 
 - The aggregate "jobs completed with N errors" line was compared for assert commands only. Other generic-worker commands (certificate authority, register-bulk, template execute, sessions encrypt and decrypt) print no line on `v2.59.0` and were not checked on v3.
 - The fileguard rule (exit 101 or 100) depends on the flag name and command path, and was compared on about 30 commands. Other commands with a `device` driver flag could differ.
 - Name lookup detection depends on the SDK text `not found with name` and on the `groupByName` endpoint. A change in the SDK message would silently fall back to a `serverError`; unit tests cover the current text.
-- The TLS cases in `tests/offline/realtime/subscribe_parity.yaml` pass without a TLS fake server (they print "skipped" and exit 0). They only mean something under `C8Y_OFFLINE_TLS=1`, which `task test-cli-offline-realtime` sets.
+- The TLS cases of the transport errors (`tests/offline/common/transport_tls.sh`) print a pass line without TLS. They run in CI through `test-cli-offline-manual`, which runs `errors_parity.yaml` with `C8Y_OFFLINE_TLS=1`; the TLS cases in `tests/offline/realtime/subscribe_parity.yaml` also only mean something under `C8Y_OFFLINE_TLS=1`, which `task test-cli-offline-realtime` sets.
 - The retry timing test in `tests/offline/common/output_parity.yaml` checks wall-clock waits and could be flaky on a heavily loaded runner.
 - A custom `--header "User-Agent: x"` or `--header "X-Application: x"` on the realtime and notification2 websocket handshake (the SDK sets both headers itself there) was not compared with `v2.59.0`.
-- The CLI `go.mod` is pinned to go-c8y `1acd118` (the merge of #245). Re-pin to the newest `origin/v2` commit when another SDK PR merges.
+- The CLI `go.mod` is pinned to go-c8y `e090e1c` (the merge of #247). Re-pin to the newest `origin/v2` commit when another SDK PR merges.
+- The `NoDefaultPageSize` exemption list (topic 8) comes from the commands that were compared. Other hand-written commands that send a GET without a page size on `v2.59.0` could still show a spurious `pageSize`; a differential run of the 283 single-line `tests/auto` commands found none. `devices enroll` and other manual commands were not compared beyond the listed ones.
+- `go-c8y#247` merged with a failing `test-live` job (`Test_Registration_Register`, "Error during password validation"), which also fails on `v2` push runs; the live job was not re-run.
 
 ## Notes and open questions (not CLI behavior)
 
