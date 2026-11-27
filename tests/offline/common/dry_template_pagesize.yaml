@@ -129,19 +129,16 @@ tests:
       . ./offline/common/request_lib.sh
       start_server data
       export C8Y_SETTINGS_DEFAULTS_PAGESIZE=" "
-      c8y alarms list --totalPages 2 --select id -o csv | tr '\n' ' '
-      echo
-      c8y events list --currentPage 2 --select id -o csv | tr '\n' ' '
-      echo
-      c8y operations list --pageSize 5 --totalPages 2 --select id -o csv | tr '\n' ' '
-      echo
+      c8y alarms list --totalPages 2 --select id -o csv | paste -s -d ' ' -
+      c8y events list --currentPage 2 --select id -o csv | paste -s -d ' ' -
+      c8y operations list --pageSize 5 --totalPages 2 --select id -o csv | paste -s -d ' ' -
       requests
     exit-code: 0
     stdout:
       exactly: |
-        8 7 6 5 4 3 2 1 
-        3 2 1 
-        8 7 6 5 4 3 2 1 
+        8 7 6 5 4 3 2 1
+        3 2 1
+        8 7 6 5 4 3 2 1
         GET /alarm/alarms
         GET /alarm/alarms?currentPage=2
         GET /event/events?currentPage=2
