@@ -33,10 +33,20 @@ func (a *assertion) filter(seq func(yield func(jsondoc.JSONDoc, error) bool)) fu
 	}
 }
 
-// exitCode gives a processed command error the assertion exit code.
+// exitCode gives a processed command error the assertion exit code. The
+// errors of the batch itself (aborted, completed with errors, job limit) keep
+// their own exit code: the individual assertion errors were already given the
+// assertion exit code when they were reported, as in v1.
 func (a *assertion) exitCode(err error) error {
 	if err == nil {
 		return nil
+	}
+	var ce cmderrors.CommandError
+	if errors.As(err, &ce) {
+		switch ce.ExitCode {
+		case cmderrors.ExitAbortedWithErrors, cmderrors.ExitCompletedWithErrors, cmderrors.ExitJobLimitExceeded:
+			return err
+		}
 	}
 	wrapped := cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAssertionError, err)
 	wrapped.Processed = true

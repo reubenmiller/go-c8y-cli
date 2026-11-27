@@ -14,6 +14,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
@@ -268,6 +269,12 @@ func (n *CmdCreate) prepare(in *c8ystream.Resolver, client *apiv2.Client, log *l
 	return plan, nil
 }
 
+// fileError is a problem with the plugin file (it is missing, denied, not a
+// plugin, could not be downloaded). It exits with 100 (unexpected error), as in v1.
+func fileError(err error) error {
+	return cmderrors.NewSystemError(err)
+}
+
 func (n *CmdCreate) prepareFile(in *c8ystream.Resolver, client *apiv2.Client, log *logger.Logger, plan *uploadPlan) error {
 	file := n.file
 
@@ -275,7 +282,7 @@ func (n *CmdCreate) prepareFile(in *c8ystream.Resolver, client *apiv2.Client, lo
 	if ShouldDownload(file) {
 		localFile, downloadErr := DownloadFile(file, log)
 		if downloadErr != nil {
-			return fmt.Errorf("could not download plugin. %w", downloadErr)
+			return fileError(fmt.Errorf("could not download plugin. %w", downloadErr))
 		}
 		log.Infof("Downloaded plugin to %s", localFile)
 		file = localFile
@@ -285,12 +292,12 @@ func (n *CmdCreate) prepareFile(in *c8ystream.Resolver, client *apiv2.Client, lo
 			}
 		})
 	} else if err := fileguard.Check(file); err != nil {
-		return err
+		return fileError(err)
 	}
 
 	application, manifest, err := n.getApplicationDetails(file)
 	if err != nil {
-		return err
+		return fileError(err)
 	}
 
 	// The file is not allowed to have any spaces in the filename
@@ -302,7 +309,7 @@ func (n *CmdCreate) prepareFile(in *c8ystream.Resolver, client *apiv2.Client, lo
 		log.Warnf("Plugin file contains a space, so creating a temp file without a space to avoid being rejected by the server. tmpfile=%s", tmpFile)
 
 		if err := fileutilities.CopyFile(tmpFile, file); err != nil {
-			return fmt.Errorf("could not copy file to tmp directory. %w", err)
+			return fileError(fmt.Errorf("could not copy file to tmp directory. %w", err))
 		}
 		plan.cleanup = append(plan.cleanup, func() { _ = os.Remove(tmpFile) })
 		file = tmpFile

@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	neturl "net/url"
+	"regexp"
+	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
@@ -47,6 +51,29 @@ func (r *Runner) toServerError(err error) error {
 		return err
 	}
 
+	// A name that the SDK could not resolve to an id is reported as v1 did:
+	// "referenceByName: no matching items found" (commandError, exit code 4).
+	if name, ok := unresolvedName(apiErr, r.directNameLookup); ok {
+		notFound := cmderrors.NewUserErrorWithExitCode(
+			cmderrors.ExitNotFound404,
+			cmderrors.NewNoMatchesFoundError(name),
+		)
+		notFound.StatusCode = http.StatusNotFound
+		return notFound
+	}
+
+	detail := parseServerError(apiErr)
+
+	// A failed request of an assert command (e.g. the lookup of the device)
+	// is a plain command error ("METHOD url: status type message") as in v1.
+	if r.assert != nil && detail != nil {
+		return cmderrors.CommandError{
+			Message:   detail.Error(),
+			ErrorType: cmderrors.ErrTypeCommand,
+			ExitCode:  cmderrors.ExitError,
+		}
+	}
+
 	var body json.RawMessage
 	if apiErr.MessageRaw != "" && json.Valid([]byte(apiErr.MessageRaw)) {
 		body = json.RawMessage(apiErr.MessageRaw)
@@ -56,17 +83,164 @@ func (r *Runner) toServerError(err error) error {
 		url = apiErr.Response.Request.URL.Path
 	}
 
+	// A failed request the command marked with UserErrorRequests (e.g. the
+	// bootstrap user of microservices serviceusers get) is a user error (exit
+	// code 101), whatever the status, as in v1.
+	if detail != nil && r.userErrorPath != "" && strings.HasSuffix(url, r.userErrorPath) {
+		return cmderrors.NewUserError(detail)
+	}
+
+	// The error is shaped like the v1 ErrorResponse: the message is the server's
+	// message, the error carries "METHOD url: status type message" and, as JSON
+	// (--withError), the {error, message, info} of the response. The raw body is
+	// printed below the message unless --withError sends it to stdout.
+	var wrapped error = apiErr
+	if detail != nil {
+		wrapped = detail
+	}
+	message := apiErr.Message
+	if detail != nil {
+		message = detail.Message
+	}
+
 	return cmderrors.CommandError{
-		Message:         apiErr.Message,
+		Message:         message,
 		ErrorType:       cmderrors.ErrTypeServer,
 		StatusCode:      status,
 		ExitCode:        cmderrors.ExitCodeFromStatusCode(status),
 		URL:             url,
 		CumulocityError: body,
-		Err:             err,
-		WithRawMessage:  r.Config.WithError(),
+		Err:             wrapped,
+		WithRawMessage:  !r.Config.WithError(),
 		IO:              r.Factory.IOStreams,
 	}
+}
+
+// UserErrorRequests makes a failed request whose url path ends with
+// pathSuffix a user error (commandError, exit code 101) in the v1 format
+// "METHOD url: status type message". v1 did this for a few hand-written
+// commands only (e.g. the bootstrap user lookup of microservices serviceusers
+// get); the generated command of the same endpoint kept the server error.
+func (r *Runner) UserErrorRequests(pathSuffix string) {
+	r.userErrorPath = pathSuffix
+}
+
+// DirectNameLookup marks a command whose own request is a lookup by name
+// (usergroups getByName): its 404 is a server error as in v1, not an
+// unresolved name reference.
+func (r *Runner) DirectNameLookup() {
+	r.directNameLookup = true
+}
+
+// WaitRequestError turns the HTTP error that ended a wait command (operations
+// wait, inventory wait) into the command error v1 gave: "METHOD url: status
+// type message", commandError, exit code 100. Other errors are returned as is.
+func WaitRequestError(err error) error {
+	var apiErr *core.Error
+	if err == nil || !errors.As(err, &apiErr) || apiErr.StatusCode() < 100 {
+		return err
+	}
+	detail := parseServerError(apiErr)
+	if detail == nil {
+		return err
+	}
+	return cmderrors.CommandError{
+		Message:   detail.Error(),
+		ErrorType: cmderrors.ErrTypeCommand,
+		ExitCode:  cmderrors.ExitError,
+	}
+}
+
+// ServerResponseError is the error of a failed request in the format of the
+// v1 client: it prints as "METHOD url: status type message" and marshals to
+// the error body of the server ({error, message, info}).
+type ServerResponseError struct {
+	Method     string `json:"-"`
+	URL        string `json:"-"`
+	StatusCode int    `json:"-"`
+	ErrorType  string `json:"error,omitempty"`
+	Message    string `json:"message,omitempty"`
+	Info       string `json:"info,omitempty"`
+
+	err error
+}
+
+func (e *ServerResponseError) Error() string {
+	return fmt.Sprintf("%s %s: %d %s %s", e.Method, e.URL, e.StatusCode, e.ErrorType, e.Message)
+}
+
+// Unwrap gives access to the SDK error (status code checks, errors.As).
+func (e *ServerResponseError) Unwrap() error { return e.err }
+
+// parseServerError reads the error body of the server. It returns nil when
+// the request is not known (no response) so the caller keeps the SDK error.
+func parseServerError(apiErr *core.Error) *ServerResponseError {
+	if apiErr.Response == nil || apiErr.Response.Request == nil || apiErr.Response.Request.URL == nil {
+		return nil
+	}
+	e := &ServerResponseError{
+		Method:     apiErr.Response.Request.Method,
+		URL:        sanitizeURL(apiErr.Response.Request.URL),
+		StatusCode: apiErr.StatusCode(),
+		err:        apiErr,
+	}
+	var body struct {
+		Error    string   `json:"error"`
+		Message  string   `json:"message"`
+		Messages []string `json:"messages"`
+		Info     string   `json:"info"`
+	}
+	if apiErr.MessageRaw != "" && json.Unmarshal([]byte(apiErr.MessageRaw), &body) == nil {
+		e.ErrorType = body.Error
+		e.Message = body.Message
+		if e.Message == "" {
+			e.Message = strings.Join(body.Messages, "; ")
+		}
+		e.Info = body.Info
+		if e.Message != "" || e.ErrorType != "" {
+			return e
+		}
+	}
+	// no usable error body (e.g. an HTML page of a proxy): keep the text the SDK derived
+	e.ErrorType, e.Info = "", ""
+	e.Message = apiErr.Message
+	return e
+}
+
+// sanitizeURL is the url of a request without the secrets in its query.
+func sanitizeURL(u *neturl.URL) string {
+	q := u.Query()
+	if q.Get("client_secret") == "" {
+		return u.String()
+	}
+	q.Set("client_secret", "REDACTED")
+	clean := *u
+	clean.RawQuery = q.Encode()
+	return clean.String()
+}
+
+var nameLookupRe = regexp.MustCompile(`not found with name[:=]\s*(.+?)(?:,\s*\w+[:=].*)?$`)
+
+// unresolvedName returns the name of a lookup by name that found nothing: the
+// SDK's "<thing> not found with name: <name>", or the 404 of the group name
+// endpoint (unless that request is the command itself, see DirectNameLookup).
+// A 404 of an id is a normal server error.
+func unresolvedName(apiErr *core.Error, directNameLookup bool) (string, bool) {
+	if apiErr.StatusCode() != http.StatusNotFound {
+		return "", false
+	}
+	if apiErr.Response == nil {
+		if m := nameLookupRe.FindStringSubmatch(apiErr.Message); m != nil {
+			return m[1], true
+		}
+		return "", false
+	}
+	if req := apiErr.Response.Request; !directNameLookup && req != nil && req.URL != nil {
+		if _, name, ok := strings.Cut(req.URL.Path, "/groupByName/"); ok && name != "" {
+			return name, true
+		}
+	}
+	return "", false
 }
 
 // errorDocument converts an item error into the JSON document emitted to stdout
@@ -118,10 +292,14 @@ func (r *Runner) collapseErrors(errs []error) error {
 	case 1:
 		return r.toServerError(errs[0])
 	default:
-		return cmderrors.NewErrorWithExitCode(
+		aggregate := cmderrors.NewErrorWithExitCode(
 			cmderrors.ExitCompletedWithErrors,
 			nil,
 			fmt.Sprintf("jobs completed with %d errors", len(errs)),
 		)
+		// The assert commands of v1 did not print a summary line: the
+		// assertion errors were all reported, and the exit code says the rest.
+		aggregate.Processed = r.assert != nil
+		return aggregate
 	}
 }

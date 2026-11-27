@@ -73,6 +73,9 @@ func (n *GetByNameCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// a group which is not found is a server error, not an unresolved reference
+	r.DirectNameLookup()
+
 	if err := r.InputFlag("name"); err != nil {
 		return err
 	}

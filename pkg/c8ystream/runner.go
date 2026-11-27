@@ -14,6 +14,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileguard"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
@@ -72,6 +73,9 @@ type Runner struct {
 	submission   *submission     // confirmation + delays; nil when neither applies
 	assert       *assertion      // set by Assert; nil for other commands
 	filters      []string        // filters of the command itself (see Filter)
+
+	userErrorPath    string // see UserErrorRequests
+	directNameLookup bool   // see DirectNameLookup
 
 	viewDefinition  *dataview.Definition // the view applied to the output; its column widths apply to tables
 	consoleRenderer *consoleRenderer     // the table/json renderer; nil for csv/tsv
@@ -222,6 +226,12 @@ func (r *Runner) InputFlag(name string) error {
 	pipeOpts.Disabled = pipeOpts.Disabled || r.stdinDisabled()
 	iter, err := flags.NewFlagWithPipeIterator(r.Cmd, pipeOpts, true)
 	if err != nil {
+		if name == "device" && errors.Is(err, fileguard.ErrDenied) && r.assert == nil && !devicePathCommand(r.Cmd) {
+			// A denied file of the source device filter is a user error (exit
+			// code 101), unlike a denied file of a path argument (--id) or of an
+			// assert command, as in v1.
+			return cmderrors.NewUserError(err)
+		}
 		return err
 	}
 	if iter != nil {
@@ -239,6 +249,21 @@ func (r *Runner) InputFlag(name string) error {
 	r.primaryName = name
 	r.detectPipeOverride()
 	return nil
+}
+
+// devicePathCommands are the commands whose --device is a path argument rather
+// than a filter or body property; v1 reported a denied file there as an
+// unexpected error (exit code 100).
+var devicePathCommands = []string{" devices services ", " identity ", " remoteaccess "}
+
+func devicePathCommand(cmd *cobra.Command) bool {
+	path := cmd.CommandPath() + " "
+	for _, c := range devicePathCommands {
+		if strings.Contains(path, c) {
+			return true
+		}
+	}
+	return false
 }
 
 // stdinDisabled reports whether reading piped input from stdin is turned off

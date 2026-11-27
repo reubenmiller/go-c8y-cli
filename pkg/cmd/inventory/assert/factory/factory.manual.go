@@ -83,6 +83,9 @@ func New(cmd *cobra.Command, f *cmdutil.Factory, a Assert) *cobra.Command {
 		if err != nil {
 			return err
 		}
+		// before InputFlag: a denied file of an assert command is an
+		// unexpected error (exit code 100), as in v1
+		r.Assert(strict)
 		if err := r.InputFlag(flag); err != nil {
 			return err
 		}
@@ -90,7 +93,6 @@ func New(cmd *cobra.Command, f *cmdutil.Factory, a Assert) *cobra.Command {
 		if err != nil {
 			return err
 		}
-		r.Assert(strict)
 		return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 			ref := in.String(flag)
 			if a.Target != Tenant {
@@ -158,7 +160,10 @@ func RunWait(cmd *cobra.Command, f *cmdutil.Factory, flag string, check Check) e
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		state := check(client, in, in.String(flag))
 		return func(ctx context.Context) any {
-			return c8ywait.Seq(c8ywait.Until(ctx, opts, state))
+			doc, err := c8ywait.Until(ctx, opts, state)
+			// A failed request ends the wait with a command error (exit code
+			// 100), not a server error, as in v1.
+			return c8ywait.Seq(doc, c8ystream.WaitRequestError(err))
 		}, nil
 	})
 }

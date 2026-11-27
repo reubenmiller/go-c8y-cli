@@ -130,10 +130,21 @@ tests:
         C8Y_SETTINGS_FILES_DENIEDPATHS: testdata/fileguard/sessions
     command: >
       c8y events list --device testdata/fileguard/sessions/ids.txt --dry
-    exit-code: 100
+    exit-code: 101
     stdout:
       not-contains:
         - /event/events
+    stderr:
+      contains:
+        - access to the file is denied
+
+  It reports a denied device file of an assert command as an unexpected error:
+    config:
+      env:
+        C8Y_SETTINGS_FILES_DENIEDPATHS: testdata/fileguard/sessions
+    command: >
+      c8y events assert count --device testdata/fileguard/sessions/ids.txt
+    exit-code: 100
     stderr:
       contains:
         - access to the file is denied

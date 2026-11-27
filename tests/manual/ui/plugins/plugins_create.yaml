@@ -67,7 +67,7 @@ tests:
   It rejects a file which is not a plugin:
     command: |
       c8y ui plugins create --file testdata/ui-plugin/not-a-plugin.zip
-    exit-code: 101
+    exit-code: 100
     stderr:
       contains:
         - The given file is not a UI plugin or blueprint
@@ -75,4 +75,4 @@ tests:
   It fails when the file does not exist:
     command: |
       c8y ui plugins create --file testdata/ui-plugin/does-not-exist.zip
-    exit-code: 101
+    exit-code: 100
