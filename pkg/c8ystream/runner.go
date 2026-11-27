@@ -75,13 +75,13 @@ type Runner struct {
 	assert       *assertion      // set by Assert; nil for other commands
 	filters      []string        // filters of the command itself (see Filter)
 
-	userErrorPath     string // see UserErrorRequests
-	lookupStyled      bool
-	lookupPrefix      string
-	lookupExitCode    cmderrors.ExitCode
-	directNameLookup  bool // see DirectNameLookup
-	noDefaultPageSize bool // see NoDefaultPageSize
-	getPageSize       int  // page size of the GET requests of a call (0: none), see defaultPageSizeHook
+	userErrorPath     string             // see UserErrorRequests
+	lookupStyled      bool               // see LookupFailureStyle
+	lookupPrefix      string             // see LookupFailureStyle
+	lookupExitCode    cmderrors.ExitCode // see LookupFailureStyle
+	directNameLookup  bool               // see DirectNameLookup
+	noDefaultPageSize bool               // see NoDefaultPageSize
+	getPageSize       int                // page size of the GET requests of a call (0: none), see defaultPageSizeHook
 
 	viewMu          sync.Mutex           // guards viewResp against the response middleware
 	viewResp        *viewResponse        // the latest response, which --view auto matches

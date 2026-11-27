@@ -91,7 +91,8 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		id, err := serviceref.ResolveID(in.ResolveContext(), client, serviceref.First(in.StringSlice("device")), in.String("id"))
+		idRef := in.String("id")
+		id, err := serviceref.ResolveID(in.ResolveContextFor("device"), client, serviceref.First(in.StringSlice("device")), idRef)
 		if err != nil {
 			return nil, err
 		}

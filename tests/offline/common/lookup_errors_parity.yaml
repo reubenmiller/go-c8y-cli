@@ -138,6 +138,20 @@ tests:
     stderr:
       match-pattern: 'commandError: failed to lookup by name. Could not fetch by id: Get "http://127.0.0.1:1/inventory/managedObjects\?[^"]*": .*connection refused$'
 
+  It reports a refused connection of the lookup of a device service and of its device:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y devices services get --device 1 --id svc1 2>&1 >/dev/null | sed -n 's/.*\(commandError: Could not fetch by id: Get "http:\/\/127.0.0.1:1\/inventory\/managedObjects\).*/\1/p' | head -1
+      C8Y_HOST=http://127.0.0.1:1 c8y devices services get --device 1 --id svc1 >/dev/null 2>&1 || echo "service=$?"
+      C8Y_HOST=http://127.0.0.1:1 c8y devices services delete --device dev1 --id svc1 2>&1 >/dev/null | sed -n 's/.*\(commandError: failed to lookup by name. Could not fetch by id: \).*/\1/p' | head -1
+      C8Y_HOST=http://127.0.0.1:1 c8y devices services delete --device dev1 --id svc1 >/dev/null 2>&1 || echo "device=$?"
+    exit-code: 0
+    stdout:
+      exactly: |
+        commandError: Could not fetch by id: Get "http://127.0.0.1:1/inventory/managedObjects
+        service=101
+        commandError: failed to lookup by name. Could not fetch by id: 
+        device=100
+
   It reports a refused connection of the lookup of the hosted application of createHostedApplication with exit code 100:
     command: |
       C8Y_HOST=http://127.0.0.1:1 c8y applications createHostedApplication --name myapp --key k --contextPath c --resourcesUrl /
@@ -193,6 +207,24 @@ tests:
         smartgroups=4
         deviceprofiles=4
         configuration=4
+
+  It reports a device service and a device of a device service command which match nothing:
+    command: |
+      id=$(c8y devices create --name lookupErrorsServiceDevice01 --select id -o csv)
+      c8y devices services get --device "$id" --id nosuchservice 2>&1 >/dev/null | grep -o 'commandError: referenceByName: no matching items found. name=nosuchservice'
+      c8y devices services get --device "$id" --id nosuchservice >/dev/null 2>&1 || echo "service=$?"
+      c8y devices services update --device lookupErrorsServiceDevice01 --id nosuchservice --status up >/dev/null 2>&1 || echo "update=$?"
+      c8y devices services delete --device nosuchdevice --id nosuchservice 2>&1 >/dev/null | grep -o 'commandError: reference by name: no matches found'
+      c8y devices services delete --device nosuchdevice --id nosuchservice >/dev/null 2>&1 || echo "device=$?"
+      c8y devices delete --id "$id" >/dev/null 2>&1
+    exit-code: 0
+    stdout:
+      exactly: |
+        commandError: referenceByName: no matching items found. name=nosuchservice
+        service=4
+        update=4
+        commandError: reference by name: no matches found
+        device=100
 
   It reports a name which matches nothing as no matches for a flag which does not drive the command:
     command: |
