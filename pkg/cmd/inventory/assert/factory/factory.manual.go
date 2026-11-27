@@ -86,6 +86,7 @@ func New(cmd *cobra.Command, f *cmdutil.Factory, a Assert) *cobra.Command {
 		// before InputFlag: a denied file of an assert command is an
 		// unexpected error (exit code 100), as in v1
 		r.Assert(strict)
+		r.NoDefaultPageSize()
 		if err := r.InputFlag(flag); err != nil {
 			return err
 		}
@@ -150,6 +151,7 @@ func RunWait(cmd *cobra.Command, f *cmdutil.Factory, flag string, check Check) e
 	if err != nil {
 		return err
 	}
+	r.NoDefaultPageSize()
 	if err := r.InputFlag(flag); err != nil {
 		return err
 	}

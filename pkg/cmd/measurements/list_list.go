@@ -103,7 +103,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	paging, err := r.Pagination()
+	paging, err := r.PaginationByPage()
 	if err != nil {
 		return err
 	}

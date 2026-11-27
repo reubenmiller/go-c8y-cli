@@ -132,6 +132,14 @@ func (r *Runner) DirectNameLookup() {
 	r.directNameLookup = true
 }
 
+// NoDefaultPageSize keeps the GET requests of the command free of the default
+// page size, which the requests of a command get otherwise (see
+// defaultPageSizeHook). The wait and assert commands poll a state; v2.59.0 sent
+// their requests without a page size.
+func (r *Runner) NoDefaultPageSize() {
+	r.noDefaultPageSize = true
+}
+
 // WaitRequestError turns the HTTP error that ended a wait command (operations
 // wait, inventory wait) into the command error v1 gave: "METHOD url: status
 // type message", commandError, exit code 100. Other errors are returned as is.

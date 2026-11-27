@@ -12,16 +12,75 @@ Modes:
   ok           answers with JSON (default)
   slow         waits 2 seconds before it answers
   unavailable  answers 503
+  notfound     answers every GET with 404 and the error of the platform
+  data         answers the collections (events, alarms, measurements, operations,
+               audit records and managed objects) with 8 items each, filtered by
+               dateFrom/dateTo (inclusive) and by an "_id gt 'N'" in the query, newest
+               first (oldest first with revert=true or an "$orderby=_id asc"), and
+               paged by currentPage and pageSize, like the platform does
   escaped      answers a list with the "<", ">" and "&" of the names escaped (as Go's
                encoding/json writes them: the six characters backslash-u-0-0-3-c etc.)
 """
 import json
+import re
 import sys
 import time
+from urllib.parse import parse_qs, urlencode, urlparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 port_file, log_file = sys.argv[1], sys.argv[2]
 mode = sys.argv[3] if len(sys.argv) > 3 else "ok"
+
+
+COLLECTIONS = {
+    "/event/events": "events",
+    "/alarm/alarms": "alarms",
+    "/measurement/measurements": "measurements",
+    "/devicecontrol/operations": "operations",
+    "/audit/auditRecords": "auditRecords",
+    "/inventory/managedObjects": "managedObjects",
+}
+TOTAL = 8
+
+
+def stamp(n):
+    return "2024-01-01T10:00:%02d.000Z" % n
+
+
+def data_page(path, query):
+    """The page of a collection: 8 items with the ids 1 to 8, the time of item n is n seconds."""
+    q = {k: v[0] for k, v in parse_qs(query).items()}
+    items = list(range(1, TOTAL + 1))
+    text = q.get("query", "") + " " + q.get("q", "")
+    # time filters (the platform keeps the items with dateFrom <= time <= dateTo)
+    if q.get("dateTo"):
+        items = [n for n in items if stamp(n) <= q["dateTo"]]
+    if q.get("dateFrom"):
+        items = [n for n in items if stamp(n) >= q["dateFrom"]]
+    m = re.search(r"_id gt '(\d+)'", text)
+    if m:
+        items = [n for n in items if n > int(m.group(1))]
+    ascending = q.get("revert") == "true" or "_id asc" in text
+    items.sort(reverse=not ascending)
+    total = len(items)
+    size = int(q.get("pageSize", 5))
+    page = int(q.get("currentPage", 1))
+    items = items[(page - 1) * size:page * size]
+    key = COLLECTIONS[path]
+    out = []
+    for n in items:
+        item = {"id": str(n), "time": stamp(n), "creationTime": stamp(n), "type": "t", "source": {"id": "1"}, "name": "n%d" % n}
+        if key == "managedObjects":
+            item.pop("time")
+        out.append(item)
+    base = "http://127.0.0.1:%d%s" % (server.server_address[1], path)
+    result = {"next": None, "self": base + "?" + urlencode(q), key: out, "statistics": {"currentPage": page, "pageSize": size}}
+    result.pop("next")
+    if page * size < total:
+        nxt = dict(q)
+        nxt["currentPage"] = str(page + 1)
+        result["next"] = base + "?" + urlencode(nxt)
+    return result
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -55,6 +114,10 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?")[0]
         if mode == "unavailable":
             status, out = 503, {}
+        elif mode == "notfound" and self.command == "GET":
+            status, out = 404, {"error": "inventory/Not Found", "message": "Finding device data from database failed", "info": "https://cumulocity.com/api"}
+        elif mode == "data" and self.command == "GET" and path in COLLECTIONS:
+            out = data_page(path, urlparse(self.path).query)
         elif path.endswith("/emptyarr"):
             out = []
         elif path.endswith("/arr"):

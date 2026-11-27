@@ -1,16 +1,16 @@
 ##### curl (shell)
 
 ```sh
-curl -X POST 'https://{host}/devicecontrol/bulkNewDeviceRequests' -H 'Accept: application/json' -H 'Authorization: Basic {base64 tenant/username:password}' -F 'file=@devices.csv;type=text/csv'
+curl -X POST 'https://{host}/devicecontrol/bulkNewDeviceRequests' -H 'Accept: application/json' -H 'Authorization: Basic {base64 tenant/username:password}' -F 'file=@input1.txt'
 ```
 
 ##### curl (PowerShell)
 
 ```powershell
-curl -X POST 'https://{host}/devicecontrol/bulkNewDeviceRequests' -H 'Accept: application/json' -H 'Authorization: Basic {base64 tenant/username:password}' -F 'file=@devices.csv;type=text/csv'
+curl -X POST 'https://{host}/devicecontrol/bulkNewDeviceRequests' -H 'Accept: application/json' -H 'Authorization: Basic {base64 tenant/username:password}' -F 'file=@input1.txt'
 ```
 
-##### file: devices.csv
+##### file: input1.txt
 
 
 ```text/plain

@@ -68,6 +68,8 @@ func (n *QueryCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// the Data Hub api does not take the page size of the Cumulocity collections
+	r.NoDefaultPageSize()
 
 	if err := r.InputFlag("sql"); err != nil {
 		return err

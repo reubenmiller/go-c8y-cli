@@ -297,11 +297,11 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 			}
 			requestHost = urlHost
 		}
+		// The paging flags and the default page size replace the paging
+		// parameters of the url (v2.59.0: "?pageSize=7" is sent as
+		// "pageSize=20", or the value of --pageSize)
 		for key, values := range paging {
-			// The url's own paging parameters win
-			if !query.Has(key) {
-				query[key] = values
-			}
+			query[key] = values
 		}
 
 		opts := apiv2.RequestOptions{
