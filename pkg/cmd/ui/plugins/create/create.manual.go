@@ -219,6 +219,8 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// v2.59.0 sent the requests of this command without a page size
+	r.NoDefaultPageSize()
 	client, err := r.Client()
 	if err != nil {
 		return err

@@ -37,6 +37,8 @@ func (c *PluginCmd) Run(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
+	// v2.59.0 sent the requests of the ui applications plugins commands without a page size
+	r.NoDefaultPageSize()
 	if err := r.InputFlag("application"); err != nil {
 		return err
 	}

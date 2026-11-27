@@ -32,6 +32,8 @@ func run(cmd *cobra.Command, f *cmdutil.Factory, authType string, password secre
 	if err != nil {
 		return err
 	}
+	// v2.59.0 sent the requests of the bulk registration commands without a page size
+	r.NoDefaultPageSize()
 	if err := r.InputFlag("id"); err != nil {
 		return err
 	}

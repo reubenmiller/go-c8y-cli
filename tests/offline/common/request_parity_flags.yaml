@@ -197,6 +197,36 @@ tests:
         GET /inventory/managedObjects/1
         GET /inventory/managedObjects/1
 
+  The manual commands which sent no page size in v2.59.0 send none:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=20 C8Y_SETTINGS_CI=true
+      c8y deviceregistration register-basic --id dev01 >/dev/null 2>&1
+      c8y ui applications plugins delete --application 1 --plugin 1 >/dev/null 2>&1
+      requests | grep '^GET' | sed -n 1,2p
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /identity/externalIds/c8y_Serial/dev01
+        GET /application/applications/1
+
+  The Data Hub job commands send the page size (the results as the limit):
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=20
+      c8y datahub jobs get --id 1 >/dev/null
+      c8y datahub jobs listresults --id 1 >/dev/null
+      c8y datahub jobs listresults --id 1 --pageSize 7 --offset 2 >/dev/null
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /service/datahub/dremio/api/v3/job/1?pageSize=20
+        GET /service/datahub/dremio/api/v3/job/1/results?limit=20
+        GET /service/datahub/dremio/api/v3/job/1/results?limit=7&offset=2
+
   The failed get request, and its log line, have the page size:
     command: |
       . ./offline/common/request_lib.sh

@@ -6,6 +6,7 @@ package jobs
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
@@ -67,7 +68,7 @@ func (n *ListResultsCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	// the Data Hub api does not take the page size of the Cumulocity collections
+	// the page size is sent as the limit of the rows (as in v2.59.0), not as pageSize
 	r.NoDefaultPageSize()
 
 	if err := r.InputFlag("id"); err != nil {
@@ -81,11 +82,18 @@ func (n *ListResultsCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// offset is a single query parameter shared across piped ids.
 	offset, _ := cmd.Flags().GetInt("offset")
+	limit := 0
+	if common, err := r.Config.GetOutputCommonOptions(cmd); err == nil {
+		limit = common.PageSize
+	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		id := in.String("id")
 		opt := jobs.ResultsOptions{Offset: offset}
 		return func(ctx context.Context) any {
+			if limit > 0 {
+				ctx = c8ystream.WithQueryParam(ctx, "limit", strconv.Itoa(limit))
+			}
 			return output.FromIterator(client.DataHub.Jobs.GetResults(ctx, id, opt).Items())
 		}, nil
 	})
