@@ -234,12 +234,27 @@ func subscribeStream(ctx context.Context, client *apiv2.Client, opts notificatio
 				ExitCode:  cmderrors.ExitError,
 			}
 		}
+		// The token request failed with an HTTP error: as in v2.59.0 a command
+		// error "METHOD url: status type message" (exit code 100), whatever the
+		// status.
+		if httpErr, ok := c8ystream.HTTPCommandError(err); ok {
+			return nil, httpErr
+		}
 		return nil, err
 	}
 	nc.SetConnector(connector)
 	if err := nc.ConnectContext(ctx); err != nil {
 		_ = nc.Close()
-		return nil, err
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return nil, err
+		}
+		// The websocket could not be opened (e.g. the handshake was rejected):
+		// as in v2.59.0 a command error with exit code 100.
+		return nil, cmderrors.CommandError{
+			ErrorType: cmderrors.ErrTypeCommand,
+			Message:   err.Error(),
+			ExitCode:  cmderrors.ExitError,
+		}
 	}
 
 	// The client delivers the messages to ch. Forward them to the stream until

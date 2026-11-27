@@ -1,0 +1,164 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# The errors of v2.59.0 when the websocket of a realtime command cannot be opened, against a
+# server which answers the websocket upgrade with a plain 200 (so the handshake fails) and
+# every /notification2/* request with 403: the commands exit 100 (commandError).
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+tests:
+  realtime subscribe exits 100 when the websocket handshake fails:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-403
+      c8y realtime subscribe --channel '/measurements/*' --duration 1s
+    exit-code: 100
+    stderr:
+      contains:
+        - 'commandError: could not create realtime client. websocket: bad handshake'
+
+  events subscribe exits 100 when the websocket handshake fails:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-403
+      c8y events subscribe --device 1 --duration 1s
+    exit-code: 100
+    stderr:
+      contains:
+        - 'commandError: could not create realtime client. websocket: bad handshake'
+
+  alarms subscribe exits 100 when the websocket handshake fails:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-403
+      c8y alarms subscribe --device 1 --duration 1s
+    exit-code: 100
+    stderr:
+      contains:
+        - 'commandError: could not create realtime client. websocket: bad handshake'
+
+  measurements subscribe exits 100 when the websocket handshake fails:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-403
+      c8y measurements subscribe --device 1 --duration 1s
+    exit-code: 100
+    stderr:
+      contains:
+        - 'commandError: could not create realtime client. websocket: bad handshake'
+
+  operations subscribe exits 100 when the websocket handshake fails:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-403
+      c8y operations subscribe --device 1 --duration 1s
+    exit-code: 100
+    stderr:
+      contains:
+        - 'commandError: could not create realtime client. websocket: bad handshake'
+
+  inventory subscribe exits 100 when the websocket handshake fails:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-403
+      c8y inventory subscribe --device 1 --duration 1s
+    exit-code: 100
+    stderr:
+      contains:
+        - 'commandError: could not create realtime client. websocket: bad handshake'
+
+  realtime subscribeAll exits 100 when the websocket handshake fails:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-403
+      c8y realtime subscribeAll --duration 1s
+    exit-code: 100
+    stderr:
+      contains:
+        - 'commandError: could not create realtime client. websocket: bad handshake'
+
+  realtime subscribe --withError prints the command error as JSON when the websocket handshake fails:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-403
+      c8y realtime subscribe --channel '/measurements/*' --duration 1s --withError
+    exit-code: 100
+    stdout:
+      contains:
+        - '"errorType":"commandError"'
+        - '"message":"could not create realtime client. websocket: bad handshake"'
+    stderr:
+      contains:
+        - 'commandError: could not create realtime client. websocket: bad handshake'
+
+  notification2 subscriptions subscribe exits 100 when the token request answers 403:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-403
+      c8y notification2 subscriptions subscribe --name x --duration 1s
+    exit-code: 100
+    stderr:
+      contains:
+        - ': 403 security/Forbidden Access is denied'
+        - 'commandError: POST http'
+
+  notification2 subscriptions subscribe exits 100 when the token request answers 401:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-401
+      c8y notification2 subscriptions subscribe --name x --duration 1s
+    exit-code: 100
+    stderr:
+      contains:
+        - ': 401 security/Forbidden Access is denied'
+        - 'commandError: POST http'
+
+  notification2 subscriptions subscribe exits 100 when the token request answers 404:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-404
+      c8y notification2 subscriptions subscribe --name x --duration 1s
+    exit-code: 100
+    stderr:
+      contains:
+        - ': 404 security/Forbidden Access is denied'
+        - 'commandError: POST http'
+
+  notification2 subscriptions subscribe exits 100 when the token request answers 500:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-500
+      c8y notification2 subscriptions subscribe --name x --duration 1s
+    exit-code: 100
+    stderr:
+      contains:
+        - ': 500 security/Forbidden Access is denied'
+        - 'commandError: POST http'
+
+  notification2 subscriptions subscribe --withError prints the failed token request as a command error:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-403
+      c8y notification2 subscriptions subscribe --name x --duration 1s --withError
+    exit-code: 100
+    stdout:
+      contains:
+        - '"errorType":"commandError"'
+        - '/notification2/token: 403 security/Forbidden Access is denied"'
+
+  notification2 subscriptions subscribe --dry connects without a token and exits 100 when the handshake fails:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server wsfail-403
+      c8y notification2 subscriptions subscribe --name x --duration 1s --dry
+    exit-code: 100
+    stdout:
+      contains:
+        - '"method":"POST"'
+        - '"path":"/notification2/token"'
+    stderr:
+      contains:
+        - 'Failed to establish connection. websocket: bad handshake'
+        - 'commandError: websocket: bad handshake'
