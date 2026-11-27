@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	neturl "net/url"
-	"regexp"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
@@ -48,6 +47,17 @@ func (r *Runner) toServerError(err error) error {
 			IO:        r.Factory.IOStreams,
 		}
 	}
+	// A request which got no response while a name was being resolved is a
+	// command error, as v2.59.0 reported it (see LookupTransportError). The
+	// transport error of the request the command asked for stays below.
+	if lookupErr, ok := r.lookupTransportError(err, false); ok {
+		return lookupErr
+	}
+	// A name that the SDK could not resolve to an id is reported as v1 did:
+	// "referenceByName: no matching items found" (commandError, exit code 4).
+	if _, name, ok := core.NameNotFound(err); ok {
+		return UnresolvedNameError(name)
+	}
 	var apiErr *core.Error
 	if !errors.As(err, &apiErr) || apiErr.StatusCode() < 100 {
 		// Not an HTTP error. Code < 100 is a sentinel (ErrorFromError/String/...),
@@ -68,9 +78,9 @@ func (r *Runner) toServerError(err error) error {
 	}
 	status := apiErr.StatusCode()
 
-	// A name that the SDK could not resolve to an id is reported as v1 did:
-	// "referenceByName: no matching items found" (commandError, exit code 4).
-	if name, ok := unresolvedName(apiErr, r.directNameLookup); ok {
+	// The 404 of the endpoint which looks a user group up by name is an
+	// unresolved name too
+	if name, ok := unresolvedGroupName(apiErr, r.directNameLookup); ok {
 		return UnresolvedNameError(name)
 	}
 
@@ -147,15 +157,83 @@ func TransportError(err error) (cmderrors.CommandError, bool) {
 	}, true
 }
 
-// IsUnresolvedName reports whether err is an SDK lookup by name which found
-// nothing (the SDK's "<thing> not found with name: <name>").
+// IsUnresolvedName reports whether err is a lookup by name which found nothing
+// (see core.NameNotFound).
 func IsUnresolvedName(err error) bool {
+	if _, _, ok := core.NameNotFound(err); ok {
+		return true
+	}
 	var apiErr *core.Error
 	if !errors.As(err, &apiErr) {
 		return false
 	}
-	_, ok := unresolvedName(apiErr, false)
+	_, ok := unresolvedGroupName(apiErr, false)
 	return ok
+}
+
+// NoMatchesFlagError is the error of the value of a flag, which does not drive
+// the command, when it names nothing: "reference by name: no matches found"
+// (commandError, exit code 100), as v2.59.0 reported it. A name which matches
+// nothing is reported as UnresolvedNameError otherwise.
+func NoMatchesFlagError() error {
+	return cmderrors.CommandError{
+		Message:   "reference by name: no matches found",
+		ErrorType: cmderrors.ErrTypeCommand,
+		ExitCode:  cmderrors.ExitError,
+	}
+}
+
+// lookupTexts are the texts v2.59.0 put in front of the error of a failed
+// request when it looked a name up, by the kind of resource (the Resource of
+// the core.LookupError). The fetchers of v2.59.0 differed per resource: most
+// said "Could not fetch by id", a few had an own text.
+var lookupTexts = map[string]string{
+	"application":                 "",
+	"microservice":                "could not fetch microservices: ",
+	"ui plugin":                   "could not fetch ui plugin: ",
+	"hosted application":          "could not fetch applications: ",
+	"remote access configuration": "could not fetch microservices: ",
+}
+
+// defaultLookupText is the text of the other resources (devices, groups,
+// software, firmware, users, ...).
+const defaultLookupText = "Could not fetch by id: "
+
+// LookupTransportError returns the error v2.59.0 reported when a request got
+// no response (connection refused, TLS verification failure, ...) while a name
+// was being resolved: a command error "Could not fetch by id: <error>" with
+// exit code 101 (the text depends on the resource, see lookupTexts). ok is
+// false for any other error, also for a transport error of the request the
+// command asked for (that stays a serverError, exit code 99), and for an HTTP
+// error of the lookup.
+//
+// secondary is true when the name was the value of a flag which does not drive
+// the command (not the piped flag, e.g. the --device of
+// "remoteaccess configurations get"): v2.59.0 put "failed to lookup by name. "
+// in front of the text and exited with 100.
+func LookupTransportError(err error, secondary bool) (cmderrors.CommandError, bool) {
+	var lookupErr *core.LookupError
+	if !errors.As(err, &lookupErr) {
+		return cmderrors.CommandError{}, false
+	}
+	transportErr, ok := TransportError(lookupErr.Err)
+	if !ok {
+		return cmderrors.CommandError{}, false
+	}
+	text, known := lookupTexts[lookupErr.Resource]
+	if !known {
+		text = defaultLookupText
+	}
+	exitCode := cmderrors.ExitUserError
+	if secondary {
+		text = "failed to lookup by name. " + text
+		exitCode = cmderrors.ExitError
+	}
+	return cmderrors.CommandError{
+		Message:   text + transportErr.Message,
+		ErrorType: cmderrors.ErrTypeCommand,
+		ExitCode:  exitCode,
+	}, true
 }
 
 // UnresolvedNameError is the error of a name which matches nothing, as v1
@@ -177,6 +255,26 @@ func UnresolvedNameError(name string) error {
 // get); the generated command of the same endpoint kept the server error.
 func (r *Runner) UserErrorRequests(pathSuffix string) {
 	r.userErrorPath = pathSuffix
+}
+
+// lookupTransportError is LookupTransportError with the style the command
+// asked for (see LookupFailureStyle).
+func (r *Runner) lookupTransportError(err error, secondary bool) (cmderrors.CommandError, bool) {
+	lookupErr, ok := LookupTransportError(err, secondary)
+	if ok && r.lookupStyled {
+		lookupErr.Message = r.lookupPrefix + lookupErr.Message
+		lookupErr.ExitCode = r.lookupExitCode
+	}
+	return lookupErr, ok
+}
+
+// LookupFailureStyle sets the text and the exit code of the error of a name
+// lookup which got no response (see LookupTransportError), for a command which
+// v2.59.0 reported differently: the text is put in front of the message.
+func (r *Runner) LookupFailureStyle(prefix string, exitCode cmderrors.ExitCode) {
+	r.lookupStyled = true
+	r.lookupPrefix = prefix
+	r.lookupExitCode = exitCode
 }
 
 // DirectNameLookup marks a command whose own request is a lookup by name
@@ -291,20 +389,11 @@ func sanitizeURL(u *neturl.URL) string {
 	return clean.String()
 }
 
-var nameLookupRe = regexp.MustCompile(`not found with name[:=]\s*(.+?)(?:,\s*\w+[:=].*)?$`)
-
-// unresolvedName returns the name of a lookup by name that found nothing: the
-// SDK's "<thing> not found with name: <name>", or the 404 of the group name
-// endpoint (unless that request is the command itself, see DirectNameLookup).
-// A 404 of an id is a normal server error.
-func unresolvedName(apiErr *core.Error, directNameLookup bool) (string, bool) {
-	if apiErr.StatusCode() != http.StatusNotFound {
-		return "", false
-	}
-	if apiErr.Response == nil {
-		if m := nameLookupRe.FindStringSubmatch(apiErr.Message); m != nil {
-			return m[1], true
-		}
+// unresolvedGroupName returns the name of a user group lookup which the group
+// name endpoint answered with 404 (unless that request is the command itself,
+// see DirectNameLookup). A 404 of an id is a normal server error.
+func unresolvedGroupName(apiErr *core.Error, directNameLookup bool) (string, bool) {
+	if apiErr.StatusCode() != http.StatusNotFound || apiErr.Response == nil {
 		return "", false
 	}
 	if req := apiErr.Response.Request; !directNameLookup && req != nil && req.URL != nil {

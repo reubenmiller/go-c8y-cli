@@ -14,15 +14,11 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extexec"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/matcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/repodetails"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/applications"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/firmware/firmwarepatches"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/firmware/firmwareversions"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/software/softwareversions"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/users"
-	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
 	"github.com/spf13/cobra"
 )
 
@@ -91,6 +87,10 @@ func (r *references) withReference(resolve resolveFunc, args []string, opts ...s
 			if errors.Is(err, cmderrors.ErrNoMatchesFound) || c8ystream.IsUnresolvedName(err) {
 				// the text of v2.59.0 for the value of a flag
 				err = errNoMatchesFound
+			} else if lookupErr, ok := c8ystream.LookupTransportError(err, true); ok {
+				// the server could not be reached: as v2.59.0 reported the
+				// lookup of a flag which does not drive the command
+				err = lookupErr
 			}
 			return dst, nil, err
 		}
@@ -141,6 +141,9 @@ func (i *referenceIterator) GetNext() ([]byte, interface{}, error) {
 	}
 	resolved, err := i.refs.resolve(i.resolve, i.cmd, ref)
 	if err != nil {
+		if lookupErr, ok := c8ystream.LookupTransportError(err, false); ok {
+			err = lookupErr
+		}
 		return nil, input, err
 	}
 	return []byte(applyFormat(i.format, resolved)), input, nil
@@ -243,6 +246,10 @@ func resolveConfiguration(ctx context.Context, r *references, _ *cobra.Command, 
 // the software given by the softwareFlag)
 func resolveSoftwareVersion(softwareFlag string) resolveFunc {
 	return func(ctx context.Context, r *references, cmd *cobra.Command, value string) (string, error) {
+		if dependentValue(cmd, softwareFlag) == "" {
+			// as v2.59.0: a version number without its software is looked up in all software
+			return repodetails.VersionWithoutParent(ctx, r.client, repodetails.SoftwareVersionKind, c8ystream.FirstID(value))
+		}
 		ref := versionRef(value, dependentValue(cmd, softwareFlag), softwareversions.NewRef().ByVersion, func(version, name string) string {
 			return softwareversions.NewRef().ByVersionAndName(version, name)
 		})
@@ -254,6 +261,9 @@ func resolveSoftwareVersion(softwareFlag string) resolveFunc {
 // the firmware given by the firmwareFlag)
 func resolveFirmwareVersion(firmwareFlag string) resolveFunc {
 	return func(ctx context.Context, r *references, cmd *cobra.Command, value string) (string, error) {
+		if dependentValue(cmd, firmwareFlag) == "" {
+			return repodetails.VersionWithoutParent(ctx, r.client, repodetails.FirmwareVersionKind, c8ystream.FirstID(value))
+		}
 		ref := versionRef(value, dependentValue(cmd, firmwareFlag), firmwareversions.NewRef().ByVersion, firmwareversions.NewRef().ByVersionAndName)
 		return r.client.Repository.Firmware.Versions.ResolveID(ctx, ref, nil)
 	}
@@ -263,6 +273,9 @@ func resolveFirmwareVersion(firmwareFlag string) resolveFunc {
 // the firmware given by the firmwareFlag)
 func resolveFirmwarePatch(firmwareFlag string) resolveFunc {
 	return func(ctx context.Context, r *references, cmd *cobra.Command, value string) (string, error) {
+		if dependentValue(cmd, firmwareFlag) == "" {
+			return repodetails.VersionWithoutParent(ctx, r.client, repodetails.FirmwarePatchKind, c8ystream.FirstID(value))
+		}
 		ref := versionRef(value, dependentValue(cmd, firmwareFlag), firmwarepatches.NewRef().ByVersion, firmwarepatches.NewRef().ByVersionAndName)
 		return r.client.Repository.Firmware.Patches.ResolveID(ctx, ref, nil)
 	}
@@ -297,7 +310,7 @@ func resolveUser(ctx context.Context, r *references, _ *cobra.Command, value str
 	if !strings.Contains(value, "*") {
 		return r.client.Users.UserID(value), nil
 	}
-	user, found, err := firstUserMatch(ctx, r, value)
+	user, found, err := c8ystream.FirstUserMatch(ctx, r.client, value)
 	if err != nil || !found {
 		return "", err
 	}
@@ -310,7 +323,7 @@ func resolveUserSelf(ctx context.Context, r *references, _ *cobra.Command, value
 	if !strings.Contains(value, "*") {
 		return r.client.Users.UserSelfLink(r.tenant, r.client.Users.UserID(value)), nil
 	}
-	user, found, err := firstUserMatch(ctx, r, value)
+	user, found, err := c8ystream.FirstUserMatch(ctx, r.client, value)
 	if err != nil || !found {
 		return "", err
 	}
@@ -320,56 +333,10 @@ func resolveUserSelf(ctx context.Context, r *references, _ *cobra.Command, value
 	return r.client.Users.UserSelfLink(r.tenant, user.ID()), nil
 }
 
-// firstUserMatch returns the first user whose name matches the pattern. Like
-// v2.59.0 it asks the server for one page of 5 users, filtered by the pattern
-// without its wildcards.
-func firstUserMatch(ctx context.Context, r *references, pattern string) (jsonmodels.User, bool, error) {
-	res := r.client.Users.List(ctx, users.ListOptions{
-		Username:          strings.ReplaceAll(pattern, "*", ""),
-		PaginationOptions: pagination.PaginationOptions{PageSize: 5},
-	})
-	if res.Err != nil {
-		return jsonmodels.User{}, false, res.Err
-	}
-	for user, err := range res.Items() {
-		if err != nil {
-			return jsonmodels.User{}, false, err
-		}
-		if matched, _ := matcher.MatchWithWildcards(user.ID(), pattern); matched {
-			return user, true, nil
-		}
-	}
-	return jsonmodels.User{}, false, nil
-}
-
 // resolveHostedApplication resolves the name of a hosted application (an id
-// is used as is). As in v2.59.0 only hosted applications are matched, the ones
-// owned by the current tenant first; the name must match exactly.
+// is used as is), see c8ystream.ResolveHostedApplication.
 func resolveHostedApplication(ctx context.Context, r *references, _ *cobra.Command, value string) (string, error) {
-	if c8ydata.IsID(value) {
-		return value, nil
-	}
-	for _, owner := range []string{r.tenant, ""} {
-		res := r.client.Applications.List(ctx, applications.ListOptions{
-			Type:              applications.TypeHosted,
-			Owner:             owner,
-			PaginationOptions: pagination.PaginationOptions{PageSize: 2000},
-		})
-		if res.Err != nil {
-			return "", res.Err
-		}
-		for app, err := range res.Items() {
-			if err != nil {
-				return "", err
-			}
-			if app.Name() == value {
-				return app.ID(), nil
-			}
-		}
-		// the applications of other tenants (e.g. cockpit) are only used when
-		// the current tenant has none with the name
-	}
-	return "", nil
+	return c8ystream.ResolveHostedApplication(ctx, r.client, r.tenant, value)
 }
 
 // resolveRole returns the role id (the role name). A name with wildcards is

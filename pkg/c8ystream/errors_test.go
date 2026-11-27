@@ -12,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
@@ -83,10 +84,12 @@ func TestToServerError_withErrorJSON(t *testing.T) {
 func TestToServerError_unresolvedName(t *testing.T) {
 	r := newErrorRunner(false)
 	tests := map[string]error{
-		"nosuch":   core.ErrNotFound("managed object not found with name: %s", "nosuch"),
-		"my app":   core.ErrNotFound("application not found with name: %s, type: %s", "my app", "MICROSERVICE"),
+		"nosuch":   core.NewNameNotFoundError("managed object", "nosuch", "managed object not found with name: %s", "nosuch"),
+		"my app":   core.NewNameNotFoundError("application", "my app", "application not found with name: %s, type: %s", "my app", "MICROSERVICE"),
 		"nogroup":  serverErr("GET", "http://host/user/t1/groupByName/nogroup", 404, `{"error":"user/group/notFound","message":"Not found"}`),
-		"someName": core.ErrNotFound("microservice not found with name: %s", "someName"),
+		"someName": core.WrapLookup("microservice", "name:someName", core.NewNameNotFoundError("microservice", "someName", "microservice not found with name: %s", "someName")),
+		"fw":       core.WrapLookup("firmware", "name:fw", core.NewNameNotFoundError("firmware", "fw", "firmware not found: name=%s", "fw")),
+		"cfg":      core.NewNameNotFoundError("configuration", "cfg", "configuration not found: %s", "cfg"),
 	}
 	for name, in := range tests {
 		ce, ok := r.toServerError(in).(cmderrors.CommandError)
@@ -252,5 +255,166 @@ func TestTransportError_notATransportError(t *testing.T) {
 		if _, ok := TransportError(err); ok {
 			t.Errorf("%s must not be a transport error", name)
 		}
+	}
+}
+
+// TestToServerError_unresolvedNameIsNotMatchedByText checks that the CLI relies
+// on the typed error of the SDK: a 404 which only says so in its text is a
+// normal server error.
+func TestToServerError_unresolvedNameIsNotMatchedByText(t *testing.T) {
+	r := newErrorRunner(false)
+	for _, in := range []error{
+		core.ErrNotFound("managed object not found with name: %s", "nosuch"),
+		core.ErrNotFound("remote access configuration not found: name=%s", "nosuch"),
+	} {
+		ce, ok := r.toServerError(in).(cmderrors.CommandError)
+		if !ok || ce.ErrorType != cmderrors.ErrTypeServer {
+			t.Errorf("%v: want a serverError, got %#v", in, r.toServerError(in))
+		}
+	}
+	if IsUnresolvedName(core.ErrNotFound("managed object not found with name: x")) {
+		t.Error("a text must not make an unresolved name")
+	}
+	if !IsUnresolvedName(core.WrapLookup("managed object", "name:x", core.NewNameNotFoundError("managed object", "x", "x"))) {
+		t.Error("a name not found error is an unresolved name")
+	}
+}
+
+func refused() error {
+	return &url.Error{Op: "Get", URL: "http://127.0.0.1:1/inventory/managedObjects?pageSize=1", Err: errors.New("dial tcp 127.0.0.1:1: connect: connection refused")}
+}
+
+// TestToServerError_transportErrorOfLookup checks the error of a name lookup
+// which got no response, per kind of resource (the texts of v2.59.0).
+func TestToServerError_transportErrorOfLookup(t *testing.T) {
+	r := newErrorRunner(false)
+	tests := []struct {
+		resource string
+		want     string
+	}{
+		{"managed object", "commandError: Could not fetch by id: "},
+		{"firmware", "commandError: Could not fetch by id: "},
+		{"user group", "commandError: Could not fetch by id: "},
+		{"application", "commandError: Get "},
+		{"microservice", "commandError: could not fetch microservices: "},
+		{"ui plugin", "commandError: could not fetch ui plugin: "},
+		{"hosted application", "commandError: could not fetch applications: "},
+		{"remote access configuration", "commandError: could not fetch microservices: "},
+	}
+	for _, tc := range tests {
+		got := r.toServerError(core.WrapLookup(tc.resource, "name:x", refused()))
+		ce, ok := got.(cmderrors.CommandError)
+		if !ok || ce.ErrorType != cmderrors.ErrTypeCommand || ce.ExitCode != cmderrors.ExitUserError {
+			t.Errorf("%s: want a commandError with exit code 101, got %#v", tc.resource, got)
+			continue
+		}
+		want := tc.want + refused().Error()
+		if tc.resource == "application" {
+			want = "commandError: " + refused().Error()
+		}
+		if ce.Error() != want {
+			t.Errorf("%s: Error() = %q, want %q", tc.resource, ce.Error(), want)
+		}
+	}
+
+	// the transport error of the request of the command is a server error
+	ce := r.toServerError(refused()).(cmderrors.CommandError)
+	if ce.ErrorType != cmderrors.ErrTypeServer || ce.ExitCode != cmderrors.ExitUnknownError {
+		t.Errorf("own request: got %s exit=%d, want serverError 99", ce.ErrorType, ce.ExitCode)
+	}
+
+	// an HTTP error of the lookup request is not a transport error
+	ce = r.toServerError(core.WrapLookup("managed object", "name:x", serverErr("GET", "http://host/inventory/managedObjects", 500, `{"error":"x","message":"boom"}`))).(cmderrors.CommandError)
+	if ce.ErrorType != cmderrors.ErrTypeServer || ce.ExitCode != cmderrors.ExitInternalServerError500 {
+		t.Errorf("http error of a lookup: got %s exit=%d, want a serverError", ce.ErrorType, ce.ExitCode)
+	}
+}
+
+func TestLookupTransportError_secondaryFlag(t *testing.T) {
+	ce, ok := LookupTransportError(core.WrapLookup("managed object", "name:x", refused()), true)
+	if !ok || ce.ExitCode != cmderrors.ExitError {
+		t.Fatalf("got %#v ok=%v, want exit code 100", ce, ok)
+	}
+	if want := "commandError: failed to lookup by name. Could not fetch by id: " + refused().Error(); ce.Error() != want {
+		t.Errorf("Error() = %q, want %q", ce.Error(), want)
+	}
+	if _, ok := LookupTransportError(refused(), true); ok {
+		t.Error("a transport error of the request itself is no lookup error")
+	}
+	if _, ok := LookupTransportError(core.WrapLookup("managed object", "x", errors.New("boom")), false); ok {
+		t.Error("only a transport error is turned into the lookup error")
+	}
+}
+
+func TestRunner_lookupFailureStyle(t *testing.T) {
+	r := newErrorRunner(false)
+	r.LookupFailureStyle("failed to find hosted application. ", cmderrors.ExitError)
+	ce := r.toServerError(core.WrapLookup("hosted application", "x", refused())).(cmderrors.CommandError)
+	if ce.ExitCode != cmderrors.ExitError {
+		t.Errorf("exit = %d, want 100", ce.ExitCode)
+	}
+	if want := "commandError: failed to find hosted application. could not fetch applications: " + refused().Error(); ce.Error() != want {
+		t.Errorf("Error() = %q, want %q", ce.Error(), want)
+	}
+}
+
+func TestNoMatchesFlagError(t *testing.T) {
+	ce := NoMatchesFlagError().(cmderrors.CommandError)
+	if ce.Error() != "commandError: reference by name: no matches found" || ce.ExitCode != cmderrors.ExitError {
+		t.Errorf("got %q exit=%d", ce.Error(), ce.ExitCode)
+	}
+}
+
+// TestRunner_buildErrorOfLookup checks the error of a name which is looked up
+// while the call is built: it depends on the flag which holds the name.
+func TestRunner_buildErrorOfLookup(t *testing.T) {
+	cmd := &cobra.Command{}
+	cmd.Flags().StringSlice("id", nil, "")
+	cmd.Flags().StringSlice("device", nil, "")
+	r := newErrorRunner(false)
+	r.Cmd = cmd
+	r.primaryName = "id"
+	in := &Resolver{r: r, ctx: context.Background()}
+
+	notFound := core.WrapLookup("managed object", "name:x", core.NewNameNotFoundError("managed object", "x", "managed object not found with name: x"))
+	lookup := core.WrapLookup("managed object", "name:x", refused())
+
+	// the flag which drives the command
+	in.ResolveContextFor("id")
+	if ce := r.buildError(in, lookup).(cmderrors.CommandError); ce.ExitCode != cmderrors.ExitUserError || ce.Message != "Could not fetch by id: "+refused().Error() {
+		t.Errorf("driver flag, transport: got %q exit=%d", ce.Message, ce.ExitCode)
+	}
+	if got := r.buildError(in, notFound); got != notFound {
+		t.Errorf("driver flag, not found: got %v, want the error unchanged (reported as an unresolved name later)", got)
+	}
+
+	// another flag
+	_ = in.FirstString("device")
+	if ce := r.buildError(in, lookup).(cmderrors.CommandError); ce.ExitCode != cmderrors.ExitError || ce.Message != "failed to lookup by name. Could not fetch by id: "+refused().Error() {
+		t.Errorf("secondary flag, transport: got %q exit=%d", ce.Message, ce.ExitCode)
+	}
+	if ce := r.buildError(in, notFound).(cmderrors.CommandError); ce.Error() != "commandError: reference by name: no matches found" || ce.ExitCode != cmderrors.ExitError {
+		t.Errorf("secondary flag, not found: got %q exit=%d", ce.Error(), ce.ExitCode)
+	}
+
+	// the value of the flag which drives the command, looked up after another
+	// flag was read
+	in.primary = "x"
+	_ = in.FirstString("device")
+	if ce := r.buildError(in, lookup).(cmderrors.CommandError); ce.ExitCode != cmderrors.ExitUserError || ce.Message != "Could not fetch by id: "+refused().Error() {
+		t.Errorf("driver flag read before another flag, transport: got %q exit=%d", ce.Message, ce.ExitCode)
+	}
+	if got := r.buildError(in, notFound); got != notFound {
+		t.Errorf("driver flag read before another flag, not found: got %v, want the error unchanged", got)
+	}
+	in.primary = "y"
+	if ce := r.buildError(in, notFound).(cmderrors.CommandError); ce.ExitCode != cmderrors.ExitError {
+		t.Errorf("secondary flag with another driver value, not found: got %q exit=%d", ce.Error(), ce.ExitCode)
+	}
+
+	// any other error is left alone
+	other := errors.New("boom")
+	if got := r.buildError(in, other); got != other {
+		t.Errorf("got %v, want the error unchanged", got)
 	}
 }

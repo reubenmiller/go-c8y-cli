@@ -54,7 +54,12 @@ func (c *PluginCmd) Run(cmd *cobra.Command) error {
 		return err
 	}
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		app := c8ystream.NameOrID(in.String("application"))
+		// v2.59.0 looked up the name of a hosted application (the ones of the
+		// tenant first) before it changed it
+		app, err := c8ystream.HostedApplicationRef(in.ResolveContext(), client, c.Factory.GetTenant(), in.String("application"))
+		if err != nil {
+			return nil, err
+		}
 		opt := applicationplugins.UpdateOptions{
 			Install:       c.Add,
 			Remove:        c.Remove,

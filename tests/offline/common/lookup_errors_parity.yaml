@@ -1,0 +1,324 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# The errors of the lookup of a name (a device, an application, a firmware, ...) and the
+# requests of the lookups, as v2.59.0 had them. A request which got no response while
+# a name was looked up is a command error (exit code 101, or 100 for a flag which does
+# not drive the command), not the server error (99) of the request of the command itself.
+# The text depends on the resource. A name which matches nothing is reported the same
+# way for every resource. These tests pass on v2.59.0 too, except the one marked as a
+# v2 bug.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+    C8Y_SETTINGS_DEFAULTS_PAGESIZE: " "
+
+tests:
+  #
+  # no response while a name is looked up (nothing listens on port 1)
+  #
+  It reports a refused connection of the lookup of a device as a command error with exit code 101:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y devices get --id dev1
+    exit-code: 101
+    stdout:
+      match-pattern: ^$
+    stderr:
+      match-pattern: 'commandError: Could not fetch by id: Get "http://127.0.0.1:1/inventory/managedObjects\?[^"]*": .*connection refused$'
+      not-contains:
+        - serverError
+
+  It reports a refused connection of the lookup of the device of a list command the same way:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y events list --device dev1
+    exit-code: 101
+    stderr:
+      match-pattern: 'commandError: Could not fetch by id: Get "http://127.0.0.1:1/inventory/managedObjects\?[^"]*": .*connection refused$'
+      not-contains:
+        - serverError
+
+  It reports a refused connection of the lookup of a device of a create command the same way:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y alarms create --device dev1 --type t --text x --severity MAJOR
+    exit-code: 101
+    stderr:
+      match-pattern: 'commandError: Could not fetch by id: Get "http://127.0.0.1:1/inventory/managedObjects\?[^"]*": .*connection refused$'
+
+  It still reports a refused connection of the request of the command itself as a server error:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y events list --device 1
+    exit-code: 99
+    stderr:
+      match-pattern: 'serverError: Get "http://127.0.0.1:1/event/events\?[^"]*": .*connection refused Get '
+      not-contains:
+        - commandError
+
+  It reports a refused connection of the lookup of a remote access device which does not drive the command with exit code 100:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y remoteaccess configurations get --device dev1 --id 1
+    exit-code: 100
+    stderr:
+      match-pattern: 'commandError: failed to lookup by name. Could not fetch by id: Get "http://127.0.0.1:1/inventory/managedObjects\?[^"]*": .*connection refused$'
+
+  It reports a refused connection of the lookup of a remote access configuration with exit code 101:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y remoteaccess configurations get --device 123 --id name1
+    exit-code: 101
+    stderr:
+      match-pattern: 'commandError: could not fetch microservices: Get "http://127.0.0.1:1/service/remoteaccess/devices/123/configurations": .*connection refused$'
+
+  It reports a refused connection of the lookup of an application without a prefix:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y applications get --id myapp
+    exit-code: 101
+    stderr:
+      match-pattern: 'commandError: Get "http://127.0.0.1:1/application/applications\?[^"]*": .*connection refused$'
+      not-contains:
+        - "referenceByName"
+
+  It reports a refused connection of the lookup of a microservice:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y microservices get --id myms
+    exit-code: 101
+    stderr:
+      match-pattern: 'commandError: could not fetch microservices: Get "http://127.0.0.1:1/application/applications\?[^"]*": .*connection refused$'
+      not-contains:
+        - "referenceByName"
+
+  It reports a refused connection of the lookup of a ui plugin:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y ui plugins get --id pl
+    exit-code: 101
+    stderr:
+      match-pattern: 'commandError: could not fetch ui plugin: Get "http://127.0.0.1:1/application/applications\?[^"]*": .*connection refused$'
+      not-contains:
+        - "referenceByName"
+
+  It reports a refused connection of the lookup of the hosted application of a plugin command:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y ui applications plugins install --application cockpit --plugin 123
+    exit-code: 101
+    stderr:
+      match-pattern: 'commandError: could not fetch applications: Get "http://127.0.0.1:1/application/applications\?[^"]*": .*connection refused$'
+      not-contains:
+        - "referenceByName"
+
+  It reports a refused connection of the lookup of the application of the plugin list with exit code 100:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y ui applications plugins list --application cockpit
+    exit-code: 100
+    stderr:
+      match-pattern: 'commandError: could not fetch applications: Get "http://127.0.0.1:1/application/applications\?[^"]*": .*connection refused$'
+
+  It reports a refused connection of the lookup of a user group:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y usergroups get --id grp
+    exit-code: 101
+    stderr:
+      match-pattern: 'commandError: Could not fetch by id: Get "http://127.0.0.1:1/user/[^"]*": .*connection refused$'
+
+  It reports a refused connection of the lookup of a software and a firmware:
+    command: |
+      for cmd in "software get --id sw1" "firmware get --id fw1" "devicegroups get --id grp1" "configuration get --id cfg1" "agents get --id ag1"; do
+        out=$(C8Y_HOST=http://127.0.0.1:1 c8y $cmd 2>&1 >/dev/null); code=$?
+        printf '%s %s\n' "$code" "$out" | sed 's/^\([0-9]*\) .*ERROR[[:space:]]*/\1 /; s/ *Get ".*$//'
+      done
+    exit-code: 0
+    stdout:
+      exactly: |
+        101 commandError: Could not fetch by id:
+        101 commandError: Could not fetch by id:
+        101 commandError: Could not fetch by id:
+        101 commandError: Could not fetch by id:
+        101 commandError: Could not fetch by id:
+
+  It reports a refused connection of the lookup of the software of a version with exit code 100:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y software versions get --id 1.0.0 --software sw1
+    exit-code: 100
+    stderr:
+      match-pattern: 'commandError: failed to lookup by name. Could not fetch by id: Get "http://127.0.0.1:1/inventory/managedObjects\?[^"]*": .*connection refused$'
+
+  It reports a refused connection of the lookup of a device service and of its device:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y devices services get --device 1 --id svc1 2>&1 >/dev/null | sed -n 's/.*\(commandError: Could not fetch by id: Get "http:\/\/127.0.0.1:1\/inventory\/managedObjects\).*/\1/p' | head -1
+      C8Y_HOST=http://127.0.0.1:1 c8y devices services get --device 1 --id svc1 >/dev/null 2>&1 || echo "service=$?"
+      C8Y_HOST=http://127.0.0.1:1 c8y devices services delete --device dev1 --id svc1 2>&1 >/dev/null | sed -n 's/.*\(commandError: failed to lookup by name. Could not fetch by id: \).*/\1/p' | head -1
+      C8Y_HOST=http://127.0.0.1:1 c8y devices services delete --device dev1 --id svc1 >/dev/null 2>&1 || echo "device=$?"
+    exit-code: 0
+    stdout:
+      exactly: |
+        commandError: Could not fetch by id: Get "http://127.0.0.1:1/inventory/managedObjects
+        service=101
+        commandError: failed to lookup by name. Could not fetch by id: 
+        device=100
+
+  It reports a refused connection of the lookup of the hosted application of createHostedApplication with exit code 100:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y applications createHostedApplication --name myapp --key k --contextPath c --resourcesUrl /
+    exit-code: 100
+    stderr:
+      match-pattern: 'commandError: failed to find hosted application. could not fetch applications: Get "http://127.0.0.1:1/application/applications\?[^"]*": .*connection refused$'
+
+  #
+  # a name which matches nothing
+  #
+  It reports a name which matches nothing as an unresolved name for every resource:
+    command: |
+      for cmd in "firmware get --id nosuchname" "software get --id nosuchname" "configuration get --id nosuchname" "devicegroups get --id nosuchname" "smartgroups get --id nosuchname" "deviceprofiles get --id nosuchname" "agents get --id nosuchname" "applications get --id nosuchname" "microservices get --id nosuchname" "ui plugins get --id nosuchname" "devices get --id nosuchname" "usergroups get --id nosuchname" "firmware versions list --firmware nosuchname"; do
+        out=$(c8y $cmd 2>&1 >/dev/null); code=$?
+        printf '%s %s\n' "$code" "$out" | sed 's/^\([0-9]*\) .*ERROR[[:space:]]*/\1 /'
+      done
+    exit-code: 0
+    stdout:
+      exactly: |
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+        4 commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404
+
+  It exits with 4 for a name of a firmware which matches nothing:
+    command: |
+      c8y firmware get --id nosuchname
+    exit-code: 4
+    stderr:
+      match-pattern: "commandError: referenceByName: no matching items found. name=nosuchname  ::StatusCode=404"
+      not-contains:
+        - serverError
+
+  It exits with 4 for a name of a device group, smart group and device profile which matches nothing:
+    command: |
+      c8y devicegroups get --id nosuchname || echo "devicegroups=$?"
+      c8y smartgroups get --id nosuchname || echo "smartgroups=$?"
+      c8y deviceprofiles get --id nosuchname || echo "deviceprofiles=$?"
+      c8y configuration get --id nosuchname || echo "configuration=$?"
+    exit-code: 0
+    stdout:
+      exactly: |
+        devicegroups=4
+        smartgroups=4
+        deviceprofiles=4
+        configuration=4
+
+  It reports a device service and a device of a device service command which match nothing:
+    command: |
+      id=$(c8y devices create --name lookupErrorsServiceDevice01 --select id -o csv)
+      c8y devices services get --device "$id" --id nosuchservice 2>&1 >/dev/null | grep -o 'commandError: referenceByName: no matching items found. name=nosuchservice'
+      c8y devices services get --device "$id" --id nosuchservice >/dev/null 2>&1 || echo "service=$?"
+      c8y devices services update --device lookupErrorsServiceDevice01 --id nosuchservice --status up >/dev/null 2>&1 || echo "update=$?"
+      c8y devices services delete --device nosuchdevice --id nosuchservice 2>&1 >/dev/null | grep -o 'commandError: reference by name: no matches found'
+      c8y devices services delete --device nosuchdevice --id nosuchservice >/dev/null 2>&1 || echo "device=$?"
+      c8y devices delete --id "$id" >/dev/null 2>&1
+    exit-code: 0
+    stdout:
+      exactly: |
+        commandError: referenceByName: no matching items found. name=nosuchservice
+        service=4
+        update=4
+        commandError: reference by name: no matches found
+        device=100
+
+  It reports a name which matches nothing as no matches for a flag which does not drive the command:
+    command: |
+      c8y software versions get --id 1.0.0 --software nosuchname || echo "versions=$?"
+      c8y firmware versions get --id 1.0.0 --firmware nosuchname || echo "firmware versions=$?"
+      c8y remoteaccess configurations get --device nosuchname --id 1 || echo "remoteaccess=$?"
+    exit-code: 0
+    stdout:
+      exactly: |
+        versions=100
+        firmware versions=100
+        remoteaccess=100
+    stderr:
+      match-pattern: "commandError: reference by name: no matches found"
+      not-contains:
+        - referenceByName
+
+  # v2.59.0 exited with 0 and printed nothing here (a v2 bug, not restored)
+  It reports a plugin list of an application which no hosted application has as an unresolved name:
+    command: |
+      c8y ui applications plugins list --application nosuchname
+    exit-code: 4
+    stdout:
+      match-pattern: ^$
+    stderr:
+      match-pattern: "commandError: referenceByName: no matching items found. name=nosuchname"
+
+  It resolves a user with a wildcard and reports one which matches nothing:
+    command: |
+      c8y users get --id "nosuchuser*" || echo "users get=$?"
+      c8y users get --id "adm*" --select id -o csv
+    exit-code: 0
+    stdout:
+      exactly: |
+        users get=4
+        admin
+    stderr:
+      match-pattern: "commandError: referenceByName: no matching items found. name=nosuchuser\\*  ::StatusCode=404"
+
+  #
+  # the requests of a lookup
+  #
+  It looks a software version up by its version when no software is given:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y software versions get --id 1.0.0 >/dev/null 2>&1
+      c8y software versions delete --id 1.0.0 >/dev/null 2>&1
+      c8y firmware versions get --id 1.0.0 >/dev/null 2>&1
+      c8y firmware patches get --id 1.0.0 >/dev/null 2>&1
+      echo "by id: $(requests | grep -c 'managedObjects/1.0.0')"
+      echo "software: $(requests | grep -c 'c8y_Software.version+eq+%271.0.0%27')"
+      echo "firmware: $(requests | grep -c 'c8y_Firmware.version+eq+%271.0.0%27')"
+      echo "patch: $(requests | grep 'c8y_Firmware.version' | grep -c 'has%28c8y_Patch%29')"
+    exit-code: 0
+    stdout:
+      exactly: |
+        by id: 0
+        software: 2
+        firmware: 2
+        patch: 2
+
+  It fetches a plugin which is given by its id by id:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y ui applications plugins delete --application 11 --plugin 12 >/dev/null 2>&1
+      requests | grep -v '^PUT'
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /application/applications/11
+        GET /application/applications/12
+
+  It looks the hosted application of a plugin command up by name among the hosted applications:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y ui applications plugins delete --application cockpit --plugin 12 >/dev/null 2>&1
+      requests | head -1
+    exit-code: 0
+    stdout:
+      match-pattern: ^GET /application/applications\?(owner=[^&]*&)?pageSize=2000&type=HOSTED$
+
+  It looks a user with a wildcard up before the request of the command:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y users get --id "adm*" >/dev/null 2>&1
+      c8y users delete --id "adm*" --silentStatusCodes 404 >/dev/null 2>&1
+      requests | grep -c 'username=adm&pageSize=5\|pageSize=5&username=adm' || true
+      requests | grep -c 'users/adm' || true
+    exit-code: 0
+    stdout:
+      exactly: |
+        2
+        0

@@ -103,10 +103,15 @@ func (n *DeleteUserFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, err
 		}
+		// as v2.59.0: a user name with a wildcard resolves to the first user which matches
+		userName, err := c8ystream.UserWithWildcards(in.ResolveContext(), client, in.String("user"))
+		if err != nil {
+			return nil, err
+		}
 		opt := groupusers.UnassignUserOptions{
 			TenantID: tenant,
 			GroupID:  groupID,
-			UserID:   client.Users.UserID(in.String("user")),
+			UserID:   client.Users.UserID(userName),
 		}
 		return func(ctx context.Context) any {
 			return client.UserGroups.Users.UnassignUser(ctx, opt)

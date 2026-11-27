@@ -89,9 +89,14 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		if tenant == "" {
 			tenant = n.factory.GetTenant()
 		}
+		// as v2.59.0: a user name with a wildcard resolves to the first user which matches
+		userID, err := c8ystream.UserWithWildcards(in.ResolveContext(), client, in.String("id"))
+		if err != nil {
+			return nil, err
+		}
 		opt := users.DeleteOptions{
 			Tenant: tenant,
-			ID:     users.UserRef(in.String("id")),
+			ID:     users.UserRef(userID),
 		}
 		return func(ctx context.Context) any {
 			return client.Users.Delete(ctx, opt)
