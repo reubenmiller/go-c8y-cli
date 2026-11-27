@@ -11,6 +11,8 @@ Modes:
   ok           answers with JSON (default)
   slow         waits 2 seconds before it answers
   unavailable  answers 503
+  escaped      answers a list with the "<", ">" and "&" of the names escaped (as Go's
+               encoding/json writes them: the six characters backslash-u-0-0-3-c etc.)
 """
 import json
 import sys
@@ -63,6 +65,16 @@ class Handler(BaseHTTPRequestHandler):
         else:
             out = {"id": "1", "name": "x"}
         payload = json.dumps(out).encode()
+        if mode == "escaped":
+            # a list which has the characters escaped, as Go's encoding/json writes them
+            base = "http://127.0.0.1:%d/inventory/managedObjects" % server.server_address[1]
+            payload = json.dumps({
+                "managedObjects": [{"id": "1", "name": "amp&lt<gt>"}],
+                "next": base + "?pageSize=1&currentPage=2",
+                "statistics": {"currentPage": 1, "pageSize": 1},
+            }).encode()
+            for char, code in (("<", "003c"), (">", "003e"), ("&", "0026")):
+                payload = payload.replace(char.encode(), (chr(92) + "u" + code).encode())
         try:
             self.send_response(status)
             self.send_header("Content-Type", "application/json")

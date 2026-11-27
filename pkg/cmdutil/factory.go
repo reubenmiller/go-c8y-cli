@@ -71,6 +71,10 @@ type Factory struct {
 
 	tenantMu sync.Mutex
 	tenant   string
+
+	// the session log messages which are shown once
+	bindLogged     sync.Once
+	authTypeLogged sync.Once
 }
 
 // Set reference to the cobra command

@@ -144,5 +144,6 @@ func TestClientOptionsV2RequestSettings(t *testing.T) {
 	opts, err = f.ClientOptionsV2(false)
 	require.NoError(t, err)
 	assert.Equal(t, 2, opts.Retry.Count)
+	assert.True(t, opts.Retry.Exponential, "v2.59.0 waited WaitMin, 2*WaitMin, 4*WaitMin, ... without jitter")
 	assert.True(t, opts.Transport.(*http.Transport).DisableCompression)
 }

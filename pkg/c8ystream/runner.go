@@ -534,8 +534,10 @@ func (r *Runner) run(newProducer func() Producer) error {
 		pipeline = append(pipeline, progress.stage())
 	}
 	pipeline = append(pipeline, stages...)
+	// v2.59.0 printed "<", ">" and "&" as the characters, not as their \u escapes
+	pipeline = append(pipeline, unescapeHTMLStage())
 
-	err = output.Render(ctx, Stream(ctx, cfg.GetWorkers(), newProducer()), renderer, pipeline...)
+	err = output.Render(ctx, Stream(ctx, cfg.GetWorkers(), r.logJobs(newProducer())), renderer, pipeline...)
 	if progress != nil {
 		progress.done()
 	}

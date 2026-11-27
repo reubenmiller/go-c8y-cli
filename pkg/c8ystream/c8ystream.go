@@ -236,10 +236,11 @@ func runConcurrent(ctx context.Context, workers int, produce Producer) output.Se
 		}()
 
 		var wg sync.WaitGroup
-		for range workers {
+		for id := 1; id <= workers; id++ {
 			wg.Go(func() {
+				workerCtx := withWorkerID(ctx, id)
 				for job := range jobs {
-					for doc, err := range job(ctx) {
+					for doc, err := range job(workerCtx) {
 						select {
 						case results <- item{doc, err}:
 						case <-ctx.Done():
