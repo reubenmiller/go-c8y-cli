@@ -6,6 +6,7 @@ Usage: request_server.py <port-file> <log-file> [mode]
 It picks a free port, writes it to <port-file> and serves until killed. Every
 request is appended to <log-file> as a block: the request line ("GET /path?query"),
 one line per header ("Name: value"), the body (latin-1) and a "--" line.
+The time (seconds since the epoch) of each request is appended to <log-file>.times.
 
 Modes:
   ok           answers with JSON (default)
@@ -46,6 +47,8 @@ class Handler(BaseHTTPRequestHandler):
             for name, value in self.headers.items():
                 f.write("%s: %s\n" % (name, value))
             f.write(body.decode("latin-1") + "\n--\n")
+        with open(log_file + ".times", "a") as f:
+            f.write("%f\n" % time.time())
         if mode == "slow":
             time.sleep(2)
         status = 200

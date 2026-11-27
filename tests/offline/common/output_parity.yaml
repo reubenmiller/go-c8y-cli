@@ -218,12 +218,11 @@ tests:
     command: |
       . ./offline/common/request_lib.sh
       start_server unavailable
-      start=$(python3 -c 'import time; print(time.time())')
       c8y inventory list --retries 3 >/dev/null 2>&1
-      end=$(python3 -c 'import time; print(time.time())')
       echo "requests: $(count_requests)"
-      # 0.5s, 1s and 2s: no jitter, so the total is the same on every run
-      python3 -c "import sys; d = $end - $start; print('ok' if 3.5 <= d < 3.95 else 'took %.2fs' % d)"
+      # 0.5s, 1s and 2s: no jitter, so the waits are the same on every run (measured by the
+      # server, so the start of the CLI does not count)
+      check_waits 0.5 1 2
     exit-code: 0
     stdout:
       exactly: |

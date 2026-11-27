@@ -40,6 +40,19 @@ count_requests() {
     requests "$@" | wc -l | tr -d ' '
 }
 
+# check_waits <seconds>... prints "ok" if the server got the requests with the given waits
+# between them (up to 0.2s longer), otherwise the waits it measured
+check_waits() {
+    python3 - "$LOG.times" "$@" <<'PY'
+import sys
+t = [float(l) for l in open(sys.argv[1])]
+waits = [b - a for a, b in zip(t, t[1:])]
+want = [float(w) for w in sys.argv[2:]]
+ok = len(waits) == len(want) and all(w <= got < w + 0.2 for got, w in zip(waits, want))
+print("ok" if ok else "waits: " + " ".join("%.3f" % w for w in waits))
+PY
+}
+
 # verbose_log runs a command and prints its log (stderr) without the time and level of each line,
 # and without the lines which depend on the environment. A duration is printed as Nms.
 verbose_log() {
