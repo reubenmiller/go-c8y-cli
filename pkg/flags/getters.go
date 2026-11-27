@@ -619,6 +619,31 @@ func WithOverrideValue(opts ...string) GetOption {
 	}
 }
 
+// WithDeniedFileCheck fails when a value of the flag is a file in a location
+// which the fileguard denies. A flag which sets a body property from a
+// reference (e.g. --device) does not read a file, but v2.59.0 reported such a
+// file as denied ("access to the file is denied: <file>"), so the value was not
+// silently dropped.
+func WithDeniedFileCheck(src string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		if cmd.Flag(src) == nil {
+			return "", nil, nil
+		}
+		values, err := GetFlagStringValues(cmd, src)
+		if err != nil {
+			return "", nil, nil
+		}
+		for _, value := range values {
+			if isFile(value) {
+				if err := fileguard.Check(value); err != nil {
+					return "", nil, err
+				}
+			}
+		}
+		return "", nil, nil
+	}
+}
+
 func ShouldReadFromPipeline(v string) bool {
 	return v == FlagReadFromPipeText || strings.HasPrefix(v, FlagReadFromPipeJSON)
 }

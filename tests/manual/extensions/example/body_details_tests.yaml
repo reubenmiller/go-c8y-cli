@@ -115,7 +115,7 @@ tests:
     exit-code: 101
     stderr:
       contains:
-        - no matching items found
+        - "reference by name: no matches found"
 
   #
   # Binary upload

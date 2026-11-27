@@ -89,7 +89,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, err
 		}
-		configID, err := client.RemoteAccess.Configurations.ResolveID(in.ResolveContext(), deviceID, c8ystream.NameOrID(in.String("id")))
+		configID, err := resolveConfigurationID(in.ResolveContext(), client, deviceID, in.String("id"))
 		if err != nil {
 			return nil, err
 		}

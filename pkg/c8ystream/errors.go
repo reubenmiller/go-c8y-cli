@@ -42,24 +42,29 @@ func (r *Runner) toServerError(err error) error {
 		}
 	}
 	var apiErr *core.Error
-	if !errors.As(err, &apiErr) {
+	if !errors.As(err, &apiErr) || apiErr.StatusCode() < 100 {
+		// Not an HTTP error. Code < 100 is a sentinel (ErrorFromError/String/...),
+		// not an HTTP status.
+		if transportErr, ok := TransportError(err); ok {
+			if r.assert != nil {
+				// a failed request of an assert command is a plain command
+				// error, as for the other failed requests (see below)
+				return cmderrors.CommandError{
+					Message:   transportErr.Message,
+					ErrorType: cmderrors.ErrTypeCommand,
+					ExitCode:  cmderrors.ExitError,
+				}
+			}
+			return transportErr
+		}
 		return err
 	}
 	status := apiErr.StatusCode()
-	if status < 100 {
-		// Code is a sentinel (ErrorFromError/String/...), not an HTTP status.
-		return err
-	}
 
 	// A name that the SDK could not resolve to an id is reported as v1 did:
 	// "referenceByName: no matching items found" (commandError, exit code 4).
 	if name, ok := unresolvedName(apiErr, r.directNameLookup); ok {
-		notFound := cmderrors.NewUserErrorWithExitCode(
-			cmderrors.ExitNotFound404,
-			cmderrors.NewNoMatchesFoundError(name),
-		)
-		notFound.StatusCode = http.StatusNotFound
-		return notFound
+		return UnresolvedNameError(name)
 	}
 
 	detail := parseServerError(apiErr)
@@ -116,6 +121,48 @@ func (r *Runner) toServerError(err error) error {
 	}
 }
 
+// TransportError is the error of a request which got no response (connection
+// refused, TLS verification failure, ...), as v1 reported it: a serverError
+// with the raw error of the Go http client and exit code 99. It prints the
+// message twice (the message and the error) and the --withError document
+// has the structure of the Go error under "error". ok is false for any other
+// error (e.g. a cancelled request).
+func TransportError(err error) (cmderrors.CommandError, bool) {
+	var urlErr *neturl.Error
+	if !errors.As(err, &urlErr) || errors.Is(err, context.Canceled) {
+		return cmderrors.CommandError{}, false
+	}
+	return cmderrors.CommandError{
+		Message:   urlErr.Error(),
+		ErrorType: cmderrors.ErrTypeServer,
+		ExitCode:  cmderrors.ExitUnknownError,
+		Err:       urlErr,
+	}, true
+}
+
+// IsUnresolvedName reports whether err is an SDK lookup by name which found
+// nothing (the SDK's "<thing> not found with name: <name>").
+func IsUnresolvedName(err error) bool {
+	var apiErr *core.Error
+	if !errors.As(err, &apiErr) {
+		return false
+	}
+	_, ok := unresolvedName(apiErr, false)
+	return ok
+}
+
+// UnresolvedNameError is the error of a name which matches nothing, as v1
+// reported it: "referenceByName: no matching items found. name=<name>"
+// (commandError, exit code 4, status code 404).
+func UnresolvedNameError(name string) error {
+	notFound := cmderrors.NewUserErrorWithExitCode(
+		cmderrors.ExitNotFound404,
+		cmderrors.NewNoMatchesFoundError(name),
+	)
+	notFound.StatusCode = http.StatusNotFound
+	return notFound
+}
+
 // UserErrorRequests makes a failed request whose url path ends with
 // pathSuffix a user error (commandError, exit code 101) in the v1 format
 // "METHOD url: status type message". v1 did this for a few hand-written
@@ -144,8 +191,18 @@ func (r *Runner) NoDefaultPageSize() {
 // wait, inventory wait) into the command error v1 gave: "METHOD url: status
 // type message", commandError, exit code 100. Other errors are returned as is.
 func WaitRequestError(err error) error {
+	if err == nil {
+		return err
+	}
 	var apiErr *core.Error
-	if err == nil || !errors.As(err, &apiErr) || apiErr.StatusCode() < 100 {
+	if !errors.As(err, &apiErr) || apiErr.StatusCode() < 100 {
+		if transportErr, ok := TransportError(err); ok {
+			return cmderrors.CommandError{
+				Message:   transportErr.Message,
+				ErrorType: cmderrors.ErrTypeCommand,
+				ExitCode:  cmderrors.ExitError,
+			}
+		}
 		return err
 	}
 	detail := parseServerError(apiErr)

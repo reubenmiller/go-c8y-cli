@@ -3,6 +3,7 @@ package cmdparser
 import (
 	"context"
 	"errors"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/software/softwareversions"
 	"github.com/spf13/cobra"
 )
@@ -112,6 +114,29 @@ func TestWithReference(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		if _, _, err := iter.GetNext(); !errors.Is(err, cmderrors.ErrNoMatchesFound) {
 			t.Errorf("item %d: expected no matches found. got=%v", i, err)
+		}
+	}
+}
+
+// TestWithReference_unknownFlagValue checks the error of a flag whose name
+// matches nothing: the text of v2.59.0, whether the lookup found no match or
+// the SDK reported the name as not found.
+func TestWithReference_unknownFlagValue(t *testing.T) {
+	refs := &references{client: apiv2.NewClient(apiv2.ClientOptions{BaseURL: "http://127.0.0.1:1"})}
+	cmd := &cobra.Command{}
+	cmd.Flags().String("application", "", "")
+	if err := cmd.Flags().Parse([]string{"--application", "unknown"}); err != nil {
+		t.Fatal(err)
+	}
+	for name, resolve := range map[string]resolveFunc{
+		"no match": func(context.Context, *references, *cobra.Command, string) (string, error) { return "", nil },
+		"sdk not found": func(context.Context, *references, *cobra.Command, string) (string, error) {
+			return "", &core.Error{Code: http.StatusNotFound, Message: "application not found with name: unknown"}
+		},
+	} {
+		_, _, err := refs.withReference(resolve, nil, "application", "id")(cmd, &flags.RequestInputIterators{})
+		if err == nil || err.Error() != "reference by name: no matches found" {
+			t.Errorf("%s: got %v", name, err)
 		}
 	}
 }

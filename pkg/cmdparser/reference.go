@@ -14,10 +14,15 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/extexec"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/matcher"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/applications"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/pagination"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/firmware/firmwarepatches"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/firmware/firmwareversions"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/repository/software/softwareversions"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/users"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsonmodels"
 	"github.com/spf13/cobra"
 )
 
@@ -40,6 +45,9 @@ func (r *references) context() context.Context {
 	}
 	return apiv2.ResolutionContext(context.Background())
 }
+
+// errNoMatchesFound is the error of a flag whose name matches nothing
+var errNoMatchesFound = errors.New("reference by name: no matches found")
 
 // resolveFunc resolves one reference value to the value the request uses
 // (usually an id).
@@ -80,6 +88,10 @@ func (r *references) withReference(resolve resolveFunc, args []string, opts ...s
 		}
 		resolved, err := r.resolve(resolve, cmd, value)
 		if err != nil {
+			if errors.Is(err, cmderrors.ErrNoMatchesFound) || c8ystream.IsUnresolvedName(err) {
+				// the text of v2.59.0 for the value of a flag
+				err = errNoMatchesFound
+			}
 			return dst, nil, err
 		}
 		return dst, applyFormat(format, resolved), nil
@@ -278,14 +290,86 @@ func resolveCertificate(ctx context.Context, r *references, _ *cobra.Command, va
 	return r.client.TrustedCertificates.ResolveID(ctx, r.tenant, value)
 }
 
-// resolveUser returns the user id (the user name)
-func resolveUser(_ context.Context, r *references, _ *cobra.Command, value string) (string, error) {
-	return r.client.Users.UserID(value), nil
+// resolveUser returns the user id (the user name). As in v2.59.0, a name with
+// a wildcard ("peter*") is looked up and resolves to the first user which
+// matches.
+func resolveUser(ctx context.Context, r *references, _ *cobra.Command, value string) (string, error) {
+	if !strings.Contains(value, "*") {
+		return r.client.Users.UserID(value), nil
+	}
+	user, found, err := firstUserMatch(ctx, r, value)
+	if err != nil || !found {
+		return "", err
+	}
+	return user.ID(), nil
 }
 
-// resolveUserSelf returns the self link of a user
+// resolveUserSelf returns the self link of a user. A name with a wildcard is
+// looked up like in resolveUser.
 func resolveUserSelf(ctx context.Context, r *references, _ *cobra.Command, value string) (string, error) {
-	return r.client.Users.UserSelfLink(r.tenant, r.client.Users.UserID(value)), nil
+	if !strings.Contains(value, "*") {
+		return r.client.Users.UserSelfLink(r.tenant, r.client.Users.UserID(value)), nil
+	}
+	user, found, err := firstUserMatch(ctx, r, value)
+	if err != nil || !found {
+		return "", err
+	}
+	if self := user.Self(); self != "" {
+		return self, nil
+	}
+	return r.client.Users.UserSelfLink(r.tenant, user.ID()), nil
+}
+
+// firstUserMatch returns the first user whose name matches the pattern. Like
+// v2.59.0 it asks the server for one page of 5 users, filtered by the pattern
+// without its wildcards.
+func firstUserMatch(ctx context.Context, r *references, pattern string) (jsonmodels.User, bool, error) {
+	res := r.client.Users.List(ctx, users.ListOptions{
+		Username:          strings.ReplaceAll(pattern, "*", ""),
+		PaginationOptions: pagination.PaginationOptions{PageSize: 5},
+	})
+	if res.Err != nil {
+		return jsonmodels.User{}, false, res.Err
+	}
+	for user, err := range res.Items() {
+		if err != nil {
+			return jsonmodels.User{}, false, err
+		}
+		if matched, _ := matcher.MatchWithWildcards(user.ID(), pattern); matched {
+			return user, true, nil
+		}
+	}
+	return jsonmodels.User{}, false, nil
+}
+
+// resolveHostedApplication resolves the name of a hosted application (an id
+// is used as is). As in v2.59.0 only hosted applications are matched, the ones
+// owned by the current tenant first; the name must match exactly.
+func resolveHostedApplication(ctx context.Context, r *references, _ *cobra.Command, value string) (string, error) {
+	if c8ydata.IsID(value) {
+		return value, nil
+	}
+	for _, owner := range []string{r.tenant, ""} {
+		res := r.client.Applications.List(ctx, applications.ListOptions{
+			Type:              applications.TypeHosted,
+			Owner:             owner,
+			PaginationOptions: pagination.PaginationOptions{PageSize: 2000},
+		})
+		if res.Err != nil {
+			return "", res.Err
+		}
+		for app, err := range res.Items() {
+			if err != nil {
+				return "", err
+			}
+			if app.Name() == value {
+				return app.ID(), nil
+			}
+		}
+		// the applications of other tenants (e.g. cockpit) are only used when
+		// the current tenant has none with the name
+	}
+	return "", nil
 }
 
 // resolveRole returns the role id (the role name). A name with wildcards is

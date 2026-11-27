@@ -10,6 +10,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/shape"
 	"github.com/tidwall/gjson"
 )
 
@@ -32,11 +33,17 @@ type consoleRenderer struct {
 	// selected are the --select patterns; an element of an array which was
 	// selected explicitly (e.g. tags.1) gets its own table column
 	selected []string
+
+	// cols owns the columns of a table (--select, or the view): each document
+	// is shaped by it here, and every column of it is a table column, also for
+	// documents which lack it. Nil, or without a selector, the columns are the
+	// properties of the documents
+	cols *columnSelector
 }
 
 // newConsoleRenderer builds a console renderer for the json/table/server
 // response formats from the session/flag configuration.
-func newConsoleRenderer(out io.Writer, cfg *config.Config) *consoleRenderer {
+func newConsoleRenderer(out io.Writer, cfg *config.Config, cols *columnSelector) *consoleRenderer {
 	tableOptions := &console.TableOptions{
 		MinColumnWidth:           cfg.ViewColumnMinWidth(),
 		MinEmptyValueColumnWidth: cfg.ViewColumnEmptyValueMinWidth(),
@@ -55,12 +62,18 @@ func newConsoleRenderer(out io.Writer, cfg *config.Config) *consoleRenderer {
 		console:  c,
 		isTable:  c.IsTable(),
 		selected: cfg.GetJSONSelect(),
+		cols:     cols,
 	}
 }
 
 func (r *consoleRenderer) Write(doc jsondoc.JSONDoc) error {
 	raw := doc.Raw()
-	if r.isTable {
+	if selection := r.cols.selection(); r.isTable && selection != nil {
+		if shaped, groups, ok := shapeToColumns(selection, raw); ok {
+			raw = shaped
+			r.console.SetHeaderFromInput("", groups)
+		}
+	} else if r.isTable {
 		// Provide the resolved columns for this row so the console can merge
 		// them into the table header across the sampled rows.
 		if cols := leafPaths(raw, r.selected); len(cols) > 0 {
@@ -77,6 +90,59 @@ func (r *consoleRenderer) Write(doc jsondoc.JSONDoc) error {
 	}
 	_, err := r.console.Write(raw)
 	return err
+}
+
+// shapeToColumns applies the columns of a table (--select or a view) to a
+// document. It returns the shaped document and the columns, grouped by the
+// pattern which resolved them in selection order, so the table keeps a column
+// for a pattern which the document lacks (shown as an empty cell, or as the
+// pattern itself when no sampled row has it), as v1 did.
+func shapeToColumns(columns *columnSelection, raw []byte) ([]byte, []jsonfilter.KeyGroup, bool) {
+	selection, err := columns.selector.Apply(raw)
+	if err != nil {
+		return nil, nil, false
+	}
+	shaped, err := selection.JSON()
+	if err != nil {
+		return nil, nil, false
+	}
+	return shaped, assignColumns(leafPaths(shaped, columns.patterns), selection.Groups()), true
+}
+
+// assignColumns puts each column of a shaped document in the group of the first
+// pattern which resolved it, keeping the order of the patterns. A pattern which
+// resolved nothing keeps an empty group (the merged header names the pattern).
+func assignColumns(paths []string, groups []shape.KeyGroup) []jsonfilter.KeyGroup {
+	result := make([]jsonfilter.KeyGroup, len(groups))
+	normalised := make([][]string, len(groups))
+	for i, group := range groups {
+		result[i].Pattern = group.Pattern
+		for _, key := range group.Keys {
+			normalised[i] = append(normalised[i], strings.ToLower(strings.ReplaceAll(key, "::k::", "")))
+		}
+	}
+	for _, path := range paths {
+		lower := strings.ToLower(path)
+		assigned := false
+		for i := range groups {
+			for _, key := range normalised[i] {
+				// the column is the key, below the key (an object), or the whole
+				// array of which the key is an element
+				if lower == key || strings.HasPrefix(lower, key+".") || strings.HasPrefix(key, lower+".") {
+					result[i].Keys = append(result[i].Keys, path)
+					assigned = true
+					break
+				}
+			}
+			if assigned {
+				break
+			}
+		}
+		if !assigned {
+			result = append(result, jsonfilter.KeyGroup{Pattern: path, Keys: []string{path}})
+		}
+	}
+	return result
 }
 
 func (r *consoleRenderer) Close() error {
@@ -101,7 +167,12 @@ func leafPaths(raw []byte, selected []string) []string {
 			}
 			switch {
 			case v.IsObject():
-				walk(v, path)
+				if len(v.Map()) == 0 {
+					// an empty object (c8y_IsDevice: {}) is a value, shown as {}
+					paths = append(paths, path)
+				} else {
+					walk(v, path)
+				}
 			case v.IsArray():
 				if elements := selectedElements(path, selected, v); len(elements) > 0 {
 					paths = append(paths, elements...)
