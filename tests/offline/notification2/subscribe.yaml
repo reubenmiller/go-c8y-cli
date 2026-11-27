@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# Moved from tests/manual: the live test tenant has no Notification 2.0 access (403).
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+tests:
+  It stops after the duration:
+    command: |
+      c8y devices create --name notification2-device --select id -o csv > /dev/null &&
+      c8y notification2 subscriptions create --name my-subscription --context mo --apiFilter managedobjects --device notification2-device > /dev/null &&
+      c8y notification2 subscriptions subscribe --name my-subscription --duration 1s
+    exit-code: 0
