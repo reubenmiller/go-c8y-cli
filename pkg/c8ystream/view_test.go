@@ -1,9 +1,17 @@
 package c8ystream
 
 import (
+	"iter"
+	"net/http"
+	"os"
+	"path/filepath"
+	"slices"
 	"testing"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output/shape"
 	"github.com/tidwall/gjson"
 )
@@ -29,5 +37,163 @@ func TestApplyStageToDocSelectsExistingColumns(t *testing.T) {
 		if got.Get(absent).Exists() {
 			t.Errorf("expected column %q to be absent, output=%s", absent, out.Raw())
 		}
+	}
+}
+
+func newTestDataView(t *testing.T, definitions string) *dataview.DataView {
+	t.Helper()
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "views.json"), []byte(definitions), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	dv, err := dataview.NewDataView("*", ".json", nil, dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return dv
+}
+
+func collectDocs(t *testing.T, seq output.Seq) []string {
+	t.Helper()
+	var docs []string
+	for doc, err := range seq {
+		if err != nil {
+			t.Fatal(err)
+		}
+		docs = append(docs, string(doc.Raw()))
+	}
+	return docs
+}
+
+func seqOf(docs ...string) output.Seq {
+	return func(yield func(jsondoc.JSONDoc, error) bool) {
+		for _, d := range docs {
+			if !yield(jsondoc.New([]byte(d)), nil) {
+				return
+			}
+		}
+	}
+}
+
+// TestShapeToColumnsKeepsColumnsTheDocumentLacks checks that a table keeps every
+// column of the view, in the order of the view, also for a document which lacks it.
+func TestShapeToColumnsKeepsColumnsTheDocumentLacks(t *testing.T) {
+	cols := &columnSelector{}
+	cols.set([]string{"id", "name", "c8y_Agent.version", "c8y_Hardware.model"})
+
+	_, groups, ok := shapeToColumns(cols.selection(), []byte(`{"id":"1","name":"a","c8y_Hardware":{"model":"M"},"self":"x"}`))
+	if !ok {
+		t.Fatal("expected the document to be shaped")
+	}
+	merged := jsonfilter.MergeKeyGroups([][]jsonfilter.KeyGroup{groups})
+	want := []string{"id", "name", "c8y_Agent.version", "c8y_Hardware.model"}
+	if !slices.Equal(merged, want) {
+		t.Errorf("columns = %v, want %v", merged, want)
+	}
+}
+
+// TestShapeToColumnsUsesAliasAndWildcardColumns checks that aliases, wildcards and
+// an empty object keep the columns of the pattern which resolved them.
+func TestShapeToColumnsUsesAliasAndWildcardColumns(t *testing.T) {
+	cols := &columnSelector{}
+	cols.set([]string{"label:name", "tags.**", "c8y_IsDevice", "!tags.secret"})
+
+	shaped, groups, ok := shapeToColumns(cols.selection(), []byte(`{"name":"a","tags":{"x":1,"secret":2,"y":3},"c8y_IsDevice":{},"other":1}`))
+	if !ok {
+		t.Fatal("expected the document to be shaped")
+	}
+	if got := string(shaped); got != `{"label":"a","tags":{"x":1,"y":3},"c8y_IsDevice":{}}` {
+		t.Errorf("shaped = %s", got)
+	}
+	merged := jsonfilter.MergeKeyGroups([][]jsonfilter.KeyGroup{groups})
+	want := []string{"label", "tags.x", "tags.y", "c8y_IsDevice"}
+	if !slices.Equal(merged, want) {
+		t.Errorf("columns = %v, want %v", merged, want)
+	}
+}
+
+func TestLeafPathsHasAColumnForAnEmptyObject(t *testing.T) {
+	got := leafPaths([]byte(`{"a":{},"b":{"c":{}, "d":1},"e":[]}`), nil)
+	want := []string{"a", "b.c", "b.d", "e"}
+	if !slices.Equal(got, want) {
+		t.Errorf("leafPaths = %v, want %v", got, want)
+	}
+}
+
+// TestAutoViewStageMatchesTheRequestAndContentType checks that the view is
+// detected with the request path, method and content type of the response, as in v1.
+func TestAutoViewStageMatchesTheRequestAndContentType(t *testing.T) {
+	dv := newTestDataView(t, `{"definitions":[
+		{"name":"byRequest","priority":1,"requestMethod":"GET","requestPath":"/alarm/alarms$","contentType":"alarmCollection","columns":["id","text"]}
+	]}`)
+	req, _ := http.NewRequest(http.MethodGet, "http://host/alarm/alarms?pageSize=1", nil)
+	current := &viewResponse{request: req, contentType: "application/vnd.com.nsn.cumulocity.alarmCollection+json"}
+
+	cols := &columnSelector{}
+	stage := autoViewStage(dv, func() *viewResponse { return current }, cols, true, func(*dataview.Definition) {})
+	got := collectDocs(t, stage(seqOf(`{"id":"1","text":"t","type":"x"}`)))
+	if len(got) != 1 || got[0] != `{"id":"1","text":"t"}` {
+		t.Errorf("docs = %v", got)
+	}
+	if cols.get() == nil {
+		t.Error("expected the columns of the view to be set")
+	}
+
+	// no response (e.g. a dry run): the definition needs a request, so it does not match
+	dv2 := newTestDataView(t, `{"definitions":[{"name":"byRequest","priority":1,"requestPath":"/alarm/alarms$","columns":["id"]}]}`)
+	cols2 := &columnSelector{}
+	stage = autoViewStage(dv2, func() *viewResponse { return nil }, cols2, true, func(*dataview.Definition) {})
+	got = collectDocs(t, stage(seqOf(`{"id":"1","text":"t"}`)))
+	if len(got) != 1 || got[0] != `{"id":"1","text":"t"}` || cols2.get() != nil {
+		t.Errorf("docs = %v, columns set = %v", got, cols2.get() != nil)
+	}
+}
+
+// TestAutoViewStageDetectsAgainForTheNextResponse checks that, like v1 which
+// matched each response on its own, a response whose first document did not match
+// does not stop the next response from matching a view.
+func TestAutoViewStageDetectsAgainForTheNextResponse(t *testing.T) {
+	dv := newTestDataView(t, `{"definitions":[{"name":"devices","priority":1,"fragments":["c8y_IsDevice"],"columns":["id","name"]}]}`)
+	first := &viewResponse{}
+	second := &viewResponse{}
+	current := first
+	cols := &columnSelector{}
+	stage := autoViewStage(dv, func() *viewResponse { return current }, cols, true, func(*dataview.Definition) {})
+
+	var got []string
+	next, stop := iter.Pull2(stage(seqOf(`{"id":"1","owner":"a"}`, `{"id":"2","c8y_IsDevice":{},"name":"n","owner":"b"}`, `{"id":"3","c8y_IsDevice":{},"name":"m","owner":"c"}`)))
+	defer stop()
+	for i := 0; ; i++ {
+		if i == 1 {
+			current = second // the second document is of a new response
+		}
+		doc, err, ok := next()
+		if !ok {
+			break
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		got = append(got, string(doc.Raw()))
+	}
+	want := []string{`{"id":"1","owner":"a"}`, `{"id":"2","name":"n"}`, `{"id":"3","name":"m"}`}
+	if !slices.Equal(got, want) {
+		t.Errorf("docs = %v, want %v", got, want)
+	}
+}
+
+// TestAutoViewStageKeepsDocumentsWholeForTables checks that the stage does not
+// shape the documents when the renderer owns the columns.
+func TestAutoViewStageKeepsDocumentsWholeForTables(t *testing.T) {
+	dv := newTestDataView(t, `{"definitions":[{"name":"devices","priority":1,"fragments":["c8y_IsDevice"],"columns":["id","name"]}]}`)
+	cols := &columnSelector{}
+	stage := autoViewStage(dv, func() *viewResponse { return nil }, cols, false, func(*dataview.Definition) {})
+	doc := `{"id":"1","c8y_IsDevice":{},"owner":"a"}`
+	got := collectDocs(t, stage(seqOf(doc)))
+	if len(got) != 1 || got[0] != doc {
+		t.Errorf("docs = %v", got)
+	}
+	if cols.get() == nil {
+		t.Error("expected the columns of the view to be set")
 	}
 }
