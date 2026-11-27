@@ -6,10 +6,7 @@ Cancel operation
 
 ### Synopsis
 
-Cancel an operation. This is a convenience command to set an operation to the FAILED status along with a sensible default failure reason.
-Note: Cancelling an operation does not guarantee that any client that is already processing the operation will stop and in
-normal circumstances this command should be used sparingly.
-
+Cancel an existing operation by setting its status (and a failure reason)
 
 ```
 c8y operations cancel [flags]
@@ -30,7 +27,7 @@ Cancel an operation
       --failureReason string       Reason for the failure (default "User cancelled operation")
       --id strings                 Operation id (required) (accepts pipeline)
       --processingMode string      Cumulocity processing mode
-      --status string              Operation status
+      --status string              Operation status (default "FAILED")
       --template string            Body template
       --templateVars stringArray   Body template variables
 ```
@@ -75,6 +72,7 @@ Cancel an operation
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

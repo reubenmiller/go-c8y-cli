@@ -23,10 +23,13 @@ Add a role to the admin group
 ### Options
 
 ```
-      --group strings           Group ID (required)
-      --processingMode string   Cumulocity processing mode
-      --role strings            User role id (required) (accepts pipeline)
-      --tenant string           Tenant
+  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --group strings              Group ID (required)
+      --processingMode string      Cumulocity processing mode
+      --role strings               User role id (required) (accepts pipeline)
+      --template string            Body template
+      --templateVars stringArray   Body template variables
+      --tenant string              Tenant
 ```
 
 ### Options inherited from parent commands
@@ -69,6 +72,7 @@ Add a role to the admin group
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

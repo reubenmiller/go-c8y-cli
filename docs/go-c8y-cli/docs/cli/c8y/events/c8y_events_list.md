@@ -15,30 +15,30 @@ c8y events list [flags]
 ### Examples
 
 ```
-$ c8y events list --type my_CustomType --dateFrom "-10d"
-Get events with type 'my_CustomType' that were created in the last 10 days
+$ c8y events list --device 12345 --type myType
+Get events for a device of a given type
 
-$ c8y events list --device 12345
-Get events from a device
+$ c8y devices list --type myType | c8y events list
+List events for each piped device
         
 ```
 
 ### Options
 
 ```
-      --createdFrom string               Start date or date and time of the event's creation (set by the platform during creation).
-      --createdTo string                 End date or date and time of the event's creation (set by the platform during creation).
-      --dateFrom string                  Start date or date and time of event occurrence.
-      --dateTo string                    End date or date and time of event occurrence.
-      --device strings                   Device ID (accepts pipeline)
-      --fragmentType string              Fragment name from event.
-      --fragmentValue string             Allows filtering events by the fragment's value, but only when provided together with fragmentType.
-      --lastUpdatedFrom string           Start date or date and time of the last update made.
-      --lastUpdatedTo string             End date or date and time of the last update made.
+      --createdFrom string               Start date or date and time of the event's creation (set by the platform during creation)
+      --createdTo string                 End date or date and time of the event's creation (set by the platform during creation)
+      --dateFrom string                  Start date or date and time of event occurrence
+      --dateTo string                    End date or date and time of event occurrence
+      --device strings                   Source device id (accepts pipeline)
+      --fragmentType string              Fragment name from event
+      --fragmentValue string             Allows filtering events by the fragment's value, but only when provided together with fragmentType
+      --lastUpdatedFrom string           Start date or date and time of the last update made
+      --lastUpdatedTo string             End date or date and time of the last update made
       --revert[=true|false]              Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters
-      --type string                      Event type.
-      --withSourceAssets[=true|false]    When set to true also events for related source assets will be included in the request. When this parameter is provided a source must be specified.
-      --withSourceDevices[=true|false]   When set to true also events for related source devices will be included in the request. When this parameter is provided a source must be specified.
+      --type string                      Event type
+      --withSourceAssets[=true|false]    When set to true also events for related source assets will be included in the request. When this parameter is provided a source must be specified
+      --withSourceDevices[=true|false]   When set to true also events for related source devices will be included in the request. When this parameter is provided a source must be specified
 ```
 
 ### Options inherited from parent commands
@@ -81,6 +81,7 @@ Get events from a device
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

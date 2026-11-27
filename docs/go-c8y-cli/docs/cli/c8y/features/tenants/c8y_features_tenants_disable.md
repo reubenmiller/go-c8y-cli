@@ -6,7 +6,7 @@ Disable a feature override for a given tenant
 
 ### Synopsis
 
-Disable a feature override for a given tenant
+Disable a feature toggle override for a specific tenant (from the management tenant)
 
 ```
 c8y features tenants disable [flags]
@@ -16,22 +16,16 @@ c8y features tenants disable [flags]
 
 ```
 $ c8y features tenants disable --key example --tenant t12345
-Disable a feature in the current tenant
-
-$ c8y features tenants list --key ui.datapoint-graph.v2 | c8y features tenants disable --key ui.datapoint-graph.v2
-Disable the feature when it is active on subtenants
+Disable a feature for a specific tenant
         
 ```
 
 ### Options
 
 ```
-  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --key string                 Feature ID / Key
-      --processingMode string      Cumulocity processing mode
-      --template string            Body template
-      --templateVars stringArray   Body template variables
-      --tenant string              Unique identifier of a Cumulocity tenant (accepts pipeline)
+      --key string              Feature ID / Key
+      --processingMode string   Cumulocity processing mode
+      --tenant string           Unique identifier of a Cumulocity tenant (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
@@ -74,6 +68,7 @@ Disable the feature when it is active on subtenants
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

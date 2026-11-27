@@ -6,10 +6,7 @@ Delete application
 
 ### Synopsis
 
-The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions
-
-Delete an application (by a given ID). This method is not supported by microservice applications.
-
+Delete an existing application
 
 ```
 c8y applications delete [flags]
@@ -19,20 +16,14 @@ c8y applications delete [flags]
 
 ```
 $ c8y applications delete --id 12345
-Delete an application by id
-
-$ c8y applications delete --id my-example-app
-Delete an application by name
-
-$ c8y applications delete --id 12345 --unsubscribeAll
-Unsubscribe and application then delete it
+Delete an application
         
 ```
 
 ### Options
 
 ```
-      --id string                     Application id (required) (accepts pipeline)
+      --id strings                    Application id (required) (accepts pipeline)
       --processingMode string         Cumulocity processing mode
       --unsubscribeAll[=true|false]   Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.
 ```
@@ -77,6 +68,7 @@ Unsubscribe and application then delete it
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

@@ -15,21 +15,14 @@ c8y template execute [flags]
 ### Examples
 
 ```
-Example 1:
-$ c8y template execute --template ./mytemplate.jsonnet
-
+$ c8y template Execute --template ./mytemplate.jsonnet
 Verify a jsonnet template and show the output after it is evaluated
 
-Example 2:
-$ c8y template execute --template ./mytemplate.jsonnet --templateVars "name=testme" --data "name=myDeviceName"
-
-Verify a jsonnet template and specify input data to be used as the input when evaluating the template
-
-Example 3:
-$ echo '{"name": "external_source"}' | c8y template execute --template "{name: input.value.name, nestedValues: input.value}"
-$ => {"name":"external_source","nestedValues":{"name":"external_source"}}
-
+$ echo '{"name": "external_source"}' | c8y template Execute --template "{name: input.value.name}"
 Pass external json data into the template, and reference it via the "input.value" variable
+
+$ c8y devices list | c8y template Execute --template "{id: input.value.id}" --select id --outputFile ids.json
+Evaluate a template per piped device and tee the results to a file
 		
 ```
 
@@ -82,6 +75,7 @@ Pass external json data into the template, and reference it via the "input.value
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

@@ -21,14 +21,11 @@ Get a collection of devices of type "myType", and their names start with "sensor
 $ c8y devices list --query "name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'"
 Get devices which names containing 'sensor' and were created after 2021-04-02
 
-$ c8y devices list --creationTimeDateFrom -7d
-Get devices which where registered longer than 7 days ago
-
-$ c8y devices list --creationTimeDateTo -1d
-Get devices which where registered in the last day
-
 $ echo -e "c8y_MacOS\nc8y_Linux" | c8y devices list --queryTemplate "type eq '%s'"
 Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipeline)
+
+$ echo '{"name":"foo","type":"bar"}' | c8y devices list --name -.name --type -.type
+Bind several filters to properties of the same piped object
         
 ```
 
@@ -97,6 +94,7 @@ Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipe
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

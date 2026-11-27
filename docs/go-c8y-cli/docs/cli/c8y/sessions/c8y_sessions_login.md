@@ -33,6 +33,9 @@ Set a session from an external command, where the external commands returns the 
 $ eval "$( c8y sessions login --from-extension bitwarden )"
 Set a session using the session provider "bitwarden" of an installed extension
 
+$ eval "$( c8y sessions login --from-extension bitwarden --select "bitwarden://3f0b9d4e-1c2a-4f5b-9e8d-7a6b5c4d3e2f" )"
+Set a session from the session provider "bitwarden" without selecting it interactively (the provider must declare list and select)
+
 $ eval "$( c8y sessions login --from-prompt --host example.cumulocity.com)"
 
 $ eval "$( c8y sessions login --from-file .env --loginType DEVICE )"
@@ -68,6 +71,7 @@ Login using a device certificate (mTLS); reads cert paths from the session file 
       --output-format string       Output format
       --provider string            Session provider which returns the session to use
       --secrets strings            List of secrets to include as env variables when running an external command or extension provider. Only valid with from-cmd or from-extension
+      --select string              sessionUri of the session to use from the extension session provider, without user interaction. Only valid with from-extension (or the extension provider type)
       --shell string               Shell type to return the environment variables
       --sso-audience string        SSO Audience
       --sso-scopes string          SSO Scopes
@@ -114,11 +118,11 @@ Login using a device certificate (mTLS); reads cert paths from the session file 
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off
       --retries int                      Max number of attempts when a failed http call is encountered (default 3)
-      --select stringArray               Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'
       --session string                   Session configuration
       --sessionMode string               Override default session mode for a single command which would normally be disabled
   -P, --sessionPassword string           Override session password

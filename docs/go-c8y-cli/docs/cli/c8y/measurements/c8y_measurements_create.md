@@ -6,7 +6,7 @@ Create measurement
 
 ### Synopsis
 
-Create a new measurement
+Create a new measurement on a device
 
 ```
 c8y measurements create [flags]
@@ -15,23 +15,11 @@ c8y measurements create [flags]
 ### Examples
 
 ```
-$ c8y measurements create --device 12345 --type "myType" --data "c8y_Winding.temperature.value=25.0,c8y_Winding.temperature.unit=°C"
-Create measurement using shorthand data
+$ c8y measurements create --device 12345 --type c8y_Temperature --data "c8y_Temperature.T.value=25"
+Create a temperature measurement on a device
 
-$ c8y measurements create --device 12345 --type "myType" --template "{c8y_Winding:{temperature:{value: 25.0,unit:'°C'}}}"
-Create measurement using a template (more portable across shells)
-
-$ c8y measurements create --device 12345 --type "myType" --template ./mymeasurement.jsonnet
-Create measurement using a template file
-
-$ c8y measurements create --device 12345 --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 25,\"unit\":\"°C\"}}}"
-Create measurement using json data (sh/bash/zsh/fish only)
-
-$ c8y measurements create --device 12345 --type "myType" --data '{\"c8y_Winding\":{\"temperature\":{\"value\": 25,\"unit\":\"C\"}}}'
-Create measurement using json data (powershell only)
-
-$ c8y measurements list --device 12345 --select '!id,**' | c8y measurements create --device 22222 --template input.value
-Copy measurements from one device to another
+$ c8y measurements create --device MyDevice --type c8y_Temperature --data "c8y_Temperature.T.value=25"
+Create a measurement, resolving the device name to its id
         
 ```
 
@@ -39,12 +27,12 @@ Copy measurements from one device to another
 
 ```
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings             The ManagedObject which is the source of this measurement. (accepts pipeline)
+      --device strings             The ManagedObject which is the source of this measurement (accepts pipeline). Multiple devices fan out one measurement per device.
       --processingMode string      Cumulocity processing mode
       --template string            Body template
       --templateVars stringArray   Body template variables
-      --time string                Time of the measurement. Defaults to current timestamp.
-      --type string                The most specific type of this entire measurement.
+      --time string                Time of the measurement. Defaults to current timestamp
+      --type string                The most specific type of this entire measurement
 ```
 
 ### Options inherited from parent commands
@@ -87,6 +75,7 @@ Copy measurements from one device to another
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

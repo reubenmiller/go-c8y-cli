@@ -20,12 +20,6 @@ Get number of active alarms with the severity set to MAJOR
 
 $ c8y alarms count --dateFrom "-10m" --status ACTIVE
 Get number of active alarms which occurred in the last 10 minutes
-
-$ c8y alarms count --dateFrom "-10m" --status ACTIVE --device 12345
-Get number of active alarms which occurred in the last 10 minutes on a device
-
-$ c8y devices list --type linuxA | c8y alarms count --dateFrom "-10m"
-Get number of alarms from a list of devices using pipeline
         
 ```
 
@@ -35,7 +29,7 @@ Get number of alarms from a list of devices using pipeline
       --dateFrom string                  Start date or date and time of alarm occurrence.
       --dateTo string                    End date or date and time of alarm occurrence.
       --device strings                   Source device id. (accepts pipeline)
-      --resolved[=true|false]            When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
+      --resolved[=true|false]            When set to true only resolved alarms will be counted (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
       --severity string                  Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
       --status strings                   Comma separated alarm statuses, for example ACTIVE,CLEARED.
       --type string                      Alarm type.
@@ -83,6 +77,7 @@ Get number of alarms from a list of devices using pipeline
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

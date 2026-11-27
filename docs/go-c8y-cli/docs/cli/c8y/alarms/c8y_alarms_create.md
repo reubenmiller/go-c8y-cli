@@ -6,7 +6,7 @@ Create alarm
 
 ### Synopsis
 
-Create an alarm on a device or agent.
+Create a new alarm on a device
 
 ```
 c8y alarms create [flags]
@@ -15,8 +15,11 @@ c8y alarms create [flags]
 ### Examples
 
 ```
-$ c8y alarms create --device 12345 --type c8y_TestAlarm --time "-0s" --text "Test alarm" --severity MAJOR
-Create a new alarm for device
+$ c8y alarms create --device 12345 --type c8y_TestAlarm --text "Test alarm" --severity MAJOR
+Create a major alarm on a device
+
+$ c8y alarms create --device MyDevice --type c8y_TestAlarm --text "Test alarm" --severity CRITICAL
+Create an alarm, resolving the device name to its id
         
 ```
 
@@ -24,15 +27,15 @@ Create a new alarm for device
 
 ```
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings             The ManagedObject that the alarm originated from (accepts pipeline)
+      --device strings             The ManagedObject that the alarm originated from (accepts pipeline). Multiple devices fan out one alarm per device.
       --processingMode string      Cumulocity processing mode
-      --severity string            The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.
-      --status string              The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.
+      --severity string            The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING
+      --status string              The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED (defaults to ACTIVE)
       --template string            Body template
       --templateVars stringArray   Body template variables
-      --text string                Text description of the alarm.
-      --time string                Time of the alarm. Defaults to current timestamp.
-      --type string                Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'.
+      --text string                Text description of the alarm
+      --time string                Time of the alarm. Defaults to current timestamp
+      --type string                Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'
 ```
 
 ### Options inherited from parent commands
@@ -75,6 +78,7 @@ Create a new alarm for device
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

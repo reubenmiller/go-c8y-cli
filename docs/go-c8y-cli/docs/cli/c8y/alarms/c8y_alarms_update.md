@@ -6,7 +6,7 @@ Update alarm
 
 ### Synopsis
 
-Update an alarm by its id
+Update an existing alarm, e.g. change its status or severity
 
 ```
 c8y alarms update [flags]
@@ -16,10 +16,10 @@ c8y alarms update [flags]
 
 ```
 $ c8y alarms update --id 12345 --status ACKNOWLEDGED
-Acknowledge an existing alarm
+Acknowledge an alarm
 
-$ c8y alarms update --id 12345 --severity CRITICAL
-Update severity of an existing alarm to CRITICAL
+$ c8y alarms list --severity MAJOR --status ACTIVE | c8y alarms update --status CLEARED --workers 5
+Clear all active major alarms concurrently
         
 ```
 
@@ -29,11 +29,11 @@ Update severity of an existing alarm to CRITICAL
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --id strings                 Alarm id (required) (accepts pipeline)
       --processingMode string      Cumulocity processing mode
-      --severity string            Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status string              The status of the alarm. If not specified, a new alarm will be created as ACTIVE.
+      --severity string            Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING
+      --status string              The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED
       --template string            Body template
       --templateVars stringArray   Body template variables
-      --text string                Text description of the alarm.
+      --text string                Text description of the alarm
 ```
 
 ### Options inherited from parent commands
@@ -76,6 +76,7 @@ Update severity of an existing alarm to CRITICAL
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

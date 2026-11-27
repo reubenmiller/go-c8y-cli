@@ -6,7 +6,7 @@ Enable a feature override for a given tenant
 
 ### Synopsis
 
-Enable a feature override for a given tenant
+Enable a feature toggle override for a specific tenant (from the management tenant)
 
 ```
 c8y features tenants enable [flags]
@@ -16,22 +16,16 @@ c8y features tenants enable [flags]
 
 ```
 $ c8y features tenants enable --key example --tenant t12345
-Enable a feature for a given tenant
-
-$ c8y tenants list | c8y features tenants enable --key ui.datapoint-graph.v2
-Enable a specific feature on all subtenants
+Enable a feature for a specific tenant
         
 ```
 
 ### Options
 
 ```
-  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --key string                 Feature ID / Key
-      --processingMode string      Cumulocity processing mode
-      --template string            Body template
-      --templateVars stringArray   Body template variables
-      --tenant string              Unique identifier of a Cumulocity tenant (accepts pipeline)
+      --key string              Feature ID / Key
+      --processingMode string   Cumulocity processing mode
+      --tenant string           Unique identifier of a Cumulocity tenant (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
@@ -74,6 +68,7 @@ Enable a specific feature on all subtenants
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

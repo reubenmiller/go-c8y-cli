@@ -23,14 +23,11 @@ Create a new version for a plugin
 ### Options
 
 ```
-      --data string                data
-      --file string                The ZIP file to be uploaded
-      --plugin string              Plugin (accepts pipeline)
-      --processingMode string      Cumulocity processing mode
-      --tag strings                List of tags associated to the version
-      --template string            Body template
-      --templateVars stringArray   Body template variables
-      --version string             Plugin version (required)
+      --file string             The ZIP file to be uploaded (a local path or an http(s) URL)
+      --plugin string           Plugin (accepts pipeline)
+      --processingMode string   Cumulocity processing mode
+      --tag strings             List of tags associated to the version
+      --version string          Plugin version (required)
 ```
 
 ### Options inherited from parent commands
@@ -73,6 +70,7 @@ Create a new version for a plugin
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

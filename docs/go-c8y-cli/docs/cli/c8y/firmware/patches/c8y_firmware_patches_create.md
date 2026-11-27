@@ -23,7 +23,7 @@ Create a new patch (storing the file in Cumulocity) to an existing firmware vers
 
 $ c8y firmware patches create --firmware 12345 --dependencyVersion 2.2.0
 Create a new patch with an empty version number and url
-     
+        
 ```
 
 ### Options
@@ -32,7 +32,7 @@ Create a new patch with an empty version number and url
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --dependencyVersion string   Existing firmware version that the patch is dependent on
       --file string                File to be uploaded
-      --firmware strings           Firmware package id where the version will be added to (accepts pipeline)
+      --firmware string            Firmware package id where the version will be added to (accepts pipeline)
       --processingMode string      Cumulocity processing mode
       --template string            Body template
       --templateVars stringArray   Body template variables
@@ -80,6 +80,7 @@ Create a new patch with an empty version number and url
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

@@ -6,15 +6,12 @@ Download binary
 
 ### Synopsis
 
-Download a binary stored in Cumulocity and display it on the console. 
+Download a binary stored in Cumulocity and display it on the console.
 
-For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.
-
-When downloading a binary it is useful to use the outputFileRaw global parameter and to use one of the following references:
+For non text based binaries or if the output should be saved to file, the --outputFileRaw global parameter should be used, which supports the following placeholders:
 
 * \{filename} - Filename found in the Content-Disposition response header
-* \{id} - An id like value found in the request path (/inventory/binaries/12345 => 12345)
-* \{basename} - The last path section of the request path (/some/nested/url/withafilename.json => withafilename.json)
+* \{id} - The binary id
 
 
 ```
@@ -81,6 +78,7 @@ Download a list of binaries and save the files to the current working directory
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

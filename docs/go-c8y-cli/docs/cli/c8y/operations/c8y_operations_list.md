@@ -15,28 +15,25 @@ c8y operations list [flags]
 ### Examples
 
 ```
-$ c8y operations list --status PENDING
-Get a list of pending operations
-
-$ c8y operations list --agent 12345 --status PENDING
-Get a list of pending operations for a given agent and all of its child devices
-
 $ c8y operations list --device 12345 --status PENDING
-Get a list of pending operations for a device
+Get pending operations for a device
+
+$ c8y devices list --type myType | c8y operations list --status EXECUTING
+List executing operations for each piped device
         
 ```
 
 ### Options
 
 ```
-      --agent strings            Agent ID
-      --bulkOperationId string   Bulk operation id. Only retrieve operations related to the given bulk operation.
-      --dateFrom string          Start date or date and time of operation.
-      --dateTo string            End date or date and time of operation.
-      --device strings           Device ID (accepts pipeline)
-      --fragmentType string      The type of fragment that must be part of the operation. i.e. c8y_Restart
+      --agent strings            Agent id
+      --bulkOperationId string   Only retrieve operations related to the given bulk operation id
+      --dateFrom string          Start date or date and time of operation
+      --dateTo string            End date or date and time of operation
+      --device strings           Device id (accepts pipeline)
+      --fragmentType string      The type of fragment that must be part of the operation, e.g. c8y_Restart
       --revert[=true|false]      Sort operations newest to oldest. Must be used with dateFrom and/or dateTo parameters
-      --status string            Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+      --status string            Operation status, one of SUCCESSFUL, FAILED, EXECUTING or PENDING
 ```
 
 ### Options inherited from parent commands
@@ -79,6 +76,7 @@ Get a list of pending operations for a device
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

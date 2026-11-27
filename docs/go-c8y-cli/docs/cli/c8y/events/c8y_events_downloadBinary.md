@@ -8,11 +8,10 @@ Get event binary
 
 Get the binary associated with an event
 
-When downloading a binary it is useful to use the outputFileRaw global parameter and to use one of the following references:
+When downloading a binary it is useful to use the --outputFileRaw global parameter and to use one of the following placeholders:
 
 * \{filename} - Filename found in the Content-Disposition response header
-* \{id} - An id like value found in the request path (/event/events/12345/binaries => 12345)
-* \{basename} - The last path section of the request path (/some/nested/url/withafilename.json => withafilename.json)
+* \{id} - The event id
 
 
 ```
@@ -76,6 +75,7 @@ Download a list of event binaries and use a template name to save each binary in
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

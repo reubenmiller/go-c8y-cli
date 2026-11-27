@@ -21,11 +21,8 @@ Update device by id
 $ c8y devices update --id 12345 --template "{c8y_SupportedOperations:['c8y_Restart', 'c8y_Command']}"
 Update device using a template
 
-$ c8y devices update --id 12345 --data "my.nested.number=1.234,my.nested.bool=true,my.nested.string=my name,my.nested.num_as_str='1.234'"
-Update device using a data (with different formats)
-
-$ c8y devices update --id 12345 --data "myFragment=null"
-Remove a property from a device by setting it to null
+$ c8y devices list | c8y devices update --data "myFragment={}" --workers 5
+Update all piped devices concurrently
         
 ```
 
@@ -80,6 +77,7 @@ Remove a property from a device by setting it to null
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

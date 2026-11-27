@@ -19,16 +19,10 @@ $ c8y agents list --name "sensor*" --type myType
 Get a collection of agents with type "myType", and their names start with "sensor"
 
 $ echo "name eq 'sensor*'" | c8y agents list
-Get a collection of agents with names starting with "sensor" using a piped inventory query (or could be piped from a file)
+Get a collection of agents with names starting with "sensor" using a piped inventory query
 
 $ c8y agents list --creationTimeDateFrom -7d
 Get agents which where registered longer than 7 days ago
-
-$ c8y agents list --creationTimeDateTo -1d
-Get agents which where registered in the last day
-
-$ c8y agents list --name "my example agent" --select type --output csv | c8y agents list --queryTemplate "type eq '%s'"
-Find an agent by name, then find other agents which the same type
         
 ```
 
@@ -96,6 +90,7 @@ Find an agent by name, then find other agents which the same type
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

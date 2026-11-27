@@ -23,13 +23,10 @@ Replace tags assigned to a version of a plugin
 ### Options
 
 ```
-  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --plugin string              Plugin (accepts pipeline)
-      --processingMode string      Cumulocity processing mode
-      --tag strings                Tag assigned to the version. Version tags must be unique across all versions and version fields of plugin versions
-      --template string            Body template
-      --templateVars stringArray   Body template variables
-      --version string             Version
+      --plugin string           Plugin (accepts pipeline)
+      --processingMode string   Cumulocity processing mode
+      --tag strings             Tag assigned to the version. Version tags must be unique across all versions and version fields of plugin versions
+      --version string          Version
 ```
 
 ### Options inherited from parent commands
@@ -72,6 +69,7 @@ Replace tags assigned to a version of a plugin
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

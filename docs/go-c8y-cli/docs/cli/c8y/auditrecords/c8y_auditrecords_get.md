@@ -6,7 +6,7 @@ Get audit record
 
 ### Synopsis
 
-Get an audit record
+Get an existing audit record by id
 
 ```
 c8y auditrecords get [flags]
@@ -16,14 +16,17 @@ c8y auditrecords get [flags]
 
 ```
 $ c8y auditrecords get --id 12345
-Get an audit record by id
+Get audit record by id
+
+$ c8y auditrecords list --type Alarm | c8y auditrecords get
+Get each piped audit record
         
 ```
 
 ### Options
 
 ```
-      --id strings   Audit id (required) (accepts pipeline)
+      --id strings   Audit record id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
@@ -66,6 +69,7 @@ Get an audit record by id
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

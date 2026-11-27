@@ -23,17 +23,17 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 ### Options
 
 ```
-      --createdFrom string         Start date or date and time of the alarm creation. Version >= 10.11
-      --createdTo string           End date or date and time of the alarm creation. Version >= 10.11
+      --createdFrom string         Start date or date and time of the alarm creation.
+      --createdTo string           End date or date and time of the alarm creation.
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --dateFrom string            Start date or date and time of alarm occurrence.
       --dateTo string              End date or date and time of alarm occurrence.
       --device strings             The ManagedObject that the alarm originated from (accepts pipeline)
       --newStatus string           New status to be applied to all of the matching alarms
       --processingMode string      Cumulocity processing mode
-      --resolved[=true|false]      When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
-      --severity string            The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.
-      --status string              The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.
+      --resolved[=true|false]      When set to true only resolved alarms will be updated (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
+      --severity string            The severity of the alarm to filter by: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.
+      --status string              The status of the alarm to filter by: ACTIVE, ACKNOWLEDGED or CLEARED. Must be upper-case.
       --template string            Body template
       --templateVars stringArray   Body template variables
 ```
@@ -78,6 +78,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

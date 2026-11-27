@@ -6,10 +6,7 @@ Get audit record collection
 
 ### Synopsis
 
-Audit records contain information about modifications to other Cumulocity entities.
-
-For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -> EXECUTING -> SUCCESSFUL.
-
+Get a collection of audit records based on filter parameters
 
 ```
 c8y auditrecords list [flags]
@@ -18,8 +15,11 @@ c8y auditrecords list [flags]
 ### Examples
 
 ```
-$ c8y auditrecords list --pageSize 100
-Get a list of audit records
+$ c8y auditrecords list --type Alarm --user admin
+Get audit records of type Alarm created by admin
+
+$ c8y auditrecords list --source 12345
+Get audit records for a given source object
         
 ```
 
@@ -27,11 +27,11 @@ Get a list of audit records
 
 ```
       --application string    Application
-      --dateFrom string       Start date or date and time of audit record occurrence.
-      --dateTo string         End date or date and time of audit record occurrence.
+      --dateFrom string       Start date or date and time of audit record occurrence
+      --dateTo string         End date or date and time of audit record occurrence
       --revert[=true|false]   Return the newest instead of the oldest audit records. Must be used with dateFrom and dateTo parameters
-      --source string         Source Id or object containing an .id property of the element that should be detected. i.e. AlarmID, or Operation ID. Note: Only one source can be provided (accepts pipeline)
-      --type string           Type
+      --source string         Source id of the audit record (accepts pipeline)
+      --type string           Audit record type
       --user string           Username
 ```
 
@@ -75,6 +75,7 @@ Get a list of audit records
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off
