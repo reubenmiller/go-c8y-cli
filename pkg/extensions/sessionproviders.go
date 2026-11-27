@@ -1,6 +1,8 @@
 package extensions
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -114,4 +116,51 @@ func SessionProviderCompletions(providers []InstalledSessionProvider) []string {
 		values = append(values, ref+"\t"+description)
 	}
 	return values
+}
+
+// ProviderSession is a session listed by a session provider (see SessionProvider.List). It does
+// not contain any secrets: secret properties in the provider's output are ignored
+type ProviderSession struct {
+	// SessionURI identifies the session within the provider, e.g. "bitwarden://<item-id>". It is
+	// passed to the provider's select command
+	SessionURI  string `json:"sessionUri"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	Host        string `json:"host"`
+	Tenant      string `json:"tenant,omitempty"`
+	Username    string `json:"username,omitempty"`
+	Mode        string `json:"mode,omitempty"`
+	LoginType   string `json:"loginType,omitempty"`
+
+	// Group is an optional grouping shown to the user, e.g. the folder of the vault
+	Group string `json:"group,omitempty"`
+}
+
+// DisplayName returns the name shown to the user
+func (s ProviderSession) DisplayName() string {
+	for _, v := range []string{s.Name, s.Description, s.SessionURI} {
+		if v = strings.TrimSpace(v); v != "" {
+			return v
+		}
+	}
+	return s.Host
+}
+
+// ParseProviderSessions parses the output of a provider's list command: a json array of
+// sessions. Sessions without a sessionUri or host are skipped, and returned as warnings
+func ParseProviderSessions(data []byte) ([]ProviderSession, []string, error) {
+	sessions := []ProviderSession{}
+	if err := json.Unmarshal(bytes.TrimSpace(data), &sessions); err != nil {
+		return nil, nil, fmt.Errorf("the session provider did not print a json array of sessions. %w", err)
+	}
+	valid := make([]ProviderSession, 0, len(sessions))
+	warnings := []string{}
+	for i, s := range sessions {
+		if strings.TrimSpace(s.SessionURI) == "" || strings.TrimSpace(s.Host) == "" {
+			warnings = append(warnings, fmt.Sprintf("session is ignored as the sessionUri or host is empty. index=%d, name=%s", i, s.DisplayName()))
+			continue
+		}
+		valid = append(valid, s)
+	}
+	return valid, warnings, nil
 }

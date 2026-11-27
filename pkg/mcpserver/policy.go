@@ -114,8 +114,8 @@ var DeniedShortFlags = []rune{'U', 'P', 'k', 'f', 'l'}
 
 // Policy controls what the agent can and can't do
 type Policy struct {
-	// Mode maximum session mode the agent may use. It can never exceed the
-	// mode of the session itself. SessionModeUnset uses the session's mode
+	// Mode the ceiling: the maximum mode the agent may use, whatever the user
+	// chooses for a session. SessionModeUnset allows up to dev
 	Mode config.SessionMode
 
 	// Allow if non-empty, only commands matching one of these patterns are allowed
@@ -175,19 +175,7 @@ func ParseMode(name string) (config.SessionMode, error) {
 // unset policy mode uses the session mode, and an unset session mode is prod (read
 // only). The ci mode is treated like dev so the agent never gets more than dev.
 func CapMode(policyMode, sessionMode config.SessionMode) config.SessionMode {
-	if sessionMode == config.SessionModeUnset {
-		sessionMode = config.SessionModeProduction
-	}
-	if sessionMode > config.SessionModeDev {
-		sessionMode = config.SessionModeDev
-	}
-	if policyMode > config.SessionModeDev {
-		policyMode = config.SessionModeDev
-	}
-	if policyMode < sessionMode {
-		return policyMode
-	}
-	return sessionMode
+	return ResolveMode(policyMode, sessionMode, config.SessionModeUnset)
 }
 
 // MatchCommand checks if a command path (e.g. "devices list") matches a pattern.
@@ -324,6 +312,29 @@ func checkDeniedFlags(args []string, deniedFlags []string, deniedShortFlags []ru
 
 func isLetter(c byte) bool {
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+}
+
+// BrowserCommands commands which open a page of the web UI in a browser. With
+// --noBrowser they only print the page's address, without a request to Cumulocity
+var BrowserCommands = []string{"applications open"}
+
+// PrintsURLOnly checks if a browser command was told to print the page's address
+// instead of opening a browser
+func PrintsURLOnly(commandPath string, args []string) bool {
+	if _, ok := matchAny(BrowserCommands, commandPath); !ok {
+		return false
+	}
+	noBrowser := false
+	args, _, _ = SplitAtTerminator(args)
+	for _, arg := range args {
+		switch strings.ToLower(arg) {
+		case "--nobrowser", "--nobrowser=true":
+			noBrowser = true
+		case "--nobrowser=false":
+			noBrowser = false
+		}
+	}
+	return noBrowser
 }
 
 // HasDryRun checks if the arguments activate the dry run mode

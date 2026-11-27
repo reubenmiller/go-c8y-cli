@@ -3,6 +3,7 @@ package mcpserver
 import (
 	"os"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
@@ -33,6 +34,12 @@ func newTestRoot() *cobra.Command {
 	group("microservices", "list", "getBootstrapUser")
 	group("operations", "wait", "list", "create")
 	group("template", "execute")
+	applications := group("applications", "list")
+	open := &cobra.Command{Use: "open", RunE: noop}
+	open.Flags().Bool("noBrowser", false, "")
+	open.Flags().StringSlice("device", nil, "")
+	open.Flags().String("page", "", "")
+	applications.AddCommand(open)
 
 	remoteAccess := &cobra.Command{Use: "remoteaccess"}
 	connect := &cobra.Command{Use: "connect"}
@@ -121,6 +128,14 @@ func TestPlanReadWriteClassification(t *testing.T) {
 		{"api --method=DELETE /inventory/managedObjects/1", false},
 		{"api DELETE /inventory/managedObjects/1", false},
 		{"api POST", false},
+		{"devices", true},
+		{"devices --select id", true},
+		{"applications open --device 1 --page device-info --noBrowser", true},
+		{"applications open --device 1 --noBrowser=true", true},
+		{"applications open --device 1", false},
+		{"applications open --device 1 --noBrowser=false", false},
+		{"devices list --noBrowser", true},
+		{"devices delete --id 1 --noBrowser", false},
 	}
 
 	c := newTestClassifier()
@@ -153,6 +168,10 @@ func TestPlanRejections(t *testing.T) {
 		{"devices list > out.json", "shell operator"},
 		{"devices list | jq .id", "unknown c8y command"},
 		{"foo bar", "unknown c8y command"},
+		{"devices count", `"devices" has no sub command "count"`},
+		{"devices --select id count", "Available sub commands: create, delete"},
+		{"remoteaccess connect foo", `"remoteaccess connect" has no sub command "foo"`},
+		{"tedge unknown", `"tedge" has no sub command "unknown"`},
 		{"--select id", "must start with a c8y command"},
 		{"api --url https://example.com/x", "absolute urls"},
 		{"api GET https://example.com/x", "absolute urls"},
@@ -326,4 +345,32 @@ func TestLimitedWriter(t *testing.T) {
 	if buf.String() != "hello" || !w.truncated {
 		t.Errorf("unexpected output %q, truncated=%v", buf.String(), w.truncated)
 	}
+}
+
+// Tool calls are handled concurrently, and cobra changes the command tree while
+// finding a command, so the classifier must serialize the lookups. Run with -race
+func TestPlanConcurrent(t *testing.T) {
+	c := newTestClassifier()
+	commands := []string{
+		"devices list --select id,name",
+		"devices create --dry",
+		"inventory get --select id",
+		"applications open --device 1 --page device-info --noBrowser",
+		"remoteaccess connect ssh --device 1 -- uptime",
+		"api --url /inventory/managedObjects | devices get --select id",
+		"tedge demo start tedge_mux_test --skip-website",
+	}
+	var wg sync.WaitGroup
+	for i := 0; i < 50; i++ {
+		for _, command := range commands {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				if _, err := c.Plan(command); err != nil {
+					t.Errorf("%q: unexpected error: %s", command, err)
+				}
+			}()
+		}
+	}
+	wg.Wait()
 }
