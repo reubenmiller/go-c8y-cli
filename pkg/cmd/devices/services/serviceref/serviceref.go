@@ -13,6 +13,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/inventory/managedobjects/childadditions"
 )
 
@@ -34,6 +35,10 @@ func First(values []string) string {
 // numeric id passes through unchanged (no lookup, so it works under --dry without
 // a server round-trip); otherwise the name is resolved among the parent device's
 // c8y_Service child additions. deviceRef is only needed for the name case.
+// Read the --id flag before the --device flag and look the device up with the
+// context of Resolver.ResolveContextFor("device"): a failed lookup of the device
+// is then reported as the lookup of a flag which does not drive the command
+// (exit code 100), as in v2.59.0.
 func ResolveID(ctx context.Context, client *apiv2.Client, deviceRef, idRef string) (string, error) {
 	if idRef == "" || isPlainID(idRef) {
 		return idRef, nil
@@ -48,11 +53,13 @@ func ResolveID(ctx context.Context, client *apiv2.Client, deviceRef, idRef strin
 	opt.PageSize = 1
 	for mo, err := range client.ManagedObjects.ChildAdditions.ListAll(ctx, deviceID, opt).Items() {
 		if err != nil {
-			return "", err
+			// as v2.59.0: an error of the lookup (e.g. "Could not fetch by id: <error>")
+			return "", core.WrapLookup("device service", idRef, err)
 		}
 		return mo.ID(), nil
 	}
-	return "", fmt.Errorf("no device service found with name %q", idRef)
+	// as v2.59.0: an unresolved name (referenceByName, exit code 4)
+	return "", core.NewNameNotFoundError("device service", idRef, "no device service found with name %q", idRef)
 }
 
 // isPlainID reports whether value is a non-empty all-digit id.

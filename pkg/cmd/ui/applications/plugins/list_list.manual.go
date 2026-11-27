@@ -6,6 +6,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
@@ -71,6 +72,8 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	}
 	// v2.59.0 sent the requests of this command without a page size
 	r.NoDefaultPageSize()
+	// v2.59.0 exited with 100 (not 101) when the server could not be reached to look the application up
+	r.LookupFailureStyle("", cmderrors.ExitError)
 	if err := r.InputFlag("application"); err != nil {
 		return err
 	}
@@ -79,7 +82,13 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		app := c8ystream.NameOrID(in.String("application"))
+		// A name which no hosted application has is an unresolved name (exit
+		// code 4). v2.59.0 listed nothing and exited with 0, which is a v2 bug
+		// (see docs/proposals/BREAKING_CHANGE_CANDIDATES.md).
+		app, err := c8ystream.HostedApplicationRef(in.ResolveContext(), client, n.factory.GetTenant(), in.String("application"))
+		if err != nil {
+			return nil, err
+		}
 		if app == "" {
 			// As in v2.59.0 no application is not an error: nothing is
 			// listed (also nothing under --raw) and no request is sent

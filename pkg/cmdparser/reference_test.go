@@ -3,7 +3,6 @@ package cmdparser
 import (
 	"context"
 	"errors"
-	"net/http"
 	"strings"
 	"testing"
 
@@ -131,7 +130,7 @@ func TestWithReference_unknownFlagValue(t *testing.T) {
 	for name, resolve := range map[string]resolveFunc{
 		"no match": func(context.Context, *references, *cobra.Command, string) (string, error) { return "", nil },
 		"sdk not found": func(context.Context, *references, *cobra.Command, string) (string, error) {
-			return "", &core.Error{Code: http.StatusNotFound, Message: "application not found with name: unknown"}
+			return "", core.WrapLookup("application", "name:unknown", core.NewNameNotFoundError("application", "unknown", "application not found with name: unknown"))
 		},
 	} {
 		_, _, err := refs.withReference(resolve, nil, "application", "id")(cmd, &flags.RequestInputIterators{})

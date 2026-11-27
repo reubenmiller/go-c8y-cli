@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/url"
 	"os"
 	"strings"
@@ -16,6 +17,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -34,6 +36,40 @@ type Resolver struct {
 	index   int64
 	input   []byte // raw current input item (nil when running without a driver)
 	primary string // value resolved by the driver flag (InputFlag), if any
+
+	// lastFlag is the flag which was read last. A lookup which fails while
+	// Build runs is the lookup of the value of this flag (a command reads the
+	// flag, then resolves it), see lookupFlagIsSecondary.
+	lastFlag string
+}
+
+// lookupFlagIsSecondary reports whether the lookup which failed with err was
+// the lookup of a flag which does not drive the command (InputFlag), e.g.
+// --device of "remoteaccess configurations get", which is driven by --id: the
+// last flag read is another flag, and the name which could not be looked up
+// is not the value of the flag which drives the command (a command may read
+// that value, then other flags, then look it up).
+func (in *Resolver) lookupFlagIsSecondary(err error) bool {
+	if in.lastFlag == "" || in.lastFlag == in.r.primaryName {
+		return false
+	}
+	if name, ok := lookupName(err); ok && in.primary != "" && name == in.primary {
+		return false
+	}
+	return true
+}
+
+// lookupName returns the name of a failed lookup: the name which matched
+// nothing, or the reference which could not be resolved (without "name:").
+func lookupName(err error) (string, bool) {
+	if _, name, ok := core.NameNotFound(err); ok {
+		return name, true
+	}
+	var lookupErr *core.LookupError
+	if errors.As(err, &lookupErr) {
+		return strings.TrimPrefix(lookupErr.Reference, "name:"), true
+	}
+	return "", false
 }
 
 // Index is the zero-based position of this item in the input stream.
@@ -52,6 +88,15 @@ func (in *Resolver) ResolveContext() context.Context {
 	return apiv2.ResolutionContext(in.ctx)
 }
 
+// ResolveContextFor is ResolveContext for the lookup of the value of a flag.
+// Name the flag so a lookup which fails is reported the way v2.59.0 reported
+// it: a flag which does not drive the command (not the InputFlag) has its own
+// text and exit code (see LookupTransportError and NoMatchesFlagError).
+func (in *Resolver) ResolveContextFor(flag string) context.Context {
+	in.lastFlag = flag
+	return in.ResolveContext()
+}
+
 // Input returns the raw current input item (the piped line), or nil.
 func (in *Resolver) Input() []byte { return in.input }
 
@@ -61,6 +106,7 @@ func (in *Resolver) Input() []byte { return in.input }
 // unless another flag claimed the pipe via `-` (pipeOverride), in which case the
 // driver's own flag is left at its (unset) command-line value.
 func (in *Resolver) String(flag string) string {
+	in.lastFlag = flag
 	// The driver flag uses the value the driver resolved, except when another
 	// flag claimed the pipe (pipeOverride) AND the driver flag was not given
 	// explicitly — then the pipe belongs to the other flag and the driver's own
@@ -200,6 +246,7 @@ func (in *Resolver) BoolPtrIfChanged(flag string) *bool {
 // WithReferenceByNameFirstMatch, which resolved values[0]. For a plain string
 // flag it behaves like String.
 func (in *Resolver) FirstString(flag string) string {
+	in.lastFlag = flag
 	f := in.r.Cmd.Flags().Lookup(flag)
 	if f == nil {
 		return ""
@@ -218,6 +265,7 @@ func (in *Resolver) FirstString(flag string) string {
 // StringSlice returns a string-slice flag's value, resolving any `-`/`-.path`
 // element against the current input item (e.g. `--user -`).
 func (in *Resolver) StringSlice(flag string) []string {
+	in.lastFlag = flag
 	v, _ := in.r.Cmd.Flags().GetStringSlice(flag)
 	for i, item := range v {
 		if path, ok := iterator.InputReference(item); ok {

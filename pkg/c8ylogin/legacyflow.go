@@ -226,7 +226,7 @@ func (h *LoginHandlerV2) initLoginOptions() error {
 
 	result := h.V2Client.LoginOptions.ListNoAuth(h.ctx(), loginoptions.ListOptions{})
 	if result.Err != nil {
-		if strings.Contains(result.Err.Error(), "401") {
+		if apiv2.IsUnauthorized(result.Err) {
 			h.Logger.Infof("Login options returned 401. This may happen when your c8y hostname is not setup correctly")
 			return nil
 		}
