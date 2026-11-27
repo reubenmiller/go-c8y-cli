@@ -174,8 +174,8 @@ github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pquerna/otp v1.5.0 h1:NMMR+WrmaqXU4EzdGJEE1aUUI0AMRzsp96fFFWNPwxs=
 github.com/pquerna/otp v1.5.0/go.mod h1:dkJfzwRKNiegxyNb54X/3fLwhCynbMspSyWKnvi1AEg=
-github.com/reubenmiller/go-c8y/v2 v2.0.0-20261127062024-4c7ef6c61122 h1:iad+9M+YmHsgZbcIoONdy9K0mCaPYOcumzg7DzQ/KSQ=
-github.com/reubenmiller/go-c8y/v2 v2.0.0-20261127062024-4c7ef6c61122/go.mod h1:lRo1Q+bHYGaDXezkaWm9B30IPRDhdXtFGdS1cdnCWPY=
+github.com/reubenmiller/go-c8y/v2 v2.0.0-20261127072954-c376fa26c68f h1:umRuBD7mEga9eyO2cR0CLS0NjhJ/HMByCa+kdccoqQQ=
+github.com/reubenmiller/go-c8y/v2 v2.0.0-20261127072954-c376fa26c68f/go.mod h1:lRo1Q+bHYGaDXezkaWm9B30IPRDhdXtFGdS1cdnCWPY=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
