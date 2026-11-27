@@ -1,6 +1,7 @@
 package c8ystream
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -176,5 +177,80 @@ func TestToServerError_assertRequestIsCommandError(t *testing.T) {
 	want := "commandError: GET http://host/inventory/managedObjects/1: 404 inventory/Not Found No managedObject for id '1'!"
 	if ce.Error() != want {
 		t.Errorf("Error() = %q, want %q", ce.Error(), want)
+	}
+}
+
+// transportError is the error of a request which got no response, as the SDK
+// returns it (the Go error of the http client wrapped in a core.Error)
+func transportError(t *testing.T) error {
+	t.Helper()
+	urlErr := &url.Error{Op: "Get", URL: "http://127.0.0.1:1/inventory/managedObjects/1", Err: errors.New("dial tcp 127.0.0.1:1: connect: connection refused")}
+	return &core.Error{Code: core.ErrorFromError, Message: urlErr.Error(), Err: urlErr}
+}
+
+func TestToServerError_transportError(t *testing.T) {
+	r := newErrorRunner(false)
+	got := r.toServerError(transportError(t))
+	ce, ok := got.(cmderrors.CommandError)
+	if !ok {
+		t.Fatalf("want a CommandError, got %T", got)
+	}
+	// v2.59.0: serverError, exit code 99, the message of the http client twice
+	if ce.ErrorType != cmderrors.ErrTypeServer || ce.ExitCode != cmderrors.ExitUnknownError {
+		t.Errorf("unexpected type/exit: %+v", ce)
+	}
+	msg := `Get "http://127.0.0.1:1/inventory/managedObjects/1": dial tcp 127.0.0.1:1: connect: connection refused`
+	if want := "serverError: " + msg + " " + msg; ce.Error() != want {
+		t.Errorf("Error() = %q, want %q", ce.Error(), want)
+	}
+
+	// the --withError document has the error of the http client under "error"
+	raw, err := json.Marshal(ce)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var doc struct {
+		ErrorType string `json:"errorType"`
+		Message   string `json:"message"`
+		ExitCode  int    `json:"exitCode"`
+		Error     struct {
+			Op  string
+			URL string
+		} `json:"error"`
+	}
+	if err := json.Unmarshal(raw, &doc); err != nil {
+		t.Fatal(err)
+	}
+	if doc.ErrorType != "serverError" || doc.Message != msg || doc.ExitCode != 99 || doc.Error.Op != "Get" || doc.Error.URL == "" {
+		t.Errorf("unexpected document: %s", raw)
+	}
+}
+
+func TestToServerError_transportErrorOfAssert(t *testing.T) {
+	r := newErrorRunner(false)
+	r.assert = &assertion{}
+	ce := r.toServerError(transportError(t)).(cmderrors.CommandError)
+	if ce.ErrorType != cmderrors.ErrTypeCommand || ce.ExitCode != cmderrors.ExitError {
+		t.Errorf("an assert command reports a plain command error: %+v", ce)
+	}
+}
+
+func TestWaitRequestError_transportError(t *testing.T) {
+	ce, ok := WaitRequestError(transportError(t)).(cmderrors.CommandError)
+	if !ok || ce.ErrorType != cmderrors.ErrTypeCommand || ce.ExitCode != cmderrors.ExitError {
+		t.Errorf("a wait command reports a command error with exit code 100: %+v", ce)
+	}
+}
+
+func TestTransportError_notATransportError(t *testing.T) {
+	for name, err := range map[string]error{
+		"plain error":      errors.New("boom"),
+		"server error":     serverErr("GET", "http://host/x", 500, "{}"),
+		"cancelled":        &url.Error{Op: "Get", URL: "http://host/x", Err: context.Canceled},
+		"cancelled in sdk": &core.Error{Code: core.ErrorFromError, Err: &url.Error{Op: "Get", URL: "http://host/x", Err: context.Canceled}},
+	} {
+		if _, ok := TransportError(err); ok {
+			t.Errorf("%s must not be a transport error", name)
+		}
 	}
 }

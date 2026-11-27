@@ -1,0 +1,94 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# The reference types of extension parameters as in v2.59.0:
+#   * user[] and userself[] expand wildcards (the first match is used)
+#   * hostedapplication only matches hosted applications (of the current tenant first)
+#   * a name which matches nothing: "reference by name: no matches found"
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+
+tests:
+  It uses a user name without wildcards as it is:
+    command: |
+      c8y kitchensink body_complex user --user "nobody-at-all" --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.user: nobody-at-all
+
+  It resolves the first user which matches a wildcard (user[]):
+    command: |
+      c8y kitchensink body_complex user --user "adm*" --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.user: admin
+
+  It resolves the first user which matches a wildcard (userself[]):
+    command: |
+      c8y kitchensink body_complex userself --user "adm*" --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.user: r/^https?://.+/user/t12345/users/admin$
+
+  It fails when no user matches a wildcard (user[]):
+    command: |
+      c8y kitchensink body_complex user --user "nobody-at-all*" --dry --dryFormat json
+    exit-code: 101
+    stderr:
+      contains:
+        - "commandError: reference by name: no matches found"
+
+  It fails when no user matches a wildcard (userself[]):
+    command: |
+      c8y kitchensink body_complex userself --user "nobody-at-all*" --dry --dryFormat json
+    exit-code: 101
+    stderr:
+      contains:
+        - "commandError: reference by name: no matches found"
+
+  It resolves a hosted application by name:
+    command: |
+      c8y kitchensink body_complex hostedapplication --id cockpit --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.id: r/^[1-9][0-9]*$
+
+  It uses the id of a hosted application as it is:
+    command: |
+      c8y kitchensink body_complex hostedapplication --id 123456 --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.id: "123456"
+
+  It does not resolve the name of a microservice as a hosted application:
+    command: |
+      c8y kitchensink body_complex hostedapplication --id report-agent --dry --dryFormat json
+    exit-code: 101
+    stderr:
+      contains:
+        - "commandError: reference by name: no matches found"
+      not-contains:
+        - "[404]"
+
+  It still resolves the name of a microservice as a microservice:
+    command: |
+      c8y kitchensink body_complex microservice --id report-agent --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.id: r/^[1-9][0-9]*$
+
+  It reports an unknown application name with the text of v2:
+    command: |
+      c8y kitchensink body_complex application --id does-not-exist --dry --dryFormat json
+    exit-code: 101
+    stderr:
+      contains:
+        - "commandError: reference by name: no matches found"
+      not-contains:
+        - "[404]"

@@ -138,6 +138,70 @@ tests:
       contains:
         - access to the file is denied
 
+  It names the denied device file of events create:
+    config:
+      env:
+        C8Y_SETTINGS_FILES_DENIEDPATHS: testdata/fileguard/sessions
+    command: >
+      c8y events create --device testdata/fileguard/sessions/ids.txt --type x --text y --dry
+    exit-code: 101
+    stdout:
+      not-contains:
+        - /
+    stderr:
+      contains:
+        - "commandError: access to the file is denied: testdata/fileguard/sessions/ids.txt"
+      not-contains:
+        - "missing required properties"
+
+  It names the denied device file of alarms create:
+    config:
+      env:
+        C8Y_SETTINGS_FILES_DENIEDPATHS: testdata/fileguard/sessions
+    command: >
+      c8y alarms create --device testdata/fileguard/sessions/ids.txt --type x --text y --severity MAJOR --dry
+    exit-code: 101
+    stdout:
+      not-contains:
+        - /
+    stderr:
+      contains:
+        - "commandError: access to the file is denied: testdata/fileguard/sessions/ids.txt"
+      not-contains:
+        - "missing required properties"
+
+  It names the denied device file of measurements create:
+    config:
+      env:
+        C8Y_SETTINGS_FILES_DENIEDPATHS: testdata/fileguard/sessions
+    command: >
+      c8y measurements create --device testdata/fileguard/sessions/ids.txt --type x --dry
+    exit-code: 101
+    stdout:
+      not-contains:
+        - /
+    stderr:
+      contains:
+        - "commandError: access to the file is denied: testdata/fileguard/sessions/ids.txt"
+      not-contains:
+        - "missing required properties"
+
+  It names the denied device file of operations create:
+    config:
+      env:
+        C8Y_SETTINGS_FILES_DENIEDPATHS: testdata/fileguard/sessions
+    command: >
+      c8y operations create --device testdata/fileguard/sessions/ids.txt --description x --dry
+    exit-code: 101
+    stdout:
+      not-contains:
+        - /
+    stderr:
+      contains:
+        - "commandError: access to the file is denied: testdata/fileguard/sessions/ids.txt"
+      not-contains:
+        - "missing required properties"
+
   It reports a denied device file of an assert command as an unexpected error:
     config:
       env:

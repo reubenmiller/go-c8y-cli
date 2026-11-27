@@ -86,6 +86,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	err = r.Body(
+		flags.WithDeniedFileCheck("device"),
 		flags.WithOverrideValue("device", "deviceId"),
 		flags.WithDataFlagValue(),
 		flags.WithSliceRefValue("device", "deviceId"),

@@ -233,7 +233,7 @@ func (n *RuntimeCmd) RunE(cmd *cobra.Command, args []string) error {
 		current.name = pipeOpts.Name
 		if err := r.InputFlag(pipeOpts.Name); err != nil {
 			if paramErr := new(flags.ParameterError); errors.As(err, &paramErr) {
-				return cmderrors.NewUserError(err)
+				return n.missingPipelineParameter(paramErr)
 			}
 			return err
 		}
@@ -268,6 +268,39 @@ func (n *RuntimeCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		return r.RequestCall(client, opts), nil
 	})
+}
+
+// missingPipelineParameter reports the required pipeline parameter which has
+// no value (no argument and nothing piped). As in v2.59.0, a path parameter is
+// an unexpected error (exit code 100; a parameter which is looked up by name
+// reports the unset path variable instead), anything else is a user error
+// (exit code 101).
+func (n *RuntimeCmd) missingPipelineParameter(paramErr *flags.ParameterError) error {
+	for _, p := range n.options.Spec.PathParameters {
+		if p.Name != paramErr.Name {
+			continue
+		}
+		if isReferenceLookupType(p.Type) {
+			return fmt.Errorf("missing required parameters. [%s]", p.Name)
+		}
+		return paramErr
+	}
+	return cmderrors.NewUserError(paramErr)
+}
+
+// isReferenceLookupType reports whether a parameter type is a reference which
+// is resolved by name (the v2.59.0 "ByNameFirstMatch" getters).
+func isReferenceLookupType(paramType string) bool {
+	switch paramType {
+	case "application", "hostedapplication", "microservice", "uiplugin",
+		"software[]", "softwareversion[]", "deviceservice[]", "certificate[]",
+		"firmware[]", "firmwareversion[]", "firmwarepatch[]", "configuration[]",
+		"deviceprofile[]", "device[]", "agent[]", "devicegroup[]", "smartgroup[]",
+		"user[]", "userself[]", "roleself[]", "role[]", "usergroup[]",
+		"remoteaccessconfiguration":
+		return true
+	}
+	return false
 }
 
 // requestTemplate holds the parts of a runtime command's request. Parts which

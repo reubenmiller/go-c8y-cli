@@ -77,6 +77,13 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	}
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		app := c8ystream.NameOrID(in.String("application"))
+		if app == "" {
+			// As in v2.59.0 no application is not an error: nothing is
+			// listed (also nothing under --raw) and no request is sent
+			return func(context.Context) any {
+				return nil
+			}, nil
+		}
 		return func(ctx context.Context) any {
 			return client.UIApplicationPlugins.ListPlugins(ctx, app)
 		}, nil

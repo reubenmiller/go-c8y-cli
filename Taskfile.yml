@@ -428,6 +428,8 @@ tasks:
           env PATH="$LOCAL_PATH" C8Y_OFFLINE_TLS=1 C8Y_OFFLINE_SUITE=manual ./tests/run-offline.sh "$suite" || exit 1
         done
       - env PATH="$LOCAL_PATH" C8Y_OFFLINE_SUITE=offline ./tests/run-offline.sh .
+      # the transport error tests which need a certificate to verify
+      - env PATH="$LOCAL_PATH" C8Y_OFFLINE_TLS=1 C8Y_OFFLINE_SUITE=offline ./tests/run-offline.sh common/errors_parity.yaml
 
   test-cli-offline-extensions:
     desc: Run the extension (runtime command) cli tests against the go-c8y fake server, using the c8y-kitchensink test extension

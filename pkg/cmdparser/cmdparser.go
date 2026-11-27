@@ -465,7 +465,7 @@ func GetOption(cmd *CmdOptions, p *models.Parameter, factory *cmdutil.Factory, a
 		opts = append(opts, refs.withReference(resolveApplication, args, p.Name, targetProp, p.Format))
 
 	case "hostedapplication":
-		opts = append(opts, refs.withReference(resolveApplication, args, p.Name, targetProp, p.Format))
+		opts = append(opts, refs.withReference(resolveHostedApplication, args, p.Name, targetProp, p.Format))
 
 	case "microservice":
 		opts = append(opts, refs.withReference(resolveMicroservice, args, p.Name, targetProp, p.Format))
