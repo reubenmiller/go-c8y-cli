@@ -53,13 +53,18 @@ func (r *Runner) installOutputTemplateCapture(client *apiv2.Client) {
 			"body":          string(o.Body),
 		}
 
-		r.tmplMu.Lock()
-		r.tmplRequest = requestData
 		page := templatePage{body: o.Body}
 		if req := raw.Request; req != nil && req.URL != nil {
 			page.method, page.path = req.Method, req.URL.Path
+			// the responses of a job are kept with the job, as the jobs of
+			// --workers run at the same time
+			if capture, ok := req.Context().Value(templateCaptureKey{}).(*templateCapture); ok {
+				capture.add(page, requestData, responseData)
+			}
 		}
-		r.tmplPages = append(r.tmplPages, page)
+
+		r.tmplMu.Lock()
+		r.tmplRequest = requestData
 		r.tmplResponse = responseData
 		r.tmplMu.Unlock()
 	}))

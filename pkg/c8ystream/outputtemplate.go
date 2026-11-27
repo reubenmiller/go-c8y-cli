@@ -3,6 +3,7 @@ package c8ystream
 import (
 	"context"
 	"strings"
+	"sync"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
@@ -54,11 +55,21 @@ func (r *Runner) wrapTemplateJob(ot *mapbuilder.OutputTemplate, flags map[string
 	// with --raw --select, as in v2.59.0)
 	split := !whole || (r.Config.RawOutput() && r.shapesItems())
 
+	// input is the piped item that produced this job (nil -> input.value is
+	// null, matching v1 for a command run without iteration input). It is read
+	// here, when the producer creates the job, as the job may run later on
+	// another worker (--workers), when the producer has read the next items.
+	var input any
+	if len(r.tmplInput) > 0 {
+		input = r.tmplInput
+	}
+
 	return func(ctx context.Context) output.Seq {
 		return func(yield func(jsondoc.JSONDoc, error) bool) {
-			r.tmplMu.Lock()
-			r.tmplPages = nil
-			r.tmplMu.Unlock()
+			// the responses of this job (and not of the jobs which run at the
+			// same time on other workers)
+			capture := &templateCapture{}
+			ctx = context.WithValue(ctx, templateCaptureKey{}, capture)
 
 			var docs [][]byte
 			failed := false
@@ -73,17 +84,15 @@ func (r *Runner) wrapTemplateJob(ot *mapbuilder.OutputTemplate, flags map[string
 			if failed {
 				return
 			}
-			// input is the piped item that produced this job (nil -> input.value
-			// is null, matching v1 for a command run without iteration input).
-			var input any
-			if len(r.tmplInput) > 0 {
-				input = r.tmplInput
+			pages, reqData, respData := capture.get()
+			if reqData == nil && respData == nil {
+				// no request of this job was seen (e.g. a dry run)
+				r.tmplMu.Lock()
+				reqData, respData = r.tmplRequest, r.tmplResponse
+				r.tmplMu.Unlock()
 			}
-			r.tmplMu.Lock()
-			reqData, respData := r.tmplRequest, r.tmplResponse
-			r.tmplMu.Unlock()
 
-			for _, body := range r.templateBodies(docs, whole) {
+			for _, body := range r.templateBodies(pages, docs, whole) {
 				out, err := ot.Evaluate(body, input, reqData, respData, flags)
 				if err != nil {
 					yield(jsondoc.Empty(), err)
@@ -117,18 +126,43 @@ type templatePage struct {
 	body         []byte
 }
 
-// jobPages returns the JSON responses of the pages of the current job: the
-// ones with the method and path of the last response (the requests which
-// resolved names to ids are left out).
-func (r *Runner) jobPages() []templatePage {
-	r.tmplMu.Lock()
-	defer r.tmplMu.Unlock()
-	if len(r.tmplPages) == 0 {
+// templateCaptureKey is the context key of the templateCapture of a job: the
+// response middleware (installOutputTemplateCapture) records the responses of
+// the requests which are sent with the context of the job in it.
+type templateCaptureKey struct{}
+
+// templateCapture holds the responses of one job for --outputTemplate.
+type templateCapture struct {
+	mu       sync.Mutex
+	pages    []templatePage
+	request  map[string]any
+	response map[string]any
+}
+
+func (c *templateCapture) add(page templatePage, request, response map[string]any) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.pages = append(c.pages, page)
+	c.request, c.response = request, response
+}
+
+// get returns the pages of the job (see jobPages) and its last request and response.
+func (c *templateCapture) get() ([]templatePage, map[string]any, map[string]any) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return jobPages(c.pages), c.request, c.response
+}
+
+// jobPages returns the JSON responses of the pages of a job: the ones with the
+// method and path of the last response (the requests which resolved names to
+// ids are left out).
+func jobPages(all []templatePage) []templatePage {
+	if len(all) == 0 {
 		return nil
 	}
-	last := r.tmplPages[len(r.tmplPages)-1]
+	last := all[len(all)-1]
 	var pages []templatePage
-	for _, p := range r.tmplPages {
+	for _, p := range all {
 		if p.method == last.method && p.path == last.path && gjson.ValidBytes(p.body) {
 			pages = append(pages, p)
 		}
@@ -137,10 +171,9 @@ func (r *Runner) jobPages() []templatePage {
 }
 
 // templateBodies returns the inputs (`output`) which the template is
-// evaluated with, one evaluation each: see wrapTemplateJob. docs are the
-// documents the job produced.
-func (r *Runner) templateBodies(docs [][]byte, whole bool) [][]byte {
-	pages := r.jobPages()
+// evaluated with, one evaluation each: see wrapTemplateJob. pages are the
+// responses of the job (see jobPages) and docs the documents it produced.
+func (r *Runner) templateBodies(pages []templatePage, docs [][]byte, whole bool) [][]byte {
 
 	if whole {
 		// the whole response of each page, with the envelope and statistics

@@ -29,16 +29,16 @@ func TestTemplateBodiesOfAList(t *testing.T) {
 		"nothing to see": {nil, nil, []string{`null`}},
 	} {
 		t.Run(name, func(t *testing.T) {
-			r.tmplPages = nil
+			var pages []templatePage
 			for _, p := range tt.pages {
-				r.tmplPages = append(r.tmplPages, templatePage{method: "GET", path: "/inventory/managedObjects", body: []byte(p)})
+				pages = append(pages, templatePage{method: "GET", path: "/inventory/managedObjects", body: []byte(p)})
 			}
 			docs := make([][]byte, 0, len(tt.docs))
 			for _, d := range tt.docs {
 				docs = append(docs, []byte(d))
 			}
 			got := []string{}
-			for _, b := range r.templateBodies(docs, false) {
+			for _, b := range r.templateBodies(jobPages(pages), docs, false) {
 				got = append(got, string(b))
 			}
 			assert.Equal(t, tt.want, got)
@@ -49,7 +49,7 @@ func TestTemplateBodiesOfAList(t *testing.T) {
 // with --raw, --withTotalPages and --withTotalElements the template gets the whole response
 func TestTemplateBodiesOfTheWholeResponse(t *testing.T) {
 	r := &Runner{}
-	r.tmplPages = []templatePage{{method: "GET", path: "/inventory/managedObjects", body: []byte(`{"managedObjects":[{"id":"1"}],"statistics":{"pageSize":5}}`)}}
-	got := r.templateBodies([][]byte{[]byte(`{"id":"1"}`)}, true)
+	pages := []templatePage{{method: "GET", path: "/inventory/managedObjects", body: []byte(`{"managedObjects":[{"id":"1"}],"statistics":{"pageSize":5}}`)}}
+	got := r.templateBodies(pages, [][]byte{[]byte(`{"id":"1"}`)}, true)
 	assert.Equal(t, [][]byte{[]byte(`{"managedObjects":[{"id":"1"}],"statistics":{"pageSize":5}}`)}, got)
 }

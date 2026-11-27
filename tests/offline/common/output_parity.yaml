@@ -347,3 +347,23 @@ tests:
       exactly: |
         [c8y]
           name = "x"
+
+  --outputTemplate gets the response and the input of its own job with --workers:
+    command: |
+      input=$(mktemp)
+      for i in 1 2 3 4 5 6; do
+        id=$(c8y devices create --name "template-workers-$i" --select id -o csv)
+        for j in $(seq 1 $i); do c8y events create --device "$id" --type t --text x >/dev/null; done
+        echo "{\"id\":\"$id\"}"
+      done > "$input"
+      c8y events list --workers 4 --pageSize 20 --outputTemplate '{n: std.length(output), ok: input.value.id == request.queryParams.source}' < "$input" | sort
+      rm -f "$input"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"n":1,"ok":true}
+        {"n":2,"ok":true}
+        {"n":3,"ok":true}
+        {"n":4,"ok":true}
+        {"n":5,"ok":true}
+        {"n":6,"ok":true}

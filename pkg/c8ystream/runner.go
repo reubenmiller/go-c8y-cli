@@ -95,7 +95,6 @@ type Runner struct {
 	tmplMu       sync.Mutex // guards tmplRequest/tmplResponse against the response middleware
 	tmplRequest  map[string]any
 	tmplResponse map[string]any
-	tmplPages    []templatePage // the responses of the current job, guarded by tmplMu
 }
 
 // NewRunner resolves the command configuration and pipeline annotations and
