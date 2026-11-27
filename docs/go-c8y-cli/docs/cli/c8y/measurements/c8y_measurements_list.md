@@ -15,11 +15,11 @@ c8y measurements list [flags]
 ### Examples
 
 ```
-$ c8y measurements list
-Get a list of measurements
+$ c8y measurements list --device 12345 --valueFragmentType c8y_Temperature
+Get temperature measurements for a device
 
-$ c8y measurements list --dateFrom -1d --revert=false
-Get a list of measurements from the last day, showing the oldest first
+$ c8y devices list --type myType | c8y measurements list --dateFrom -1d
+List the last day of measurements for each piped device
         
 ```
 
@@ -27,15 +27,16 @@ Get a list of measurements from the last day, showing the oldest first
 
 ```
       --csvFormat[=true|false]       Results will be displayed in csv format. Note: -IncludeAll, is not supported when using using this parameter
-      --dateFrom string              Start date or date and time of measurement occurrence.
-      --dateTo string                End date or date and time of measurement occurrence.
-      --device strings               Device ID (accepts pipeline)
+      --dateFrom string              Start date or date and time of measurement occurrence
+      --dateTo string                End date or date and time of measurement occurrence
+      --device strings               Source device id (accepts pipeline)
       --excelFormat[=true|false]     Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter
-      --revert[=true|false]          Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters. By default, the results are sorted by the newest measurements first for time series and by the oldest first for legacy measurements
-      --type string                  Measurement type.
+      --fragmentType string          Fragment name from measurement (deprecated)
+      --revert[=true|false]          Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters
+      --type string                  Measurement type
       --unit string                  Every measurement fragment which contains 'unit' property will be transformed to use required system of units.
-      --valueFragmentSeries string   value fragment series
-      --valueFragmentType string     value fragment type
+      --valueFragmentSeries string   Value fragment series, e.g. T
+      --valueFragmentType string     Value fragment type, e.g. c8y_Temperature
 ```
 
 ### Options inherited from parent commands
@@ -78,6 +79,7 @@ Get a list of measurements from the last day, showing the oldest first
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

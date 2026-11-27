@@ -15,33 +15,30 @@ c8y alarms list [flags]
 ### Examples
 
 ```
-$ c8y alarms list --severity MAJOR --pageSize 100
-Get alarms with the severity set to MAJOR
+$ c8y alarms list --severity MAJOR --status ACTIVE
+Get active MAJOR alarms
 
-$ c8y alarms list --dateFrom "-10m" --status ACTIVE
-Get collection of active alarms which occurred in the last 10 minutes
-
-$ c8y alarms list --dateFrom "-1d" --status ACTIVE --status ACKNOWLEDGED
-Get collection of active and acknowledged alarms in the last 1d
+$ c8y devices list --type myType | c8y alarms list --severity CRITICAL
+List critical alarms for each piped device
         
 ```
 
 ### Options
 
 ```
-      --createdFrom string               Start date or date and time of the alarm creation. Version >= 10.11
-      --createdTo string                 End date or date and time of the alarm creation. Version >= 10.11
-      --dateFrom string                  Start date or date and time of alarm occurrence.
-      --dateTo string                    End date or date and time of alarm occurrence.
-      --device strings                   Source device id. (accepts pipeline)
-      --lastUpdatedFrom string           Start date or date and time of the last update made. Version >= 10.11
-      --lastUpdatedTo string             End date or date and time of the last update made. Version >= 10.11
-      --resolved[=true|false]            When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
-      --severity string                  Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status strings                   Comma separated alarm statuses, for example ACTIVE,CLEARED.
-      --type string                      Alarm type.
-      --withSourceAssets[=true|false]    When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.
-      --withSourceDevices[=true|false]   When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.
+      --createdFrom string               Start date or date and time of the alarm creation
+      --createdTo string                 End date or date and time of the alarm creation
+      --dateFrom string                  Start date or date and time of alarm occurrence
+      --dateTo string                    End date or date and time of alarm occurrence
+      --device strings                   Source device id (accepts pipeline)
+      --lastUpdatedFrom string           Start date or date and time of the last update made
+      --lastUpdatedTo string             End date or date and time of the last update made
+      --resolved[=true|false]            When set to true only resolved alarms will be returned (the ones with status CLEARED)
+      --severity string                  Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING
+      --status strings                   Comma separated alarm statuses, for example ACTIVE,CLEARED
+      --type string                      Alarm type
+      --withSourceAssets[=true|false]    When set to true also alarms for related source assets will be included in the request. When this parameter is provided a source must be specified
+      --withSourceDevices[=true|false]   When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified
 ```
 
 ### Options inherited from parent commands
@@ -84,6 +81,7 @@ Get collection of active and acknowledged alarms in the last 1d
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

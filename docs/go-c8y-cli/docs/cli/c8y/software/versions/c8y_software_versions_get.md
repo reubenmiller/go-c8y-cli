@@ -17,6 +17,9 @@ c8y software versions get [flags]
 ```
 $ c8y software versions get --software 11111 --id 1.0.0
 Get a software package version using name
+
+$ c8y software versions list --software 12345 | c8y software versions get --withParents
+Get a software package version using pipeline
         
 ```
 
@@ -25,7 +28,7 @@ Get a software package version using name
 ```
       --id strings                       Software Package version id or name (required) (accepts pipeline)
       --skipChildrenNames[=true|false]   Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --software strings                 Software package id (used to help completion be more accurate)
+      --software strings                 Software package id or name (used to help completion be more accurate)
       --withChildren[=true|false]        Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
       --withChildrenCount[=true|false]   When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)
       --withGroups[=true|false]          When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
@@ -72,6 +75,7 @@ Get a software package version using name
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

@@ -15,28 +15,18 @@ c8y datahub query [flags]
 ### Examples
 
 ```
-$ c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms"
-Get a list of alarms from datahub
-
-$ c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms" --limit 2000
-Get a list of alarms from datahub with custom limit
-
-$ c8y datahub query --sql "SELECT * FROM myTenantIdDataLake.Dremio.myTenantId.alarms" --format PANDAS --raw
-Get a list of alarms from datahub using the PANDAS format (note the raw format is necessary here)
+$ c8y datahub query --sql "SELECT * FROM mytable" --limit 10
+Execute a SQL query and return the first 10 rows
         
 ```
 
 ### Options
 
 ```
-  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --format string              The response format, which is either DREMIO or PANDAS. The DREMIO format is the same response format as provided by the sql endpoint of the Standard API. The PANDAS format fits to the data format the Pandas library for Python expects.
-      --limit int                  The maximum number of query results (default 1000)
-      --processingMode string      Cumulocity processing mode
-      --sql string                 The SQL query to execute (accepts pipeline)
-      --template string            Body template
-      --templateVars stringArray   Body template variables
-      --version string             The version of the high-performance API (default "v1")
+      --format string    The response format, which is either DREMIO or PANDAS
+      --limit int        The maximum number of query results (default 1000)
+      --sql string       The SQL query to execute (accepts pipeline)
+      --version string   The version of the high-performance API (default "v1")
 ```
 
 ### Options inherited from parent commands
@@ -79,6 +69,7 @@ Get a list of alarms from datahub using the PANDAS format (note the raw format i
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

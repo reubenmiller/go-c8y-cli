@@ -2,12 +2,11 @@
 category: applications
 title: c8y applications listApplicationBinaries
 ---
-Get application binaries
+Get application binary collection
 
 ### Synopsis
 
-A list of all binaries related to the given application will be returned
-
+Retrieve all binaries of an application
 
 ```
 c8y applications listApplicationBinaries [flags]
@@ -17,14 +16,14 @@ c8y applications listApplicationBinaries [flags]
 
 ```
 $ c8y applications listApplicationBinaries --id 12345
-List all of the binaries related to a Hosted (web) application
+List the binaries of an application
         
 ```
 
 ### Options
 
 ```
-      --id string   Application id (required) (accepts pipeline)
+      --id strings   Application id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
@@ -67,6 +66,7 @@ List all of the binaries related to a Hosted (web) application
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

@@ -18,8 +18,8 @@ c8y events create [flags]
 $ c8y events create --device 12345 --type c8y_TestEvent --text "Test event"
 Create a new event for a device
 
-$ c8y devices get --id 12345 | c8y events create --type c8y_TestEvent --text "Test event"
-Create a new event for a device (using pipeline)
+$ c8y events create --device MyDevice --type c8y_TestEvent --text "Test event"
+Create a new event, resolving the device name to its id
         
 ```
 
@@ -27,13 +27,13 @@ Create a new event for a device (using pipeline)
 
 ```
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings             The ManagedObject which is the source of this event. (accepts pipeline)
+      --device strings             The ManagedObject which is the source of this event (accepts pipeline). Multiple devices fan out one event per device.
       --processingMode string      Cumulocity processing mode
       --template string            Body template
       --templateVars stringArray   Body template variables
-      --text string                Text description of the event.
-      --time string                Time of the event. Defaults to current timestamp.
-      --type string                Identifies the type of this event.
+      --text string                Text description of the event
+      --time string                Time of the event. Defaults to current timestamp
+      --type string                Identifies the type of this event
 ```
 
 ### Options inherited from parent commands
@@ -76,6 +76,7 @@ Create a new event for a device (using pipeline)
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

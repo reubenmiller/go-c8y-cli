@@ -22,7 +22,6 @@ If the software/version exists in the software repository, then it will add the 
 
 $ c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0 --url "https://mybloblstore/go-c8y-cli.deb"
 Install a software package version with an explicit url
-
         
 ```
 
@@ -82,6 +81,7 @@ Install a software package version with an explicit url
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

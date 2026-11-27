@@ -6,8 +6,7 @@ Update operation
 
 ### Synopsis
 
-Update an operation. This is commonly used to change an operation's status. For example the operation can be set to FAILED along with a failure reason.
-
+Update an operation, commonly to change its status (e.g. to EXECUTING or FAILED with a reason)
 
 ```
 c8y operations update [flags]
@@ -17,19 +16,22 @@ c8y operations update [flags]
 
 ```
 $ c8y operations update --id 12345 --status EXECUTING
-Update an operation
+Set an operation to executing
+
+$ c8y operations list --device 12345 --status PENDING | c8y operations update --status FAILED --failureReason "timeout"
+Fail all pending operations of a device
         
 ```
 
 ### Options
 
 ```
-      --agent strings              Agent ID or name
+      --agent strings              Agent id or name
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --failureReason string       Reason for the failure. Use when setting status to FAILED
       --id strings                 Operation id (required) (accepts pipeline)
       --processingMode string      Cumulocity processing mode
-      --status string              Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+      --status string              Operation status, one of SUCCESSFUL, FAILED, EXECUTING or PENDING
       --template string            Body template
       --templateVars stringArray   Body template variables
 ```
@@ -74,6 +76,7 @@ Update an operation
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

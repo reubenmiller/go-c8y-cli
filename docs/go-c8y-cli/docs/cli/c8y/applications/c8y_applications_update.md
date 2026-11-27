@@ -2,11 +2,11 @@
 category: applications
 title: c8y applications update
 ---
-Update application details
+Update application
 
 ### Synopsis
 
-Update details of an existing application
+Update an existing application
 
 ```
 c8y applications update [flags]
@@ -15,8 +15,8 @@ c8y applications update [flags]
 ### Examples
 
 ```
-$ c8y applications update --id "my-example-app" --availability MARKET
-Update application availability to MARKET
+$ c8y applications update --id 12345 --availability MARKET
+Update an application's availability
         
 ```
 
@@ -27,7 +27,7 @@ Update application availability to MARKET
       --contextPath string         contextPath of the hosted application
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --externalUrl string         URL to the external application
-      --id string                  Application id (required) (accepts pipeline)
+      --id strings                 Application id (required) (accepts pipeline)
       --key string                 Shared secret of application
       --name string                Name of application
       --processingMode string      Cumulocity processing mode
@@ -78,6 +78,7 @@ Update application availability to MARKET
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

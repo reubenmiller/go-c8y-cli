@@ -6,7 +6,7 @@ Removes the feature toggle override for a tenant of authenticated user
 
 ### Synopsis
 
-Removes the feature toggle override for a tenant of authenticated user
+Remove a feature toggle override for a specific tenant (from the management tenant)
 
 ```
 c8y features tenants delete [flags]
@@ -16,7 +16,7 @@ c8y features tenants delete [flags]
 
 ```
 $ c8y features tenants delete --key example --tenant t12345
-Remove the feature override from a given tenant
+Remove the feature override for a specific tenant
         
 ```
 
@@ -68,6 +68,7 @@ Remove the feature override from a given tenant
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

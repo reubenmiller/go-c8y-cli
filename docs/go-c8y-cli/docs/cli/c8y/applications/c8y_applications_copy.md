@@ -6,16 +6,7 @@ Copy application
 
 ### Synopsis
 
-A POST request to the 'clone' resource creates a new application based on an already existing one.
-
-The properties are copied to the newly created application. For name, key and context path a 'clone' prefix is added in order to be unique.
-
-If the target application is hosted and has an active version, the new application will have the active version with the same content.
-
-The response contains a representation of the newly created application.
-
-Required role ROLE_APPLICATION_MANAGEMENT_ADMIN
-
+Copy/clone an existing application
 
 ```
 c8y applications copy [flags]
@@ -24,15 +15,15 @@ c8y applications copy [flags]
 ### Examples
 
 ```
-$ c8y applications copy --id my-example-app
-Copy an existing application
+$ c8y applications copy --id 12345
+Copy an application
         
 ```
 
 ### Options
 
 ```
-      --id string               Application id (required) (accepts pipeline)
+      --id strings              Application id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 
@@ -76,6 +67,7 @@ Copy an existing application
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

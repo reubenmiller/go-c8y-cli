@@ -43,7 +43,7 @@ $ echo 1 | c8y devices assert exists --strict
 
 ```
       --attempts int          Number of attempts before giving up per id (-1 = unlimited) (default -1)
-      --device strings        The ManagedObject which is the source of this event. (accepts pipeline)
+      --device strings        Device id or name (accepts pipeline)
       --duration string       Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
       --interval string       Interval to check on the status, i.e. 10s or 1min (default "5s")
       --not[=true|false]      Negate the match
@@ -90,6 +90,7 @@ $ echo 1 | c8y devices assert exists --strict
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

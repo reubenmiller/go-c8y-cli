@@ -6,7 +6,7 @@ Set a feature override for a given tenant
 
 ### Synopsis
 
-Set a feature override for a given tenant
+Set a feature toggle override (active/inactive) for a specific tenant (from the management tenant)
 
 ```
 c8y features tenants update [flags]
@@ -15,21 +15,18 @@ c8y features tenants update [flags]
 ### Examples
 
 ```
-$ c8y features tenants update --key example --active --tenant t12345
-Enable a feature for a given specific tenant
+$ c8y features tenants update --key example --tenant t12345 --active
+Enable a feature for a specific tenant
         
 ```
 
 ### Options
 
 ```
-      --active[=true|false]        Enable feature
-  -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --key string                 Feature ID / Key (required)
-      --processingMode string      Cumulocity processing mode
-      --template string            Body template
-      --templateVars stringArray   Body template variables
-      --tenant string              Unique identifier of a Cumulocity tenant (accepts pipeline)
+      --active[=true|false]     Enable feature
+      --key string              Feature ID / Key (required)
+      --processingMode string   Cumulocity processing mode
+      --tenant string           Unique identifier of a Cumulocity tenant (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
@@ -72,6 +69,7 @@ Enable a feature for a given specific tenant
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

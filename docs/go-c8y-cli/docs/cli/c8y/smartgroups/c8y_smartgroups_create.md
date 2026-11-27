@@ -8,7 +8,6 @@ Create smart group
 
 Create a smart group (managed object) which groups devices by an inventory query.
 
-
 ```
 c8y smartgroups create [flags]
 ```
@@ -16,14 +15,8 @@ c8y smartgroups create [flags]
 ### Examples
 
 ```
-$ c8y smartgroups create --name mySmartGroup --query "name eq 'my*'"
-Create smart group (without a filter)
-
-$ c8y smartgroups create --name mySmartGroup --query "type eq 'IS*' and has(c8y_Hardware.serialNumber)"
-Create smart group with a device filter (filter by type and has a serial number)
-
-$ c8y smartgroups create --name mySmartGroup --query "type eq 'IS*'" --invisible
-Create a smart group which is not visible in the UI
+$ c8y smartgroups create --name mygroup --query "has(c8y_IsDevice)"
+Create a smart group
         
 ```
 
@@ -79,6 +72,7 @@ Create a smart group which is not visible in the UI
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

@@ -6,7 +6,7 @@ Create audit record
 
 ### Synopsis
 
-Create a new audit record for a given action
+Create a new audit record
 
 ```
 c8y auditrecords create [flags]
@@ -15,26 +15,26 @@ c8y auditrecords create [flags]
 ### Examples
 
 ```
-$ c8y auditrecords create --type "Inventory" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"
-Create an audit record for a custom managed object update
+$ c8y auditrecords create --type "Custom" --source 12345 --activity "Did something" --text "details"
+Create an audit record for a source object
         
 ```
 
 ### Options
 
 ```
-      --activity string            The activity that was carried out.
-      --application string         The application used to carry out the audited action.
+      --activity string            The activity that was carried out
+      --application string         The application used to carry out the audited action
   -d, --data stringArray           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --processingMode string      Cumulocity processing mode
-      --severity string            The severity of action: critical, major, minor, warning or information.
-      --source string              An optional ManagedObject that the audit record originated from (accepts pipeline)
+      --severity string            The severity: critical, major, minor, warning or information
+      --source string              The ManagedObject id that the audit record originated from (accepts pipeline)
       --template string            Body template
       --templateVars stringArray   Body template variables
-      --text string                Text description of the audit record.
-      --time string                Time of the audit record. Defaults to current timestamp.
-      --type string                Identifies the type of this audit record.
-      --user string                The user responsible for the audited action.
+      --text string                Text description of the audit record
+      --time string                Time of the audit record. Defaults to current timestamp
+      --type string                Identifies the type of this audit record
+      --user string                The user responsible for the audited action
 ```
 
 ### Options inherited from parent commands
@@ -77,6 +77,7 @@ Create an audit record for a custom managed object update
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

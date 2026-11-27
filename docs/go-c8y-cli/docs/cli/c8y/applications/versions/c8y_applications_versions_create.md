@@ -15,7 +15,7 @@ c8y applications versions create [flags]
 ### Examples
 
 ```
-$ c8y applications versions create --application 1234 --file "./testdata/myapp.zip" --version "2.0.0"
+$ c8y applications versions create --application 1234 --file "./testdata/myapp.zip" --version "2.0.0" --tags latest
 Create a new application version
         
 ```
@@ -23,14 +23,11 @@ Create a new application version
 ### Options
 
 ```
-      --application string         Application (accepts pipeline)
-      --data string                data
-      --file string                The ZIP file to be uploaded
-      --processingMode string      Cumulocity processing mode
-      --tags strings               The JSON file with version information. todo (required)
-      --template string            Body template
-      --templateVars stringArray   Body template variables
-      --version string             The JSON file with version information. (required)
+      --application string      Application (accepts pipeline)
+      --file string             The ZIP file to be uploaded (a local path or an http(s) URL)
+      --processingMode string   Cumulocity processing mode
+      --tags strings            Tags assigned to the version. Version tags must be unique across all versions and version fields of application versions (required)
+      --version string          The version name (required)
 ```
 
 ### Options inherited from parent commands
@@ -73,6 +70,7 @@ Create a new application version
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off

@@ -29,12 +29,14 @@ Delete measurements with a given fragment and older than 10 days for a device
 ### Options
 
 ```
-      --dateFrom string         Start date or date and time of measurement occurrence.
-      --dateTo string           End date or date and time of measurement occurrence.
-      --device strings          Device ID (accepts pipeline)
-      --fragmentType string     Fragment name from measurement
-      --processingMode string   Cumulocity processing mode
-      --type string             Measurement type.
+      --dateFrom string              Start date or date and time of measurement occurrence.
+      --dateTo string                End date or date and time of measurement occurrence.
+      --device strings               Device ID (accepts pipeline)
+      --fragmentType string          Fragment name from measurement
+      --processingMode string        Cumulocity processing mode
+      --type string                  Measurement type.
+      --valueFragmentSeries string   value fragment series
+      --valueFragmentType string     value fragment type
 ```
 
 ### Options inherited from parent commands
@@ -77,6 +79,7 @@ Delete measurements with a given fragment and older than 10 days for a device
       --outputFileRaw string             Save raw response to file (before select/view)
       --outputTemplate string            jsonnet template to apply to the output
   -p, --pageSize int                     Maximum results per page (default 5)
+      --paginationStrategy string        Pagination strategy used when iterating results (e.g. with --includeAll): auto (default), offset, id, time
       --progress[=true|false]            Show progress bar. This will also disable any other verbose output
       --proxy string                     Proxy setting, i.e. http://10.0.0.1:8080
   -r, --raw[=true|false]                 Show raw response. This mode will force output=json and view=off
