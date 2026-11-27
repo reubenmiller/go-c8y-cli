@@ -1,6 +1,7 @@
 package cmdutil
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -136,4 +137,25 @@ func TestUnfilteredArraySize(t *testing.T) {
 	assert.False(t, ok, "an object")
 	_, ok = unfilteredArraySize([]byte(`{"a":[1],"b":[2]}`))
 	assert.False(t, ok, "more than one array")
+}
+
+type failingTransport struct{}
+
+func (failingTransport) RoundTrip(*http.Request) (*http.Response, error) {
+	return nil, errors.New("connection refused")
+}
+
+// v2.59.0 logged the error of http.Client.Do, which names the method and the url
+func TestVerboseTransportLogsAFailedRequest(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	defer server.Close()
+	log, read := captureLog(t)
+	transport, _ := newVerboseTestTransport(t, server, log)
+	transport.base = failingTransport{}
+
+	req, err := http.NewRequest(http.MethodGet, server.URL+"/x", nil)
+	require.NoError(t, err)
+	_, err = transport.RoundTrip(req)
+	require.Error(t, err)
+	assert.Contains(t, read(), `ERROR: Request failed. Get "`+server.URL+`/x": connection refused`)
 }

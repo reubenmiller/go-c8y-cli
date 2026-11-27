@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -75,7 +76,8 @@ func (t *verboseTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	start := time.Now()
 	resp, err := t.base.RoundTrip(req)
 	if err != nil {
-		t.log.Infof("ERROR: Request failed. %s", err)
+		// v2.59.0 logged the error of http.Client.Do, which names the request: Get "<url>": <error>
+		t.log.Infof("ERROR: Request failed. %s", &url.Error{Op: urlErrorOp(req.Method), URL: req.URL.String(), Err: err})
 		return resp, err
 	}
 	duration := time.Since(start)
@@ -200,6 +202,14 @@ func unfilteredArraySize(body []byte) (int, bool) {
 		return 0, false
 	}
 	return len(parsed.Get(gjson.Escape(property)).Array()), true
+}
+
+// urlErrorOp is the Op of the *url.Error of http.Client (e.g. "Get")
+func urlErrorOp(method string) string {
+	if method == "" {
+		return "Get"
+	}
+	return method[:1] + strings.ToLower(method[1:])
 }
 
 type readCloser struct {
