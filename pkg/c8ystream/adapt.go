@@ -233,6 +233,13 @@ func skipDeclined(seq output.Seq) output.Seq {
 	}
 }
 
+// isBinaryResult reports whether a call result is a download, which binary
+// renders.
+func isBinaryResult(v any) bool {
+	_, ok := v.(op.Result[core.BinaryResponse])
+	return ok
+}
+
 // binary writes a downloaded file to --outputFileRaw (templated with {id} and
 // {filename}) or streams it to stdout, yielding no documents. A dry run or
 // deferred result was never received, so nothing is written.

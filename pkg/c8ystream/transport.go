@@ -26,5 +26,6 @@ func (r *Runner) dryRunHandler() (func(*http.Request), error) {
 			log.Debug("Overriding common options provided in the context. dryRun=true")
 		}
 		handler.PrintRequestDetails(out, req)
+		r.captureDryRunRequest(req)
 	}, nil
 }

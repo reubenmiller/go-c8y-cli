@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
@@ -80,6 +81,7 @@ type Runner struct {
 	lookupPrefix      string             // see LookupFailureStyle
 	lookupExitCode    cmderrors.ExitCode // see LookupFailureStyle
 	directNameLookup  bool               // see DirectNameLookup
+	dropPageSize      atomic.Bool        // a list sends no page size, see noPageSize
 	noDefaultPageSize bool               // see NoDefaultPageSize
 	getPageSize       int                // page size of the GET requests of a call (0: none), see defaultPageSizeHook
 
@@ -88,6 +90,7 @@ type Runner struct {
 	viewDefinition  *dataview.Definition // the view applied to the output; its column widths apply to tables
 	consoleRenderer *consoleRenderer     // the table/json renderer; nil for csv/tsv
 	index           int64
+	fileReceived    atomic.Bool // a response with a body was received (--outputFile)
 
 	// tmplInput is the current item's raw input, kept pointed at the item being
 	// produced so the --outputTemplate evaluation can bind it as input.value.
@@ -411,6 +414,7 @@ func (r *Runner) Client() (*apiv2.Client, error) {
 		return nil, err
 	}
 	r.installOutputTemplateCapture(client)
+	r.installOutputFileCapture(client)
 	r.installViewCapture(client)
 	r.installSilentSuccessMessage(client)
 	return client, nil
@@ -493,12 +497,21 @@ func (r *Runner) run(newProducer func() Producer) error {
 	// final pass never reprints), exactly like v1's per-job checkError. The
 	// processed results feed the single-error collapse below.
 	var processedErrs []error
+	var fileTee *fileTee // see the renderer below
 	collector.Log = func(err error) {
 		converted := r.toServerError(err)
 		if ce, ok := converted.(cmderrors.CommandError); ok && collector.Emit != nil {
 			// The pipeline already emitted the error document (--withError).
 			ce.OutputEmitted = true
 			converted = ce
+		} else if ok && fileTee != nil && cfg.WithError() && isResponseError(err) {
+			// --withError: v2.59.0 wrote the error of a failed request to
+			// --outputFile in place of the response
+			if werr := fileTee.writeError(jsondoc.New([]byte(ce.JSONString()))); werr != nil {
+				if log, lerr := r.Factory.Logger(); lerr == nil && log != nil {
+					log.Errorf("could not write the error to the output file. %s", werr)
+				}
+			}
 		}
 		processedErrs = append(processedErrs, r.Factory.CheckPostCommandError(converted))
 	}
@@ -551,10 +564,14 @@ func (r *Runner) run(newProducer func() Producer) error {
 	} else if vs != nil {
 		stages = append(stages, vs)
 	}
-	renderer, err := newRenderer(r.Cmd.OutOrStdout(), cfg, cols)
+	// A response with a body and no document (an empty list) writes an empty
+	// --outputFile, unless the command failed (e.g. its --outputTemplate)
+	received := func() bool { return r.fileReceived.Load() && len(collector.Errors) == 0 }
+	renderer, err := newRenderer(r.Cmd.OutOrStdout(), cfg, cols, received)
 	if err != nil {
 		return err
 	}
+	fileTee = findFileTee(renderer)
 	r.consoleRenderer = findConsoleRenderer(renderer)
 	r.applyViewDefinition()
 
@@ -562,12 +579,6 @@ func (r *Runner) run(newProducer func() Producer) error {
 	// single consuming goroutine, so the bar needs no locking).
 	progress := newProgress(r.Factory.IOStreams.ErrOut, cfg.ShowProgress())
 	pipeline := []output.Stage{collector.Stage()}
-	// --outputFileRaw tees the unshaped document to disk, so it runs before the
-	// filter/template/select stages (it sees what the server returned, not the
-	// rendered shape), matching v1.
-	if rawPath := cfg.GetOutputFileRaw(); rawPath != "" {
-		pipeline = append(pipeline, rawFileStage(rawPath))
-	}
 	if progress != nil {
 		pipeline = append(pipeline, progress.stage())
 	}
@@ -655,7 +666,15 @@ func (r *Runner) producer(build Build) Producer {
 			if r.getPageSize > 0 {
 				callCtx = apiv2.WithRequestHook(callCtx, defaultPageSizeHook(r.getPageSize))
 			}
-			seq := r.adaptItem(call(callCtx), item)
+			if r.dropPageSize.Load() {
+				callCtx = apiv2.WithRequestHook(callCtx, dropNoPageSizeHook())
+			}
+			result := call(callCtx)
+			if isBinaryResult(result) {
+				// a download writes --outputFileRaw itself (see binary)
+				markRawFileHandled(ctx)
+			}
+			seq := r.adaptItem(result, item)
 			if r.assert != nil {
 				seq = r.assert.filter(seq)
 			}
@@ -663,6 +682,11 @@ func (r *Runner) producer(build Build) Producer {
 		})
 		if r.submission != nil {
 			job = r.submission.withDelays(job)
+		}
+		// --outputFileRaw writes the unshaped response, so it wraps the job
+		// before the output template does
+		if rawPath := r.Config.GetOutputFileRaw(); rawPath != "" {
+			job = r.wrapRawFileJob(rawPath, job)
 		}
 		if r.tmpl != nil {
 			job = r.wrapTemplateJob(r.tmpl, r.tmplFlags, job)

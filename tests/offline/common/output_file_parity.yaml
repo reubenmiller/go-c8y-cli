@@ -1,0 +1,299 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+#
+# --outputFile, --outputFileRaw, --outputTemplate with --dry and a blank page
+# size, as in v2.59.0: the file has one JSON document per line (not a JSON
+# array) and no newline after the last one, and the list requests send no
+# pageSize when the page size setting is blank.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+    C8Y_SETTINGS_DEFAULTS_PAGESIZE: " "
+    C8Y_SETTINGS_ACTIVITYLOG_ENABLED: false
+
+tests:
+  --outputFile of a list is one JSON document per line, with no newline at the end:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 3 --select id,name --outputFile "$d/out.json" >/dev/null
+      cat "$d/out.json"
+      echo
+      echo "newlines: $(wc -l < "$d/out.json" | tr -d ' ')"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"id":"8","name":"n8"}
+        {"id":"7","name":"n7"}
+        {"id":"6","name":"n6"}
+        newlines: 2
+
+  --outputFile of one document is the JSON document and stdout still shows it:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      d=$(mktemp -d)
+      c8y inventory get --id 1 --select id,name --outputFile "$d/out.json"
+      echo "--- file"
+      cat "$d/out.json"
+      echo
+      echo "newlines: $(wc -l < "$d/out.json" | tr -d ' ')"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"id":"1","name":"x"}
+        --- file
+        {"id":"1","name":"x"}
+        newlines: 0
+
+  --outputFile replaces an existing file:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      d=$(mktemp -d)
+      printf 'old content\nmore old content\n' > "$d/out.json"
+      c8y inventory get --id 1 --select id --outputFile "$d/out.json" >/dev/null
+      cat "$d/out.json"
+      echo
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"id":"1"}
+
+  --outputFile with csv has the rows of the output:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 3 --select id,name --output csv --outputFile "$d/out.csv" >/dev/null
+      cat "$d/out.csv"
+      echo
+      echo "newlines: $(wc -l < "$d/out.csv" | tr -d ' ')"
+    exit-code: 0
+    stdout:
+      exactly: |
+        8,n8
+        7,n7
+        6,n6
+        newlines: 2
+
+  --outputFile with csvheader has the rows without the header:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 2 --select id,name --output csvheader --outputFile "$d/out.csv"
+      echo "--- file"
+      cat "$d/out.csv"
+      echo
+    exit-code: 0
+    stdout:
+      exactly: |
+        id,name
+        8,n8
+        7,n7
+        --- file
+        8,n8
+        7,n7
+
+  --outputFile with tsv has the rows of the output:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 2 --select id,name --output tsv --outputFile "$d/out.tsv" >/dev/null
+      cat "$d/out.tsv"
+      echo
+    exit-code: 0
+    stdout:
+      exactly: |
+        8	n8
+        7	n7
+
+  --outputFile with table has the JSON documents:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 2 --select id,name --output table --outputFile "$d/out.json" >/dev/null
+      cat "$d/out.json"
+      echo
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"id":"8","name":"n8"}
+        {"id":"7","name":"n7"}
+
+  --outputFile with --outputTemplate has the output of the template:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      d=$(mktemp -d)
+      c8y inventory get --id 1 --outputTemplate '{n: output.name}' --outputFile "$d/out.json" >/dev/null
+      cat "$d/out.json"
+      echo
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"n":"x"}
+
+  --outputFile writes the file for a list without items and none for an error or a dry run:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 1 --outputFile "$d/empty.json" >/dev/null
+      echo "empty list: $(wc -c < "$d/empty.json" | tr -d ' ') bytes"
+      c8y inventory get --id 1 --dry --outputFile "$d/dry.json" >/dev/null
+      [ -e "$d/dry.json" ] && echo "dry: file" || echo "dry: no file"
+      stop() { kill $_servers 2>/dev/null; }
+      stop
+      start_server notfound
+      c8y inventory get --id 1 --outputFile "$d/error.json" >/dev/null 2>&1
+      [ -e "$d/error.json" ] && echo "error: file" || echo "error: no file"
+    exit-code: 0
+    stdout:
+      exactly: |
+        empty list: 0 bytes
+        dry: no file
+        error: no file
+
+  --outputFile with {id} in the path writes the file of the document:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      d=$(mktemp -d)
+      c8y inventory get --id 1 --select id,name --outputFile "$d/{id}-{name}.json" >/dev/null
+      ls "$d"
+      cat "$d/1-x.json"
+      echo
+    exit-code: 0
+    stdout:
+      exactly: |
+        1-x.json
+        {"id":"1","name":"x"}
+
+  --outputFileRaw of a list is the response as received:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 2 --select id --outputFileRaw "$d/raw.json" >/dev/null
+      python3 - "$d/raw.json" <<'PY'
+      import json, sys
+      doc = json.load(open(sys.argv[1]))
+      print(sorted(doc.keys()))
+      print([item["id"] for item in doc["managedObjects"]])
+      print(doc["statistics"])
+      PY
+    exit-code: 0
+    stdout:
+      exactly: |
+        ['managedObjects', 'next', 'self', 'statistics']
+        ['8', '7']
+        {'currentPage': 1, 'pageSize': 2}
+
+  --outputFileRaw of one document is the response as received:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      d=$(mktemp -d)
+      c8y inventory get --id 1 --select name --outputFileRaw "$d/raw.json"
+      echo "--- file"
+      cat "$d/raw.json"
+      echo
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"name":"x"}
+        --- file
+        {"id": "1", "name": "x"}
+
+  --outputFile and --outputFileRaw write each own file:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 2 --select id --outputFile "$d/out.json" --outputFileRaw "$d/raw.json" >/dev/null
+      cat "$d/out.json"
+      echo
+      grep -o '"managedObjects"' "$d/raw.json" | head -n 1
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"id":"8"}
+        {"id":"7"}
+        "managedObjects"
+
+  --outputFile with --withError has the error of a failed request:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server notfound
+      d=$(mktemp -d)
+      c8y inventory get --id 1 --withError --outputFile "$d/out.json" >/dev/null 2>&1
+      echo "exit code: $?"
+      cat "$d/out.json"
+      echo
+    exit-code: 0
+    stdout:
+      exactly: |
+        exit code: 4
+        {"errorType":"serverError","message":"Finding device data from database failed","statusCode":404,"exitCode":4,"url":"/inventory/managedObjects/1","c8yResponse":{"error":"inventory/Not Found","message":"Finding device data from database failed","info":"https://cumulocity.com/api"},"error":{"error":"inventory/Not Found","message":"Finding device data from database failed","info":"https://cumulocity.com/api"}}
+
+  --outputFile is not written when the --outputTemplate fails:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 2 --outputTemplate 'output.id + 1' --outputFile "$d/out.json" >/dev/null 2>&1
+      [ -e "$d/out.json" ] && echo "file" || echo "no file"
+    exit-code: 0
+    stdout:
+      exactly: |
+        no file
+
+  --outputFileRaw fills {basename} and the {id} of the request path:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      d=$(mktemp -d)
+      c8y inventory list --pageSize 1 --outputFileRaw "$d/list-{basename}.json" >/dev/null
+      c8y api GET /inventory/managedObjects/12 --outputFileRaw "$d/api-{id}-{basename}.json" >/dev/null
+      ls "$d"
+    exit-code: 0
+    stdout:
+      exactly: |
+        api-12-12.json
+        list-managedObjects.json
+
+  --outputFileRaw of a request without a response body is an empty file:
+    command: |
+      tmp=$(mktemp -d)
+      trap 'rm -rf "$tmp"' EXIT
+      id=$(c8y devices create --name outputFileRawDelete --select id -o csv) &&
+      c8y inventory delete --id "$id" --outputFileRaw "$tmp/{id}.json" &&
+      c8y inventory delete --id "$id" --dry --outputFileRaw "$tmp/dry-{id}.json" >/dev/null &&
+      ls "$tmp" | sed "s/^$id\./ID./" &&
+      echo "size: $(wc -c < "$tmp/$id.json" | tr -d ' ')"
+    exit-code: 0
+    stdout:
+      exactly: |
+        ID.json
+        size: 0
+
+  --outputFileRaw of a downloaded JSON file is the file only:
+    command: |
+      tmp=$(mktemp -d)
+      trap 'rm -rf "$tmp"' EXIT
+      printf '{"a":1}' > "$tmp/data.json"
+      id=$(c8y binaries create --file "$tmp/data.json" --select id -o csv) &&
+      mkdir "$tmp/out" &&
+      c8y binaries get --id "$id" --outputFileRaw "$tmp/out/{id}-{filename}" >/dev/null &&
+      ls "$tmp/out" | sed "s/^$id-/ID-/" &&
+      cat "$tmp/out/$id-data.json"
+    exit-code: 0
+    stdout:
+      exactly: |
+        ID-data.json
+        {"a":1}

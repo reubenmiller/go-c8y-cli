@@ -59,6 +59,7 @@ func (r *Runner) sendRequest(ctx context.Context, client *apiv2.Client, opts api
 			return
 		}
 		if r.Config.IsResponseOutput() || !isJSONDocument(body) {
+			markRawFileHandled(ctx)
 			if err := r.writeResponseBody(res, body); err != nil {
 				yield(jsondoc.Empty(), err)
 			}
@@ -211,16 +212,27 @@ func responseText(body []byte, raw bool) []byte {
 }
 
 func responseFields(res *apiv2.RequestResult, body []byte) map[string]string {
+	return rawFileFields(res.Response, body)
+}
+
+// rawFileFields returns the values of the --outputFileRaw placeholders of a
+// response, as v2.59.0 filled them: {id}, {name}, {type} and {owner} from the
+// body, {filename} from the Content-Disposition header, {basename} from the
+// request path, and {id} from the first id in the request path when it has one.
+func rawFileFields(resp *http.Response, body []byte) map[string]string {
 	fields := map[string]string{}
 	for _, prop := range []string{"id", "name", "type", "owner"} {
 		fields[prop] = gjson.GetBytes(body, prop).String()
 	}
-	if _, params, err := mime.ParseMediaType(res.Header("Content-Disposition")); err == nil {
+	if resp == nil {
+		return fields
+	}
+	if _, params, err := mime.ParseMediaType(resp.Header.Get("Content-Disposition")); err == nil {
 		if name, ok := params["filename"]; ok {
 			fields["filename"] = name
 		}
 	}
-	if req := res.Response.Request; req != nil {
+	if req := resp.Request; req != nil && req.URL != nil {
 		fields["basename"] = path.Base(req.URL.Path)
 		for part := range strings.SplitSeq(req.URL.Path, "/") {
 			if part != "" && isDigits(part) {

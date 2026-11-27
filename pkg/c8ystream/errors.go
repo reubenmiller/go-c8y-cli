@@ -14,6 +14,13 @@ import (
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
 )
 
+// isResponseError reports whether err is the error response of a request
+// (an HTTP error status), not an error which happened before or instead of one.
+func isResponseError(err error) bool {
+	var apiErr *core.Error
+	return errors.As(err, &apiErr) && apiErr.StatusCode() >= 100
+}
+
 // toServerError turns a go-c8y v2 HTTP error into a cmderrors.CommandError that
 // carries the HTTP status code and the mapped exit code, the way the v1 request
 // handler did with NewServerError. Without this, the streaming path surfaced a

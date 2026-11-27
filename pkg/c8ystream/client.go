@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydefaults"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/requestutil"
@@ -109,6 +110,36 @@ func defaultPageSizeHook(pageSize int) func(*http.Request) error {
 		}
 		parts = append(parts[:insertAt], append([]string{param}, parts[insertAt:]...)...)
 		req.URL.RawQuery = strings.Join(parts, "&")
+		return nil
+	}
+}
+
+// noPageSize is the page size which Pagination gives a list when the page
+// size is the platform's default (the setting or --pageSize is blank, 0 or 5,
+// and there is no --includeAll), and which dropNoPageSizeHook removes from its
+// requests: v2.59.0 sent no pageSize then, so the platform's default page size
+// (5) applied. The SDK sends a page size on every list (2000 when it has
+// none), and it needs the size of the pages the server returns to read
+// --totalPages N pages. A request without pageSize=5 reads the same items as
+// one with it.
+const noPageSize = c8ydefaults.PageSize
+
+// dropNoPageSizeHook returns the request hook which removes the pageSize that
+// stands for no page size (see noPageSize).
+func dropNoPageSizeHook() func(*http.Request) error {
+	param := "pageSize=" + strconv.Itoa(noPageSize)
+	return func(req *http.Request) error {
+		if req.Method != http.MethodGet || req.URL == nil || !strings.Contains(req.URL.RawQuery, param) {
+			return nil
+		}
+		parts := strings.Split(req.URL.RawQuery, "&")
+		kept := parts[:0]
+		for _, part := range parts {
+			if part != param {
+				kept = append(kept, part)
+			}
+		}
+		req.URL.RawQuery = strings.Join(kept, "&")
 		return nil
 	}
 }

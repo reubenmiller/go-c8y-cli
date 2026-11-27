@@ -19,12 +19,20 @@ func (r *Runner) Pagination() (pagination.PaginationOptions, error) {
 	if err != nil {
 		return pagination.PaginationOptions{}, err
 	}
+	pageSize, maxItems := common.PageSize, r.Config.MaxItems()
+	if r.noPageSizeActive() {
+		// the platform's default page size, which the requests do not send
+		// (see noPageSize); --totalPages N reads N pages of it
+		pageSize = noPageSize
+		maxItems = int64(noPageSize) * max(r.Config.GetTotalPages(), 1)
+		r.dropPageSize.Store(true)
+	}
 	return pagination.PaginationOptions{
-		PageSize:          common.PageSize,
+		PageSize:          pageSize,
 		WithTotalPages:    common.WithTotalPages,
 		WithTotalElements: common.WithTotalElements,
 		CurrentPage:       int(common.CurrentPage),
-		MaxItems:          r.Config.MaxItems(),
+		MaxItems:          maxItems,
 		Strategy:          pagination.StrategyKind(r.Config.PaginationStrategy()),
 		// Render the full-walk first request in dry runs of --includeAll.
 		FullWalk: r.Config.IncludeAll(),
@@ -53,4 +61,16 @@ func (r *Runner) PaginationByPage() (pagination.PaginationOptions, error) {
 		paging.Strategy = pagination.StrategyOffset
 	}
 	return paging, nil
+}
+
+// noPageSizeActive reports whether a list sends no page size: the page size
+// (setting or --pageSize) is blank, 0 or 5, and there is no --includeAll. A dry
+// run shows the request without the SDK's default page size already.
+func (r *Runner) noPageSizeActive() bool {
+	cfg := r.Config
+	common, err := cfg.GetOutputCommonOptions(r.Cmd)
+	if err != nil || common.PageSize != 0 || cfg.IncludeAll() {
+		return false
+	}
+	return !cfg.ShouldUseDryRun(r.Cmd.CommandPath())
 }

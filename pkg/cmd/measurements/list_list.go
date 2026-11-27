@@ -146,7 +146,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			// CSV/Excel export: the server streams the whole matching collection
 			// as one non-JSON document, so bypass the paginated iterator and write
 			// the payload to --outputFileRaw (or stdout), yielding nothing — the
-			// runner's rawFileStage must not overwrite the file with rendered docs.
+			// runner's raw file wrapper must not overwrite the file with rendered docs.
 			return func(ctx context.Context) any {
 				return client.Measurements.Export(withParams(ctx), opt, exportAccept)
 			}, nil

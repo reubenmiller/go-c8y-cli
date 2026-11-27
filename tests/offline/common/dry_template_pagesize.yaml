@@ -1,0 +1,160 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+#
+# --outputTemplate with --dry gets the request which would be sent, and a blank
+# page size setting sends no pageSize on a list, as in v2.59.0.
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: false
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+    C8Y_SETTINGS_ACTIVITYLOG_ENABLED: false
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  --outputTemplate with --dry gets the method of the request:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y inventory get --id 1 --dry --dryFormat json --compact --outputTemplate request.method | tail -n 1
+      c8y inventory get --id 1 --dry --dryFormat json --compact --outputTemplate request.path | tail -n 1
+      c8y inventory create --data a=1 --dry --dryFormat json --compact --outputTemplate request.method | tail -n 1
+      c8y inventory delete --id 1 --dry --dryFormat json --compact --outputTemplate request.method | tail -n 1
+      echo "requests sent: $(count_requests)"
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET
+        /inventory/managedObjects/1
+        POST
+        DELETE
+        requests sent: 0
+
+  --outputTemplate with --dry gets the url and the query of the request:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y inventory list --pageSize 2 --dry --dryFormat json --compact --outputTemplate 'request.query' | tail -n 1
+      c8y inventory list --pageSize 2 --dry --dryFormat json --compact --outputTemplate 'request.queryParams.pageSize' | tail -n 1
+      c8y inventory get --id 1 --dry --dryFormat json --compact --outputTemplate 'if std.startsWith(request.url, "http://") && std.endsWith(request.url, "/inventory/managedObjects/1") then "url ok" else request.url' | tail -n 1
+    exit-code: 0
+    stdout:
+      exactly: |
+        pageSize=2
+        2
+        url ok
+
+  --outputTemplate with --dry gets the keys of the request and an empty response:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y inventory get --id 1 --dry --dryFormat json --compact --outputTemplate 'std.join(",", std.objectFields(request))' | tail -n 1
+      c8y inventory get --id 1 --dry --dryFormat json --compact --outputTemplate 'response' | tail -n 1
+      c8y inventory get --id 1 --dry --dryFormat json --compact --outputTemplate 'std.type(output)' | tail -n 1
+    exit-code: 0
+    stdout:
+      exactly: |
+        host,method,path,pathEncoded,query,queryParams,url
+        {"body":"","contentLength":0,"contentType":"","duration":0,"header":{},"proto":"","status":"","statusCode":0}
+        string
+
+  --outputTemplate with --dry evaluates the template for each piped item:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      printf '1\n2\n' | c8y inventory get --dry --dryFormat json --compact --outputTemplate 'request.path' | grep '^/inventory'
+    exit-code: 0
+    stdout:
+      exactly: |
+        /inventory/managedObjects/1
+        /inventory/managedObjects/2
+
+  --outputTemplate with --dry without a request value fails as before:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      c8y inventory get --id 1 --dry --dryFormat json --compact --outputTemplate 'request.unknown' >/dev/null 2>&1
+    exit-code: 101
+
+  A blank page size setting sends no pageSize on a list:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=" "
+      c8y inventory list >/dev/null
+      c8y devices list >/dev/null
+      c8y events list >/dev/null
+      c8y alarms list >/dev/null
+      c8y measurements list >/dev/null
+      c8y operations list >/dev/null
+      c8y applications list >/dev/null
+      c8y users list >/dev/null
+      c8y inventory get --id 1 >/dev/null
+      c8y api GET /inventory/managedObjects >/dev/null
+      c8y api GET /inventory/managedObjects/1 >/dev/null
+      c8y inventory list --withTotalElements >/dev/null
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /inventory/managedObjects
+        GET /inventory/managedObjects?q=%24filter%3D+%24orderby%3Dname
+        GET /event/events
+        GET /alarm/alarms
+        GET /measurement/measurements
+        GET /devicecontrol/operations
+        GET /application/applications
+        GET /user/t12345/users
+        GET /inventory/managedObjects/1
+        GET /inventory/managedObjects
+        GET /inventory/managedObjects/1
+        GET /inventory/managedObjects?withTotalElements=true
+
+  A blank page size setting does not change an explicit page size or includeAll:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=" "
+      c8y inventory list --pageSize 3 >/dev/null
+      c8y events list --pageSize 2000 >/dev/null
+      c8y operations list --includeAll >/dev/null
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /inventory/managedObjects?pageSize=3
+        GET /event/events?pageSize=2000
+        GET /devicecontrol/operations?pageSize=2000
+
+  A blank page size setting reads --totalPages pages of the platform's default size:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server data
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=" "
+      c8y alarms list --totalPages 2 --select id -o csv | paste -s -d ' ' -
+      c8y events list --currentPage 2 --select id -o csv | paste -s -d ' ' -
+      c8y operations list --pageSize 5 --totalPages 2 --select id -o csv | paste -s -d ' ' -
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        8 7 6 5 4 3 2 1
+        3 2 1
+        8 7 6 5 4 3 2 1
+        GET /alarm/alarms
+        GET /alarm/alarms?currentPage=2
+        GET /event/events?currentPage=2
+        GET /devicecontrol/operations
+        GET /devicecontrol/operations?currentPage=2
+
+  The page size setting of the default settings.yaml (20) is sent on a list and on a get:
+    command: |
+      . ./offline/common/request_lib.sh
+      start_server
+      export C8Y_SETTINGS_DEFAULTS_PAGESIZE=20
+      c8y events list >/dev/null
+      c8y inventory get --id 1 >/dev/null
+      requests
+    exit-code: 0
+    stdout:
+      exactly: |
+        GET /event/events?pageSize=20
+        GET /inventory/managedObjects/1?pageSize=20
