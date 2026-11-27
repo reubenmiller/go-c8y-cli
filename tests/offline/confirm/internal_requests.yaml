@@ -10,6 +10,18 @@
 # commands which create, update or delete data still ask.
 config:
   env:
+    # c8y also turns on the CI mode (no prompts) when it finds the variables of a CI system
+    # (e.g. CI=true on GitHub Actions), so they are cleared for the commands which run without
+    # C8Y_SETTINGS_CI
+    CI: "false"
+    BUILD_ID: ""
+    BUILD_NUMBER: ""
+    RUN_ID: ""
+    CI_APP_ID: ""
+    CI_BUILD_ID: ""
+    CI_BUILD_NUMBER: ""
+    CI_NAME: ""
+    CONTINUOUS_INTEGRATION: ""
     C8Y_SETTINGS_DEFAULTS_OUTPUT: json
     C8Y_SETTINGS_DEFAULTS_CACHE: false
     C8Y_SETTINGS_DEFAULTS_DRY: false

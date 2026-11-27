@@ -9,14 +9,15 @@ import (
 )
 
 func testSubmission(semanticMethod string, forceConfirm bool) *submission {
-	v := viper.New()
-	v.Set(config.SettingsModeConfirmation, "PUT POST DELETE")
-	v.Set(config.SettingsForceConfirm, forceConfirm)
-	// independent of the environment (e.g. C8Y_SETTINGS_CI of the offline tests)
-	v.Set(config.SettingsModeCI, false)
-	v.Set(config.SettingsForce, false)
-	v.Set(config.SettingsDryRun, false)
-	return &submission{cfg: config.NewConfig(v), semanticMethod: semanticMethod}
+	// Set after NewConfig, which reads the environment (C8Y_SETTINGS_CI of the
+	// offline tests, CI=true of a CI runner, ...), so the test does not depend on it
+	cfg := config.NewConfig(viper.New())
+	cfg.Set(config.SettingsModeConfirmation, "PUT POST DELETE")
+	cfg.Set(config.SettingsForceConfirm, forceConfirm)
+	cfg.Set(config.SettingsModeCI, false)
+	cfg.Set(config.SettingsForce, false)
+	cfg.Set(config.SettingsDryRun, false)
+	return &submission{cfg: cfg, semanticMethod: semanticMethod}
 }
 
 // The semantic method of a command, not the method of the request, decides
