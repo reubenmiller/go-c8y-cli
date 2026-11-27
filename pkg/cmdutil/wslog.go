@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"regexp"
 	"strings"
 	"sync/atomic"
 
@@ -23,6 +24,10 @@ type websocketLogHandler struct {
 	// muted stops the log (when it is set), and drop lists the messages which are not logged
 	muted *atomic.Bool
 	drop  map[string]bool
+
+	// hideTokens masks the credentials of the realtime handshake in the frames
+	// which are logged (see maskWebsocketTokens)
+	hideTokens bool
 }
 
 // NewWebsocketLogHandler returns the slog handler which logs the websocket
@@ -39,7 +44,23 @@ func NewWebsocketLogHandler(log *logger.Logger, muted *atomic.Bool, drop ...stri
 // NewRealtimeLogHandler is the handler of the realtime client of the factory
 // (see Factory.MuteWebsocketLog).
 func (f *Factory) NewRealtimeLogHandler(log *logger.Logger) slog.Handler {
-	return NewWebsocketLogHandler(log, &f.wsLogMuted, "Subscription acknowledged successfully")
+	h := NewWebsocketLogHandler(log, &f.wsLogMuted, "Subscription acknowledged successfully").(*websocketLogHandler)
+	if f.Config != nil {
+		if cfg, err := f.Config(); err == nil && cfg != nil {
+			h.hideTokens = cfg.HideSensitive()
+		}
+	}
+	return h
+}
+
+// websocketTokenPattern matches the credentials of the realtime handshake
+// (com.cumulocity.authn: the basic credentials or the OAuth token)
+var websocketTokenPattern = regexp.MustCompile(`"(token|xsrfToken)":"[^"]*"`)
+
+// maskWebsocketTokens hides the credentials of a realtime frame. v2.59.0 logged
+// them as they are, also when the sensitive information is hidden.
+func maskWebsocketTokens(text string) string {
+	return websocketTokenPattern.ReplaceAllString(text, `"$1":"{token}"`)
 }
 
 func (h *websocketLogHandler) Enabled(context.Context, slog.Level) bool { return true }
@@ -66,6 +87,9 @@ func (h *websocketLogHandler) Handle(_ context.Context, r slog.Record) error {
 	r.Attrs(add)
 
 	message := websocketMessage(r.Message, attrs, order)
+	if h.hideTokens && r.Message == "ws (send)" {
+		message = maskWebsocketTokens(message)
+	}
 	if r.Message == "Subscribing to pattern" {
 		// v2.59.0 logged the channels before it subscribed
 		h.log.Infof("Listening to subscriptions: %s", attrs["value"].String())
@@ -84,7 +108,7 @@ func (h *websocketLogHandler) Handle(_ context.Context, r slog.Record) error {
 }
 
 func (h *websocketLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
-	return &websocketLogHandler{log: h.log, attrs: append(append([]slog.Attr(nil), h.attrs...), attrs...), muted: h.muted, drop: h.drop}
+	return &websocketLogHandler{log: h.log, attrs: append(append([]slog.Attr(nil), h.attrs...), attrs...), muted: h.muted, drop: h.drop, hideTokens: h.hideTokens}
 }
 
 func (h *websocketLogHandler) WithGroup(string) slog.Handler { return h }

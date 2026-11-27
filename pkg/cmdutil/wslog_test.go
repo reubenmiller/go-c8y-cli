@@ -63,3 +63,18 @@ func TestWebsocketLogHandlerListensBeforeSubscribingAndCanBeMuted(t *testing.T) 
 	out := logPrefix.ReplaceAllString(read(), "")
 	assert.Equal(t, "Listening to subscriptions: /alarms/1\nSubscribing to /alarms/1\nReceived message 3\n", out)
 }
+
+// the credentials of the realtime handshake are hidden like the ones of the requests
+func TestWebsocketLogHandlerHidesTheHandshakeToken(t *testing.T) {
+	log, read := captureLog(t)
+	h := NewWebsocketLogHandler(log, nil).(*websocketLogHandler)
+	h.hideTokens = true
+	l := slog.New(h)
+
+	l.Info("ws (send)", "channel", "/meta/handshake", "text", `{"channel":"/meta/handshake","ext":{"com.cumulocity.authn":{"token":"dDEvdTpw"}},"version":"1.0"}`)
+	l.Info("ws (send)", "channel", "/meta/handshake", "text", `{"ext":{"com.cumulocity.authn":{"token":"abc","xsrfToken":"def"}}}`)
+
+	out := logPrefix.ReplaceAllString(read(), "")
+	assert.Equal(t, `ws (send): /meta/handshake : {"channel":"/meta/handshake","ext":{"com.cumulocity.authn":{"token":"{token}"}},"version":"1.0"}`+"\n"+
+		`ws (send): /meta/handshake : {"ext":{"com.cumulocity.authn":{"token":"{token}","xsrfToken":"{token}"}}}`+"\n", out)
+}
