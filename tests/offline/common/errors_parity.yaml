@@ -182,3 +182,150 @@ tests:
       not-contains:
         - "Error Response"
         - serverError
+
+  #
+  # Extension commands: a required pipeline parameter without a value
+  #
+  It reports a missing required path parameter of an extension command as an unexpected error:
+    command: |
+      c8y kitchensink pipeline get
+    exit-code: 100
+    stderr:
+      contains:
+        - "commandError: missing required parameters. [device]"
+      not-contains:
+        - "Missing required parameter"
+
+  It reports a missing required path parameter (id) of an extension command as an unexpected error:
+    command: |
+      c8y kitchensink hierarchy items get
+    exit-code: 100
+    stderr:
+      contains:
+        - "commandError: Missing required parameter. id"
+
+  It reports a missing required query parameter of an extension command as a user error:
+    command: |
+      c8y kitchensink required queryparameters_withpipe
+    exit-code: 101
+    stderr:
+      contains:
+        - "commandError: Missing required parameter. required_string"
+
+  #
+  # Remote access configurations: a name which matches nothing
+  #
+  It reports an unknown configuration name of remoteaccess configurations get like any unresolved name:
+    command: |
+      c8y remoteaccess configurations get --device $(c8y devices create --name ra-cfg-get --select id -o csv) --id nope
+    exit-code: 4
+    stderr:
+      match-pattern: "commandError: referenceByName: no matching items found. name=nope +::StatusCode=404"
+      not-contains:
+        - "remote access configuration not found"
+
+  It reports an unknown configuration name of remoteaccess configurations delete like any unresolved name:
+    command: |
+      c8y remoteaccess configurations delete --device $(c8y devices create --name ra-cfg-delete --select id -o csv) --id nope
+    exit-code: 4
+    stderr:
+      match-pattern: "commandError: referenceByName: no matching items found. name=nope +::StatusCode=404"
+
+  It reports an unknown configuration name of remoteaccess configurations update like any unresolved name:
+    command: |
+      c8y remoteaccess configurations update --device $(c8y devices create --name ra-cfg-update --select id -o csv) --id nope --newName x
+    exit-code: 4
+    stderr:
+      match-pattern: "commandError: referenceByName: no matching items found. name=nope +::StatusCode=404"
+
+  #
+  # REST transport errors (no response)
+  #
+  It reports a refused connection as a server error with exit code 99, printing the message twice:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y devices get --id 1
+    exit-code: 99
+    stdout:
+      match-pattern: ^$
+    stderr:
+      match-pattern: 'serverError: Get "http://127.0.0.1:1/inventory/managedObjects/1": .*connection refused Get "http://127.0.0.1:1/inventory/managedObjects/1": .*connection refused$'
+      not-contains:
+        - "[002]"
+        - commandError
+
+  It reports a refused connection of an api request as a server error with exit code 99:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y api GET /inventory/managedObjects
+    exit-code: 99
+    stderr:
+      contains:
+        - "serverError: Get "
+      not-contains:
+        - "[002]"
+
+  It prints the error of the http client with --withError for a refused connection:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y devices get --id 1 --withError
+    exit-code: 99
+    stdout:
+      json:
+        errorType: serverError
+        exitCode: "99"
+        error.Op: Get
+        error.URL: http://127.0.0.1:1/inventory/managedObjects/1
+        error.Err.Op: dial
+        error.Err.Net: tcp
+
+  It reports a refused connection of a wait command as a command error with exit code 100:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y operations wait --id 1 --duration 2s
+    exit-code: 100
+    stderr:
+      match-pattern: 'commandError: Get "http://127.0.0.1:1/devicecontrol/operations/1": .*connection refused$'
+      not-contains:
+        - serverError
+        - "[002]"
+
+  It reports a refused connection of an assert command as a command error:
+    command: |
+      C8Y_HOST=http://127.0.0.1:1 c8y inventory assert exists --id 1 --attempts 1
+    exit-code: 112
+    stderr:
+      match-pattern: 'commandError: Get "http://127.0.0.1:1/inventory/managedObjects/1": .*connection refused$'
+      not-contains:
+        - serverError
+
+  It reports a certificate which can not be verified as a server error with exit code 99:
+    command: ./offline/common/transport_tls.sh rest
+    exit-code: 0
+    stdout:
+      contains:
+        - "exit=99"
+        - "serverError: Get "
+        - "certificate"
+      not-contains:
+        - "[002]"
+
+  It reports the failed token request of notification2 subscribe as a command error with exit code 100:
+    command: ./offline/common/transport_tls.sh notification2
+    exit-code: 0
+    stdout:
+      contains:
+        - "exit=100"
+        - "commandError: Post "
+        - "certificate"
+      not-contains:
+        - "[002]"
+        - serverError
+
+  #
+  # ui applications plugins list without an application
+  #
+  It lists nothing without --application:
+    command: |
+      c8y ui applications plugins list
+    exit-code: 0
+    stdout:
+      match-pattern: ^$
+    stderr:
+      match-pattern: ^$

@@ -9,6 +9,8 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
 	"github.com/spf13/cobra"
 )
 
@@ -77,6 +79,12 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	}
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		app := c8ystream.NameOrID(in.String("application"))
+		if app == "" {
+			// As in v2.59.0 no application is not an error: nothing is listed
+			return func(context.Context) any {
+				return op.OK(jsondoc.New([]byte("[]")))
+			}, nil
+		}
 		return func(ctx context.Context) any {
 			return client.UIApplicationPlugins.ListPlugins(ctx, app)
 		}, nil

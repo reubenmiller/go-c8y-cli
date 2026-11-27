@@ -12,6 +12,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ystream"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
@@ -209,6 +210,16 @@ func (n *SubscribeCmd) messages(ctx context.Context, cfg *config.Config, logger 
 func subscribeStream(ctx context.Context, client *apiv2.Client, opts notification2.ClientOptions, connector wsdial.Connector) (*notification2.MessageStream, error) {
 	nc, err := client.Notification2.CreateClient(ctx, opts)
 	if err != nil {
+		if transportErr, ok := c8ystream.TransportError(err); ok {
+			// The token request got no response (e.g. the certificate of the
+			// server could not be verified). As in v2.59.0 this is a command
+			// error with the error of the http client, not a server error.
+			return nil, cmderrors.CommandError{
+				ErrorType: cmderrors.ErrTypeCommand,
+				Message:   transportErr.Message,
+				ExitCode:  cmderrors.ExitError,
+			}
+		}
 		return nil, err
 	}
 	nc.SetConnector(connector)
