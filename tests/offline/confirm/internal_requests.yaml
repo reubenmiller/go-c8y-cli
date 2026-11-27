@@ -5,8 +5,9 @@
 # command exits with 100/101 ("User did not confirm action").
 #
 # v2.59.0: a command which reads or streams does not ask before the internal POST/PUT/DELETE it
-# sends (e.g. the token request of notification2 subscriptions subscribe); the commands which
-# create, update or delete data still ask.
+# sends (e.g. the token request of notification2 subscriptions subscribe, also with --confirm); a
+# read sent as POST (datahub query, deviceregistration getCredentials) asks only with --confirm; the
+# commands which create, update or delete data still ask.
 config:
   env:
     C8Y_SETTINGS_DEFAULTS_OUTPUT: json
@@ -86,6 +87,25 @@ tests:
   notification2 subscriptions create still asks:
     command: |
       env -u C8Y_SETTINGS_CI C8Y_MODE=dev c8y notification2 subscriptions create --name confirm-n2-other --context mo --apiFilter alarms --device 1 </dev/null
+    exit-code: 101
+    stderr:
+      contains:
+        - User did not confirm action
+
+  datahub query does not ask (a read sent as POST, semantic method GET):
+    command: |
+      out=$(env -u C8Y_SETTINGS_CI C8Y_MODE=dev c8y datahub query --sql "SELECT 1" --verbose </dev/null 2>&1)
+      echo "$out" | grep -q 'did not confirm' && echo prompted
+      echo "$out" | grep -q 'Sending request: POST .*/service/datahub/sql' && echo sent
+      true
+    exit-code: 0
+    stdout:
+      exactly: |
+        sent
+
+  a read semantic method still asks with --confirm (deviceregistration getCredentials):
+    command: |
+      env -u C8Y_SETTINGS_CI C8Y_MODE=dev c8y deviceregistration getCredentials --id confirm-reg --sessionUsername x --sessionPassword y --confirm </dev/null
     exit-code: 101
     stderr:
       contains:

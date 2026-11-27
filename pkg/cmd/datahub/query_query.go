@@ -54,6 +54,8 @@ Execute a SQL query and return the first 10 rows
 		flags.WithCollectionProperty("rows"),
 		flags.WithPowershellName("Get-DataHubQueryResult"),
 		flags.WithOutputType("application/json", ""),
+		// a query is a read (sent as POST): it asks only with --confirm, as in v2.59.0
+		flags.WithSemanticMethod("GET"),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)

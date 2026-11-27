@@ -94,7 +94,7 @@ func NewSubscribeCmd(f *cmdutil.Factory) *SubscribeCmd {
 	flags.WithOptions(
 		cmd,
 		// The command reads a stream. The token request which it sends when no
-		// token is given is an internal step, so it must not ask for a confirmation
+		// token is given is an internal step, which never asks (see subscribeStream)
 		flags.WithSemanticMethod("GET"),
 	)
 
@@ -225,7 +225,11 @@ func (n *SubscribeCmd) messages(ctx context.Context, cfg *config.Config, logger 
 // the token and then connects, and the insecure setting applies to the
 // certificate of the server.
 func subscribeStream(ctx context.Context, client *apiv2.Client, opts notification2.ClientOptions, connector wsdial.Connector) (*notification2.MessageStream, error) {
-	nc, err := client.Notification2.CreateClient(ctx, opts)
+	// The token request (and its renewal) is an internal step of the
+	// subscription, not an action of the user: as in v2.59.0 it never asks for
+	// a confirmation, also not with --confirm. Only the approver is removed, a
+	// dry run still shows the request.
+	nc, err := client.Notification2.CreateClient(apiv2.WithRequestApprover(ctx, nil), opts)
 	if err != nil {
 		if transportErr, ok := c8ystream.TransportError(err); ok {
 			// The token request got no response (e.g. the certificate of the
