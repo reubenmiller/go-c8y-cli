@@ -329,3 +329,12 @@ tests:
       match-pattern: ^$
     stderr:
       match-pattern: ^$
+
+  It lists nothing without --application, also with --raw:
+    command: |
+      c8y ui applications plugins list --raw
+    exit-code: 0
+    stdout:
+      match-pattern: ^$
+    stderr:
+      match-pattern: ^$
