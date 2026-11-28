@@ -395,7 +395,7 @@ func (p *uploadPlan) upload(ctx context.Context, client *apiv2.Client, progress 
 			opts.File.Progress = fn
 			finish = done
 		}
-		version := client.ApplicationVersions.Create(ctx, appID, opts)
+		version := client.Applications.Versions.Create(ctx, appID, opts)
 		finish()
 		progress.Wait()
 		if version.Err != nil {

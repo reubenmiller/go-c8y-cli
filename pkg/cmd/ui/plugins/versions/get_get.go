@@ -100,9 +100,9 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		return func(ctx context.Context) any {
 			var res op.Result[jsonmodels.ApplicationVersion]
 			if tag != "" {
-				res = client.ApplicationVersions.ListByTag(ctx, pluginID, tag)
+				res = client.Applications.Versions.ListByTag(ctx, pluginID, tag)
 			} else {
-				res = client.ApplicationVersions.ListByVersion(ctx, pluginID, version)
+				res = client.Applications.Versions.ListByVersion(ctx, pluginID, version)
 			}
 			// The SDK requests the single-version representation (the version/tag
 			// filter only works with that Accept header), so this renders exactly

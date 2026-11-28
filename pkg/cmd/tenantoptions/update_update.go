@@ -95,7 +95,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, err
 		}
-		opt := tenantoptions.UpdateOption{
+		opt := tenantoptions.UpdateOptions{
 			Category: in.String("category"),
 			// The SDK url.PathEscapes the key when it builds the path. v1 accepted
 			// an already-percent-encoded key and sent it through unchanged, so
