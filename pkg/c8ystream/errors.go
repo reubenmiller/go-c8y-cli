@@ -53,6 +53,9 @@ func (r *Runner) toServerError(err error) error {
 	if lookupErr, ok := r.lookupTransportError(err, false); ok {
 		return lookupErr
 	}
+	if emptyErr, ok := EmptyReferenceError(err); ok {
+		return emptyErr
+	}
 	// A name that the SDK could not resolve to an id is reported as v1 did:
 	// "referenceByName: no matching items found" (commandError, exit code 4).
 	if _, name, ok := core.NameNotFound(err); ok {
@@ -256,6 +259,43 @@ func LookupTransportError(err error, secondary bool) (cmderrors.CommandError, bo
 		ExitCode:  exitCode,
 	}, true
 }
+
+// emptyReferenceTexts are the messages the CLI reports for an empty reference,
+// by the kind of resource (the Resource of the core.LookupError). The SDK words
+// them as "empty <resource> reference"; the CLI keeps the texts it reported
+// before. Resources which are not listed keep the message of the SDK.
+var emptyReferenceTexts = map[string]string{
+	"application":    "empty application reference string",
+	"microservice":   "empty microservice reference string",
+	"ui plugin":      "empty ui plugin reference string",
+	"managed object": "empty source string",
+}
+
+// EmptyReferenceError returns the error of an empty reference (e.g. a
+// --device "" or " "), with the text the CLI reported before the SDK
+// unified it (see emptyReferenceTexts). The error is a core.LookupError with
+// no reference; ok is false for any other error.
+func EmptyReferenceError(err error) (error, bool) {
+	var lookupErr *core.LookupError
+	if !errors.As(err, &lookupErr) || lookupErr.Reference != "" {
+		return nil, false
+	}
+	text, ok := emptyReferenceTexts[lookupErr.Resource]
+	if !ok {
+		return nil, false
+	}
+	return messageError{msg: text, err: err}, true
+}
+
+// messageError replaces the message of an error and keeps its chain.
+type messageError struct {
+	msg string
+	err error
+}
+
+func (e messageError) Error() string { return e.msg }
+
+func (e messageError) Unwrap() error { return e.err }
 
 // UnresolvedNameError is the error of a name which matches nothing, as v1
 // reported it: "referenceByName: no matching items found. name=<name>"

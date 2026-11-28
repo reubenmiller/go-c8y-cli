@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"testing"
@@ -416,5 +417,37 @@ func TestRunner_buildErrorOfLookup(t *testing.T) {
 	other := errors.New("boom")
 	if got := r.buildError(in, other); got != other {
 		t.Errorf("got %v, want the error unchanged", got)
+	}
+}
+
+// TestToServerError_emptyReference checks that an empty reference keeps the
+// text the CLI reported before go-c8y unified the empty reference messages.
+func TestToServerError_emptyReference(t *testing.T) {
+	r := newErrorRunner(false)
+	tests := []struct {
+		resource string
+		want     string
+	}{
+		{"application", "empty application reference string"},
+		{"microservice", "empty microservice reference string"},
+		{"ui plugin", "empty ui plugin reference string"},
+		{"managed object", "empty source string"},
+		{"agent", "empty agent reference"},
+	}
+	for _, tc := range tests {
+		sdkErr := core.WrapLookup(tc.resource, "", fmt.Errorf("empty %s reference", tc.resource))
+		got := r.toServerError(sdkErr)
+		if got.Error() != tc.want {
+			t.Errorf("%s: Error() = %q, want %q", tc.resource, got.Error(), tc.want)
+		}
+		if !core.IsLookupError(got) {
+			t.Errorf("%s: the error is no longer a core.LookupError", tc.resource)
+		}
+	}
+
+	// a reference which is not empty keeps the message of the SDK
+	sdkErr := core.WrapLookup("microservice", "foo:bar", errors.New(`unknown microservice resolver scheme: "foo"`))
+	if got := r.toServerError(sdkErr); got.Error() != sdkErr.Error() {
+		t.Errorf("non-empty reference: Error() = %q, want %q", got.Error(), sdkErr.Error())
 	}
 }
