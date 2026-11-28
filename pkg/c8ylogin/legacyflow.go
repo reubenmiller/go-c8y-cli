@@ -524,8 +524,8 @@ func (h *LoginHandlerV2) loginInternal() error {
 	}
 
 	// the login can change the credentials, e.g. the password after a forced password change
-	h.auth.Username = h.V2Client.Auth.Username
-	h.auth.Password = h.V2Client.Auth.Password
+	h.auth.Username = h.V2Client.Auth().Username
+	h.auth.Password = h.V2Client.Auth().Password
 	h.auth.Token = token
 	h.authType = authv2.AuthTypeBearer
 	h.syncAuth()
@@ -543,7 +543,7 @@ func (h *LoginHandlerV2) loginInternal() error {
 
 // fetchVersion gets the Cumulocity version, but doesn't fail if it does not work
 func (h *LoginHandlerV2) fetchVersion() string {
-	result := h.V2Client.Tenants.SystemOptions.Get(h.ctx(), systemoptions.GetOption{
+	result := h.V2Client.Tenants.SystemOptions.Get(h.ctx(), systemoptions.GetOptions{
 		Category: "system",
 		Key:      "version",
 	})
@@ -620,7 +620,7 @@ func (h *LoginHandlerV2) verify() (LoginState, error) {
 	// Get user information if not set (e.g. external SSO tokens don't generally include the username in a known field)
 	if h.auth.Username == "" {
 		h.Logger.Infof("Getting the current user's information as the username is not set")
-		currentUser := h.V2Client.Users.CurrentUser.Get(h.ctx())
+		currentUser := h.V2Client.Users.Current.Get(h.ctx())
 		if currentUser.Err != nil {
 			h.Logger.Warnf("Could not get username. %s", currentUser.Err)
 		} else {

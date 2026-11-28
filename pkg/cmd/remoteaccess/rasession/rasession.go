@@ -29,7 +29,7 @@ type Options struct {
 
 // Session is a remote access client for a device's configuration.
 type Session struct {
-	*remoteaccess.RemoteAccessClient
+	*remoteaccess.Client
 	DeviceID      string
 	Configuration jsonmodels.RemoteAccessConfiguration
 	Multiplex     bool
@@ -59,23 +59,27 @@ func notFoundError(name string) error {
 }
 
 // New creates the remote access client for a configuration from Detect.
-func New(client *apiv2.Client, opts Options, config jsonmodels.RemoteAccessConfiguration) *Session {
+func New(client *apiv2.Client, opts Options, config jsonmodels.RemoteAccessConfiguration) (*Session, error) {
 	multiplex := false
 	if opts.Multiplex != nil {
 		multiplex = *opts.Multiplex
 	} else if name, ok := remoteaccess.ParseConfigurationName(config.Name()); ok {
 		multiplex = name.Multiplex
 	}
+	raClient, err := remoteaccess.NewClient(client, remoteaccess.ClientOptions{
+		ManagedObjectID: opts.DeviceID,
+		RemoteAccessID:  config.ID(),
+		Multiplex:       multiplex,
+	})
+	if err != nil {
+		return nil, err
+	}
 	return &Session{
-		RemoteAccessClient: remoteaccess.NewRemoteAccessClient(client, remoteaccess.RemoteAccessOptions{
-			ManagedObjectID: opts.DeviceID,
-			RemoteAccessID:  config.ID(),
-			Multiplex:       multiplex,
-		}),
+		Client:        raClient,
 		DeviceID:      opts.DeviceID,
 		Configuration: config,
 		Multiplex:     multiplex,
-	}
+	}, nil
 }
 
 // HostPort splits the listener address into host and port. An address
@@ -104,5 +108,5 @@ func (s *Session) BrowserScheme(scheme string) string {
 
 // CumulocityURL is the tenant URL, for messages
 func CumulocityURL(client *apiv2.Client) string {
-	return strings.TrimRight(client.BaseURL.String(), "/")
+	return strings.TrimRight(client.BaseURL().String(), "/")
 }

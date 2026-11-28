@@ -867,7 +867,7 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 		if loginType == logintype.Browser || loginType == logintype.Certificate || loginType == logintype.Device {
 			insecure = cfg.SkipSSLVerify()
 		}
-		handler := c8ylogin.NewLoginHandlerV2(
+		handler, err := c8ylogin.NewLoginHandlerV2(
 			n.factory.IOStreams,
 			apiv2.ClientOptions{
 				BaseURL:            session.Host,
@@ -877,6 +877,9 @@ func (n *CmdLogin) RunE(cmd *cobra.Command, args []string) error {
 			cmd.ErrOrStderr(),
 			func() {},
 		)
+		if err != nil {
+			return err
+		}
 		handler.LoginType = loginType
 		handler.CertificatePath = session.Certificate
 		handler.CertificateKeyPath = session.CertificateKey

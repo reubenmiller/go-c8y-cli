@@ -145,7 +145,10 @@ func (n *CmdRun) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		return func(ctx context.Context) any {
-			session := rasession.New(client, opts, config)
+			session, err := rasession.New(client, opts, config)
+			if err != nil {
+				return err
+			}
 			log.Debugf("Using remote access configuration: id=%s, name=%s, multiplex=%v", config.ID(), config.Name(), session.Multiplex)
 
 			// TCP / socket listener, served in the background

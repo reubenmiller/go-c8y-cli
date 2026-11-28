@@ -212,11 +212,15 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 
 	if !cmd.Flags().Changed("loginType") {
 		// Note: Self-signed certificates have always been accepted when looking up the login options
-		localClient := apiv2.NewClient(apiv2.ClientOptions{
+		localClient, err := apiv2.NewClient(apiv2.ClientOptions{
 			BaseURL:            n.host,
 			InsecureSkipVerify: true,
 			SkipTenantLookup:   true,
+			Agent:              "go-client",
 		})
+		if err != nil {
+			return err
+		}
 		loginOptions := localClient.LoginOptions.ListNoAuth(context.Background(), loginoptions.ListOptions{})
 		if loginOptions.Err != nil {
 			return loginOptions.Err

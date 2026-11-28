@@ -9,6 +9,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/testing/testclient"
+
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
@@ -30,7 +32,7 @@ func recordingClient(t *testing.T, body string) (*apiv2.Client, func() []string)
 		_, _ = w.Write([]byte(body))
 	}))
 	t.Cleanup(srv.Close)
-	return apiv2.NewClient(apiv2.ClientOptions{BaseURL: srv.URL}), func() []string {
+	return testclient.Must(apiv2.ClientOptions{BaseURL: srv.URL}), func() []string {
 		mu.Lock()
 		defer mu.Unlock()
 		return append([]string(nil), requests...)
@@ -38,7 +40,7 @@ func recordingClient(t *testing.T, body string) (*apiv2.Client, func() []string)
 }
 
 func unreachableClient() *apiv2.Client {
-	return apiv2.NewClient(apiv2.ClientOptions{BaseURL: "http://127.0.0.1:1"})
+	return testclient.Must(apiv2.ClientOptions{BaseURL: "http://127.0.0.1:1"})
 }
 
 func TestResolveHostedApplication(t *testing.T) {

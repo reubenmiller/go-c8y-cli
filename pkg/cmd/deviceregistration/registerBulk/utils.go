@@ -99,7 +99,7 @@ func run(cmd *cobra.Command, f *cmdutil.Factory, authType string, password secre
 		}
 		tenant := opt.Tenant
 		if tenant == "" {
-			tenant = client.Auth.Tenant
+			tenant = client.Auth().Tenant
 		}
 		output["username"] = fmt.Sprintf("%s/device_%s", tenant, opt.ExternalID)
 

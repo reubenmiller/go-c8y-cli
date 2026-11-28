@@ -15,11 +15,12 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/jsondoc"
+	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/op"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/output"
 	"github.com/tidwall/gjson"
 )
 
-// RequestCall returns the Call which sends a custom request (client.SendRequest)
+// RequestCall returns the Call which sends a custom request (client.Request)
 // and renders the response the same way for any endpoint:
 //
 //   - a JSON response yields the items of its collection (the response's only
@@ -48,13 +49,13 @@ func (r *Runner) sendRequest(ctx context.Context, client *apiv2.Client, opts api
 	whole := r.Config.RawOutput() || common.WithTotalPages || common.WithTotalElements
 
 	for page := int64(1); ; page++ {
-		res := client.SendRequest(ctx, opts)
-		if res.Error != nil {
-			yield(jsondoc.Empty(), res.Error)
+		res := client.Request(ctx, opts)
+		if res.Err != nil {
+			yield(jsondoc.Empty(), res.Err)
 			return
 		}
-		body := res.Body()
-		if res.Response == nil || len(body) == 0 {
+		body := res.Response
+		if res.HTTPStatus == 0 || len(body) == 0 {
 			// A dry run, or a response without a body (e.g. 204)
 			return
 		}
@@ -178,13 +179,13 @@ func collectionProperty(body []byte) string {
 // to stdout. The --outputFileRaw template can use {id} (the first id in the
 // request path, or the response's id), {name}, {type}, {owner}, {filename}
 // (from the Content-Disposition header) and {basename} (of the request path).
-func (r *Runner) writeResponseBody(res *apiv2.RequestResult, body []byte) error {
+func (r *Runner) writeResponseBody(res op.Result[jsondoc.JSONDoc], body []byte) error {
 	if path := r.Config.GetOutputFileRaw(); path != "" {
 		_, err := fileutilities.WriteToFile(bytes.NewReader(body), path, false, isJSONDocument(body), responseFields(res, body))
 		return err
 	}
 	out := r.Cmd.OutOrStdout()
-	raw := r.Config.IsResponseOutput() || res.Header("Content-Type") == "application/octet-stream"
+	raw := r.Config.IsResponseOutput() || res.Header.Get("Content-Type") == "application/octet-stream"
 	if body = responseText(body, raw); len(body) == 0 {
 		return nil
 	}
@@ -211,8 +212,8 @@ func responseText(body []byte, raw bool) []byte {
 	return append(body[:len(body):len(body)], '\n')
 }
 
-func responseFields(res *apiv2.RequestResult, body []byte) map[string]string {
-	return rawFileFields(res.Response, body)
+func responseFields(res op.Result[jsondoc.JSONDoc], body []byte) map[string]string {
+	return rawFileFields(&http.Response{Header: res.Header, Request: res.Request}, body)
 }
 
 // rawFileFields returns the values of the --outputFileRaw placeholders of a

@@ -9,6 +9,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/testing/testclient"
+
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/core"
 )
@@ -31,7 +33,7 @@ func TestVersionWithoutParent(t *testing.T) {
 		_, _ = w.Write([]byte(`{"managedObjects":[{"id":"501","type":"c8y_SoftwareBinary"},{"id":"502"}],"statistics":{"pageSize":5,"currentPage":1}}`))
 	}))
 	defer srv.Close()
-	client := apiv2.NewClient(apiv2.ClientOptions{BaseURL: srv.URL})
+	client := testclient.Must(apiv2.ClientOptions{BaseURL: srv.URL})
 	ctx := context.Background()
 
 	for _, id := range []string{"", "12345"} {
@@ -80,7 +82,7 @@ func TestVersionWithoutParent(t *testing.T) {
 		t.Errorf("an unknown version is an unresolved name, got %v", err)
 	}
 
-	_, err = VersionWithoutParent(ctx, apiv2.NewClient(apiv2.ClientOptions{BaseURL: "http://127.0.0.1:1"}), SoftwareVersionKind, "1.0.0")
+	_, err = VersionWithoutParent(ctx, testclient.Must(apiv2.ClientOptions{BaseURL: "http://127.0.0.1:1"}), SoftwareVersionKind, "1.0.0")
 	var lookupErr *core.LookupError
 	if !errors.As(err, &lookupErr) {
 		t.Errorf("want a lookup error, got %v", err)

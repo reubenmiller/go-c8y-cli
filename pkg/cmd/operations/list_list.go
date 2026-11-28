@@ -117,7 +117,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		if v := in.String("bulkOperationId"); v != "" {
 			if id, convErr := strconv.Atoi(v); convErr == nil {
-				opt.BulkOperationID = id
+				opt.BulkOperationID = strconv.Itoa(id)
 			}
 		}
 		opt.PaginationOptions = paging

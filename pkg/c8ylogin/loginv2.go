@@ -198,7 +198,7 @@ func NewLoginHandlerV2(
 	opts apiv2.ClientOptions,
 	w io.Writer,
 	onSave func(),
-) *LoginHandlerV2 {
+) (*LoginHandlerV2, error) {
 	h := &LoginHandlerV2{
 		IO:     IO,
 		Writer: w,
@@ -213,6 +213,10 @@ func NewLoginHandlerV2(
 	h.authType = opts.Auth.GetAuthTypes()[0]
 
 	opts.SkipTenantLookup = true
+	if opts.Agent == "" {
+		// v2.59.0 sent "go-client" as the User-Agent
+		opts.Agent = "go-client"
+	}
 	if opts.Timeout == 0 {
 		opts.Timeout = time.Duration(Timeout) * time.Millisecond
 	}
@@ -224,8 +228,12 @@ func NewLoginHandlerV2(
 		opts.Logger = slog.New(slog.NewTextHandler(errOut, &slog.HandlerOptions{Level: slog.LevelWarn}))
 	}
 	opts.Auth = h.requestAuth()
-	h.V2Client = apiv2.NewClient(opts)
-	return h
+	client, err := apiv2.NewClient(opts)
+	if err != nil {
+		return nil, err
+	}
+	h.V2Client = client
+	return h, nil
 }
 
 // SetLogger replaces the no-op logger with a real one.
@@ -234,7 +242,7 @@ func (h *LoginHandlerV2) SetLogger(l *logger.Logger) { h.Logger = l }
 // Session returns the credentials of the session. The values are updated by the login,
 // e.g. with the token and the tenant.
 func (h *LoginHandlerV2) Session() config.ClientSession {
-	session := config.NewClientSession(h.V2Client.BaseURL, h.auth, h.version)
+	session := config.NewClientSession(h.V2Client.BaseURL(), h.auth, h.version)
 	session.AuthType = h.authType
 	return session
 }
@@ -354,7 +362,7 @@ func (h *LoginHandlerV2) runSDKFlow() error {
 	}
 
 	// Keep the credentials which the login has set (e.g. the token, or credentials from the prompts)
-	h.auth = h.V2Client.Auth
+	h.auth = h.V2Client.Auth()
 	if token != "" {
 		h.auth.Token = token
 	}

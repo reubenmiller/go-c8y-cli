@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/testing/testclient"
+
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 )
@@ -19,7 +21,7 @@ func TestResolveConfigurationID(t *testing.T) {
 		_, _ = w.Write([]byte(`[{"id":"1","name":"webssh","protocol":"SSH"}]`))
 	}))
 	defer srv.Close()
-	client := apiv2.NewClient(apiv2.ClientOptions{BaseURL: srv.URL})
+	client := testclient.Must(apiv2.ClientOptions{BaseURL: srv.URL})
 	ctx := context.Background()
 
 	if id, err := resolveConfigurationID(ctx, client, "d1", "WebSSH"); err != nil || id != "1" {

@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/testing/testclient"
+
 	"github.com/gorilla/websocket"
 	apiv2 "github.com/reubenmiller/go-c8y/v2/pkg/c8y/api"
 	"github.com/reubenmiller/go-c8y/v2/pkg/c8y/api/authentication"
@@ -38,7 +40,7 @@ func newWrappedClient(t *testing.T, server *httptest.Server) *apiv2.Client {
 	t.Helper()
 	base := http.DefaultTransport.(*http.Transport).Clone()
 	base.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	return apiv2.NewClient(apiv2.ClientOptions{
+	return testclient.Must(apiv2.ClientOptions{
 		BaseURL:            server.URL,
 		Auth:               authentication.AuthOptions{Tenant: "t1", Username: "u", Password: "p"},
 		InsecureSkipVerify: true,
@@ -170,7 +172,7 @@ func newBasicClient(t *testing.T) *apiv2.Client {
 	t.Helper()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 	t.Cleanup(server.Close)
-	return apiv2.NewClient(apiv2.ClientOptions{
+	return testclient.Must(apiv2.ClientOptions{
 		BaseURL:          server.URL,
 		Auth:             authentication.AuthOptions{Tenant: "t1", Username: "u", Password: "p"},
 		SkipTenantLookup: true,

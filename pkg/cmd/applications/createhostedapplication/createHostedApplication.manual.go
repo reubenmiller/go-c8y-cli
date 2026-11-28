@@ -112,7 +112,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 		opt := applications.DeployHostedOptions{
 			// Only the tenant's own applications are updated, never a
 			// subscribed one with the same name (e.g. cockpit).
-			Owner:          client.Auth.Tenant,
+			Owner:          client.Auth().Tenant,
 			Path:           path,
 			Name:           n.name,
 			Key:            n.key,

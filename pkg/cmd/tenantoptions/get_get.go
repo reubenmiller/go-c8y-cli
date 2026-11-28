@@ -75,7 +75,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		opt := tenantoptions.GetOption{
+		opt := tenantoptions.GetOptions{
 			Category: in.String("category"),
 			Key:      in.String("key"),
 		}

@@ -85,7 +85,10 @@ func NewCmdCount(f *cmdutil.Factory) *CmdExists {
 				Status:       types.OperationStatus(in.String("status")),
 			}
 			if v := in.String("bulkOperationId"); v != "" {
-				opt.BulkOperationID, _ = strconv.Atoi(v)
+				// A value which is not a number is not sent (as in v2.59.0)
+				if id, _ := strconv.Atoi(v); id != 0 {
+					opt.BulkOperationID = strconv.Itoa(id)
+				}
 			}
 			opt.PageSize = 1
 			// v2.59.0 counted the pages of one item (withTotalPages)
