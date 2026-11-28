@@ -84,11 +84,14 @@ func getPassword() string {
 
 func CreateSessionWithOAuth2Internal() (*c8ysession.CumulocitySession, error) {
 	ctx := context.Background()
-	client := apiv2.NewClient(apiv2.ClientOptions{
+	client, err := apiv2.NewClient(apiv2.ClientOptions{
 		BaseURL:            getHost(),
 		InsecureSkipVerify: true,
 		SkipTenantLookup:   true,
 	})
+	if err != nil {
+		return nil, err
+	}
 	client.SetAuth(authentication.AuthOptions{
 		Username: getUsername(),
 		Password: getPassword(),
@@ -118,9 +121,9 @@ func CreateSessionWithOAuth2Internal() (*c8ysession.CumulocitySession, error) {
 	}
 
 	return &c8ysession.CumulocitySession{
-		Host:     client.BaseURL.String(),
-		Username: client.Auth.Username,
-		Password: client.Auth.Password,
+		Host:     client.BaseURL().String(),
+		Username: client.Auth().Username,
+		Password: client.Auth().Password,
 		Token:    token,
 	}, nil
 }

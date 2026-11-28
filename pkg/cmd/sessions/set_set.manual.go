@@ -273,7 +273,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	var handler *c8ylogin.LoginHandlerV2
-	handler = c8ylogin.NewLoginHandlerV2(
+	handler, err = c8ylogin.NewLoginHandlerV2(
 		n.factory.IOStreams,
 		apiv2.ClientOptions{
 			BaseURL: clientOpts.BaseURL,
@@ -294,6 +294,9 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 			n.onSave(&session)
 		},
 	)
+	if err != nil {
+		return err
+	}
 	handler.LoginType = n.LoginType
 	if n.LoginType != "" {
 		handler.AllowedLoginTypes = strings.Split(n.LoginType, ",")

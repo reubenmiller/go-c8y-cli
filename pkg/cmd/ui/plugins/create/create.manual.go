@@ -324,7 +324,7 @@ func (n *CmdCreate) prepareFile(in *c8ystream.Resolver, client *apiv2.Client, lo
 	// Only the plugins which are owned by the current tenant can be managed
 	matches, err := client.UIPlugins.List(in.ResolveContext(), plugins.ListOptions{
 		Name:        application.Name,
-		Owner:       client.Auth.Tenant,
+		Owner:       client.Auth().Tenant,
 		HasVersions: true,
 	}).Collect()
 	if err != nil {

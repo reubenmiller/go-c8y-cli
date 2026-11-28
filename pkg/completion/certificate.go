@@ -19,7 +19,7 @@ func WithDeviceCertificate(flagName string, clientFunc ClientFunc) Option {
 			items, err := client.TrustedCertificates.List(
 				context.Background(),
 				trustedcertificates.ListOptions{
-					TenantID:          client.Auth.Tenant,
+					TenantID:          client.Auth().Tenant,
 					PaginationOptions: pageSize(100),
 				},
 			).Collect()

@@ -17,7 +17,7 @@ func WithTenantID(flagName string, clientFunc ClientFunc) Option {
 			if err != nil {
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
-			currentTenant := client.Auth.Tenant
+			currentTenant := client.Auth().Tenant
 			items, err := client.Tenants.List(
 				context.Background(),
 				tenants.ListOptions{PaginationOptions: pageSize(20)},

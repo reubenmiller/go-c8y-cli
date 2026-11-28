@@ -29,11 +29,11 @@ func listApplications(client *apiv2.Client, opt applications.ListOptions) ([]jso
 
 // isOwnedByOtherTenant reports whether the application is owned by a tenant other than the client's tenant
 func isOwnedByOtherTenant(client *apiv2.Client, app jsonmodels.Application) bool {
-	if client.Auth.Tenant == "" {
+	if client.Auth().Tenant == "" {
 		return false
 	}
 	owner := app.OwnerTenantID()
-	return owner != "" && owner != client.Auth.Tenant
+	return owner != "" && owner != client.Auth().Tenant
 }
 
 // formatApplication formats an application as "name<TAB>type | id: <id>"

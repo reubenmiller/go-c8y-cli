@@ -84,6 +84,8 @@ func (c *Context) Client() (*api.Client, error) {
 		Auth:      auth,
 		Transport: httpClient.Transport,
 		Timeout:   httpClient.Timeout,
+		// v2.59.0 sent "go-client" as the User-Agent
+		Agent: "go-client",
 		// the tenant of the session is used, and it must not send any request when creating the client
 		SkipTenantLookup: true,
 	}), nil

@@ -524,8 +524,8 @@ func (h *LoginHandlerV2) loginInternal() error {
 	}
 
 	// the login can change the credentials, e.g. the password after a forced password change
-	h.auth.Username = h.V2Client.Auth.Username
-	h.auth.Password = h.V2Client.Auth.Password
+	h.auth.Username = h.V2Client.Auth().Username
+	h.auth.Password = h.V2Client.Auth().Password
 	h.auth.Token = token
 	h.authType = authv2.AuthTypeBearer
 	h.syncAuth()

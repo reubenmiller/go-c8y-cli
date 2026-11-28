@@ -122,10 +122,11 @@ func newTestHandler(t *testing.T, server *fakeTenant, auth authentication.AuthOp
 	t.Helper()
 	ios, _, _, _ := iostreams.Test()
 	saved := 0
-	h := NewLoginHandlerV2(ios, apiv2.ClientOptions{
+	h, err := NewLoginHandlerV2(ios, apiv2.ClientOptions{
 		BaseURL: server.t.URL,
 		Auth:    auth,
 	}, ios.ErrOut, func() { saved++ })
+	require.NoError(t, err)
 	return h
 }
 

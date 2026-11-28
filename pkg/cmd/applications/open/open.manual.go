@@ -126,7 +126,7 @@ func (n *OpenCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	cfg := r.Config
-	baseURL := strings.TrimSuffix(client.BaseURL.String(), "/")
+	baseURL := strings.TrimSuffix(client.BaseURL().String(), "/")
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		device := in.String("device")
