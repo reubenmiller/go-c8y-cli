@@ -1,5 +1,5 @@
 // v2-based current user update: builds the body (name/contact/password +
-// --data/--template) and updates the current user via Users.CurrentUser.Update.
+// --data/--template) and updates the current user via Users.Current.Update.
 // Runs once (no pipeline).
 
 package currentuser
@@ -98,7 +98,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, err
 		}
 		return func(ctx context.Context) any {
-			return client.Users.CurrentUser.Update(ctx, body)
+			return client.Users.Current.Update(ctx, body)
 		}, nil
 	})
 }

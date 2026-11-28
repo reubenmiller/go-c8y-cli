@@ -92,7 +92,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		version := in.String("version")
 		tags := in.StringSlice("tag")
 		return func(ctx context.Context) any {
-			return client.ApplicationVersions.Update(ctx, appID, version, tags)
+			return client.Applications.Versions.Update(ctx, appID, version, tags)
 		}, nil
 	})
 }

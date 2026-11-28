@@ -105,7 +105,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, fmt.Errorf("at least one --tag is required")
 		}
 		return func(ctx context.Context) any {
-			return client.ApplicationVersions.Update(ctx, pluginID, version, tags)
+			return client.Applications.Versions.Update(ctx, pluginID, version, tags)
 		}, nil
 	})
 }

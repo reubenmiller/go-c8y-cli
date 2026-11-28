@@ -168,7 +168,7 @@ func WithUIPluginVersion(flagVersion string, flagExtension string, clientFunc Cl
 			}
 
 			// Get versions
-			items, err := client.ApplicationVersions.List(context.Background(), extensionID, versions.ListOptions{
+			items, err := client.Applications.Versions.List(context.Background(), extensionID, versions.ListOptions{
 				PaginationOptions: pageSize(100),
 			}).Collect()
 			if err != nil {
