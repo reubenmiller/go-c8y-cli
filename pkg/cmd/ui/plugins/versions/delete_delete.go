@@ -97,9 +97,9 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		tag := in.String("tag")
 		return func(ctx context.Context) any {
 			if tag != "" {
-				return client.ApplicationVersions.DeleteByTag(ctx, pluginID, tag)
+				return client.Applications.Versions.DeleteByTag(ctx, pluginID, tag)
 			}
-			return client.ApplicationVersions.DeleteByVersion(ctx, pluginID, version)
+			return client.Applications.Versions.DeleteByVersion(ctx, pluginID, version)
 		}, nil
 	})
 }

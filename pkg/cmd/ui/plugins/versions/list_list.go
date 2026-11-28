@@ -100,7 +100,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		opt := appversions.ListOptions{}
 		opt.PaginationOptions = paging
 		listAll := func(ctx context.Context, o appversions.ListOptions) *appversions.VersionIterator {
-			return client.ApplicationVersions.ListAll(ctx, pluginID, o)
+			return client.Applications.Versions.ListAll(ctx, pluginID, o)
 		}
 		return func(ctx context.Context) any {
 			return listAll(ctx, opt)

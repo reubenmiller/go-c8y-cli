@@ -99,7 +99,7 @@ func (n *UpdateBulkCmd) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return nil, err
 		}
-		opt := tenantoptions.UpdateByCategoryOption{
+		opt := tenantoptions.UpdateByCategoryOptions{
 			Category: in.String("category"),
 			Body:     options,
 		}

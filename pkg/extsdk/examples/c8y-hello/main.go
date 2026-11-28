@@ -78,7 +78,7 @@ func newDevicesCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			res := client.SendRequest(cmd.Context(), api.RequestOptions{
+			res := client.Request(cmd.Context(), api.RequestOptions{
 				Method: http.MethodGet,
 				Path:   "/inventory/managedObjects",
 				Query: url.Values{
@@ -87,15 +87,15 @@ func newDevicesCmd() *cobra.Command {
 					"withTotalElements": {"true"},
 				},
 			})
-			if res.Error != nil {
-				return extsdk.CheckError(res.Error)
+			if res.Err != nil {
+				return extsdk.CheckError(res.Err)
 			}
 			var page struct {
 				Statistics struct {
 					TotalElements int `json:"totalElements"`
 				} `json:"statistics"`
 			}
-			if err := json.Unmarshal(res.Body(), &page); err != nil {
+			if err := json.Unmarshal(res.Response, &page); err != nil {
 				return err
 			}
 			total := page.Statistics.TotalElements

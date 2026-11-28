@@ -1,5 +1,5 @@
 // v2-based current user get: returns the user associated with the current
-// session credentials via Users.CurrentUser.Get. Runs once (no pipeline).
+// session credentials via Users.Current.Get. Runs once (no pipeline).
 
 package currentuser
 
@@ -67,7 +67,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
 		return func(ctx context.Context) any {
-			return client.Users.CurrentUser.Get(ctx)
+			return client.Users.Current.Get(ctx)
 		}, nil
 	})
 }

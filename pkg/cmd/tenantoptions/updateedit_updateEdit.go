@@ -86,7 +86,7 @@ func (n *UpdateEditCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return r.Run(func(in *c8ystream.Resolver) (c8ystream.Call, error) {
-		opt := tenantoptions.UpdateEditableFlagOption{
+		opt := tenantoptions.UpdateEditableFlagOptions{
 			Category: in.String("category"),
 			Key:      in.String("key"),
 			Editable: in.String("editable") == "true",

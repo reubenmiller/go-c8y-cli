@@ -1,5 +1,5 @@
 // v2-based get inventory role: the id flag drives iteration (pipe or --id); each
-// numeric role id is fetched via InventoryRoles.Get. Lookup by name is not
+// numeric role id is fetched via UserRoles.Inventory.Get. Lookup by name is not
 // supported (the API has no by-name endpoint), so the id must be numeric.
 
 package users
@@ -86,7 +86,7 @@ func (n *GetInventoryRoleCmd) RunE(cmd *cobra.Command, args []string) error {
 			return nil, cmderrors.NewUserError("invalid inventory role id (must be numeric): ", in.String("id"))
 		}
 		return func(ctx context.Context) any {
-			return client.InventoryRoles.Get(ctx, id)
+			return client.UserRoles.Inventory.Get(ctx, strconv.FormatInt(id, 10))
 		}, nil
 	})
 }
