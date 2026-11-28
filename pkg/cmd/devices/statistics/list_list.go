@@ -126,9 +126,9 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 			PaginationOptions: paging,
 		}
 
-		listAll := client.DeviceStatistics.ListAllDaily
+		listAll := client.Tenants.DeviceStatistics.ListAllDaily
 		if in.String("type") == "monthly" {
-			listAll = client.DeviceStatistics.ListAllMonthly
+			listAll = client.Tenants.DeviceStatistics.ListAllMonthly
 		}
 		return func(ctx context.Context) any {
 			return listAll(ctx, opt)

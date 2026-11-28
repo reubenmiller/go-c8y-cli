@@ -1,5 +1,5 @@
 // v2-based inventory role list: lists all inventory roles via
-// InventoryRoles.ListAll. There is no pipeline input, so the command runs once.
+// UserRoles.Inventory.ListAll. There is no pipeline input, so the command runs once.
 
 package users
 
@@ -81,7 +81,7 @@ func (n *ListInventoryRolesCmd) RunE(cmd *cobra.Command, args []string) error {
 		opt := inventoryroles.ListOptions{}
 		opt.PaginationOptions = paging
 		return func(ctx context.Context) any {
-			return client.InventoryRoles.ListAll(ctx, opt)
+			return client.UserRoles.Inventory.ListAll(ctx, opt)
 		}, nil
 	})
 }

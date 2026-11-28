@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/testing/testclient"
+
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
@@ -56,7 +58,7 @@ func TestVersionRef(t *testing.T) {
 // once (with the getter's format), the pipeline flag is resolved for each
 // item, and an empty piped value is only an error when the flag is required.
 func TestWithReference(t *testing.T) {
-	refs := &references{client: apiv2.NewClient(apiv2.ClientOptions{BaseURL: "http://127.0.0.1:1"})}
+	refs := &references{client: testclient.Must(apiv2.ClientOptions{BaseURL: "http://127.0.0.1:1"})}
 	var lookups []string
 	resolve := func(_ context.Context, _ *references, _ *cobra.Command, value string) (string, error) {
 		lookups = append(lookups, value)
@@ -121,7 +123,7 @@ func TestWithReference(t *testing.T) {
 // matches nothing: the text of v2.59.0, whether the lookup found no match or
 // the SDK reported the name as not found.
 func TestWithReference_unknownFlagValue(t *testing.T) {
-	refs := &references{client: apiv2.NewClient(apiv2.ClientOptions{BaseURL: "http://127.0.0.1:1"})}
+	refs := &references{client: testclient.Must(apiv2.ClientOptions{BaseURL: "http://127.0.0.1:1"})}
 	cmd := &cobra.Command{}
 	cmd.Flags().String("application", "", "")
 	if err := cmd.Flags().Parse([]string{"--application", "unknown"}); err != nil {

@@ -294,16 +294,21 @@ func enrollOptions(session *apiv2.Client, hasSession bool, deviceID string, opti
 		if err != nil || u.Host == "" {
 			return nil, opt, cmderrors.NewUserError(fmt.Sprintf("invalid host. %s", host))
 		}
-		if !hasSession || u.Host != session.BaseURL.Host {
+		if !hasSession || u.Host != session.BaseURL().Host {
 			// Another tenant: enroll without credentials
-			client = apiv2.NewClient(apiv2.ClientOptions{BaseURL: u.String(), Timeout: opt.Timeout})
+			// (Agent: the User-Agent of v2.59.0 requests)
+			otherClient, err := apiv2.NewClient(apiv2.ClientOptions{BaseURL: u.String(), Timeout: opt.Timeout, Agent: "go-client"})
+			if err != nil {
+				return nil, opt, cmderrors.NewUserError(fmt.Sprintf("invalid host. %s", host))
+			}
+			client = otherClient
 			hasSession = false
 		}
 	} else if !hasSession {
 		return nil, opt, cmderrors.NewUserError("host is not set. Use a session or --host")
 	}
 
-	auth := session.Auth
+	auth := session.Auth()
 	hasCredentials := hasSession && (auth.Token != "" || (auth.Username != "" && auth.Password != ""))
 	opt.RemoveRequest = hasCredentials
 	opt.Register = hasCredentials && cmp.Or(options.Get("mode").String(), "auto") == "auto"

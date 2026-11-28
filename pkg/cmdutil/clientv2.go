@@ -261,7 +261,10 @@ func (f *Factory) ClientV2() (*apiv2.Client, error) {
 	// which would print info messages on stderr of every command.
 	slog.SetDefault(slog.New(&dropMessageHandler{Handler: logger.Handler(), drop: sdkNoise}))
 
-	client := apiv2.NewClient(opts)
+	client, err := apiv2.NewClient(opts)
+	if err != nil {
+		return nil, err
+	}
 	client.Realtime().SetConnector(NewRealtimeConnector(client, cfg.IgnoreProxy()))
 	// The websocket frames are logged in the format of v2.59.0 (see websocketLogHandler)
 	realtimeLogger := logger.With("component", "realtime")

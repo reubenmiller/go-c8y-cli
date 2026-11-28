@@ -113,7 +113,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 			// SubmitUpload (not Submit): the multipart body can't be prepared for
 			// the confirmation prompt without blocking. CreateFromFile opens the
 			// local path / downloads the URL when the call runs.
-			return client.ApplicationVersions.CreateFromFile(ctx, pluginID, file, version, tags)
+			return client.Applications.Versions.CreateFromFile(ctx, pluginID, file, version, tags)
 		}, nil
 	})
 }
